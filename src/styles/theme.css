@@ -59,9 +59,6 @@
         /* Set this to 0 if you want all of the rounded cards, images, etc to be straight edges */
         --theme-shape-radius: clamp(1rem, 2rem, 3rem);
         --theme-button-border-radius: 3rem;
-
-        --theme-surface-shadow: 0 30px 80px -40px rgba(15, 23, 42, 0.45);
-        --theme-image-shadow: 0 40px 90px -45px rgba(15, 23, 42, 0.55);
         --hero-divider-color: rgba(15, 23, 42, 0.2);
 
 	/* Theme Transition */
@@ -96,8 +93,6 @@
         --theme-shape-radius: clamp(1rem, 2rem, 3rem);
         --theme-button-border-radius: 3rem;
 
-        --theme-surface-shadow: 0 35px 95px -55px rgba(0, 0, 0, 0.8);
-        --theme-image-shadow: 0 45px 110px -60px rgba(0, 0, 0, 0.85);
         --hero-divider-color: rgba(148, 163, 184, 0.35);
 
         --form-field-input-color: var(--theme-on-bg);
