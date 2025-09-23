@@ -6,7 +6,7 @@ import lit from "@astrojs/lit";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://cybersandwich.github.io/', // Your public domain, e.g.: https://my-site.dev/. Used to generate sitemaps and canonical URLs.
+  site: 'https://saputra.co.uk/', // Your public domain, e.g.: https://my-site.dev/. Used to generate sitemaps and canonical URLs.
   sitemap: true, // Generate sitemap (set to "false" to disable)
   integrations: [sitemap(), mdx(), lit(), icon()], // Add renderers to the config
 });
