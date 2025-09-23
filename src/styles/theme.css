@@ -59,15 +59,6 @@
         /* Set this to 0 if you want all of the rounded cards, images, etc to be straight edges */
         --theme-shape-radius: clamp(1rem, 2rem, 3rem);
         --theme-button-border-radius: 3rem;
-
-        --theme-surface-shadow:
-                0 18px 45px -15px rgba(15, 23, 42, 0.28),
-                0 10px 25px -15px rgba(15, 23, 42, 0.24),
-                0 0 1px rgba(15, 23, 42, 0.12);
-        --theme-image-shadow:
-                0 25px 60px -20px rgba(15, 23, 42, 0.38),
-                0 18px 40px -20px rgba(15, 23, 42, 0.3),
-                0 0 1px rgba(15, 23, 42, 0.18);
         --hero-divider-color: rgba(15, 23, 42, 0.2);
 
 	/* Theme Transition */
@@ -102,14 +93,6 @@
         --theme-shape-radius: clamp(1rem, 2rem, 3rem);
         --theme-button-border-radius: 3rem;
 
-        --theme-surface-shadow:
-                0 22px 55px -25px rgba(0, 0, 0, 0.75),
-                0 16px 35px -25px rgba(15, 23, 42, 0.5),
-                0 0 1px rgba(255, 255, 255, 0.08);
-        --theme-image-shadow:
-                0 32px 80px -30px rgba(0, 0, 0, 0.85),
-                0 22px 50px -30px rgba(15, 23, 42, 0.6),
-                0 0 1px rgba(255, 255, 255, 0.1);
         --hero-divider-color: rgba(148, 163, 184, 0.35);
 
         --form-field-input-color: var(--theme-on-bg);
