@@ -4,9 +4,20 @@
 <!-- This is a simple script to check if there is a theme value in local storage. That way the theme stays with you between pages -->
 <script is:inline>
 	const doc = document.firstElementChild;
-	const localStorageTheme = localStorage.getItem('theme');
+        const localStorageTheme = localStorage.getItem('theme');
+        const legacyLightThemes = new Set(['classic', 'default', 'earth', 'ocean', 'sand']);
 
-	if (localStorageTheme !== null) {
-		doc.setAttribute('data-theme', localStorageTheme);
-	}
+        if (localStorageTheme !== null) {
+                const normalizedTheme = legacyLightThemes.has(localStorageTheme)
+                        ? 'light'
+                        : localStorageTheme;
+
+                if (normalizedTheme !== localStorageTheme) {
+                        localStorage.setItem('theme', normalizedTheme);
+                }
+
+                doc.setAttribute('data-theme', normalizedTheme);
+        } else {
+                doc.setAttribute('data-theme', 'dark');
+        }
 </script>

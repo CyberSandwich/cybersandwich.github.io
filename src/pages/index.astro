@@ -14,7 +14,7 @@ import HomeHeroSection from '../components/sections/heros/HomeHeroSection.astro'
 				Use one of our landing pages to jumpstart your website or
 				ad campaign.
 			</p>
-			<div class="feature-card__grid">
+                        <div class="feature-card__grid">
 				<FeatureCard href="/landing-pages/landing-1" title="Landing Page 1" imgSrc="/assets/images/home/screenshots/landing-1">
 				</FeatureCard>
 				<FeatureCard href="/landing-pages/landing-2" title="Landing Page 2" imgSrc="/assets/images/home/screenshots/landing-2">
@@ -57,19 +57,13 @@ import HomeHeroSection from '../components/sections/heros/HomeHeroSection.astro'
 		<section class="feature-card__section">
 			<h2>Theme Pages</h2>
 			<p>Learn more about how to set up and use the Odyssey Theme.</p>
-			<div class="feature-card__grid">
-				<FeatureCard
-					href="/theme/get-started"
-					imgSrc="/assets/images/home/screenshots/get-started"
-					title="Get Started"
-				>
-				</FeatureCard>
-				<FeatureCard
-					href="/theme/style-guide"
-					imgSrc="/assets/images/home/screenshots/style-guide"
-					title="Style Guide"
-				>
-				</FeatureCard>
+                        <div class="feature-card__grid feature-card__grid--single">
+                                <FeatureCard
+                                        href="/theme/get-started"
+                                        imgSrc="/assets/images/home/screenshots/get-started"
+                                        title="Get Started"
+                                >
+                                </FeatureCard>
 			</div>
 		</section>
 	</Container>
@@ -79,14 +73,18 @@ import HomeHeroSection from '../components/sections/heros/HomeHeroSection.astro'
 	.feature-card__section {
 		margin: var(--section-margin) auto;
 	}
-	.feature-card__grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: var(--theme-grid-gap);
-	}
-	@media (max-width: 768px) {
-		.feature-card__grid {
-			grid-template-columns: 1fr;
-		}
-	}
+        .feature-card__grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--theme-grid-gap);
+        }
+        .feature-card__grid--single {
+                grid-template-columns: minmax(0, 1fr);
+                max-width: 32rem;
+        }
+        @media (max-width: 768px) {
+                .feature-card__grid {
+                        grid-template-columns: 1fr;
+                }
+        }
 </style>

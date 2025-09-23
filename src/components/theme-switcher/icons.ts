@@ -1,6 +1,6 @@
 import { html } from 'lit';
 
-export const classicThemeIcon = html`<svg
+export const lightThemeIcon = html`<svg
 	width="24"
 	height="24"
 	viewBox="0 0 24 24"
