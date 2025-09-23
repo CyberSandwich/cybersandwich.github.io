@@ -6,7 +6,9 @@
 	const doc = document.firstElementChild;
 	const localStorageTheme = localStorage.getItem('theme');
 
-	if (localStorageTheme !== null) {
-		doc.setAttribute('data-theme', localStorageTheme);
-	}
+        if (localStorageTheme !== null) {
+                doc.setAttribute('data-theme', localStorageTheme);
+        } else {
+                doc.setAttribute('data-theme', 'dark');
+        }
 </script>
