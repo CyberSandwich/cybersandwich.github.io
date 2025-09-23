@@ -2,28 +2,32 @@
 import { Icon } from 'astro-icon/components';
 import { Container, Button } from '@components/odyssey-theme';
 import settings from '../../../config/settings.js';
-import {ThemeSwitcher} from '../../theme-switcher/theme-switcher';
+import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
 ---
 
 <Container>
 	<section class="hero-section__section">
-		<div class="hero-section__text">
-                                <h1>Duke Saputra</h1>
-                                <p>
-                                        On a mission to drive value through entrepreneurship
-                                </p>
-				<div class="hero-btns__container">
-					<Button href="/theme/get-started" customIcon
-						>Get Started
-            <Fragment slot="icon">
-              <Icon name="ic:baseline-chevron-right"/>
-            </Fragment>
-            </Button
-					>
-					<Button href="/theme/style-guide" unelevated>Style Guide</Button>
-				</div>
-        {settings.enableThemeSwitcher && <ThemeSwitcher client:only/>}
-		</div>
+                <div class="hero-section__text">
+                        <h1>Duke Saputra</h1>
+                        <p class="hero-section__lead">
+                                On a mission to drive real change
+                        </p>
+                        <ul class="hero-section__highlights">
+                                <li>BSc Management @ Warwick</li>
+                                <li>Ex-Microsoft</li>
+                                <li>Ex-IBM</li>
+                        </ul>
+                        <div class="hero-btns__container">
+                                <Button href="/theme/get-started" customIcon
+                                        >Get Started
+                                        <Fragment slot="icon">
+                                                <Icon name="ic:baseline-chevron-right" />
+                                        </Fragment>
+                                </Button>
+                                <Button href="/theme/style-guide" unelevated>Style Guide</Button>
+                        </div>
+                        {settings.enableThemeSwitcher && <ThemeSwitcher client:only />}
+                </div>
 		<div class="hero-section__image">
 				<picture>
 					<img
@@ -45,28 +49,51 @@ import {ThemeSwitcher} from '../../theme-switcher/theme-switcher';
 		align-items: center;
 		gap: 1rem;
 	}
-	.hero-section__text {
-		justify-self: center;
-		max-width: 25rem;
-	}
-	.hero-btns__container {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
+        .hero-section__text {
+                justify-self: center;
+                max-width: 28rem;
+        }
+        .hero-section__lead {
+                margin-bottom: 1.5rem;
+                font-size: var(--font-size-md);
+                color: var(--theme-on-bg);
+                opacity: 0.86;
+        }
+        .hero-section__highlights {
+                margin: 0 0 2rem 0;
+                padding: 1.5rem 0 0 0;
+                list-style: none;
+                display: grid;
+                gap: 0.75rem;
+                border-top: 1px solid var(--hero-divider-color);
+        }
+        .hero-section__highlights li {
+                font-size: var(--font-size-sm);
+                font-weight: 500;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: var(--theme-on-bg);
+                opacity: 0.72;
+        }
+        .hero-btns__container {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+        }
 	.hero-btns__container {
 		margin-right: 1rem;
 	}
-	.hero-section__image {
-		display: flex;
-	}
-	.hero-section__image img {
-		width: 100%;
-		height: 100%;
-		max-height: 80vh;
-		object-fit: cover;
-		border-radius: var(--theme-shape-radius);
-	}
+        .hero-section__image {
+                display: flex;
+        }
+        .hero-section__image img {
+                width: 100%;
+                height: 100%;
+                max-height: 80vh;
+                object-fit: cover;
+                border-radius: var(--theme-shape-radius);
+                box-shadow: var(--theme-image-shadow);
+        }
 	@media (max-width: 768px) {
 		.hero-section__section {
 			grid-template-columns: 1fr;
