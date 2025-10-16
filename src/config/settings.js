@@ -1,6 +1,6 @@
 export default {
         title: `DS | Home`,
-	description: `BSc Management @ Warwick Business School | Ex-Microsoft | Ex-IBM`,
+        description: `Duke Saputra`,
 	url: `https://saputra.co.uk`, // No trailing slash!
 	name: `Duke`, // The short name of the business or brand name. Used for things like the copyright in the footer.
 	enableThemeSwitcher: true,

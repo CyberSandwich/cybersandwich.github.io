@@ -190,11 +190,18 @@ const seo = {
         </TextSection>
 
         <style is:inline>
+                :global(.about-hero .content__container) {
+                        display: grid;
+                        place-items: center;
+                        min-height: calc(100vh - var(--navbar-height, 0px));
+                        padding-block: clamp(3rem, 8vw, 6rem);
+                }
+
                 :global(.about-hero .hero-section__section) {
                         grid-template-columns: minmax(0, 1fr);
                         place-items: center;
-                        min-height: auto;
-                        padding-block: clamp(3rem, 8vw, 6rem);
+                        margin: 0 auto;
+                        width: min(100%, 640px);
                 }
 
                 .about-hero__intro {
