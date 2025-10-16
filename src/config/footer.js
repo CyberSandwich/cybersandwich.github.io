@@ -33,7 +33,7 @@ export const footerLists = [
                                 title: 'Landing Page 2',
                                 slug: '/landing-pages/landing-2',
                         },
-      // {
+                        // {
                         //      title: 'Landing Page 3',
                         //      slug: '/landing-pages/landing-3',
                         // },
@@ -43,8 +43,8 @@ export const footerLists = [
                 title: 'Company',
                 items: [
                         {
-                                title: 'About',
-                                slug: '/about',
+                                title: 'CV',
+                                slug: '/cv',
                         },
                         {
                                 title: 'Ventures',
@@ -67,14 +67,14 @@ export const footerLists = [
                                 title: 'Style Guide',
                                 slug: '/theme/style-guide',
                         },
-      {
-        title: 'Theme Setup',
-        slug: '/theme/theme-setup',
-      },
-      {
-        title: 'Customizing Odyssey',
-        slug: '/theme/customizing-odyssey',
-      }
+                        {
+                                title: 'Theme Setup',
+                                slug: '/theme/theme-setup',
+                        },
+                        {
+                                title: 'Customizing Odyssey',
+                                slug: '/theme/customizing-odyssey',
+                        },
                 ],
         },
 ];

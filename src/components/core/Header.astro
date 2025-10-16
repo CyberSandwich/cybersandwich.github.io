@@ -56,13 +56,22 @@ const { navData, rightMenu } = Astro.props;
   </div>
   <div class="header-nav__container">
     <slot name="nav">
-      {navData && <nav>
-        <ul>
-          {navData.map(navItem => (
-            (<li><a href={navItem.slug} >{navItem.title}</a></li>)
-          ))}
-        </ul>
-      </nav>}
+      {navData && (
+        <nav>
+          <ul>
+            {navData.map((navItem) => (
+              <li>
+                <a
+                  href={navItem.slug}
+                  class={`nav__link ${navItem.isCTA ? 'nav__link--cta' : ''}`.trim()}
+                >
+                  {navItem.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
     </slot>
   </div>
   <div class="header-action-item__container">
@@ -121,23 +130,42 @@ const { navData, rightMenu } = Astro.props;
     display: none !important;
   }
   nav {
-  display: flex;
+    display: flex;
   }
   nav ul {
     margin: 0;
     padding: 0;
     list-style: none;
     display: flex;
+    gap: 0.75rem;
   }
-  nav ul li a {
+  nav ul li {
+    display: flex;
+  }
+  .nav__link {
     text-decoration: none;
-    margin-right: 1rem;
     color: inherit;
     opacity: 0.72;
     transition: opacity linear 150ms;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    padding: 0.25rem 0.35rem;
   }
-  nav ul li a:hover {
+  .nav__link:hover {
     opacity: 1;
+  }
+  .nav__link--cta {
+    padding: 0.36rem 0.92rem;
+    background-color: var(--theme-primary);
+    color: var(--theme-on-primary);
+    border-radius: var(--theme-button-border-radius);
+    opacity: 1;
+    transition: background-color var(--theme-transition, 150ms linear);
+  }
+  .nav__link--cta:hover {
+    background-color: var(--theme-primary-hover);
   }
   @media(max-width: 600px) {
     header.header--right {
@@ -181,10 +209,19 @@ const { navData, rightMenu } = Astro.props;
     header[mobile-menu-open] nav ul {
       align-items: center;
       flex-direction: column;
+      gap: 1rem;
     }
-     header[mobile-menu-open] nav ul li {
-       font-size: var(--font-size-lg);
-       margin-bottom: 1rem;
-     }
+    header[mobile-menu-open] nav ul li {
+      font-size: var(--font-size-lg);
+    }
+    header[mobile-menu-open] .nav__link {
+      opacity: 1;
+      padding: 0.25rem 0.35rem;
+    }
+    header[mobile-menu-open] .nav__link--cta {
+      width: min(18rem, 80vw);
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+    }
   }
 </style>
