@@ -61,7 +61,6 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
         .hero-section__highlights {
                 margin: 0;
                 margin-inline: auto;
-                padding: 0;
                 list-style: none;
                 display: grid;
                 justify-items: center;
@@ -80,7 +79,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
         .hero-section__cta {
                 display: flex;
                 justify-content: center;
-                margin-top: 1.5rem;
+                margin-top: 0;
         }
         .hero-section__image {
                 display: flex;
@@ -105,13 +104,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 }
                 .hero-section__text {
                         justify-self: stretch;
-                        justify-items: center;
-                        text-align: center;
                         gap: 1rem;
-                }
-                .hero-section__image {
-                        justify-content: flex-start;
-                        align-items: flex-start;
                 }
                 .hero-section__image img {
                         max-width: min(22rem, 100%);
@@ -121,8 +114,6 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
         @media (max-width: 600px) {
                 .hero-section__image {
                         order: -1;
-                        justify-content: flex-start;
-                        align-items: flex-start;
                 }
                 .hero-section__image img {
                         max-width: min(18rem, 75vw);
