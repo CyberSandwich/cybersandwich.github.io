@@ -18,12 +18,25 @@ const {posts} = Astro.props;
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2rem;
 }
+
+.blog-posts-list__list > :last-child:nth-child(2n + 1) {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: min(100%, 28rem);
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   .blog-posts-list__list {
     grid-template-columns: 1fr;
+  }
+
+  .blog-posts-list__list > :last-child:nth-child(2n + 1) {
+    grid-column: auto;
+    max-width: none;
   }
 }
 </style>
