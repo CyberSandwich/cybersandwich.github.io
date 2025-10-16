@@ -17,7 +17,7 @@ export class ThemeSwitcher extends LitElement {
                         display: block;
                 }
                 .theme-switcher__container {
-                        margin: 2rem 0;
+                        margin: 1.5rem 0 0;
                         display: grid;
                         grid-template-columns: repeat(2, minmax(0, 1fr));
                         gap: 1.5rem;
