@@ -262,9 +262,9 @@ const seo = {
                 .cv-item {
                         position: relative;
                         background: color-mix(in srgb, var(--theme-surface-1) 94%, transparent);
-                        border-radius: calc(var(--theme-shape-radius) * 1.6);
+                        border-radius: calc(var(--theme-shape-radius) * 0.75);
                         padding: clamp(1.65rem, 3vw, 2.25rem);
-                        border: 1px solid color-mix(in srgb, var(--theme-border-color) 80%, transparent);
+                        border: 1px solid color-mix(in srgb, var(--theme-on-bg) 12%, transparent);
                         box-shadow: var(--theme-card-shadow, 0 18px 44px rgba(15, 23, 42, 0.08));
                         display: grid;
                         gap: 1.25rem;
@@ -335,12 +335,18 @@ const seo = {
 
                 .cv-section--split .cv-column {
                         background: color-mix(in srgb, var(--theme-surface-1) 96%, transparent);
-                        border-radius: calc(var(--theme-shape-radius) * 1.6);
+                        border-radius: calc(var(--theme-shape-radius) * 0.75);
                         padding: clamp(1.5rem, 3vw, 2rem);
                         box-shadow: var(--theme-card-shadow, 0 16px 40px rgba(15, 23, 42, 0.08));
-                        border: 1px solid color-mix(in srgb, var(--theme-border-color) 80%, transparent);
+                        border: 1px solid color-mix(in srgb, var(--theme-on-bg) 12%, transparent);
                         display: grid;
                         gap: 1rem;
+                }
+                :global(html[data-theme='light'] .cv-item),
+                :global(html[data-theme='light'] .cv-section--split .cv-column) {
+                        background: #fff;
+                        border-color: color-mix(in srgb, var(--theme-on-bg) 8%, transparent);
+                        box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
                 }
 
                 .cv-section--split .cv-column h2 {

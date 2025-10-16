@@ -1,17 +1,22 @@
 ---
 import { Container } from '@components/odyssey-theme';
+
+const hasImageSlot = Astro.slots.has('image-container');
+const sectionClass = `hero-section__section${!hasImageSlot ? ' hero-section__section--single' : ''}`;
+---
 ---
 
 <Container>
-	<section class="hero-section__section">
-		<div class="hero-section__text">
-			<slot name="text-container"></slot>
-		</div>
-		<div class="hero-section__image">
-			<slot name="image-container">
-			</slot>
-		</div>
-	</section>
+        <section class={sectionClass}>
+                <div class="hero-section__text">
+                        <slot name="text-container"></slot>
+                </div>
+                {hasImageSlot && (
+                        <div class="hero-section__image">
+                                <slot name="image-container"></slot>
+                        </div>
+                )}
+        </section>
 </Container>
 
 <style>
@@ -46,10 +51,22 @@ import { Container } from '@components/odyssey-theme';
                 border-radius: var(--theme-shape-radius);
                 box-shadow: var(--theme-image-shadow);
         }
-	@media (max-width: 768px) {
-		.hero-section__section {
-			margin: 2rem auto 0 auto;
-			grid-template-columns: 1fr;
-		}
+        .hero-section__section--single {
+                grid-template-columns: minmax(0, 1fr);
+                justify-items: center;
+                text-align: center;
+        }
+        .hero-section__section--single .hero-section__text {
+                justify-self: center;
+                text-align: center;
+        }
+        .hero-section__section--single .hero-section__cta {
+                justify-content: center;
+        }
+        @media (max-width: 768px) {
+                .hero-section__section {
+                        margin: 2rem auto 0 auto;
+                        grid-template-columns: 1fr;
+                }
 	}
 </style>
