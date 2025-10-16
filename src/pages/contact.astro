@@ -5,7 +5,7 @@ import { Container } from '@components/odyssey-theme';
 const seo = {
         title: 'DS | Contact',
         description:
-                'The quickest ways to connect with Duke DJ Saputra across phone, email, LinkedIn, and calendar booking.',
+                'The quickest ways to connect with Duke Saputra across phone, email, LinkedIn, and calendar booking.',
 };
 ---
 
@@ -13,512 +13,228 @@ const seo = {
         <Container>
                 <section class="contact-card" aria-labelledby="contact-card-heading">
                         <div class="contact-card__shell">
-                                <div class="contact-card__halo" aria-hidden="true"></div>
-
-                                <header class="contact-card__identity">
-                                        <div class="contact-card__portrait" aria-hidden="true">
-                                                <img
-                                                        src="/assets/images/home/DS%20Headshot.jpeg"
-                                                        alt="Portrait of Duke DJ Saputra"
-                                                        loading="lazy"
-                                                />
-                                        </div>
-                                        <div class="contact-card__identity-text">
-                                                <p class="contact-card__eyebrow">Undergraduate · Warwick Business School</p>
-                                                <h1 id="contact-card-heading">Duke DJ Saputra</h1>
-                                                <p class="contact-card__company">University of Warwick</p>
-                                                <p class="contact-card__intro">
-                                                        Building ventures while studying at Warwick Business School. Reach out through the
-                                                        channel that fits your workflow best.
-                                                </p>
-                                                <p class="contact-card__address" aria-label="Work address">
-                                                        Warwick Business School, Gibbet Hill Road, Coventry, England, CV4 7AL, United
-                                                        Kingdom
-                                                </p>
-                                        </div>
+                                <header class="contact-card__header">
+                                        <h1 id="contact-card-heading">Duke Saputra</h1>
                                         <a
-                                                class="contact-card__download"
+                                                class="contact-card__cta"
                                                 href="/assets/DS%20Contact%20Card.vcf"
-                                                download="Duke DJ Saputra.vcf"
-                                                aria-label="Download Duke DJ Saputra's contact card"
+                                                download="Duke Saputra.vcf"
                                         >
-                                                <span class="contact-card__download-icon" aria-hidden="true">⇩</span>
-                                                <span>Download Contact Card</span>
+                                                Add to Contacts
                                         </a>
                                 </header>
 
-                                <div class="contact-card__cta" role="list">
-                                        <a class="contact-card__cta-button" role="listitem" href="tel:+447985667166">
-                                                <span class="contact-card__cta-label">Call</span>
-                                                <span class="contact-card__cta-value">+44 7985 667 166</span>
-                                        </a>
-                                        <a class="contact-card__cta-button" role="listitem" href="mailto:duke@saputra.co.uk">
-                                                <span class="contact-card__cta-label">Primary Email</span>
-                                                <span class="contact-card__cta-value">duke@saputra.co.uk</span>
-                                        </a>
-                                        <a
-                                                class="contact-card__cta-button"
-                                                role="listitem"
-                                                href="https://fantastical.app/DukeSaputra/gm"
-                                                target="_blank"
-                                                rel="noreferrer"
-                                        >
-                                                <span class="contact-card__cta-label">Book time</span>
-                                                <span class="contact-card__cta-value">Fantastical</span>
-                                        </a>
+                                <div class="contact-card__sections">
+                                        <section class="contact-card__section">
+                                                <h2 class="contact-card__section-title">Links</h2>
+                                                <ul class="contact-card__items" role="list">
+                                                        <li>
+                                                                <a
+                                                                        class="contact-card__item"
+                                                                        href="https://wa.me/qr/EYDEYNUZSEK4B1"
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                >
+                                                                        <span class="contact-card__item-label">WhatsApp</span>
+                                                                        <span class="contact-card__item-value">Message</span>
+                                                                </a>
+                                                        </li>
+                                                        <li>
+                                                                <a
+                                                                        class="contact-card__item"
+                                                                        href="https://fantastical.app/DukeSaputra/gm"
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                >
+                                                                        <span class="contact-card__item-label">Fantastical</span>
+                                                                        <span class="contact-card__item-value">Book Time</span>
+                                                                </a>
+                                                        </li>
+                                                        <li>
+                                                                <a
+                                                                        class="contact-card__item"
+                                                                        data-linkedin
+                                                                        href="https://linkedin.com/in/dukedj"
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                >
+                                                                        <span class="contact-card__item-label">LinkedIn</span>
+                                                                        <span class="contact-card__item-value">linkedin.com/in/dukedj</span>
+                                                                </a>
+                                                        </li>
+                                                </ul>
+                                        </section>
+                                        <section class="contact-card__section">
+                                                <h2 class="contact-card__section-title">Emails</h2>
+                                                <ul class="contact-card__items" role="list">
+                                                        <li>
+                                                                <a class="contact-card__item" href="mailto:duke@saputra.co.uk">
+                                                                        <span class="contact-card__item-label">Primary Email</span>
+                                                                        <span class="contact-card__item-value">duke@saputra.co.uk</span>
+                                                                </a>
+                                                        </li>
+                                                        <li>
+                                                                <a class="contact-card__item" href="mailto:ventures@saputra.co.uk">
+                                                                        <span class="contact-card__item-label">Ventures Email</span>
+                                                                        <span class="contact-card__item-value">ventures@saputra.co.uk</span>
+                                                                </a>
+                                                        </li>
+                                                        <li>
+                                                                <a
+                                                                        class="contact-card__item"
+                                                                        href="mailto:duke.saputra@warwick.ac.uk"
+                                                                >
+                                                                        <span class="contact-card__item-label">University Email</span>
+                                                                        <span class="contact-card__item-value">duke.saputra@warwick.ac.uk</span>
+                                                                </a>
+                                                        </li>
+                                                </ul>
+                                        </section>
+                                        <section class="contact-card__section">
+                                                <h2 class="contact-card__section-title">Others</h2>
+                                                <ul class="contact-card__items" role="list">
+                                                        <li>
+                                                                <a class="contact-card__item" href="tel:+447985667166">
+                                                                        <span class="contact-card__item-label">Phone Number</span>
+                                                                        <span class="contact-card__item-value">+44 7985 667 166</span>
+                                                                </a>
+                                                        </li>
+                                                        <li>
+                                                                <a
+                                                                        class="contact-card__item"
+                                                                        href="https://maps.app.goo.gl/B9Z3rFS8ZnbiuYgs8"
+                                                                        target="_blank"
+                                                                        rel="noreferrer"
+                                                                >
+                                                                        <span class="contact-card__item-label">Location</span>
+                                                                        <span
+                                                                                class="contact-card__item-value"
+                                                                                role="group"
+                                                                                aria-label="Warwick Business School address"
+                                                                        >
+                                                                                <span>Warwick Business School</span>
+                                                                                <span>Gibbet Hill Road</span>
+                                                                                <span>Coventry</span>
+                                                                                <span>CV4 7AL</span>
+                                                                                <span>United Kingdom</span>
+                                                                        </span>
+                                                                </a>
+                                                        </li>
+                                                </ul>
+                                        </section>
                                 </div>
 
-                                <div class="contact-card__panels">
-                                        <article class="contact-card__panel contact-card__panel--email">
-                                                <header>
-                                                        <h2>Email suites</h2>
-                                                        <p>
-                                                                Choose the inbox that best matches the conversation—personal, venture focused, or
-                                                                university correspondence.
-                                                        </p>
-                                                </header>
-                                                <dl class="contact-card__list">
-                                                        <div>
-                                                                <dt>Primary</dt>
-                                                                <dd>
-                                                                        <a href="mailto:duke@saputra.co.uk">duke@saputra.co.uk</a>
-                                                                </dd>
-                                                        </div>
-                                                        <div>
-                                                                <dt>Ventures</dt>
-                                                                <dd>
-                                                                        <a href="mailto:ventures@saputra.co.uk">ventures@saputra.co.uk</a>
-                                                                </dd>
-                                                        </div>
-                                                        <div>
-                                                                <dt>University</dt>
-                                                                <dd>
-                                                                        <a href="mailto:duke.saputra@warwick.ac.uk">duke.saputra@warwick.ac.uk</a>
-                                                                </dd>
-                                                        </div>
-                                                </dl>
-                                        </article>
-
-                                        <article class="contact-card__panel contact-card__panel--network">
-                                                <header>
-                                                        <h2>Connect on LinkedIn</h2>
-                                                        <p>
-                                                                Continue the conversation on LinkedIn with a link optimised for your device, or stay on
-                                                                the web if you prefer.
-                                                        </p>
-                                                </header>
-                                                <div class="contact-card__actions">
-                                                        <a
-                                                                data-linkedin-device
-                                                                class="contact-card__action-button contact-card__action-button--primary"
-                                                                href="https://linkedin.com/in/dukedj"
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                        >
-                                                                Open on my device
-                                                        </a>
-                                                        <a
-                                                                class="contact-card__action-button"
-                                                                href="https://linkedin.com/in/dukedj"
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                        >
-                                                                View on the web
-                                                        </a>
-                                                </div>
-                                                <details class="contact-card__deep-links">
-                                                        <summary>Prefer a specific deep link?</summary>
-                                                        <ul>
-                                                                <li>
-                                                                        <a href="linkedin://in/dukedj">LinkedIn for iOS</a>
-                                                                </li>
-                                                                <li>
-                                                                        <a href="intent://in/dukedj#Intent;package=com.linkedin.android;scheme=https;end">
-                                                                                LinkedIn for Android
-                                                                        </a>
-                                                                </li>
-                                                        </ul>
-                                                </details>
-                                        </article>
-
-                                        <article class="contact-card__panel contact-card__panel--messaging">
-                                                <header>
-                                                        <h2>Messaging & quick notes</h2>
-                                                        <p>
-                                                                Share updates or ask quick questions—WhatsApp pings Duke instantly while the digital
-                                                                card keeps everything at hand.
-                                                        </p>
-                                                </header>
-                                                <div class="contact-card__actions">
-                                                        <a
-                                                                class="contact-card__action-button contact-card__action-button--primary"
-                                                                href="https://wa.me/qr/EYDEYNUZSEK4B1"
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                        >
-                                                                Open WhatsApp
-                                                        </a>
-                                                        <a
-                                                                class="contact-card__action-button"
-                                                                href="/assets/DS%20Contact%20Card.vcf"
-                                                                download="Duke DJ Saputra.vcf"
-                                                        >
-                                                                Save digital card
-                                                        </a>
-                                                </div>
-                                        </article>
-
-                                        <article class="contact-card__panel contact-card__panel--location">
-                                                <header>
-                                                        <h2>On campus</h2>
-                                                        <p>Find Duke at Warwick Business School in Coventry, United Kingdom.</p>
-                                                </header>
-                                                <address class="contact-card__address-block">
-                                                        Warwick Business School,
-                                                        <span>Gibbet Hill Road</span>,
-                                                        <span>Coventry</span>,
-                                                        <span>England</span>,
-                                                        <span>CV4 7AL</span>,
-                                                        <span>United Kingdom</span>
-                                                </address>
-                                        </article>
-                                </div>
-
-                                <footer class="contact-card__footnote">
-                                        <p>
-                                                Download the vCard to keep all details synced, or drop Duke a line on whichever platform makes
-                                                collaboration effortless.
-                                        </p>
-                                </footer>
                         </div>
                 </section>
         </Container>
 </Layout>
 
 <style>
-        :root {
-                --contact-card-gradient: radial-gradient(circle at 10% -10%, rgba(15, 133, 255, 0.35), transparent 55%),
-                        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.12), transparent 60%);
-        }
         .contact-card {
                 margin: var(--section-margin) auto clamp(3rem, 10vw, 6rem);
         }
         .contact-card__shell {
                 position: relative;
-                padding: clamp(2.5rem, 6vw, 4rem);
-                display: flex;
-                flex-direction: column;
-                gap: clamp(2rem, 4vw, 3rem);
-                background: var(--contact-card-gradient) rgba(11, 13, 23, 0.72);
-                border-radius: calc(var(--theme-shape-radius) * 1.7);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                box-shadow: 0 28px 60px rgba(6, 9, 18, 0.45);
-                backdrop-filter: blur(20px);
-                overflow: hidden;
+                display: grid;
+                gap: clamp(2.5rem, 5vw, 3.5rem);
         }
-        .contact-card__halo {
-                position: absolute;
-                inset: 0;
-                background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 55%);
-                opacity: 0.4;
-                pointer-events: none;
-        }
-        .contact-card__identity {
+        .contact-card__header {
                 position: relative;
                 display: grid;
-                grid-template-columns: auto 1fr auto;
-                gap: clamp(1.75rem, 3vw, 2.5rem);
-                align-items: center;
+                justify-items: center;
+                gap: 1.5rem;
+                text-align: center;
                 z-index: 1;
         }
-        .contact-card__portrait {
-                width: clamp(6rem, 9vw, 7.5rem);
-                aspect-ratio: 1;
-                border-radius: 24px;
-                padding: 0.45rem;
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.05));
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: inset 0 1px 14px rgba(255, 255, 255, 0.18);
-        }
-        .contact-card__portrait img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                border-radius: 18px;
-                box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
-        }
-        .contact-card__identity-text h1 {
+        .contact-card__header h1 {
+                margin: 0;
                 font-size: clamp(2.2rem, 4vw, 3rem);
-                margin: 0.15rem 0 0.35rem;
-        }
-        .contact-card__eyebrow {
-                font-size: 0.95rem;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                color: rgba(255, 255, 255, 0.62);
-                margin-bottom: 0.35rem;
-        }
-        .contact-card__company {
-                font-weight: 600;
-                color: rgba(255, 255, 255, 0.85);
-        }
-        .contact-card__intro {
-                margin: 1rem 0 0;
-                color: rgba(255, 255, 255, 0.75);
-                max-width: 45ch;
-        }
-        .contact-card__address {
-                margin-top: 0.85rem;
-                max-width: 36ch;
-                line-height: 1.5;
-                color: rgba(255, 255, 255, 0.68);
-        }
-        .contact-card__download {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.65rem;
-                padding: 0.85rem 1.85rem;
-                border-radius: 999px;
-                background: linear-gradient(135deg, rgba(15, 133, 255, 0.95), rgba(15, 133, 255, 0.75));
-                color: var(--theme-inverse);
-                font-weight: 600;
-                text-decoration: none;
-                box-shadow: 0 20px 36px rgba(15, 133, 255, 0.35);
-                transition: transform 180ms ease, box-shadow 180ms ease;
-                white-space: nowrap;
-        }
-        .contact-card__download-icon {
-                display: inline-flex;
-                width: 1.2rem;
-                height: 1.2rem;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.1rem;
-        }
-        .contact-card__download:hover,
-        .contact-card__download:focus-visible {
-                transform: translateY(-2px);
-                box-shadow: 0 28px 44px rgba(15, 133, 255, 0.45);
+                color: var(--theme-on-bg);
         }
         .contact-card__cta {
-                display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: clamp(1rem, 2.5vw, 1.5rem);
-                z-index: 1;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.36rem 0.92rem;
+                border-radius: var(--theme-button-border-radius);
+                background-color: var(--theme-primary);
+                color: var(--theme-on-primary);
+                font-weight: 500;
+                text-decoration: none;
+                transition: background-color var(--theme-transition, 180ms ease);
         }
-        .contact-card__cta-button {
+        .contact-card__cta:hover,
+        .contact-card__cta:focus-visible {
+                background-color: var(--theme-primary-hover);
+        }
+        .contact-card__sections {
+                display: grid;
+                gap: clamp(2.25rem, 5vw, 3rem);
+        }
+        .contact-card__section {
+                display: grid;
+                gap: 1.25rem;
+        }
+        .contact-card__section-title {
+                margin: 0;
+                font-size: clamp(1.35rem, 3vw, 1.7rem);
+                color: var(--theme-on-bg);
+        }
+        .contact-card__items {
+                position: relative;
+                z-index: 1;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                display: grid;
+                gap: clamp(1rem, 2.5vw, 1.5rem);
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+        .contact-card__item {
                 position: relative;
                 display: flex;
                 flex-direction: column;
                 gap: 0.45rem;
-                padding: 1.25rem 1.4rem;
-                border-radius: calc(var(--theme-shape-radius) * 1.2);
-                background: rgba(16, 18, 30, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.08);
+                padding: 1.15rem 1.35rem;
+                border-radius: calc(var(--theme-shape-radius) * 0.75);
                 text-decoration: none;
-                color: inherit;
-                transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
-                overflow: hidden;
+                color: var(--theme-on-bg);
+                background: color-mix(in srgb, var(--theme-surface-1) 92%, transparent);
+                border: 1px solid color-mix(in srgb, var(--theme-on-bg) 10%, transparent);
+                box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-on-bg) 6%, transparent);
+                transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
         }
-        .contact-card__cta-button::after {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 60%);
-                opacity: 0;
-                transition: opacity 160ms ease;
-        }
-        .contact-card__cta-button:hover,
-        .contact-card__cta-button:focus-visible {
-                border-color: rgba(255, 255, 255, 0.35);
+        .contact-card__item:hover,
+        .contact-card__item:focus-visible {
                 transform: translateY(-3px);
-                background: rgba(30, 32, 46, 0.72);
+                border-color: color-mix(in srgb, var(--theme-primary) 32%, transparent);
+                background: color-mix(in srgb, var(--theme-surface-1) 98%, transparent);
+                box-shadow: 0 18px 30px rgba(15, 23, 42, 0.14);
         }
-        .contact-card__cta-button:hover::after,
-        .contact-card__cta-button:focus-visible::after {
-                opacity: 1;
-        }
-        .contact-card__cta-label {
-                font-size: 0.85rem;
+        .contact-card__item-label {
+                font-size: 0.8rem;
                 letter-spacing: 0.08em;
                 text-transform: uppercase;
-                color: rgba(255, 255, 255, 0.6);
+                color: color-mix(in srgb, var(--theme-on-bg) 58%, transparent);
         }
-        .contact-card__cta-value {
-                font-size: 1.15rem;
+        .contact-card__item-value {
+                font-size: 1.1rem;
                 font-weight: 600;
-                color: rgba(255, 255, 255, 0.9);
-                word-break: break-word;
-        }
-        .contact-card__panels {
+                line-height: 1.4;
+                color: color-mix(in srgb, var(--theme-on-bg) 90%, transparent);
                 display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: clamp(1.5rem, 3vw, 2rem);
-                z-index: 1;
+                gap: 0.15rem;
+                overflow-wrap: anywhere;
         }
-        .contact-card__panel {
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                gap: 1.35rem;
-                padding: clamp(1.5rem, 3vw, 2rem);
-                border-radius: calc(var(--theme-shape-radius) * 1.1);
-                background: rgba(14, 16, 28, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        .contact-card__item-value span {
+                display: block;
         }
-        .contact-card__panel header h2 {
-                margin: 0;
-                font-size: 1.35rem;
+        :global(html[data-theme='light'] .contact-card__item) {
+                background: color-mix(in srgb, #fff 95%, transparent);
+                border-color: color-mix(in srgb, var(--theme-on-bg) 8%, transparent);
         }
-        .contact-card__panel header p {
-                margin: 0.35rem 0 0;
-                color: rgba(255, 255, 255, 0.7);
-        }
-        .contact-card__list {
-                display: grid;
-                gap: 0.9rem;
-        }
-        .contact-card__list div {
-                display: grid;
-                gap: 0.35rem;
-        }
-        .contact-card__list dt {
-                font-size: 0.9rem;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                color: rgba(255, 255, 255, 0.55);
-        }
-        .contact-card__list dd {
-                margin: 0;
-        }
-        .contact-card__list a {
-                color: rgba(255, 255, 255, 0.9);
-                font-weight: 600;
-                text-decoration: none;
-                border-bottom: 1px solid transparent;
-                transition: border-color 160ms ease;
-        }
-        .contact-card__list a:hover,
-        .contact-card__list a:focus-visible {
-                border-color: rgba(255, 255, 255, 0.35);
-        }
-        .contact-card__actions {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.75rem;
-        }
-        .contact-card__action-button {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0.75rem 1.3rem;
-                border-radius: 999px;
-                border: 1px solid rgba(255, 255, 255, 0.16);
-                text-decoration: none;
-                color: rgba(255, 255, 255, 0.82);
-                font-weight: 600;
-                background: rgba(24, 26, 40, 0.5);
-                transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-        }
-        .contact-card__action-button:hover,
-        .contact-card__action-button:focus-visible {
-                transform: translateY(-2px);
-                border-color: rgba(255, 255, 255, 0.35);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
-        }
-        .contact-card__action-button--primary {
-                background: linear-gradient(135deg, rgba(15, 133, 255, 0.9), rgba(15, 133, 255, 0.65));
-                color: var(--theme-inverse);
-                border-color: transparent;
-        }
-        .contact-card__deep-links {
-                border-radius: calc(var(--theme-shape-radius) * 0.8);
-                background: rgba(19, 20, 32, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                padding: 0.85rem 1.15rem;
-        }
-        .contact-card__deep-links summary {
-                cursor: pointer;
-                font-weight: 600;
-                color: rgba(255, 255, 255, 0.85);
-                list-style: none;
-        }
-        .contact-card__deep-links summary::-webkit-details-marker {
-                display: none;
-        }
-        .contact-card__deep-links ul {
-                margin: 0.75rem 0 0;
-                padding: 0;
-                list-style: none;
-                display: grid;
-                gap: 0.5rem;
-        }
-        .contact-card__deep-links a {
-                color: var(--theme-primary);
-                font-weight: 500;
-        }
-        .contact-card__address-block {
-                display: grid;
-                gap: 0.2rem;
-                font-style: normal;
-                color: rgba(255, 255, 255, 0.78);
-                line-height: 1.6;
-        }
-        .contact-card__footnote {
-                color: rgba(255, 255, 255, 0.68);
-                max-width: 60ch;
-                z-index: 1;
-        }
-        @media (max-width: 1080px) {
-                .contact-card__identity {
-                        grid-template-columns: auto 1fr;
-                        grid-template-rows: auto auto;
-                }
-                .contact-card__download {
-                        grid-column: 1 / -1;
-                        justify-self: flex-start;
-                }
-                .contact-card__cta {
-                        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                }
-                .contact-card__panels {
-                        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                }
-        }
-        @media (max-width: 720px) {
-                .contact-card__shell {
-                        padding: clamp(2rem, 8vw, 2.5rem);
-                }
-                .contact-card__identity {
-                        grid-template-columns: 1fr;
-                        justify-items: start;
-                        gap: 1.5rem;
-                }
-                .contact-card__portrait {
-                        width: 5.25rem;
-                        border-radius: 20px;
-                }
-                .contact-card__portrait img {
-                        border-radius: 14px;
-                }
-                .contact-card__download {
-                        width: 100%;
-                        justify-content: center;
-                }
-        }
-        @media (max-width: 560px) {
-                .contact-card__cta-button {
-                        padding: 1.1rem 1.2rem;
-                }
-        }
-        @media (max-width: 480px) {
-                .contact-card__cta {
-                        grid-template-columns: 1fr;
-                }
-                .contact-card__panels {
+        @media (max-width: 520px) {
+                .contact-card__items {
                         grid-template-columns: 1fr;
                 }
         }
@@ -535,15 +251,13 @@ const seo = {
 </style>
 
 <script>
-        const deepLinkButton = document.querySelector('[data-linkedin-device]');
+        const deepLinkButton = document.querySelector('[data-linkedin]');
         if (deepLinkButton) {
                 const userAgent = navigator.userAgent.toLowerCase();
                 if (/iphone|ipad|ipod/.test(userAgent)) {
                         deepLinkButton.href = 'linkedin://in/dukedj';
-                        deepLinkButton.textContent = 'Open in LinkedIn (iOS)';
                 } else if (/android/.test(userAgent)) {
                         deepLinkButton.href = 'intent://in/dukedj#Intent;package=com.linkedin.android;scheme=https;end';
-                        deepLinkButton.textContent = 'Open in LinkedIn (Android)';
                 }
         }
 </script>
