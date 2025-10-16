@@ -16,6 +16,11 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                         <div class="hero-section__cta">
                                 <Button href="/company/contact">Contact</Button>
                         </div>
+                        {settings.enableThemeSwitcher && (
+                                <div class="hero-section__theme-switcher">
+                                        <ThemeSwitcher client:only />
+                                </div>
+                        )}
                 </div>
                 <div class="hero-section__image">
                                 <picture>
@@ -27,11 +32,6 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                                 </picture>
                 </div>
         </section>
-        {settings.enableThemeSwitcher && (
-                <div class="hero-section__theme-switcher">
-                        <ThemeSwitcher client:only />
-                </div>
-        )}
 </Container>
 
 <style>
@@ -95,7 +95,6 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 box-shadow: var(--theme-image-shadow);
         }
         .hero-section__theme-switcher {
-                margin-top: 2rem;
                 display: flex;
                 justify-content: center;
         }

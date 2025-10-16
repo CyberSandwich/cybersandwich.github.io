@@ -6,19 +6,6 @@ import {
   darkThemeIcon,
 } from './icons';
 
-const themes = [
-  {
-    name: 'light',
-    icon: classicThemeIcon,
-    label: 'Light',
-  },
-  {
-    name: 'dark',
-    icon: darkThemeIcon,
-    label: 'Dark',
-  },
-];
-
 @customElement('theme-switcher')
 export class ThemeSwitcher extends LitElement {
 	static styles = [
@@ -60,50 +47,49 @@ export class ThemeSwitcher extends LitElement {
                 `,
         ];
 
-	// set the _doc element
-	private _doc = document.firstElementChild;
+  // set the _doc element
+  private _doc = document.firstElementChild;
 
-	@property({ type: String })
-	theme: string | null = null;
+  @property({ type: String, reflect: true })
+  theme: string | null = null;
 
-        private _getCurrentTheme() {
-                // check for a local storage theme first
-                const storedTheme = localStorage.getItem('theme');
-                if (storedTheme !== null) {
-                        const legacyLightThemes = new Set([
-                                'default',
-                                'earth',
-                                'ocean',
-                                'sand',
-                        ]);
-                        const normalizedTheme = legacyLightThemes.has(storedTheme)
-                                ? 'light'
-                                : storedTheme;
-                        const isValidTheme = themes.some(
-                                (theme) => theme.name === normalizedTheme,
-                        );
+  private _getCurrentTheme() {
+    // check for a local storage theme first
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme !== null) {
+      const legacyLightThemes = new Set([
+        'default',
+        'earth',
+        'ocean',
+        'sand',
+      ]);
+      const normalizedTheme = legacyLightThemes.has(storedTheme)
+        ? 'light'
+        : storedTheme;
+      const isValidTheme = normalizedTheme === 'light' || normalizedTheme === 'dark';
 
-                        this._setTheme(isValidTheme ? normalizedTheme : 'dark');
-                } else {
-                        this._setTheme('dark');
-                }
-        }
+      this._setTheme(isValidTheme ? normalizedTheme : 'dark');
+    } else {
+      this._setTheme('dark');
+    }
+  }
 
-        firstUpdated() {
-                this._getCurrentTheme();
-        }
+  firstUpdated() {
+    this._getCurrentTheme();
+  }
 
-        private _setTheme(theme) {
-                this._doc.setAttribute('data-theme', theme);
+  private _setTheme(theme: string) {
+    this._doc?.setAttribute('data-theme', theme);
 
-                const _heroImage = document.querySelector('#home-hero-image') as
-                        HTMLImageElement | null;
-                if (_heroImage) {
-                        _heroImage.src = '/assets/images/home/DS Headshot.jpeg';
-                }
-                localStorage.setItem('theme', theme);
-                this.theme = theme;
-        }
+    const _heroImage = document.querySelector('#home-hero-image') as
+      | HTMLImageElement
+      | null;
+    if (_heroImage) {
+      _heroImage.src = '/assets/images/home/DS Headshot.jpeg';
+    }
+    localStorage.setItem('theme', theme);
+    this.theme = theme;
+  }
 
         render() {
                 const themeButtons = html`${themes.map((theme) => {
@@ -121,10 +107,23 @@ export class ThemeSwitcher extends LitElement {
                         `;
                 })}`;
 
-                return html`
-                        <div class="theme-switcher__container">
-                                ${themeButtons}
-                        </div>
-                `;
-        }
+  render() {
+    return html`
+      <button
+        class="theme-toggle"
+        type="button"
+        role="switch"
+        aria-checked=${this.theme === 'dark'}
+        title="Toggle color theme"
+        aria-label="Toggle color theme"
+        @click=${this._toggleTheme}
+      >
+        <span class="theme-toggle__icons" aria-hidden="true">
+          <span class="theme-toggle__icon theme-toggle__icon--light">${classicThemeIcon}</span>
+          <span class="theme-toggle__icon theme-toggle__icon--dark">${darkThemeIcon}</span>
+        </span>
+        <span class="theme-toggle__thumb" aria-hidden="true"></span>
+      </button>
+    `;
+  }
 }
