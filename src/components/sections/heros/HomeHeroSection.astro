@@ -23,16 +23,59 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                         )}
                 </div>
                 <div class="hero-section__image">
-                                <picture>
-                                        <img
-                                                src="/assets/images/home/DS Headshot.jpeg"
-                                                alt="Portrait of Duke Saputra"
-                                                id="home-hero-image"
-                                        />
-                                </picture>
+                                <a
+                                        href="https://www.linkedin.com/in/dukedj"
+                                        class="hero-section__image-link"
+                                        id="hero-image-link"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                >
+                                        <picture>
+                                                <img
+                                                        src="/assets/images/home/DS Headshot.jpeg"
+                                                        alt="Portrait of Duke Saputra"
+                                                        id="home-hero-image"
+                                                />
+                                        </picture>
+                                </a>
                 </div>
         </section>
 </Container>
+
+<script is:inline>
+        if (typeof window !== 'undefined') {
+                const heroImageLink = document.querySelector<HTMLAnchorElement>('#hero-image-link');
+                if (heroImageLink) {
+                        const fallbackUrl = 'https://www.linkedin.com/in/dukedj';
+                        const iosDeepLink = 'linkedin://in/dukedj';
+                        const androidIntent = 'intent://in/dukedj#Intent;package=com.linkedin.android;scheme=https;end';
+
+                        heroImageLink.addEventListener('click', (event) => {
+                                const userAgent = navigator.userAgent || navigator.vendor || '';
+                                const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+                                const isAndroid = /Android/i.test(userAgent);
+
+                                if (isIOS || isAndroid) {
+                                        event.preventDefault();
+
+                                        const fallbackTimer = window.setTimeout(() => {
+                                                window.location.href = fallbackUrl;
+                                        }, 600);
+
+                                        if (isIOS) {
+                                                window.location.href = iosDeepLink;
+                                        } else if (isAndroid) {
+                                                window.location.href = androidIntent;
+                                        }
+
+                                        window.setTimeout(() => {
+                                                window.clearTimeout(fallbackTimer);
+                                        }, 1500);
+                                }
+                        });
+                }
+        }
+</script>
 
 <style>
 	.hero-section__section {
@@ -87,6 +130,10 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 display: flex;
                 justify-content: center;
         }
+        .hero-section__image-link {
+                display: block;
+                line-height: 0;
+        }
         .hero-section__image img {
                 width: 100%;
                 height: 100%;
@@ -98,7 +145,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
         .hero-section__theme-switcher {
                 display: flex;
                 justify-content: center;
-                margin-top: 1.25rem;
+                margin-top: 0;
         }
         @media (max-width: 768px) {
                 .hero-section__section {
@@ -121,6 +168,10 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 }
         }
         @media (max-width: 600px) {
+                .hero-section__section {
+                        margin: calc(var(--section-margin) * 0.65) auto var(--section-margin);
+                        gap: 2rem;
+                }
                 .hero-section__image {
                         order: -1;
                         justify-content: center;
@@ -129,9 +180,6 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 .hero-section__image img {
                         max-width: min(18rem, 75vw);
                         width: 100%;
-                }
-                .hero-section__section {
-                        gap: 2rem;
                 }
                 .hero-section__highlights {
                         width: 100%;
