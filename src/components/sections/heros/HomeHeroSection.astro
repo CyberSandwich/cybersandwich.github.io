@@ -13,17 +13,17 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                         <ul class="hero-section__highlights">
                                 <li>Warwick | Microsoft | IBM</li>
                         </ul>
+                        {settings.enableThemeSwitcher && (
+                                <div class="hero-section__theme-switcher">
+                                        <ThemeSwitcher client:only />
+                                </div>
+                        )}
                         <div class="hero-section__cta">
                                 <Button href="/company/contact">Contact</Button>
                         </div>
                 </div>
                 <div class="hero-section__image">
                         <div class="hero-section__image-stack">
-                                {settings.enableThemeSwitcher && (
-                                        <div class="hero-section__theme-switcher">
-                                                <ThemeSwitcher client:only />
-                                        </div>
-                                )}
                                 <a
                                         href="https://www.linkedin.com/in/dukedj"
                                         class="hero-section__image-link"
@@ -94,7 +94,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 max-width: min(32rem, 100%);
                 justify-items: center;
                 text-align: center;
-                gap: 1rem;
+                gap: clamp(0.85rem, 2vw, 1.35rem);
         }
         .hero-section__text h1 {
                 margin: 0;
@@ -106,7 +106,6 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
         .hero-section__highlights {
                 margin: 0;
                 margin-inline: auto;
-                margin-bottom: 1.75rem;
                 padding: 0;
                 list-style: none;
                 display: grid;
@@ -123,10 +122,14 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 white-space: nowrap;
                 text-align: center;
         }
+        .hero-section__theme-switcher {
+                display: flex;
+                justify-content: center;
+        }
         .hero-section__cta {
                 display: flex;
                 justify-content: center;
-                margin-top: 1.5rem;
+                margin-top: clamp(1rem, 2.5vw, 1.5rem);
         }
         .hero-section__image {
                 display: flex;
@@ -148,17 +151,13 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 height: 100%;
                 max-height: 80vh;
                 object-fit: cover;
-                border-radius: var(--theme-shape-radius);
-                box-shadow: var(--theme-image-shadow);
+                border-radius: calc(var(--theme-shape-radius) * 1.1);
+                box-shadow:
+                        0 32px 80px -36px rgba(15, 23, 42, 0.6),
+                        0 22px 40px -30px color-mix(in srgb, var(--theme-surface-color) 20%, rgba(15, 23, 42, 0.4));
         }
-        .hero-section__theme-switcher {
-                display: flex;
-                justify-content: center;
-                padding: 0.5rem;
-                border-radius: 999px;
-                background: color-mix(in srgb, var(--theme-surface-color) 92%, transparent);
-                box-shadow: var(--theme-card-shadow, 0 16px 40px rgba(15, 23, 42, 0.12));
-                margin-top: 0;
+        :global(.hero-section__theme-switcher .theme-switcher__container) {
+                margin: 0;
         }
         @media (max-width: 768px) {
                 .hero-section__section {
@@ -182,6 +181,9 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 .hero-section__image img {
                         max-width: min(22rem, 100%);
                         height: auto;
+                }
+                .hero-section__cta {
+                        margin-top: 1.25rem;
                 }
         }
         @media (max-width: 600px) {

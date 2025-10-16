@@ -13,9 +13,11 @@ const seo = {
         <div class="about-hero">
                 <HeroSection>
                         <div slot="text-container" class="about-hero__intro">
-                                <h1>Duke Saputra</h1>
-                                <div class="about-hero__cta">
-                                        <Button href="/company/contact">Contact</Button>
+                                <div class="about-hero__card">
+                                        <h1>Duke Saputra</h1>
+                                        <div class="about-hero__cta">
+                                                <Button href="/company/contact">Contact</Button>
+                                        </div>
                                 </div>
                         </div>
                 </HeroSection>
@@ -198,14 +200,35 @@ const seo = {
                 :global(.about-hero .hero-section__text) {
                         justify-items: center;
                         text-align: center;
-                        gap: 1.25rem;
-                        max-width: min(36rem, 100%);
+                        gap: clamp(1.25rem, 4vw, 1.75rem);
+                        max-width: min(38rem, 100%);
                 }
 
                 :global(.about-hero .hero-section__text h1) {
                         font-size: clamp(2.75rem, 5vw, 4rem);
                         letter-spacing: -0.02em;
                         margin: 0;
+                }
+
+                .about-hero__intro {
+                        display: flex;
+                        justify-content: center;
+                        width: 100%;
+                }
+
+                .about-hero__card {
+                        width: min(100%, 32rem);
+                        display: grid;
+                        gap: clamp(1.25rem, 4vw, 1.75rem);
+                        justify-items: center;
+                        padding: clamp(2rem, 6vw, 2.75rem);
+                        background: color-mix(in srgb, var(--theme-surface-color) 88%, rgba(15, 23, 42, 0.32));
+                        border-radius: calc(var(--theme-shape-radius) * 1.15);
+                        box-shadow:
+                                0 28px 60px -40px rgba(15, 23, 42, 0.65),
+                                0 16px 32px -24px color-mix(in srgb, var(--theme-surface-color) 24%, rgba(15, 23, 42, 0.45));
+                        border: 1px solid color-mix(in srgb, var(--theme-border-color) 65%, transparent);
+                        backdrop-filter: blur(6px);
                 }
 
                 :global(.about-hero .hero-section__cta) {
