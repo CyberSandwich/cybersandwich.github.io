@@ -11,7 +11,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                                 Duke <span class="hero-section__name-accent">Saputra</span>
                         </h1>
                         <ul class="hero-section__highlights">
-                                <li>Warwick | Microsoft | IBM</li>
+                                <li>WBS | Microsoft | IBM</li>
                         </ul>
                         {settings.enableThemeSwitcher && (
                                 <div class="hero-section__theme-switcher">
@@ -19,7 +19,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                                 </div>
                         )}
                         <div class="hero-section__cta">
-                                <Button href="/company/contact">Contact</Button>
+                                <Button href="/contact">Contact</Button>
                         </div>
                 </div>
                 <div class="hero-section__image">
@@ -100,8 +100,8 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 margin: 0;
         }
         .hero-section__name-accent {
-                color: var(--theme-on-bg);
-                opacity: 0.72;
+                color: inherit;
+                opacity: 1;
         }
         .hero-section__highlights {
                 margin: 0;
@@ -129,7 +129,7 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
         .hero-section__cta {
                 display: flex;
                 justify-content: center;
-                margin-top: clamp(1rem, 2.5vw, 1.5rem);
+                margin-top: clamp(0.65rem, 2vw, 1.1rem);
         }
         .hero-section__image {
                 display: flex;
