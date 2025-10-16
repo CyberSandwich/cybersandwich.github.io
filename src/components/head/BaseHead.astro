@@ -13,6 +13,7 @@ export interface Props {
 
 const title = Astro.props.title || settings.title;
 const description = Astro.props.description || settings.description;
+const socialDescription = settings.shareDescription || 'Duke Saputra';
 const canonicalURL = Astro.props.canonicalURL || new URL(Astro.url.pathname, Astro.site);
 const defaultImage = '/assets/images/home/DS%20Headshot.jpeg';
 const image = new URL(Astro.props.image || defaultImage, Astro.site);
@@ -33,14 +34,14 @@ const image = new URL(Astro.props.image || defaultImage, Astro.site);
 <meta property="og:type" content="website" />
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
+<meta property="og:description" content={socialDescription} />
 <meta property="og:image" content={image} />
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={canonicalURL} />
 <meta property="twitter:title" content={title} />
-<meta property="twitter:description" content={description} />
+<meta property="twitter:description" content={socialDescription} />
 <meta property="twitter:image" content={image} />
 
 <!-- For Demonstration of the themes -->

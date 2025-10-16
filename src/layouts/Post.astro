@@ -30,13 +30,16 @@ const seo = {
   #article {
     padding-bottom: 3rem;
   }
+  #article > :first-child {
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+  }
   .post-header__container {
     max-width: var(--theme-blog-post-header-width);
     margin: 1rem auto;
     padding: var(--container-padding);
   }
   .post-layout__img {
-    margin: 0 auto 1rem auto;
+    margin: clamp(1.5rem, 4vw, 2.5rem) auto;
     border-radius: var(--theme-shape-radius);
   }
   .post-layout__date {
