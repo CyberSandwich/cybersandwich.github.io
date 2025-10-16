@@ -4,7 +4,7 @@
 	--theme-primary-hover: hsl(0, 0%, 20%);
 	--theme-on-primary: #fff;
 
-	--theme-bg: #fff;
+        --theme-bg: #fdf1e6;
 	--theme-on-bg: #000;
 
         --theme-surface-1: #f2f2f2;
@@ -46,7 +46,7 @@
 	--theme-primary-hover: hsl(0, 0%, 20%);
 	--theme-on-primary: #fff;
 
-	--theme-bg: #fff;
+        --theme-bg: #fdf1e6;
 	--theme-on-bg: #000;
 
 	--theme-surface-1: #f2f2f2;
