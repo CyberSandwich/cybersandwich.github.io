@@ -1,0 +1,48 @@
+---
+import { parse, isBefore } from 'date-fns';
+import { Container, BlogPostsList } from '@components/odyssey-theme';
+import Layout from '../../layouts/Page.astro';
+
+const posts = await Astro.glob('./posts/*.mdx').then(posts =>
+        posts
+                .map(({ frontmatter, url }) => ({
+                        title: frontmatter.title,
+                        description: frontmatter.description,
+                        authors: frontmatter.authors,
+                        publishDate: parse(frontmatter.publishDate, 'MMMM d, yyyy', new Date()),
+                        featuredImage: frontmatter.featuredImage,
+                        excerpt: frontmatter.excerpt,
+                        href: url,
+                }))
+                .sort((a, b) => {
+                        if (isBefore(a.publishDate, b.publishDate)) return 1;
+                        if (isBefore(b.publishDate, a.publishDate)) return -1;
+                        return 0;
+                })
+);
+
+const seo = {
+        title: 'DS | Ventures',
+        description: 'Menuva and other venture updates from Duke Saputra.',
+};
+---
+
+<Layout {seo}>
+        <Container>
+                <h1 class="ventures-page__title">Ventures</h1>
+                <section class="blog-posts-list__section">
+                        <BlogPostsList posts={posts} />
+                </section>
+        </Container>
+</Layout>
+
+<style>
+        .ventures-page__title {
+                margin: var(--section-margin) auto 0;
+                text-align: center;
+        }
+
+        .blog-posts-list__section {
+                margin: var(--section-margin) auto;
+        }
+</style>
