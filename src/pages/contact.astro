@@ -162,7 +162,7 @@ const seo = {
                 list-style: none;
                 display: grid;
                 gap: clamp(1rem, 2.5vw, 1.5rem);
-                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
         }
         .contact-card__item {
                 position: relative;
@@ -199,8 +199,6 @@ const seo = {
                 color: color-mix(in srgb, var(--theme-on-bg) 90%, transparent);
                 display: block;
                 white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
         }
         .contact-card__item-value--address {
                 display: grid;
@@ -214,6 +212,9 @@ const seo = {
         @media (max-width: 520px) {
                 .contact-card__items {
                         grid-template-columns: 1fr;
+                }
+                .contact-card__item-value {
+                        white-space: normal;
                 }
         }
         @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 ---
 import { Container } from '@components/odyssey-theme';
-import Layout from './Page.astro'; 
-const {content: {title, description, publishDate, canonicalURL, featuredImage} } = Astro.props;
+import Layout from './Page.astro';
+const {content: {title, description, publishDate, canonicalURL, featuredImage, hideDate = false, centerTitle = false} } = Astro.props;
 
 const seo = {
 	title,
@@ -13,10 +13,12 @@ const seo = {
 ---
 <Layout seo={seo}> 
   <div class="post-header__container">
-    <h1>{title}</h1>
-    <p class="post-layout__date">
-      <time><em>{publishDate}</em></time>
-    </p>
+    <h1 class:list={{ 'post-header__title': true, 'post-header__title--center': centerTitle }}>{title}</h1>
+    {!hideDate && publishDate && (
+      <p class="post-layout__date">
+        <time><em>{publishDate}</em></time>
+      </p>
+    )}
     {featuredImage && <img class="post-layout__img" src={featuredImage} alt={title} />}
   </div>
   <Container narrow>  
@@ -30,9 +32,6 @@ const seo = {
   #article {
     padding-bottom: 3rem;
   }
-  #article > :first-child {
-    margin-top: clamp(2.5rem, 6vw, 3.5rem);
-  }
   .post-header__container {
     max-width: var(--theme-blog-post-header-width);
     margin: 1rem auto;
@@ -45,5 +44,14 @@ const seo = {
   .post-layout__date {
     margin-bottom: 1rem;
     opacity: 0.84;
+  }
+  .post-header__title {
+    margin-bottom: 0.5rem;
+  }
+  .post-header__title--center {
+    text-align: center;
+  }
+  #article > :first-child {
+    margin-top: clamp(3.5rem, 7vw, 5rem);
   }
 </style>
