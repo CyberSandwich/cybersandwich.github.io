@@ -2,13 +2,22 @@
 const {navData} = Astro.props;
 ---
 
-{navData && <nav>
-  <ul>
-    {navData.map(navItem => (
-      (<li><a href={navItem.slug} >{navItem.title}</a></li>)
-    ))}
-  </ul>
-</nav> }
+{navData && (
+  <nav>
+    <ul>
+      {navData.map((navItem) => (
+        <li>
+          <a
+            href={navItem.slug}
+            class={`nav__link ${navItem.isCTA ? 'nav__link--cta' : ''}`.trim()}
+          >
+            {navItem.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
 
 <style>
   nav {
@@ -19,16 +28,35 @@ const {navData} = Astro.props;
     padding: 0;
     list-style: none;
     display: flex;
+    gap: 0.75rem;
   }
-  nav ul li a {
+  nav ul li {
+    display: flex;
+  }
+  .nav__link {
     text-decoration: none;
-    margin-right: 1rem;
     color: inherit;
     opacity: 0.72;
     transition: opacity linear 150ms;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
   }
-  nav ul li a:hover {
+  .nav__link:hover {
     opacity: 1;
+  }
+  .nav__link--cta {
+    padding: 0.36rem 0.92rem;
+    margin-right: 0;
+    background-color: var(--theme-primary);
+    color: var(--theme-on-primary);
+    border-radius: var(--theme-button-border-radius);
+    opacity: 1;
+    transition: background-color var(--theme-transition, 150ms linear);
+  }
+  .nav__link--cta:hover {
+    background-color: var(--theme-primary-hover);
   }
   @media(max-width: 600px) {
     nav {

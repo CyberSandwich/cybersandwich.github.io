@@ -8,7 +8,12 @@ export const nav = [
                 slug: '/ventures',
         },
         {
-                title: 'About',
-                slug: '/about',
+                title: 'CV',
+                slug: '/cv',
+        },
+        {
+                title: 'Contact',
+                slug: '/contact',
+                isCTA: true,
         },
 ];

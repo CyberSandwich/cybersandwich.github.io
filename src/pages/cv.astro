@@ -4,18 +4,18 @@ import Layout from '../layouts/Page.astro';
 import HeroSection from '../components/sections/heros/HeroSection.astro';
 
 const seo = {
-        title: 'DS | About',
-        description: 'Duke Saputra — experience, education, and interests.',
+        title: 'DS | CV',
+        description: 'Duke Saputra — curriculum vitae, experience, education, and interests.',
 };
 ---
 
 <Layout {seo}>
-        <div class="about-hero">
+        <div class="cv-hero">
                 <HeroSection>
-                        <div slot="text-container" class="about-hero__intro">
-                                <div class="about-hero__text">
+                        <div slot="text-container" class="cv-hero__intro">
+                                <div class="cv-hero__text">
                                         <h1>Duke Saputra</h1>
-                                        <div class="about-hero__cta hero-section__cta">
+                                        <div class="cv-hero__cta hero-section__cta">
                                                 <Button href="/contact">Contact</Button>
                                         </div>
                                 </div>
@@ -190,27 +190,27 @@ const seo = {
         </TextSection>
 
         <style is:inline>
-                :global(.about-hero .content__container) {
+                :global(.cv-hero .content__container) {
                         display: grid;
                         place-items: center;
                         min-height: calc(100vh - var(--navbar-height, 0px));
                         padding-block: clamp(3rem, 8vw, 6rem);
                 }
 
-                :global(.about-hero .hero-section__section) {
+                :global(.cv-hero .hero-section__section) {
                         grid-template-columns: minmax(0, 1fr);
                         place-items: center;
                         margin: 0 auto;
                         width: min(100%, 640px);
                 }
 
-                .about-hero__intro {
+                .cv-hero__intro {
                         display: flex;
                         justify-content: center;
                         width: 100%;
                 }
 
-                .about-hero__text {
+                .cv-hero__text {
                         display: grid;
                         justify-items: center;
                         text-align: center;
@@ -219,7 +219,7 @@ const seo = {
                         margin: 0 auto;
                 }
 
-                :global(.about-hero .hero-section__text) {
+                :global(.cv-hero .hero-section__text) {
                         display: grid;
                         justify-items: center;
                         text-align: center;
@@ -227,18 +227,18 @@ const seo = {
                         max-width: min(38rem, 100%);
                 }
 
-                :global(.about-hero .hero-section__text h1) {
+                :global(.cv-hero .hero-section__text h1) {
                         font-size: clamp(2.75rem, 5vw, 4rem);
                         letter-spacing: -0.02em;
                         margin: 0;
                 }
 
-                :global(.about-hero .hero-section__cta) {
+                :global(.cv-hero .hero-section__cta) {
                         justify-content: center;
                         margin: 0;
                 }
 
-                :global(.about-hero .hero-section__image) {
+                :global(.cv-hero .hero-section__image) {
                         display: none;
                 }
 
@@ -348,7 +348,7 @@ const seo = {
                 }
 
                 @media (max-width: 768px) {
-                        :global(.about-hero .hero-section__section) {
+                        :global(.cv-hero .hero-section__section) {
                                 padding-block: clamp(2.75rem, 12vw, 4.5rem);
                         }
 
