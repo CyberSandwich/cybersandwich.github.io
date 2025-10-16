@@ -1,30 +1,37 @@
 ---
-import { Container } from '@components/odyssey-theme';
+import { Button, Container } from '@components/odyssey-theme';
 import settings from '../../../config/settings.js';
 import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
 ---
 
 <Container>
-	<section class="hero-section__section">
+        <section class="hero-section__section">
                 <div class="hero-section__text">
                         <h1>
                                 Duke <span class="hero-section__name-accent">Saputra</span>
                         </h1>
                         <ul class="hero-section__highlights">
-                                <li>Warwick Business School | Ex-Microsoft | Ex-IBM</li>
+                                <li>Warwick Business School | Microsoft | IBM</li>
                         </ul>
-                        {settings.enableThemeSwitcher && <ThemeSwitcher client:only />}
+                        <div class="hero-section__cta">
+                                <Button href="/company/contact">Contact</Button>
+                        </div>
                 </div>
-		<div class="hero-section__image">
-				<picture>
-					<img
-						src="/assets/images/home/classic-hero.jpg"
-						alt="Astro Odyssey"
-						id="home-hero-image"
-					/>
-				</picture>
-		</div>
-	</section>
+                <div class="hero-section__image">
+                                <picture>
+                                        <img
+                                                src="/assets/images/home/DS Headshot.jpeg"
+                                                alt="Portrait of Duke Saputra"
+                                                id="home-hero-image"
+                                        />
+                                </picture>
+                </div>
+        </section>
+        {settings.enableThemeSwitcher && (
+                <div class="hero-section__theme-switcher">
+                        <ThemeSwitcher client:only />
+                </div>
+        )}
 </Container>
 
 <style>
@@ -40,21 +47,24 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 justify-self: center;
                 display: grid;
                 max-width: min(32rem, 100%);
+                justify-items: center;
+                text-align: center;
+                gap: 1.5rem;
         }
         .hero-section__text h1 {
-                margin-bottom: 1.5rem;
-                width: fit-content;
+                margin: 0;
         }
         .hero-section__name-accent {
                 color: var(--theme-on-bg);
                 opacity: 0.72;
         }
         .hero-section__highlights {
-                margin: 0 0 4rem 0;
-                padding: 1.5rem 0 0 0;
+                margin: 0;
+                margin-inline: auto;
                 list-style: none;
-                display: block;
-                border-top: 1px solid var(--hero-divider-color);
+                display: grid;
+                justify-items: center;
+                gap: 0.75rem;
                 width: fit-content;
         }
         .hero-section__highlights li {
@@ -64,6 +74,11 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 color: var(--theme-on-bg);
                 opacity: 0.72;
                 white-space: nowrap;
+        }
+        .hero-section__cta {
+                display: flex;
+                justify-content: center;
+                margin-top: 1.25rem;
         }
         .hero-section__image {
                 display: flex;
@@ -75,6 +90,11 @@ import { ThemeSwitcher } from '../../theme-switcher/theme-switcher';
                 object-fit: cover;
                 border-radius: var(--theme-shape-radius);
                 box-shadow: var(--theme-image-shadow);
+        }
+        .hero-section__theme-switcher {
+                margin-top: 2rem;
+                display: flex;
+                justify-content: center;
         }
         @media (max-width: 768px) {
                 .hero-section__section {

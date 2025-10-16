@@ -104,10 +104,16 @@ const { navData, rightMenu } = Astro.props;
     display: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0;
   }
   #menuButton > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--theme-on-bg);
-    vertical-align: middle;
   }
   nav {
   display: flex;
@@ -130,7 +136,7 @@ const { navData, rightMenu } = Astro.props;
   }
   @media(max-width: 600px) {
     #menuButton {
-      display: block;  
+      display: flex;
       z-index: 100;
     }
     .header-nav__container {
