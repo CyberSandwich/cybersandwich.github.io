@@ -4,7 +4,6 @@ import { Container } from '@components/odyssey-theme';
 const hasImageSlot = Astro.slots.has('image-container');
 const sectionClass = `hero-section__section${!hasImageSlot ? ' hero-section__section--single' : ''}`;
 ---
----
 
 <Container>
         <section class={sectionClass}>

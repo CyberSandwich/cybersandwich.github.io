@@ -3,9 +3,9 @@ const {post} = Astro.props;
 ---
 
 <li class="blog-post__preview">
-  <a href={post.href}>
-    <img src={post.featuredImage} />
-    <h3>{post.title}</h3>
+  <a class="blog-post__preview-link" href={post.href} aria-label={post.title}>
+    <img src={post.featuredImage} alt={post.title} />
+    <span class="sr-only">{post.title}</span>
   </a>
 </li>
 
@@ -20,12 +20,20 @@ const {post} = Astro.props;
 .blog-post__preview:hover img {
   border-radius: var(--theme-shape-radius);
 }
-.blog-post__preview a {
+.blog-post__preview-link {
   display: block;
   text-decoration: none;
   color: inherit;
 }
-.blog-post__preview h3 {
-  margin: 0;
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-</style> 
+</style>
