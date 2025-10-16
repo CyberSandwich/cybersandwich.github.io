@@ -48,20 +48,17 @@ export class ThemeSwitcher extends LitElement {
                                 margin: 2rem 0;
                                 display: grid;
                                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                                gap: 2rem;
+                                gap: 1.5rem;
                                 justify-items: center;
                         }
-			.theme-select__container {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-			}
-			.theme-select__container p {
-				font-size: var(--font-size-sm);
-			}
-		`,
-	];
+                        .theme-select__container {
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                justify-content: center;
+                        }
+                `,
+        ];
 
 	// set the _doc element
 	private _doc = document.firstElementChild;
@@ -116,10 +113,10 @@ export class ThemeSwitcher extends LitElement {
                                                 @click=${() => this._setTheme(theme.name)}
                                                 ?active=${this.theme === theme.name}
                                                 title=${`Enable ${theme.label} Theme`}
+                                                aria-label=${`Enable ${theme.label} Theme`}
                                         >
                                                 ${theme.icon}
                                         </button>
-                                        <p>${theme.label}</p>
                                 </div>
                         `;
                 })}`;
