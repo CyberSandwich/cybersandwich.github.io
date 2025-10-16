@@ -48,7 +48,7 @@ export class ThemeSwitcher extends LitElement {
                                 margin: 2rem 0;
                                 display: grid;
                                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                                gap: 1rem;
+                                gap: 2rem;
                                 justify-items: center;
                         }
 			.theme-select__container {
@@ -102,12 +102,7 @@ export class ThemeSwitcher extends LitElement {
                 const _heroImage = document.querySelector('#home-hero-image') as
                         HTMLImageElement | null;
                 if (_heroImage) {
-                        if (theme === 'light') {
-                                _heroImage.src = '/assets/images/home/classic-hero.jpg';
-                        }
-                        if (theme === 'dark') {
-                                _heroImage.src = '/assets/images/home/dark-hero.jpg';
-                        }
+                        _heroImage.src = '/assets/images/home/DS Headshot.jpeg';
                 }
                 localStorage.setItem('theme', theme);
                 this.theme = theme;

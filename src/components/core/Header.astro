@@ -87,6 +87,8 @@ const { navData, rightMenu } = Astro.props;
     width: fit-content;
     color: inherit;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
   }
   .header-logo-menu__container {
     display: flex;
@@ -100,13 +102,13 @@ const { navData, rightMenu } = Astro.props;
     outline: none;
     border: none;
     background-color: transparent;
-    margin-right: 0.5rem;
     display: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: 2.75rem;
+    width: 2.75rem;
     padding: 0;
   }
   #menuButton > span {
@@ -114,6 +116,9 @@ const { navData, rightMenu } = Astro.props;
     align-items: center;
     justify-content: center;
     color: var(--theme-on-bg);
+  }
+  #menuButton > span[hidden] {
+    display: none !important;
   }
   nav {
   display: flex;
@@ -138,6 +143,21 @@ const { navData, rightMenu } = Astro.props;
     #menuButton {
       display: flex;
       z-index: 100;
+    }
+    .header-logo-menu__container {
+      position: relative;
+      width: 100%;
+      justify-content: center;
+    }
+    #menuButton {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0.25rem;
+    }
+    .header-logo__link {
+      margin: 0 auto;
     }
     .header-nav__container {
       width: 100%;
