@@ -41,6 +41,10 @@ const { navData, rightMenu } = Astro.props;
 
 <header id="odysseyNavHeader" class={`${rightMenu ? "header--right" : ``.trim()}`}>
   <div class="header-logo-menu__container">
+  <a class="header-logo__link" href="/">
+    <slot name="logo">
+    </slot>
+  </a>
   <button id="menuButton" title="Open Main Menu">
     <span id="menuButtonIconHam">
       <Icon name="ic:baseline-menu" width="24px" height="24px" />
@@ -49,10 +53,6 @@ const { navData, rightMenu } = Astro.props;
       <Icon name="ic:baseline-close" width="24px" height="24px" />
     </span>
   </button>
-  <a class="header-logo__link" href="/">
-    <slot name="logo">
-    </slot>
-  </a>
   </div>
   <div class="header-nav__container">
     <slot name="nav">
@@ -140,24 +140,28 @@ const { navData, rightMenu } = Astro.props;
     opacity: 1;
   }
   @media(max-width: 600px) {
+    header.header--right {
+      display: flex;
+    }
     #menuButton {
       display: flex;
       z-index: 100;
     }
     .header-logo-menu__container {
-      position: relative;
       width: 100%;
       justify-content: flex-start;
-    }
-    #menuButton {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 0.25rem;
+      gap: 0.75rem;
     }
     .header-logo__link {
       margin: 0;
+    }
+    #menuButton {
+      margin-left: auto;
+      position: static;
+      right: auto;
+      top: auto;
+      transform: none;
+      padding: 0.25rem;
     }
     .header-nav__container {
       width: 100%;
