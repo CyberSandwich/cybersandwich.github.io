@@ -44,6 +44,10 @@ View a [live demo](https://odyssey-theme.sapling.supply/) of the Odyssey Theme.
 1. View the [Theme Setup Guide](https://odyssey-theme.sapling.supply/theme/theme-setup)
 2. View the [Customizing the Theme Guide](https://odyssey-theme.sapling.supply/theme/customizing-odyssey)
 
+## Updating the homepage hero image
+
+The hero portrait on the landing page is rendered by [`src/components/sections/heros/HomeHeroSection.astro`](src/components/sections/heros/HomeHeroSection.astro). Update the `src` attribute of the `<img>` inside the `<picture>` element to point at your new image asset (for example, replace `/assets/images/home/classic-hero.jpg` with your own file path). Make sure the file is available under `public/` or `assets/` so Astro can serve it during the build.
+
 ## Usage
 
 ```bash
