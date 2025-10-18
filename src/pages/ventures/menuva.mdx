@@ -26,7 +26,7 @@ import { Button } from '@components/odyssey-theme'
   <section class="menuva-section" id="problem">
     <h2 class="menuva-section__title">The Problem</h2>
     <div class="menuva-card-stack">
-      <div class="menuva-card">
+      <div class="menuva-section__lede">
         <p class="menuva-lede">
           <strong>79% of Gen Z plan to dine out more in 2025</strong><sup>1</sup>, yet menu anxiety is on the rise.
         </p>
@@ -56,7 +56,7 @@ import { Button } from '@components/odyssey-theme'
   <section class="menuva-section" id="solution">
     <h2 class="menuva-section__title">The Solution</h2>
     <div class="menuva-card-stack">
-      <div class="menuva-card menuva-card--lede">
+      <div class="menuva-section__lede">
         <p class="menuva-lede">
           Menuva turns any menu into an elegant, interactive experience that is effortless for diners to understand and seamless for
           restaurants to run.
@@ -108,7 +108,7 @@ import { Button } from '@components/odyssey-theme'
   <section class="menuva-section" id="business-model">
     <h2 class="menuva-section__title">Business Model</h2>
     <div class="menuva-card-stack">
-      <div class="menuva-card menuva-card--business-intro">
+      <div class="menuva-business-intro">
         <div class="menuva-pill-row" role="list">
           <span role="listitem">Free for diners</span>
           <span role="listitem">Free menu publication for restaurants</span>
@@ -221,7 +221,7 @@ import { Button } from '@components/odyssey-theme'
 <style is:global>{`
   .menuva {
     display: grid;
-    gap: clamp(1.2rem, 3.6vw, 2.5rem);
+    gap: clamp(2rem, 5vw, 3.4rem);
     justify-items: center;
     width: 100%;
     margin-inline: auto;
@@ -236,7 +236,7 @@ import { Button } from '@components/odyssey-theme'
   .menuva-hero,
   .menuva-section {
     display: grid;
-    gap: clamp(0.85rem, 2.1vw, 1.35rem);
+    gap: clamp(1.1rem, 2.8vw, 1.8rem);
     justify-items: stretch;
   }
 
@@ -246,7 +246,7 @@ import { Button } from '@components/odyssey-theme'
     font-size: clamp(1rem, 2.4vw, 1.18rem);
     line-height: 1.7;
     letter-spacing: 0;
-    font-weight: 400;
+    font-weight: 700;
     color: color-mix(in srgb, var(--theme-on-bg) 78%, transparent);
     max-width: 48ch;
     justify-self: center;
@@ -257,9 +257,9 @@ import { Button } from '@components/odyssey-theme'
     border-radius: calc(var(--theme-shape-radius) * 0.75);
     border: 1px solid color-mix(in srgb, var(--theme-on-bg) 12%, transparent);
     box-shadow: var(--theme-card-shadow, 0 18px 44px rgba(15, 23, 42, 0.08));
-    padding: clamp(1.25rem, 3.2vw, 2.1rem);
+    padding: clamp(1.6rem, 4vw, 2.45rem);
     display: grid;
-    gap: clamp(0.65rem, 2vw, 1.1rem);
+    gap: clamp(0.85rem, 2.5vw, 1.45rem);
     width: 100%;
   }
 
@@ -315,42 +315,27 @@ import { Button } from '@components/odyssey-theme'
 
   #problem .menuva-card,
   #solution .menuva-card {
-    padding-block: clamp(1.1rem, 2.5vw, 1.65rem);
-    gap: clamp(0.55rem, 1.8vw, 0.95rem);
+    padding-block: clamp(1.5rem, 3.6vw, 2.2rem);
+    gap: clamp(0.8rem, 2.3vw, 1.25rem);
   }
 
   #problem .menuva-card--problem-outcome {
-    padding-block: clamp(0.85rem, 2.2vw, 1.35rem);
+    padding-block: clamp(1.35rem, 3.1vw, 1.95rem);
     text-align: center;
-  }
-
-  .menuva-card--lede {
-    padding-block: clamp(1rem, 2.3vw, 1.5rem);
-    gap: clamp(0.45rem, 1.6vw, 0.8rem);
   }
 
   .menuva-card-stack {
     display: grid;
-    gap: clamp(0.9rem, 2.4vw, 1.4rem);
+    gap: clamp(1.1rem, 2.8vw, 1.8rem);
   }
 
   .menuva-card-stack--metrics {
     align-items: stretch;
   }
 
-  .menuva-card--business-intro {
-    justify-items: center;
-    text-align: center;
-  }
-
   .menuva-card--business-detail {
-    padding-block: clamp(1rem, 2.4vw, 1.6rem);
-    gap: clamp(0.5rem, 1.8vw, 0.9rem);
-  }
-
-  .menuva-card--business-intro p {
-    margin: 0;
-    color: color-mix(in srgb, var(--theme-on-bg) 82%, transparent);
+    padding-block: clamp(1.5rem, 3.4vw, 2.1rem);
+    gap: clamp(0.9rem, 2.3vw, 1.25rem);
   }
 
   .menuva-list {
@@ -404,7 +389,8 @@ import { Button } from '@components/odyssey-theme'
   }
 
   .menuva-card--metric {
-    gap: clamp(0.75rem, 2.2vw, 1.2rem);
+    gap: clamp(0.85rem, 2.4vw, 1.35rem);
+    padding: clamp(1.9rem, 4.2vw, 2.6rem);
   }
 
   .menuva-card h4 {
@@ -437,6 +423,35 @@ import { Button } from '@components/odyssey-theme'
   .menuva-card--highlight {
     justify-items: center;
     text-align: center;
+  }
+
+  .menuva-section__lede {
+    display: grid;
+    gap: clamp(0.65rem, 2vw, 1rem);
+    justify-items: start;
+    text-align: left;
+    padding-inline: clamp(1.6rem, 4vw, 2.45rem);
+    width: 100%;
+    max-width: 940px;
+  }
+
+  .menuva-section__lede .menuva-lede {
+    text-align: left;
+  }
+
+  .menuva-business-intro {
+    display: grid;
+    gap: clamp(0.85rem, 2.3vw, 1.3rem);
+    justify-items: start;
+    text-align: left;
+    padding-inline: clamp(1.6rem, 4vw, 2.45rem);
+    width: 100%;
+    max-width: 940px;
+  }
+
+  .menuva-business-intro p {
+    margin: 0;
+    color: color-mix(in srgb, var(--theme-on-bg) 78%, transparent);
   }
 
   .menuva-card-stack--duo {
