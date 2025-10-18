@@ -17,28 +17,7 @@ import { Button } from '@components/odyssey-theme'
     <div class="menuva-cta menuva-cta--hero">
       <Button href="/contact">Contact</Button>
     </div>
-    <div class="menuva-card menuva-card--hero">
-      <header class="menuva-hero__header">
-        <p class="menuva-eyebrow">Inclusive dining, elegantly delivered</p>
-        <p class="menuva-hero__lead">
-          Menuva reimagines the dine-in journey with adaptive typography, instant translation, allergen intelligence, and calm,
-          confident ordering for every guest and every team.
-        </p>
-      </header>
-      <ul class="menuva-hero__highlights">
-        <li>Allergen-aware menus, adjustable type, and on-demand translation for modern diners</li>
-        <li>Confident ordering flows with personal baskets that diners can hand straight to a server</li>
-        <li>No new hardware or redesign. Menuva layers onto menus that restaurants already maintain.</li>
-      </ul>
-    </div>
   </section>
-
-  <figure class="menuva-mockup">
-    <img
-      src="/assets/images/ventures/menuva/Menuva%20Primary%20Mockup.png"
-      alt="Menuva product mockup showcasing the digital dining experience"
-    />
-  </figure>
 
   <section class="menuva-section" id="problem">
     <h2 class="menuva-section__title">The Problem</h2>
@@ -51,7 +30,7 @@ import { Button } from '@components/odyssey-theme'
         <div>
           <h4>What diners experience</h4>
           <ul class="menuva-list">
-            <li><strong>Menu anxiety persists.</strong> <strong>86%</strong> of Gen Z feel stressed or uncertain when ordering because menus are unclear or overwhelming.<sup>2</sup></li>
+            <li><strong>Menu anxiety persists.</strong> <strong>86%</strong> of Gen Z feel stressed or uncertain when ordering.<sup>2</sup></li>
             <li><strong>Safety is guesswork.</strong> <strong>45%</strong> of UK diners avoid eating out due to allergies or intolerances when menus lack clarity.<sup>3</sup></li>
             <li><strong>Online research falls short.</strong> Over half of diners search for menus online yet struggle to find accurate prices, ingredients, or allergen information.<sup>4</sup></li>
           </ul>
@@ -65,8 +44,14 @@ import { Button } from '@components/odyssey-theme'
           </ul>
         </div>
       </div>
-      <p class="menuva-summary">The result: anxious guests, missed revenue, and accessibility gaps across the dining room.</p>
     </div>
+    <p class="menuva-summary">The result: anxious guests, missed revenue, and accessibility gaps across the dining room.</p>
+    <figure class="menuva-mockup">
+      <img
+        src="/assets/images/ventures/menuva/Menuva%20Primary%20Mockup.png"
+        alt="Menuva product mockup showcasing the digital dining experience"
+      />
+    </figure>
   </section>
 
   <section class="menuva-section" id="solution">
@@ -117,18 +102,22 @@ import { Button } from '@components/odyssey-theme'
 
   <section class="menuva-section" id="business-model">
     <h2 class="menuva-section__title">Business Model</h2>
-    <div class="menuva-card">
-      <div class="menuva-pill-row" role="list">
-        <span role="listitem">Free for diners</span>
-        <span role="listitem">Free menu publication for restaurants</span>
-        <span role="listitem">Optional payments from August 2026</span>
+    <div class="menuva-card-group menuva-card-group--business">
+      <div class="menuva-card menuva-card--business-intro">
+        <div class="menuva-pill-row" role="list">
+          <span role="listitem">Free for diners</span>
+          <span role="listitem">Free menu publication for restaurants</span>
+          <span role="listitem">Optional payments integration from August 2026</span>
+        </div>
       </div>
-      <ul class="menuva-list">
-        <li>Visibility, mock ordering, and digital baskets remain complimentary beyond launch</li>
-        <li>Restaurants can activate payment or point-of-sale integrations when ready</li>
-        <li>A projected £0.10 + 2.5% fee applies only to completed paid orders and only for opted-in venues</li>
-      </ul>
-      <p class="menuva-summary">This approach builds trust, encourages rapid adoption, and monetises only when tangible value is delivered.</p>
+      <div class="menuva-card menuva-card--business-details">
+        <ul class="menuva-list">
+          <li>Visibility, mock ordering, and digital baskets remain complimentary beyond launch</li>
+          <li>Restaurants can activate payment or point-of-sale integrations when ready</li>
+          <li>A projected £0.10 + 2.5% fee applies only to completed paid orders and only for opted-in venues</li>
+        </ul>
+        <p class="menuva-summary">This approach builds trust, encourages rapid adoption, and monetises only when tangible value is delivered.</p>
+      </div>
     </div>
   </section>
 
@@ -167,25 +156,25 @@ import { Button } from '@components/odyssey-theme'
           <span role="columnheader">Basis</span>
         </div>
         <div class="menuva-table__row" role="row">
-          <div class="menuva-table__cell" data-title="Segment" role="cell" aria-label="Segment: TAM">TAM</div>
+          <div class="menuva-table__cell" data-title="Segment" role="cell" aria-label="Segment: Total addressable market">Total addressable market</div>
           <div class="menuva-table__cell" data-title="Value" role="cell" aria-label="Value: £1.90 trillion">£1.90 trillion</div>
           <div class="menuva-table__cell" data-title="Basis" role="cell" aria-label="Basis: Global dine-in restaurant market">Global dine-in restaurant market with hospitality spend captured in 2024 benchmark studies.<sup>10</sup></div>
         </div>
         <div class="menuva-table__row" role="row">
-          <div class="menuva-table__cell" data-title="Segment" role="cell" aria-label="Segment: SAM">SAM</div>
+          <div class="menuva-table__cell" data-title="Segment" role="cell" aria-label="Segment: Serviceable available market">Serviceable available market</div>
           <div class="menuva-table__cell" data-title="Value" role="cell" aria-label="Value: £166 million">£166 million</div>
           <div class="menuva-table__cell" data-title="Basis" role="cell" aria-label="Basis: UK dine-in market adjusted for digital adoption, smartphone penetration, and in-venue dining rate">UK dine-in market adjusted for digital adoption, smartphone penetration, and in-venue dining rate with hospitality recovery indicators.<sup>12</sup> <sup>13</sup> <sup>14</sup></div>
         </div>
         <div class="menuva-table__row" role="row">
-          <div class="menuva-table__cell" data-title="Segment" role="cell" aria-label="Segment: SOM">SOM</div>
+          <div class="menuva-table__cell" data-title="Segment" role="cell" aria-label="Segment: Serviceable obtainable market">Serviceable obtainable market</div>
           <div class="menuva-table__cell" data-title="Value" role="cell" aria-label="Value: £2.49 million">£2.49 million</div>
           <div class="menuva-table__cell" data-title="Basis" role="cell" aria-label="Basis: 624 launch-region venues × 96% independents × 30% penetration × 70 orders per day × 330 days × £0.60 per order">624 launch-region venues × 96% independents × 30% penetration × 70 orders/day × 330 days × £0.60/order (transaction fee only if enabled).<sup>15</sup> <sup>16</sup> <sup>17</sup></div>
         </div>
       </div>
       <ul class="menuva-table-notes">
-        <li><strong>TAM</strong> Total addressable market covering global dine-in restaurant spend. It shows the ceiling for Menuva as inclusive dining becomes standard.</li>
-        <li><strong>SAM</strong> Serviceable available market reflecting UK venues with digital-ready diners. It highlights the first geography where Menuva can scale quickly.</li>
-        <li><strong>SOM</strong> Serviceable obtainable market representing realistic conversion in the launch region. It is grounded in venue counts, adoption targets, and opt-in transaction fees.</li>
+        <li><strong>Total addressable market.</strong> Global dine-in restaurant spend shows the ceiling for Menuva as inclusive dining becomes standard.</li>
+        <li><strong>Serviceable available market.</strong> UK venues with digital-ready diners highlight the first geography where Menuva can scale quickly.</li>
+        <li><strong>Serviceable obtainable market.</strong> Launch-region conversion is grounded in venue counts, adoption targets, and opt-in transaction fees.</li>
       </ul>
       <p class="menuva-summary">The SOM presents a pragmatic growth path grounded in accessible pricing and proven demand.</p>
     </div>
@@ -254,9 +243,13 @@ import { Button } from '@components/odyssey-theme'
   .menuva-hero__headline {
     margin: 0;
     text-align: center;
-    font-size: clamp(2rem, 5.4vw, 2.65rem);
-    line-height: 1.1;
-    letter-spacing: -0.01em;
+    font-size: clamp(1.2rem, 3.2vw, 1.6rem);
+    line-height: 1.55;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: color-mix(in srgb, var(--theme-on-bg) 78%, transparent);
+    max-width: 44ch;
+    justify-self: center;
   }
 
   .menuva-card {
@@ -270,35 +263,10 @@ import { Button } from '@components/odyssey-theme'
     width: 100%;
   }
 
-  .menuva-card--hero {
-    gap: clamp(0.7rem, 2vw, 1.05rem);
-  }
-
   html[data-theme='light'] .menuva-card {
     background: #fff;
     border-color: color-mix(in srgb, var(--theme-on-bg) 8%, transparent);
     box-shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
-  }
-
-  .menuva-hero__header {
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  .menuva-eyebrow {
-    margin: 0;
-    font-size: 0.85rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: color-mix(in srgb, var(--theme-on-bg) 65%, transparent);
-  }
-
-  .menuva-hero__lead {
-    margin: 0;
-    font-size: clamp(1.02rem, 2vw, 1.18rem);
-    line-height: 1.6;
-    color: color-mix(in srgb, var(--theme-on-bg) 85%, transparent);
   }
 
   .menuva-lede {
@@ -308,31 +276,10 @@ import { Button } from '@components/odyssey-theme'
     color: color-mix(in srgb, var(--theme-on-bg) 88%, transparent);
   }
 
-  .menuva-card > .menuva-lede {
-    margin-bottom: -0.55rem;
-  }
-
   @media (min-width: 880px) {
     .menuva-lede {
       max-width: 60ch;
     }
-  }
-
-  .menuva-hero__highlights {
-    display: grid;
-    gap: 0.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .menuva-hero__highlights li {
-    padding: 0.85rem 1.1rem;
-    border-radius: calc(var(--theme-shape-radius) * 0.6);
-    background: color-mix(in srgb, var(--theme-surface-1) 88%, transparent);
-    border: 1px solid color-mix(in srgb, var(--theme-on-bg) 10%, transparent);
-    font-weight: 600;
-    line-height: 1.45;
   }
 
   .menuva-mockup {
@@ -366,8 +313,47 @@ import { Button } from '@components/odyssey-theme'
     gap: clamp(1.15rem, 3.4vw, 2rem);
   }
 
+  #problem .menuva-card,
+  #solution .menuva-card {
+    padding-block: clamp(1.25rem, 3vw, 2rem);
+    gap: clamp(0.6rem, 2vw, 1rem);
+  }
+
+  #problem > .menuva-summary {
+    margin-top: clamp(0.85rem, 2.4vw, 1.35rem);
+    text-align: center;
+  }
+
+  #problem > .menuva-summary + .menuva-mockup {
+    margin-top: clamp(0.65rem, 2vw, 1.1rem);
+  }
+
+  #problem > .menuva-mockup {
+    width: min(100%, 780px);
+  }
+
+  .menuva-card-group {
+    display: grid;
+    gap: clamp(1rem, 2.8vw, 1.6rem);
+  }
+
+  .menuva-card--business-intro {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .menuva-card--business-details {
+    gap: clamp(0.75rem, 2.2vw, 1.2rem);
+  }
+
   @media (min-width: 880px) {
     .menuva-columns {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 880px) {
+    .menuva-card-group--business {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -574,5 +560,9 @@ import { Button } from '@components/odyssey-theme'
 
   .menuva-cta--hero {
     margin-top: clamp(0.5rem, 1.4vw, 0.9rem);
+  }
+
+  .post-header__container {
+    display: none;
   }
 `}</style>
