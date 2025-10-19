@@ -228,7 +228,7 @@ import { Button } from '@components/odyssey-theme'
 <style is:global>{`
   .menuva {
     display: grid;
-    gap: clamp(1.4rem, 4vw, 2.8rem);
+    gap: clamp(0.75rem, 2.2vw, 1.4rem);
     justify-items: center;
     width: 100%;
     margin-inline: auto;
@@ -238,6 +238,11 @@ import { Button } from '@components/odyssey-theme'
   .menuva-section,
   .menuva-section--references {
     width: min(100%, 940px);
+  }
+
+  .menuva > .menuva-section,
+  .menuva > .menuva-section--references {
+    margin-block-start: clamp(0.85rem, 2.6vw, 1.5rem);
   }
 
   .menuva-hero,
@@ -319,8 +324,9 @@ import { Button } from '@components/odyssey-theme'
   }
 
   .menuva-card--summary-callout {
-    padding-block: clamp(1.35rem, 3.1vw, 1.95rem);
+    padding-block: clamp(1.15rem, 2.6vw, 1.7rem);
     text-align: center;
+    align-items: center;
   }
 
   .menuva-card-stack {
