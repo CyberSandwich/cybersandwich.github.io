@@ -57,7 +57,7 @@ import { Button } from '@components/odyssey-theme'
             src="/assets/images/ventures/menuva/Menuva%20Primary%20Mockup.png"
             alt="Menuva product mockup showcasing the digital dining experience"
           />
-          <figcaption class="menuva-mockup__caption">screenshots from functional prototype</figcaption>
+          <figcaption class="menuva-mockup__caption">(screenshots taken from a functional swift-native prototype)</figcaption>
         </figure>
       </div>
       <div class="menuva-card">
@@ -252,8 +252,9 @@ import { Button } from '@components/odyssey-theme'
     display: inline-block;
     padding-inline: 0.25em;
     border-radius: 0.4em;
-    background: color-mix(in srgb, var(--theme-on-bg) 10%, transparent);
-    color: inherit;
+    --menuva-hero-accent: #ff7a18;
+    background: color-mix(in srgb, var(--menuva-hero-accent) 18%, transparent);
+    color: var(--menuva-hero-accent);
     box-decoration-break: clone;
   }
 
@@ -288,6 +289,12 @@ import { Button } from '@components/odyssey-theme'
     width: 100%;
     border-radius: calc(var(--theme-shape-radius) * 0.6);
     box-shadow: none;
+  }
+
+  .menuva-card--mockup .menuva-mockup > img {
+    display: block;
+    width: 100%;
+    border-radius: inherit;
   }
 
   .menuva-mockup__caption {
