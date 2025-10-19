@@ -17,7 +17,7 @@ import { Button } from '@components/odyssey-theme'
   </figure>
 
   <section class="menuva-hero">
-    <h1 class="menuva-hero__headline">A digital menu platform that makes dining in simple and accessible</h1>
+    <h1 class="menuva-hero__headline">A digital menu platform that makes <span class="menuva-hero__accent">dining in</span> simple and accessible</h1>
     <div class="menuva-cta menuva-cta--hero">
       <Button href="/contact">Contact</Button>
     </div>
@@ -29,7 +29,7 @@ import { Button } from '@components/odyssey-theme'
       <div class="menuva-card">
         <h4>What Diners Experience</h4>
         <ul class="menuva-list">
-          <li><strong>Menu anxiety persists.</strong> <strong>86%</strong> of Gen Z feel stressed or uncertain when ordering.<sup>2</sup></li>
+          <li><strong>Menu anxiety is on the rise.</strong> <strong>86%</strong> of Gen Z feel stressed or uncertain when ordering.<sup>2</sup></li>
           <li><strong>Safety is guesswork.</strong> <strong>45%</strong> of UK diners avoid eating out due to allergies or intolerances when menus lack clarity.<sup>3</sup></li>
           <li><strong>Online research falls short.</strong> Over 50% of diners search for menus online yet many stay offline or lack prices, images, and allergen information.<sup>4</sup></li>
         </ul>
@@ -57,6 +57,7 @@ import { Button } from '@components/odyssey-theme'
             src="/assets/images/ventures/menuva/Menuva%20Primary%20Mockup.png"
             alt="Menuva product mockup showcasing the digital dining experience"
           />
+          <figcaption class="menuva-mockup__caption">screenshots from functional prototype</figcaption>
         </figure>
       </div>
       <div class="menuva-card">
@@ -235,8 +236,25 @@ import { Button } from '@components/odyssey-theme'
   .menuva-hero,
   .menuva-section {
     display: grid;
-    gap: clamp(1.1rem, 2.8vw, 1.8rem);
     justify-items: stretch;
+  }
+
+  .menuva-hero {
+    gap: clamp(0.75rem, 2.2vw, 1.4rem);
+  }
+
+  .menuva-section {
+    gap: clamp(1.1rem, 2.8vw, 1.8rem);
+  }
+
+  .menuva-hero__accent {
+    position: relative;
+    display: inline-block;
+    padding-inline: 0.25em;
+    border-radius: 0.4em;
+    background: color-mix(in srgb, var(--theme-on-bg) 10%, transparent);
+    color: inherit;
+    box-decoration-break: clone;
   }
 
   .menuva-hero__headline {
@@ -270,6 +288,14 @@ import { Button } from '@components/odyssey-theme'
     width: 100%;
     border-radius: calc(var(--theme-shape-radius) * 0.6);
     box-shadow: none;
+  }
+
+  .menuva-mockup__caption {
+    margin: clamp(0.65rem, 1.8vw, 0.95rem) auto 0;
+    text-align: center;
+    font-size: clamp(0.95rem, 2.2vw, 1rem);
+    color: color-mix(in srgb, var(--theme-on-bg) 58%, transparent);
+    max-width: 42ch;
   }
 
   html[data-theme='dark'] .menuva-card--mockup .menuva-mockup {
@@ -492,7 +518,7 @@ import { Button } from '@components/odyssey-theme'
   }
 
   .menuva-cta--hero {
-    margin-top: clamp(0.5rem, 1.4vw, 0.9rem);
+    margin-top: 0;
   }
 
   .post-header__container {
