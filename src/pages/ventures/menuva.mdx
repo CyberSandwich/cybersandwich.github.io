@@ -23,15 +23,17 @@ import { Button } from '@components/odyssey-theme'
     </div>
   </section>
 
+  <hr class="menuva-divider" />
+
   <section class="menuva-section" id="problem">
     <h2 class="menuva-section__title">The Problem</h2>
     <div class="menuva-card-stack">
       <div class="menuva-card">
         <h4>What Diners Experience</h4>
         <ul class="menuva-list">
-          <li><strong>Menu anxiety is on the rise.</strong> <strong>86%</strong> of Gen Z feel stressed or uncertain when ordering.<sup>2</sup></li>
-          <li><strong>Safety is guesswork.</strong> <strong>45%</strong> of UK diners avoid eating out due to allergies or intolerances when menus lack clarity.<sup>3</sup></li>
-          <li><strong>Online research falls short.</strong> Over 50% of diners search for menus online yet many stay offline or lack prices, images, and allergen information.<sup>4</sup></li>
+          <li><span class="menuva-highlight"><strong>Menu anxiety is on the rise.</strong></span> <strong>86%</strong> of Gen Z feel stressed or uncertain when ordering.<sup>2</sup></li>
+          <li><span class="menuva-highlight"><strong>Safety is guesswork.</strong></span> <strong>45%</strong> of UK diners avoid eating out due to allergies or intolerances when menus lack clarity.<sup>3</sup></li>
+          <li><span class="menuva-highlight"><strong>Online research falls short.</strong></span> Over 50% of diners search for menus online yet many stay offline or lack prices, images, and allergen information.<sup>4</sup></li>
         </ul>
       </div>
       <div class="menuva-card">
@@ -57,7 +59,7 @@ import { Button } from '@components/odyssey-theme'
             src="/assets/images/ventures/menuva/Menuva%20Primary%20Mockup.png"
             alt="Menuva product mockup showcasing the digital dining experience"
           />
-          <figcaption class="menuva-mockup__caption">(screenshots taken from a functional swift-native prototype)</figcaption>
+          <figcaption class="menuva-mockup__caption">(Screenshots Taken From a Functional Swift-Native Prototype)</figcaption>
         </figure>
       </div>
       <div class="menuva-card">
@@ -88,10 +90,10 @@ import { Button } from '@components/odyssey-theme'
     <div class="menuva-card">
       <p>Menuva opens dining experiences to the millions who are currently underserved or excluded</p>
       <ul class="menuva-grid-list">
-        <li><strong>Inclusive design.</strong> Supports people with visual impairments, dyslexia, and cognitive overload.</li>
-        <li><strong>Lowered anxiety.</strong> Reduces the stress of ordering in public by guiding diners through every choice.</li>
-        <li><strong>Dietary confidence.</strong> Empowers guests with allergies or dietary restrictions to dine safely.</li>
-        <li><strong>Equitable hospitality.</strong> Helps restaurants champion inclusion without adding cost.</li>
+        <li><span class="menuva-highlight"><strong>Inclusive design.</strong></span> Supports people with visual impairments, dyslexia, and cognitive overload.</li>
+        <li><span class="menuva-highlight"><strong>Lowered anxiety.</strong></span> Reduces the stress of ordering in public by guiding diners through every choice.</li>
+        <li><span class="menuva-highlight"><strong>Dietary confidence.</strong></span> Empowers guests with allergies or dietary restrictions to dine safely.</li>
+        <li><span class="menuva-highlight"><strong>Equitable hospitality.</strong></span> Helps restaurants champion inclusion without adding cost.</li>
       </ul>
       <p class="menuva-summary">Accessible dining should be a baseline expectation, not a premium upgrade</p>
     </div>
@@ -176,9 +178,9 @@ import { Button } from '@components/odyssey-theme'
     <div class="menuva-card-stack menuva-card-stack--duo">
       <div class="menuva-card">
         <ol class="menuva-ordered">
-          <li><strong>Decision fatigue is real.</strong> Diners want clarity, guidance, and reassurance at the table</li>
-          <li><strong>Transparency drives trust.</strong> Ingredients, allergens, and pricing need to be instantly available</li>
-          <li><strong>Inclusion is non-negotiable.</strong> Accessibility expectations are rising and Menuva meets them without extra complexity</li>
+          <li><span class="menuva-highlight"><strong>Decision fatigue is real.</strong></span> Diners want clarity, guidance, and reassurance at the table</li>
+          <li><span class="menuva-highlight"><strong>Transparency drives trust.</strong></span> Ingredients, allergens, and pricing need to be instantly available</li>
+          <li><span class="menuva-highlight"><strong>Inclusion is non-negotiable.</strong></span> Accessibility expectations are rising and Menuva meets them without extra complexity</li>
         </ol>
       </div>
       <div class="menuva-card menuva-card--highlight">
@@ -241,6 +243,7 @@ import { Button } from '@components/odyssey-theme'
 
   .menuva-hero {
     gap: clamp(0.75rem, 2.2vw, 1.4rem);
+    margin-block-end: clamp(1.8rem, 5vw, 3.1rem);
   }
 
   .menuva-section {
@@ -256,6 +259,21 @@ import { Button } from '@components/odyssey-theme'
     background: color-mix(in srgb, var(--menuva-hero-accent) 18%, transparent);
     color: var(--menuva-hero-accent);
     box-decoration-break: clone;
+  }
+
+  .menuva-highlight {
+    position: relative;
+    display: inline;
+    padding: 0.1em 0.35em;
+    border-radius: 0.4em;
+    --menuva-highlight-color: #ff7a18;
+    background: color-mix(in srgb, var(--menuva-highlight-color) 18%, transparent);
+    color: var(--menuva-highlight-color);
+    box-decoration-break: clone;
+  }
+
+  .menuva-highlight strong {
+    color: inherit;
   }
 
   .menuva-hero__headline {
@@ -298,11 +316,12 @@ import { Button } from '@components/odyssey-theme'
   }
 
   .menuva-mockup__caption {
-    margin: clamp(0.65rem, 1.8vw, 0.95rem) auto 0;
+    margin-block-start: clamp(0.65rem, 1.8vw, 0.95rem);
+    margin-inline: 0;
     text-align: center;
     font-size: clamp(0.95rem, 2.2vw, 1rem);
     color: color-mix(in srgb, var(--theme-on-bg) 58%, transparent);
-    max-width: 42ch;
+    width: 100%;
   }
 
   html[data-theme='dark'] .menuva-card--mockup .menuva-mockup {
@@ -322,6 +341,13 @@ import { Button } from '@components/odyssey-theme'
     border-radius: calc(var(--theme-shape-radius) * 0.85);
     overflow: hidden;
     box-shadow: 0 20px 48px rgba(15, 23, 42, 0.16);
+  }
+
+  .menuva-divider {
+    width: min(100%, 940px);
+    border: none;
+    border-top: 1px solid color-mix(in srgb, var(--theme-on-bg) 16%, transparent);
+    margin: clamp(1.2rem, 3.6vw, 2.4rem) 0;
   }
 
   .menuva-mockup--logo {
