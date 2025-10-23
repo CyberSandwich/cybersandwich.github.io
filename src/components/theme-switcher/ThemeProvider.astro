@@ -1,14 +1,43 @@
 ---
+import {
+        DEFAULT_THEME,
+        LEGACY_LIGHT_THEMES,
+        SUPPORTED_THEMES,
+        THEME_STORAGE_KEY,
+} from './constants';
+
+const serializedSupportedThemes = JSON.stringify(SUPPORTED_THEMES);
+const serializedLegacyLightThemes = JSON.stringify(LEGACY_LIGHT_THEMES);
+const serializedDefaultTheme = JSON.stringify(DEFAULT_THEME);
+const serializedStorageKey = JSON.stringify(THEME_STORAGE_KEY);
 ---
 
-<!-- This is a simple script to check if there is a theme value in local storage. That way the theme stays with you between pages -->
+<!-- This is a simple script to check if there is a theme value in local storage. That way the theme stays with you between page loads -->
 <script is:inline>
-	const doc = document.firstElementChild;
-	const localStorageTheme = localStorage.getItem('theme');
+        (function () {
+                const doc = document.documentElement;
+                const storageKey = {serializedStorageKey};
+                const defaultTheme = {serializedDefaultTheme};
+                const supportedThemes = new Set({serializedSupportedThemes});
+                const legacyLightThemes = new Set({serializedLegacyLightThemes});
 
-        if (localStorageTheme !== null) {
-                doc.setAttribute('data-theme', localStorageTheme);
-        } else {
-                doc.setAttribute('data-theme', 'dark');
-        }
+                let storedTheme = null;
+
+                try {
+                        storedTheme = window.localStorage.getItem(storageKey);
+                } catch (error) {
+                        storedTheme = null;
+                }
+
+                const normalizedTheme =
+                        storedTheme && legacyLightThemes.has(storedTheme) ? defaultTheme : storedTheme;
+                const themeToApply =
+                        normalizedTheme && supportedThemes.has(normalizedTheme)
+                                ? normalizedTheme
+                                : defaultTheme;
+
+                if (doc) {
+                        doc.setAttribute('data-theme', themeToApply);
+                }
+        })();
 </script>

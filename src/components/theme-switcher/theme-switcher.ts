@@ -2,13 +2,21 @@ import { LitElement, TemplateResult, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { classicThemeIcon, darkThemeIcon } from './icons';
-
-type ThemeOption = 'light' | 'dark';
+import {
+        DEFAULT_THEME,
+        LEGACY_LIGHT_THEMES,
+        SUPPORTED_THEMES,
+        THEME_STORAGE_KEY,
+        type ThemeOption,
+} from './constants';
 
 const THEMES: Array<{ name: ThemeOption; label: string; icon: TemplateResult }> = [
         { name: 'light', label: 'Light', icon: classicThemeIcon },
         { name: 'dark', label: 'Dark', icon: darkThemeIcon },
 ];
+
+const LEGACY_LIGHT_THEME_SET = new Set<string>(LEGACY_LIGHT_THEMES);
+const SUPPORTED_THEME_SET = new Set<string>(SUPPORTED_THEMES);
 
 @customElement('theme-switcher')
 export class ThemeSwitcher extends LitElement {
@@ -52,49 +60,71 @@ export class ThemeSwitcher extends LitElement {
         `;
 
         // set the _doc element
-        private readonly _doc = typeof document !== 'undefined' ? document.firstElementChild : null;
+        private readonly _doc = typeof document !== 'undefined' ? document.documentElement : null;
+
+        private heroImage: HTMLImageElement | null = null;
 
         @property({ type: String, reflect: true })
         theme: ThemeOption | null = null;
 
         protected firstUpdated(): void {
-                this._getCurrentTheme();
+                this.heroImage = document.querySelector('#home-hero-image') as HTMLImageElement | null;
+                this._applyStoredTheme();
         }
 
-        private _getCurrentTheme(): void {
-                if (typeof localStorage === 'undefined') {
-                        this._setTheme('dark');
-                        return;
+        private _applyStoredTheme(): void {
+                const storedTheme = this._getStoredTheme();
+                this._setTheme(storedTheme ?? DEFAULT_THEME);
+        }
+
+        private _getStoredTheme(): ThemeOption | null {
+                const storedTheme = this._readStoredTheme();
+
+                if (storedTheme === null) {
+                        return null;
                 }
 
-                const storedTheme = localStorage.getItem('theme');
+                if (LEGACY_LIGHT_THEME_SET.has(storedTheme)) {
+                        return DEFAULT_THEME;
+                }
 
-                if (storedTheme !== null) {
-                        const legacyLightThemes = new Set(['default', 'earth', 'ocean', 'sand']);
-                        const normalizedTheme = legacyLightThemes.has(storedTheme)
-                                ? 'light'
-                                : (storedTheme as ThemeOption);
-                        const isValidTheme = normalizedTheme === 'light' || normalizedTheme === 'dark';
+                return SUPPORTED_THEME_SET.has(storedTheme) ? (storedTheme as ThemeOption) : null;
+        }
 
-                        this._setTheme(isValidTheme ? normalizedTheme : 'dark');
-                } else {
-                        this._setTheme('dark');
+        private _readStoredTheme(): string | null {
+                if (typeof window === 'undefined' || !('localStorage' in window)) {
+                        return null;
+                }
+
+                try {
+                        return window.localStorage.getItem(THEME_STORAGE_KEY);
+                } catch (error) {
+                        return null;
                 }
         }
 
         private _setTheme(theme: ThemeOption): void {
                 this._doc?.setAttribute('data-theme', theme);
 
-                const heroImage = document.querySelector('#home-hero-image') as HTMLImageElement | null;
-                if (heroImage) {
-                        heroImage.src = '/assets/images/home/DS Headshot.jpeg';
+                if (this.heroImage) {
+                        this.heroImage.src = '/assets/images/home/DS Headshot.jpeg';
                 }
 
-                if (typeof localStorage !== 'undefined') {
-                        localStorage.setItem('theme', theme);
-                }
+                this._storeTheme(theme);
 
                 this.theme = theme;
+        }
+
+        private _storeTheme(theme: ThemeOption): void {
+                if (typeof window === 'undefined' || !('localStorage' in window)) {
+                        return;
+                }
+
+                try {
+                        window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+                } catch (error) {
+                        /* no-op */
+                }
         }
 
         private _handleSelect(theme: ThemeOption): void {
