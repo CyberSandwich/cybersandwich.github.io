@@ -26,6 +26,62 @@ import { Button } from '@components/odyssey-theme'
   </section>
 
 
+  <section class="menuva-section menuva-section--toc" id="table-of-contents">
+    <h2 class="menuva-section__title">Table of Contents</h2>
+    <div class="menuva-card menuva-card--toc">
+      <ul class="menuva-toc">
+        <li>
+          <a class="menuva-toc__link" href="#problem">
+            <span class="menuva-toc__eyebrow">01</span>
+            <span class="menuva-toc__label">The Problem</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#solution">
+            <span class="menuva-toc__eyebrow">02</span>
+            <span class="menuva-toc__label">The Solution</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#impact">
+            <span class="menuva-toc__eyebrow">03</span>
+            <span class="menuva-toc__label">Social Impact</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#business-model">
+            <span class="menuva-toc__eyebrow">04</span>
+            <span class="menuva-toc__label">Business Model</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#market-opportunity">
+            <span class="menuva-toc__eyebrow">05</span>
+            <span class="menuva-toc__label">Market Opportunity</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#market-size">
+            <span class="menuva-toc__eyebrow">06</span>
+            <span class="menuva-toc__label">Market Size</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#why-menuva-matters">
+            <span class="menuva-toc__eyebrow">07</span>
+            <span class="menuva-toc__label">Why Menuva Matters</span>
+          </a>
+        </li>
+        <li>
+          <a class="menuva-toc__link" href="#references">
+            <span class="menuva-toc__eyebrow">08</span>
+            <span class="menuva-toc__label">References</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
   <section class="menuva-section" id="problem">
     <h2 class="menuva-section__title">The Problem</h2>
     <div class="menuva-card-stack">
@@ -319,6 +375,10 @@ import { Button } from '@components/odyssey-theme'
     padding: clamp(0.95rem, 2.6vw, 1.5rem);
   }
 
+  .menuva-card--toc {
+    padding: clamp(1.35rem, 3.2vw, 1.9rem);
+  }
+
   .menuva-card--mockup .menuva-mockup {
     width: 100%;
     border-radius: calc(var(--theme-shape-radius) * 0.6);
@@ -401,6 +461,56 @@ import { Button } from '@components/odyssey-theme'
   .menuva-card-stack {
     display: grid;
     gap: clamp(1.1rem, 2.8vw, 1.8rem);
+  }
+
+  .menuva-toc {
+    display: grid;
+    gap: clamp(0.75rem, 2.2vw, 1.15rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 760px) {
+    .menuva-toc {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .menuva-toc__link {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.65rem;
+    padding: clamp(0.85rem, 2.3vw, 1.15rem) clamp(1rem, 2.8vw, 1.35rem);
+    border-radius: calc(var(--theme-shape-radius) * 0.6);
+    background: color-mix(in srgb, var(--theme-surface-1) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--theme-on-bg) 10%, transparent);
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    color: color-mix(in srgb, var(--theme-on-bg) 82%, transparent);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+
+  .menuva-toc__link:hover,
+  .menuva-toc__link:focus-visible {
+    background: color-mix(in srgb, var(--theme-surface-1) 96%, transparent);
+    border-color: color-mix(in srgb, var(--theme-on-bg) 16%, transparent);
+    color: color-mix(in srgb, var(--theme-on-bg) 90%, transparent);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .menuva-toc__eyebrow {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, var(--theme-on-bg) 56%, transparent);
+  }
+
+  .menuva-toc__label {
+    font-size: clamp(0.98rem, 2.4vw, 1.15rem);
   }
 
   .menuva-card-stack--metrics {
