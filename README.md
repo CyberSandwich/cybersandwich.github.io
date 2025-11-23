@@ -66,4 +66,4 @@ Astro has [an in-depth guide](https://docs.astro.build/en/guides/deploy/) on how
 
 ## Support
 
-Please feel free to post issues or submit PRs to this repo and we will do our best to respond in a timely manner, keeping in mind this template is offered for free as is on GitHub.
+Please feel free to post issues or submit PRs to this repo and we will do our best to respond in a timely manner, keeping in mind this template is offered for free as is on GitHub. 
