@@ -1,0 +1,11 @@
+exclude:
+  - src
+  - node_modules
+  - assets
+  - public
+  - .astro
+  - package-lock.json
+  - package.json
+  - tsconfig.json
+  - astro.config.mjs
+  - netlify.toml
