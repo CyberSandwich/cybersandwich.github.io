@@ -156,24 +156,21 @@ import { Button } from '@components/odyssey-theme'
     <h2 class="menuva-section__title">Business Model</h2>
     <div class="menuva-card-stack">
       <div class="menuva-card menuva-card--business-overview">
-        <h4>Access &amp; Pricing</h4>
+        <h4>Access</h4>
         <ul class="menuva-list menuva-list--bulleted">
           <li>Free for diners</li>
           <li>Free menu publication for restaurants</li>
-          <li>Optional payments integration from August 2026</li>
         </ul>
       </div>
       <div class="menuva-card menuva-card--summary-callout">
-        <p class="menuva-summary">Visibility, mock ordering, and digital baskets remain complimentary beyond launch</p>
+        <p class="menuva-summary">Visibility, mock ordering, and digital baskets remain free beyond launch</p>
+      </div>
+      <div class="menuva-card menuva-card--summary-callout">
+        <p class="menuva-summary">Want to learn more about our monetization plans? Contact hello@menuva.co.uk</p>
       </div>
       <div class="menuva-card menuva-card--business-detail">
         <h4>Flexible Activation</h4>
         <p>Restaurants can activate payment or point-of-sale integrations when ready, keeping Menuva aligned with existing workflows</p>
-      </div>
-      <div class="menuva-card menuva-card--business-detail">
-        <h4>Aligned Monetisation</h4>
-        <p>A projected £0.10 + 2.5% fee applies only to completed paid orders and only for opted-in venues</p>
-        <p class="menuva-summary">This approach builds trust, encourages rapid adoption, and monetises only when tangible value is delivered</p>
       </div>
     </div>
   </section>
@@ -441,6 +438,10 @@ import { Button } from '@components/odyssey-theme'
   #solution .menuva-card {
     padding-block: clamp(1.5rem, 3.6vw, 2.2rem);
     gap: clamp(0.8rem, 2.3vw, 1.25rem);
+  }
+
+  #problem .menuva-card {
+    text-align: center;
   }
 
   #problem .menuva-card--problem-outcome {
