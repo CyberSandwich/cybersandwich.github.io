@@ -1,12 +1,17 @@
 [
   {
+    "title": "Obsidian",
+    "url": "https://obsidian.md/download",
+    "category": "Personal"
+  },
+  {
     "title": "OpenAI Whisper",
     "url": "https://github.com/openai/whisper",
     "category": "Personal"
   },
   {
-    "title": "Obsidian",
-    "url": "https://obsidian.md/download",
+    "title": "UK E-Visa",
+    "url": "https://view-immigration-status.service.gov.uk/status",
     "category": "Personal"
   },
   {
@@ -17,6 +22,11 @@
   {
     "title": "App Store Connect",
     "url": "https://appstoreconnect.apple.com/",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Certificates, Identifiers & Profiles",
+    "url": "https://developer.apple.com/account/resources/identifiers/list",
     "category": "Initiatives"
   },
   {
@@ -55,8 +65,23 @@
     "category": "Initiatives"
   },
   {
+    "title": "Startium",
+    "url": "https://warwick.startium.co.uk/community",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Swift Tutorial",
+    "url": "https://developer.apple.com/tutorials/develop-in-swift/",
+    "category": "Initiatives"
+  },
+  {
     "title": "Academic Phrasebank",
     "url": "https://www.phrasebank.manchester.ac.uk/",
+    "category": "Academic"
+  },
+  {
+    "title": "GradIntelligence",
+    "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
     "category": "Academic"
   },
   {
@@ -75,13 +100,18 @@
     "category": "Academic"
   },
   {
-    "title": "WBS 0.002d Room Booking",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002d/?start=05082024&view=week&selectedResource=8a17841a5ec3d40a015ec3fa2bb2027e",
+    "title": "Tabula",
+    "url": "https://tabula.warwick.ac.uk/",
     "category": "Academic"
   },
   {
-    "title": "WBS 0.002e Room Booking",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
+    "title": "University of Warwick Past Papers",
+    "url": "https://warwick.ac.uk/services/exampapers/",
+    "category": "Academic"
+  },
+  {
+    "title": "University of Warwick Room Booking",
+    "url": "https://abs.warwick.ac.uk/wrb2526/default.aspx",
     "category": "Academic"
   },
   {
@@ -90,8 +120,23 @@
     "category": "Academic"
   },
   {
+    "title": "Warwick Module Search",
+    "url": "https://courses.warwick.ac.uk/",
+    "category": "Academic"
+  },
+  {
     "title": "Warwick Print",
     "url": "https://mobileprint.warwick.ac.uk/",
+    "category": "Academic"
+  },
+  {
+    "title": "WBS 0.002d Room Booking",
+    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002d/?start=05082024&view=week&selectedResource=8a17841a5ec3d40a015ec3fa2bb2027e",
+    "category": "Academic"
+  },
+  {
+    "title": "WBS 0.002e Room Booking",
+    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
     "category": "Academic"
   },
   {
