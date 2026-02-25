@@ -25,6 +25,11 @@
     "category": "Personal"
   },
   {
+    "title": "Outlook",
+    "url": "https://outlook.office.com/mail/",
+    "category": "Personal"
+  },
+  {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
     "category": "Personal"
