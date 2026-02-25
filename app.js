@@ -159,7 +159,7 @@ function showCards(cfg){
     if(sw)sw.parentNode.style.display='block';
     var idx=0;
     cfg.cats.forEach(function(cat){
-      var filtered=items.filter(function(x){return x.category===cat});
+      var filtered=items.filter(function(x){return x.category===cat}).sort(function(a,b){return a.title.localeCompare(b.title)});
       if(!filtered.length)return;
       var sec=document.createElement('div');sec.className='link-sec';
       var h=document.createElement('h3');h.textContent=cat;sec.appendChild(h);
