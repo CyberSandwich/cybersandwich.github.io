@@ -147,7 +147,7 @@ function getPosts(){
 // Render post list using DOM methods
 function showList(){
   var el=$('#ulist');
-  if(posts&&el.children.length)return;
+  if(posts&&el.querySelector('.ucard'))return;
   while(el.firstChild)el.removeChild(el.firstChild);
 
   getPosts().then(function(p){

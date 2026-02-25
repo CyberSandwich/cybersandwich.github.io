@@ -145,7 +145,8 @@ body{
 }
 .cve .cn{font-size:.875rem;color:var(--t2);line-height:1.7;margin-top:8px;margin-bottom:4px}
 .cve .hl{
-  display:inline-block;
+  display:block;
+  width:fit-content;
   font-size:.8125rem;
   font-weight:600;
   color:var(--t2);
@@ -153,7 +154,8 @@ body{
   background:var(--bg2);
   border-radius:16px;
   line-height:1.4;
-  margin:4px 0 8px
+  margin:4px auto 8px;
+  text-align:center
 }
 .cve .cv-sub{font-size:.8125rem;font-weight:600;color:var(--t3);letter-spacing:.02em;margin:18px 0 8px}
 .cve .cv-sub:first-child{margin-top:0}
@@ -282,13 +284,13 @@ nav{
 }
 .tabs{
   display:flex;
-  background:rgba(255,255,255,.75);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
   border-radius:var(--rr);
   padding:5px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);
-  border:1px solid rgba(0,0,0,.04)
+  box-shadow:0 2px 8px rgba(0,0,0,.04),0 12px 32px rgba(0,0,0,.08);
+  border:1px solid rgba(255,255,255,.5)
 }
 .tabs a{
   border:none;
@@ -303,9 +305,9 @@ nav{
   text-decoration:none
 }
 .tabs a.active{
-  background:#48484A;
+  background:rgba(50,50,52,.85);
   color:#fff;
-  box-shadow:0 1px 4px rgba(0,0,0,.12)
+  box-shadow:0 2px 8px rgba(0,0,0,.15)
 }
 .tabs a:hover:not(.active){color:var(--t2)}
 
