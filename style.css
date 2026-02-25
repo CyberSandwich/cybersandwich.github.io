@@ -85,6 +85,23 @@ body{
 .links a:last-child{border-bottom:none}
 .links a:hover{background:var(--bg2);color:var(--t1)}
 .links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.copy-row{display:flex;align-items:center;border-bottom:1px solid var(--bdr2)}
+.copy-row a{flex:1;min-width:0;border-bottom:none}
+.links>.copy-row:last-child,.links>:last-child.copy-row{border-bottom:none}
+.copy-btn{
+  padding:6px 16px;
+  margin-right:14px;
+  border:1.5px solid var(--bdr);
+  border-radius:var(--rr);
+  background:none;
+  font:500 .75rem/1 var(--font);
+  color:var(--t3);
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background .15s,color .15s,border-color .15s
+}
+.copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
+.copy-btn.copied{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 .vcf-link{margin-bottom:14px}
 .vcf-link a{font-weight:600;color:#fff;background:#48484A;justify-content:center}
 .vcf-link a:hover{background:#3A3A3C;color:#fff}

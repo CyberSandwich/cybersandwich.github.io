@@ -57,6 +57,18 @@ function route(){
   }
 }
 
+// Copy buttons
+document.addEventListener('click',function(e){
+  var btn=e.target.closest('.copy-btn');
+  if(!btn)return;
+  e.preventDefault();
+  var text=btn.getAttribute('data-copy');
+  navigator.clipboard.writeText(text).then(function(){
+    btn.textContent='Copied';
+    setTimeout(function(){btn.textContent='Copy'},1500);
+  });
+});
+
 // SPA link interception
 document.addEventListener('click',function(e){
   var a=e.target.closest('a[href]');
