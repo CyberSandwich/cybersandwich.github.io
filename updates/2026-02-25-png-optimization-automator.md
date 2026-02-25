@@ -1,6 +1,6 @@
 # PNG Optimization (Automator)
 
-PNG optimization works differently from JPEG optimization. JPEG is inherently lossy, so the challenge there is finding the right quality threshold. PNG is lossless, which means the file faithfully stores every pixel. The opportunity for savings comes from reducing the number of _unique_ colors in the image (palette quantization) and then recompressing the result with better algorithms than what most tools use by default.
+PNG optimization works differently from JPEG optimization. JPEG is inherently lossy, so the challenge there is finding the right quality threshold. PNG is lossless, which means the file faithfully stores every pixel. The opportunity for savings comes from reducing the number of *unique* colors in the image (palette quantization) and then recompressing the result with better algorithms than what most tools use by default.
 
 ## How the Pipeline Works
 
