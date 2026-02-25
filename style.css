@@ -366,7 +366,7 @@ nav{
   font:500 .875rem/1 var(--font);
   color:var(--t3);
   cursor:pointer;
-  transition:all .15s;
+  transition:color .15s,background .15s,box-shadow .15s;
   white-space:nowrap;
   text-decoration:none
 }
@@ -375,7 +375,7 @@ nav{
   color:#fff;
   box-shadow:0 2px 8px rgba(0,0,0,.15)
 }
-.tabs a:hover:not(.active){color:var(--t2)}
+@media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
 
 /* Responsive */
 @media(max-width:480px){
