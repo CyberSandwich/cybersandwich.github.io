@@ -77,7 +77,14 @@ document.addEventListener('click',function(e){
     poly.setAttribute('points','20 6 9 17 4 12');
     svg.appendChild(poly);
     btn.appendChild(svg);
-    setTimeout(function(){btn.classList.remove('copied');btn.textContent='Copy'},1500);
+    setTimeout(function(){
+      btn.style.opacity='0';
+      setTimeout(function(){
+        btn.classList.remove('copied');
+        btn.textContent='Copy';
+        btn.style.opacity='';
+      },200);
+    },1500);
   });
 });
 
