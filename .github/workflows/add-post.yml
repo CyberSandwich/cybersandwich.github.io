@@ -1,0 +1,37 @@
+name: Add Post
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Post title'
+        required: true
+      body:
+        description: 'Post content (Markdown)'
+        required: true
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          TITLE: ${{ github.event.inputs.title }}
+          BODY: ${{ github.event.inputs.body }}
+        run: |
+          python3 << 'EOF'
+          import os, re, datetime
+          title = os.environ['TITLE']
+          body = os.environ['BODY']
+          date = datetime.date.today().isoformat()
+          slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+          filename = f"updates/{date}-{slug}.md"
+          with open(filename, 'w') as f:
+            f.write(f"# {title}\n\n{body}\n")
+          EOF
+      - env:
+          TITLE: ${{ github.event.inputs.title }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updates/
+          git commit -m "Add post: $TITLE"
+          git push
