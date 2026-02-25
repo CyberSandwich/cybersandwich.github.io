@@ -1,5 +1,10 @@
 [
   {
+    "title": "OpenAI Whisper",
+    "url": "https://github.com/openai/whisper",
+    "category": "Personal"
+  },
+  {
     "title": "Webpage Archive",
     "url": "https://archive.ph",
     "category": "Personal"
@@ -58,5 +63,25 @@
     "title": "Warwick Print",
     "url": "https://mobileprint.warwick.ac.uk/",
     "category": "Academic"
+  },
+  {
+    "title": "IB3J70 Decision Making in Entrepreneurship",
+    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3A70 Financial Statement Analysis & Security Valuation",
+    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3J60 Law for Entrepreneurs",
+    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3J80 Managing People in a Complex World",
+    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
+    "category": "Modules"
   }
 ]

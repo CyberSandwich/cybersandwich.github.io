@@ -142,7 +142,7 @@ function getLinks(){
   return linksPromise;
 }
 
-var linkCategories=['Personal','Career','Initiatives','Academic','Community','Miscellaneous'];
+var linkCategories=['Personal','Career','Initiatives','Academic','Modules','Community','Miscellaneous'];
 
 function showLinks(){
   var el=$('#llist');
