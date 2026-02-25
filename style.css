@@ -41,7 +41,7 @@ body{
 .page.active{display:block}
 
 .name-card{
-  font-size:clamp(4rem,12vw,6rem);
+  font-size:clamp(5rem,18vw,9rem);
   font-weight:700;
   letter-spacing:-.03em;
   color:var(--t1);
