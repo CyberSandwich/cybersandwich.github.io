@@ -1,16 +1,16 @@
 # JPEG Optimization (Automator)
 
-Photos from phones and cameras are typically 5-15MB each. Most of that data is perceptually invisible - you'd never notice the difference. But when you're storing, sharing, or uploading hundreds of these, it adds up fast.
+Photos from phones and cameras are typically 5-15MB each. Most of that data is perceptually redundant, and the file sizes add up when you're storing or sharing hundreds of them.
 
 ## The Approach
 
 This script pairs two tools: ImageMagick for preprocessing and mozjpeg for compression.
 
-ImageMagick handles the prep work - auto-orienting from EXIF data, flattening transparency for formats like PNG, normalizing to sRGB colorspace, capping resolution at 2560px (the biggest single saver), and stripping metadata. The result gets piped to mozjpeg as a lossless intermediate.
+ImageMagick handles preprocessing: auto-orienting from EXIF data, flattening transparency for formats like PNG, normalizing to sRGB colorspace, capping resolution at 2560px, and stripping metadata. The result gets piped to mozjpeg as a lossless intermediate.
 
-mozjpeg then does the heavy lifting. It uses MS-SSIM tuning, which optimizes for how humans actually perceive image quality rather than raw pixel differences. At quality 75 with its MS-SSIM quantization table, typical savings land between 60-90% with no visible quality loss.
+mozjpeg handles the compression using MS-SSIM tuning, which optimizes for how humans perceive image quality rather than raw pixel differences. At quality 75 with its MS-SSIM quantization table, typical savings are 60-90% with no visible quality loss.
 
-Wrapping this in an Automator Quick Action means it's a right-click away. No terminal, no remembering flags. Select files, right-click, done.
+Wrapping this in an Automator Quick Action makes it accessible from Finder's right-click menu without needing the terminal.
 
 ## How to Set It Up
 
@@ -244,10 +244,10 @@ Select one or more images, right-click, and run it. Each file gets an `_optimize
 
 The script has a configuration block at the top you can tweak:
 
-- **QUALITY** - mozjpeg quality (0-100). Default 75 is aggressive but clean with MS-SSIM tuning.
-- **MAX_DIM** - Cap the longest edge in pixels. Default 2560 (retina 13"). Set to 0 to skip resizing.
-- **STRIP_METADATA** - Strips EXIF, IPTC, XMP, ICC profiles. Set to false if you need to keep camera data or copyright info.
-- **SKIP_EXISTING** - Won't re-process files that already have a newer `_optimized.jpeg` output.
-- **PRESERVE_TIMESTAMP** - Copies the original file's modification date to the output.
+- **QUALITY**: mozjpeg quality (0-100). Default 75 works well with MS-SSIM tuning.
+- **MAX_DIM**: caps the longest edge in pixels. Default 2560 (retina 13"). Set to 0 to skip resizing.
+- **STRIP_METADATA**: removes EXIF, IPTC, XMP, ICC profiles. Set to false to keep camera data or copyright info.
+- **SKIP_EXISTING**: skips files that already have a newer `_optimized.jpeg` output.
+- **PRESERVE_TIMESTAMP**: copies the original file's modification date to the output.
 
 It handles jpg, jpeg, png, tiff, bmp, webp, heic, heif, avif, and gif (first frame only). Transparent formats get flattened to a white background since JPEG doesn't support alpha.
