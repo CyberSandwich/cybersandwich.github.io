@@ -119,7 +119,7 @@ var getProjects=makeLoader('/projects/projects.json',function(d){projects=d;retu
 var getLinks=makeLoader('/links/links.json',function(d){links=d;return d});
 var getCV=makeLoader('/cv/cv.json',function(d){cv=d;return d});
 var getPosts=makeLoader('/updates/posts.json',function(d){
-  d.sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:0});
+  d.sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:a.title.localeCompare(b.title)});
   posts=d;return d;
 });
 
