@@ -9,7 +9,22 @@
     "url": "https://support.apple.com/en-us/100100",
     "category": "Personal"
   },
-{
+  {
+    "title": "Have I Been Pwned",
+    "url": "https://haveibeenpwned.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Monkeytype",
+    "url": "https://monkeytype.com/",
+    "category": "Personal"
+  },
+  {
+    "title": "Neal Fun",
+    "url": "https://neal.fun",
+    "category": "Personal"
+  },
+  {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
     "category": "Personal"
@@ -20,8 +35,18 @@
     "category": "Personal"
   },
   {
+    "title": "Pexels",
+    "url": "https://www.pexels.com",
+    "category": "Personal"
+  },
+  {
     "title": "UK E-Visa",
     "url": "https://view-immigration-status.service.gov.uk/status",
+    "category": "Personal"
+  },
+  {
+    "title": "Wayback Machine",
+    "url": "https://web.archive.org",
     "category": "Personal"
   },
   {
@@ -102,6 +127,11 @@
   {
     "title": "GradIntelligence",
     "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
+    "category": "Academic"
+  },
+  {
+    "title": "Lettuce Meet",
+    "url": "https://lettucemeet.com",
     "category": "Academic"
   },
   {
