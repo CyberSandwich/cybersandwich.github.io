@@ -2,21 +2,37 @@
   {
     "title": "Clock",
     "subtitle": "A Minimal 8KB Clock",
-    "url": "/time/"
+    "url": "/time/",
+    "category": "Launched"
   },
   {
     "title": "CodeGen",
     "subtitle": "QR Code & Barcode Tool",
-    "url": "/codegen/"
+    "url": "/codegen/",
+    "category": "Launched"
   },
   {
     "title": "menuva",
     "subtitle": "The Digital Menu Platform",
-    "url": "https://menuva.co.uk"
+    "url": "https://menuva.co.uk",
+    "category": "Launched"
   },
   {
     "title": "Miele Laundry Guide",
     "subtitle": "Vita Student Cannon Park Laundry Guide",
-    "url": "/laundry/"
+    "url": "/laundry/",
+    "category": "Launched"
+  },
+  {
+    "title": "Whisp",
+    "subtitle": "Offline Audio Transcription With Whisper Models",
+    "url": "#",
+    "category": "In Development"
+  },
+  {
+    "title": "Wright",
+    "subtitle": "A Minimal Markdown Text Editor",
+    "url": "#",
+    "category": "In Development"
   }
 ]

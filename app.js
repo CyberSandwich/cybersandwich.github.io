@@ -77,6 +77,8 @@ function getProjects(){
   return projectsPromise;
 }
 
+var projectCategories=['Launched','In Development'];
+
 function showProjects(){
   var el=$('#plist');
   if(projects&&el.children.length)return;
@@ -89,27 +91,41 @@ function showProjects(){
       el.appendChild(emptyDiv);
       return;
     }
-    p.forEach(function(x,i){
-      var a=document.createElement('a');
-      a.className='pcard';
-      a.href=x.url;
-      a.style.animationDelay=(i*0.04)+'s';
-      if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener noreferrer'}
+    var idx=0;
+    projectCategories.forEach(function(cat){
+      var items=p.filter(function(x){return x.category===cat});
+      if(!items.length)return;
+      var sec=document.createElement('div');
+      sec.className='link-sec';
+      var h=document.createElement('h3');
+      h.textContent=cat;
+      sec.appendChild(h);
+      items.forEach(function(x){
+        var a=document.createElement('a');
+        a.className='pcard';
+        if(x.url&&x.url!=='#'){
+          a.href=x.url;
+          if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener noreferrer'}
+        }
+        a.style.animationDelay=(idx*0.04)+'s';
+        idx++;
 
-      var inf=document.createElement('div');
-      inf.className='pinf';
-      var pt=document.createElement('div');
-      pt.className='pt';pt.textContent=x.title;
-      var pd=document.createElement('div');
-      pd.className='pd';pd.textContent=x.subtitle;
-      inf.appendChild(pt);inf.appendChild(pd);
+        var inf=document.createElement('div');
+        inf.className='pinf';
+        var pt=document.createElement('div');
+        pt.className='pt';pt.textContent=x.title;
+        var pd=document.createElement('div');
+        pd.className='pd';pd.textContent=x.subtitle;
+        inf.appendChild(pt);inf.appendChild(pd);
 
-      var arr=document.createElement('div');
-      arr.className='arr';
-      arr.appendChild(mkSvg('M9 18l6-6-6-6'));
+        var arr=document.createElement('div');
+        arr.className='arr';
+        arr.appendChild(mkSvg('M9 18l6-6-6-6'));
 
-      a.appendChild(inf);a.appendChild(arr);
-      el.appendChild(a);
+        a.appendChild(inf);a.appendChild(arr);
+        sec.appendChild(a);
+      });
+      el.appendChild(sec);
     });
   });
 }
