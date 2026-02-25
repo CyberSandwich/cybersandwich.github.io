@@ -306,7 +306,7 @@ body{
 }
 .search:focus{border-color:var(--t4);box-shadow:0 0 0 4px rgba(0,0,0,.04);outline:none}
 .search::placeholder{color:var(--t4)}
-.search-wrap{position:relative;margin-bottom:20px}
+.search-wrap{display:none;position:relative;margin-bottom:20px}
 .search-x{
   display:none;
   position:absolute;

@@ -156,7 +156,7 @@ function showCards(cfg){
       var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
       el.appendChild(d);return;
     }
-    if(sw)sw.parentNode.style.display='';
+    if(sw)sw.parentNode.style.display='block';
     var idx=0;
     cfg.cats.forEach(function(cat){
       var filtered=items.filter(function(x){return x.category===cat});
@@ -199,7 +199,7 @@ function showCV(){
       var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
       el.appendChild(d);return;
     }
-    if(sw)sw.parentNode.style.display='';
+    if(sw)sw.parentNode.style.display='block';
     var idx=0;
     data.forEach(function(section){
       var sec=document.createElement('div');sec.className='cv-sec';
@@ -266,7 +266,7 @@ function showList(){
       var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
       el.appendChild(d);return;
     }
-    if(sw)sw.parentNode.style.display='';
+    if(sw)sw.parentNode.style.display='block';
     p.forEach(function(x,i){
       var a=document.createElement('a');
       a.className='ucard';
