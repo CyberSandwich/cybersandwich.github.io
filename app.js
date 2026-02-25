@@ -185,7 +185,7 @@ function showCards(cfg){
 }
 
 function showProjects(){showCards({el:'#plist',data:projects,get:getProjects,cats:projectCategories,si:'#psearch',sub:function(x){return x.subtitle}})}
-function showLinks(){showCards({el:'#llist',data:links,get:getLinks,cats:linkCategories,si:'#lsearch',sub:function(x){return x.url}})}
+function showLinks(){showCards({el:'#llist',data:links,get:getLinks,cats:linkCategories,si:'#lsearch',sub:function(x){return x.url.replace(/^https?:\/\//,'')}})}
 
 // Render CV
 function showCV(){
