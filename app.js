@@ -55,7 +55,7 @@ function route(){
     var wrap=$('#usearch');
     if(wrap)wrap=wrap.parentNode;
     if(slug){if(wrap)wrap.style.display='none';showPost(slug)}
-    else{if(wrap)wrap.style.display='';showList()}
+    else{if(wrap)wrap.style.display='block';showList()}
   }
 }
 
