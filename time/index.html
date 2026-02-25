@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Clock</title>
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" href="data:,">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAFAFA;--bg2:#F5F5F5;--bg3:#EFEFEF;
+  --card:#FFFFFF;
+  --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--t4:#C7C7CC;
+  --bdr:#E8E8E8;--bdr2:#F0F0F0;
+  --acc:#3B82F6;--accd:#2563EB;--accl:rgba(59,130,246,.06);
+  --ok:#2D7D46;--err:#C41E3A;
+  --r:14px;--rr:50px;
+  --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
+}
+html{height:100%;overflow-x:hidden}
+body{min-height:100%;font-family:var(--font);font-variant-numeric:tabular-nums;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+header{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10}
+.tabs{display:flex;background:rgba(255,255,255,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--rr);padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.04)}
+.tabs button{border:none;background:none;padding:10px 20px;border-radius:var(--rr);font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,box-shadow .15s;white-space:nowrap}
+.tabs button.active{background:var(--card);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
+.view{display:none}.view.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:768px){main{padding:32px 48px 100px}}
+#v-clock{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--bg)}
+#v-clock.active{display:flex}
+.hero-time{font-size:clamp(4rem,14vw,12rem);letter-spacing:-.04em;line-height:1;text-align:center;user-select:none}
+.hero-sec{color:var(--t3)}
+.btn{padding:14px 28px;border:none;border-radius:var(--rr);font:600 .9375rem/1 var(--font);cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s;touch-action:manipulation}
+.btn-p{background:var(--acc);color:#fff;box-shadow:0 4px 14px rgba(59,130,246,.25)}
+.btn-p:hover{background:var(--accd);box-shadow:0 6px 20px rgba(59,130,246,.35)}
+.btn-p:active,.btn-s:active{transform:scale(.985)}
+.btn-p:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-s{background:var(--bg3);color:var(--t2)}
+.btn-s:hover{background:#E5E5EA}
+.alarm-form{display:flex;flex-direction:column;align-items:center;padding:clamp(24px,6vh,48px) 0 clamp(20px,4vh,32px)}
+.alarm-form .t-digit input{font-size:clamp(3.5rem,12vw,9rem)}
+.alarm-form .t-colon{font-size:clamp(2.5rem,8vw,6rem)}
+.alarm-form .t-digit label{display:none}
+.alarm-form .t-input{gap:clamp(8px,2vw,16px)}
+.af-actions{max-width:200px;width:100%}
+.af-actions button{width:100%;padding:16px 24px;font-size:1rem}
+.alarm-list{display:flex;flex-direction:column;gap:14px;max-width:400px;margin:0 auto}
+.alarm-card{position:relative;background:var(--card);border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:center;transition:box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04)}
+.alarm-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08)}
+.ac-time{font-size:clamp(1.75rem,5vw,2.25rem);font-weight:500;letter-spacing:-.02em}
+.ac-del{position:absolute;right:16px;top:50%;transform:translateY(-50%);border:none;background:var(--bg2);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t4);transition:opacity .15s,background .15s,color .15s;opacity:0}
+.alarm-card:hover .ac-del{opacity:1}
+.ac-del:hover{background:var(--bg3);color:var(--err)}
+.ac-del svg{width:18px;height:18px}
+.fire-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:20px}
+.fire-overlay.active{display:flex}
+.fire-card{background:var(--card);border-radius:24px;padding:clamp(32px,6vw,48px);text-align:center;max-width:380px;width:100%;animation:scaleUp .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+@keyframes scaleUp{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.fire-icon{width:56px;height:56px;margin:0 auto 24px;color:var(--acc);animation:wiggle .4s ease infinite alternate}
+@keyframes wiggle{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+.fire-time{font-size:2.75rem;margin-bottom:4px}
+.fire-label{font-size:.9375rem;color:var(--t2);margin-bottom:32px}
+.fire-btns button{width:100%}
+#v-sw{position:fixed;inset:0;overflow:hidden;padding:20px 24px 0;background:var(--bg)}
+#v-sw.active{display:block}
+.sw-wrap{display:flex;flex-direction:column;align-items:center;height:100%;overflow:hidden;max-width:960px;margin:0 auto;padding-bottom:80px}
+.sw-hero{display:flex;align-items:center;justify-content:center;width:100%;height:38vh;flex-shrink:0}
+.sw-display{font-size:clamp(4rem,15vw,9rem);letter-spacing:-.03em;line-height:1;user-select:none}
+.sw-ms{color:var(--t3)}
+.sw-controls{display:flex;gap:10px;width:100%;max-width:440px;margin-bottom:20px;flex-shrink:0}
+.sw-controls button{flex:1;padding:18px;font-size:1rem}
+#lapWrap{flex:1;min-height:0;overflow:hidden;width:100%;max-width:640px;padding-bottom:16px}
+.lap-section{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;max-height:100%}
+.lap-hdr{display:grid;grid-template-columns:1fr 1fr;padding:14px 28px;font-size:.75rem;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--bdr2);flex-shrink:0}
+.lap-hdr span:last-child,.laps .l span:last-child{text-align:right}
+.laps{display:flex;flex-direction:column;overflow-y:auto;flex:1;min-height:0}
+.laps .l{display:grid;grid-template-columns:1fr 1fr;padding:14px 28px;border-bottom:1px solid var(--bdr2);font-size:1rem}
+.laps .l:last-child{border:none}
+.laps .l span:first-child{color:var(--t2)}
+.laps .l.best span:last-child{color:var(--ok)}
+.laps .l.worst span:last-child{color:var(--err)}
+.t-setup{display:flex;flex-direction:column;align-items:center;padding:clamp(24px,5vh,56px) 0 clamp(20px,3vh,32px)}
+.t-input{display:flex;align-items:center;gap:clamp(4px,1.2vw,10px);margin-bottom:clamp(24px,4vh,40px)}
+.t-digit{display:flex;flex-direction:column;align-items:center;gap:8px}
+.t-digit input{width:2.6ch;padding:clamp(10px,2vw,20px) 4px;text-align:center;border:1.5px solid var(--bdr);border-radius:16px;font:400 clamp(3rem,9vw,6rem)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--t1);background:var(--card);outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.03);-moz-appearance:textfield}
+.t-digit input::-webkit-inner-spin-button,.t-digit input::-webkit-outer-spin-button{-webkit-appearance:none}
+.t-digit input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+.t-digit label{font-size:.6875rem;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.t-colon{font-size:clamp(2rem,6vw,4rem);color:var(--t4)}
+.t-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:clamp(20px,4vh,36px);max-width:540px}
+.t-chips button{padding:11px 24px;border:1.5px solid var(--bdr);border-radius:var(--rr);background:var(--card);font:500 .875rem/1 var(--font);color:var(--t2);cursor:pointer;transition:border-color .15s,color .15s,background .15s,box-shadow .15s,transform .1s;box-shadow:0 1px 2px rgba(0,0,0,.03);touch-action:manipulation}
+.t-chips button:hover{border-color:var(--acc);color:var(--acc);background:var(--accl);box-shadow:0 2px 8px rgba(59,130,246,.1)}
+.t-chips button:active{transform:scale(.96)}
+.t-setup-btns{display:flex;gap:10px;width:100%;max-width:440px}
+.t-setup-btns .btn{flex:1;padding:16px 28px;font-size:1rem}
+.t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding-bottom:40px}
+.t-grid:empty{display:none}
+.t-card{position:relative;background:var(--card);border:1.5px solid var(--bdr);border-radius:20px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;align-items:center;transition:border-color .3s,box-shadow .3s}
+.t-card.done{border-color:var(--acc);animation:pulse-glow 2s ease infinite}
+.t-card.done .tc-val{color:var(--acc)}
+@keyframes pulse-glow{0%,100%{box-shadow:0 2px 12px rgba(0,0,0,.04)}50%{box-shadow:0 0 0 4px rgba(59,130,246,.08),0 4px 20px rgba(59,130,246,.1)}}
+.tc-ring{position:relative;width:clamp(160px,35vw,240px);height:clamp(160px,35vw,240px);margin-bottom:clamp(16px,2.5vw,28px)}
+.tc-ring svg{width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(59,130,246,.08))}
+.tc-track{opacity:.1}
+.tc-arc{transition:stroke-dashoffset .15s ease}
+.tc-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.tc-val{font-size:clamp(2rem,5.5vw,3.25rem);letter-spacing:-.02em;transition:color .3s}
+.tc-btns{display:flex;gap:10px;width:100%;max-width:340px}
+.tc-btns button{flex:1}
+.t-expand{position:absolute;top:12px;right:12px;border:none;background:var(--bg2);width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);transition:background .15s,color .15s}
+.t-expand:hover{background:var(--bg3);color:var(--t2)}
+.t-expand svg{width:15px;height:15px}
+.t-full{display:none;position:relative}
+.t-full.active{display:flex;flex-direction:column;align-items:center;min-height:calc(100vh - 68px);min-height:calc(100dvh - 68px);justify-content:center;padding:0 0 40px}
+.t-full.done .tf-val{color:var(--acc)}
+.t-back{position:absolute;top:0;left:0;display:flex;align-items:center;gap:6px;border:none;background:none;padding:8px 4px;font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s}
+.t-back:hover{color:var(--t1)}
+.t-back svg{width:18px;height:18px}
+.tf-ring{position:relative;width:clamp(280px,60vw,440px);height:clamp(280px,60vw,440px);margin-bottom:clamp(36px,6vh,60px)}
+.tf-ring svg{width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(59,130,246,.12))}
+.tf-val{font-size:clamp(3.25rem,10vw,6rem);letter-spacing:-.02em;transition:color .3s}
+.tf-btns{display:flex;gap:10px;width:100%;max-width:440px}
+.tf-btns button{flex:1;padding:16px;font-size:.9375rem}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.18)}
+@media(hover:none){.ac-del{opacity:1}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="tabs" role="tablist">
+    <button class="active" data-tab="clock" role="tab" aria-selected="true">Clock</button>
+    <button data-tab="alarm" role="tab" aria-selected="false">Alarm</button>
+    <button data-tab="sw" role="tab" aria-selected="false">Stopwatch</button>
+    <button data-tab="timer" role="tab" aria-selected="false">Timer</button>
+  </div>
+</header>
+<section id="v-clock" class="view active" role="tabpanel">
+  <div class="hero-time"><span id="heroHM"></span><span class="hero-sec" id="heroS"></span></div>
+</section>
+<section id="v-sw" class="view" role="tabpanel">
+  <div class="sw-wrap">
+    <div class="sw-hero">
+      <div class="sw-display"><span id="swMain">00:00</span><span class="sw-ms" id="swMs">.00</span></div>
+    </div>
+    <div class="sw-controls">
+      <button class="btn btn-s" id="swBtnL" onclick="swLap()" disabled aria-label="Lap">Lap</button>
+      <button class="btn btn-p" id="swBtnS" onclick="swToggle()" aria-label="Start stopwatch">Start</button>
+    </div>
+    <div id="lapWrap" style="display:none">
+      <div class="lap-section">
+        <div class="lap-hdr"><span>Lap</span><span>Time</span></div>
+        <div class="laps" id="lapList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<main>
+  <section id="v-alarm" class="view" role="tabpanel">
+    <div class="alarm-form">
+      <div class="t-input">
+        <div class="t-digit">
+          <input type="number" id="afH" min="0" max="23" placeholder="00" inputmode="numeric" aria-label="Hours">
+          <label>Hours</label>
+        </div>
+        <span class="t-colon">:</span>
+        <div class="t-digit">
+          <input type="number" id="afM" min="0" max="59" placeholder="00" inputmode="numeric" aria-label="Minutes">
+          <label>Min</label>
+        </div>
+      </div>
+      <div class="af-actions">
+        <button class="btn btn-p" onclick="saveAlarm()">Set</button>
+      </div>
+    </div>
+    <div class="alarm-list" id="alarmList"></div>
+  </section>
+  <section id="v-timer" class="view" role="tabpanel">
+    <div class="t-setup" id="tSetup">
+      <div class="t-chips">
+        <button onclick="tGo(60)">1 min</button>
+        <button onclick="tGo(120)">2 min</button>
+        <button onclick="tGo(300)">5 min</button>
+      </div>
+      <div class="t-input">
+        <div class="t-digit">
+          <input type="number" id="cH" min="0" max="99" placeholder="0" aria-label="Hours" inputmode="numeric">
+          <label>Hours</label>
+        </div>
+        <span class="t-colon">:</span>
+        <div class="t-digit">
+          <input type="number" id="cM" min="0" max="59" placeholder="0" aria-label="Minutes" inputmode="numeric">
+          <label>Min</label>
+        </div>
+        <span class="t-colon">:</span>
+        <div class="t-digit">
+          <input type="number" id="cS" min="0" max="59" placeholder="0" aria-label="Seconds" inputmode="numeric">
+          <label>Sec</label>
+        </div>
+      </div>
+      <div class="t-setup-btns">
+        <button class="btn btn-s" onclick="tClear()">Clear</button>
+        <button class="btn btn-p" onclick="tStartCustom()">Start</button>
+      </div>
+    </div>
+    <div class="t-grid" id="tGrid"></div>
+    <div class="t-full" id="tFull">
+      <button class="t-back" onclick="tExitFull()" aria-label="Back to timer list">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back
+      </button>
+      <div class="tf-ring">
+        <svg viewBox="0 0 200 200">
+          <circle class="tc-track" cx="100" cy="100" r="90" fill="none" stroke="var(--acc)" stroke-width="5"/>
+          <circle id="tfArc" cx="100" cy="100" r="90" fill="none" stroke="var(--acc)" stroke-width="5" stroke-dasharray="565.49" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+        </svg>
+        <div class="tc-center">
+          <div class="tf-val" id="tfVal">0:00</div>
+        </div>
+      </div>
+      <div class="tf-btns" id="tfBtns"></div>
+    </div>
+  </section>
+</main>
+<div class="fire-overlay" id="fireOv" role="alertdialog" aria-modal="true">
+  <div class="fire-card">
+    <div class="fire-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="fire-time" id="fireTime"></div>
+    <div class="fire-label" id="fireLbl"></div>
+    <div class="fire-btns">
+      <button class="btn btn-p" onclick="dismiss()">Dismiss</button>
+    </div>
+  </div>
+</div>
+<script>
+const CIRC=565.49,$=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),q=s=>document.querySelector(s),qa=s=>document.querySelectorAll(s);
+const SVG_X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+const SVG_EXPAND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+let alarms=[],aNextId=0;
+let swOn=false,swT0=0,swE=0,swLaps=[],swRaf=null;
+let timers=[],tNextId=0,tInt=null,tFullId=null;
+let audioCtx,sndInt,fired=null,firedTid=null,lastChk='';
+function save(){localStorage.setItem('clk',JSON.stringify({alarms,aNextId}))}
+function load(){try{const d=JSON.parse(localStorage.getItem('clk'));if(d){alarms=d.alarms||[];aNextId=d.aNextId||0}}catch(e){}}
+q('.tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  qa('.tabs button').forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false')});
+  qa('.view').forEach(v=>v.classList.remove('active'));
+  b.classList.add('active');b.setAttribute('aria-selected','true');
+  $('v-'+b.dataset.tab).classList.add('active');
+});
+function tick(){
+  const now=new Date();
+  $('heroHM').textContent=pad(now.getHours())+':'+pad(now.getMinutes());
+  $('heroS').textContent=':'+pad(now.getSeconds());
+}
+function initAlarmTime(){
+  const now=new Date();
+  $('afH').value=pad(now.getHours());
+  $('afM').value=pad(now.getMinutes());
+}
+function saveAlarm(){
+  const h=parseInt($('afH').value)||0,m=parseInt($('afM').value)||0;
+  alarms.push({id:++aNextId,time:pad(Math.max(0,Math.min(23,h)))+':'+pad(Math.max(0,Math.min(59,m)))});
+  save();renderAlarms();initAlarmTime();
+}
+function rmAlarm(id){alarms=alarms.filter(a=>a.id!==id);save();renderAlarms()}
+function renderAlarms(){
+  const el=$('alarmList');
+  if(!alarms.length){el.innerHTML='';return}
+  el.innerHTML=alarms.map(a=>
+    '<div class="alarm-card"><div class="ac-time">'+a.time+'</div><button class="ac-del" onclick="rmAlarm('+a.id+')" aria-label="Delete alarm">'+SVG_X+'</button></div>'
+  ).join('');
+}
+function chkAlarms(){
+  const n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());
+  if(hm===lastChk)return;lastChk=hm;
+  alarms.forEach(a=>{if(a.time===hm&&!fired)fireAlarm(a)});
+}
+function fireAlarm(a){
+  fired=a;firedTid=null;
+  $('fireTime').textContent=a.time;
+  $('fireLbl').textContent='Alarm';
+  $('fireOv').classList.add('active');checkSound();
+}
+function fireTimer(t){
+  firedTid=t.id;fired=null;
+  $('fireTime').textContent=fmtTimer(t.dur);
+  $('fireLbl').textContent='Timer';
+  $('fireOv').classList.add('active');checkSound();
+}
+function dismiss(){
+  if(firedTid!==null){tRemove(firedTid);firedTid=null}
+  fired=null;
+  $('fireOv').classList.remove('active');
+  const next=timers.find(t=>t.done);
+  if(next)fireTimer(next);
+  else checkSound();
+}
+function initAudio(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+}
+function beep(){
+  initAudio();
+  if(audioCtx.state!=='running')return;
+  const t=audioCtx.currentTime;
+  [0,.2,.4].forEach(d=>{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.frequency.value=d===.2?1046:880;o.type='sine';
+    g.gain.setValueAtTime(.4,t+d);g.gain.exponentialRampToValueAtTime(.01,t+d+.15);
+    o.start(t+d);o.stop(t+d+.15);
+  });
+}
+function playSound(){
+  initAudio();
+  let tries=0;
+  const tryBeep=()=>{if(audioCtx.state==='running'){beep();sndInt=setInterval(beep,2000)}else if(++tries<20){setTimeout(tryBeep,50)}};
+  tryBeep();
+}
+function stopSound(){if(sndInt){clearInterval(sndInt);sndInt=null}}
+function needsSound(){return !!(fired||firedTid!==null||timers.some(t=>t.done))}
+function checkSound(){if(needsSound()&&!sndInt)playSound();if(!needsSound()&&sndInt)stopSound()}
+function swToggle(){swOn?swStop():swStart()}
+function swStart(){
+  swOn=true;swT0=performance.now()-swE;
+  const b=$('swBtnS');b.textContent='Stop';b.style.background='var(--err)';b.style.boxShadow='0 4px 14px rgba(196,30,58,.25)';
+  $('swBtnL').disabled=false;$('swBtnL').textContent='Lap';swTick();initAudio();
+}
+function swStop(){
+  swOn=false;swE=performance.now()-swT0;cancelAnimationFrame(swRaf);
+  const b=$('swBtnS');b.textContent='Start';b.style.background='';b.style.boxShadow='';
+  $('swBtnL').textContent='Reset';
+}
+function swLap(){
+  if(!swOn){swE=0;swLaps=[];$('swMain').textContent='00:00';$('swMs').textContent='.00';$('swBtnL').disabled=true;$('swBtnL').textContent='Lap';$('lapWrap').style.display='none';return}
+  const tot=performance.now()-swT0,prev=swLaps.reduce((s,l)=>s+l,0);
+  swLaps.push(tot-prev);renderLaps();
+}
+function swTick(){
+  if(!swOn)return;
+  const e=performance.now()-swT0,h=Math.floor(e/3600000),m=Math.floor((e%3600000)/60000),s=Math.floor((e%60000)/1000),cs=Math.floor((e%1000)/10);
+  $('swMain').textContent=h>0?h+':'+pad(m)+':'+pad(s):pad(m)+':'+pad(s);
+  $('swMs').textContent='.'+pad(cs);
+  swRaf=requestAnimationFrame(swTick);
+}
+function fmtLap(ms){
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);
+  return h>0?h+':'+pad(m)+':'+pad(s)+'.'+pad(cs):pad(m)+':'+pad(s)+'.'+pad(cs);
+}
+function renderLaps(){
+  if(!swLaps.length){$('lapWrap').style.display='none';return}
+  $('lapWrap').style.display='';
+  let best=Infinity,worst=0;
+  if(swLaps.length>1)swLaps.forEach(l=>{if(l<best)best=l;if(l>worst)worst=l});
+  $('lapList').innerHTML=swLaps.map((l,i)=>{
+    let c='';if(swLaps.length>1){if(l===best)c=' best';if(l===worst)c=' worst'}
+    return '<div class="l'+c+'"><span>Lap '+(i+1)+'</span><span>'+fmtLap(l)+'</span></div>';
+  }).reverse().join('');
+}
+function timerCarry(){
+  let s=parseInt($('cS').value)||0,m=parseInt($('cM').value)||0,h=parseInt($('cH').value)||0;
+  if(s>=60){m+=Math.floor(s/60);s%=60}
+  if(m>=60){h+=Math.floor(m/60);m%=60}
+  if(h>99)h=99;
+  $('cS').value=s||'';$('cM').value=m||'';$('cH').value=h||'';
+}
+['cH','cM','cS'].forEach(id=>{
+  $(id).addEventListener('blur',timerCarry);
+  $(id).addEventListener('input',()=>{if($(id).value.length>3)$(id).value=$(id).value.slice(0,3)});
+});
+function alarmClamp(el,max){
+  el.addEventListener('blur',()=>{el.value=pad(Math.max(0,Math.min(max,parseInt(el.value)||0)))});
+  el.addEventListener('input',()=>{if(el.value.length>2)el.value=el.value.slice(0,2)});
+}
+alarmClamp($('afH'),23);alarmClamp($('afM'),59);
+function fmtTimer(rem){
+  const ts=Math.ceil(rem),h=Math.floor(ts/3600),m=Math.floor((ts%3600)/60),s=ts%60;
+  if(h>0)return h+':'+pad(m)+':'+pad(s);
+  if(m>0)return m+':'+pad(s);
+  return '0:'+pad(s);
+}
+function tBtns(t){
+  return t.done
+    ?'<button class="btn btn-p" onclick="tRemove('+t.id+')">Dismiss</button>'
+    :'<button class="btn btn-s" onclick="tRemove('+t.id+')">Cancel</button><button class="btn btn-p" onclick="tToggle('+t.id+')">'+(t.paused?'Resume':'Pause')+'</button>';
+}
+function tGo(sec){
+  timers.push({id:++tNextId,dur:sec,rem:sec,end:Date.now()+sec*1000,paused:false,done:false});
+  renderTimerGrid();tEnsureInterval();initAudio();tEnterFull(tNextId);
+}
+function tClear(){$('cH').value='';$('cM').value='';$('cS').value=''}
+function tStartCustom(){
+  const h=parseInt($('cH').value)||0,m=parseInt($('cM').value)||0,s=parseInt($('cS').value)||0;
+  const sec=h*3600+m*60+s;if(sec<=0)return;
+  tClear();tGo(sec);
+}
+function tEnsureInterval(){if(!tInt)tInt=setInterval(tTickAll,100)}
+function tTickAll(){
+  if(!timers.length)return;
+  const now=Date.now();let any=false;
+  timers.forEach(t=>{
+    if(t.done||t.paused)return;
+    t.rem=Math.max(0,(t.end-now)/1000);
+    if(t.rem<=0)tFinish(t);else any=true;
+  });
+  updateTimerDisplays();
+  if(!any&&tInt){clearInterval(tInt);tInt=null}
+}
+function tFinish(t){
+  t.done=true;t.rem=0;
+  const card=$('t'+t.id);
+  if(card){
+    card.classList.add('done');
+    card.querySelector('.tc-val').textContent='0:00';
+    card.querySelector('.tc-arc').style.strokeDashoffset=CIRC;
+    card.querySelector('.tc-btns').innerHTML=tBtns(t);
+  }
+  if(tFullId===t.id)updateFullView();
+  const inFull=tFullId===t.id&&$('v-timer').classList.contains('active');
+  if(!fired&&firedTid===null&&!inFull)fireTimer(t);
+  else checkSound();
+  if(navigator.vibrate)navigator.vibrate([300,100,300,100,300]);
+}
+function updateTimerDisplays(){
+  timers.forEach(t=>{
+    if(t.done)return;
+    const card=$('t'+t.id);
+    if(!card)return;
+    card.querySelector('.tc-val').textContent=fmtTimer(t.rem);
+    card.querySelector('.tc-arc').style.strokeDashoffset=CIRC*(1-(t.dur>0?t.rem/t.dur:0));
+  });
+  if(tFullId!==null){
+    const t=timers.find(x=>x.id===tFullId);
+    if(!t){tExitFull();return}
+    if(!t.done){
+      $('tfVal').textContent=fmtTimer(t.rem);
+      $('tfArc').style.strokeDashoffset=CIRC*(1-(t.dur>0?t.rem/t.dur:0));
+    }
+  }
+}
+function tToggle(id){
+  const t=timers.find(x=>x.id===id);if(!t||t.done)return;
+  if(t.paused){t.end=Date.now()+t.rem*1000;t.paused=false;tEnsureInterval()}
+  else{t.paused=true}
+  const card=$('t'+id);
+  if(card)card.querySelector('.tc-btns .btn-p').textContent=t.paused?'Resume':'Pause';
+  if(tFullId===id)updateFullView();
+}
+function tRemove(id){
+  if(tFullId===id)tExitFull();
+  timers=timers.filter(t=>t.id!==id);
+  renderTimerGrid();checkSound();
+  if(!timers.some(t=>!t.done&&!t.paused)&&tInt){clearInterval(tInt);tInt=null}
+}
+function renderTimerGrid(){
+  const grid=$('tGrid');
+  if(!timers.length){grid.innerHTML='';return}
+  grid.innerHTML=timers.map(t=>{
+    const time=fmtTimer(t.rem),off=CIRC*(1-(t.dur>0?t.rem/t.dur:0)),dc=t.done?' done':'';
+    return '<div class="t-card'+dc+'" id="t'+t.id+'"><button class="t-expand" onclick="tEnterFull('+t.id+')" title="Full screen" aria-label="Expand timer">'+SVG_EXPAND+'</button><div class="tc-ring"><svg viewBox="0 0 200 200"><circle class="tc-track" cx="100" cy="100" r="90" fill="none" stroke="var(--acc)" stroke-width="5"/><circle class="tc-arc" cx="100" cy="100" r="90" fill="none" stroke="var(--acc)" stroke-width="5" stroke-dasharray="'+CIRC+'" stroke-dashoffset="'+off+'" stroke-linecap="round" transform="rotate(-90 100 100)"/></svg><div class="tc-center"><div class="tc-val">'+time+'</div></div></div><div class="tc-btns">'+tBtns(t)+'</div></div>';
+  }).join('');
+}
+function tEnterFull(id){
+  tFullId=id;
+  $('tSetup').style.display='none';$('tGrid').style.display='none';
+  $('tFull').classList.add('active');updateFullView();
+}
+function tExitFull(){
+  tFullId=null;
+  $('tFull').classList.remove('active','done');
+  $('tSetup').style.display='';$('tGrid').style.display='';
+}
+function updateFullView(){
+  if(tFullId===null)return;
+  const t=timers.find(x=>x.id===tFullId);
+  if(!t){tExitFull();return}
+  $('tfVal').textContent=t.done?'0:00':fmtTimer(t.rem);
+  $('tfArc').style.strokeDashoffset=t.done?CIRC:CIRC*(1-(t.dur>0?t.rem/t.dur:0));
+  $('tFull').classList.toggle('done',t.done);
+  $('tfBtns').innerHTML=tBtns(t);
+}
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){tTickAll();checkSound()}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key===' '||e.code==='Space'){
+    const active=q('.tabs button.active');
+    if(active?.dataset.tab==='sw'){e.preventDefault();swToggle()}
+  }
+});
+load();tick();initAlarmTime();renderAlarms();
+setInterval(()=>{tick();chkAlarms()},1000);
+document.addEventListener('click',()=>initAudio(),{once:true});
+</script>
+</body>
+</html>

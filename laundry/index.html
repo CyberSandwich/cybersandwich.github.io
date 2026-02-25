@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#8B1538">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Miele Laundry Guide</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--b:#8B1538;--bd:#6D1029;--g:#C9A962;--sf:#FAFAFA;--c:#FFF;--sk:#F3F3F3;--sb:#F7F7F7;--t:#1A1A1A;--tm:#6B6B6B;--tf:#9A9A9A;--br:#E8E8E8;--s:#2D7D46;--sbg:#E8F5EC;--w:#B45309;--wbg:#FEF3C7;--e:#C41E3A;--ebg:#FEE2E7;--r:14px;--rl:20px}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--sf);color:var(--t);min-height:100dvh;line-height:1.5;-webkit-tap-highlight-color:transparent}
+.a{max-width:440px;margin:0 auto;padding:16px;min-height:100dvh}
+@media(min-width:640px){.a{padding:32px 24px}}
+.s{background:var(--c);border-radius:var(--rl);padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04)}
+.st{font-size:.75rem;font-weight:600;color:var(--b);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.rs{display:flex;flex-direction:column;gap:8px}
+.r{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--sb);border:2px solid transparent;border-radius:50px;font-size:.9375rem;font-weight:500;color:var(--t);cursor:pointer;transition:border-color .15s,background .15s;user-select:none;-webkit-user-select:none}
+.r:hover{border-color:var(--b);background:#FDF8F9}
+.r:active{transform:scale(.99)}
+.r.x{border-color:var(--b);background:linear-gradient(135deg,#FDF8F9,#FCF5F6)}
+.ri,.rc,.sw,.si{width:22px;height:22px;flex-shrink:0}
+.ri{color:var(--tf)}
+.r.x .ri,.r.x .si{color:var(--b)}
+.rl{flex:1;text-align:left}
+.rc{border-radius:50%;border:2px solid var(--br);background:#fff;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
+.r.x .rc{background:var(--b);border-color:var(--b)}
+.rc svg{width:12px;height:12px;color:#fff;opacity:0;transition:opacity .15s}
+.r.x .rc svg{opacity:1}
+.sw{border-radius:50%}
+.sw-w{background:#FFF;box-shadow:inset 0 0 0 2px var(--br)}
+.sw-l{background:linear-gradient(135deg,#F5E6D3,#FDF5E6)}
+.sw-b{background:linear-gradient(135deg,#3B82F6,#EC4899 50%,#F59E0B)}
+.sw-d{background:linear-gradient(135deg,#1F2937,#374151)}
+.sw-m{background:conic-gradient(#FFF 0deg,#F5E6D3 90deg,#3B82F6 180deg,#1F2937 270deg);box-shadow:inset 0 0 0 1px var(--br)}
+.si{display:flex;align-items:center;justify-content:center;color:var(--tf)}
+.si svg{width:20px;height:20px}
+.bg,.br{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.bg{padding:18px 24px;border-radius:14px;font-size:1rem;font-weight:600;background:linear-gradient(135deg,var(--b),var(--bd));color:#fff;box-shadow:0 4px 14px rgba(139,21,56,.35);margin-bottom:14px}
+.bg:hover{box-shadow:0 6px 20px rgba(139,21,56,.45)}
+.bg:active,.br:active{transform:scale(.98)}
+.bg:disabled{background:var(--br);color:var(--tf);box-shadow:none;cursor:not-allowed;transform:none}
+.bg svg{width:18px;height:18px}
+.br{padding:14px;border-radius:12px;font-size:.875rem;font-weight:500;background:var(--sk);color:var(--tm)}
+.br:hover{background:var(--br);color:var(--t)}
+.br svg{width:16px;height:16px}
+.re{background:var(--c);border-radius:var(--rl);padding:20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08)}
+.re>:last-child{margin-bottom:0}
+.rh{text-align:center;margin-bottom:20px}
+.rx{width:56px;height:56px;margin:0 auto 12px;background:var(--sbg);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.rx svg{width:28px;height:28px;color:var(--s)}
+.rt{font-size:1.25rem;font-weight:700;letter-spacing:-.02em}
+.ft{text-align:center;padding:20px;font-size:.75rem}
+.ft a{color:var(--tf);text-decoration:none}
+.ft a:hover{color:var(--b)}
+.wa{background:var(--wbg);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.wt,.ph,.ah,.dt,.at,.tt{display:flex;align-items:center;gap:8px;font-weight:600}
+.wt{color:var(--w);font-size:.875rem;margin-bottom:8px}
+.wt svg,.ah svg{width:18px;height:18px}
+.wa ul,.ti ul,.de ul,.av ul,.ad ul{list-style:none}
+.wa li,.de li,.av li,.ad li{padding:3px 0 3px 16px;position:relative;font-size:.8125rem;line-height:1.4}
+.wa li::before,.de li::before,.av li::before,.ad li::before{content:"•";position:absolute;left:4px}
+.wa p,.de p,.av p,.ad p{font-size:.8125rem;line-height:1.4}
+.wa li{color:#92400E}
+.wa li::before{color:var(--w)}
+.wa p{color:#92400E}
+.p{background:linear-gradient(135deg,var(--b),var(--bd));border-radius:var(--r);padding:20px;color:#fff;margin-bottom:12px}
+.ph{gap:10px;margin-bottom:12px;opacity:.9}
+.ph svg{width:20px;height:20px}
+.ph span,.ah span{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.pn{font-size:1.375rem;font-weight:700;margin-bottom:4px}
+.pd{font-size:.8125rem;opacity:.85;margin-bottom:16px;line-height:1.5}
+.ps{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px}
+.g4{grid-template-columns:repeat(2,1fr)}
+.sp{background:rgba(255,255,255,.15);border-radius:10px;padding:10px 12px}
+.sl{font-size:.625rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:2px}
+.sv{font-size:.875rem;font-weight:600}
+.dr{background:var(--sb);border-radius:var(--r);padding:20px;margin-bottom:12px}
+.dr .ph{color:var(--tm)}
+.dr .pn{color:var(--t);font-size:1.125rem}
+.dr .pd{color:var(--tm);opacity:1}
+.dr .sp{background:#fff}
+.dr .sl{color:var(--tf);opacity:1}
+.dr .sv{color:var(--t)}
+.to{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--sbg);border-radius:var(--r);padding:14px 16px;margin-top:12px}
+.to svg{width:18px;height:18px;color:var(--s)}
+.to span{font-size:.875rem;color:var(--t)}
+.to strong{font-weight:600}
+.ad{background:#E0F2FE;border-radius:var(--r);padding:16px;margin-bottom:12px}
+.ah{gap:10px;color:#0369A1;margin-bottom:8px}
+.ad li,.ad li::before,.ad p{color:#0369A1}
+.de{background:var(--sb);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.dt{font-size:.8125rem;margin-bottom:8px}
+.dt svg,.at svg{width:16px;height:16px}
+.dt svg{color:var(--tm)}
+.de li,.de li::before,.de p{color:var(--tm)}
+.av{background:var(--ebg);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.at{color:var(--e);font-size:.8125rem;margin-bottom:8px}
+.av li,.av p{color:#991B1B}
+.av li::before{color:var(--e)}
+.ti{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.tt{gap:10px;color:var(--w);font-size:.875rem;margin-bottom:12px}
+.tt svg{width:18px;height:18px;color:var(--g)}
+.ti li{display:flex;gap:10px;padding:8px 0;font-size:.8125rem;color:#78350F;line-height:1.4;border-bottom:1px solid rgba(201,169,98,.25)}
+.ti li:last-child{border-bottom:none;padding-bottom:0}
+.ti li svg{width:14px;height:14px;color:var(--g);flex-shrink:0;margin-top:2px}
+.gl{display:flex;align-items:baseline;gap:12px}
+.gn{font-size:.75rem;font-weight:600;color:var(--tf);min-width:14px;flex-shrink:0}
+.gt{font-size:.875rem;color:var(--tm);line-height:1.5}
+.ab{display:flex;gap:8px;padding:4px 0 0}
+.al{flex:1;display:flex;align-items:center;justify-content:center;padding:12px;border-radius:50px;background:var(--sb);border:2px solid var(--br);color:var(--tm);font-size:.8125rem;font-weight:600;text-decoration:none;transition:border-color .15s,background .15s}
+.al:hover{border-color:var(--tm)}
+@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:f .25s ease-out}
+</style>
+</head>
+<body>
+<div class="a" id="a"></div>
+<script>
+const $='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"',
+T='><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z"/>',
+I={tshirt:$+' stroke-linecap="round" stroke-linejoin="round"'+T+'</svg>',shirt:$+T+'<path d="M12 2v6"/></svg>',pants:$+'><path d="M4 4h16v4l-2 14h-4l-2-10-2 10H6L4 8V4z"/></svg>',underwear:$+'><path d="M4 6h16v4c0 4-2 8-4 10h-8c-2-2-4-6-4-10V6z"/><path d="M12 6v14"/></svg>',towel:$+'><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>',bed:$+'><path d="M2 9V5a2 2 0 012-2h16a2 2 0 012 2v4"/><path d="M2 11v6a2 2 0 002 2h16a2 2 0 002-2v-6"/><path d="M2 11h20"/></svg>',activewear:$+'><circle cx="12" cy="5" r="3"/><path d="M12 8v8M8 12l-4 6M16 12l4 6"/></svg>',heart:$+'><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',sweater:$+T+'<path d="M4 13h16"/></svg>',jacket:$+'><path d="M16 2l4 4v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6l4-4M12 2v6M4 6h16"/></svg>',jeans:$+'><path d="M4 4h16v4l-2 14h-4l-2-8-2 8H6L4 8V4zM8 4v4M16 4v4"/></svg>',check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>',warn:$+'><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>',bulb:$+'><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 019 14"/></svg>',refresh:$+'><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',washer:$+'><rect x="3" y="2" width="18" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M7 6h.01M12 6h2"/></svg>',dryer:$+'><rect x="3" y="2" width="18" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M9 13c1-1 3-1 4 0s3 1 4 0"/></svg>',wind:$+'><path d="M17.7 7.7a2.5 2.5 0 111.8 4.3H2M9.6 4.6A2 2 0 1111 8H2M12.6 19.4A2 2 0 1014 16H2"/></svg>',star:$+'><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/></svg>',ban:$+'><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>',beaker:$+'><path d="M4.5 3h15M6 3v16a2 2 0 002 2h8a2 2 0 002-2V3M6 14h12"/></svg>',soilLight:$+'><circle cx="12" cy="12" r="1.5"/></svg>',soilNormal:$+'><circle cx="12" cy="8" r="1.5"/><circle cx="8" cy="14" r="1.5"/><circle cx="16" cy="14" r="1.5"/></svg>',soilHeavy:$+'><circle cx="12" cy="6" r="1.5"/><circle cx="7" cy="11" r="1.5"/><circle cx="17" cy="11" r="1.5"/><circle cx="9" cy="17" r="1.5"/><circle cx="15" cy="17" r="1.5"/></svg>',clock:$+'><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+phone:$+'><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>',
+users:$+'><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+qmark:$+'><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>'},
+G=[{id:'tshirts',l:'T-Shirts & Tops',i:'tshirt',f:'cotton'},{id:'shirts',l:'Dress Shirts',i:'shirt',f:'blend'},{id:'pants',l:'Trousers',i:'pants',f:'blend'},{id:'jeans',l:'Jeans & Denim',i:'jeans',f:'denim'},{id:'underwear',l:'Underwear & Socks',i:'underwear',f:'cotton'},{id:'towels',l:'Towels',i:'towel',f:'cotton'},{id:'bedding',l:'Bed Linen',i:'bed',f:'cotton'},{id:'activewear',l:'Sportswear',i:'activewear',f:'synthetic'},{id:'delicates',l:'Delicates',i:'heart',f:'delicate'},{id:'knitwear',l:'Knitwear',i:'sweater',f:'wool'},{id:'jackets',l:'Jackets',i:'jacket',f:'outdoor'}],
+K=[{id:'white',l:'White',w:'w'},{id:'light',l:'Light Colours',w:'l'},{id:'bright',l:'Bright Colours',w:'b'},{id:'dark',l:'Dark Colours',w:'d'},{id:'mixed',l:'Mixed Colours',w:'m'}],
+O=[{id:0,l:'Lightly Soiled',i:'soilLight'},{id:1,l:'Normal',i:'soilNormal'},{id:2,l:'Heavily Soiled',i:'soilHeavy'}],
+W={'Cottons Pro':{t:'60°C',s:'1400 rpm',l:'7.0 kg',u:'0:59 h',d:'Everyday cotton items. Adjusts to soil level.'},'Whites (90)':{t:'90°C',s:'1600 rpm',u:'1:11 h',d:'Maximum hygiene for heavily soiled whites.'},'Whites (75)':{t:'75°C',s:'1600 rpm',u:'1:11 h',d:'Hygienic wash for whites and light colours.'},'Colored Items (60)':{t:'60°C',s:'1600 rpm',u:'0:59 h',d:'Coloured cottons at higher temperature.'},'Colored Items (20)':{t:'20°C',s:'1600 rpm',u:'1:09 h',d:'Energy-saving for lightly soiled colours.'},'Minimum Iron (40)':{t:'40°C',s:'1000 rpm',u:'0:40 h',d:'Synthetics and blends. Reduces creasing.'},'Delicates (30)':{t:'30°C',s:'600 rpm',u:'0:37 h',d:'Gentle cycle for delicate fabrics.'},'Dark Garments':{t:'40°C',s:'1200 rpm',u:'0:45 h',d:'Protects dark colours. Higher water, 3 rinses, reduced spin.'},Denim:{t:'40°C',s:'1000 rpm',u:'0:42 h',d:'Gentle on denim, preserves colour and fit.'},Shirts:{t:'40°C',s:'800 rpm',u:'0:35 h',d:'Gentle mechanics and low spin minimize creasing.'},Towels:{t:'40°C',s:'1400 rpm',l:'5.5 kg',u:'0:41 h',d:'High temp for hygiene, thorough rinsing for absorbency.'},Express:{t:'30°C',s:'1400 rpm',u:'0:20 h',d:'Quick 20-min wash for lightly soiled items only.'}},
+Y={'Cottons (Closet +)':{v:'Normal +',l:'8.0 kg',u:'0:36 h',d:'Thick towels, bathrobes. Ready to store.'},'Cottons (Closet)':{v:'Normal',l:'8.0 kg',u:'0:35 h',d:'Everyday cotton. Ready to fold and store.'},'Cottons (Iron)':{v:'Hand Iron',l:'8.0 kg',u:'0:35 h',d:'Slightly damp, ideal for ironing.'},'Cottons (Spin)':{v:'Machine Iron',l:'8.0 kg',u:'0:35 h',d:'Very damp, for items to line dry after.'},'Minimum Iron (Closet)':{v:'Normal',l:'4.0 kg',u:'0:24 h',d:'Synthetics and blends. Limits wrinkles.'},'Minimum Iron (Iron)':{v:'Hand Iron',l:'4.0 kg',u:'0:24 h',d:'Synthetics, slightly damp for ironing.'},'Delicates (Closet)':{v:'Normal',l:'4.0 kg',u:'0:46 h',d:'Delicate synthetics and lingerie.'},Shirts:{v:'Normal',l:'2.0 kg',u:'0:20 h',d:'Reduces creasing. Remove and hang immediately.'},'Smoothing (Iron)':{l:'1.0 kg',u:'0:05 h',d:'Freshens and relaxes wrinkles with steam.'},Woolens:{l:'2.0 kg',u:'0:05 h',d:'Fluff and freshen only. Air dry flat after.'},Express:{v:'Normal',l:'4.0 kg',u:'0:29 h',d:'Fast dry for small loads.'},'Timed Drying Warm Air (40)':{l:'8.0 kg',u:'0:40 h',d:'Gentle warm air for delicate items with trims.'}};
+let S={items:[],color:'mixed',soil:1,show:0};
+function rec(){
+let{items:t,color:c,soil:s}=S,warn=[],tips=[],avoid=[],det='',air=[],prog='Cottons Pro',dry='Cottons (Closet)',fab=t.map(id=>G.find(g=>g.id===id)?.f).filter(Boolean),hW=fab.includes('wool'),hS=fab.includes('synthetic'),hD=fab.includes('delicate'),hJ=fab.includes('denim'),hO=fab.includes('outdoor'),hBl=fab.includes('blend'),hT=t.includes('towels'),hB=t.includes('bedding'),hSh=t.includes('shirts'),hU=t.includes('underwear'),hA=t.includes('activewear'),hK=t.includes('knitwear'),hP=t.includes('pants'),hJa=t.includes('jackets'),hTs=t.includes('tshirts'),iD=c==='dark',iW=c==='white',iB=c==='bright',iL=c==='light',iM=c==='mixed',sL=s===0,sH=s===2,noDry=false,hyg=hU||hT||hB;
+hT&&(hA||hS)&&warn.push('SEPARATE: Towel lint permanently clogs synthetic wicking fibers. Wash towels separately to protect sportswear.');
+hT&&hD&&warn.push('SEPARATE: Towel weight stretches delicates; terry abrades lace. Using Delicates program to protect fragile items.');
+hT&&hB&&warn.push('Wash sheets and towels separately for best results: different weights reduce cleaning efficiency.');
+(hT||hB)&&hSh&&warn.push('HYGIENE TRADE-OFF: Using Shirts program (40C, 800rpm) to protect dress shirts from permanent creasing. Rewash towels/bedding separately at 60C+ for hygiene.');
+hW&&(hT||hB||hU)&&warn.push('SEPARATE: Wool max 30C; towels/bedding/underwear need 55-60C for hygiene. Protecting wool at 30C.');
+hW&&(hA||hS)&&warn.push('SEPARATE: Wool needs gentle 30C; synthetics tolerate 40C. Using wool-safe settings.');
+hA&&hB&&warn.push('SEPARATE: Bedding needs 55C+ for dust mites; sportswear elastane degrades above 40C. Protecting sportswear.');
+hU&&hW&&warn.push('SEPARATE: Underwear needs 60C to kill bacteria/fungi; wool felts above 30C. Protecting wool; underwear hygiene compromised.');
+hU&&hD&&warn.push('Underwear needs 60C for hygiene; delicates max 30C. Using 30C to protect delicates; consider tumble drying for pathogen reduction.');
+hU&&hA&&!hW&&!hD&&!hSh&&warn.push('Underwear ideally needs 60C; sportswear max 40C. Using 40C with bio detergent; tumble dry for hygiene.');
+hU&&hSh&&!hW&&!hD&&warn.push('HYGIENE TRADE-OFF: Using Shirts program to protect dress shirts. Rewash underwear separately at 60C for full hygiene.');
+hJ&&hSh&&warn.push('Using Shirts program (800rpm) to protect dress shirts from creasing. Denim may benefit from separate wash.');
+hJ&&hD&&warn.push('SEPARATE: Denim abrades delicates. Using Delicates program; wash denim separately.');
+(hJa||hP)&&hSh&&!hJ&&warn.push('Using Shirts program to protect dress shirts from heavy item creasing.');
+hJ&&(iW||iL)&&warn.push('SEPARATE: Denim bleeds indigo for first 5-6 washes. Wash new denim alone.');
+iD&&!hJ&&warn.push('New dark items bleed dye for first 5-6 washes. Wash new darks separately or use colour-catchers.');
+t.length>5&&warn.push('Large load selected: ensure drum is max 3/4 full for proper agitation and rinsing.');
+if(hW||hK){
+prog='Delicates (30)';dry='Woolens';noDry=true;
+sH&&warn.push('Heavy soil on wool: professional cleaning recommended. Hot water causes irreversible felting.');
+tips.push('Turn inside out; use mesh bag to prevent pilling and snagging.');
+tips.push('30C max with minimal agitation: wool scales interlock above this temp, causing 20-40% shrinkage.');
+air.push('Lay flat on towel, reshape while damp. Never hang; weight stretches the neckline permanently.');
+det='Wool/silk detergent only (pH-neutral, enzyme-free). Protease enzymes digest protein fibers.';
+avoid.push('NEVER use bio/enzyme detergent: permanently damages wool and cashmere fibers');
+avoid.push('NEVER tumble dry: any heat with agitation causes irreversible felting');
+avoid.push('NEVER use fabric softener: unnecessary on wool; causes waxy buildup');
+}else if(hD){
+prog='Delicates (30)';dry='Delicates (Closet)';
+tips.push('Use mesh bags to prevent snagging, stretching, and tangling.');
+tips.push('Fasten all hooks and close bra clasps; underwires can escape and damage drum.');
+tips.push('600rpm leaves items damp; allow 4-6 hours air dry time.');
+hU&&tips.push('For hygiene: tumble dry on Delicates adds 3-4 log bacterial reduction.');
+air.push('Hang or lay flat immediately. Silk and lace: air dry only to preserve fibers.');
+det='Mild liquid detergent, enzyme-free for silk. No bleach or optical brighteners.';
+avoid.push('NEVER tumble dry silk, bras, swimwear, tights, or sequined/beaded items');
+avoid.push('NEVER tumble dry rubber-backed or PVC-printed items: heat melts adhesive');
+avoid.push('NEVER use enzyme detergent on silk: protease digests protein fibers');
+}else if(hSh){
+prog=iD?'Dark Garments':'Shirts';dry='Shirts';
+tips.push('Unbutton collars, cuffs, and fronts: closed buttons stress buttonholes and cause puckering.');
+tips.push('800rpm minimizes creasing. Wrinkles set permanently above 1200rpm on cotton-poly blends.');
+tips.push('Remove immediately when cycle ends: wrinkles set within minutes in warm, damp fabric.');
+air.push('Hang on padded hangers while slightly damp. Button top button to maintain collar shape.');
+det=iW?'Liquid with optical brighteners for crisp white shirts.':iD?'Liquid for darks; no brighteners.':'Liquid HE detergent.';
+sH&&tips.unshift('Pre-treat collars/cuffs: dish soap for sebum oils, enzyme spray for sweat proteins.');
+(hT||hB)&&tips.push('Towels/bedding in this load need 60C for hygiene: rewash separately or tumble dry to reduce pathogens.');
+hU&&tips.push('Underwear in this load needs 60C for hygiene: rewash separately or tumble dry to reduce pathogens.');
+hJ&&tips.push('Denim in this load may need separate wash at Denim program for thorough cleaning.');
+}else if(hJ){
+prog='Denim';dry='Cottons (Iron)';
+tips.push('Turn inside out: protects surface indigo dye from abrasion.');
+tips.push('1000rpm prevents white crease lines along seams that higher speeds cause.');
+tips.push('First 5-6 washes: wash alone. Indigo bleeds at all temperatures.');
+air.push('Hang by waistband or lay flat. Avoid direct sunlight; UV accelerates indigo fading.');
+det='Liquid detergent only. No optical brighteners (cause blue-white cast on denim).';
+avoid.push('Avoid overdrying: heat shrinks denim 4-10% and accelerates fading');
+avoid.push('NEVER use powder: mineral residue visible as white specks on dark denim');
+}else if(hO||hJa){
+prog='Minimum Iron (40)';dry='Timed Drying Warm Air (40)';
+tips.push('40C removes body oils without damaging waterproof membranes or DWR coating.');
+tips.push('Close all zips, empty pockets, fasten velcro: open zips snag and velcro pills fabric.');
+tips.push('20-min warm tumble reactivates DWR water-repellent coating after washing.');
+tips.push('Use extra rinse: detergent residue in membrane pores reduces breathability.');
+air.push('Hang to drip dry if skipping dryer. DWR reactivation requires heat.');
+det='Technical wash liquid only (e.g., Nikwax Tech Wash). Standard detergent clogs membranes.';
+avoid.push('NEVER use fabric softener: destroys waterproof membrane and DWR coating');
+avoid.push('NEVER exceed 40C: heat delaminates sealed seam tape');
+}else if(hA||(hS&&!hT&&!hB)){
+prog=iD?'Dark Garments':'Minimum Iron (40)';dry='Minimum Iron (Closet)';
+tips.push('40C max: elastane elastic bonds begin breaking at 120C; dryer heat accelerates this.');
+tips.push('Turn inside out to protect printed logos and reduce surface pilling.');
+tips.push('Wash promptly after use: Micrococci bacteria multiply rapidly on damp synthetics, causing persistent odor.');
+hU&&tips.push('Bio detergent + tumble dry achieves comparable hygiene to 60C wash.');
+air.push('Hang in shade: UV radiation degrades synthetic fibers and fades colors.');
+det='Liquid bio detergent breaks down sweat proteins. CV4 water: use 25-30ml.';
+avoid.push('NEVER use fabric softener: coats wicking fiber pores, reducing moisture transport 70%');
+avoid.push('NEVER use Extra Dry: synthetics deform above 70C; use Normal level only');
+}else if(hT){
+prog=sL?'Towels':sH?(iW?'Whites (90)':'Whites (75)'):(iW?'Whites (75)':'Colored Items (60)');
+iD&&(prog=sL?'Towels':'Colored Items (60)');
+dry='Cottons (Closet +)';
+tips.push('Shake vigorously before drying: separates terry loops for maximum fluffiness.');
+tips.push('First 2 washes at 60C: removes factory sizing and sets dye to reduce bleeding.');
+tips.push('Athlete\'s foot fungus (T. rubrum) survives 30C but dies at 60C. Monthly 60C wash recommended.');
+tips.push('CV4 water (164 mg/L): use standard dose. Overdosing coats fibers, causing scratchiness.');
+air.push('Direct sunlight naturally sanitizes (UV) and whitens. Shake halfway through drying.');
+det=iW?'Powder with oxygen bleach (sodium percarbonate) for whitening.':'Powder bio detergent; '+(sL?'55ml for light soil.':sH?'100ml for heavy soil.':'75ml for normal soil.');
+avoid.push('NEVER use fabric softener: silicone coating destroys absorbency and traps bacteria causing musty smell');
+}else if(hB){
+prog=sH?(iW?'Whites (90)':'Whites (75)'):sL?(iW?'Cottons Pro':'Colored Items (20)'):(iW?'Whites (75)':'Colored Items (60)');
+(iB||iM)&&!sH&&(prog='Colored Items (20)');
+iD&&(prog=sH?'Colored Items (60)':'Dark Garments');
+dry='Cottons (Closet +)';
+tips.push('Wash duvet covers inside out with opening closed or buttoned to prevent tangling.');
+tips.push('55C+ kills 100% of dust mites; at 40C only 6.5% die. Essential for allergy sufferers.');
+tips.push('Ensure load is max 3/4 full: bedding needs room to move for proper cleaning.');
+tips.push('Weekly washing at 60C recommended: bedding accumulates skin cells, sweat, and mites rapidly.');
+air.push('Line dry when possible; shake periodically to redistribute filling and prevent clumping.');
+det=iW?'Powder with bleaching agents for hygiene and whiteness.':iD?'Liquid for darks; no brighteners.':'Liquid bio detergent; 27ml for CV4 water.';
+(iB||iM)&&!sH&&tips.push('20C protects bright/mixed colours from bleeding; consider 40C minimum for hygiene.');
+}else if(hU&&t.length<=2){
+prog=iW?'Whites (75)':'Colored Items (60)';
+iD&&(prog='Colored Items (60)');
+dry='Cottons (Closet)';
+tips.push('60C kills E. coli, Enterococcus, and fungi. At 40C, fecal bacteria survive and transfer to other items.');
+tips.push('Athlete\'s foot fungus: 36% of socks remain contaminated after 40C wash; 60C eliminates it.');
+tips.push('Tumble drying adds 3-4 log bacterial reduction beyond washing alone.');
+air.push('Rack dry in well-ventilated area. Ensure fully dry before storing to prevent mold.');
+det='Bio powder with enzymes and oxygen bleach for maximum hygiene. CV4 water: 75ml.';
+}else if(hBl||hP){
+prog=iD?'Dark Garments':iW?'Cottons Pro':'Minimum Iron (40)';
+dry=iD?'Minimum Iron (Closet)':'Cottons (Closet)';
+tips.push('Cotton-poly blends: 40C prevents heat-setting creases; polyester glass transition is 70C.');
+tips.push('Check for elastane content (2-5% common in trousers): max 40C wash, avoid tumble drying.');
+tips.push('1000-1200rpm balances moisture extraction with wrinkle prevention.');
+tips.push('Remove promptly from dryer: wrinkles set quickly in warm synthetic blends.');
+air.push('Hang by waistband or use trouser hangers with clips at hem.');
+det=iD?'Liquid for darks; no brighteners or zeolites.':iW?'Liquid with optical brighteners.':'Liquid bio detergent; 27ml for CV4 water.';
+hP&&avoid.push('Check pockets: coins damage pump and drum; tissues disintegrate into lint');
+}else if(hTs){
+prog=iW?(sH?'Whites (75)':'Cottons Pro'):iD?'Dark Garments':(sH?'Colored Items (60)':'Cottons Pro');
+(iB||iM)&&!sH&&(prog='Colored Items (20)');
+dry=iW?'Cottons (Closet +)':iD?'Minimum Iron (Closet)':'Cottons (Closet)';
+tips.push('Cotton tolerates high temps; the 60C/1400rpm Cottons Pro provides thorough cleaning.');
+iW&&tips.push('Powder detergent with oxygen bleach counteracts yellowing in white cotton.');
+iD&&tips.push('Turn inside out; Dark Garments program uses extra water and 3 rinses to prevent residue.');
+(iB||iM)&&tips.push('20C keeps cotton fibers closed, trapping dye inside. Use colour-catcher sheets.');
+air.push('Shake well before hanging to release wrinkles. Cotton can shrink 4-10% with excessive heat.');
+det=iW?'Powder with bleaching agents.':iD?'Liquid for darks; no brighteners.':'Liquid bio detergent.';
+}else if(iD){
+prog='Dark Garments';dry='Minimum Iron (Closet)';
+tips.push('Turn everything inside out: protects surface dye from drum abrasion.');
+tips.push('Dark Garments program: higher water level and 3 rinses prevents white detergent residue.');
+tips.push('Max dye release occurs at 40C. Cold (20C) preserves color but reduces cleaning.');
+tips.push('1200rpm balances efficient moisture extraction with color protection.');
+air.push('Dry in shade: direct sunlight accelerates UV fading on dark fabrics.');
+det='Liquid for darks only. No brighteners, zeolites, or powder (leaves visible white specks).';
+avoid.push('NEVER use powder detergent: mineral residue shows as white specks on dark fabric');
+avoid.push('NEVER use optical brighteners: cause uneven appearance under UV light');
+}else if(iW){
+prog=sH?'Whites (90)':sL?'Cottons Pro':'Whites (75)';
+dry='Cottons (Closet +)';
+tips.push('Powder detergent with oxygen bleach (sodium percarbonate) counteracts yellowing.');
+tips.push('Verify items are truly white: cream and off-white develop blue cast with brighteners.');
+tips.push('75-90C provides thermal disinfection and activates bleaching agents in powder.');
+tips.push('1600rpm extracts maximum moisture for efficient, quick drying.');
+air.push('Direct sunlight naturally whitens (UV bleaching) and sanitizes cotton.');
+det='Powder with bleaching agents. CV4 water: '+(sL?'55ml light soil.':sH?'100ml heavy soil.':'75ml normal soil.');
+}else{
+if(sL&&t.length<=3){
+prog='Express';dry='Express';
+tips.push('Express: for lightly worn items only. No visible stains, odors, or heavy soil.');
+tips.push('Max 2kg load for proper cleaning. Larger loads won\'t clean effectively in 20 minutes.');
+tips.push('Half detergent dose (13ml liquid). Full dose won\'t rinse out in short cycle.');
+}else if(sH){
+prog=iL?'Cottons Pro':'Colored Items (60)';dry='Cottons (Closet +)';
+tips.push('60C provides better stain removal for heavy soil and kills most bacteria.');
+tips.push('Pre-treat visible stains before washing for best results.');
+}else if(iB||iM){
+prog='Colored Items (20)';dry='Cottons (Closet)';
+tips.push('20C cold wash keeps fibers closed, preventing dye bleeding between items.');
+tips.push('Use colour-catcher sheets: they absorb 70-90% of loose dye in the wash.');
+}else if(iL){
+prog='Cottons Pro';dry='Cottons (Closet)';
+tips.push('Light colours tolerate 40-60C; Cottons Pro at 60C provides thorough cleaning.');
+tips.push('Watch for dye bleed from new bright items mixed with lights.');
+}else{
+prog='Cottons Pro';dry='Cottons (Closet)';
+tips.push('Cottons Pro adjusts to soil level; efficient 59-minute cycle at 60C.');
+}
+air.push('Shake well before hanging to release wrinkles and speed drying.');
+det=det||'Liquid bio detergent. CV4 water (moderately soft): 27ml standard dose.';
+}
+let tempC=parseInt(W[prog]?.t)||40;
+iM&&warn.push(tempC<=20?'Mixed colours: using 20C to minimize dye bleeding. Use colour-catcher sheets.':tempC<=30?'Mixed colours can bleed even at 30C. Use colour-catcher sheets.':tempC<=40?'Mixed colours can bleed at 40C. Use colour-catcher sheets.':'Mixed colours can bleed. Using '+tempC+'C for hygiene; use colour-catcher sheets.');
+iB&&warn.push(tempC<=20?'Bright colours: using 20C cold wash to preserve vibrancy. Use colour-catcher sheets.':tempC<=30?'Bright colours can bleed even at low temps. Use colour-catcher sheets.':tempC<=40?'Bright colours can bleed at 40C. Use colour-catcher sheets.':'Bright colours can bleed. Using '+tempC+'C for hygiene; use colour-catcher sheets.');
+if(sH){
+tips.unshift('Pre-treat stains: enzyme spray for protein (blood, sweat), dish soap for grease, oxygen bleach paste for tannins (coffee, wine).');
+tips.push('Heavy soil: increase detergent 50% (40ml liquid or 100ml powder for CV4 water).');
+avoid.push('NEVER tumble dry until stains are fully removed: heat sets protein and tannin stains permanently');
+['Whites (90)','Whites (75)','Colored Items (60)'].includes(prog)&&tips.push('COLD water pre-soak for protein stains (blood, sweat, egg): hot water denatures protein, setting stains permanently.');
+!det.includes('Powder')&&!hW&&!hD&&(det+=' For mud/clay: powder with oxygen bleach works better than liquid.');
+}
+if(sL){
+det=det.replace(/27ml/g,'20ml').replace(/75ml/g,'55ml');
+!tips.some(t=>t.includes('Express'))&&tips.push('Light soil: consider reducing detergent by 25% to prevent residue buildup.');
+}
+!det&&(det='Liquid bio detergent. CV4 water (164 mg/L, moderately soft): 27ml standard, 20ml light soil, 40ml heavy soil.');
+!air.length&&air.push('Hang promptly after washing: mold and bacteria grow within 8-12 hours in damp fabric.');
+avoid.push('Remove from machine within 8 hours: musty smell develops quickly in damp conditions');
+hyg&&!['Whites (90)','Whites (75)','Colored Items (60)'].includes(prog)&&!warn.some(w=>w.includes('hygiene'))&&warn.push('This load contains items that benefit from 60C for hygiene. Current program protects delicate fabrics; tumble drying adds pathogen reduction.');
+(hD||hSh)&&(hJ||hJa||hP)&&tips.push('Close all zippers before washing: open metal zips snag and tear delicate fabrics.');
+(iM||iB)&&!tips.some(t=>t.includes('colour-catcher'))&&tips.push('Use colour-catcher sheets to absorb loose dyes and prevent transfer.');
+(hJ||hP||hJa)&&!tips.some(t=>t.includes('pockets'))&&tips.push('Empty all pockets: coins damage pump; tissues disintegrate into lint that coats everything.');
+let w=W[prog],y=Y[dry];
+return{wash:{p:prog,...w},dry:noDry?null:(y?{p:dry,...y}:null),warn:[...new Set(warn)].slice(0,5),tips:[...new Set(tips)].slice(0,6),det,avoid:[...new Set(avoid)].slice(0,4),air:[...new Set(air)].slice(0,2)};
+}
+function render(){
+let e=document.getElementById('a'),ok=S.items.length&&S.color,
+h='<div class="s"><div class="st">Getting Started</div><div class="rs">'
++'<div class="gl"><span class="gn">1</span><span class="gt">Choose machine: W for wash, D for dry</span></div>'
++'<div class="gl"><span class="gn">2</span><span class="gt">Open the door</span></div>'
++'<div class="gl"><span class="gn">3</span><span class="gt">Load your laundry</span></div>'
++'<div class="gl"><span class="gn">4</span><span class="gt">Close the door</span></div>'
++'</div></div>'
++'<div class="s"><div class="st">What are you washing?</div><div class="rs">';
+G.forEach(g=>{let x=S.items.includes(g.id);h+='<button class="r'+(x?' x':'')+'" onclick="toggle(\''+g.id+'\')"><span class="ri">'+I[g.i]+'</span><span class="rl">'+g.l+'</span><div class="rc">'+I.check+'</div></button>';});
+h+='</div></div><div class="s"><div class="st">Colour</div><div class="rs">';
+K.forEach(c=>{let x=S.color===c.id;h+='<button class="r'+(x?' x':'')+'" onclick="setColor(\''+c.id+'\')"><span class="sw sw-'+c.w+'"></span><span class="rl">'+c.l+'</span><div class="rc">'+I.check+'</div></button>';});
+h+='</div></div><div class="s"><div class="st">How dirty?</div><div class="rs">';
+O.forEach(o=>{let x=S.soil===o.id;h+='<button class="r'+(x?' x':'')+'" onclick="setSoil('+o.id+')"><span class="si">'+I[o.i]+'</span><span class="rl">'+o.l+'</span><div class="rc">'+I.check+'</div></button>';});
+h+='</div></div><button class="bg" onclick="go()"'+(ok?'':' disabled')+'>Get Settings</button>';
+S.show||(h+='<button class="br" onclick="reset()">'+I.refresh+' Start Over</button>');
+if(S.show&&ok){
+let r=rec();
+h+='<div class="re fi"><div class="rh"><div class="rx">'+I.check+'</div><div class="rt">Your Settings</div></div>';
+r.warn.length&&(h+='<div class="wa"><div class="wt">'+I.warn+' Important</div>'+(r.warn.length===1?'<p>'+r.warn[0]+'</p>':'<ul>'+r.warn.map(w=>'<li>'+w+'</li>').join('')+'</ul>')+'</div>');
+h+='<div class="p"><div class="ph">'+I.washer+'<span>Washing Machine</span></div><div class="pn">'+r.wash.p+'</div><div class="pd">'+r.wash.d+'</div><div class="ps'+(r.wash.l?' g4':'')+'"><div class="sp"><div class="sl">Duration</div><div class="sv">'+r.wash.u+'</div></div><div class="sp"><div class="sl">Temp</div><div class="sv">'+r.wash.t+'</div></div><div class="sp"><div class="sl">Spin</div><div class="sv">'+r.wash.s+'</div></div>'+(r.wash.l?'<div class="sp"><div class="sl">Max Load</div><div class="sv">'+r.wash.l+'</div></div>':'')+'</div></div>';
+if(r.dry){let wm=r.wash.u.match(/(\d+):(\d+)/),dm=r.dry.u.match(/(\d+):(\d+)/),tm=(+wm[1]*60+ +wm[2])+(+dm[1]*60+ +dm[2]),th=Math.floor(tm/60),tmi=tm%60,ts=(th?th+' hour'+(th>1?'s':''):'')+(th&&tmi?' ':'')+(tmi?tmi+' minute'+(tmi>1?'s':''):'');h+='<div class="dr"><div class="ph">'+I.dryer+'<span>Dryer</span></div><div class="pn">'+r.dry.p+'</div><div class="pd">'+r.dry.d+'</div><div class="ps"><div class="sp"><div class="sl">Duration</div><div class="sv">'+r.dry.u+'</div></div><div class="sp"><div class="sl">Max Load</div><div class="sv">'+r.dry.l+'</div></div>'+(r.dry.v?'<div class="sp"><div class="sl">Level</div><div class="sv">'+r.dry.v+'</div></div>':'')+'</div></div><div class="to">'+I.clock+'<span><strong>Total Time</strong> '+ts+'</span></div>';}
+h+='</div>'
++'<div class="s fi"><div class="st">Payment & Start</div><div class="rs">'
++'<div class="gl"><span class="gn">5</span><span class="gt">Pay using Airwallet app or at the display near entrance</span></div>'
++'<div class="gl"><span class="gn">6</span><span class="gt">Match machine number on screen with your device</span></div>'
++'<div class="gl"><span class="gn">7</span><span class="gt">After payment approved, press start</span></div>'
++'<div class="gl"><span class="gn">8</span><span class="gt">Unload when finished so others can use the machines</span></div>'
++'</div>'
++'<div class="de" style="margin:14px 0 0"><div class="dt">'+I.phone+' Get Airwallet</div>'
++'<div class="ab"><a class="al" href="https://play.google.com/store/apps/details?id=com.companyname.Signup&hl=en_GB&pli=1" target="_blank" rel="noopener">Google Play</a>'
++'<a class="al" href="https://apps.apple.com/no/app/airwallet/id1382938805" target="_blank" rel="noopener">App Store</a></div></div>'
++'</div><div class="s fi">';
+r.tips.length&&(h+='<div class="ti"><div class="tt">'+I.bulb+' Tips</div><ul>',r.tips.forEach(t=>h+='<li>'+I.star+'<span>'+t+'</span></li>'),h+='</ul></div>');
+r.avoid.length&&(h+='<div class="av"><div class="at">'+I.ban+' Avoid</div>'+(r.avoid.length===1?'<p>'+r.avoid[0]+'</p>':'<ul>'+r.avoid.map(a=>'<li>'+a+'</li>').join('')+'</ul>')+'</div>');
+r.air.length&&(h+='<div class="ad"><div class="ah">'+I.wind+'<span>If Air Drying</span></div><p>'+r.air.join(' ')+'</p></div>');
+r.det&&(h+='<div class="de"><div class="dt">'+I.beaker+' Detergent</div><p>'+r.det+'</p></div>');
+h+='</div>'
++'<div class="s fi">'
++'<div class="ad"><div class="ah">'+I.phone+'<span>Airwallet Features</span></div>'
++'<ul><li>Check machine availability anytime</li><li>Book washing and drying machines remotely</li><li>Schedule sessions up to 2 weeks in advance</li></ul></div>'
++'<div class="wa"><div class="wt">'+I.users+' Fair Usage</div>'
++'<ul><li>One machine at a time so everyone gets a turn</li><li>Do not leave baskets or bags in the laundry room</li>'
++'<li>Do not leave items in machines; check progress via app</li><li>Items left 24+ hours will be removed; Vita Student not liable</li>'
++'<li>Follow care label instructions; not responsible for damage</li></ul></div>'
++'<div class="de"><div class="dt">'+I.qmark+' Need Help?</div><p>For help or to report a fault, contact your Residence Team.</p></div>'
++'</div>'
++'<button class="br" onclick="reset()">'+I.refresh+' Start Over</button>';
+}
+h+='<div class="ft"><a href="https://saputra.co.uk">\u00A9 2026 Duke Saputra</a></div>';
+e.innerHTML=h;
+S.show&&setTimeout(()=>{let r=document.querySelector('.re');r&&r.scrollIntoView({behavior:'smooth',block:'start'});},50);
+}
+function toggle(id){let i=S.items.indexOf(id);~i?S.items.splice(i,1):S.items.push(id);S.show=0;render();}
+function setColor(id){S.color=S.color===id?null:id;S.show=0;render();}
+function setSoil(v){S.soil=v;S.show=0;render();}
+function go(){S.show=1;render();}
+function reset(){S={items:[],color:'mixed',soil:1,show:0};render();scrollTo(0,0);}
+render();
+</script>
+</body>
+</html>
