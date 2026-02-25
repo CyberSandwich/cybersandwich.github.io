@@ -254,7 +254,10 @@ function showCV(){
 // Render post list
 function showList(){
   var el=$('#ulist');
-  if(posts&&el.querySelector('.ucard'))return;
+  if(posts&&el.querySelector('.ucard')){
+    var sw=$('#usearch');if(sw)sw.parentNode.style.display='block';
+    return;
+  }
   while(el.firstChild)el.removeChild(el.firstChild);
   getPosts().then(function(p){
     var sw=$('#usearch');
