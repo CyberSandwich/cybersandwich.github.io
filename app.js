@@ -426,14 +426,28 @@ function fmtDate(d){
   return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
 
+// Set data-q on CV entries (org name first for priority, then full text)
+$$('.cve').forEach(function(c){
+  var co=c.querySelector('.co');
+  var cr=c.querySelector('.cr');
+  var t=(co?co.textContent+' ':'')+(cr?cr.textContent+' ':'')+c.textContent;
+  c.setAttribute('data-q',t.toLowerCase());
+});
+
 // Search wiring
 function wireSearch(iid,cid){
   var i=$(iid),c=$(cid);
   if(!i||!c)return;
-  i.addEventListener('input',function(){filterList(i,c)});
+  var x=i.parentNode.querySelector('.search-x');
+  function update(){
+    filterList(i,c);
+    if(x)x.style.display=i.value?'flex':'none';
+  }
+  i.addEventListener('input',update);
   i.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){i.value='';filterList(i,c);i.blur()}
+    if(e.key==='Escape'){i.value='';update();i.blur()}
   });
+  if(x)x.addEventListener('click',function(){i.value='';update();i.focus()});
 }
 wireSearch('#psearch','#plist');
 wireSearch('#csearch','#cv');
