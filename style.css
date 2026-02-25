@@ -98,11 +98,16 @@ body{
   color:var(--t3);
   cursor:pointer;
   flex-shrink:0;
-  transition:background .15s,color .15s,border-color .15s
+  min-width:58px;
+  text-align:center;
+  transition:all .2s ease
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
-.copy-btn.copied{background:#DCFCE7;color:#4ADE80;border-color:#BBF7D0}
-.copy-btn.copied svg{width:12px;height:12px}
+.copy-btn.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
+.copy-btn.copied svg{width:14px;height:14px;display:block;margin:0 auto}
+.copy-btn.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:checkDraw .35s ease .08s forwards}
+@keyframes copyPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes checkDraw{to{stroke-dashoffset:0}}
 .vcf-link{margin-bottom:14px}
 .vcf-link a{font-weight:600;color:#fff;background:#48484A;justify-content:center}
 .vcf-link a:hover{background:#3A3A3C;color:#fff}
