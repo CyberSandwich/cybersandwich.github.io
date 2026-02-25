@@ -299,7 +299,7 @@ body{
   border:1.5px solid var(--bdr);
   border-radius:var(--rr);
   background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") 16px center/18px no-repeat;
-  font:400 .9375rem/1 var(--font);
+  font:400 1rem/1 var(--font);
   color:var(--t1);
   outline:none;
   transition:border-color .15s,box-shadow .15s
@@ -347,7 +347,8 @@ nav{
   left:50%;
   transform:translateX(-50%);
   z-index:10;
-  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))
+  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));
+  will-change:transform
 }
 .tabs{
   display:flex;
@@ -375,11 +376,12 @@ nav{
   color:#fff;
   box-shadow:0 2px 8px rgba(0,0,0,.15)
 }
+.tabs a:active{opacity:.7}
 @media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
 
 /* Responsive */
 @media(max-width:480px){
-  .tabs a{padding:12px 16px;font-size:.8125rem}
+  .tabs a{flex:1;text-align:center;padding:16px 0;font-size:.8125rem}
 }
 
 /* Animations */

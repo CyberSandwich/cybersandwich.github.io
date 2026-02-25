@@ -182,6 +182,7 @@ function showCards(cfg){
       el.appendChild(sec);
     });
     var si=$(cfg.si);if(si&&si.value)filterList(si,el);
+    setTimeout(function(){el.querySelectorAll('.pcard').forEach(function(c){c.style.animation='none'})},idx*40+250);
   });
 }
 
@@ -252,6 +253,7 @@ function showCV(){
       el.appendChild(sec);
     });
     var si=$('#csearch');if(si&&si.value)filterList(si,el);
+    setTimeout(function(){el.querySelectorAll('.cve').forEach(function(c){c.style.animation='none'})},idx*40+250);
   });
 }
 
@@ -280,6 +282,7 @@ function showList(){
     });
     var si=$('#usearch');
     if(si&&si.value)filterList(si,el);
+    setTimeout(function(){el.querySelectorAll('.ucard').forEach(function(c){c.style.animation='none'})},p.length*40+250);
   });
 }
 
@@ -495,5 +498,9 @@ wireSearch('#lsearch','#llist');
 // Init
 window.addEventListener('popstate',route);
 route();
+
+// Prefetch all data during idle time so tab switches are instant
+var ric=window.requestIdleCallback||function(cb){setTimeout(cb,200)};
+ric(function(){getProjects();getCV();getPosts();getLinks()});
 
 })();
