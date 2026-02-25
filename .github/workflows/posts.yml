@@ -1,0 +1,45 @@
+name: Generate Posts Manifest
+
+on:
+  push:
+    paths:
+      - 'updates/*.md'
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate posts.json from local md files
+        run: |
+          posts="[]"
+          for f in updates/*.md; do
+            [ -f "$f" ] || continue
+            basename_f=$(basename "$f")
+            date_val="${basename_f:0:10}"
+            title_val=$(sed '/^---$/,/^---$/d' "$f" | grep -m1 '^# ' | sed 's/^# //')
+            if [ -z "$title_val" ]; then
+              slug="${basename_f:11}"
+              title_val="${slug%.md}"
+              title_val=$(echo "$title_val" | tr '-' ' ')
+            fi
+            posts=$(echo "$posts" | jq \
+              --arg d "$date_val" \
+              --arg t "$title_val" \
+              --arg f "$basename_f" \
+              '. + [{date:$d,title:$t,file:$f}]')
+          done
+          echo "$posts" | jq 'sort_by(.date) | reverse' > updates/posts.json
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updates/posts.json
+          git diff --staged --quiet || (git commit -m "chore: update posts manifest" && git push)
