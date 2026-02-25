@@ -19,7 +19,10 @@ function route(){
   if(path!=='/'&&path.endsWith('/'))path=path.slice(0,-1);
   var parts=path.split('/').filter(Boolean);
   var page=parts[0]||'home';
-  if(validPages.indexOf(page)===-1)page='home';
+  if(validPages.indexOf(page)===-1){
+    history.replaceState(null,'','/');
+    page='home';
+  }
   var slug=parts.slice(1).join('/');
 
   var active=$('.page.active');
