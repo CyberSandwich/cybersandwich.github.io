@@ -8,6 +8,7 @@ var posts=null;
 var projects=null;
 var links=null;
 var cv=null;
+var postCache={};
 var validPages=['home','projects','cv','updates','links'];
 var titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
 var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
@@ -288,32 +289,35 @@ function showList(){
 function showPost(slug){
   var el=$('#ulist');
   while(el.firstChild)el.removeChild(el.firstChild);
+  function render(md){
+    var back=document.createElement('a');
+    back.className='post-back';
+    back.href='/updates';
+    back.title='Back to all updates';
+    back.textContent='Back';
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('width','16');svg.setAttribute('height','16');
+    svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');
+    svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
+    svg.setAttribute('aria-hidden','true');
+    var poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    poly.setAttribute('points','15 18 9 12 15 6');
+    svg.appendChild(poly);
+    back.insertBefore(svg,back.firstChild);
+    // innerHTML required for rendered markdown — source: first-party .md files
+    var content=document.createElement('div');
+    content.className='pcontent';
+    content.innerHTML=parseMd(md);
+    el.appendChild(back);el.appendChild(content);
+    window.scrollTo(0,0);
+  }
+  if(postCache[slug]){render(postCache[slug]);return}
   fetch('/updates/'+encodeURIComponent(slug)+'.md')
     .then(function(r){if(!r.ok)throw 0;return r.text()})
     .then(function(md){
-      var back=document.createElement('a');
-      back.className='post-back';
-      back.href='/updates';
-      back.title='Back to all updates';
-      back.textContent='Back';
-      var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-      svg.setAttribute('width','16');svg.setAttribute('height','16');
-      svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');
-      svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');
-      svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
-      svg.setAttribute('aria-hidden','true');
-      var poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-      poly.setAttribute('points','15 18 9 12 15 6');
-      svg.appendChild(poly);
-      back.insertBefore(svg,back.firstChild);
-
-      // innerHTML required for rendered markdown — source: first-party .md files
-      var content=document.createElement('div');
-      content.className='pcontent';
-      content.innerHTML=parseMd(md);
-
-      el.appendChild(back);el.appendChild(content);
-      window.scrollTo(0,0);
+      postCache[slug]=md;
+      render(md);
     })
     .catch(function(){
       history.replaceState(null,'','/updates');
