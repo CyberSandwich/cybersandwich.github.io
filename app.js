@@ -289,7 +289,7 @@ function showList(){
 function showPost(slug){
   var el=$('#ulist');
   while(el.firstChild)el.removeChild(el.firstChild);
-  function render(md){
+  function render(html){
     var back=document.createElement('a');
     back.className='post-back';
     back.href='/updates';
@@ -308,7 +308,7 @@ function showPost(slug){
     // innerHTML required for rendered markdown — source: first-party .md files
     var content=document.createElement('div');
     content.className='pcontent';
-    content.innerHTML=parseMd(md);
+    content.innerHTML=html;
     el.appendChild(back);el.appendChild(content);
     window.scrollTo(0,0);
   }
@@ -316,8 +316,9 @@ function showPost(slug){
   fetch('/updates/'+encodeURIComponent(slug)+'.md')
     .then(function(r){if(!r.ok)throw 0;return r.text()})
     .then(function(md){
-      postCache[slug]=md;
-      render(md);
+      var html=parseMd(md);
+      postCache[slug]=html;
+      render(html);
     })
     .catch(function(){
       history.replaceState(null,'','/updates');
