@@ -8,11 +8,18 @@ var posts=null;
 var projects=null;
 var validPages=['home','projects','cv','updates'];
 
+// Handle 404.html redirect
+var sp=new URLSearchParams(location.search);
+var redir=sp.get('p');
+if(redir){history.replaceState(null,'',redir)}
+
 // Router
 function route(){
-  var hash=location.hash.slice(1)||'home';
-  var parts=hash.split('/');
-  var page=validPages.indexOf(parts[0])!==-1?parts[0]:'home';
+  var path=location.pathname;
+  if(path!=='/'&&path.endsWith('/'))path=path.slice(0,-1);
+  var parts=path.split('/').filter(Boolean);
+  var page=parts[0]||'home';
+  if(validPages.indexOf(page)===-1)page='home';
   var slug=parts.slice(1).join('/');
 
   var active=$('.page.active');
@@ -25,7 +32,8 @@ function route(){
   }
 
   $$('.tabs a').forEach(function(a){
-    var isActive=a.getAttribute('href')==='#'+page;
+    var href=a.getAttribute('href');
+    var isActive=(page==='home'&&href==='/')||(page!=='home'&&href==='/'+page);
     a.classList.toggle('active',isActive);
     if(isActive)a.setAttribute('aria-current','page');
     else a.removeAttribute('aria-current');
@@ -38,10 +46,25 @@ function route(){
   }
 }
 
+// SPA link interception
+document.addEventListener('click',function(e){
+  var a=e.target.closest('a[href]');
+  if(!a)return;
+  var href=a.getAttribute('href');
+  if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download'))return;
+  var parts=href.split('/').filter(Boolean);
+  var page=parts[0];
+  if(!page||validPages.indexOf(page)!==-1){
+    e.preventDefault();
+    history.pushState(null,'',href);
+    route();
+  }
+});
+
 // Fetch and render projects
 function getProjects(){
   if(projects)return Promise.resolve(projects);
-  return fetch('projects/projects.json')
+  return fetch('/projects/projects.json')
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(p){projects=p;return projects})
     .catch(function(){return []});
@@ -104,7 +127,7 @@ function mkSvg(d){
 // Fetch posts manifest
 function getPosts(){
   if(posts)return Promise.resolve(posts);
-  return fetch('updates/posts.json')
+  return fetch('/updates/posts.json')
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(p){
       posts=p;
@@ -117,7 +140,6 @@ function getPosts(){
 // Render post list using DOM methods
 function showList(){
   var el=$('#ulist');
-  // Clear previous content safely
   while(el.firstChild)el.removeChild(el.firstChild);
 
   getPosts().then(function(p){
@@ -131,7 +153,7 @@ function showList(){
     p.forEach(function(x,i){
       var a=document.createElement('a');
       a.className='ucard';
-      a.href='#updates/'+x.file.replace('.md','');
+      a.href='/updates/'+x.file.replace('.md','');
       a.style.animationDelay=(i*0.04)+'s';
 
       var titleDiv=document.createElement('div');
@@ -156,13 +178,13 @@ function showPost(slug){
   var el=$('#ulist');
   while(el.firstChild)el.removeChild(el.firstChild);
 
-  fetch('updates/'+encodeURIComponent(slug)+'.md')
+  fetch('/updates/'+encodeURIComponent(slug)+'.md')
     .then(function(r){if(!r.ok)throw 0;return r.text()})
     .then(function(md){
       // Back link
       var back=document.createElement('a');
       back.className='post-back';
-      back.href='#updates';
+      back.href='/updates';
       back.title='Back to all updates';
       back.textContent='Back';
       var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -191,7 +213,10 @@ function showPost(slug){
       el.appendChild(content);
       window.scrollTo(0,0);
     })
-    .catch(function(){location.hash='updates'});
+    .catch(function(){
+      history.replaceState(null,'','/updates');
+      route();
+    });
 }
 
 // Markdown parser — processes first-party .md files only
@@ -254,7 +279,7 @@ function fmtDate(d){
 }
 
 // Init
-window.addEventListener('hashchange',route);
+window.addEventListener('popstate',route);
 route();
 
 })();
