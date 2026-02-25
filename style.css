@@ -101,7 +101,8 @@ body{
   transition:background .15s,color .15s,border-color .15s
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
-.copy-btn.copied{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
+.copy-btn.copied{background:#DCFCE7;color:#4ADE80;border-color:#BBF7D0}
+.copy-btn.copied svg{width:12px;height:12px}
 .vcf-link{margin-bottom:14px}
 .vcf-link a{font-weight:600;color:#fff;background:#48484A;justify-content:center}
 .vcf-link a:hover{background:#3A3A3C;color:#fff}

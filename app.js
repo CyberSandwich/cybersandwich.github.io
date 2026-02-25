@@ -64,8 +64,20 @@ document.addEventListener('click',function(e){
   e.preventDefault();
   var text=btn.getAttribute('data-copy');
   navigator.clipboard.writeText(text).then(function(){
-    btn.textContent='Copied';
-    setTimeout(function(){btn.textContent='Copy'},1500);
+    btn.classList.add('copied');
+    btn.textContent='';
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');
+    svg.setAttribute('stroke-width','3');
+    svg.setAttribute('stroke-linecap','round');
+    svg.setAttribute('stroke-linejoin','round');
+    var poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    poly.setAttribute('points','20 6 9 17 4 12');
+    svg.appendChild(poly);
+    btn.appendChild(svg);
+    setTimeout(function(){btn.classList.remove('copied');btn.textContent='Copy'},1500);
   });
 });
 
