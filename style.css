@@ -281,7 +281,7 @@ body{
   margin-bottom:20px;
   box-shadow:var(--shadow)
 }
-.search:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+.search:focus{border-color:var(--t4);box-shadow:0 0 0 4px rgba(0,0,0,.04);outline:none}
 .search::placeholder{color:var(--t4)}
 
 /* Empty State */
