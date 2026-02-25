@@ -266,6 +266,24 @@ body{
 }
 .pcontent img{max-width:100%;border-radius:12px;margin:12px 0}
 
+/* Search */
+.search{
+  display:block;
+  width:100%;
+  padding:14px 20px 14px 44px;
+  border:1.5px solid var(--bdr);
+  border-radius:var(--rr);
+  background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") 16px center/18px no-repeat;
+  font:400 .9375rem/1 var(--font);
+  color:var(--t1);
+  outline:none;
+  transition:border-color .15s,box-shadow .15s;
+  margin-bottom:20px;
+  box-shadow:var(--shadow)
+}
+.search:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+.search::placeholder{color:var(--t4)}
+
 /* Empty State */
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:.875rem}
 

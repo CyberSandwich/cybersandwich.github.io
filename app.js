@@ -190,6 +190,7 @@ function showLinks(){
         a.href=x.url;
         a.target='_blank';
         a.rel='noopener noreferrer';
+        a.setAttribute('data-q',(x.title+' '+x.url+' '+x.category).toLowerCase());
         a.style.animationDelay=(idx*0.04)+'s';
         idx++;
 
@@ -210,6 +211,8 @@ function showLinks(){
       });
       el.appendChild(sec);
     });
+    var si=$('#lsearch');
+    if(si&&si.value)filterList(si,el);
   });
 }
 
@@ -365,9 +368,59 @@ function esc(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Fuzzy search — checks if all chars of q appear in order within text
+function fuzzy(q,text){
+  if(text.indexOf(q)!==-1)return true;
+  for(var qi=0,ti=0;ti<text.length&&qi<q.length;ti++){
+    if(text[ti]===q[qi])qi++;
+  }
+  return qi===q.length;
+}
+
+// Generic list filter — works on any container with .link-sec>.pcard[data-q]
+function filterList(input,container){
+  var q=input.value.trim().toLowerCase();
+  var words=q.split(/\s+/).filter(Boolean);
+  var secs=container.querySelectorAll('.link-sec');
+  var any=false;
+  secs.forEach(function(sec){
+    var cards=sec.querySelectorAll('.pcard');
+    var vis=false;
+    cards.forEach(function(c){
+      var t=c.getAttribute('data-q')||'';
+      var ok=!words.length||words.every(function(w){return fuzzy(w,t)});
+      c.style.display=ok?'':'none';
+      if(ok)vis=true;
+    });
+    sec.style.display=vis?'':'none';
+    if(vis)any=true;
+  });
+  var empty=container.querySelector('.search-empty');
+  if(!any&&q){
+    if(!empty){
+      empty=document.createElement('div');
+      empty.className='empty search-empty';
+      empty.textContent='No results';
+      container.appendChild(empty);
+    }
+    empty.style.display='';
+  } else if(empty){
+    empty.style.display='none';
+  }
+}
+
 function fmtDate(d){
   var dt=new Date(d+'T00:00:00');
   return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+
+// Search wiring
+var lsearch=$('#lsearch');
+if(lsearch){
+  lsearch.addEventListener('input',function(){filterList(lsearch,$('#llist'))});
+  lsearch.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){lsearch.value='';filterList(lsearch,$('#llist'));lsearch.blur()}
+  });
 }
 
 // Init
