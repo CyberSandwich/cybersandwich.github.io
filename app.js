@@ -6,7 +6,8 @@ var $$=function(s){return document.querySelectorAll(s)};
 // State
 var posts=null;
 var projects=null;
-var validPages=['home','projects','cv','updates'];
+var links=null;
+var validPages=['home','projects','cv','updates','links'];
 
 // Handle 404.html redirect
 var sp=new URLSearchParams(location.search);
@@ -43,6 +44,7 @@ function route(){
   });
 
   if(page==='projects'){showProjects()}
+  if(page==='links'){showLinks()}
   if(page==='updates'){
     if(slug){showPost(slug)}
     else{showList()}
@@ -127,6 +129,55 @@ function mkSvg(d){
     svg.appendChild(path);
   });
   return svg;
+}
+
+// Fetch and render links
+var linksPromise=null;
+function getLinks(){
+  if(linksPromise)return linksPromise;
+  linksPromise=fetch('/links/links.json')
+    .then(function(r){if(!r.ok)throw 0;return r.json()})
+    .then(function(l){links=l;return links})
+    .catch(function(){return []});
+  return linksPromise;
+}
+
+function showLinks(){
+  var el=$('#llist');
+  if(links&&el.children.length)return;
+  while(el.firstChild)el.removeChild(el.firstChild);
+  getLinks().then(function(l){
+    if(!l.length){
+      var emptyDiv=document.createElement('div');
+      emptyDiv.className='empty';
+      emptyDiv.textContent='Coming Soon!';
+      el.appendChild(emptyDiv);
+      return;
+    }
+    l.forEach(function(x,i){
+      var a=document.createElement('a');
+      a.className='pcard';
+      a.href=x.url;
+      a.target='_blank';
+      a.rel='noopener noreferrer';
+      a.style.animationDelay=(i*0.04)+'s';
+
+      var inf=document.createElement('div');
+      inf.className='pinf';
+      var pt=document.createElement('div');
+      pt.className='pt';pt.textContent=x.title;
+      var pd=document.createElement('div');
+      pd.className='pd';pd.textContent=x.url;
+      inf.appendChild(pt);inf.appendChild(pd);
+
+      var arr=document.createElement('div');
+      arr.className='arr';
+      arr.appendChild(mkSvg('M9 18l6-6-6-6'));
+
+      a.appendChild(inf);a.appendChild(arr);
+      el.appendChild(a);
+    });
+  });
 }
 
 // Fetch posts manifest

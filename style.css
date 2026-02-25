@@ -255,21 +255,6 @@ body{
 }
 .pcontent img{max-width:100%;border-radius:12px;margin:12px 0}
 
-/* Footer */
-.site-footer{
-  text-align:center;
-  font-size:.75rem;
-  color:var(--t3);
-  padding:14px 0 0
-}
-.site-footer a{
-  color:var(--t3);
-  text-decoration:none
-}
-.site-footer a:hover{
-  color:var(--t2)
-}
-
 /* Empty State */
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:.875rem}
 
