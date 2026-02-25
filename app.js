@@ -7,6 +7,7 @@ var $$=function(s){return document.querySelectorAll(s)};
 var posts=null;
 var projects=null;
 var links=null;
+var cv=null;
 var validPages=['home','projects','cv','updates','links'];
 var titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
 var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
@@ -46,6 +47,7 @@ function route(){
   });
 
   if(page==='projects'){showProjects()}
+  if(page==='cv'){showCV()}
   if(page==='links'){showLinks()}
   if(page==='updates'){
     var wrap=$('#usearch');
@@ -84,6 +86,7 @@ function makeLoader(url,cb){
 }
 var getProjects=makeLoader('/projects/projects.json',function(d){projects=d;return d});
 var getLinks=makeLoader('/links/links.json',function(d){links=d;return d});
+var getCV=makeLoader('/cv/cv.json',function(d){cv=d;return d});
 var getPosts=makeLoader('/updates/posts.json',function(d){
   d.sort(function(a,b){return b.date>a.date?1:b.date<a.date?-1:0});
   posts=d;return d;
@@ -149,6 +152,70 @@ function showCards(cfg){
 
 function showProjects(){showCards({el:'#plist',data:projects,get:getProjects,cats:projectCategories,si:'#psearch',sub:function(x){return x.subtitle}})}
 function showLinks(){showCards({el:'#llist',data:links,get:getLinks,cats:linkCategories,si:'#lsearch',sub:function(x){return x.url}})}
+
+// Render CV
+function showCV(){
+  var el=$('#cvlist');
+  if(cv&&el.children.length)return;
+  while(el.firstChild)el.removeChild(el.firstChild);
+  getCV().then(function(data){
+    if(!data.length){
+      var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
+      el.appendChild(d);return;
+    }
+    var idx=0;
+    data.forEach(function(section){
+      var sec=document.createElement('div');sec.className='cv-sec';
+      var h=document.createElement('h3');h.textContent=section.section;sec.appendChild(h);
+      section.entries.forEach(function(e){
+        var card=document.createElement('div');card.className='cve';
+        if(e.org){
+          var co=document.createElement('div');co.className='co';co.textContent=e.org;card.appendChild(co);
+          var cr=document.createElement('div');cr.className='cr';cr.textContent=e.role;card.appendChild(cr);
+          var meta=document.createElement('div');meta.className='cmeta';
+          var loc=document.createElement('span');loc.textContent=e.location;
+          var dates=document.createElement('span');dates.textContent=e.dates;
+          meta.appendChild(loc);meta.appendChild(dates);card.appendChild(meta);
+          if(e.highlight){
+            var hl=document.createElement('div');hl.className='hl';hl.textContent=e.highlight;card.appendChild(hl);
+          }
+          if(e.notes){
+            e.notes.forEach(function(n){
+              var cn=document.createElement('div');cn.className='cn';cn.textContent=n;card.appendChild(cn);
+            });
+          }
+          if(e.bullets){
+            var ul=document.createElement('ul');
+            e.bullets.forEach(function(b){
+              var li=document.createElement('li');li.textContent=b;ul.appendChild(li);
+            });
+            card.appendChild(ul);
+          }
+        }
+        if(e.subs){
+          e.subs.forEach(function(sub){
+            var st=document.createElement('div');st.className='cv-sub';st.textContent=sub.title;card.appendChild(st);
+            if(sub.text){
+              var cn=document.createElement('div');cn.className='cn';cn.textContent=sub.text;card.appendChild(cn);
+            }
+            if(sub.pills){
+              var pills=document.createElement('div');pills.className='pills';
+              sub.pills.forEach(function(p){
+                var pill=document.createElement('span');pill.className='pill';pill.textContent=p;pills.appendChild(pill);
+              });
+              card.appendChild(pills);
+            }
+          });
+        }
+        card.setAttribute('data-q',((e.org?e.org+' ':'')+(e.role?e.role+' ':'')+card.textContent).toLowerCase());
+        card.style.animationDelay=(idx*0.04)+'s';idx++;
+        sec.appendChild(card);
+      });
+      el.appendChild(sec);
+    });
+    var si=$('#csearch');if(si&&si.value)filterList(si,el);
+  });
+}
 
 // Render post list
 function showList(){
@@ -355,15 +422,6 @@ function fmtDate(d){
   return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
 
-// Set data-q and staggered animation on CV entries
-$$('.cve').forEach(function(c,i){
-  var co=c.querySelector('.co');
-  var cr=c.querySelector('.cr');
-  var t=(co?co.textContent+' ':'')+(cr?cr.textContent+' ':'')+c.textContent;
-  c.setAttribute('data-q',t.toLowerCase());
-  c.style.animationDelay=(i*0.04)+'s';
-});
-
 // Search wiring with debounce
 function wireSearch(iid,cid){
   var i=$(iid),c=$(cid);
@@ -385,7 +443,7 @@ function wireSearch(iid,cid){
   if(x)x.addEventListener('click',function(){clearTimeout(timer);i.value='';run();i.focus()});
 }
 wireSearch('#psearch','#plist');
-wireSearch('#csearch','#cv');
+wireSearch('#csearch','#cvlist');
 wireSearch('#usearch','#ulist');
 wireSearch('#lsearch','#llist');
 
