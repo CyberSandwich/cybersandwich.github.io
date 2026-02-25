@@ -463,12 +463,13 @@ function fmtDate(d){
   return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
 
-// Set data-q on CV entries (org name first for priority, then full text)
-$$('.cve').forEach(function(c){
+// Set data-q and staggered animation on CV entries
+$$('.cve').forEach(function(c,i){
   var co=c.querySelector('.co');
   var cr=c.querySelector('.cr');
   var t=(co?co.textContent+' ':'')+(cr?cr.textContent+' ':'')+c.textContent;
   c.setAttribute('data-q',t.toLowerCase());
+  c.style.animationDelay=(i*0.04)+'s';
 });
 
 // Search wiring with debounce

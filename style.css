@@ -313,7 +313,7 @@ body{
 .search-x::after{transform:rotate(-45deg)}
 
 /* Empty State */
-.empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:.875rem}
+.empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:.875rem;background:none;box-shadow:none}
 
 /* Navigation */
 nav{
@@ -360,7 +360,7 @@ nav{
 
 /* Animations */
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.pcard,.ucard{animation:fadeIn .2s ease both}
+.pcard,.ucard,.cve{animation:fadeIn .2s ease both}
 
 /* Focus */
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
