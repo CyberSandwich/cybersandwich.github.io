@@ -244,7 +244,7 @@ function showCV(){
             }
           });
         }
-        card.setAttribute('data-q',((e.org?e.org+' ':'')+(e.role?e.role+' ':'')+card.textContent).toLowerCase());
+        card.setAttribute('data-q',card.textContent.toLowerCase());
         card.style.animationDelay=(idx*0.04)+'s';idx++;
         sec.appendChild(card);
       });
@@ -367,7 +367,7 @@ function il(t){
       return '<img src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(_,text,href){
-      return '<a href="'+esc(href)+'" target="_blank" rel="noopener">'+esc(text)+'</a>';
+      return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+'</a>';
     });
 }
 
