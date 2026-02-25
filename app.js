@@ -394,7 +394,8 @@ function filterList(input,container){
     var vis=false;
     cards.forEach(function(c){
       var t=c.getAttribute('data-q')||c.textContent.toLowerCase();
-      var ok=!words.length||words.every(function(w){return fuzzy(w,t)});
+      var isCv=c.classList.contains('cve');
+      var ok=!words.length||words.every(function(w){return isCv?t.indexOf(w)!==-1:fuzzy(w,t)});
       c.style.display=ok?'':'none';
       if(ok)vis=true;
     });
