@@ -39,7 +39,7 @@ body{
 
 /* Pages */
 .page{display:none}
-.page.active{display:block}
+.page.active{display:block;transform:translateZ(0)}
 
 .name-card{
   font-size:clamp(5rem,18vw,9rem);

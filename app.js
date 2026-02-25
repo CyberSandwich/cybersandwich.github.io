@@ -27,6 +27,10 @@ function route(){
   }
   var slug=parts.slice(1).join('/');
 
+  // Dynamic page title
+  var titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
+  document.title='DS | '+(titles[page]||'Home');
+
   var active=$('.page.active');
   if(!active||active.id!==page){
     $$('.page').forEach(function(p){
@@ -58,7 +62,7 @@ document.addEventListener('click',function(e){
   var a=e.target.closest('a[href]');
   if(!a)return;
   var href=a.getAttribute('href');
-  if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download'))return;
+  if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download')||a.target==='_blank')return;
   var parts=href.split('/').filter(Boolean);
   var page=parts[0];
   if(!page||validPages.indexOf(page)!==-1){
@@ -109,7 +113,7 @@ function showProjects(){
           a.href='mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Inquiry: '+x.title)+'&body='+emailBody;
         } else {
           a.href=x.url;
-          if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener noreferrer'}
+          a.target='_blank';a.rel='noopener noreferrer';
         }
         a.setAttribute('data-q',(x.title+' '+x.subtitle+' '+x.category).toLowerCase());
         a.style.animationDelay=(idx*0.04)+'s';
