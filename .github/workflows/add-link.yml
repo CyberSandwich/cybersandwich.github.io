@@ -1,0 +1,53 @@
+name: Add Link
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Link title'
+        required: true
+      url:
+        description: 'Full URL (https://...)'
+        required: true
+      category:
+        description: 'Category'
+        required: true
+        type: choice
+        options:
+          - Personal
+          - Career
+          - Initiatives
+          - Academic
+          - Modules
+          - Community
+          - Miscellaneous
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          TITLE: ${{ github.event.inputs.title }}
+          URL: ${{ github.event.inputs.url }}
+          CATEGORY: ${{ github.event.inputs.category }}
+        run: |
+          python3 << 'EOF'
+          import json, os
+          with open('links/links.json') as f:
+            data = json.load(f)
+          data.append({
+            'title': os.environ['TITLE'],
+            'url': os.environ['URL'],
+            'category': os.environ['CATEGORY']
+          })
+          with open('links/links.json', 'w') as f:
+            json.dump(data, f, indent=2)
+            f.write('\n')
+          EOF
+      - env:
+          TITLE: ${{ github.event.inputs.title }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add links/links.json
+          git commit -m "Add link: $TITLE"
+          git push
