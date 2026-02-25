@@ -79,7 +79,7 @@ function getProjects(){
   return projectsPromise;
 }
 
-var projectCategories=['Launched','In Development'];
+var projectCategories=['Mobile','Web','Extensions','In Development'];
 
 function showProjects(){
   var el=$('#plist');
@@ -105,7 +105,7 @@ function showProjects(){
       items.forEach(function(x){
         var a=document.createElement('a');
         a.className='pcard';
-        if(x.category==='In Development'){
+        if(x.url==='#'){
           a.href='mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Inquiry: '+x.title)+'&body='+emailBody;
         } else {
           a.href=x.url;

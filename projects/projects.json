@@ -1,27 +1,39 @@
 [
   {
+    "title": "menuva",
+    "subtitle": "The Digital Menu Platform",
+    "url": "https://menuva.co.uk",
+    "category": "Mobile"
+  },
+  {
     "title": "Clock",
     "subtitle": "A Minimal 8KB Clock",
     "url": "/time/",
-    "category": "Launched"
+    "category": "Web"
   },
   {
     "title": "CodeGen",
     "subtitle": "QR Code & Barcode Tool",
     "url": "/codegen/",
-    "category": "Launched"
-  },
-  {
-    "title": "menuva",
-    "subtitle": "The Digital Menu Platform",
-    "url": "https://menuva.co.uk",
-    "category": "Launched"
+    "category": "Web"
   },
   {
     "title": "Miele Laundry Guide",
     "subtitle": "Vita Student Cannon Park Laundry Guide",
     "url": "/laundry/",
-    "category": "Launched"
+    "category": "Web"
+  },
+  {
+    "title": "Project Convergence",
+    "subtitle": "Stealth Mode",
+    "url": "#",
+    "category": "Extensions"
+  },
+  {
+    "title": "Project Shifting Tides",
+    "subtitle": "Stealth Mode",
+    "url": "#",
+    "category": "Extensions"
   },
   {
     "title": "Whisp",
