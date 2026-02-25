@@ -1,5 +1,25 @@
 [
   {
+    "title": "Apple Maps",
+    "url": "https://maps.apple.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Apple Security Releases",
+    "url": "https://support.apple.com/en-us/100100",
+    "category": "Personal"
+  },
+  {
+    "title": "Fantastical Meeting Slots",
+    "url": "https://fantastical.app/DukeSaputra/gm",
+    "category": "Personal"
+  },
+  {
+    "title": "LinkedIn (Duke)",
+    "url": "https://linkedin.com/in/dukedj",
+    "category": "Personal"
+  },
+  {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
     "category": "Personal"
@@ -17,6 +37,11 @@
   {
     "title": "Webpage Archive",
     "url": "https://archive.ph",
+    "category": "Personal"
+  },
+  {
+    "title": "WhatsApp (Duke)",
+    "url": "https://wa.me/qr/EYDEYNUZSEK4B1",
     "category": "Personal"
   },
   {
@@ -40,8 +65,18 @@
     "category": "Initiatives"
   },
   {
+    "title": "Firebase Console",
+    "url": "https://console.firebase.google.com",
+    "category": "Initiatives"
+  },
+  {
     "title": "Human Interface Guidelines",
     "url": "https://developer.apple.com/design/human-interface-guidelines",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Menuva Admin Portal",
+    "url": "https://admin.menuva.co.uk",
     "category": "Initiatives"
   },
   {
