@@ -74,7 +74,7 @@ document.addEventListener('click',function(e){
     svg.setAttribute('stroke-linecap','round');
     svg.setAttribute('stroke-linejoin','round');
     var poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    poly.setAttribute('points','20 6 9 17 4 12');
+    poly.setAttribute('points','4 12 9 17 20 6');
     svg.appendChild(poly);
     btn.appendChild(svg);
     setTimeout(function(){
