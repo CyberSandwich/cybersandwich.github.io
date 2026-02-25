@@ -150,10 +150,13 @@ function showCards(cfg){
   if(cfg.data&&el.children.length)return;
   while(el.firstChild)el.removeChild(el.firstChild);
   cfg.get().then(function(items){
+    var sw=$(cfg.si);
     if(!items.length){
+      if(sw)sw.parentNode.style.display='none';
       var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
       el.appendChild(d);return;
     }
+    if(sw)sw.parentNode.style.display='';
     var idx=0;
     cfg.cats.forEach(function(cat){
       var filtered=items.filter(function(x){return x.category===cat});
@@ -190,10 +193,13 @@ function showCV(){
   if(cv&&el.children.length)return;
   while(el.firstChild)el.removeChild(el.firstChild);
   getCV().then(function(data){
+    var sw=$('#csearch');
     if(!data.length){
+      if(sw)sw.parentNode.style.display='none';
       var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
       el.appendChild(d);return;
     }
+    if(sw)sw.parentNode.style.display='';
     var idx=0;
     data.forEach(function(section){
       var sec=document.createElement('div');sec.className='cv-sec';
@@ -254,10 +260,13 @@ function showList(){
   if(posts&&el.querySelector('.ucard'))return;
   while(el.firstChild)el.removeChild(el.firstChild);
   getPosts().then(function(p){
+    var sw=$('#usearch');
     if(!p.length){
+      if(sw)sw.parentNode.style.display='none';
       var d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';
       el.appendChild(d);return;
     }
+    if(sw)sw.parentNode.style.display='';
     p.forEach(function(x,i){
       var a=document.createElement('a');
       a.className='ucard';
