@@ -384,42 +384,59 @@ function fuzzy(q,text){
   return qi===q.length;
 }
 
-// Generic list filter — handles sectioned (.link-sec/.cv-sec) and flat (.ucard) layouts
+// Score how well a word matches text (0 = no match)
+function scoreWord(w,t,nf){
+  var i=t.indexOf(w);
+  if(i===-1)return(!nf&&fuzzy(w,t))?1:0;
+  return i===0?4:t[i-1]===' '?3:2;
+}
+
+// Generic list filter — scores, sorts, flattens results when searching
 function filterList(input,container){
   var q=input.value.trim().toLowerCase();
   var words=q.split(/\s+/).filter(Boolean);
-  var any=false;
-  container.querySelectorAll('.link-sec,.cv-sec').forEach(function(sec){
-    var cards=sec.querySelectorAll('.pcard,.cve');
-    var vis=false;
-    cards.forEach(function(c){
-      var t=c.getAttribute('data-q')||c.textContent.toLowerCase();
-      var isCv=c.classList.contains('cve');
-      var ok=!words.length||words.every(function(w){return isCv?t.indexOf(w)!==-1:fuzzy(w,t)});
-      c.style.display=ok?'':'none';
-      if(ok)vis=true;
-    });
-    sec.style.display=vis?'':'none';
-    if(vis)any=true;
-  });
-  container.querySelectorAll('.ucard').forEach(function(c){
-    var t=c.getAttribute('data-q')||c.textContent.toLowerCase();
-    var ok=!words.length||words.every(function(w){return fuzzy(w,t)});
-    c.style.display=ok?'':'none';
-    if(ok)any=true;
-  });
-  var empty=container.querySelector('.search-empty');
-  if(!any&&q){
-    if(!empty){
-      empty=document.createElement('div');
-      empty.className='empty search-empty';
-      empty.textContent='No results';
-      container.appendChild(empty);
-    }
-    empty.style.display='';
-  } else if(empty){
-    empty.style.display='none';
+  var secs=[].slice.call(container.querySelectorAll('.link-sec,.cv-sec'));
+  var cards=[].slice.call(container.querySelectorAll('.pcard,.cve,.ucard'));
+
+  // Save original parent refs once (for restoring categorized layout)
+  if(!container._saved&&cards.length){
+    container._saved=cards.map(function(c){return{el:c,parent:c.parentNode}});
   }
+
+  // No query — restore original categorized layout
+  if(!words.length){
+    if(container._saved){
+      container._saved.forEach(function(s){s.parent.appendChild(s.el);s.el.style.display=''});
+    }
+    secs.forEach(function(s){s.style.display=''});
+    var empty=container.querySelector('.search-empty');
+    if(empty)empty.style.display='none';
+    return;
+  }
+
+  // Score each card
+  var scored=[];
+  cards.forEach(function(c){
+    var t=c.getAttribute('data-q')||c.textContent.toLowerCase();
+    var cv=c.classList.contains('cve');
+    var total=0;
+    var ok=words.every(function(w){var s=scoreWord(w,t,cv);total+=s;return s>0});
+    if(ok)scored.push({el:c,score:total});
+    else c.style.display='none';
+  });
+
+  scored.sort(function(a,b){return b.score-a.score});
+
+  // Hide sections, append sorted results flat
+  secs.forEach(function(s){s.style.display='none'});
+  scored.forEach(function(s){s.el.style.display='';container.appendChild(s.el)});
+
+  // Empty state
+  var empty=container.querySelector('.search-empty');
+  if(!scored.length){
+    if(!empty){empty=document.createElement('div');empty.className='empty search-empty';empty.textContent='No results';container.appendChild(empty)}
+    empty.style.display='';
+  }else if(empty){empty.style.display='none'}
 }
 
 function fmtDate(d){
