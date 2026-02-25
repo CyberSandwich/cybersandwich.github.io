@@ -397,22 +397,28 @@ function filterList(input,container){
   var words=q.split(/\s+/).filter(Boolean);
   var secs=[].slice.call(container.querySelectorAll('.link-sec,.cv-sec'));
   var cards=[].slice.call(container.querySelectorAll('.pcard,.cve,.ucard'));
+  var wasSearching=container._searching;
 
-  // Save original parent refs once (for restoring categorized layout)
   if(!container._saved&&cards.length){
     container._saved=cards.map(function(c){return{el:c,parent:c.parentNode}});
   }
 
-  // No query — restore original categorized layout
+  // No query — restore original categorized layout instantly
   if(!words.length){
+    container._searching=false;
     if(container._saved){
-      container._saved.forEach(function(s){s.parent.appendChild(s.el);s.el.style.display=''});
+      container._saved.forEach(function(s){
+        s.parent.appendChild(s.el);s.el.style.display='';
+        s.el.style.animation='none';s.el.style.animationDelay='';
+      });
     }
     secs.forEach(function(s){s.style.display=''});
     var empty=container.querySelector('.search-empty');
     if(empty)empty.style.display='none';
     return;
   }
+
+  container._searching=true;
 
   // Score each card
   var scored=[];
@@ -422,14 +428,27 @@ function filterList(input,container){
     var total=0;
     var ok=words.every(function(w){var s=scoreWord(w,t,cv);total+=s;return s>0});
     if(ok)scored.push({el:c,score:total});
-    else c.style.display='none';
+    else{c.style.display='none';c.style.animation='none'}
   });
 
   scored.sort(function(a,b){return b.score-a.score});
-
-  // Hide sections, append sorted results flat
   secs.forEach(function(s){s.style.display='none'});
-  scored.forEach(function(s){s.el.style.display='';container.appendChild(s.el)});
+
+  // Animate on first search entry; instant updates while refining
+  var animate=!wasSearching;
+  if(animate){
+    scored.forEach(function(s){s.el.style.animation='none'});
+    void container.offsetHeight;
+  }
+
+  scored.forEach(function(s,idx){
+    if(idx<10){
+      s.el.style.display='';
+      s.el.style.animation=animate?'':'none';
+      s.el.style.animationDelay=animate?(idx*0.03)+'s':'';
+      container.appendChild(s.el);
+    }else{s.el.style.display='none'}
+  });
 
   // Empty state
   var empty=container.querySelector('.search-empty');
@@ -452,20 +471,25 @@ $$('.cve').forEach(function(c){
   c.setAttribute('data-q',t.toLowerCase());
 });
 
-// Search wiring
+// Search wiring with debounce
 function wireSearch(iid,cid){
   var i=$(iid),c=$(cid);
   if(!i||!c)return;
   var x=i.parentNode.querySelector('.search-x');
-  function update(){
+  var timer;
+  function run(){
     filterList(i,c);
     if(x)x.style.display=i.value?'flex':'none';
   }
-  i.addEventListener('input',update);
-  i.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){i.value='';update();i.blur()}
+  i.addEventListener('input',function(){
+    clearTimeout(timer);
+    if(x)x.style.display=i.value?'flex':'none';
+    timer=setTimeout(run,120);
   });
-  if(x)x.addEventListener('click',function(){i.value='';update();i.focus()});
+  i.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){clearTimeout(timer);i.value='';run();i.blur()}
+  });
+  if(x)x.addEventListener('click',function(){clearTimeout(timer);i.value='';run();i.focus()});
 }
 wireSearch('#psearch','#plist');
 wireSearch('#csearch','#cv');
