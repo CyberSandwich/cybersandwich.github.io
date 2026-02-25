@@ -86,9 +86,8 @@ body{
 .links a:hover{background:var(--bg2);color:var(--t1)}
 .links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .vcf-link{margin-bottom:14px}
-.vcf-link a{font-weight:600;color:#fff;background:#48484A}
+.vcf-link a{font-weight:600;color:#fff;background:#48484A;justify-content:center}
 .vcf-link a:hover{background:#3A3A3C;color:#fff}
-.vcf-link svg{color:rgba(255,255,255,.6)}
 
 /* Project Card */
 .pcard{
@@ -335,7 +334,6 @@ nav{
   border:1px solid rgba(255,255,255,.45)
 }
 .tabs a{
-  border:none;
   background:none;
   padding:12px 22px;
   border-radius:var(--rr);
