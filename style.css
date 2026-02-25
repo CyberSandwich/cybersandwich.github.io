@@ -161,11 +161,11 @@ body{
   font-size:.8125rem;
   font-weight:600;
   color:var(--t2);
-  padding:10px 18px;
+  padding:12px 22px;
   background:var(--bg2);
   border-radius:16px;
   line-height:1.4;
-  margin:4px auto 8px;
+  margin:12px auto 14px;
   text-align:center
 }
 .cve .cv-sub{font-size:.8125rem;font-weight:600;color:var(--t3);letter-spacing:.02em;margin:18px 0 8px}

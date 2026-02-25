@@ -103,7 +103,9 @@ function showProjects(){
       items.forEach(function(x){
         var a=document.createElement('a');
         a.className='pcard';
-        if(x.url&&x.url!=='#'){
+        if(x.category==='In Development'){
+          a.href='mailto:ventures@saputra.co.uk';
+        } else {
           a.href=x.url;
           if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener noreferrer'}
         }
