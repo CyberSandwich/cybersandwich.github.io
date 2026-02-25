@@ -9,6 +9,7 @@ var projects=null;
 var links=null;
 var cv=null;
 var postCache={};
+var postVer=0;
 var validPages=['home','projects','cv','updates','links'];
 var titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
 var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
@@ -65,6 +66,7 @@ document.addEventListener('click',function(e){
   e.preventDefault();
   var text=btn.getAttribute('data-copy');
   navigator.clipboard.writeText(text).then(function(){
+    clearTimeout(btn._t1);clearTimeout(btn._t2);
     btn.classList.add('copied');
     btn.textContent='';
     var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -78,9 +80,9 @@ document.addEventListener('click',function(e){
     poly.setAttribute('points','4 12 9 17 20 6');
     svg.appendChild(poly);
     btn.appendChild(svg);
-    setTimeout(function(){
+    btn._t1=setTimeout(function(){
       btn.style.opacity='0';
-      setTimeout(function(){
+      btn._t2=setTimeout(function(){
         btn.classList.remove('copied');
         btn.textContent='Copy';
         btn.style.opacity='';
@@ -91,6 +93,7 @@ document.addEventListener('click',function(e){
 
 // SPA link interception
 document.addEventListener('click',function(e){
+  if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
   var a=e.target.closest('a[href]');
   if(!a)return;
   var href=a.getAttribute('href');
@@ -99,7 +102,7 @@ document.addEventListener('click',function(e){
   var page=parts[0];
   if(!page||validPages.indexOf(page)!==-1){
     e.preventDefault();
-    history.pushState(null,'',href);
+    if(href!==location.pathname)history.pushState(null,'',href);
     route();
   }
 });
@@ -112,7 +115,7 @@ function makeLoader(url,cb){
     p=fetch(url,{cache:'no-cache'})
       .then(function(r){if(!r.ok)throw 0;return r.json()})
       .then(cb)
-      .catch(function(){return []});
+      .catch(function(){p=null;return []});
     return p;
   };
 }
@@ -179,7 +182,7 @@ function showCards(cfg){
       });
       el.appendChild(sec);
     });
-    var si=$(cfg.si);if(si&&si.value)filterList(si,el);
+    var si=$(cfg.si);if(si&&si.value){filterList(si,el);var x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
   });
 }
 
@@ -247,7 +250,7 @@ function showCV(){
       });
       el.appendChild(sec);
     });
-    var si=$('#csearch');if(si&&si.value)filterList(si,el);
+    var si=$('#csearch');if(si&&si.value){filterList(si,el);var x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
   });
 }
 
@@ -258,6 +261,7 @@ function showList(){
     var sw=$('#usearch');if(sw)sw.parentNode.style.display='block';
     return;
   }
+  el._saved=null;
   while(el.firstChild)el.removeChild(el.firstChild);
   getPosts().then(function(p){
     var sw=$('#usearch');
@@ -277,7 +281,7 @@ function showList(){
       a.appendChild(t);a.appendChild(d);el.appendChild(a);
     });
     var si=$('#usearch');
-    if(si&&si.value)filterList(si,el);
+    if(si&&si.value){filterList(si,el);var x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
   });
 }
 
@@ -286,8 +290,10 @@ function showList(){
 // files committed by the site owner. Content is same-origin and trusted.
 function showPost(slug){
   var el=$('#ulist');
+  var ver=++postVer;
   while(el.firstChild)el.removeChild(el.firstChild);
   function render(html){
+    if(ver!==postVer)return;
     var back=document.createElement('a');
     back.className='post-back';
     back.href='/updates';
@@ -319,6 +325,7 @@ function showPost(slug){
       render(html);
     })
     .catch(function(){
+      if(ver!==postVer)return;
       history.replaceState(null,'','/updates');
       route();
     });
@@ -363,14 +370,14 @@ function parseMd(md){
 
 function il(t){
   return t
-    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/`([^`]+)`/g,function(_,c){return '<code>'+esc(c)+'</code>'})
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g,'<em>$1</em>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,function(_,alt,src){
       return '<img src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(_,text,href){
-      return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+'</a>';
+      return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';
     });
 }
 
