@@ -8,7 +8,7 @@ var posts=null;
 var projects=null;
 var links=null;
 var validPages=['home','projects','cv','updates','links'];
-var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nQuery & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
+var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
 
 // Handle 404.html redirect
 var sp=new URLSearchParams(location.search);
@@ -105,7 +105,7 @@ function showProjects(){
         var a=document.createElement('a');
         a.className='pcard';
         if(x.category==='In Development'){
-          a.href='mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Query: '+x.title)+'&body='+emailBody;
+          a.href='mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Inquiry: '+x.title)+'&body='+emailBody;
         } else {
           a.href=x.url;
           if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener noreferrer'}
