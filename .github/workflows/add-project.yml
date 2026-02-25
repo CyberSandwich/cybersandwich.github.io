@@ -1,0 +1,55 @@
+name: Add Project
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Project title'
+        required: true
+      subtitle:
+        description: 'Short description (Title Case)'
+        required: true
+      url:
+        description: 'URL (use # for stealth/email)'
+        required: true
+      category:
+        description: 'Category'
+        required: true
+        type: choice
+        options:
+          - Mobile
+          - Web
+          - Extensions
+          - In Development
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          TITLE: ${{ github.event.inputs.title }}
+          SUBTITLE: ${{ github.event.inputs.subtitle }}
+          URL: ${{ github.event.inputs.url }}
+          CATEGORY: ${{ github.event.inputs.category }}
+        run: |
+          python3 << 'EOF'
+          import json, os
+          with open('projects/projects.json') as f:
+            data = json.load(f)
+          data.append({
+            'title': os.environ['TITLE'],
+            'subtitle': os.environ['SUBTITLE'],
+            'url': os.environ['URL'],
+            'category': os.environ['CATEGORY']
+          })
+          with open('projects/projects.json', 'w') as f:
+            json.dump(data, f, indent=2)
+            f.write('\n')
+          EOF
+      - env:
+          TITLE: ${{ github.event.inputs.title }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add projects/projects.json
+          git commit -m "Add project: $TITLE"
+          git push
