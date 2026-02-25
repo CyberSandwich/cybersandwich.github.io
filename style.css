@@ -5,6 +5,7 @@
   --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--t4:#C7C7CC;
   --bdr:#E8E8E8;--bdr2:#F0F0F0;
   --acc:#3B82F6;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
   --rr:50px;
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
 }
@@ -66,7 +67,7 @@ body{
   margin:0 auto 14px;
   background:var(--card);
   border-radius:20px;
-  box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  box-shadow:var(--shadow);
   overflow:hidden
 }
 .links a{
@@ -97,7 +98,7 @@ body{
   padding:24px;
   background:var(--card);
   border-radius:20px;
-  box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  box-shadow:var(--shadow);
   text-decoration:none;
   color:var(--t1);
   transition:box-shadow .15s,transform .1s;
@@ -113,7 +114,7 @@ body{
 
 /* CV */
 .cv-sec{margin-bottom:40px}
-.cv-sec h2{
+.cv-sec h3{
   font-size:.75rem;
   font-weight:600;
   letter-spacing:.08em;
@@ -125,7 +126,7 @@ body{
   padding:24px 28px;
   background:var(--card);
   border-radius:20px;
-  box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  box-shadow:var(--shadow);
   margin-bottom:14px
 }
 .cve .co{font-size:1rem;font-weight:700;color:var(--t1);letter-spacing:-.01em}
@@ -189,7 +190,7 @@ body{
   padding:22px 24px;
   background:var(--card);
   border-radius:20px;
-  box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  box-shadow:var(--shadow);
   margin-bottom:14px;
   text-decoration:none;
   color:var(--t1);
@@ -208,8 +209,6 @@ body{
   cursor:pointer;
   margin-bottom:16px;
   transition:color .15s;
-  background:none;
-  border:none;
   text-decoration:none
 }
 .post-back:hover{color:var(--t1)}
@@ -217,7 +216,7 @@ body{
   padding:16px 20px;
   background:var(--card);
   border-radius:18px;
-  box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  box-shadow:var(--shadow);
   margin-bottom:12px;
   animation:fadeIn .25s ease
 }
@@ -320,7 +319,7 @@ nav{
 .pcard,.ucard{animation:fadeIn .2s ease backwards}
 
 /* Focus */
-:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 
 /* Print */
 @media print{
@@ -334,4 +333,5 @@ nav{
 /* Reduced Motion */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
 }

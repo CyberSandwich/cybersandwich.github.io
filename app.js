@@ -65,12 +65,14 @@ document.addEventListener('click',function(e){
 });
 
 // Fetch and render projects
+var projectsPromise=null;
 function getProjects(){
-  if(projects)return Promise.resolve(projects);
-  return fetch('/projects/projects.json')
+  if(projectsPromise)return projectsPromise;
+  projectsPromise=fetch('/projects/projects.json')
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(p){projects=p;return projects})
     .catch(function(){return []});
+  return projectsPromise;
 }
 
 function showProjects(){
@@ -90,7 +92,7 @@ function showProjects(){
       a.className='pcard';
       a.href=x.url;
       a.style.animationDelay=(i*0.04)+'s';
-      if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener'}
+      if(x.url.startsWith('http')){a.target='_blank';a.rel='noopener noreferrer'}
 
       var inf=document.createElement('div');
       inf.className='pinf';
@@ -128,9 +130,10 @@ function mkSvg(d){
 }
 
 // Fetch posts manifest
+var postsPromise=null;
 function getPosts(){
-  if(posts)return Promise.resolve(posts);
-  return fetch('/updates/posts.json')
+  if(postsPromise)return postsPromise;
+  postsPromise=fetch('/updates/posts.json')
     .then(function(r){if(!r.ok)throw 0;return r.json()})
     .then(function(p){
       posts=p;
@@ -138,11 +141,13 @@ function getPosts(){
       return posts;
     })
     .catch(function(){return []});
+  return postsPromise;
 }
 
 // Render post list using DOM methods
 function showList(){
   var el=$('#ulist');
+  if(posts&&el.children.length)return;
   while(el.firstChild)el.removeChild(el.firstChild);
 
   getPosts().then(function(p){
