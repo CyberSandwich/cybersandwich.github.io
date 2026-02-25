@@ -5,6 +5,11 @@
     "category": "Personal"
   },
   {
+    "title": "Obsidian",
+    "url": "https://obsidian.md/download",
+    "category": "Personal"
+  },
+  {
     "title": "Webpage Archive",
     "url": "https://archive.ph",
     "category": "Personal"
@@ -25,6 +30,11 @@
     "category": "Initiatives"
   },
   {
+    "title": "Human Interface Guidelines",
+    "url": "https://developer.apple.com/design/human-interface-guidelines",
+    "category": "Initiatives"
+  },
+  {
     "title": "menuva my.wbs Feature",
     "url": "https://my.wbs.ac.uk/-/academic/20778/item/id/1927732/#/",
     "category": "Initiatives"
@@ -37,6 +47,11 @@
   {
     "title": "menuva WBS Feature",
     "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/",
+    "category": "Initiatives"
+  },
+  {
+    "title": "SF Symbols",
+    "url": "https://developer.apple.com/sf-symbols/",
     "category": "Initiatives"
   },
   {
