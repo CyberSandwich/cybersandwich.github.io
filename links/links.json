@@ -1,50 +1,62 @@
 [
   {
-    "title": "Academic Phrasebank",
-    "url": "https://www.phrasebank.manchester.ac.uk/"
+    "title": "Webpage Archive",
+    "url": "https://archive.ph",
+    "category": "Personal"
   },
   {
     "title": "App Store Connect",
-    "url": "https://appstoreconnect.apple.com/"
+    "url": "https://appstoreconnect.apple.com/",
+    "category": "Initiatives"
   },
   {
     "title": "CS50x 2026 Lectures",
-    "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6"
+    "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
+    "category": "Initiatives"
   },
   {
     "title": "Device Mockup",
-    "url": "https://device-mockup-generator.garylaw.me/"
+    "url": "https://device-mockup-generator.garylaw.me/",
+    "category": "Initiatives"
   },
   {
     "title": "menuva University of Warwick Feature",
-    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/"
+    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/",
+    "category": "Initiatives"
   },
   {
     "title": "menuva WBS Feature",
-    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/"
+    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Academic Phrasebank",
+    "url": "https://www.phrasebank.manchester.ac.uk/",
+    "category": "Academic"
   },
   {
     "title": "MyBib",
-    "url": "https://www.mybib.com/#/projects/"
+    "url": "https://www.mybib.com/#/projects/",
+    "category": "Academic"
   },
   {
     "title": "my.wbs",
-    "url": "https://my.wbs.ac.uk/-/academic/homepage/"
+    "url": "https://my.wbs.ac.uk/-/academic/homepage/",
+    "category": "Academic"
   },
   {
     "title": "Scopus",
-    "url": "https://www.scopus.com/search/form.uri?display=basic#basic"
+    "url": "https://www.scopus.com/search/form.uri?display=basic#basic",
+    "category": "Academic"
   },
   {
     "title": "Warwick e:Vision",
-    "url": "https://warwick.ac.uk/evision"
+    "url": "https://warwick.ac.uk/evision",
+    "category": "Academic"
   },
   {
     "title": "Warwick Print",
-    "url": "https://mobileprint.warwick.ac.uk/index.cfm?Message=JobAdded"
-  },
-  {
-    "title": "Webpage Archive",
-    "url": "https://archive.ph"
+    "url": "https://mobileprint.warwick.ac.uk/",
+    "category": "Academic"
   }
 ]
