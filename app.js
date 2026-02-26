@@ -459,6 +459,29 @@ wireSearch('#csearch','#cvlist');
 wireSearch('#usearch','#ulist');
 wireSearch('#lsearch','#llist');
 
+// Theme toggle
+var themeBtn=$('#theme-toggle');
+if(themeBtn){
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  themeBtn.querySelector('span').textContent=isDark?'Light':'Dark';
+  themeBtn.addEventListener('click',function(){
+    var dark=document.documentElement.getAttribute('data-theme')==='dark';
+    var next=dark?'light':'dark';
+    if(next==='dark'){
+      document.documentElement.setAttribute('data-theme','dark');
+      localStorage.setItem('theme','dark');
+    }else{
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.removeItem('theme');
+    }
+    themeBtn.querySelector('span').textContent=next==='dark'?'Light':'Dark';
+    var mc=next==='dark'?'#1C1C1E':'#FAFAFA';
+    var cs=next==='dark'?'dark':'light';
+    var mt=$('meta[name="theme-color"]');if(mt)mt.content=mc;
+    var ms=$('meta[name="color-scheme"]');if(ms)ms.content=cs;
+  });
+}
+
 // Init
 window.addEventListener('popstate',route);
 route();

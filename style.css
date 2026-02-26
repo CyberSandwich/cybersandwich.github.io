@@ -381,6 +381,49 @@ nav{
   .cve,.pcard,.ucard,.pcontent{break-inside:avoid}
 }
 
+/* Theme Toggle */
+.theme-toggle{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin:0 auto;
+  padding:8px 20px;
+  border:1.5px solid var(--bdr);
+  border-radius:var(--rr);
+  background:none;
+  font:500 .8125rem/1 var(--font);
+  color:var(--t3);
+  cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s
+}
+.theme-toggle:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
+.theme-toggle svg{width:15px;height:15px}
+html:not([data-theme="dark"]) .theme-toggle .icon-sun{display:none}
+html[data-theme="dark"] .theme-toggle .icon-moon{display:none}
+
+/* Dark Mode */
+html[data-theme="dark"]{
+  --bg:#1C1C1E;--bg2:#2C2C2E;
+  --card:#2C2C2E;
+  --t1:#F5F5F7;--t2:#A1A1A6;--t3:#6E6E73;--t4:#48484A;
+  --bdr:#38383A;--bdr2:#2C2C2E;
+  --acc:#64B5F6;
+  --shadow:0 1px 3px rgba(0,0,0,.2),0 4px 12px rgba(0,0,0,.15)
+}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+html[data-theme="dark"] ::selection{background:rgba(100,181,246,.2)}
+html[data-theme="dark"] .vcf-link a{background:#3A3A3C}
+html[data-theme="dark"] .vcf-link a:hover{background:#48484A}
+html[data-theme="dark"] .copy-btn.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
+html[data-theme="dark"] .tabs{background:rgba(44,44,46,.92);border-color:rgba(255,255,255,.06);box-shadow:0 2px 6px rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.18)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  html[data-theme="dark"] .tabs{background:rgba(44,44,46,.45)}
+}
+html[data-theme="dark"] .tabs a.active{background:rgba(245,245,247,.12)}
+html[data-theme="dark"] .search{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+
 /* Reduced Motion */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
