@@ -33,13 +33,14 @@ body{
   max-width:720px;
   margin:0 auto;
   padding:20px 20px 120px;
+  min-height:100vh;
   min-height:100dvh
 }
 @media(min-width:640px){.wrap{padding:32px 32px 120px}}
 
 /* Pages */
 .page{display:none}
-.page.active{display:block;transform:translateZ(0)}
+.page.active{display:block}
 
 .name-card{
   display:block;
@@ -103,7 +104,7 @@ body{
   flex-shrink:0;
   min-width:58px;
   text-align:center;
-  transition:all .2s ease
+  transition:background .2s ease,color .2s ease,border-color .2s ease
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 .copy-btn.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
@@ -129,8 +130,8 @@ body{
   transition:box-shadow .15s,transform .1s;
   margin-bottom:14px
 }
-.pcard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
-.pcard:active{transform:translateY(-1px) scale(.985)}
+.pcard:hover,.ucard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
+.pcard:active,.ucard:active{transform:translateY(-1px) scale(.985)}
 .pcard .pinf{flex:1;min-width:0}
 .pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pcard .pd{font-size:.8125rem;color:var(--t3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -139,7 +140,7 @@ body{
 
 /* Link Sections */
 .link-sec{margin-bottom:28px}
-.link-sec h3{
+.link-sec h3,.cv-sec h3{
   font-size:.75rem;
   font-weight:600;
   letter-spacing:.08em;
@@ -150,14 +151,7 @@ body{
 
 /* CV */
 .cv-sec{margin-bottom:40px}
-.cv-sec h3{
-  font-size:.75rem;
-  font-weight:600;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--t3);
-  margin-bottom:16px
-}
+.cv-sec h3{margin-bottom:16px}
 .cve{
   padding:24px 28px;
   background:var(--card);
@@ -219,8 +213,7 @@ body{
   color:var(--t1);
   transition:box-shadow .15s,transform .1s
 }
-.ucard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
-.ucard:active{transform:translateY(-1px) scale(.985)}
+/* hover/active shared with .pcard above */
 .ucard .ut{font-size:1.0625rem;font-weight:600;color:var(--t1);margin-bottom:4px}
 .ucard .ud{font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.02em}
 .post-back{
@@ -289,7 +282,7 @@ body{
   outline:none;
   transition:border-color .15s,box-shadow .15s
 }
-.search:focus{border-color:var(--t4);box-shadow:0 0 0 4px rgba(0,0,0,.04);outline:none}
+.search:focus{border-color:var(--t4);box-shadow:0 0 0 4px rgba(0,0,0,.04)}
 .search::placeholder{color:var(--t4)}
 .search-wrap{display:none;position:relative;margin-bottom:20px}
 .search-x{
@@ -332,18 +325,18 @@ nav{
   left:50%;
   transform:translateX(-50%);
   z-index:10;
-  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));
-  will-change:transform
+  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))
 }
 .tabs{
   display:flex;
-  background:rgba(255,255,255,.35);
-  backdrop-filter:blur(28px) saturate(1.6);
-  -webkit-backdrop-filter:blur(28px) saturate(1.6);
+  background:rgba(245,245,245,.92);
   border-radius:var(--rr);
   padding:5px;
   box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
   border:1px solid rgba(255,255,255,.45)
+}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
 }
 .tabs a{
   background:none;
@@ -373,14 +366,17 @@ nav{
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 
-/* Focus */
+/* Focus (with fallback for older Safari) */
+:focus{outline:2px solid var(--acc);outline-offset:3px}
+:focus:not(:focus-visible){outline:none}
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 
-/* Print */
+/* Print (only active page) */
 @media print{
   nav{display:none}
-  .page{display:block!important;animation:none!important;page-break-before:always}
-  .page:first-child{page-break-before:auto}
+  .page{display:none!important}
+  .page.active{display:block!important}
+  .search-wrap{display:none!important}
   .wrap{padding-bottom:0;max-width:100%}
   .cve,.pcard,.ucard,.pcontent{break-inside:avoid}
 }

@@ -14,9 +14,9 @@ var validPages=['home','projects','cv','updates','links'];
 var titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
 var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
 
-// Handle 404.html redirect
+// Handle 404.html redirect (validate path is relative to prevent cross-origin crash)
 var redir=new URLSearchParams(location.search).get('p');
-if(redir){history.replaceState(null,'',redir)}
+if(redir){try{if(redir.startsWith('/')&&!redir.startsWith('//'))history.replaceState(null,'',redir);else history.replaceState(null,'','/')}catch(e){history.replaceState(null,'','/')}}
 
 // Router
 function route(){
@@ -59,27 +59,21 @@ function route(){
   }
 }
 
-// Copy buttons
+// Copy buttons (with clipboard API fallback and error handling)
+// Note: innerHTML below uses hardcoded SVG string, not user content — safe from XSS
 document.addEventListener('click',function(e){
   var btn=e.target.closest('.copy-btn');
   if(!btn)return;
   e.preventDefault();
   var text=btn.getAttribute('data-copy');
-  navigator.clipboard.writeText(text).then(function(){
+  var CHECK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
+  function done(){
     clearTimeout(btn._t1);clearTimeout(btn._t2);
     btn.classList.add('copied');
     btn.textContent='';
-    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('viewBox','0 0 24 24');
-    svg.setAttribute('fill','none');
-    svg.setAttribute('stroke','currentColor');
-    svg.setAttribute('stroke-width','2.5');
-    svg.setAttribute('stroke-linecap','round');
-    svg.setAttribute('stroke-linejoin','round');
-    var poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    poly.setAttribute('points','4 12 9 17 20 6');
-    svg.appendChild(poly);
-    btn.appendChild(svg);
+    var tmp=document.createElement('span');
+    tmp.innerHTML=CHECK_SVG;
+    btn.appendChild(tmp.firstChild);
     btn._t1=setTimeout(function(){
       btn.style.opacity='0';
       btn._t2=setTimeout(function(){
@@ -88,7 +82,14 @@ document.addEventListener('click',function(e){
         btn.style.opacity='';
       },200);
     },1500);
-  });
+  }
+  function legacy(){
+    var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){try{legacy()}catch(e){}});
+  }else{try{legacy()}catch(e){}}
 });
 
 // SPA link interception
@@ -107,15 +108,16 @@ document.addEventListener('click',function(e){
   }
 });
 
-// Data loaders
+// Data loaders (with retry cap and error logging)
 function makeLoader(url,cb){
-  var p=null;
+  var p=null,fails=0;
   return function(){
     if(p)return p;
+    if(fails>=3)return Promise.resolve([]);
     p=fetch(url,{cache:'no-cache'})
-      .then(function(r){if(!r.ok)throw 0;return r.json()})
-      .then(cb)
-      .catch(function(){p=null;return []});
+      .then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.json()})
+      .then(function(d){fails=0;return cb(d)})
+      .catch(function(e){p=null;fails++;console.error('Load failed:',e);return []});
     return p;
   };
 }
@@ -130,23 +132,8 @@ var getPosts=makeLoader('/updates/posts.json',function(d){
 var projectCategories=['Mobile','Web','Extensions','In Development'];
 var linkCategories=['Personal','Career','Initiatives','Academic','Modules','Community','Miscellaneous'];
 
-// SVG helper
-function mkSvg(d){
-  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox','0 0 24 24');
-  svg.setAttribute('fill','none');
-  svg.setAttribute('stroke','currentColor');
-  svg.setAttribute('stroke-width','2');
-  svg.setAttribute('stroke-linecap','round');
-  svg.setAttribute('stroke-linejoin','round');
-  svg.setAttribute('aria-hidden','true');
-  d.split('M').filter(Boolean).forEach(function(seg){
-    var path=document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d','M'+seg);
-    svg.appendChild(path);
-  });
-  return svg;
-}
+// Chevron SVG for card arrows
+var CHEVRON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
 
 // Render categorized cards (projects & links)
 function showCards(cfg){
@@ -177,7 +164,7 @@ function showCards(cfg){
         var pd=document.createElement('div');pd.className='pd';pd.textContent=cfg.sub(x);
         inf.appendChild(pt);inf.appendChild(pd);
         var arr=document.createElement('div');arr.className='arr';
-        arr.appendChild(mkSvg('M9 18l6-6-6-6'));
+        arr.innerHTML=CHEVRON;
         a.appendChild(inf);a.appendChild(arr);sec.appendChild(a);
       });
       el.appendChild(sec);
@@ -212,11 +199,11 @@ function showCV(){
           if(e.role){
             var cr=document.createElement('div');cr.className='cr';cr.textContent=e.role;card.appendChild(cr);
           }
-          if(e.location&&e.dates){
+          if(e.location||e.dates){
             var meta=document.createElement('div');meta.className='cmeta';
-            var loc=document.createElement('span');loc.textContent=e.location;
-            var dates=document.createElement('span');dates.textContent=e.dates;
-            meta.appendChild(loc);meta.appendChild(dates);card.appendChild(meta);
+            if(e.location){var loc=document.createElement('span');loc.textContent=e.location;meta.appendChild(loc)}
+            if(e.dates){var dates=document.createElement('span');dates.textContent=e.dates;meta.appendChild(dates)}
+            card.appendChild(meta);
           }
           if(e.text){
             var cn=document.createElement('div');cn.className='cn';cn.textContent=e.text;card.appendChild(cn);
@@ -250,6 +237,7 @@ function showList(){
   var el=$('#ulist');
   if(posts&&el.querySelector('.ucard')){
     var sw=$('#usearch');if(sw)sw.parentNode.style.display='block';
+    if(sw&&sw.value)filterList(sw,el);
     return;
   }
   el._saved=null;
@@ -289,17 +277,7 @@ function showPost(slug){
     back.className='post-back';
     back.href='/updates';
     back.title='Back to all updates';
-    back.textContent='Back';
-    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width','16');svg.setAttribute('height','16');
-    svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');
-    svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');
-    svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
-    svg.setAttribute('aria-hidden','true');
-    var poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    poly.setAttribute('points','15 18 9 12 15 6');
-    svg.appendChild(poly);
-    back.insertBefore(svg,back.firstChild);
+    back.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>Back';
     // innerHTML required for rendered markdown — source: first-party .md files
     var content=document.createElement('div');
     content.className='pcontent';
@@ -309,16 +287,18 @@ function showPost(slug){
   }
   if(postCache[slug]){render(postCache[slug]);return}
   fetch('/updates/'+encodeURIComponent(slug)+'.md')
-    .then(function(r){if(!r.ok)throw 0;return r.text()})
+    .then(function(r){if(!r.ok)throw new Error('Post '+r.status);return r.text()})
     .then(function(md){
       var html=parseMd(md);
       postCache[slug]=html;
       render(html);
     })
-    .catch(function(){
+    .catch(function(e){
       if(ver!==postVer)return;
-      history.replaceState(null,'','/updates');
-      route();
+      console.error('Post load failed:',slug,e);
+      var msg=document.createElement('div');msg.className='empty';
+      msg.textContent='Unable to load this post. Please check your connection and try again.';
+      el.appendChild(msg);
     });
 }
 
@@ -368,7 +348,7 @@ function il(t){
       return '<img src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,function(_,text,href){
-      return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';
+      return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+'</a>';
     });
 }
 
@@ -445,7 +425,9 @@ function filterList(input,container){
 }
 
 function fmtDate(d){
+  if(!d)return '';
   var dt=new Date(d+'T00:00:00');
+  if(isNaN(dt.getTime()))return '';
   return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
 
