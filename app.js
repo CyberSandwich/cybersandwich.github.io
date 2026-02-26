@@ -38,8 +38,8 @@ function route(){
       if(p.id===page){p.classList.add('active')}
       else{p.classList.remove('active')}
     });
-    window.scrollTo(0,0);
   }
+  window.scrollTo(0,0);
 
   $$('.tabs a').forEach(function(a){
     var href=a.getAttribute('href');
