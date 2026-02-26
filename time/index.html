@@ -21,10 +21,14 @@
 }
 html{height:100%;overflow-x:hidden}
 body{min-height:100%;font-family:var(--font);font-variant-numeric:tabular-nums;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
-header{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10}
-.tabs{display:flex;background:rgba(255,255,255,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--rr);padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.04)}
-.tabs button{border:none;background:none;padding:10px 20px;border-radius:var(--rr);font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,box-shadow .15s;white-space:nowrap}
-.tabs button.active{background:var(--card);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
+.tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.45)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
+.tabs a,.tabs button{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
+.tabs button.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.tabs a:active,.tabs button:active{opacity:.7}
+@media(hover:hover){.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}}
+@media(max-width:480px){.tabs a,.tabs button{padding:14px 16px;font-size:.8125rem}}
 main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .view{display:none}.view.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -133,14 +137,15 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 </style>
 </head>
 <body>
-<header>
-  <div class="tabs" role="tablist">
-    <button class="active" data-tab="clock" role="tab" aria-selected="true">Clock</button>
-    <button data-tab="alarm" role="tab" aria-selected="false">Alarm</button>
-    <button data-tab="sw" role="tab" aria-selected="false">Stopwatch</button>
-    <button data-tab="timer" role="tab" aria-selected="false">Timer</button>
+<nav>
+  <div class="tabs">
+    <a href="/">Home</a>
+    <button class="active" data-tab="clock">Clock</button>
+    <button data-tab="alarm">Alarm</button>
+    <button data-tab="sw">Stopwatch</button>
+    <button data-tab="timer">Timer</button>
   </div>
-</header>
+</nav>
 <section id="v-clock" class="view active" role="tabpanel">
   <div class="hero-time"><span id="heroHM"></span><span class="hero-sec" id="heroS"></span></div>
 </section>
@@ -252,9 +257,9 @@ function save(){localStorage.setItem('clk',JSON.stringify({alarms,aNextId}))}
 function load(){try{const d=JSON.parse(localStorage.getItem('clk'));if(d){alarms=d.alarms||[];aNextId=d.aNextId||0}}catch(e){}}
 q('.tabs').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
-  qa('.tabs button').forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false')});
+  qa('.tabs button').forEach(t=>t.classList.remove('active'));
   qa('.view').forEach(v=>v.classList.remove('active'));
-  b.classList.add('active');b.setAttribute('aria-selected','true');
+  b.classList.add('active');
   $('v-'+b.dataset.tab).classList.add('active');
 });
 function tick(){
