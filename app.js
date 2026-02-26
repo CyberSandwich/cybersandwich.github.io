@@ -214,14 +214,6 @@ function showCV(){
           var loc=document.createElement('span');loc.textContent=e.location;
           var dates=document.createElement('span');dates.textContent=e.dates;
           meta.appendChild(loc);meta.appendChild(dates);card.appendChild(meta);
-          if(e.highlight){
-            var hl=document.createElement('div');hl.className='hl';hl.textContent=e.highlight;card.appendChild(hl);
-          }
-          if(e.notes){
-            e.notes.forEach(function(n){
-              var cn=document.createElement('div');cn.className='cn';cn.textContent=n;card.appendChild(cn);
-            });
-          }
           if(e.bullets){
             var ul=document.createElement('ul');
             e.bullets.forEach(function(b){

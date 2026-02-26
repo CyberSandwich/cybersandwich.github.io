@@ -7,8 +7,8 @@
         "role": "BSc (Hons) Management with Entrepreneurship (with Placement Year)",
         "location": "Coventry, United Kingdom",
         "dates": "Sep 2022 - Jul 2026",
-        "highlight": "Highest course mark in Years 2 and 3 out of 280 students",
-        "notes": [
+        "bullets": [
+          "Highest course mark in Years 2 and 3 out of 280 students",
           "Year 1: 79% (1st) · Year 2: 78% (1st) · Year 3: 86% (1st)",
           "Modules: Venture Capital, Financial Reporting 1 & 2, Financial Management, Data Analysis, Design Thinking, Strategy"
         ]
@@ -18,8 +18,8 @@
         "role": "International Baccalaureate Diploma Programme (IBDP)",
         "location": "Batam, Indonesia",
         "dates": "Jul 2020 - Jun 2022",
-        "highlight": "Ranked 2nd in the cohort (top 8% globally)",
-        "notes": [
+        "bullets": [
+          "Ranked 2nd in the cohort (top 8% globally)",
           "42/45 · Business Management HL (7/7) · Economics HL (7/7) · English A Language & Literature SL (7/7)"
         ]
       },
@@ -28,8 +28,8 @@
         "role": "IGCSE",
         "location": "Batam, Indonesia",
         "dates": "Jul 2018 - Jun 2020",
-        "highlight": "Ranked 1st in the cohort",
-        "notes": [
+        "bullets": [
+          "Ranked 1st in the cohort",
           "A*A*A*A*A*A*A · ICE Award with Distinction"
         ]
       }
@@ -43,8 +43,8 @@
         "role": "Enterprise Account Manager, Financial Services",
         "location": "London, United Kingdom",
         "dates": "Jul 2024 - Jun 2025",
-        "highlight": "Early in Career Award winner (from 200+ graduates/apprentices/interns)",
         "bullets": [
+          "Early in Career Award winner (from 200+ graduates/apprentices/interns)",
           "Orchestrated innovation events and summits for Lloyds Bank and Aviva, creating £51m+ in net new recurring revenue",
           "Spearheaded the UK subsidiary's largest end-user AI training, reaching 11,800 users with an NPS score of +80",
           "Optimized divisional scrum calls, automating report preparation, and increasing pipeline closure velocity by 30%",
@@ -106,8 +106,8 @@
         "role": "Debate Club Captain",
         "location": "Batam, Indonesia",
         "dates": "Sep 2020 - Jan 2021",
-        "highlight": "6 awards from 4 committees (top school record)",
         "bullets": [
+          "6 awards from 4 committees (top school record)",
           "Led 15+ sessions to provide core lessons and organize mock debates, boosting procedural knowledge and confidence",
           "Coached participants by evaluating 40+ speeches, resulting in awards across multiple committees",
           "Drove the club's expansion efforts, including logo design, talent scouting, and digital marketing, bringing 40% growth"
