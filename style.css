@@ -93,7 +93,7 @@ body{
 .copy-row a{flex:1;min-width:0;border-bottom:none}
 .links>.copy-row:last-child,.links>:last-child.copy-row{border-bottom:none}
 .copy-btn{
-  padding:6px 16px;
+  padding:8px 16px;
   margin-right:14px;
   border:1.5px solid var(--bdr);
   border-radius:var(--rr);
@@ -359,7 +359,7 @@ nav{
 
 /* Responsive */
 @media(max-width:480px){
-  .tabs a{padding:12px 16px;font-size:.8125rem}
+  .tabs a{padding:14px 16px;font-size:.8125rem}
 }
 
 /* Animations */

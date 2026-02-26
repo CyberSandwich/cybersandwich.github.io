@@ -13,6 +13,7 @@ var postVer=0;
 var validPages=['home','projects','cv','updates','links'];
 var titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
 var emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
+var CHECK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
 
 // Handle 404.html redirect (validate path is relative to prevent cross-origin crash)
 var redir=new URLSearchParams(location.search).get('p');
@@ -66,7 +67,6 @@ document.addEventListener('click',function(e){
   if(!btn)return;
   e.preventDefault();
   var text=btn.getAttribute('data-copy');
-  var CHECK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
   function done(){
     clearTimeout(btn._t1);clearTimeout(btn._t2);
     btn.classList.add('copied');
@@ -95,6 +95,7 @@ document.addEventListener('click',function(e){
 // SPA link interception
 document.addEventListener('click',function(e){
   if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
+  if(e.target.closest('.copy-btn'))return;
   var a=e.target.closest('a[href]');
   if(!a)return;
   var href=a.getAttribute('href');
@@ -282,6 +283,8 @@ function showPost(slug){
     var content=document.createElement('div');
     content.className='pcontent';
     content.innerHTML=html;
+    var h1=content.querySelector('h1');
+    if(h1)document.title='DS | '+h1.textContent;
     el.appendChild(back);el.appendChild(content);
     window.scrollTo(0,0);
   }

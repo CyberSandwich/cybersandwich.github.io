@@ -1,0 +1,11 @@
+{
+  "name": "Duke Saputra",
+  "short_name": "DS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAFA",
+  "theme_color": "#FAFAFA",
+  "icons": [
+    {"src": "/ds-favicon.png", "sizes": "32x32", "type": "image/png"}
+  ]
+}
