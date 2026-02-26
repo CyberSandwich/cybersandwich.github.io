@@ -28,19 +28,16 @@ body{
 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .w{width:100%;max-width:440px;padding:20px 20px 100px}
 .num{
-  background:var(--card);border-radius:20px;
+  background:#48484A;border-radius:20px;
   box-shadow:var(--shadow);
-  padding:24px;text-align:center;
-  margin-bottom:14px
+  padding:24px;margin-bottom:14px
 }
 #n{
   display:block;
   font:600 clamp(1.4rem,8vw,2.25rem)/1 'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace;
   letter-spacing:.04em;
-  font-variant-numeric:tabular-nums;
-  white-space:nowrap;
-  text-align:center;
-  color:var(--t1);text-decoration:none
+  white-space:nowrap;text-align:center;
+  color:#fff;text-decoration:none
 }
 #n:active{opacity:.7}
 .fi{animation:fi .25s ease}
@@ -83,9 +80,9 @@ nav{
   .tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
 }
 .tabs a{
-  background:none;padding:12px 22px;border-radius:50px;
+  padding:12px 22px;border-radius:50px;
   font:500 .875rem/1 var(--font);
-  color:var(--t3);cursor:pointer;
+  color:var(--t3);
   transition:color .15s,background .15s,box-shadow .15s;
   white-space:nowrap;text-decoration:none
 }
@@ -100,8 +97,6 @@ nav{
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
-:focus{outline:2px solid #3B82F6;outline-offset:3px}
-:focus:not(:focus-visible){outline:none}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -123,15 +118,15 @@ nav{
 </div>
 </nav>
 <script>
-var $=function(s){return document.getElementById(s)},
+var $=s=>document.getElementById(s),
 X=new Set([509,524,700,781,797,829,839,911,924,937]),
 P=[1,2,3,4,5,7,8,9],
 el=$('n'),gb=$('g'),gs=$('gl'),cb=$('c'),si=$('ci'),sk=$('ck'),sl=$('cl'),gm,cm,cur;
-function gen(){var r=new Uint8Array(9),a,b,c;do{crypto.getRandomValues(r);a=P[r[0]&7];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));var s='07'+a+b+c;for(var i=3;i<9;i++)s+=r[i]%10;return s}
+function gen(){var r=new Uint8Array(9),a,b,c,s,i;do{crypto.getRandomValues(r);a=P[r[0]&7];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));s='07'+a+b+c;for(i=3;i<9;i++)s+=r[i]%10;return s}
 function render(){cur=gen();el.textContent=cur.slice(0,5)+'-'+cur.slice(5,8)+'-'+cur.slice(8);el.href='tel:+44'+cur.slice(1);el.classList.remove('fi');el.offsetWidth;el.classList.add('fi')}
 function doCopy(){clearTimeout(cm);navigator.clipboard.writeText(cur).then(function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';cb.classList.remove('ok');cb.offsetWidth;cb.classList.add('ok');cm=setTimeout(function(){si.style.display='';sk.style.display='none';sl.textContent='Copy';cb.classList.remove('ok')},800)},function(){sl.textContent='Failed';cm=setTimeout(function(){sl.textContent='Copy'},800)})}
 render();
-el.onclick=function(e){e.preventDefault();doCopy()};
+el.onclick=e=>{e.preventDefault();doCopy()};
 gb.onclick=function(){clearTimeout(gm);render();gs.textContent='Regenerated';gb.classList.remove('regen');gb.offsetWidth;gb.classList.add('regen');gm=setTimeout(function(){gs.textContent='Regenerate';gb.classList.remove('regen')},800)};
 cb.onclick=doCopy;
 </script>
