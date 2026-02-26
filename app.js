@@ -49,8 +49,7 @@ function route(){
     else a.removeAttribute('aria-current');
   });
 
-  var tb=$('#theme-toggle');
-  if(tb)tb.classList.toggle('visible',page==='home');
+
 
   if(page==='projects'){showProjects()}
   if(page==='cv'){showCV()}
@@ -466,7 +465,7 @@ wireSearch('#lsearch','#llist');
 var themeBtn=$('#theme-toggle');
 if(themeBtn){
   var isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  themeBtn.querySelector('span').textContent=isDark?'Light':'Dark';
+  themeBtn.textContent=isDark?'Light':'Dark';
   themeBtn.addEventListener('click',function(){
     var dark=document.documentElement.getAttribute('data-theme')==='dark';
     var next=dark?'light':'dark';
@@ -477,7 +476,7 @@ if(themeBtn){
       document.documentElement.removeAttribute('data-theme');
       localStorage.removeItem('theme');
     }
-    themeBtn.querySelector('span').textContent=next==='dark'?'Light':'Dark';
+    themeBtn.textContent=next==='dark'?'Light':'Dark';
     var mc=next==='dark'?'#1C1C1E':'#FAFAFA';
     var cs=next==='dark'?'dark':'light';
     var mt=$('meta[name="theme-color"]');if(mt)mt.content=mc;
