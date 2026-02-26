@@ -401,7 +401,7 @@ html[data-theme="dark"]{
   --bg:#1C1C1E;--bg2:#2C2C2E;
   --card:#2C2C2E;
   --t1:#F5F5F7;--t2:#A1A1A6;--t3:#6E6E73;--t4:#48484A;
-  --bdr:#38383A;--bdr2:#2C2C2E;
+  --bdr:#38383A;--bdr2:#3A3A3C;
   --acc:#64B5F6;
   --shadow:0 1px 3px rgba(0,0,0,.2),0 4px 12px rgba(0,0,0,.15)
 }
