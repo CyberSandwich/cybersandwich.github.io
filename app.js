@@ -49,6 +49,9 @@ function route(){
     else a.removeAttribute('aria-current');
   });
 
+  var tb=$('#theme-toggle');
+  if(tb)tb.classList.toggle('visible',page==='home');
+
   if(page==='projects'){showProjects()}
   if(page==='cv'){showCV()}
   if(page==='links'){showLinks()}

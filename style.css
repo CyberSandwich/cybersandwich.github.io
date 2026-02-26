@@ -373,7 +373,7 @@ nav{
 
 /* Print (only active page) */
 @media print{
-  nav{display:none}
+  nav,.theme-toggle{display:none!important}
   .page{display:none!important}
   .page.active{display:block!important}
   .search-wrap{display:none!important}
@@ -383,20 +383,25 @@ nav{
 
 /* Theme Toggle */
 .theme-toggle{
-  display:flex;
+  display:none;
+  position:fixed;
+  bottom:calc(72px + env(safe-area-inset-bottom,0px));
+  left:50%;
+  transform:translateX(-50%);
+  z-index:11;
   align-items:center;
   justify-content:center;
   gap:6px;
-  margin:24px auto 0;
   padding:8px 20px;
   border:1.5px solid var(--bdr);
   border-radius:var(--rr);
-  background:none;
+  background:var(--bg);
   font:500 .8125rem/1 var(--font);
   color:var(--t3);
   cursor:pointer;
-  transition:background .15s,color .15s,border-color .15s
+  transition:background .15s,color .15s,border-color .15s,opacity .2s
 }
+.theme-toggle.visible{display:flex}
 .theme-toggle:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 .theme-toggle svg{width:15px;height:15px}
 html:not([data-theme="dark"]) .theme-toggle .icon-sun{display:none}
