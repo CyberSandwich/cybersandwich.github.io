@@ -3,25 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>UK Number Generator</title>
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
-<script>var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.dataset.theme='dark';document.querySelector('meta[name="theme-color"]').content='#1C1C1E'}</script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#FAFAFA;--card:#FFF;
+  --bg:#FAFAFA;--bg2:#F5F5F5;--card:#FFF;
   --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--t4:#C7C7CC;
-  --bdr:#E8E8E8;
+  --bdr2:#F0F0F0;
   --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
-  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
+  --mono:'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace
 }
-html[data-theme="dark"]{
-  --bg:#1C1C1E;--card:#2C2C2E;
-  --t1:#F5F5F7;--t2:#A1A1A6;--t3:#6E6E73;--t4:#48484A;
-  --bdr:#38383A;
-  --shadow:0 1px 3px rgba(0,0,0,.2),0 4px 12px rgba(0,0,0,.15)
-}
+::selection{background:rgba(59,130,246,.12);color:var(--t1)}
 body{
   font-family:var(--font);
   -webkit-font-smoothing:antialiased;
@@ -31,45 +27,67 @@ body{
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation
 }
-.w{width:100%;max-width:400px;padding:20px}
-.back{
-  display:inline-flex;align-items:center;gap:6px;
-  font:500 .8125rem/1 var(--font);
-  color:var(--t3);text-decoration:none;
-  margin-bottom:20px;transition:color .15s
-}
-.back:hover{color:var(--t1)}
-.back svg{width:14px;height:14px}
-.card{
+.w{width:100%;max-width:400px;padding:20px 20px 100px}
+.num{
   background:var(--card);border-radius:20px;
   box-shadow:var(--shadow);
-  padding:36px 24px 28px;text-align:center
+  padding:36px 24px;text-align:center;
+  margin-bottom:14px
 }
 #n{
   display:block;
-  font:600 clamp(1.75rem,6vw,2.25rem)/1 var(--font);
-  letter-spacing:.04em;
+  font:600 clamp(1.75rem,6vw,2.25rem)/1 var(--mono);
+  letter-spacing:.05em;
   font-variant-numeric:tabular-nums;
-  color:var(--t1);margin-bottom:24px
+  color:var(--t1)
 }
 .fi{animation:fi .25s ease}
-.acts{display:flex;gap:10px;justify-content:center}
-.acts button{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:10px 20px;
-  border:1.5px solid var(--bdr);border-radius:50px;
-  background:none;font:500 .8125rem/1 var(--font);
-  color:var(--t3);cursor:pointer;
-  transition:background .15s,color .15s,border-color .15s
+.links{
+  background:var(--card);border-radius:20px;
+  box-shadow:var(--shadow);overflow:hidden
 }
-.acts button:hover{background:rgba(128,128,128,.06);color:var(--t2);border-color:var(--t4)}
-.acts button:active{transform:scale(.97)}
-.acts svg{width:14px;height:14px;flex-shrink:0}
-.ok{background:#DCFCE7!important;color:#34D399!important;border-color:#A7F3D0!important;animation:pop .35s ease}
-html[data-theme="dark"] .ok{background:#1A3A2A!important;color:#34D399!important;border-color:#2D5A3E!important}
+.links button{
+  display:flex;align-items:center;gap:12px;
+  width:100%;padding:14px 20px;
+  font:500 .9375rem/1 var(--font);
+  color:var(--t2);background:none;border:none;
+  border-bottom:1px solid var(--bdr2);
+  cursor:pointer;text-align:left;
+  transition:background .15s,color .15s
+}
+.links button:last-child{border-bottom:none}
+.links button:hover{background:var(--bg2);color:var(--t1)}
+.links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.links button.ok{background:#DCFCE7}
+.links button.ok svg{color:#34D399}
+.links button.ok span{color:#34D399}
 .ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  z-index:10;
+  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))
+}
+.tabs{
+  display:flex;
+  background:rgba(245,245,245,.92);
+  border-radius:50px;padding:5px;
+  box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
+  border:1px solid rgba(255,255,255,.45)
+}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
+}
+.tabs a{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:12px 22px;border-radius:50px;
+  font:500 .875rem/1 var(--font);
+  color:var(--t3);text-decoration:none;
+  transition:color .15s;white-space:nowrap
+}
+.tabs a:hover{color:var(--t2)}
+.tabs a:active{opacity:.7}
+.tabs svg{width:14px;height:14px}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 :focus{outline:2px solid #3B82F6;outline-offset:3px}
 :focus:not(:focus-visible){outline:none}
@@ -79,33 +97,32 @@ html[data-theme="dark"] .ok{background:#1A3A2A!important;color:#34D399!important
 </head>
 <body>
 <div class="w">
-<a href="/" class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>saputra.co.uk</a>
-<div class="card">
+<div class="num">
 <output id="n" aria-live="polite"></output>
-<div class="acts">
-<button id="g" aria-label="Generate new number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>Regenerate</button>
-<button id="c" aria-label="Copy number"><svg id="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg><span id="ct">Copy</span></button>
+</div>
+<div class="links">
+<button id="g" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>Regenerate</button>
+<button id="c" type="button"><svg id="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg><span id="cl">Copy</span></button>
 </div>
 </div>
+<nav aria-label="Navigation">
+<div class="tabs">
+<a href="/"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>Home</a>
 </div>
+</nav>
 <script>
-/* UK mobile number generator — full libphonenumber compliance.
-   Encodes the complete valid NSN regex for GB mobile:
-   7([1-4]\d\d | 5(0[0-8]|[13-9]\d|2[0-35-9]) |
-   7(0[1-9]|[1-7]\d|8[02-9]|9[0-689]) | 8([014-9]\d|[23][0-8]) |
-   9([04-9]\d|1[02-9]|2[0-35-9]|3[0-689])) \d{6}
-   First digit after 7 drawn from {1,2,3,4,5,7,8,9} (excludes 0,6).
-   Only 10 three-digit combos are invalid out of 800 attempted,
-   giving a 98.75% first-try acceptance rate via rejection sampling.
-   Uses crypto.getRandomValues() for CSPRNG quality randomness.
-   Bitmask r[0]&7 selects from 8-element pool with zero modulo bias. */
+/* UK mobile generator — full libphonenumber GB mobile regex compliance.
+   10 invalid 3-digit combos rejected via Set lookup:
+   509 524 700 781 797 829 839 911 924 937
+   98.75% first-try acceptance. CSPRNG via crypto.getRandomValues.
+   Bitmask &7 on pool[8] for zero modulo bias (256%8=0). */
 var X=new Set([509,524,700,781,797,829,839,911,924,937]),
 P=[1,2,3,4,5,7,8,9],
 el=document.getElementById('n'),
 cb=document.getElementById('c'),
 si=document.getElementById('ci'),
 sk=document.getElementById('ck'),
-sl=document.getElementById('ct'),
+sl=document.getElementById('cl'),
 tm,cur;
 function gen(){var r=new Uint8Array(9),a,b,c;do{crypto.getRandomValues(r);a=P[r[0]&7];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));var s='07'+a+b+c;for(var i=3;i<9;i++)s+=r[i]%10;return s}
 function show(){cur=gen();el.textContent=cur.slice(0,5)+'\u00A0'+cur.slice(5,8)+'\u00A0'+cur.slice(8);el.classList.remove('fi');void el.offsetWidth;el.classList.add('fi')}
