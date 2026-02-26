@@ -120,9 +120,9 @@ nav{
 <script>
 var $=s=>document.getElementById(s),
 X=new Set([509,524,700,781,797,829,839,911,924,937]),
-P=[1,2,3,4,5,7,8,9],
+W=[3,4,4,4,5,5,5,5,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9],
 el=$('n'),gb=$('g'),gs=$('gl'),cb=$('c'),si=$('ci'),sk=$('ck'),sl=$('cl'),gm,cm,cur;
-function gen(){var r=new Uint8Array(9),a,b,c,s,i;do{crypto.getRandomValues(r);a=P[r[0]&7];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));s='07'+a+b+c;for(i=3;i<9;i++)s+=r[i]%10;return s}
+function gen(){var r=new Uint8Array(9),a,b,c,s,i;do{crypto.getRandomValues(r);a=W[r[0]&31];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));s='07'+a+b+c;for(i=3;i<9;i++)s+=r[i]%10;return s}
 function render(){cur=gen();el.textContent=cur.slice(0,5)+'-'+cur.slice(5,8)+'-'+cur.slice(8);el.href='tel:+44'+cur.slice(1);el.classList.remove('fi');el.offsetWidth;el.classList.add('fi')}
 function doCopy(){clearTimeout(cm);navigator.clipboard.writeText(cur).then(function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';cb.classList.remove('ok');cb.offsetWidth;cb.classList.add('ok');cm=setTimeout(function(){si.style.display='';sk.style.display='none';sl.textContent='Copy';cb.classList.remove('ok')},800)},function(){sl.textContent='Failed';cm=setTimeout(function(){sl.textContent='Copy'},800)})}
 render();
