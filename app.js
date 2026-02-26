@@ -67,8 +67,9 @@ function route(){
 document.addEventListener('click',function(e){
   var btn=e.target.closest('.copy-btn');
   if(!btn)return;
-  e.preventDefault();
   var text=btn.getAttribute('data-copy');
+  if(!text)return;
+  e.preventDefault();
   function done(){
     clearTimeout(btn._t1);clearTimeout(btn._t2);
     btn.classList.add('copied');
