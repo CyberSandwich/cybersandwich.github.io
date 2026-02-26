@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UK Number Generator</title>
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/ds-favicon.png">
+<script>var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.dataset.theme='dark';document.querySelector('meta[name="theme-color"]').content='#1C1C1E'}</script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAFAFA;--card:#FFF;
+  --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--t4:#C7C7CC;
+  --bdr:#E8E8E8;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
+}
+html[data-theme="dark"]{
+  --bg:#1C1C1E;--card:#2C2C2E;
+  --t1:#F5F5F7;--t2:#A1A1A6;--t3:#6E6E73;--t4:#48484A;
+  --bdr:#38383A;
+  --shadow:0 1px 3px rgba(0,0,0,.2),0 4px 12px rgba(0,0,0,.15)
+}
+body{
+  font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  background:var(--bg);color:var(--t1);
+  min-height:100vh;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation
+}
+.w{width:100%;max-width:400px;padding:20px}
+.back{
+  display:inline-flex;align-items:center;gap:6px;
+  font:500 .8125rem/1 var(--font);
+  color:var(--t3);text-decoration:none;
+  margin-bottom:20px;transition:color .15s
+}
+.back:hover{color:var(--t1)}
+.back svg{width:14px;height:14px}
+.card{
+  background:var(--card);border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:36px 24px 28px;text-align:center
+}
+#n{
+  display:block;
+  font:600 clamp(1.75rem,6vw,2.25rem)/1 var(--font);
+  letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+  color:var(--t1);margin-bottom:24px
+}
+.fi{animation:fi .25s ease}
+.acts{display:flex;gap:10px;justify-content:center}
+.acts button{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:10px 20px;
+  border:1.5px solid var(--bdr);border-radius:50px;
+  background:none;font:500 .8125rem/1 var(--font);
+  color:var(--t3);cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s
+}
+.acts button:hover{background:rgba(128,128,128,.06);color:var(--t2);border-color:var(--t4)}
+.acts button:active{transform:scale(.97)}
+.acts svg{width:14px;height:14px;flex-shrink:0}
+.ok{background:#DCFCE7!important;color:#34D399!important;border-color:#A7F3D0!important;animation:pop .35s ease}
+html[data-theme="dark"] .ok{background:#1A3A2A!important;color:#34D399!important;border-color:#2D5A3E!important}
+.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+:focus{outline:2px solid #3B82F6;outline-offset:3px}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="w">
+<a href="/" class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>saputra.co.uk</a>
+<div class="card">
+<output id="n" aria-live="polite"></output>
+<div class="acts">
+<button id="g" aria-label="Generate new number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>Regenerate</button>
+<button id="c" aria-label="Copy number"><svg id="ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg><span id="ct">Copy</span></button>
+</div>
+</div>
+</div>
+<script>
+/* UK mobile number generator — full libphonenumber compliance.
+   Encodes the complete valid NSN regex for GB mobile:
+   7([1-4]\d\d | 5(0[0-8]|[13-9]\d|2[0-35-9]) |
+   7(0[1-9]|[1-7]\d|8[02-9]|9[0-689]) | 8([014-9]\d|[23][0-8]) |
+   9([04-9]\d|1[02-9]|2[0-35-9]|3[0-689])) \d{6}
+   First digit after 7 drawn from {1,2,3,4,5,7,8,9} (excludes 0,6).
+   Only 10 three-digit combos are invalid out of 800 attempted,
+   giving a 98.75% first-try acceptance rate via rejection sampling.
+   Uses crypto.getRandomValues() for CSPRNG quality randomness.
+   Bitmask r[0]&7 selects from 8-element pool with zero modulo bias. */
+var X=new Set([509,524,700,781,797,829,839,911,924,937]),
+P=[1,2,3,4,5,7,8,9],
+el=document.getElementById('n'),
+cb=document.getElementById('c'),
+si=document.getElementById('ci'),
+sk=document.getElementById('ck'),
+sl=document.getElementById('ct'),
+tm,cur;
+function gen(){var r=new Uint8Array(9),a,b,c;do{crypto.getRandomValues(r);a=P[r[0]&7];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));var s='07'+a+b+c;for(var i=3;i<9;i++)s+=r[i]%10;return s}
+function show(){cur=gen();el.textContent=cur.slice(0,5)+'\u00A0'+cur.slice(5,8)+'\u00A0'+cur.slice(8);el.classList.remove('fi');void el.offsetWidth;el.classList.add('fi')}
+show();
+document.getElementById('g').onclick=show;
+cb.onclick=function(){clearTimeout(tm);navigator.clipboard.writeText(cur).then(function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';cb.classList.add('ok');tm=setTimeout(function(){si.style.display='';sk.style.display='none';sl.textContent='Copy';cb.classList.remove('ok')},1500)},function(){sl.textContent='Failed';tm=setTimeout(function(){sl.textContent='Copy'},1500)})}
+</script>
+</body>
+</html>
