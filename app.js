@@ -209,11 +209,25 @@ function showCV(){
         var card=document.createElement('div');card.className='cve';
         if(e.org){
           var co=document.createElement('div');co.className='co';co.textContent=e.org;card.appendChild(co);
-          var cr=document.createElement('div');cr.className='cr';cr.textContent=e.role;card.appendChild(cr);
-          var meta=document.createElement('div');meta.className='cmeta';
-          var loc=document.createElement('span');loc.textContent=e.location;
-          var dates=document.createElement('span');dates.textContent=e.dates;
-          meta.appendChild(loc);meta.appendChild(dates);card.appendChild(meta);
+          if(e.role){
+            var cr=document.createElement('div');cr.className='cr';cr.textContent=e.role;card.appendChild(cr);
+          }
+          if(e.location&&e.dates){
+            var meta=document.createElement('div');meta.className='cmeta';
+            var loc=document.createElement('span');loc.textContent=e.location;
+            var dates=document.createElement('span');dates.textContent=e.dates;
+            meta.appendChild(loc);meta.appendChild(dates);card.appendChild(meta);
+          }
+          if(e.text){
+            var cn=document.createElement('div');cn.className='cn';cn.textContent=e.text;card.appendChild(cn);
+          }
+          if(e.pills){
+            var pills=document.createElement('div');pills.className='pills';
+            e.pills.forEach(function(p){
+              var pill=document.createElement('span');pill.className='pill';pill.textContent=p;pills.appendChild(pill);
+            });
+            card.appendChild(pills);
+          }
           if(e.bullets){
             var ul=document.createElement('ul');
             e.bullets.forEach(function(b){
@@ -221,21 +235,6 @@ function showCV(){
             });
             card.appendChild(ul);
           }
-        }
-        if(e.subs){
-          e.subs.forEach(function(sub){
-            var st=document.createElement('div');st.className='cv-sub';st.textContent=sub.title;card.appendChild(st);
-            if(sub.text){
-              var cn=document.createElement('div');cn.className='cn';cn.textContent=sub.text;card.appendChild(cn);
-            }
-            if(sub.pills){
-              var pills=document.createElement('div');pills.className='pills';
-              sub.pills.forEach(function(p){
-                var pill=document.createElement('span');pill.className='pill';pill.textContent=p;pills.appendChild(pill);
-              });
-              card.appendChild(pills);
-            }
-          });
         }
         card.setAttribute('data-q',card.textContent.toLowerCase());
         sec.appendChild(card);

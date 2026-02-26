@@ -119,10 +119,12 @@
     "section": "Skills",
     "entries": [
       {
-        "subs": [
-          {"title": "Languages", "pills": ["English (Native)", "Indonesian (Native)"]},
-          {"title": "Technical", "pills": ["Final Cut Pro X (Advanced)", "Pixelmator Pro / Photoshop (Intermediate)"]}
-        ]
+        "org": "Languages",
+        "pills": ["English (Native)", "Indonesian (Native)"]
+      },
+      {
+        "org": "Technical",
+        "pills": ["Final Cut Pro X (Advanced)", "Pixelmator Pro / Photoshop (Intermediate)"]
       }
     ]
   },
@@ -130,11 +132,16 @@
     "section": "Certifications & Interests",
     "entries": [
       {
-        "subs": [
-          {"title": "Awards", "text": "Winner of the 2023 Warwick Boba Awards - \"Most Likely to Turn Into a Tapioca Ball\""},
-          {"title": "Certifications", "pills": ["Prosci Change Management", "IBM Enterprise Design Thinking", "Microsoft AZ-900", "Microsoft AI-900", "Microsoft DP-900", "Microsoft SC-900", "Microsoft MS-900"]},
-          {"title": "Interests", "pills": ["Bubble Tea", "Dogs", "Drone Photography", "Technological Innovation"]}
-        ]
+        "org": "Awards",
+        "text": "Winner of the 2023 Warwick Boba Awards - \"Most Likely to Turn Into a Tapioca Ball\""
+      },
+      {
+        "org": "Certifications",
+        "pills": ["Prosci Change Management", "IBM Enterprise Design Thinking", "Microsoft AZ-900", "Microsoft AI-900", "Microsoft DP-900", "Microsoft SC-900", "Microsoft MS-900"]
+      },
+      {
+        "org": "Interests",
+        "pills": ["Bubble Tea", "Dogs", "Drone Photography", "Technological Innovation"]
       }
     ]
   }

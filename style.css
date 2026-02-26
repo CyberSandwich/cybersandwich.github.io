@@ -180,8 +180,6 @@ body{
   border-bottom:1px solid var(--bdr2)
 }
 .cve .cn{font-size:.875rem;color:var(--t2);line-height:1.7;margin-top:8px;margin-bottom:4px}
-.cve .cv-sub{font-size:.8125rem;font-weight:600;color:var(--t3);letter-spacing:.02em;margin:18px 0 8px}
-.cve .cv-sub:first-child{margin-top:0}
 .cve ul{list-style:none;padding:0;margin:14px 0 0}
 .cve li{
   font-size:.875rem;
