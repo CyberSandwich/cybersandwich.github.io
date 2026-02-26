@@ -31,7 +31,7 @@ body{
 .num{
   background:var(--card);border-radius:20px;
   box-shadow:var(--shadow);
-  padding:36px 24px;text-align:center;
+  padding:24px;text-align:center;
   margin-bottom:14px
 }
 #n{
@@ -53,7 +53,7 @@ body{
   color:var(--t2);background:none;border:none;
   border-bottom:1px solid var(--bdr2);
   cursor:pointer;text-align:left;
-  transition:background .15s,color .15s
+  transition:background .15s,color .15s,opacity .15s
 }
 .links button:last-child{border-bottom:none}
 .links button:hover{background:var(--bg2);color:var(--t1)}
@@ -62,6 +62,9 @@ body{
 .links button.ok svg{color:#34D399}
 .links button.ok span{color:#34D399}
 .ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.links button.regen{background:#FEF9C3}
+.links button.regen svg{color:#CA8A04;animation:spin .4s ease}
+.links button.regen span{color:#CA8A04}
 nav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   z-index:10;
@@ -89,6 +92,7 @@ nav{
 .tabs svg{width:14px;height:14px}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
 :focus{outline:2px solid #3B82F6;outline-offset:3px}
 :focus:not(:focus-visible){outline:none}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
@@ -101,8 +105,8 @@ nav{
 <output id="n" aria-live="polite"></output>
 </div>
 <div class="links">
-<button id="g" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>Regenerate</button>
-<button id="c" type="button"><svg id="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg><span id="cl">Copy</span></button>
+<button id="g" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="gl">Regenerate</span></button>
+<button id="c" type="button"><svg id="ci" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cl">Copy</span></button>
 </div>
 </div>
 <nav aria-label="Navigation">
@@ -119,16 +123,18 @@ nav{
 var X=new Set([509,524,700,781,797,829,839,911,924,937]),
 P=[1,2,3,4,5,7,8,9],
 el=document.getElementById('n'),
+gb=document.getElementById('g'),
+gs=document.getElementById('gl'),
 cb=document.getElementById('c'),
 si=document.getElementById('ci'),
 sk=document.getElementById('ck'),
 sl=document.getElementById('cl'),
-tm,cur;
+gm,cm,cur;
 function gen(){var r=new Uint8Array(9),a,b,c;do{crypto.getRandomValues(r);a=P[r[0]&7];b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));var s='07'+a+b+c;for(var i=3;i<9;i++)s+=r[i]%10;return s}
-function show(){cur=gen();el.textContent=cur.slice(0,5)+'\u00A0'+cur.slice(5,8)+'\u00A0'+cur.slice(8);el.classList.remove('fi');void el.offsetWidth;el.classList.add('fi')}
-show();
-document.getElementById('g').onclick=show;
-cb.onclick=function(){clearTimeout(tm);navigator.clipboard.writeText(cur).then(function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';cb.classList.add('ok');tm=setTimeout(function(){si.style.display='';sk.style.display='none';sl.textContent='Copy';cb.classList.remove('ok')},1500)},function(){sl.textContent='Failed';tm=setTimeout(function(){sl.textContent='Copy'},1500)})}
+function render(){cur=gen();el.textContent=cur.slice(0,5)+'\u00A0'+cur.slice(5,8)+'\u00A0'+cur.slice(8);el.classList.remove('fi');void el.offsetWidth;el.classList.add('fi')}
+render();
+gb.onclick=function(){clearTimeout(gm);render();gs.textContent='Regenerated';gb.classList.remove('regen');void gb.offsetWidth;gb.classList.add('regen');gm=setTimeout(function(){gb.style.opacity='0';setTimeout(function(){gs.textContent='Regenerate';gb.classList.remove('regen');gb.style.opacity=''},150)},1500)};
+cb.onclick=function(){clearTimeout(cm);navigator.clipboard.writeText(cur).then(function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';cb.classList.remove('ok');void cb.offsetWidth;cb.classList.add('ok');cm=setTimeout(function(){cb.style.opacity='0';setTimeout(function(){si.style.display='';sk.style.display='none';sl.textContent='Copy';cb.classList.remove('ok');cb.style.opacity=''},150)},1500)},function(){sl.textContent='Failed';cm=setTimeout(function(){cb.style.opacity='0';setTimeout(function(){sl.textContent='Copy';cb.style.opacity=''},150)},1500)})}
 </script>
 </body>
 </html>
