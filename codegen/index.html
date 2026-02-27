@@ -909,7 +909,7 @@ function handlePaste(btn){
   }).catch(function(){
     navigator.clipboard.readText().then(function(text){
       if(text){setInput(text);feedback(btn,'ps-fb','Pasted')}
-    }).catch(function(){feedback(btn,'err-fb','No access')});
+    }).catch(function(){feedback(btn,'err-fb','No Access')});
   });
 }
 
@@ -940,23 +940,28 @@ bcPv.addEventListener('click',function(){$('bcCp').click()});
 /* ── Global paste ── */
 document.addEventListener('paste',function(e){
   if(document.activeElement===qrIn||document.activeElement===bcIn)return;
+  var psBtn=activeTab()==='qr'?$('qrPs'):$('bcPs');
+  var cpBtn=activeTab()==='qr'?$('qrCp'):$('bcCp');
   var items=(e.clipboardData||{}).items;
   if(!items)return;
   for(var i=0;i<items.length;i++){
     if(items[i].type.indexOf('image/')===0){
       e.preventDefault();
-      var cpBtn=activeTab()==='qr'?$('qrCp'):$('bcCp');
       scanImage(items[i].getAsFile()).then(function(result){
         if(result){
+          feedback(psBtn,'ps-fb','Scanned');
           var val=result.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
           notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
-        }else notify('Nothing Found',false);
+        }else{
+          feedback(psBtn,'err-fb','Nothing Found');
+          notify('Nothing Found',false);
+        }
       });
       return;
     }
   }
   var text=(e.clipboardData||{}).getData('text');
-  if(text){e.preventDefault();setInput(text)}
+  if(text){e.preventDefault();setInput(text);feedback(psBtn,'ps-fb','Pasted')}
 });
 
 /* ── Reset ── */
@@ -1000,7 +1005,6 @@ document.addEventListener('keydown',function(e){
   if(!(e.metaKey||e.ctrlKey))return;
   if(e.key==='s'){e.preventDefault();(activeTab()==='qr'?$('qrDl'):$('bcDl')).click()}
   else if(e.key==='c'&&!getSelection().toString()){e.preventDefault();(activeTab()==='qr'?$('qrCp'):$('bcCp')).click()}
-  else if(e.key==='v'&&document.activeElement!==qrIn&&document.activeElement!==bcIn){e.preventDefault();(activeTab()==='qr'?$('qrPs'):$('bcPs')).click()}
 });
 
 /* ── Resize + Visibility ── */
