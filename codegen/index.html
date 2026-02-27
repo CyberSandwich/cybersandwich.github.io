@@ -80,15 +80,15 @@ body{
 }
 .actions button:last-child{border-bottom:none}
 .actions button:hover{background:var(--bg2);color:var(--t1)}
-.settings{background:var(--card);border-radius:20px;border:1px solid var(--bdr);overflow:hidden;margin-top:14px}
+.settings{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-top:14px}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--bdr2)}
 .srow:last-child{border-bottom:none}
 .slbl{
-  display:flex;align-items:center;gap:8px;
-  font:500 .875rem/1 var(--font);color:var(--t2);
+  display:flex;align-items:center;gap:12px;
+  font:500 .9375rem/1 var(--font);color:var(--t2);
   cursor:pointer;user-select:none;-webkit-user-select:none
 }
-.slbl svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.slbl svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--t4)}
 .slbl:active{opacity:.5}
 .schips{display:flex;gap:4px}
 .chip{
@@ -324,8 +324,7 @@ function drawCropMarks(canvas,style,margin){
 
 /* ── QR Rendering ── */
 function genQR(){
-  var text=qrIn.value.trim();
-  if(!text){var ctx=qrC.getContext('2d');qrC.width=qrC.width;return}
+  var text=qrIn.value.trim()||'saputra.co.uk';
   var st=getQRStyle();
   var w=qrC.offsetWidth||300;
   var dpr=window.devicePixelRatio||2;
@@ -346,8 +345,7 @@ function genQR(){
 }
 
 function hiResQR(){
-  var text=qrIn.value.trim();
-  if(!text)return null;
+  var text=qrIn.value.trim()||'saputra.co.uk';
   var st=getQRStyle();
   var exportSz=QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
@@ -395,8 +393,7 @@ function getQRMatrix(text,ecLevel){
 }
 
 function qrSVG(){
-  var text=qrIn.value.trim();
-  if(!text)return null;
+  var text=qrIn.value.trim()||'saputra.co.uk';
   var st=getQRStyle();
   var exportSz=QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
@@ -741,7 +738,7 @@ function updatePvStyle(pv,style){
 initSettings($('qrCh'),[
   {type:'chips',icon:IC.shield,label:'Redundancy',opts:['L','M','Q','H'],def:2,onChange:function(i){qrS.ec=i;genQR()}},
   {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:16,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i}},
-  {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px'},onChange:function(i){qrS.marginIdx=i;genQR()}},
+  {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;genQR()}},
   {type:'format',icon:IC.contrast,formats:['Dark','Light','Clear'],def:0,onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQR()}},
   {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){qrS.fmt=i}}
 ]);
@@ -751,7 +748,7 @@ initSettings($('bcCh'),[
   {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:1,onChange:function(i){bcS.height=i;genBC()}},
   {type:'chips',icon:IC.type,label:'Text',opts:['On','Off'],def:0,onChange:function(i){bcS.text=i;genBC()}},
   {type:'stepper',icon:IC.maximize,steps:BCSIZES,def:6,format:function(v){return v+' px'},onChange:function(i){bcS.sizeIdx=i}},
-  {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px'},onChange:function(i){bcS.marginIdx=i;genBC()}},
+  {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBC()}},
   {type:'format',icon:IC.contrast,formats:['Dark','Light','Clear'],def:0,onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBC()}},
   {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){bcS.fmt=i}}
 ]);
