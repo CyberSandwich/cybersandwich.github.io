@@ -37,7 +37,6 @@ body{
   transition:background .3s,transform .15s;cursor:pointer
 }
 .preview:active{transform:scale(.97)}
-.preview.dark-bg{background:#1A1A1A}
 .preview.checker{
   background-color:#fff;
   background-image:
@@ -118,6 +117,10 @@ body{
 .dl-fb .id{display:none}.dl-fb .ic{display:inline}
 .dl-fb .ic,.dl-fb span{color:#A78BFA!important}
 .ok polyline,.ps-fb polyline,.dl-fb polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.rs-fb{background:#FEF9C3!important}
+.rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
+.rs-fb span{color:#CA8A04!important}
+@keyframes spin{to{transform:rotate(360deg)}}
 .err-fb{background:#FEE2E2!important}
 .err-fb span{color:#C41E3A!important}
 .drop-overlay{
@@ -162,6 +165,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       <button id="qrPs" type="button" data-l="Paste"><svg class="id" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
       <button id="qrCp" type="button" data-l="Copy"><svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
       <button id="qrDl" type="button" data-l="Download"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
+      <button id="qrRs" type="button" data-l="Reset"><svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset</span></button>
     </div>
     <div class="settings" id="qrCh"></div>
   </section>
@@ -176,6 +180,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       <button id="bcPs" type="button" data-l="Paste"><svg class="id" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
       <button id="bcCp" type="button" data-l="Copy"><svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
       <button id="bcDl" type="button" data-l="Download"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
+      <button id="bcRs" type="button" data-l="Reset"><svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset</span></button>
     </div>
     <div class="settings" id="bcCh"></div>
   </section>
@@ -268,7 +273,7 @@ function autoGrow(el){el.style.height='auto';el.style.height=el.scrollHeight+'px
 function feedback(btn,cls,text){
   clearTimeout(tm[btn.id]);
   var sp=btn.querySelector('span');
-  btn.classList.remove('ok','ps-fb','dl-fb','err-fb');btn.offsetWidth;btn.classList.add(cls);
+  btn.classList.remove('ok','ps-fb','dl-fb','rs-fb','err-fb');btn.offsetWidth;btn.classList.add(cls);
   sp.textContent=text;
   tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.dataset.l},800);
 }
@@ -315,7 +320,7 @@ function drawCropMarks(canvas,style,margin){
   ctx.strokeStyle=style===1?'rgba(255,255,255,0.5)':'rgba(0,0,0,0.35)';
   var lw=Math.max(2,Math.round(Math.min(w,h)/200));
   ctx.lineWidth=lw;
-  var L=Math.min(Math.round(Math.min(w,h)*0.06),margin-1);
+  var L=Math.round(Math.min(w,h)*0.06);
   if(L<2){ctx.restore();return}
   var o=Math.ceil(lw/2);
   ctx.beginPath();
@@ -734,29 +739,30 @@ function initSettings(container,groups){
 }
 
 function updatePvStyle(pv,style){
-  pv.classList.remove('dark-bg','checker');
-  if(style===1)pv.classList.add('dark-bg');
+  pv.classList.remove('checker');
   if(style===2)pv.classList.add('checker');
 }
 
 /* QR Settings */
-initSettings($('qrCh'),[
+var qrGroups=[
   {type:'chips',icon:IC.shield,label:'Redundancy',opts:['L','M','Q','H'],def:2,onChange:function(i){qrS.ec=i;genQR()}},
   {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:16,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;genQR()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQR()}},
   {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){qrS.fmt=i}}
-]);
+];
+initSettings($('qrCh'),qrGroups);
 
 /* Barcode Settings */
-initSettings($('bcCh'),[
+var bcGroups=[
   {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:1,onChange:function(i){bcS.height=i;genBC()}},
   {type:'chips',icon:IC.type,label:'Text',opts:['On','Off'],def:0,onChange:function(i){bcS.text=i;genBC()}},
   {type:'stepper',icon:IC.maximize,steps:BCSIZES,def:6,format:function(v){return v+' px'},onChange:function(i){bcS.sizeIdx=i}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBC()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBC()}},
   {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){bcS.fmt=i}}
-]);
+];
+initSettings($('bcCh'),bcGroups);
 
 /* ── Actions ── */
 function copyCanvas(canvas,btn){
@@ -895,6 +901,15 @@ function pvCopy(pv,canvasFn){
 }
 pvCopy(qrPv,hiResQR);
 pvCopy(bcPv,exportBC);
+
+/* ── Reset ── */
+function resetAll(btn,groups,input,genFn){
+  groups.forEach(function(g){if(g._reset)g._reset()});
+  input.value='';autoGrow(input);genFn();
+  feedback(btn,'rs-fb','Done');
+}
+$('qrRs').onclick=function(){resetAll(this,qrGroups,qrIn,genQR)};
+$('bcRs').onclick=function(){resetAll(this,bcGroups,bcIn,genBC)};
 
 /* ── Drag and Drop ── */
 var dropOv=$('dropOv'),dragC=0;
