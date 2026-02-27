@@ -321,7 +321,7 @@ function activeTab(){return curTab}
 
 function switchTab(id){
   curTab=id;
-  document.title='CodeGen \u2014 '+(id==='qr'?'QR':'Barcode');
+  document.title='CodeGen | '+(id==='qr'?'QR':'Barcode');
   tabBtns.forEach(function(t){var a=t.dataset.tab===id;t.classList.toggle('active',a);t.setAttribute('aria-selected',a)});
   views.qr.classList.toggle('active',id==='qr');
   views.bc.classList.toggle('active',id==='bc');
@@ -1010,7 +1010,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden){if(
 
 /* ── Init ── */
 genQR();
-document.title='CodeGen \u2014 QR';
+document.title='CodeGen | QR';
 </script>
 </body>
 </html>
