@@ -1,7 +1,0 @@
-node_modules/
-dist/
-.claude/
-CLAUDE.md
-ARCHITECTURE.md
-*.local
-.DS_Store
