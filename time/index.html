@@ -13,7 +13,7 @@
   --card:#FFFFFF;
   --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--t4:#C7C7CC;
   --bdr:#E8E8E8;--bdr2:#F0F0F0;
-  --acc:#3B82F6;--accl:rgba(59,130,246,.06);
+  --acc:#48484A;--accl:rgba(72,72,74,.06);
   --ok:#2D7D46;--err:#C41E3A;
   --r:14px;--rr:50px;
   --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
@@ -44,8 +44,8 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .btn-p:disabled{opacity:.35;cursor:not-allowed;transform:none}
 .btn-s{background:var(--bg3);color:var(--t2)}
 .btn-s:hover{background:#E5E5EA}
-.btn-stop{background:var(--err);color:#fff;box-shadow:0 4px 14px rgba(196,30,58,.25)}
-.btn-stop:hover{background:#a01830}
+.btn-stop{background:#D4848C;color:#fff;box-shadow:0 4px 14px rgba(212,132,140,.25)}
+.btn-stop:hover{background:#C47580}
 .alarm-form{display:flex;flex-direction:column;align-items:center;padding:clamp(24px,6vh,48px) 0 clamp(20px,4vh,32px)}
 .alarm-form .t-digit input{font-size:clamp(3.5rem,12vw,9rem)}
 .alarm-form .t-colon{font-size:clamp(2.5rem,8vw,6rem)}
@@ -75,7 +75,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 #v-sw.active{animation:none}
 .sw-wrap{display:flex;flex-direction:column;align-items:center;height:100%;overflow:hidden;max-width:960px;margin:0 auto;padding-bottom:80px}
 .sw-hero{display:flex;align-items:center;justify-content:center;width:100%;height:38vh;flex-shrink:0}
-.sw-display{font-size:clamp(4rem,15vw,9rem);letter-spacing:-.03em;line-height:1;user-select:none}
+.sw-display{font-size:clamp(4rem,15vw,9rem);font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1;user-select:none}
 .sw-ms{color:var(--t3)}
 .sw-controls{display:flex;gap:10px;width:100%;max-width:440px;margin-bottom:20px;flex-shrink:0}
 .sw-controls button{flex:1;padding:18px;font-size:1rem}
@@ -84,7 +84,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .lap-hdr{display:grid;grid-template-columns:1fr 1fr;padding:14px 28px;font-size:.75rem;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--bdr2);flex-shrink:0}
 .lap-hdr span:last-child,.laps .l span:last-child{text-align:right}
 .laps{display:flex;flex-direction:column;overflow-y:auto;flex:1;min-height:0}
-.laps .l{display:grid;grid-template-columns:1fr 1fr;padding:14px 28px;border-bottom:1px solid var(--bdr2);font-size:1rem}
+.laps .l{display:grid;grid-template-columns:1fr 1fr;padding:14px 28px;border-bottom:1px solid var(--bdr2);font-size:1rem;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .laps .l:last-child{border:none}
 .laps .l span:first-child{color:var(--t2)}
 .laps .l.best span:last-child{color:var(--ok)}
@@ -94,12 +94,12 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .t-digit{display:flex;flex-direction:column;align-items:center;gap:8px}
 .t-digit input{width:2.6ch;padding:clamp(10px,2vw,20px) 4px;text-align:center;border:1.5px solid var(--bdr);border-radius:16px;font:400 clamp(3rem,9vw,6rem)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--t1);background:var(--card);outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.03);-moz-appearance:textfield}
 .t-digit input::-webkit-inner-spin-button,.t-digit input::-webkit-outer-spin-button{-webkit-appearance:none}
-.t-digit input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+.t-digit input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)}
 .t-digit label{font-size:.6875rem;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
 .t-colon{font-size:clamp(2rem,6vw,4rem);color:var(--t4)}
 .t-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:clamp(20px,4vh,36px);max-width:540px}
 .t-chips button{padding:11px 24px;border:1.5px solid var(--bdr);border-radius:var(--rr);background:var(--card);font:500 .875rem/1 var(--font);color:var(--t2);cursor:pointer;transition:border-color .15s,color .15s,background .15s,box-shadow .15s,transform .1s;box-shadow:0 1px 2px rgba(0,0,0,.03);touch-action:manipulation}
-.t-chips button:hover{border-color:var(--acc);color:var(--acc);background:var(--accl);box-shadow:0 2px 8px rgba(59,130,246,.1)}
+.t-chips button:hover{border-color:var(--acc);color:var(--acc);background:var(--accl);box-shadow:0 2px 8px rgba(72,72,74,.1)}
 .t-chips button:active{transform:scale(.96)}
 .t-setup-btns{display:flex;gap:10px;width:100%;max-width:440px}
 .t-setup-btns .btn{flex:1;padding:16px 28px;font-size:1rem}
@@ -107,9 +107,9 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .t-card{position:relative;background:var(--card);border:1.5px solid var(--bdr);border-radius:20px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;align-items:center;transition:border-color .3s,box-shadow .3s}
 .t-card.done{border-color:var(--acc);animation:pulse-glow 2s ease infinite}
 .t-card.done .tc-val{color:var(--acc)}
-@keyframes pulse-glow{0%,100%{box-shadow:0 2px 12px rgba(0,0,0,.04)}50%{box-shadow:0 0 0 4px rgba(59,130,246,.08),0 4px 20px rgba(59,130,246,.1)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 2px 12px rgba(0,0,0,.04)}50%{box-shadow:0 0 0 4px rgba(72,72,74,.08),0 4px 20px rgba(72,72,74,.1)}}
 .tc-ring{position:relative;width:clamp(160px,35vw,240px);height:clamp(160px,35vw,240px);margin-bottom:clamp(16px,2.5vw,28px)}
-.tc-ring svg{width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(59,130,246,.08))}
+.tc-ring svg{width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(72,72,74,.08))}
 .tc-track{opacity:.1}
 .tc-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .tc-val{font-size:clamp(2rem,5.5vw,3.25rem);letter-spacing:-.02em;transition:color .3s}
@@ -125,7 +125,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .t-back:hover{color:var(--t1)}
 .t-back svg{width:18px;height:18px}
 .tf-ring{position:relative;width:clamp(280px,60vw,440px);height:clamp(280px,60vw,440px);margin-bottom:clamp(36px,6vh,60px)}
-.tf-ring svg{width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(59,130,246,.12))}
+.tf-ring svg{width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(72,72,74,.12))}
 .tf-val{font-size:clamp(3.25rem,10vw,6rem);letter-spacing:-.02em;transition:color .3s}
 .tf-btns{display:flex;gap:10px;width:100%;max-width:440px}
 .tf-btns button{flex:1;padding:16px;font-size:.9375rem}
