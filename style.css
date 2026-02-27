@@ -89,8 +89,11 @@ body{
 .links a:last-child{border-bottom:none}
 .links a:hover{background:var(--bg2);color:var(--t1)}
 .links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
-.copy-row{display:flex;align-items:center;border-bottom:1px solid var(--bdr2)}
+.copy-row{display:flex;align-items:center;border-bottom:1px solid var(--bdr2);transition:background .15s}
+.copy-row:hover{background:var(--bg2)}
+.copy-row:hover a{color:var(--t1)}
 .copy-row a{flex:1;min-width:0;border-bottom:none}
+.copy-row a:hover{background:none}
 .links>.copy-row:last-child,.links>:last-child.copy-row{border-bottom:none}
 .copy-btn{
   padding:8px 16px;
@@ -104,7 +107,7 @@ body{
   flex-shrink:0;
   min-width:58px;
   text-align:center;
-  transition:background .2s ease,color .2s ease,border-color .2s ease
+  transition:background .2s ease,color .2s ease,border-color .2s ease,opacity .2s ease
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 .copy-btn.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
