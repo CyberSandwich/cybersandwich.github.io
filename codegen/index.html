@@ -37,6 +37,7 @@ body{
   transition:background .3s,transform .15s;cursor:pointer
 }
 .preview:active{transform:scale(.97)}
+.preview.dark{background:#000000}
 .preview.checker{
   background-color:#fff;
   background-image:
@@ -761,8 +762,9 @@ function initSettings(container,groups){
 }
 
 function updatePvStyle(pv,style){
-  pv.classList.remove('checker');
-  if(style===2)pv.classList.add('checker');
+  pv.classList.remove('dark','checker');
+  if(style===1)pv.classList.add('dark');
+  else if(style===2)pv.classList.add('checker');
 }
 
 /* QR Settings */
