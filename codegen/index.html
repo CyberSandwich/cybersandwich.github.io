@@ -308,16 +308,15 @@ function drawCropMarks(canvas,style,margin){
   if(margin<=0)return;
   var ctx=canvas.getContext('2d');
   var w=canvas.width,h=canvas.height,m=margin;
-  var len=Math.round(Math.min(w,h)*0.04);
-  if(len<2)return;
   ctx.save();
-  ctx.strokeStyle=style===1?'rgba(255,255,255,0.25)':'rgba(0,0,0,0.12)';
-  ctx.lineWidth=Math.max(1,Math.round(Math.min(w,h)/400));
+  ctx.strokeStyle=style===1?'rgba(255,255,255,0.5)':'rgba(0,0,0,0.35)';
+  ctx.lineWidth=Math.max(2,Math.round(Math.min(w,h)/200));
+  var L=Math.round(Math.min(w,h)*0.06);
   ctx.beginPath();
-  ctx.moveTo(m,m+len);ctx.lineTo(m,m);ctx.lineTo(m+len,m);
-  ctx.moveTo(w-m-len,m);ctx.lineTo(w-m,m);ctx.lineTo(w-m,m+len);
-  ctx.moveTo(m,h-m-len);ctx.lineTo(m,h-m);ctx.lineTo(m+len,h-m);
-  ctx.moveTo(w-m-len,h-m);ctx.lineTo(w-m,h-m);ctx.lineTo(w-m,h-m-len);
+  ctx.moveTo(m,m+L);ctx.lineTo(m,m);ctx.lineTo(m+L,m);
+  ctx.moveTo(w-m-L,m);ctx.lineTo(w-m,m);ctx.lineTo(w-m,m+L);
+  ctx.moveTo(m,h-m-L);ctx.lineTo(m,h-m);ctx.lineTo(m+L,h-m);
+  ctx.moveTo(w-m-L,h-m);ctx.lineTo(w-m,h-m);ctx.lineTo(w-m,h-m-L);
   ctx.stroke();
   ctx.restore();
 }
