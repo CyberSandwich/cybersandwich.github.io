@@ -79,7 +79,6 @@ body{
   transition:background .25s,color .15s
 }
 .actions button:last-child{border-bottom:none}
-.actions button:hover{background:var(--bg2);color:var(--t1)}
 .settings{background:var(--card);border-radius:20px;border:1px solid var(--bdr);overflow:hidden;margin-top:14px}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;border-bottom:1px solid var(--bdr2)}
 .srow:last-child{border-bottom:none}
@@ -95,7 +94,7 @@ body{
   padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:var(--card);
   font:500 .8125rem/1 var(--font);color:var(--t2);cursor:pointer;transition:all .15s;white-space:nowrap
 }
-.chip:hover{border-color:var(--acc);color:var(--t1)}
+.chip:active{transform:scale(.95)}
 .chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
 .stepper{display:flex;align-items:center;gap:6px}
 .step-btn{
@@ -104,7 +103,7 @@ body{
   display:flex;align-items:center;justify-content:center;
   transition:all .15s;padding:0 12px
 }
-.step-btn:hover:not(:disabled){border-color:var(--acc);color:var(--t1)}
+.step-btn:active:not(:disabled){transform:scale(.9)}
 .step-btn:disabled{opacity:.3;cursor:default}
 .id,.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .ic{stroke-width:2.5;display:none}
@@ -121,6 +120,7 @@ body{
 .rs-fb{background:#FEF9C3!important}
 .rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
 .rs-fb span{color:#CA8A04!important}
+.srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-fb{background:#FEE2E2!important}
 .err-fb span{color:#C41E3A!important}
@@ -138,7 +138,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 .tabs a,.tabs button{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
 .tabs button.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active,.tabs button:active{opacity:.7}
-@media(hover:hover){.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}}
+@media(hover:hover){.preview:hover{transform:scale(.99)}.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--acc);color:var(--t1)}.step-btn:hover:not(:disabled){border-color:var(--acc);color:var(--t1)}.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}}
 @media(max-width:480px){.tabs a,.tabs button{padding:14px 16px;font-size:.8125rem}}
 .toast{
   position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:20;
@@ -151,6 +151,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes slideOut{to{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+::selection{background:rgba(72,72,74,.15)}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -291,27 +293,32 @@ function toast(msg){
   var d=document.createElement('div');
   d.className='toast';d.setAttribute('role','status');d.textContent=msg;
   document.body.appendChild(d);
-  toastT=setTimeout(function(){d.remove()},3000);
+  toastT=setTimeout(function(){d.style.animation='slideOut .2s ease forwards';setTimeout(function(){d.remove()},200)},2800);
 }
 
 /* ── Tab switching ── */
 var tabBtns=document.querySelectorAll('[data-tab]');
 var views={qr:$('v-qr'),bc:$('v-bc')};
 
-function activeTab(){return views.qr.classList.contains('active')?'qr':'bc'}
+var curTab='qr';
+function activeTab(){return curTab}
 
 function switchTab(id){
+  curTab=id;
   document.title='CodeGen \u2014 '+(id==='qr'?'QR':'Barcode');
   tabBtns.forEach(function(t){var a=t.dataset.tab===id;t.classList.toggle('active',a);t.setAttribute('aria-selected',a)});
-  Object.keys(views).forEach(function(k){views[k].classList.toggle('active',k===id)});
+  views.qr.classList.toggle('active',id==='qr');
+  views.bc.classList.toggle('active',id==='bc');
   if(id==='qr')genQR();else genBC();
+  scrollTo(0,0);
 }
 
-document.querySelector('.tabs').addEventListener('click',function(e){
+var tabsEl=document.querySelector('.tabs');
+tabsEl.addEventListener('click',function(e){
   var b=e.target.closest('button[data-tab]');
   if(b)switchTab(b.dataset.tab);
 });
-document.querySelector('.tabs').addEventListener('keydown',function(e){
+tabsEl.addEventListener('keydown',function(e){
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
     var btns=Array.from(tabBtns),cur=btns.findIndex(function(b){return b.classList.contains('active')});
     var next=e.key==='ArrowRight'?(cur+1)%btns.length:(cur-1+btns.length)%btns.length;
@@ -319,11 +326,7 @@ document.querySelector('.tabs').addEventListener('keydown',function(e){
   }
 });
 
-/* ── QR Style ── */
-function getQRStyle(){
-  var s=qrS.style;
-  return {fg:s===1?'#FFFFFF':'#000000',bg:s===1?'#000000':(s===2?null:'#FFFFFF')};
-}
+function getStyle(s){return {fg:s===1?'#FFFFFF':'#000000',bg:s===1?'#000000':(s===2?null:'#FFFFFF')}}
 
 /* ── Crop marks at canvas corners (margin = gap to QR) ── */
 function drawCropMarks(canvas,style,margin){
@@ -349,7 +352,7 @@ function drawCropMarks(canvas,style,margin){
 /* ── QR Rendering ── */
 function genQR(){
   var text=qrIn.value.trim()||'saputra.co.uk';
-  var st=getQRStyle();
+  var st=getStyle(qrS.style);
   var w=qrC.offsetWidth||300;
   var dpr=window.devicePixelRatio||2;
   var sz=Math.round(w*dpr);
@@ -369,7 +372,7 @@ function genQR(){
 
 function hiResQR(){
   var text=qrIn.value.trim()||'saputra.co.uk';
-  var st=getQRStyle();
+  var st=getStyle(qrS.style);
   var exportSz=QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
   var marginPx=MARGINS[qrS.marginIdx];
@@ -416,7 +419,7 @@ function getQRMatrix(text,ecLevel){
 
 function qrSVG(){
   var text=qrIn.value.trim()||'saputra.co.uk';
-  var st=getQRStyle();
+  var st=getStyle(qrS.style);
   var exportSz=QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
   var marginPx=MARGINS[qrS.marginIdx];
@@ -520,11 +523,6 @@ function encC39(text){
 var encoders=[encC128,encEAN,encC39];
 
 /* ── Barcode Renderer ── */
-function getBCStyle(){
-  var s=bcS.style;
-  return {fg:s===1?'#FFFFFF':'#000000',bg:s===1?'#000000':(s===2?null:'#FFFFFF')};
-}
-
 function renderBC(canvas,modules,opts){
   var dpr=window.devicePixelRatio||2;
   var pw=canvas.parentElement.clientWidth-48||300;
@@ -546,7 +544,7 @@ function renderBC(canvas,modules,opts){
   ctx.imageSmoothingEnabled=false;
   if(bg){ctx.fillStyle=bg;ctx.fillRect(0,0,tw,th)}
   ctx.fillStyle=fg;
-  for(var i=0;i<modules.length;i++)if(modules[i])ctx.fillRect(Math.round(mgP+i*bwP),Math.round(mgP),Math.ceil(bwP),Math.round(hP));
+  var i=0;while(i<modules.length){if(modules[i]){var s=i;while(i<modules.length&&modules[i])i++;ctx.fillRect(Math.round(mgP+s*bwP),Math.round(mgP),Math.ceil((i-s)*bwP),Math.round(hP))}else i++}
   if(opts.showText&&opts.text){
     ctx.fillStyle=fg;
     var fs=Math.round(14*scale*fit);
@@ -563,7 +561,7 @@ function genBC(){
   try{
     var modules=encoders[curFmt](text);
     if(!modules)throw new Error('Invalid');
-    var st=getBCStyle();
+    var st=getStyle(bcS.style);
     var mg=MARGINS[bcS.marginIdx];
     renderBC(bcC,modules,{height:BCH[bcS.height],showText:bcS.text===0,text:text,fg:st.fg,bg:st.bg,margin:mg});
     drawCropMarks(bcC,bcS.style,mg);
@@ -580,7 +578,7 @@ function exportBC(){
   var text=bcIn.value.trim()||FMT[curFmt].p;
   var modules=encoders[curFmt](text);
   if(!modules)return null;
-  var st=getBCStyle();
+  var st=getStyle(bcS.style);
   var targetW=BCSIZES[bcS.sizeIdx];
   var mg=MARGINS[bcS.marginIdx];
   var bw=Math.max(1,Math.floor((targetW-mg*2)/modules.length));
@@ -595,7 +593,7 @@ function exportBC(){
   ctx.imageSmoothingEnabled=false;
   if(st.bg){ctx.fillStyle=st.bg;ctx.fillRect(0,0,tw,th)}
   ctx.fillStyle=st.fg;
-  for(var i=0;i<modules.length;i++)if(modules[i])ctx.fillRect(mg+i*bw,mg,bw,h);
+  var i=0;while(i<modules.length){if(modules[i]){var s=i;while(i<modules.length&&modules[i])i++;ctx.fillRect(mg+s*bw,mg,(i-s)*bw,h)}else i++}
   if(bcS.text===0){
     ctx.fillStyle=st.fg;
     ctx.font=Math.round(14*scale)+'px '+FF;
@@ -609,7 +607,7 @@ function bcSVG(){
   var text=bcIn.value.trim()||FMT[curFmt].p;
   var modules=encoders[curFmt](text);
   if(!modules)return null;
-  var st=getBCStyle();
+  var st=getStyle(bcS.style);
   var targetW=BCSIZES[bcS.sizeIdx];
   var mg=MARGINS[bcS.marginIdx];
   var bw=(targetW-mg*2)/modules.length;
@@ -651,13 +649,7 @@ bcFmtSel.addEventListener('change',function(){
 });
 
 /* ── Settings Builder ── */
-function setSVG(el,svgStr){
-  /* Safe: all svgStr values are hardcoded constants from IC object */
-  var wrap=document.createElement('span');
-  wrap.insertAdjacentHTML('afterbegin',svgStr);
-  while(el.firstChild)el.removeChild(el.firstChild);
-  while(wrap.firstChild)el.appendChild(wrap.firstChild);
-}
+function setSVG(el,s){el.innerHTML=s}
 
 function initSettings(container,groups){
   groups.forEach(function(g){
@@ -760,7 +752,8 @@ function initSettings(container,groups){
       }
     }
 
-    lbl.addEventListener('click',function(){if(g._reset)g._reset()});
+    var fbT;
+    lbl.addEventListener('click',function(){if(g._reset){g._reset();clearTimeout(fbT);row.classList.remove('rs-fb');row.offsetWidth;row.classList.add('rs-fb');fbT=setTimeout(function(){row.classList.remove('rs-fb')},600)}});
     container.appendChild(row);
   });
 }
@@ -961,6 +954,7 @@ document.addEventListener('keydown',function(e){
 /* ── Resize + Visibility ── */
 window.addEventListener('resize',debounce(function(){if(activeTab()==='qr')genQR();else genBC()},200));
 document.addEventListener('visibilitychange',function(){if(!document.hidden){if(activeTab()==='qr')genQR();else genBC()}});
+(function watchDPR(){var mq=matchMedia('(resolution:'+devicePixelRatio+'dppx)');mq.addEventListener('change',function(){if(curTab==='qr')genQR();else genBC();watchDPR()},{once:true})})();
 
 /* ── Init ── */
 genQR();
