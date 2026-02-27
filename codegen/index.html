@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>CodeGen</title>
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/ds-favicon.png">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#FAFAFA;--bg2:#F5F5F5;--card:#FFF;
+  --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--t4:#C7C7CC;
+  --bdr:#E8E8E8;--bdr2:#F0F0F0;
+  --acc:#48484A;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.04);
+  --r:14px;--rr:50px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
+}
+html{height:100%}
+body{
+  font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  background:var(--bg);color:var(--t1);
+  min-height:100%;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation
+}
+.w{width:100%;max-width:440px;padding:20px 20px 100px;margin:auto 0}
+.view{display:none}.view.active{display:block;animation:fi .25s ease}
+.preview{
+  background:var(--card);border-radius:20px;box-shadow:var(--shadow);
+  padding:clamp(20px,5vw,32px);margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;
+  min-height:180px;position:relative;overflow:hidden
+}
+#qrC{display:block;width:100%;max-width:clamp(200px,60vw,280px);aspect-ratio:1;border-radius:4px}
+#bcS{display:block;max-width:100%;height:auto;max-height:160px}
+.ldg{color:var(--t3);font-size:.875rem;position:absolute}
+.msg{text-align:center;font-size:.8125rem;color:#C41E3A;padding:2px 20px 10px}
+.in{margin-bottom:14px}
+.in textarea,.in input[type=text]{
+  width:100%;padding:14px 20px;
+  border:1.5px solid var(--bdr);border-radius:16px;
+  font:400 1rem/1.5 var(--font);color:var(--t1);background:var(--card);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  box-shadow:var(--shadow);resize:none;display:block
+}
+.in textarea:focus,.in input[type=text]:focus,.in select:focus{
+  border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)
+}
+.in select{
+  width:100%;padding:12px 40px 12px 16px;
+  border:1.5px solid var(--bdr);border-radius:var(--r);
+  background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 14px center/14px;
+  font:500 1rem/1 var(--font);color:var(--t1);cursor:pointer;
+  outline:none;appearance:none;-webkit-appearance:none;
+  transition:border-color .15s,box-shadow .15s;
+  box-shadow:var(--shadow);margin-bottom:10px;display:block
+}
+.links{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.links button{
+  display:flex;align-items:center;gap:12px;
+  width:100%;padding:14px 20px;
+  font:500 .9375rem/1 var(--font);
+  color:var(--t2);background:none;border:none;
+  border-bottom:1px solid var(--bdr2);
+  cursor:pointer;text-align:left;
+  transition:background .25s,color .15s
+}
+.links button:last-child{border-bottom:none}
+.links button:hover{background:var(--bg2);color:var(--t1)}
+.id,.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.ic{stroke-width:2.5;display:none}
+.ok{background:#DCFCE7!important}
+.ok .id{display:none}
+.ok .ic{display:inline}
+.ok .ic,.ok span{color:#34D399!important}
+.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
+.tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.45)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
+.tabs a,.tabs button{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
+.tabs button.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.tabs a:active,.tabs button:active{opacity:.7}
+@media(hover:hover){.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}}
+@media(max-width:480px){.tabs a,.tabs button{padding:14px 16px;font-size:.8125rem}}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+:focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="w">
+  <section id="v-qr" class="view active" role="tabpanel">
+    <div class="preview"><canvas id="qrC"></canvas></div>
+    <div class="msg" id="qrErr" style="display:none"></div>
+    <div class="in">
+      <textarea id="qrIn" rows="2" placeholder="Enter text or URL" spellcheck="false"></textarea>
+    </div>
+    <div class="links">
+      <button id="qrCp" type="button" data-l="Copy"><svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
+      <button id="qrDl" type="button" data-l="Download"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
+    </div>
+  </section>
+  <section id="v-bc" class="view" role="tabpanel">
+    <div class="preview"><span class="ldg" id="bcLd">Loading</span><svg id="bcS" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="msg" id="bcErr" style="display:none"></div>
+    <div class="in">
+      <select id="bcFmt" aria-label="Barcode format"></select>
+      <input type="text" id="bcIn" placeholder="1234" spellcheck="false" aria-label="Barcode data">
+    </div>
+    <div class="links">
+      <button id="bcCp" type="button" data-l="Copy"><svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
+      <button id="bcDl" type="button" data-l="Download"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
+    </div>
+  </section>
+</div>
+<nav>
+  <div class="tabs">
+    <a href="/">Home</a>
+    <button class="active" data-tab="qr">QR</button>
+    <button data-tab="bc">Barcode</button>
+  </div>
+</nav>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+var $=function(s){return document.getElementById(s)},
+    q=function(s){return document.querySelector(s)},
+    qa=function(s){return document.querySelectorAll(s)};
+
+var dt=null,bcOk=false,tm={};
+
+var FMT=[
+  {v:'CODE128',l:'Code 128',p:'1234'},
+  {v:'CODE39',l:'Code 39',p:'CODE39'},
+  {v:'EAN13',l:'EAN-13',p:'5901234123457'},
+  {v:'EAN8',l:'EAN-8',p:'96385074'},
+  {v:'UPC',l:'UPC-A',p:'123456789012'},
+  {v:'ITF14',l:'ITF-14',p:'12345678901231'},
+  {v:'MSI',l:'MSI',p:'1234'},
+  {v:'pharmacode',l:'Pharmacode',p:'1234'},
+  {v:'codabar',l:'Codabar',p:'A12345B'}
+];
+
+var bcFmt='CODE128';
+
+/* Populate format dropdown */
+var sel=$('bcFmt');
+FMT.forEach(function(f){var o=document.createElement('option');o.value=f.v;o.textContent=f.l;sel.appendChild(o)});
+
+/* Tab switching */
+q('.tabs').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  qa('.tabs button').forEach(function(t){t.classList.remove('active')});
+  qa('.view').forEach(function(v){v.classList.remove('active')});
+  b.classList.add('active');
+  $('v-'+b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='bc'&&!bcOk)loadBC();
+});
+
+/* ── QR Code ── */
+
+function genQR(){
+  var text=$('qrIn').value.trim()||'https://saputra.co.uk';
+  try{
+    var qr=qrcode(0,'H');qr.addData(text);qr.make();
+    drawQR(qr);$('qrErr').style.display='none';
+  }catch(e){
+    $('qrErr').textContent='Text too long for QR code';$('qrErr').style.display='';
+  }
+}
+
+function drawQR(qr){
+  var c=$('qrC'),ctx=c.getContext('2d'),n=qr.getModuleCount();
+  var dpr=window.devicePixelRatio||1,css=c.offsetWidth||280,sz=Math.round(css*dpr);
+  c.width=sz;c.height=sz;
+  var cell=sz/(n+8),off=cell*4;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+  ctx.fillStyle='#000';
+  for(var r=0;r<n;r++)for(var cl=0;cl<n;cl++)
+    if(qr.isDark(r,cl))ctx.fillRect(Math.round(off+cl*cell),Math.round(off+r*cell),Math.ceil(cell),Math.ceil(cell));
+}
+
+function hiRes(sz){
+  var text=$('qrIn').value.trim()||'https://saputra.co.uk';
+  var qr=qrcode(0,'H');qr.addData(text);qr.make();
+  var n=qr.getModuleCount(),c=document.createElement('canvas');
+  c.width=sz;c.height=sz;var ctx=c.getContext('2d');
+  var cell=sz/(n+8),off=cell*4;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+  ctx.fillStyle='#000';
+  for(var r=0;r<n;r++)for(var cl=0;cl<n;cl++)
+    if(qr.isDark(r,cl))ctx.fillRect(Math.round(off+cl*cell),Math.round(off+r*cell),Math.ceil(cell),Math.ceil(cell));
+  return c;
+}
+
+/* ── Barcode ── */
+
+function genBC(){
+  if(!bcOk||typeof JsBarcode==='undefined')return;
+  var text=$('bcIn').value.trim(),fmt=FMT.find(function(f){return f.v===bcFmt});
+  if(!text)text=fmt.p;
+  var svg=$('bcS');
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  try{
+    JsBarcode(svg,text,{
+      format:bcFmt,width:2,height:100,margin:10,
+      displayValue:true,
+      font:'-apple-system,BlinkMacSystemFont,sans-serif',
+      fontSize:14,fontOptions:'500',
+      lineColor:'#000',background:'#fff'
+    });
+    $('bcErr').style.display='none';$('bcLd').style.display='none';
+  }catch(e){
+    $('bcErr').textContent='Invalid data for '+fmt.l;
+    $('bcErr').style.display='';$('bcLd').style.display='none';
+  }
+}
+
+function loadBC(){
+  if(bcOk)return;
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js';
+  s.onload=function(){bcOk=true;genBC()};
+  s.onerror=function(){$('bcLd').textContent='Failed to load';$('bcLd').style.color='#C41E3A'};
+  document.head.appendChild(s);
+}
+
+/* ── SVG → Canvas ── */
+
+function svg2c(svg,scale){
+  return new Promise(function(ok,no){
+    var d=new XMLSerializer().serializeToString(svg);
+    var c=document.createElement('canvas'),img=new Image();
+    img.onload=function(){
+      c.width=img.width*scale;c.height=img.height*scale;
+      var ctx=c.getContext('2d');ctx.scale(scale,scale);
+      ctx.drawImage(img,0,0);ok(c);
+    };
+    img.onerror=no;
+    img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(d)));
+  });
+}
+
+/* ── Copy ── */
+
+async function cpQR(){
+  try{
+    var c=hiRes(1024);
+    var item=new ClipboardItem({'image/png':new Promise(function(r){c.toBlob(r,'image/png')})});
+    await navigator.clipboard.write([item]);
+    fb($('qrCp'),'Copied','qrCp');
+  }catch(e){
+    try{
+      await navigator.clipboard.writeText($('qrIn').value.trim()||'https://saputra.co.uk');
+      fb($('qrCp'),'Copied','qrCp');
+    }catch(e2){}
+  }
+}
+
+async function cpBC(){
+  try{
+    var c=await svg2c($('bcS'),3);
+    var item=new ClipboardItem({'image/png':new Promise(function(r){c.toBlob(r,'image/png')})});
+    await navigator.clipboard.write([item]);
+    fb($('bcCp'),'Copied','bcCp');
+  }catch(e){}
+}
+
+/* ── Download ── */
+
+function dlQR(){
+  var c=hiRes(1024),a=document.createElement('a');
+  a.href=c.toDataURL('image/png');a.download='qrcode.png';a.click();
+  fb($('qrDl'),'Saved','qrDl');
+}
+
+async function dlBC(){
+  try{
+    var c=await svg2c($('bcS'),3);
+    var a=document.createElement('a');
+    a.href=c.toDataURL('image/png');a.download='barcode.png';a.click();
+    fb($('bcDl'),'Saved','bcDl');
+  }catch(e){}
+}
+
+/* ── Feedback animation ── */
+
+function fb(btn,text,key){
+  clearTimeout(tm[key]);
+  var sp=btn.querySelector('span');
+  btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+  sp.textContent=text;
+  tm[key]=setTimeout(function(){btn.classList.remove('ok');sp.textContent=btn.dataset.l},800);
+}
+
+/* ── Input handlers ── */
+
+$('qrIn').addEventListener('input',function(){clearTimeout(dt);dt=setTimeout(genQR,300)});
+$('bcIn').addEventListener('input',function(){clearTimeout(dt);dt=setTimeout(genBC,300)});
+$('bcFmt').addEventListener('change',function(){
+  bcFmt=this.value;
+  var fmt=FMT.find(function(f){return f.v===bcFmt});
+  $('bcIn').placeholder=fmt.p;
+  clearTimeout(dt);dt=setTimeout(genBC,100);
+});
+
+/* ── Button handlers ── */
+
+$('qrCp').onclick=cpQR;$('qrDl').onclick=dlQR;
+$('bcCp').onclick=cpBC;$('bcDl').onclick=dlBC;
+
+/* ── Init ── */
+
+genQR();
+</script>
+</body>
+</html>
