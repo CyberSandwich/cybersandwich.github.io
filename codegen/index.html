@@ -99,10 +99,10 @@ body{
 .chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
 .stepper{display:flex;align-items:center;gap:6px}
 .step-btn{
-  height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
-  font:500 .875rem/28px var(--font);color:var(--t3);cursor:pointer;
+  width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
+  font:500 .9375rem/1 var(--font);color:var(--t3);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:all .15s;padding:0 12px
+  transition:all .15s;padding:0
 }
 .step-btn:active:not(:disabled){transform:scale(.9)}
 .step-btn:disabled{opacity:.3;cursor:default}
@@ -702,6 +702,7 @@ function initSettings(container,groups){
         chips.textContent='';
         g.formats.forEach(function(name,i){
           if(i===fmtIdx)return;
+          if(g.hide&&g.hide(i))return;
           var btn=document.createElement('button');
           btn.type='button';btn.className='chip';btn.textContent=name;
           btn.addEventListener('click',function(){
@@ -720,6 +721,7 @@ function initSettings(container,groups){
       };
       buildChips();
 
+      g._rebuild=buildChips;
       g._reset=function(){fmtIdx=g.def;setSVG(iconWrap,getIcon(g.def));nameSpan.textContent=g.formats[g.def];buildChips();g.onChange(g.def)};
       row.appendChild(chips);
 
@@ -793,11 +795,11 @@ function updatePvStyle(pv,style){
 var qrGroups1=[
   {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;genQR()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;genQR()}},
-  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,onChange:function(i){if(i===2&&qrS.fmt===2){resetGroup(qrGroups1[2]);return}qrS.style=i;updatePvStyle(qrPv,i);genQR()}}
+  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&qrS.fmt===2},onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQR()}}
 ];
 initSettings($('qrCh1'),qrGroups1);
 var qrGroups2=[
-  {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){qrS.fmt=i;qrGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&qrS.style===2)resetGroup(qrGroups1[2])}},
+  {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){qrS.fmt=i;qrGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&qrS.style===2)resetGroup(qrGroups1[2]);else qrGroups1[2]._rebuild()}},
   {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:16,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i}}
 ];
 initSettings($('qrCh2'),qrGroups2);
@@ -808,11 +810,11 @@ var bcGroups1=[
   {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBC()}},
   {type:'format',icons:TEXT_ICONS,formats:['On','Off'],def:1,onChange:function(i){bcS.text=i;genBC()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBC()}},
-  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,onChange:function(i){if(i===2&&bcS.fmt===2){resetGroup(bcGroups1[3]);return}bcS.style=i;updatePvStyle(bcPv,i);genBC()}}
+  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&bcS.fmt===2},onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBC()}}
 ];
 initSettings($('bcCh1'),bcGroups1);
 var bcGroups2=[
-  {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){bcS.fmt=i;bcGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&bcS.style===2)resetGroup(bcGroups1[3])}},
+  {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){bcS.fmt=i;bcGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&bcS.style===2)resetGroup(bcGroups1[3]);else bcGroups1[3]._rebuild()}},
   {type:'stepper',icon:IC.maximize,steps:BCSIZES,def:6,format:function(v){return v+' px'},onChange:function(i){bcS.sizeIdx=i}}
 ];
 initSettings($('bcCh2'),bcGroups2);
