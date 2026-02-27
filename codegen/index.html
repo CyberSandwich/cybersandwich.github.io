@@ -303,21 +303,23 @@ function getQRStyle(){
   return {fg:s===1?'#FFFFFF':'#000000',bg:s===1?'#000000':(s===2?null:'#FFFFFF')};
 }
 
-/* ── Crop marks at margin boundary ── */
+/* ── Crop marks at canvas corners (margin = gap to QR) ── */
 function drawCropMarks(canvas,style,margin){
   if(margin<=0)return;
   var ctx=canvas.getContext('2d');
-  var w=canvas.width,h=canvas.height,m=margin;
+  var w=canvas.width,h=canvas.height;
   ctx.save();
   ctx.strokeStyle=style===1?'rgba(255,255,255,0.5)':'rgba(0,0,0,0.35)';
-  ctx.lineWidth=Math.max(2,Math.round(Math.min(w,h)/200));
-  var L=Math.min(Math.round(Math.min(w,h)*0.06),m-1);
+  var lw=Math.max(2,Math.round(Math.min(w,h)/200));
+  ctx.lineWidth=lw;
+  var L=Math.min(Math.round(Math.min(w,h)*0.06),margin-1);
   if(L<2){ctx.restore();return}
+  var o=Math.ceil(lw/2);
   ctx.beginPath();
-  ctx.moveTo(m,m-L);ctx.lineTo(m,m);ctx.lineTo(m-L,m);
-  ctx.moveTo(w-m+L,m);ctx.lineTo(w-m,m);ctx.lineTo(w-m,m-L);
-  ctx.moveTo(m-L,h-m);ctx.lineTo(m,h-m);ctx.lineTo(m,h-m+L);
-  ctx.moveTo(w-m,h-m+L);ctx.lineTo(w-m,h-m);ctx.lineTo(w-m+L,h-m);
+  ctx.moveTo(o,L+o);ctx.lineTo(o,o);ctx.lineTo(L+o,o);
+  ctx.moveTo(w-L-o,o);ctx.lineTo(w-o,o);ctx.lineTo(w-o,L+o);
+  ctx.moveTo(o,h-L-o);ctx.lineTo(o,h-o);ctx.lineTo(L+o,h-o);
+  ctx.moveTo(w-L-o,h-o);ctx.lineTo(w-o,h-o);ctx.lineTo(w-o,h-L-o);
   ctx.stroke();
   ctx.restore();
 }
