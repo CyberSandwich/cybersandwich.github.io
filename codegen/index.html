@@ -159,7 +159,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   <section id="v-qr" class="view active" role="tabpanel">
     <div class="preview" id="qrPv" aria-live="polite"><canvas id="qrC"></canvas></div>
     <div class="in">
-      <textarea id="qrIn" rows="1" spellcheck="false"></textarea>
+      <textarea id="qrIn" rows="1" placeholder="saputra.co.uk" spellcheck="false"></textarea>
     </div>
     <div class="actions">
       <button id="qrPs" type="button" data-l="Paste"><svg class="id" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
@@ -235,7 +235,7 @@ var FMTS=['PNG','SVG','JPEG'];
 
 /* ── State ── */
 var qrS={ec:2,sizeIdx:16,marginIdx:5,style:0,fmt:0};
-var bcS={height:1,text:0,sizeIdx:6,marginIdx:5,style:0,fmt:0};
+var bcS={height:0,text:1,sizeIdx:6,marginIdx:5,style:0,fmt:0};
 
 /* ── Format data ── */
 var FMT=[
@@ -765,9 +765,10 @@ var qrGroups=[
 initSettings($('qrCh'),qrGroups);
 
 /* Barcode Settings */
+var TEXT_ICONS=[IC.type,IC.clear];
 var bcGroups=[
-  {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:1,onChange:function(i){bcS.height=i;genBC()}},
-  {type:'chips',icon:IC.type,label:'Text',opts:['On','Off'],def:0,onChange:function(i){bcS.text=i;genBC()}},
+  {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBC()}},
+  {type:'format',icons:TEXT_ICONS,formats:['On','Off'],def:1,onChange:function(i){bcS.text=i;genBC()}},
   {type:'stepper',icon:IC.maximize,steps:BCSIZES,def:6,format:function(v){return v+' px'},onChange:function(i){bcS.sizeIdx=i}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBC()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBC()}},
@@ -900,18 +901,8 @@ $('qrPs').onclick=function(){handlePaste(this)};
 $('bcPs').onclick=function(){handlePaste(this)};
 
 /* ── Preview tap-to-copy ── */
-function pvCopy(pv,canvasFn){
-  pv.addEventListener('click',function(){
-    var c;
-    try{c=canvasFn()}catch(e){return}
-    if(!c)return;
-    navigator.clipboard.write([
-      new ClipboardItem({'image/png':new Promise(function(r){c.toBlob(r,'image/png')})})
-    ]).then(function(){toast('Copied to clipboard')}).catch(function(){});
-  });
-}
-pvCopy(qrPv,hiResQR);
-pvCopy(bcPv,exportBC);
+qrPv.addEventListener('click',function(){$('qrCp').click()});
+bcPv.addEventListener('click',function(){$('bcCp').click()});
 
 /* ── Reset ── */
 function resetAll(btn,groups,input,genFn){
