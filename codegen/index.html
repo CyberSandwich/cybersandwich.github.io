@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="color-scheme" content="light">
-<title>Codegen</title>
+<title>CodeGen</title>
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
 <style>
@@ -413,7 +413,7 @@ function qrSVG(){
   var modSz=(exportSz-2*exportMargin)/qr.count;
   var svg='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+exportSz+' '+exportSz+'" width="'+exportSz+'" height="'+exportSz+'">\n';
   if(st.bg)svg+='<rect width="'+exportSz+'" height="'+exportSz+'" fill="'+st.bg+'"/>\n';
-  svg+='<g fill="'+st.fg+'">\n';
+  svg+='<g fill="'+st.fg+'" shape-rendering="crispEdges">\n';
   for(var r=0;r<qr.count;r++){
     var c=0;
     while(c<qr.count){
@@ -608,7 +608,7 @@ function bcSVG(){
   var th=h+mg*2+textH;
   var svg='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+tw.toFixed(1)+' '+th.toFixed(1)+'" width="'+Math.round(tw)+'" height="'+Math.round(th)+'">\n';
   if(st.bg)svg+='<rect width="'+tw.toFixed(1)+'" height="'+th.toFixed(1)+'" fill="'+st.bg+'"/>\n';
-  svg+='<g fill="'+st.fg+'">\n';
+  svg+='<g fill="'+st.fg+'" shape-rendering="crispEdges">\n';
   for(var i=0;i<modules.length;i++){
     if(modules[i])svg+='<rect x="'+(mg+i*bw).toFixed(2)+'" y="'+mg.toFixed(2)+'" width="'+bw.toFixed(2)+'" height="'+h.toFixed(2)+'"/>\n';
   }
