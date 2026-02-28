@@ -903,11 +903,12 @@ function handlePaste(btn){
         return;
       }
     }
-    feedback(btn,'err-fb','No Access');
+    var msg='ontouchstart' in window?'Long-press to paste images':'Use ⌘V to paste images';
+    feedback(btn,'err-fb','Nothing Found');notify(msg,false);
   }).catch(function(){
     navigator.clipboard.readText().then(function(text){
       if(text){setInput(text);feedback(btn,'ps-fb','Pasted')}
-      else feedback(btn,'err-fb','No Access');
+      else{var msg='ontouchstart' in window?'Long-press to paste images':'Use ⌘V to paste images';feedback(btn,'err-fb','Nothing Found');notify(msg,false)}
     }).catch(function(){feedback(btn,'err-fb','No Access')});
   });
 }
