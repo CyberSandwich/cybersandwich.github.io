@@ -81,15 +81,14 @@ body{
 }
 .actions button:last-child{border-bottom:none}
 .settings{margin-top:14px}
-.srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;border-bottom:1px solid var(--bdr2)}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;border-bottom:1px solid var(--bdr2);cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
+.srow:active{opacity:.7}
 .slbl{
   display:flex;align-items:center;gap:12px;
-  font:500 .9375rem/1 var(--font);color:var(--t2);
-  cursor:pointer;user-select:none;-webkit-user-select:none
+  font:500 .9375rem/1 var(--font);color:var(--t2)
 }
 .slbl svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--t4)}
-.slbl:active{opacity:.5}
 .schips{display:flex;gap:4px}
 .chip{
   padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
@@ -146,7 +145,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 .tabs button.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active,.tabs button:active{opacity:.7}
 .notif-pill:active{transform:scale(.95);opacity:.8}
-@media(hover:hover){.preview:hover{transform:scale(.99)}.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}.notif-pill:hover{opacity:.9}}
+@media(hover:hover){.srow:hover{background:var(--bg2)}.preview:hover{transform:scale(.99)}.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}.notif-pill:hover{opacity:.9}}
 @media(max-width:480px){.tabs a,.tabs button{padding:14px 16px;font-size:.8125rem}}
 .notif{
   z-index:9;
@@ -710,7 +709,7 @@ function resetGroup(g){
   var row=g._row,lbl=row.querySelector('.slbl'),ic=lbl.querySelector('svg'),orig=ic.outerHTML;
   ic.outerHTML=IC.reset;
   row.classList.remove('rs-fb');
-  var rpl=row.querySelector('.ic polyline');if(rpl){var rn=rpl.cloneNode(true);rpl.parentNode.replaceChild(rn,rpl)}
+  void row.offsetWidth;
   row.classList.add('rs-fb');
   clearTimeout(g._ft);
   g._ft=setTimeout(function(){row.classList.remove('rs-fb');lbl.querySelector('svg').outerHTML=orig},600);
@@ -821,7 +820,7 @@ function initSettings(container,groups){
 
     g._row=row;
     lbl.setAttribute('tabindex','0');lbl.setAttribute('role','button');
-    lbl.addEventListener('click',function(){if(g._reset)resetGroup(g)});
+    row.addEventListener('click',function(e){if(!e.target.closest('button')&&g._reset)resetGroup(g)});
     lbl.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();if(g._reset)resetGroup(g)}});
     container.appendChild(row);
   });
@@ -1006,8 +1005,8 @@ document.addEventListener('paste',function(e){
 
 /* Reset */
 function resetAll(btn,groups,input,genFn){
-  groups.forEach(function(g){if(g._reset)g._reset()});
-  input.value='';if(input.tagName==='TEXTAREA')autoGrow(input);genFn();
+  input.value='';if(input.tagName==='TEXTAREA')autoGrow(input);
+  groups.forEach(function(g){if(g._reset)resetGroup(g)});
   feedback(btn,'rs-fb','Done');
 }
 $('qrRs').onclick=function(){resetAll(this,qrGroups1.concat(qrGroups2),qrIn,genQR)};
