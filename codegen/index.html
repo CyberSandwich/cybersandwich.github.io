@@ -165,6 +165,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 @keyframes notifOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pvPop{0%{transform:scale(.97)}100%{transform:scale(1)}}
 ::selection{background:rgba(72,72,74,.15)}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
@@ -317,6 +318,7 @@ var jpgC=document.createElement('canvas');
 var bcDet;try{bcDet=new BarcodeDetector({formats:['qr_code','code_128','ean_13','code_39']})}catch(e){bcDet=null}
 function debounce(fn,ms){var t,last=0;return function(){clearTimeout(t);var now=Date.now();if(now-last>=ms){last=now;requestAnimationFrame(fn)}else{t=setTimeout(function(){last=Date.now();requestAnimationFrame(fn)},ms)}}}
 function autoGrow(el){requestAnimationFrame(function(){el.style.height='auto';var h=el.scrollHeight;el.style.height=h+'px';el.classList.toggle('scroll',h>=140)})}
+function pvPop(el){el.style.animation='none';el.offsetHeight;el.style.animation='pvPop .2s cubic-bezier(.34,1.56,.64,1)'}
 
 function feedback(btn,cls,text){
   clearTimeout(tm[btn.id]);
@@ -515,6 +517,7 @@ function qrSVG(){
 }
 
 var genQRD=debounce(genQR,300);
+var genQRS=debounce(function(){genQR();pvPop(qrC)},80);
 qrIn.addEventListener('input',function(){autoGrow(qrIn);genQRD()});
 
 /* Barcode Encoders */
@@ -648,6 +651,7 @@ function genBC(force){
 }
 
 var genBCD=debounce(genBC,300);
+var genBCS=debounce(function(){genBC();pvPop(bcC)},80);
 
 function exportBC(){
   var text=bcIn.value.trim()||FMT[curFmt].p;
@@ -855,9 +859,9 @@ function updatePvStyle(pv,style){
 
 /* QR Settings */
 var qrGroups1=[
-  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;genQR()}},
-  {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;genQR()}},
-  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&qrS.fmt===2},onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQR()}}
+  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;genQRS()}},
+  {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;genQRS()}},
+  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&qrS.fmt===2},onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQRS()}}
 ];
 initSettings($('qrCh1'),qrGroups1);
 var qrGroups2=[
@@ -869,10 +873,10 @@ initSettings($('qrCh2'),qrGroups2);
 /* Barcode Settings */
 var TEXT_ICONS=[IC.type,IC.clear];
 var bcGroups1=[
-  {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBC()}},
-  {type:'format',icons:TEXT_ICONS,formats:['On','Off'],def:1,onChange:function(i){bcS.text=i;genBC()}},
-  {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBC()}},
-  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&bcS.fmt===2},onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBC()}}
+  {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBCS()}},
+  {type:'format',icons:TEXT_ICONS,formats:['On','Off'],def:1,onChange:function(i){bcS.text=i;genBCS()}},
+  {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBCS()}},
+  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&bcS.fmt===2},onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBCS()}}
 ];
 initSettings($('bcCh1'),bcGroups1);
 var bcGroups2=[
