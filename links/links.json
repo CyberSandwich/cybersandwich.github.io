@@ -80,6 +80,11 @@
     "category": "Personal"
   },
   {
+    "title": "VirusTotal",
+    "url": "https://www.virustotal.com/gui/home/upload",
+    "category": "Personal"
+  },
+  {
     "title": "Wayback Machine",
     "url": "https://archive.org",
     "category": "Personal"
