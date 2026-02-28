@@ -139,16 +139,15 @@ body{
 }
 .drop-overlay.active{opacity:1;pointer-events:auto}
 .fx-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%)}
-nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:0}
-nav>a{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s;white-space:nowrap;text-decoration:none}
+nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 .tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
-.tabs button{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap}
+.tabs a,.tabs button{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
 .tabs button.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-nav>a:active,.tabs button:active{opacity:.7}
+.tabs a:active,.tabs button:active{opacity:.7}
 .notif-pill:active{transform:scale(.95);opacity:.8}
-@media(hover:hover){.preview:hover{transform:scale(.99)}.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}nav>a:hover,.tabs button:hover:not(.active){color:var(--t2)}.notif-pill:hover{opacity:.9}}
-@media(max-width:480px){nav>a,.tabs button{padding:14px 16px;font-size:.8125rem}}
+@media(hover:hover){.preview:hover{transform:scale(.99)}.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}.notif-pill:hover{opacity:.9}}
+@media(max-width:480px){.tabs a,.tabs button{padding:14px 16px;font-size:.8125rem}}
 .notif{
   z-index:9;
   padding:0 20px calc(86px + env(safe-area-inset-bottom,0px));
@@ -196,8 +195,8 @@ nav>a:active,.tabs button:active{opacity:.7}
   <div id="dropOv" class="drop-overlay" role="status" aria-live="assertive">Drop Image to Scan</div>
 </div>
 <nav class="fx-bottom">
-  <a href="/">Home</a>
   <div class="tabs" role="tablist" aria-label="Generator">
+    <a href="/" role="none">Home</a>
     <button id="tab-qr" class="active" data-tab="qr" role="tab" aria-selected="true" aria-controls="v-qr">QR</button>
     <button id="tab-bc" data-tab="bc" role="tab" aria-selected="false" aria-controls="v-bc">Barcode</button>
   </div>
