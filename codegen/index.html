@@ -46,8 +46,8 @@ body{
     linear-gradient(45deg,#E8E8E8 25%,transparent 25%,transparent 75%,#E8E8E8 75%);
   background-size:16px 16px;background-position:0 0,8px 8px
 }
-#qrC{display:block;width:100%;aspect-ratio:1;border-radius:4px}
-#bcC{display:block;max-width:100%}
+#qrC{display:block;width:100%;aspect-ratio:1;border-radius:4px;image-rendering:pixelated}
+#bcC{display:block;max-width:100%;image-rendering:pixelated}
 .msg{text-align:center;font-size:.8125rem;color:#C41E3A;padding:2px 20px 10px}
 .in{margin-bottom:14px}
 .in textarea,.in input[type=text]{
@@ -459,28 +459,28 @@ function hiResQR(){
 }
 
 /* QR SVG Matrix */
-var matC=document.createElement('canvas');
+var matC=document.createElement('canvas'),MAT_SZ=4956;
 function getQRMatrix(text,ecLevel){
-  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:500,quiet:0},matC);
+  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:MAT_SZ,quiet:0},matC);
   var ctx=matC.getContext('2d',{willReadFrequently:true});
-  var data=ctx.getImageData(0,0,500,500).data;
-  var firstLight=500;
-  for(var x=0;x<500;x++){if(data[x*4]>128){firstLight=x;break}}
+  var data=ctx.getImageData(0,0,MAT_SZ,MAT_SZ).data;
+  var firstLight=MAT_SZ;
+  for(var x=0;x<MAT_SZ;x++){if(data[x*4]>128){firstLight=x;break}}
   var modPx=firstLight/7;
-  var rawCount=500/modPx;
+  var rawCount=MAT_SZ/modPx;
   var bestCount=21,bestDiff=Math.abs(rawCount-21);
   for(var v=1;v<=40;v++){
     var c=4*v+17,d=Math.abs(rawCount-c);
     if(d<bestDiff){bestDiff=d;bestCount=c}
   }
-  modPx=500/bestCount;
+  modPx=MAT_SZ/bestCount;
   var matrix=[];
   for(var r=0;r<bestCount;r++){
     var row=[];
     for(var c=0;c<bestCount;c++){
       var px=Math.floor((c+.5)*modPx),py=Math.floor((r+.5)*modPx);
-      if(px>=500)px=499;if(py>=500)py=499;
-      row.push(data[(py*500+px)*4]<128);
+      if(px>=MAT_SZ)px=MAT_SZ-1;if(py>=MAT_SZ)py=MAT_SZ-1;
+      row.push(data[(py*MAT_SZ+px)*4]<128);
     }
     matrix.push(row);
   }
