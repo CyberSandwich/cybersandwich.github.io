@@ -872,6 +872,13 @@ function copyCanvas(canvas,btn){
   });
 }
 
+function dlName(fallback){
+  var text=curTab==='qr'?qrIn.value.trim():bcIn.value.trim();
+  if(!text)return fallback;
+  var s=text.toLowerCase().replace(/[^a-z0-9 -]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  return s.slice(0,20)||fallback;
+}
+
 function dlBlob(blob,name,btn){
   var url=URL.createObjectURL(blob);
   dlA.download=name;dlA.href=url;dlA.click();
@@ -899,7 +906,7 @@ $('qrDl').onclick=function(){
   try{
     var svg=qrS.fmt===1?qrSVG():null;
     var canvas=qrS.fmt!==1?hiResQR():null;
-    downloadExport(canvas,svg,qrS.fmt,'qrcode',btn);
+    downloadExport(canvas,svg,qrS.fmt,dlName('qrcode'),btn);
   }catch(e){feedback(btn,'err-fb','Error')}
 };
 
@@ -910,7 +917,7 @@ $('bcDl').onclick=function(){
     var svg=bcS.fmt===1?bcSVG():null;
     var canvas=bcS.fmt!==1?exportBC():null;
     if(!canvas&&!svg){feedback(btn,'err-fb','Invalid');return}
-    downloadExport(canvas,svg,bcS.fmt,'barcode',btn);
+    downloadExport(canvas,svg,bcS.fmt,dlName('barcode'),btn);
   }catch(e){feedback(btn,'err-fb','Error')}
 };
 
