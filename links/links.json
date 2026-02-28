@@ -30,11 +30,6 @@
     "category": "Personal"
   },
   {
-    "title": "Outlook",
-    "url": "https://outlook.office.com/mail/",
-    "category": "Personal"
-  },
-  {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
     "category": "Personal"
@@ -42,6 +37,11 @@
   {
     "title": "OpenAI Whisper",
     "url": "https://github.com/openai/whisper",
+    "category": "Personal"
+  },
+  {
+    "title": "Outlook",
+    "url": "https://outlook.office.com/mail/",
     "category": "Personal"
   },
   {
@@ -160,13 +160,13 @@
     "category": "Academic"
   },
   {
-    "title": "MyBib",
-    "url": "https://www.mybib.com/#/projects/",
+    "title": "my.wbs",
+    "url": "https://my.wbs.ac.uk/-/academic/homepage/",
     "category": "Academic"
   },
   {
-    "title": "my.wbs",
-    "url": "https://my.wbs.ac.uk/-/academic/homepage/",
+    "title": "MyBib",
+    "url": "https://www.mybib.com/#/projects/",
     "category": "Academic"
   },
   {
@@ -195,6 +195,11 @@
     "category": "Academic"
   },
   {
+    "title": "Warwick Interactive Map",
+    "url": "https://use.mazemap.com/#v=1&config=Warwick&campusid=2188&zlevel=1&center=-1.562515,52.382145&zoom=14.7",
+    "category": "Academic"
+  },
+  {
     "title": "Warwick Module Search",
     "url": "https://courses.warwick.ac.uk/",
     "category": "Academic"
@@ -220,11 +225,6 @@
     "category": "Academic"
   },
   {
-    "title": "IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
-    "category": "Modules"
-  },
-  {
     "title": "IB3960 Financial Statement Analysis & Security Valuation",
     "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
     "category": "Modules"
@@ -232,6 +232,11 @@
   {
     "title": "IB3G40 Law for Entrepreneurs",
     "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3N20 Decision Making in Entrepreneurship",
+    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
     "category": "Modules"
   },
   {
