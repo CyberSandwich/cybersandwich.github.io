@@ -20,6 +20,9 @@ on:
           - Modules
           - Community
           - Miscellaneous
+permissions:
+  contents: write
+
 jobs:
   add:
     runs-on: ubuntu-latest

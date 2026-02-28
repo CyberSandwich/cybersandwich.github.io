@@ -8,6 +8,9 @@ on:
       body:
         description: 'Post content (Markdown)'
         required: true
+permissions:
+  contents: write
+
 jobs:
   add:
     runs-on: ubuntu-latest
