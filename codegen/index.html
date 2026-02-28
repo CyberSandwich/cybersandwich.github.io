@@ -34,7 +34,7 @@ body{
 .preview{
   padding:24px;margin-bottom:14px;
   display:flex;align-items:center;justify-content:center;
-  min-height:180px;
+  min-height:180px;contain:content;
   transition:background .3s,transform .15s;cursor:pointer
 }
 .preview:active{transform:scale(.97)}
@@ -316,7 +316,7 @@ var tmpQR=document.createElement('canvas');
 var dlA=document.createElement('a');
 var jpgC=document.createElement('canvas');
 var bcDet;try{bcDet=new BarcodeDetector({formats:['qr_code','code_128','ean_13','code_39']})}catch(e){bcDet=null}
-function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(function(){requestAnimationFrame(fn)},ms)}}
+function debounce(fn,ms){var t,last=0;return function(){clearTimeout(t);var now=Date.now();if(now-last>=ms){last=now;requestAnimationFrame(fn)}else{t=setTimeout(function(){last=Date.now();requestAnimationFrame(fn)},ms)}}}
 function autoGrow(el){requestAnimationFrame(function(){el.style.height='auto';var h=el.scrollHeight;el.style.height=h+'px';el.classList.toggle('scroll',h>=140)})}
 
 function feedback(btn,cls,text){
@@ -354,7 +354,7 @@ function scanOk(btn,cpBtn,result){
 function scanFail(btn){feedback(btn,'err-fb',NF);notify(NF,false)}
 
 /* Tab switching */
-var tabBtns=document.querySelectorAll('[data-tab]');
+var tabBtns=Array.from(document.querySelectorAll('[data-tab]'));
 var views={qr:$('v-qr'),bc:$('v-bc')};
 
 var curTab='qr';
@@ -377,13 +377,14 @@ tabsEl.addEventListener('click',function(e){
 });
 tabsEl.addEventListener('keydown',function(e){
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
-    var btns=Array.from(tabBtns),cur=btns.findIndex(function(b){return b.classList.contains('active')});
-    var next=e.key==='ArrowRight'?(cur+1)%btns.length:(cur-1+btns.length)%btns.length;
-    btns[next].focus();switchTab(btns[next].dataset.tab);e.preventDefault();
+    var cur=tabBtns.findIndex(function(b){return b.classList.contains('active')});
+    var next=e.key==='ArrowRight'?(cur+1)%tabBtns.length:(cur-1+tabBtns.length)%tabBtns.length;
+    tabBtns[next].focus();switchTab(tabBtns[next].dataset.tab);e.preventDefault();
   }
 });
 
-function getStyle(s){return {fg:s===1?'#FFFFFF':'#000000',bg:s===1?'#000000':(s===2?null:'#FFFFFF')}}
+var STYLES=[{fg:'#000000',bg:'#FFFFFF'},{fg:'#FFFFFF',bg:'#000000'},{fg:'#000000',bg:null}];
+function getStyle(s){return STYLES[s]}
 
 /* Crop marks */
 function drawCropMarks(canvas,style,margin,ctx){
@@ -407,10 +408,14 @@ function drawCropMarks(canvas,style,margin,ctx){
 }
 
 /* QR Rendering */
-function genQR(){
+var qrKey='';
+function genQR(force){
   var text=qrIn.value.trim()||'saputra.co.uk';
-  var st=getStyle(qrS.style);
   var w=qrC.offsetWidth||300;
+  var key=text+'|'+qrS.ec+'|'+qrS.style+'|'+qrS.marginIdx+'|'+w;
+  if(!force&&key===qrKey)return;
+  qrKey=key;
+  var st=getStyle(qrS.style);
   var dpr=window.devicePixelRatio||2;
   var sz=Math.round(w*dpr);
   var marginPx=MARGINS[qrS.marginIdx];
@@ -446,10 +451,10 @@ function hiResQR(){
 }
 
 /* QR SVG Matrix */
+var matC=document.createElement('canvas');
 function getQRMatrix(text,ecLevel){
-  var tmp=document.createElement('canvas');
-  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:500,quiet:0},tmp);
-  var ctx=tmp.getContext('2d',{willReadFrequently:true});
+  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:500,quiet:0},matC);
+  var ctx=matC.getContext('2d',{willReadFrequently:true});
   var data=ctx.getImageData(0,0,500,500).data;
   var firstLight=500;
   for(var x=0;x<500;x++){if(data[x*4]>128){firstLight=x;break}}
@@ -611,10 +616,14 @@ function renderBC(canvas,modules,opts){
   return ctx;
 }
 
-function genBC(){
+var bcKey='';
+function genBC(force){
   var text=bcIn.value.trim();
   var fmt=FMT[curFmt];
   if(!text)text=fmt.p;
+  var key=text+'|'+curFmt+'|'+bcS.height+'|'+bcS.text+'|'+bcS.style+'|'+bcS.marginIdx+'|'+(bcC.parentElement.clientWidth||300);
+  if(!force&&key===bcKey)return;
+  bcKey=key;
   try{
     var modules=encoders[curFmt](text);
     if(!modules)throw new Error('Invalid');
@@ -1056,9 +1065,11 @@ document.addEventListener('keydown',function(e){
 });
 
 /* Resize + Visibility */
-window.addEventListener('resize',debounce(function(){if(curTab==='qr')genQR();else genBC()},200));
+if(window.ResizeObserver){
+  new ResizeObserver(function(){requestAnimationFrame(function(){if(curTab==='qr')genQR();else genBC()})}).observe(document.querySelector('.w'));
+}else{window.addEventListener('resize',debounce(function(){if(curTab==='qr')genQR();else genBC()},200))}
 document.addEventListener('visibilitychange',function(){if(!document.hidden)requestAnimationFrame(function(){if(curTab==='qr')genQR();else genBC()})});
-(function watchDPR(){var mq=matchMedia('(resolution:'+devicePixelRatio+'dppx)');mq.addEventListener('change',function(){if(curTab==='qr')genQR();else genBC();watchDPR()},{once:true})})();
+(function watchDPR(){var mq=matchMedia('(resolution:'+devicePixelRatio+'dppx)');mq.addEventListener('change',function(){if(curTab==='qr')genQR(true);else genBC(true);watchDPR()},{once:true})})();
 
 /* Init */
 genQR();
