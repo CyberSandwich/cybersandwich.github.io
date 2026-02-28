@@ -120,6 +120,11 @@
     "category": "Initiatives"
   },
   {
+    "title": "Google Analytics",
+    "url": "https://analytics.google.com/analytics/web/",
+    "category": "Initiatives"
+  },
+  {
     "title": "Human Interface Guidelines",
     "url": "https://developer.apple.com/design/human-interface-guidelines",
     "category": "Initiatives"
