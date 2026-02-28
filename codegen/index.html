@@ -350,6 +350,8 @@ function tabBtn(s){return $(curTab==='qr'?'qr'+s:'bc'+s)}
 function scanOk(btn,cpBtn,result){
   feedback(btn,'ps-fb','Scanned');
   var val=result.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
+  setInput(val);
+  navigator.clipboard.writeText(val).catch(function(){});
   notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
 }
 function scanFail(btn){feedback(btn,'err-fb',NF);notify(NF,false)}
@@ -414,7 +416,7 @@ function getCachedMatrix(text,ec){
   var k=text+'|'+ec;
   if(k===matKey&&matCache)return matCache;
   matKey=k;
-  try{matCache=getQRMatrix(text,EC[ec],500)}catch(e){matCache=null}
+  try{matCache=getQRMatrix(text,EC[ec])}catch(e){matCache=null}
   return matCache;
 }
 function drawQR(ctx,qr,st,sz,margin){
@@ -448,8 +450,8 @@ function genQR(force){
 
 function hiResQR(){
   var text=qrIn.value.trim()||'saputra.co.uk';
-  var qr;
-  try{qr=getQRMatrix(text,EC[qrS.ec],2000)}catch(e){return document.createElement('canvas')}
+  var qr=getCachedMatrix(text,qrS.ec);
+  if(!qr)return document.createElement('canvas');
   var st=getStyle(qrS.style);
   var exportSz=QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
@@ -460,30 +462,29 @@ function hiResQR(){
   return c;
 }
 
-/* QR SVG Matrix */
+/* QR Matrix — 177px render + center sampling (31K pixels vs 250K at 500px) */
 var matC=document.createElement('canvas');
-function getQRMatrix(text,ecLevel,sz){
-  if(!sz)sz=500;
-  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:sz,quiet:0},matC);
+function getQRMatrix(text,ecLevel){
+  var S=177;
+  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:S,quiet:0},matC);
   var ctx=matC.getContext('2d',{willReadFrequently:true});
-  var data=ctx.getImageData(0,0,sz,sz).data;
-  var firstLight=sz;
-  for(var x=0;x<sz;x++){if(data[x*4]>128){firstLight=x;break}}
+  var data=ctx.getImageData(0,0,S,S).data;
+  var firstLight=S;
+  for(var x=0;x<S;x++){if(data[x*4]>128){firstLight=x;break}}
   var modPx=firstLight/7;
-  var rawCount=sz/modPx;
+  var rawCount=S/modPx;
   var bestCount=21,bestDiff=Math.abs(rawCount-21);
   for(var v=1;v<=40;v++){
     var c=4*v+17,d=Math.abs(rawCount-c);
     if(d<bestDiff){bestDiff=d;bestCount=c}
   }
-  modPx=sz/bestCount;
+  modPx=S/bestCount;
   var matrix=[];
   for(var r=0;r<bestCount;r++){
     var row=[];
     for(var c=0;c<bestCount;c++){
       var px=Math.floor((c+.5)*modPx),py=Math.floor((r+.5)*modPx);
-      if(px>=sz)px=sz-1;if(py>=sz)py=sz-1;
-      row.push(data[(py*sz+px)*4]<128);
+      row.push(data[(py*S+px)*4]<128);
     }
     matrix.push(row);
   }
@@ -497,7 +498,7 @@ function qrSVG(){
   var w=qrC.offsetWidth||300;
   var marginPx=MARGINS[qrS.marginIdx];
   var exportMargin=Math.round(marginPx/w*exportSz);
-  var qr=getQRMatrix(text,EC[qrS.ec],2000);
+  var qr=getCachedMatrix(text,qrS.ec);
   var modSz=(exportSz-2*exportMargin)/qr.count;
   var svg='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+exportSz+' '+exportSz+'" width="'+exportSz+'" height="'+exportSz+'">\n';
   if(st.bg)svg+='<rect width="'+exportSz+'" height="'+exportSz+'" fill="'+st.bg+'"/>\n';
@@ -596,53 +597,28 @@ function encC39(text){
 
 var encoders=[encC128,encEAN,encC39];
 
-/* Barcode Renderer */
-function renderBC(canvas,modules,opts){
-  var dpr=window.devicePixelRatio||2;
-  var pw=canvas.parentElement.clientWidth-48||300;
-  var targetW=BCSIZES[bcS.sizeIdx];
-  var mg=opts.margin||0;
-  var bw=Math.max(1,Math.floor((targetW-mg*2)/modules.length));
-  var scale=bw/2;
-  var h=Math.round((opts.height||80)*scale);
-  var fg=opts.fg||'#000',bg=opts.bg;
-  var ew=modules.length*bw+mg*2;
-  var textH=opts.showText?Math.round(24*scale):0;
-  var eh=h+mg*2+textH;
-  var fit=pw/ew*dpr;
-  var tw=Math.round(ew*fit);var th=Math.round(eh*fit);
-  var bwP=bw*fit;var mgP=mg*fit;var hP=h*fit;
-  canvas.width=tw;canvas.height=th;
-  canvas.style.width=Math.round(tw/dpr)+'px';
-  var ctx=canvas.getContext('2d');
-  ctx.imageSmoothingEnabled=false;
-  if(bg){ctx.fillStyle=bg;ctx.fillRect(0,0,tw,th)}
-  ctx.fillStyle=fg;
-  var i=0;while(i<modules.length){if(modules[i]){var s=i;while(i<modules.length&&modules[i])i++;ctx.fillRect(Math.round(mgP+s*bwP),Math.round(mgP),Math.ceil((i-s)*bwP),Math.round(hP))}else i++}
-  if(opts.showText&&opts.text){
-    var fs=Math.round(14*scale*fit);
-    ctx.font=Math.max(10,fs)+'px '+FF;
-    ctx.textAlign='center';
-    ctx.fillText(opts.text,tw/2,Math.round(hP+mgP+18*scale*fit));
-  }
-  return ctx;
-}
-
+/* Barcode Preview — scales exportBC for pixel-accurate preview */
 var bcKey='';
 function genBC(force){
   var text=bcIn.value.trim();
   var fmt=FMT[curFmt];
   if(!text)text=fmt.p;
-  var key=text+'|'+curFmt+'|'+bcS.height+'|'+bcS.text+'|'+bcS.style+'|'+bcS.marginIdx+'|'+(bcC.parentElement.clientWidth||300);
+  var pw=bcC.parentElement.clientWidth-48||300;
+  var key=text+'|'+curFmt+'|'+bcS.height+'|'+bcS.text+'|'+bcS.style+'|'+bcS.marginIdx+'|'+bcS.sizeIdx+'|'+pw;
   if(!force&&key===bcKey)return;
   bcKey=key;
   try{
-    var modules=encoders[curFmt](text);
-    if(!modules)throw new Error('Invalid');
-    var st=getStyle(bcS.style);
-    var mg=MARGINS[bcS.marginIdx];
-    var bctx=renderBC(bcC,modules,{height:BCH[bcS.height],showText:bcS.text===0,text:text,fg:st.fg,bg:st.bg,margin:mg});
-    drawCropMarks(bcC,bcS.style,mg,bctx);
+    var exp=exportBC();
+    if(!exp)throw new Error('Invalid');
+    var dpr=window.devicePixelRatio||2;
+    var fit=pw/exp.width*dpr;
+    var tw=Math.round(exp.width*fit);var th=Math.round(exp.height*fit);
+    bcC.width=tw;bcC.height=th;
+    bcC.style.width=Math.round(tw/dpr)+'px';
+    var ctx=bcC.getContext('2d');
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(exp,0,0,tw,th);
+    drawCropMarks(bcC,bcS.style,MARGINS[bcS.marginIdx],ctx);
     bcErr.style.display='none';
   }catch(e){
     bcErr.textContent='Invalid data for '+fmt.l;
