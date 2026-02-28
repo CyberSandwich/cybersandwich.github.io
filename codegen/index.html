@@ -505,7 +505,7 @@ function qrSVG(){
   return svg;
 }
 
-var genQRD=debounce(genQR,150);
+var genQRD=debounce(genQR,300);
 qrIn.addEventListener('input',function(){autoGrow(qrIn);genQRD()});
 
 /* Barcode Encoders */
@@ -638,7 +638,7 @@ function genBC(force){
   }
 }
 
-var genBCD=debounce(genBC,150);
+var genBCD=debounce(genBC,300);
 
 function exportBC(){
   var text=bcIn.value.trim()||FMT[curFmt].p;
