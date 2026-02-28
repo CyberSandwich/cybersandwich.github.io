@@ -878,39 +878,36 @@ $('bcDl').onclick=function(){
 /* ── Paste + Scan ── */
 function handlePaste(btn){
   var cpBtn=activeTab()==='qr'?$('qrCp'):$('bcCp');
+  function onScanResult(result){
+    if(result){
+      feedback(btn,'ps-fb','Scanned');
+      var val=result.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
+      notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
+    }else{feedback(btn,'err-fb','Nothing Found');notify('Nothing Found',false)}
+  }
+  function onScanErr(){feedback(btn,'err-fb','Nothing Found');notify('Nothing Found',false)}
+  if(!navigator.clipboard||!navigator.clipboard.read){
+    navigator.clipboard.readText().then(function(text){
+      if(text){setInput(text);feedback(btn,'ps-fb','Pasted')}
+      else feedback(btn,'err-fb','No Access');
+    }).catch(function(){feedback(btn,'err-fb','No Access')});
+    return;
+  }
   navigator.clipboard.read().then(function(items){
     for(var x=0;x<items.length;x++){
-      var it=items[x];
-      var imgType=null;
+      var it=items[x],imgType=null;
       for(var y=0;y<it.types.length;y++){if(it.types[y].indexOf('image/')===0){imgType=it.types[y];break}}
-      if(imgType){
-        it.getType(imgType).then(function(blob){
-          scanImage(blob).then(function(result){
-            if(result){
-              feedback(btn,'ps-fb','Scanned');
-              var val=result.rawValue;
-              var display=val.length>40?val.substring(0,37)+'...':val;
-              notify(display,true,function(){
-                navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')});
-              });
-            }else{
-              feedback(btn,'err-fb','Nothing Found');
-              notify('Nothing Found',false);
-            }
-          }).catch(function(){feedback(btn,'err-fb','Nothing Found');notify('Nothing Found',false)});
-        });
-        return;
-      }
+      if(imgType){it.getType(imgType).then(function(blob){scanImage(blob).then(onScanResult).catch(onScanErr)});return}
       if(it.types.indexOf('text/plain')>=0){
-        it.getType('text/plain').then(function(blob){
-          blob.text().then(function(text){setInput(text);feedback(btn,'ps-fb','Pasted')});
-        });
+        it.getType('text/plain').then(function(blob){blob.text().then(function(text){setInput(text);feedback(btn,'ps-fb','Pasted')})});
         return;
       }
     }
+    feedback(btn,'err-fb','No Access');
   }).catch(function(){
     navigator.clipboard.readText().then(function(text){
       if(text){setInput(text);feedback(btn,'ps-fb','Pasted')}
+      else feedback(btn,'err-fb','No Access');
     }).catch(function(){feedback(btn,'err-fb','No Access')});
   });
 }
@@ -958,27 +955,28 @@ bcPv.addEventListener('click',function(){$('bcCp').click()});
 
 /* ── Global paste ── */
 document.addEventListener('paste',function(e){
-  if(document.activeElement===qrIn||document.activeElement===bcIn)return;
   var psBtn=activeTab()==='qr'?$('qrPs'):$('bcPs');
   var cpBtn=activeTab()==='qr'?$('qrCp'):$('bcCp');
   var items=(e.clipboardData||{}).items;
-  if(!items)return;
-  for(var i=0;i<items.length;i++){
-    if(items[i].type.indexOf('image/')===0){
-      e.preventDefault();
-      scanImage(items[i].getAsFile()).then(function(result){
-        if(result){
-          feedback(psBtn,'ps-fb','Scanned');
-          var val=result.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
-          notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
-        }else{
-          feedback(psBtn,'err-fb','Nothing Found');
-          notify('Nothing Found',false);
-        }
-      }).catch(function(){feedback(psBtn,'err-fb','Nothing Found');notify('Nothing Found',false)});
-      return;
+  if(items){
+    for(var i=0;i<items.length;i++){
+      if(items[i].type.indexOf('image/')===0){
+        e.preventDefault();
+        scanImage(items[i].getAsFile()).then(function(result){
+          if(result){
+            feedback(psBtn,'ps-fb','Scanned');
+            var val=result.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
+            notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
+          }else{
+            feedback(psBtn,'err-fb','Nothing Found');
+            notify('Nothing Found',false);
+          }
+        }).catch(function(){feedback(psBtn,'err-fb','Nothing Found');notify('Nothing Found',false)});
+        return;
+      }
     }
   }
+  if(document.activeElement===qrIn||document.activeElement===bcIn)return;
   var text=(e.clipboardData||{}).getData('text');
   if(text){e.preventDefault();setInput(text);feedback(psBtn,'ps-fb','Pasted')}
 });
