@@ -412,7 +412,7 @@ function getCachedMatrix(text,ec){
   var k=text+'|'+ec;
   if(k===matKey&&matCache)return matCache;
   matKey=k;
-  try{matCache=getQRMatrix(text,EC[ec])}catch(e){matCache=null}
+  try{matCache=getQRMatrix(text,EC[ec],500)}catch(e){matCache=null}
   return matCache;
 }
 function drawQR(ctx,qr,st,sz,margin){
@@ -446,8 +446,8 @@ function genQR(force){
 
 function hiResQR(){
   var text=qrIn.value.trim()||'saputra.co.uk';
-  var qr=getCachedMatrix(text,qrS.ec);
-  if(!qr)return document.createElement('canvas');
+  var qr;
+  try{qr=getQRMatrix(text,EC[qrS.ec],2000)}catch(e){return document.createElement('canvas')}
   var st=getStyle(qrS.style);
   var exportSz=QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
@@ -459,28 +459,29 @@ function hiResQR(){
 }
 
 /* QR SVG Matrix */
-var matC=document.createElement('canvas'),MAT_SZ=4956;
-function getQRMatrix(text,ecLevel){
-  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:MAT_SZ,quiet:0},matC);
+var matC=document.createElement('canvas');
+function getQRMatrix(text,ecLevel,sz){
+  if(!sz)sz=500;
+  QrCreator.render({text:text,radius:0,ecLevel:ecLevel,fill:'#000',background:'#FFF',size:sz,quiet:0},matC);
   var ctx=matC.getContext('2d',{willReadFrequently:true});
-  var data=ctx.getImageData(0,0,MAT_SZ,MAT_SZ).data;
-  var firstLight=MAT_SZ;
-  for(var x=0;x<MAT_SZ;x++){if(data[x*4]>128){firstLight=x;break}}
+  var data=ctx.getImageData(0,0,sz,sz).data;
+  var firstLight=sz;
+  for(var x=0;x<sz;x++){if(data[x*4]>128){firstLight=x;break}}
   var modPx=firstLight/7;
-  var rawCount=MAT_SZ/modPx;
+  var rawCount=sz/modPx;
   var bestCount=21,bestDiff=Math.abs(rawCount-21);
   for(var v=1;v<=40;v++){
     var c=4*v+17,d=Math.abs(rawCount-c);
     if(d<bestDiff){bestDiff=d;bestCount=c}
   }
-  modPx=MAT_SZ/bestCount;
+  modPx=sz/bestCount;
   var matrix=[];
   for(var r=0;r<bestCount;r++){
     var row=[];
     for(var c=0;c<bestCount;c++){
       var px=Math.floor((c+.5)*modPx),py=Math.floor((r+.5)*modPx);
-      if(px>=MAT_SZ)px=MAT_SZ-1;if(py>=MAT_SZ)py=MAT_SZ-1;
-      row.push(data[(py*MAT_SZ+px)*4]<128);
+      if(px>=sz)px=sz-1;if(py>=sz)py=sz-1;
+      row.push(data[(py*sz+px)*4]<128);
     }
     matrix.push(row);
   }
@@ -494,7 +495,7 @@ function qrSVG(){
   var w=qrC.offsetWidth||300;
   var marginPx=MARGINS[qrS.marginIdx];
   var exportMargin=Math.round(marginPx/w*exportSz);
-  var qr=getQRMatrix(text,EC[qrS.ec]);
+  var qr=getQRMatrix(text,EC[qrS.ec],2000);
   var modSz=(exportSz-2*exportMargin)/qr.count;
   var svg='<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+exportSz+' '+exportSz+'" width="'+exportSz+'" height="'+exportSz+'">\n';
   if(st.bg)svg+='<rect width="'+exportSz+'" height="'+exportSz+'" fill="'+st.bg+'"/>\n';
