@@ -123,6 +123,8 @@ body{
 .rs-fb span{color:#CA8A04!important}
 .srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
 @keyframes spin{to{transform:rotate(360deg)}}
+.ld .id{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .err-fb{background:#FEE2E2!important}
 .err-fb span{color:#C41E3A!important}
 .drop-overlay{
@@ -293,7 +295,7 @@ function autoGrow(el){el.style.height='auto';var h=el.scrollHeight;el.style.heig
 function feedback(btn,cls,text){
   clearTimeout(tm[btn.id]);
   var sp=btn.querySelector('span');
-  btn.classList.remove('ok','ps-fb','dl-fb','rs-fb','err-fb');btn.offsetWidth;btn.classList.add(cls);
+  btn.classList.remove('ok','ps-fb','dl-fb','rs-fb','err-fb','ld');btn.offsetWidth;btn.classList.add(cls);
   sp.textContent=text;
   tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.dataset.l},800);
 }
@@ -877,6 +879,7 @@ $('bcDl').onclick=function(){
 
 /* ── Paste + Scan ── */
 function handlePaste(btn){
+  btn.classList.add('ld');btn.querySelector('span').textContent='Reading\u2026';
   var cpBtn=activeTab()==='qr'?$('qrCp'):$('bcCp');
   function onScanResult(result){
     if(result){
@@ -963,6 +966,7 @@ document.addEventListener('paste',function(e){
     for(var i=0;i<items.length;i++){
       if(items[i].type.indexOf('image/')===0){
         e.preventDefault();
+        psBtn.classList.add('ld');psBtn.querySelector('span').textContent='Scanning\u2026';
         scanImage(items[i].getAsFile()).then(function(result){
           if(result){
             feedback(psBtn,'ps-fb','Scanned');
@@ -1005,13 +1009,16 @@ document.addEventListener('drop',function(e){
   e.preventDefault();dragC=0;dropOv.classList.remove('active');
   var f=e.dataTransfer.files[0];
   if(f&&f.type.indexOf('image/')===0){
+    var psBtn=activeTab()==='qr'?$('qrPs'):$('bcPs');
     var cpBtn=activeTab()==='qr'?$('qrCp'):$('bcCp');
+    psBtn.classList.add('ld');psBtn.querySelector('span').textContent='Scanning\u2026';
     scanImage(f).then(function(r){
       if(r){
+        feedback(psBtn,'ps-fb','Scanned');
         var val=r.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
         notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
-      }else notify('Nothing Found',false);
-    }).catch(function(){notify('Nothing Found',false)});
+      }else{feedback(psBtn,'err-fb','Nothing Found');notify('Nothing Found',false)}
+    }).catch(function(){feedback(psBtn,'err-fb','Nothing Found');notify('Nothing Found',false)});
   }else{
     var t=e.dataTransfer.getData('text');
     if(t)setInput(t);
