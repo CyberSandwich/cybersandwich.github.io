@@ -897,7 +897,7 @@ function handlePaste(btn){
               feedback(btn,'err-fb','Nothing Found');
               notify('Nothing Found',false);
             }
-          });
+          }).catch(function(){feedback(btn,'err-fb','Nothing Found');notify('Nothing Found',false)});
         });
         return;
       }
@@ -920,16 +920,24 @@ function loadJsQR(){
   var el=$('jsqr-src');
   if(el){var s=document.createElement('script');s.textContent=el.textContent;document.head.appendChild(s);el.remove();s.remove()}
 }
+function decodeImg(img){
+  if(bcDet)return bcDet.detect(img).then(function(results){return results.length>0?results[0]:null});
+  loadJsQR();
+  if(typeof jsQR==='undefined')return Promise.resolve(null);
+  var c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+  var ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+  var d=ctx.getImageData(0,0,c.width,c.height);
+  var r=jsQR(d.data,d.width,d.height);
+  return Promise.resolve(r?{rawValue:r.data}:null);
+}
 function scanImage(blob){
-  return createImageBitmap(blob).then(function(img){
-    if(bcDet)return bcDet.detect(img).then(function(results){return results.length>0?results[0]:null});
-    loadJsQR();
-    if(typeof jsQR==='undefined')return null;
-    var c=document.createElement('canvas');c.width=img.width;c.height=img.height;
-    var ctx=c.getContext('2d');ctx.drawImage(img,0,0);
-    var d=ctx.getImageData(0,0,c.width,c.height);
-    var r=jsQR(d.data,d.width,d.height);
-    return r?{rawValue:r.data}:null;
+  return createImageBitmap(blob).then(decodeImg).catch(function(){
+    var url=URL.createObjectURL(blob),img=new Image();
+    return new Promise(function(resolve){
+      img.onload=function(){URL.revokeObjectURL(url);resolve(decodeImg(img))};
+      img.onerror=function(){URL.revokeObjectURL(url);resolve(null)};
+      img.src=url;
+    });
   });
 }
 
@@ -967,7 +975,7 @@ document.addEventListener('paste',function(e){
           feedback(psBtn,'err-fb','Nothing Found');
           notify('Nothing Found',false);
         }
-      });
+      }).catch(function(){feedback(psBtn,'err-fb','Nothing Found');notify('Nothing Found',false)});
       return;
     }
   }
@@ -1004,7 +1012,7 @@ document.addEventListener('drop',function(e){
         var val=r.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
         notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')})});
       }else notify('Nothing Found',false);
-    });
+    }).catch(function(){notify('Nothing Found',false)});
   }else{
     var t=e.dataTransfer.getData('text');
     if(t)setInput(t);
