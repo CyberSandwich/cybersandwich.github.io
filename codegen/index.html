@@ -238,7 +238,7 @@ var tm={},toastT,toastFadeT;
 
 /* Constants */
 var EC=['L','M','Q','H'];
-var QRSIZES=[16,32,96,110,170,180,192,256,300,400,500,512,800,900,1000,1024,1080,1200,1500,1600,1800,2000,2048,3000,3600,4000,6000];
+var QRSIZES=[32,96,110,170,180,192,256,300,400,500,512,800,900,1000,1024,1080,1200,1500,1600,1800,2000,2048,3000,3600,4000,6000];
 var BCSIZES=[256,400,512,600,800,1000,1080,1200,1500,2000];
 var MARGINS=[0,8,16,24,32,48,64];
 var BCH=[50,80,120];
@@ -842,7 +842,7 @@ var qrGroups1=[
 initSettings($('qrCh1'),qrGroups1);
 var qrGroups2=[
   {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){qrS.fmt=i;qrGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&qrS.style===2)resetGroup(qrGroups1[2]);else qrGroups1[2]._rebuild()}},
-  {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:16,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i}}
+  {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:15,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i}}
 ];
 initSettings($('qrCh2'),qrGroups2);
 
