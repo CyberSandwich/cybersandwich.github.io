@@ -454,7 +454,7 @@ function hiResQR(){
   var exportMargin=Math.round(MARGINS[qrS.marginIdx]/w*exportSz);
   var c=document.createElement('canvas');
   c.width=exportSz;c.height=exportSz;
-  drawQR(c.getContext('2d'),qr,st,exportSz,exportMargin);
+  drawQR(c.getContext('2d',{alpha:!st.bg}),qr,st,exportSz,exportMargin);
   return c;
 }
 
@@ -663,7 +663,7 @@ function exportBC(){
   var th=h+mg*2+textH;
   var c=document.createElement('canvas');
   c.width=tw;c.height=th;
-  var ctx=c.getContext('2d');
+  var ctx=c.getContext('2d',{alpha:!st.bg});
   ctx.imageSmoothingEnabled=false;
   if(st.bg){ctx.fillStyle=st.bg;ctx.fillRect(0,0,tw,th)}
   ctx.fillStyle=st.fg;
@@ -904,7 +904,7 @@ function downloadExport(canvas,svgStr,fmt,name,btn){
     dlBlob(new Blob([svgStr],{type:'image/svg+xml'}),name+'.svg',btn);
   }else if(fmt===2&&canvas){
     jpgC.width=canvas.width;jpgC.height=canvas.height;
-    var ctx=jpgC.getContext('2d');
+    var ctx=jpgC.getContext('2d',{alpha:false});
     ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,jpgC.width,jpgC.height);
     ctx.drawImage(canvas,0,0);
     jpgC.toBlob(function(blob){dlBlob(blob,name+'.jpg',btn)},'image/jpeg',1);

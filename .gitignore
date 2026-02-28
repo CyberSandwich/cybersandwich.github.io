@@ -4,6 +4,7 @@ investigation/
 docs/
 .playwright-mcp/
 v3-check.png
+codegen/qrcode.png
 CLAUDE.md
 firebase-debug.log
 WORKFLOWS.md
