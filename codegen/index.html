@@ -831,7 +831,7 @@ function copyCanvas(canvas,btn){
     feedback(btn,'ok','Copied');
   },function(){
     var text=activeTab()==='qr'?qrIn.value.trim():bcIn.value.trim();
-    if(text)navigator.clipboard.writeText(text).then(function(){feedback(btn,'ok','Copied text')});
+    if(text)navigator.clipboard.writeText(text).then(function(){feedback(btn,'ok','Copied Text')});
   });
 }
 
@@ -906,12 +906,12 @@ function handlePaste(btn){
         return;
       }
     }
-    var msg='ontouchstart' in window?'Long-press to paste images':'Use ⌘V to paste images';
+    var msg='ontouchstart' in window?'Long-Press Input Box to Paste Images':'Use \u2318V to Paste Images';
     feedback(btn,'err-fb','Nothing Found');notify(msg,false);
   }).catch(function(){
     navigator.clipboard.readText().then(function(text){
       if(text){setInput(text);feedback(btn,'ps-fb','Pasted')}
-      else{var msg='ontouchstart' in window?'Long-press to paste images':'Use ⌘V to paste images';feedback(btn,'err-fb','Nothing Found');notify(msg,false)}
+      else{var msg='ontouchstart' in window?'Long-Press Input Box to Paste Images':'Use \u2318V to Paste Images';feedback(btn,'err-fb','Nothing Found');notify(msg,false)}
     }).catch(function(){feedback(btn,'err-fb','No Access')});
   });
 }
