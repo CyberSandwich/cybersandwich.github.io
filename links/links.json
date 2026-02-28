@@ -50,13 +50,28 @@
     "category": "Personal"
   },
   {
+    "title": "Photopea",
+    "url": "https://www.photopea.com/",
+    "category": "Personal"
+  },
+  {
+    "title": "Smallpdf",
+    "url": "https://smallpdf.com/pdf-tools",
+    "category": "Personal"
+  },
+  {
+    "title": "TinyWow",
+    "url": "https://tinywow.com",
+    "category": "Personal"
+  },
+  {
     "title": "UK E-Visa",
     "url": "https://view-immigration-status.service.gov.uk/status",
     "category": "Personal"
   },
   {
     "title": "Wayback Machine",
-    "url": "https://web.archive.org",
+    "url": "https://archive.org",
     "category": "Personal"
   },
   {
@@ -187,6 +202,11 @@
   {
     "title": "Warwick Print",
     "url": "https://mobileprint.warwick.ac.uk/",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Printer Credits",
+    "url": "https://printercredits.warwick.ac.uk/",
     "category": "Academic"
   },
   {

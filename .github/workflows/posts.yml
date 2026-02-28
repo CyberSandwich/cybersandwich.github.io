@@ -10,47 +10,135 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: generate-posts-manifest
+  cancel-in-progress: true
+
 jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
 
       - name: Auto-rename files without date prefix
         run: |
+          renamed=0
           for f in updates/*.md; do
             [ -f "$f" ] || continue
             basename_f=$(basename "$f")
             if ! echo "$basename_f" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}-'; then
               date_prefix=$(date +%Y-%m-%d)
-              mv "updates/$basename_f" "updates/${date_prefix}-${basename_f}"
+              new_name="updates/${date_prefix}-${basename_f}"
+              if [ -f "$new_name" ]; then
+                echo "::warning::Skipping rename, target already exists: $new_name"
+                continue
+              fi
+              mv "$f" "$new_name"
+              echo "Renamed: $basename_f → ${date_prefix}-${basename_f}"
+              renamed=$((renamed + 1))
             fi
           done
+          echo "Renamed $renamed file(s)"
 
-      - name: Generate posts.json from local md files
+      - name: Generate posts.json manifest
         run: |
-          posts="[]"
-          for f in updates/*.md; do
-            [ -f "$f" ] || continue
-            basename_f=$(basename "$f")
-            date_val="${basename_f:0:10}"
-            title_val=$(sed '/^---$/,/^---$/d' "$f" | grep -m1 '^# ' | sed 's/^# //')
-            if [ -z "$title_val" ]; then
-              slug="${basename_f:11}"
-              title_val="${slug%.md}"
-              title_val=$(echo "$title_val" | tr '-' ' ')
-            fi
-            posts=$(echo "$posts" | jq \
-              --arg d "$date_val" \
-              --arg t "$title_val" \
-              --arg f "$basename_f" \
-              '. + [{date:$d,title:$t,file:$f}]')
-          done
-          echo "$posts" | jq 'sort_by(.date) | reverse' > updates/posts.json
+          python3 << 'PYEOF'
+          import json, os, re, glob
+
+          posts = []
+          for filepath in sorted(glob.glob('updates/*.md')):
+              basename = os.path.basename(filepath)
+
+              # Extract date from filename (YYYY-MM-DD prefix)
+              date_match = re.match(r'^(\d{4}-\d{2}-\d{2})-', basename)
+              if not date_match:
+                  print(f"::warning::Skipping file without date prefix: {basename}")
+                  continue
+              date_val = date_match.group(1)
+
+              # Extract title from markdown H1, stripping frontmatter
+              title_val = None
+              with open(filepath, 'r') as f:
+                  content = f.read()
+
+              # Strip YAML frontmatter
+              content_body = re.sub(r'^---.*?---\n?', '', content, count=1, flags=re.DOTALL)
+
+              # Find first H1
+              h1_match = re.search(r'^# (.+)$', content_body, re.MULTILINE)
+              if h1_match:
+                  title_val = h1_match.group(1).strip()
+
+              # Fallback: derive title from slug
+              if not title_val:
+                  slug = basename[11:]  # strip date + hyphen
+                  slug = slug.replace('.md', '')
+                  title_val = slug.replace('-', ' ')
+
+              # Word count (excluding frontmatter and headings)
+              words = len(re.sub(r'^#+ .+$', '', content_body, flags=re.MULTILINE).split())
+
+              posts.append({
+                  'date': date_val,
+                  'title': title_val,
+                  'file': basename,
+                  'words': words
+              })
+
+          # Sort by date descending, then title ascending
+          posts.sort(key=lambda x: (-x['date'].replace('-', '').__len__(), x['date']), reverse=True)
+          posts.sort(key=lambda x: x['date'], reverse=True)
+
+          with open('updates/posts.json', 'w') as f:
+              json.dump(posts, f, indent=2)
+              f.write('\n')
+
+          print(f"✓ Generated manifest with {len(posts)} post(s)")
+          total_words = sum(p['words'] for p in posts)
+          print(f"  Total words across all posts: {total_words}")
+          PYEOF
+
+      - name: Validate JSON output
+        run: python3 -c "import json; d=json.load(open('updates/posts.json')); assert isinstance(d, list), 'Expected array'" || { echo "::error::Generated invalid posts.json"; exit 1; }
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add updates/
-          git diff --staged --quiet || (git commit -m "chore: update posts manifest" && git push)
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "chore: update posts manifest"
+          git push
+
+      - name: Job summary
+        run: |
+          python3 << 'PYEOF'
+          import json, os
+
+          with open('updates/posts.json') as f:
+              posts = json.load(f)
+
+          lines = []
+          lines.append("## Posts Manifest Updated")
+          lines.append(f"**Total posts:** {len(posts)}")
+          lines.append("")
+          lines.append("| Date | Title | Words |")
+          lines.append("|------|-------|-------|")
+          for p in posts:
+              words = p.get('words', '—')
+              lines.append(f"| {p['date']} | {p['title']} | {words} |")
+
+          total_words = sum(p.get('words', 0) for p in posts)
+          lines.append(f"\n**Total words:** {total_words}")
+
+          summary = '\n'.join(lines)
+          summary_file = os.environ.get('GITHUB_STEP_SUMMARY', '')
+          if summary_file:
+              with open(summary_file, 'a') as f:
+                  f.write(summary + '\n')
+          print(summary)
+          PYEOF
