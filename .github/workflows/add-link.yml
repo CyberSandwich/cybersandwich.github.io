@@ -1,4 +1,5 @@
 name: Add Link
+
 on:
   workflow_dispatch:
     inputs:
@@ -20,37 +21,112 @@ on:
           - Modules
           - Community
           - Miscellaneous
+
 permissions:
   contents: write
+
+concurrency:
+  group: modify-links
+  cancel-in-progress: false
 
 jobs:
   add:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - env:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Validate inputs
+        env:
+          URL: ${{ github.event.inputs.url }}
+          TITLE: ${{ github.event.inputs.title }}
+        run: |
+          if [ -z "$TITLE" ] || [ "${#TITLE}" -gt 100 ]; then
+            echo "::error::Title must be between 1 and 100 characters"
+            exit 1
+          fi
+          if ! echo "$URL" | grep -qE '^https?://'; then
+            echo "::error::URL must start with http:// or https://"
+            exit 1
+          fi
+
+      - name: Add link to JSON (sorted within category)
+        env:
           TITLE: ${{ github.event.inputs.title }}
           URL: ${{ github.event.inputs.url }}
           CATEGORY: ${{ github.event.inputs.category }}
         run: |
-          python3 << 'EOF'
-          import json, os
+          python3 << 'PYEOF'
+          import json, os, sys
+
+          title = os.environ['TITLE'].strip()
+          url = os.environ['URL'].strip()
+          category = os.environ['CATEGORY'].strip()
+
           with open('links/links.json') as f:
-            data = json.load(f)
-          data.append({
-            'title': os.environ['TITLE'],
-            'url': os.environ['URL'],
-            'category': os.environ['CATEGORY']
-          })
+              data = json.load(f)
+
+          # Check for duplicate URLs
+          for entry in data:
+              if entry['url'].rstrip('/') == url.rstrip('/'):
+                  print(f"::error::Duplicate URL already exists: '{entry['title']}' → {entry['url']}")
+                  sys.exit(1)
+
+          # Check for duplicate titles within the same category
+          for entry in data:
+              if entry['title'].lower() == title.lower() and entry['category'] == category:
+                  print(f"::error::Duplicate title in {category}: '{entry['title']}'")
+                  sys.exit(1)
+
+          data.append({'title': title, 'url': url, 'category': category})
+
+          # Sort alphabetically by title within each category, preserving category order
+          categories = ['Personal', 'Career', 'Initiatives', 'Academic', 'Modules', 'Community', 'Miscellaneous']
+          cat_order = {c: i for i, c in enumerate(categories)}
+          data.sort(key=lambda x: (cat_order.get(x['category'], 999), x['title'].lower()))
+
           with open('links/links.json', 'w') as f:
-            json.dump(data, f, indent=2)
-            f.write('\n')
-          EOF
-      - env:
+              json.dump(data, f, indent=2)
+              f.write('\n')
+
+          print(f"✓ Added '{title}' to {category}")
+          PYEOF
+
+      - name: Validate JSON output
+        run: python3 -c "import json; json.load(open('links/links.json'))" || { echo "::error::Generated invalid JSON"; exit 1; }
+
+      - name: Commit and push
+        env:
           TITLE: ${{ github.event.inputs.title }}
+          CATEGORY: ${{ github.event.inputs.category }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add links/links.json
-          git commit -m "Add link: $TITLE"
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "Add link: $TITLE [$CATEGORY]"
           git push
+
+      - name: Job summary
+        env:
+          TITLE: ${{ github.event.inputs.title }}
+          URL: ${{ github.event.inputs.url }}
+          CATEGORY: ${{ github.event.inputs.category }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          TOTAL=$(python3 -c "import json; print(len(json.load(open('links/links.json'))))")
+          CAT_COUNT=$(python3 -c "import json; print(sum(1 for x in json.load(open('links/links.json')) if x['category']=='$CATEGORY'))")
+          cat >> "$GITHUB_STEP_SUMMARY" << EOF
+          ## Link Added
+          | Field | Value |
+          |-------|-------|
+          | **Title** | $TITLE |
+          | **URL** | $URL |
+          | **Category** | $CATEGORY |
+          | **Triggered by** | @$ACTOR |
+          | **Links in category** | $CAT_COUNT |
+          | **Total links** | $TOTAL |
+          EOF

@@ -1,4 +1,5 @@
 name: Add Post
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,33 +9,99 @@ on:
       body:
         description: 'Post content (Markdown)'
         required: true
+
 permissions:
   contents: write
+
+concurrency:
+  group: modify-posts
+  cancel-in-progress: false
 
 jobs:
   add:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - env:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Validate inputs
+        env:
           TITLE: ${{ github.event.inputs.title }}
           BODY: ${{ github.event.inputs.body }}
         run: |
-          python3 << 'EOF'
-          import os, re, datetime
-          title = os.environ['TITLE']
+          if [ -z "$TITLE" ] || [ "${#TITLE}" -gt 200 ]; then
+            echo "::error::Title must be between 1 and 200 characters"
+            exit 1
+          fi
+          if [ -z "$BODY" ]; then
+            echo "::error::Post body cannot be empty"
+            exit 1
+          fi
+
+      - name: Create post file
+        env:
+          TITLE: ${{ github.event.inputs.title }}
+          BODY: ${{ github.event.inputs.body }}
+        run: |
+          python3 << 'PYEOF'
+          import os, re, datetime, sys
+
+          title = os.environ['TITLE'].strip()
           body = os.environ['BODY']
           date = datetime.date.today().isoformat()
           slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+
+          if not slug:
+              print("::error::Title must contain at least one alphanumeric character")
+              sys.exit(1)
+
           filename = f"updates/{date}-{slug}.md"
+
+          # Check for slug collision
+          if os.path.exists(filename):
+              print(f"::error::A post with this slug already exists today: {filename}")
+              sys.exit(1)
+
+          os.makedirs('updates', exist_ok=True)
+
           with open(filename, 'w') as f:
-            f.write(f"# {title}\n\n{body}\n")
-          EOF
-      - env:
+              f.write(f"# {title}\n\n{body}\n")
+
+          word_count = len(body.split())
+          print(f"✓ Created {filename} ({word_count} words)")
+          PYEOF
+
+      - name: Commit and push
+        env:
           TITLE: ${{ github.event.inputs.title }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add updates/
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "Add post: $TITLE"
           git push
+
+      - name: Job summary
+        env:
+          TITLE: ${{ github.event.inputs.title }}
+          BODY: ${{ github.event.inputs.body }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          WORD_COUNT=$(echo "$BODY" | wc -w | tr -d ' ')
+          POST_COUNT=$(find updates/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+          DATE=$(date +%Y-%m-%d)
+          SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//')
+          cat >> "$GITHUB_STEP_SUMMARY" << EOF
+          ## Post Created
+          | Field | Value |
+          |-------|-------|
+          | **Title** | $TITLE |
+          | **File** | updates/${DATE}-${SLUG}.md |
+          | **Word count** | $WORD_COUNT |
+          | **Triggered by** | @$ACTOR |
+          | **Total posts** | $POST_COUNT |
+          EOF

@@ -1,4 +1,5 @@
 name: Add Project
+
 on:
   workflow_dispatch:
     inputs:
@@ -20,39 +21,122 @@ on:
           - Web
           - Extensions
           - In Development
+
 permissions:
   contents: write
+
+concurrency:
+  group: modify-projects
+  cancel-in-progress: false
 
 jobs:
   add:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - env:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Validate inputs
+        env:
+          TITLE: ${{ github.event.inputs.title }}
+          SUBTITLE: ${{ github.event.inputs.subtitle }}
+          URL: ${{ github.event.inputs.url }}
+        run: |
+          if [ -z "$TITLE" ] || [ "${#TITLE}" -gt 100 ]; then
+            echo "::error::Title must be between 1 and 100 characters"
+            exit 1
+          fi
+          if [ -z "$SUBTITLE" ] || [ "${#SUBTITLE}" -gt 200 ]; then
+            echo "::error::Subtitle must be between 1 and 200 characters"
+            exit 1
+          fi
+          if [ "$URL" != "#" ] && ! echo "$URL" | grep -qE '^(https?://|mailto:)'; then
+            echo "::error::URL must start with http://, https://, mailto:, or be '#' for stealth"
+            exit 1
+          fi
+
+      - name: Add project to JSON (sorted within category)
+        env:
           TITLE: ${{ github.event.inputs.title }}
           SUBTITLE: ${{ github.event.inputs.subtitle }}
           URL: ${{ github.event.inputs.url }}
           CATEGORY: ${{ github.event.inputs.category }}
         run: |
-          python3 << 'EOF'
-          import json, os
+          python3 << 'PYEOF'
+          import json, os, sys
+
+          title = os.environ['TITLE'].strip()
+          subtitle = os.environ['SUBTITLE'].strip()
+          url = os.environ['URL'].strip()
+          category = os.environ['CATEGORY'].strip()
+
           with open('projects/projects.json') as f:
-            data = json.load(f)
-          data.append({
-            'title': os.environ['TITLE'],
-            'subtitle': os.environ['SUBTITLE'],
-            'url': os.environ['URL'],
-            'category': os.environ['CATEGORY']
-          })
+              data = json.load(f)
+
+          # Check for duplicate titles
+          for entry in data:
+              if entry['title'].lower() == title.lower():
+                  print(f"::error::Project already exists: '{entry['title']}' in {entry['category']}")
+                  sys.exit(1)
+
+          # Check for duplicate URLs (skip '#' stealth entries)
+          if url != '#':
+              for entry in data:
+                  if entry['url'] != '#' and entry['url'].rstrip('/') == url.rstrip('/'):
+                      print(f"::error::Duplicate URL already exists: '{entry['title']}' → {entry['url']}")
+                      sys.exit(1)
+
+          data.append({'title': title, 'subtitle': subtitle, 'url': url, 'category': category})
+
+          # Sort alphabetically by title within each category, preserving category order
+          categories = ['Mobile', 'Web', 'Extensions', 'In Development']
+          cat_order = {c: i for i, c in enumerate(categories)}
+          data.sort(key=lambda x: (cat_order.get(x['category'], 999), x['title'].lower()))
+
           with open('projects/projects.json', 'w') as f:
-            json.dump(data, f, indent=2)
-            f.write('\n')
-          EOF
-      - env:
+              json.dump(data, f, indent=2)
+              f.write('\n')
+
+          print(f"✓ Added '{title}' to {category}")
+          PYEOF
+
+      - name: Validate JSON output
+        run: python3 -c "import json; json.load(open('projects/projects.json'))" || { echo "::error::Generated invalid JSON"; exit 1; }
+
+      - name: Commit and push
+        env:
           TITLE: ${{ github.event.inputs.title }}
+          CATEGORY: ${{ github.event.inputs.category }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add projects/projects.json
-          git commit -m "Add project: $TITLE"
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "Add project: $TITLE [$CATEGORY]"
           git push
+
+      - name: Job summary
+        env:
+          TITLE: ${{ github.event.inputs.title }}
+          SUBTITLE: ${{ github.event.inputs.subtitle }}
+          URL: ${{ github.event.inputs.url }}
+          CATEGORY: ${{ github.event.inputs.category }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          TOTAL=$(python3 -c "import json; print(len(json.load(open('projects/projects.json'))))")
+          CAT_COUNT=$(python3 -c "import json; print(sum(1 for x in json.load(open('projects/projects.json')) if x['category']=='$CATEGORY'))")
+          cat >> "$GITHUB_STEP_SUMMARY" << EOF
+          ## Project Added
+          | Field | Value |
+          |-------|-------|
+          | **Title** | $TITLE |
+          | **Subtitle** | $SUBTITLE |
+          | **URL** | $URL |
+          | **Category** | $CATEGORY |
+          | **Triggered by** | @$ACTOR |
+          | **Projects in category** | $CAT_COUNT |
+          | **Total projects** | $TOTAL |
+          EOF
