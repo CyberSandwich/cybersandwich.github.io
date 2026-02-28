@@ -453,6 +453,12 @@ function genQR(force){
   drawCropMarks(qrC,qrS.style,marginPhys,qrCtx);
 }
 
+function quantizeCanvas(ctx,w,h,hasBg){
+  var id=ctx.getImageData(0,0,w,h),d=new Uint32Array(id.data.buffer);
+  if(hasBg){for(var i=0;i<d.length;i++)d[i]=(d[i]&0xFF)<128?0xFF000000:0xFFFFFFFF}
+  else{for(var i=0;i<d.length;i++){var a=(d[i]>>>24)&0xFF;d[i]=a>128?0xFF000000:0x00000000}}
+  ctx.putImageData(id,0,0);
+}
 function hiResQR(){
   var text=qrIn.value.trim()||'saputra.co.uk';
   var qr=getCachedMatrix(text,qrS.ec);
@@ -463,7 +469,9 @@ function hiResQR(){
   var exportMargin=Math.round(MARGINS[qrS.marginIdx]/w*exportSz);
   var c=document.createElement('canvas');
   c.width=exportSz;c.height=exportSz;
-  drawQR(c.getContext('2d',{alpha:!st.bg}),qr,st,exportSz,exportMargin);
+  var ctx=c.getContext('2d',{alpha:!st.bg});
+  drawQR(ctx,qr,st,exportSz,exportMargin);
+  quantizeCanvas(ctx,exportSz,exportSz,!!st.bg);
   return c;
 }
 
