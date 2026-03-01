@@ -15,6 +15,11 @@
     "category": "Personal"
   },
   {
+    "title": "Claude",
+    "url": "https://claude.ai/settings/usage",
+    "category": "Personal"
+  },
+  {
     "title": "Cobalt",
     "url": "https://cobalt.tools/",
     "category": "Personal"
@@ -135,6 +140,11 @@
     "category": "Personal"
   },
   {
+    "title": "Vita Student Online GP",
+    "url": "https://vitastudent.onlinegp.co/",
+    "category": "Personal"
+  },
+  {
     "title": "Wayback Machine",
     "url": "https://archive.org",
     "category": "Personal"
@@ -162,6 +172,11 @@
   {
     "title": "Device Mockup",
     "url": "https://device-mockup-generator.garylaw.me/",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Facebook Ads Manager",
+    "url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit/standalone",
     "category": "Initiatives"
   },
   {
@@ -245,6 +260,11 @@
     "category": "Academic"
   },
   {
+    "title": "Questionmark Exam Portal",
+    "url": "https://ondemand.questionmark.eu/home/610141/assessments",
+    "category": "Academic"
+  },
+  {
     "title": "Scopus",
     "url": "https://www.scopus.com/search/form.uri?display=basic#basic",
     "category": "Academic"
@@ -262,6 +282,11 @@
   {
     "title": "University of Warwick Room Booking",
     "url": "https://abs.warwick.ac.uk/wrb2526/default.aspx",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Alternative Exam Portal",
+    "url": "https://altexams.warwick.ac.uk/assessments",
     "category": "Academic"
   },
   {
