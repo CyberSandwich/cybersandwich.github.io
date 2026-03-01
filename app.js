@@ -638,8 +638,7 @@ cmdInput.addEventListener('keydown',function(e){
 });
 
 // Keyboard shortcuts
-var kbIdx=-1;
-var kbCards=[];
+var kbIdx=-1,kbCards=[],kbPrev=-1;
 
 function kbGetCards(){
   var active=$('.page.active');
@@ -647,8 +646,9 @@ function kbGetCards(){
   return [].slice.call(active.querySelectorAll('.pcard,.cve,.ucard'));
 }
 
-function kbClear(){
+function kbClear(remember){
   if(kbIdx>=0&&kbCards[kbIdx])kbCards[kbIdx].classList.remove('kb-focus');
+  kbPrev=remember?kbIdx:-1;
   kbIdx=-1;kbCards=[];
 }
 
@@ -657,12 +657,17 @@ function kbMove(dir){
   if(!kbCards.length)return;
   if(kbIdx>=0&&kbCards[kbIdx])kbCards[kbIdx].classList.remove('kb-focus');
   if(kbIdx<0){
-    var vh=window.innerHeight;
-    kbIdx=dir>0?0:kbCards.length-1;
-    for(var i=dir>0?0:kbCards.length-1;dir>0?i<kbCards.length:i>=0;i+=dir){
-      var r=kbCards[i].getBoundingClientRect();
-      if(r.bottom>0&&r.top<vh){kbIdx=i;break}
+    if(kbPrev>=0&&kbPrev<kbCards.length){
+      kbIdx=kbPrev;
+    }else{
+      var vh=window.innerHeight;
+      kbIdx=dir>0?0:kbCards.length-1;
+      for(var i=dir>0?0:kbCards.length-1;dir>0?i<kbCards.length:i>=0;i+=dir){
+        var r=kbCards[i].getBoundingClientRect();
+        if(r.bottom>0&&r.top<vh){kbIdx=i;break}
+      }
     }
+    kbPrev=-1;
   }else{
     kbIdx+=dir;
     if(kbIdx<0)kbIdx=kbCards.length-1;
@@ -672,7 +677,7 @@ function kbMove(dir){
   kbCards[kbIdx].scrollIntoView({block:'nearest'});
 }
 
-document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear()},{passive:true});
+document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear(true)},{passive:true});
 
 var tabPaths=['/','/projects','/cv','/updates','/links'];
 function isPost(){return location.pathname.startsWith('/updates/')&&location.pathname.split('/').length>2}
