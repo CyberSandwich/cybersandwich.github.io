@@ -36,12 +36,12 @@
   },
   {
     "title": "Google Docs",
-    "url": "https://docs.google.com/document/u/0/",
+    "url": "https://docs.google.com/document/",
     "category": "Personal"
   },
   {
     "title": "Google Forms",
-    "url": "https://docs.google.com/forms/u/0/",
+    "url": "https://docs.google.com/forms/",
     "category": "Personal"
   },
   {
@@ -51,17 +51,17 @@
   },
   {
     "title": "Google Sheets",
-    "url": "https://docs.google.com/spreadsheets/u/0/",
+    "url": "https://docs.google.com/spreadsheets/",
     "category": "Personal"
   },
   {
     "title": "Google Slides",
-    "url": "https://docs.google.com/presentation/u/0/",
+    "url": "https://docs.google.com/presentation/",
     "category": "Personal"
   },
   {
     "title": "Google Vids",
-    "url": "https://docs.google.com/videos/u/0/",
+    "url": "https://docs.google.com/videos/",
     "category": "Personal"
   },
   {
@@ -201,12 +201,12 @@
   },
   {
     "title": "Google Analytics",
-    "url": "https://analytics.google.com/analytics/web/",
+    "url": "https://analytics.google.com/",
     "category": "Initiatives"
   },
   {
     "title": "Google Cloud Storage Buckets",
-    "url": "https://console.cloud.google.com/storage/browser",
+    "url": "https://console.cloud.google.com/storage/",
     "category": "Initiatives"
   },
   {
