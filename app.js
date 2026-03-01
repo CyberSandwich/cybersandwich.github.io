@@ -707,8 +707,18 @@ document.addEventListener('keydown',function(e){
     return;
   }
 
-  if(key==='j'){kbMove(1);return}
-  if(key==='k'){kbMove(-1);return}
+  if(key==='j'||key==='ArrowDown'){e.preventDefault();kbMove(1);return}
+  if(key==='k'||key==='ArrowUp'){e.preventDefault();kbMove(-1);return}
+
+  if(key==='ArrowRight'||key==='ArrowLeft'){
+    var ci=tabPaths.indexOf(location.pathname==='/'?'/':location.pathname);
+    if(ci===-1)ci=0;
+    ci+=key==='ArrowRight'?1:-1;
+    if(ci<0)ci=tabPaths.length-1;
+    if(ci>=tabPaths.length)ci=0;
+    history.pushState(null,'',tabPaths[ci]);route();
+    kbClear();return;
+  }
 
   if(key==='Enter'&&kbIdx>=0&&kbCards[kbIdx]){
     kbCards[kbIdx].click();
