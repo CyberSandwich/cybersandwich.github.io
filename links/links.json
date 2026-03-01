@@ -255,6 +255,11 @@
     "category": "Academic"
   },
   {
+    "title": "mini.my.wbs",
+    "url": "https://mini-my.wbs.ac.uk",
+    "category": "Academic"
+  },
+  {
     "title": "my.wbs",
     "url": "https://my.wbs.ac.uk/-/academic/homepage/",
     "category": "Academic"
@@ -332,6 +337,11 @@
   {
     "title": "WBS 0.002e Room Booking",
     "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
+    "category": "Academic"
+  },
+  {
+    "title": "WBS Academic Record",
+    "url": "https://my.wbs.ac.uk/-/profile/me/academic-record/",
     "category": "Academic"
   },
   {
