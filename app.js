@@ -373,19 +373,22 @@ function esc(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Fuzzy search — checks if all chars of q appear in order within text
-function fuzzy(q,text){
-  for(var qi=0,ti=0;ti<text.length&&qi<q.length;ti++){
-    if(text[ti]===q[qi])qi++;
-  }
-  return qi===q.length;
-}
-
 // Score how well a word matches text (0 = no match)
+// 5 = exact, 4 = prefix, 3 = word-boundary, 2 = substring, 0.5-1.0 = fuzzy (by tightness)
 function scoreWord(w,t,nf){
   var i=t.indexOf(w);
-  if(i===-1)return(!nf&&fuzzy(w,t))?1:0;
-  return i===0?4:t[i-1]===' '?3:2;
+  if(i!==-1){
+    if(i===0&&t.length===w.length)return 5;
+    if(i===0)return 4;
+    if(t[i-1]===' ')return 3;
+    return 2;
+  }
+  if(nf)return 0;
+  for(var qi=0,ti=0,first=-1,last=0;ti<t.length&&qi<w.length;ti++){
+    if(t[ti]===w[qi]){if(first<0)first=ti;last=ti;qi++}
+  }
+  if(qi<w.length)return 0;
+  return 0.5+w.length/(last-first+1)*0.5;
 }
 
 // Generic list filter — scores, sorts, flattens results when searching
@@ -423,7 +426,7 @@ function filterList(input,container){
     else c.style.display='none';
   });
 
-  scored.sort(function(a,b){return b.score-a.score});
+  scored.sort(function(a,b){return b.score-a.score||(a.el.getAttribute('data-q')||'').localeCompare(b.el.getAttribute('data-q')||'')});
   secs.forEach(function(s){s.style.display='none'});
 
   scored.forEach(function(s,idx){
@@ -535,7 +538,7 @@ cmdOverlay.addEventListener('click',function(e){
 
 function cmdBuildItems(){
   var items=[];
-  function add(title,sub,type,act){items.push({q:(title+' '+(sub||'')).toLowerCase(),title:title,type:type,act:act})}
+  function add(title,sub,type,act){items.push({q:(title+' '+(sub||'')).toLowerCase(),tl:title.toLowerCase(),title:title,type:type,act:act})}
   validPages.forEach(function(p){
     add(titles[p],'','Page',function(){history.pushState(null,'',p==='home'?'/':'/'+p);route()});
   });
@@ -564,6 +567,9 @@ function cmdBuildItems(){
   return items;
 }
 
+// Type priority: pages are primary nav, content items next, CV last
+var cmdTypePri={Page:4,Project:3,Link:3,Post:3,CV:2};
+
 function cmdSearch(q){
   var words=q.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if(!words.length)return [];
@@ -571,10 +577,15 @@ function cmdSearch(q){
   var scored=[];
   items.forEach(function(it){
     var total=0;
-    var ok=words.every(function(w){var s=scoreWord(w,it.q);total+=s;return s>0});
-    if(ok)scored.push({item:it,score:total});
+    var ok=words.every(function(w){
+      var ts=scoreWord(w,it.tl)*1.5;
+      var fs=scoreWord(w,it.q);
+      var s=ts>fs?ts:fs;
+      total+=s;return s>0;
+    });
+    if(ok)scored.push({item:it,score:total+(cmdTypePri[it.type]||0)*0.1});
   });
-  scored.sort(function(a,b){return b.score-a.score});
+  scored.sort(function(a,b){return b.score-a.score||a.item.title.localeCompare(b.item.title)});
   return scored.slice(0,8).map(function(s){return s.item});
 }
 
