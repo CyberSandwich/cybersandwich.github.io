@@ -468,7 +468,7 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 }
 .cmd-input:focus{border-color:var(--t4);box-shadow:0 0 0 4px rgba(0,0,0,.04)}
 .cmd-input::placeholder{color:var(--t4)}
-.cmd-results{max-height:min(40vh,320px);overflow-y:auto}
+.cmd-results{max-height:min(40vh,320px);overflow-y:auto;padding-bottom:12px}
 .cmd-row{
   display:flex;align-items:center;
   width:100%;padding:12px 20px;
