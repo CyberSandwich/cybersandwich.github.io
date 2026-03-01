@@ -517,7 +517,7 @@ function openCmd(){
   cmdItems=cmdBuildItems();
   document.body.style.overflow='hidden';
   cmdOverlay.classList.add('open');
-  requestAnimationFrame(function(){cmdInput.focus()});
+  requestAnimationFrame(function(){requestAnimationFrame(function(){cmdInput.focus()})});
 }
 
 function closeCmd(){
