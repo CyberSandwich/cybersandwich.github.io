@@ -190,6 +190,11 @@
     "category": "Initiatives"
   },
   {
+    "title": "Google Cloud Storage Buckets",
+    "url": "https://console.cloud.google.com/storage/browser",
+    "category": "Initiatives"
+  },
+  {
     "title": "Human Interface Guidelines",
     "url": "https://developer.apple.com/design/human-interface-guidelines",
     "category": "Initiatives"
