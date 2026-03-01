@@ -1,173 +1,23 @@
 [
   {
-    "title": "Amazon UK",
-    "url": "https://www.amazon.co.uk",
-    "category": "Personal"
+    "title": "IB3960 Financial Statement Analysis & Security Valuation",
+    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
+    "category": "Modules"
   },
   {
-    "title": "Amazon UK - Contact Support",
-    "url": "https://www.amazon.co.uk/message-us?ref_=fs_hub_gateway_mu&amp&paradigm=foresight&amp&muClientName=foresight&amp&mu_params=%7B%22hubSushiSessionId%22%3A%22a82ff59f-0eb3-4bf2-ba69-9cde9122b2da%22%7D&sig=8f2e35d0-cf83-4a2e-a08d-55f673ed6b15#",
-    "category": "Personal"
+    "title": "IB3G40 Law for Entrepreneurs",
+    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "category": "Modules"
   },
   {
-    "title": "Apple Maps",
-    "url": "https://maps.apple.com",
-    "category": "Personal"
+    "title": "IB3N20 Decision Making in Entrepreneurship",
+    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
+    "category": "Modules"
   },
   {
-    "title": "Apple Security Releases",
-    "url": "https://support.apple.com/en-us/100100",
-    "category": "Personal"
-  },
-  {
-    "title": "ASK4 Device Management",
-    "url": "https://myaccount.ask4.com/broadband.php",
-    "category": "Personal"
-  },
-  {
-    "title": "Cobalt",
-    "url": "https://cobalt.tools/",
-    "category": "Personal"
-  },
-  {
-    "title": "Departures (Testflight)",
-    "url": "https://departures.to/",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Docs",
-    "url": "https://docs.google.com/document/",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Forms",
-    "url": "https://docs.google.com/forms/",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Maps",
-    "url": "https://www.google.com/maps/",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Sheets",
-    "url": "https://docs.google.com/spreadsheets/",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Slides",
-    "url": "https://docs.google.com/presentation/",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Vids",
-    "url": "https://docs.google.com/videos/",
-    "category": "Personal"
-  },
-  {
-    "title": "Have I Been Pwned",
-    "url": "https://haveibeenpwned.com",
-    "category": "Personal"
-  },
-  {
-    "title": "iCloud",
-    "url": "https://www.icloud.com",
-    "category": "Personal"
-  },
-  {
-    "title": "Monkeytype",
-    "url": "https://monkeytype.com/",
-    "category": "Personal"
-  },
-  {
-    "title": "Neal Fun",
-    "url": "https://neal.fun",
-    "category": "Personal"
-  },
-  {
-    "title": "Obsidian",
-    "url": "https://obsidian.md/download",
-    "category": "Personal"
-  },
-  {
-    "title": "OpenAI Whisper",
-    "url": "https://github.com/openai/whisper",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Excel",
-    "url": "https://excel.cloud.microsoft",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Outlook",
-    "url": "https://outlook.office.com/mail/",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft PowerPoint",
-    "url": "https://powerpoint.cloud.microsoft",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Teams",
-    "url": "https://teams.microsoft.com/v2/",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Word",
-    "url": "https://word.cloud.microsoft",
-    "category": "Personal"
-  },
-  {
-    "title": "Pexels",
-    "url": "https://www.pexels.com",
-    "category": "Personal"
-  },
-  {
-    "title": "Photopea",
-    "url": "https://www.photopea.com/",
-    "category": "Personal"
-  },
-  {
-    "title": "Smallpdf",
-    "url": "https://smallpdf.com/pdf-tools",
-    "category": "Personal"
-  },
-  {
-    "title": "Tesco Clubcard",
-    "url": "https://secure.tesco.com/clubcard/myvouchers",
-    "category": "Personal"
-  },
-  {
-    "title": "TinyWow",
-    "url": "https://tinywow.com",
-    "category": "Personal"
-  },
-  {
-    "title": "UK E-Visa",
-    "url": "https://view-immigration-status.service.gov.uk/status",
-    "category": "Personal"
-  },
-  {
-    "title": "VirusTotal",
-    "url": "https://www.virustotal.com/gui/home/upload",
-    "category": "Personal"
-  },
-  {
-    "title": "Vita Student Online GP",
-    "url": "https://vitastudent.onlinegp.co/",
-    "category": "Personal"
-  },
-  {
-    "title": "Wayback Machine",
-    "url": "https://archive.org",
-    "category": "Personal"
-  },
-  {
-    "title": "Webpage Archive",
-    "url": "https://archive.ph",
-    "category": "Personal"
+    "title": "IB3N90 Managing People in a Complex World",
+    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
+    "category": "Modules"
   },
   {
     "title": "App Store Connect",
@@ -360,23 +210,178 @@
     "category": "Academic"
   },
   {
-    "title": "IB3960 Financial Statement Analysis & Security Valuation",
-    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
-    "category": "Modules"
+    "title": "Amazon UK",
+    "url": "https://www.amazon.co.uk",
+    "category": "Personal"
   },
   {
-    "title": "IB3G40 Law for Entrepreneurs",
-    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
-    "category": "Modules"
+    "title": "Amazon UK - Contact Support",
+    "url": "https://www.amazon.co.uk/message-us?ref_=fs_hub_gateway_mu&amp&paradigm=foresight&amp&muClientName=foresight&amp&mu_params=%7B%22hubSushiSessionId%22%3A%22a82ff59f-0eb3-4bf2-ba69-9cde9122b2da%22%7D&sig=8f2e35d0-cf83-4a2e-a08d-55f673ed6b15#",
+    "category": "Personal"
   },
   {
-    "title": "IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
-    "category": "Modules"
+    "title": "Apple Maps",
+    "url": "https://maps.apple.com",
+    "category": "Personal"
   },
   {
-    "title": "IB3N90 Managing People in a Complex World",
-    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
-    "category": "Modules"
+    "title": "Apple Security Releases",
+    "url": "https://support.apple.com/en-us/100100",
+    "category": "Personal"
+  },
+  {
+    "title": "ASK4 Device Management",
+    "url": "https://myaccount.ask4.com/broadband.php",
+    "category": "Personal"
+  },
+  {
+    "title": "Claude Usage",
+    "url": "https://claude.ai/settings/usage",
+    "category": "Personal"
+  },
+  {
+    "title": "Cobalt",
+    "url": "https://cobalt.tools/",
+    "category": "Personal"
+  },
+  {
+    "title": "Departures (Testflight)",
+    "url": "https://departures.to/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Docs",
+    "url": "https://docs.google.com/document/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Forms",
+    "url": "https://docs.google.com/forms/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Maps",
+    "url": "https://www.google.com/maps/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Sheets",
+    "url": "https://docs.google.com/spreadsheets/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Slides",
+    "url": "https://docs.google.com/presentation/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Vids",
+    "url": "https://docs.google.com/videos/",
+    "category": "Personal"
+  },
+  {
+    "title": "Have I Been Pwned",
+    "url": "https://haveibeenpwned.com",
+    "category": "Personal"
+  },
+  {
+    "title": "iCloud",
+    "url": "https://www.icloud.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Microsoft Excel",
+    "url": "https://excel.cloud.microsoft",
+    "category": "Personal"
+  },
+  {
+    "title": "Microsoft Outlook",
+    "url": "https://outlook.office.com/mail/",
+    "category": "Personal"
+  },
+  {
+    "title": "Microsoft PowerPoint",
+    "url": "https://powerpoint.cloud.microsoft",
+    "category": "Personal"
+  },
+  {
+    "title": "Microsoft Teams",
+    "url": "https://teams.microsoft.com/v2/",
+    "category": "Personal"
+  },
+  {
+    "title": "Microsoft Word",
+    "url": "https://word.cloud.microsoft",
+    "category": "Personal"
+  },
+  {
+    "title": "Monkeytype",
+    "url": "https://monkeytype.com/",
+    "category": "Personal"
+  },
+  {
+    "title": "Neal Fun",
+    "url": "https://neal.fun",
+    "category": "Personal"
+  },
+  {
+    "title": "Obsidian",
+    "url": "https://obsidian.md/download",
+    "category": "Personal"
+  },
+  {
+    "title": "OpenAI Whisper",
+    "url": "https://github.com/openai/whisper",
+    "category": "Personal"
+  },
+  {
+    "title": "Pexels",
+    "url": "https://www.pexels.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Photopea",
+    "url": "https://www.photopea.com/",
+    "category": "Personal"
+  },
+  {
+    "title": "Smallpdf",
+    "url": "https://smallpdf.com/pdf-tools",
+    "category": "Personal"
+  },
+  {
+    "title": "Tesco Clubcard",
+    "url": "https://secure.tesco.com/clubcard/myvouchers",
+    "category": "Personal"
+  },
+  {
+    "title": "TinyWow",
+    "url": "https://tinywow.com",
+    "category": "Personal"
+  },
+  {
+    "title": "UK E-Visa",
+    "url": "https://view-immigration-status.service.gov.uk/status",
+    "category": "Personal"
+  },
+  {
+    "title": "VirusTotal",
+    "url": "https://www.virustotal.com/gui/home/upload",
+    "category": "Personal"
+  },
+  {
+    "title": "Vita Student Online GP",
+    "url": "https://vitastudent.onlinegp.co/",
+    "category": "Personal"
+  },
+  {
+    "title": "Wayback Machine",
+    "url": "https://archive.org",
+    "category": "Personal"
+  },
+  {
+    "title": "Webpage Archive",
+    "url": "https://archive.ph",
+    "category": "Personal"
   }
 ]
