@@ -656,9 +656,18 @@ function kbMove(dir){
   kbCards=kbGetCards();
   if(!kbCards.length)return;
   if(kbIdx>=0&&kbCards[kbIdx])kbCards[kbIdx].classList.remove('kb-focus');
-  kbIdx+=dir;
-  if(kbIdx<0)kbIdx=kbCards.length-1;
-  if(kbIdx>=kbCards.length)kbIdx=0;
+  if(kbIdx<0){
+    var vh=window.innerHeight;
+    kbIdx=dir>0?0:kbCards.length-1;
+    for(var i=dir>0?0:kbCards.length-1;dir>0?i<kbCards.length:i>=0;i+=dir){
+      var r=kbCards[i].getBoundingClientRect();
+      if(r.bottom>0&&r.top<vh){kbIdx=i;break}
+    }
+  }else{
+    kbIdx+=dir;
+    if(kbIdx<0)kbIdx=kbCards.length-1;
+    if(kbIdx>=kbCards.length)kbIdx=0;
+  }
   kbCards[kbIdx].classList.add('kb-focus');
   kbCards[kbIdx].scrollIntoView({block:'nearest'});
 }
