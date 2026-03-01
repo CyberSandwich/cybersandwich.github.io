@@ -2,26 +2,31 @@
   {
     "date": "2026-03-01",
     "title": "Adding Keyboard Shortcuts",
-    "file": "2026-03-01-adding-keyboard-shortcuts.md"
-  },
-  {
-    "date": "2026-02-25",
-    "title": "PNG Optimization (Automator)",
-    "file": "2026-02-25-png-optimization-automator.md"
-  },
-  {
-    "date": "2026-02-25",
-    "title": "Office to PDF (Automator)",
-    "file": "2026-02-25-office-to-pdf-automator.md"
-  },
-  {
-    "date": "2026-02-25",
-    "title": "JPEG Optimization (Automator)",
-    "file": "2026-02-25-jpeg-optimization-automator.md"
+    "file": "2026-03-01-adding-keyboard-shortcuts.md",
+    "words": 753
   },
   {
     "date": "2026-02-25",
     "title": "HEIC Optimization (Automator)",
-    "file": "2026-02-25-heic-optimization-automator.md"
+    "file": "2026-02-25-heic-optimization-automator.md",
+    "words": 1624
+  },
+  {
+    "date": "2026-02-25",
+    "title": "JPEG Optimization (Automator)",
+    "file": "2026-02-25-jpeg-optimization-automator.md",
+    "words": 944
+  },
+  {
+    "date": "2026-02-25",
+    "title": "Office to PDF (Automator)",
+    "file": "2026-02-25-office-to-pdf-automator.md",
+    "words": 2022
+  },
+  {
+    "date": "2026-02-25",
+    "title": "PNG Optimization (Automator)",
+    "file": "2026-02-25-png-optimization-automator.md",
+    "words": 1425
   }
 ]
