@@ -15,11 +15,6 @@
     "category": "Personal"
   },
   {
-    "title": "Claude",
-    "url": "https://claude.ai/settings/usage",
-    "category": "Personal"
-  },
-  {
     "title": "Cobalt",
     "url": "https://cobalt.tools/",
     "category": "Personal"
@@ -122,6 +117,11 @@
   {
     "title": "Smallpdf",
     "url": "https://smallpdf.com/pdf-tools",
+    "category": "Personal"
+  },
+  {
+    "title": "Tesco Clubcard",
+    "url": "https://secure.tesco.com/clubcard/myvouchers",
     "category": "Personal"
   },
   {
