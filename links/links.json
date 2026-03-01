@@ -1,5 +1,15 @@
 [
   {
+    "title": "Amazon UK",
+    "url": "https://www.amazon.co.uk",
+    "category": "Personal"
+  },
+  {
+    "title": "Amazon UK - Contact Support",
+    "url": "https://www.amazon.co.uk/message-us?ref_=fs_hub_gateway_mu&amp&paradigm=foresight&amp&muClientName=foresight&amp&mu_params=%7B%22hubSushiSessionId%22%3A%22a82ff59f-0eb3-4bf2-ba69-9cde9122b2da%22%7D&sig=8f2e35d0-cf83-4a2e-a08d-55f673ed6b15#",
+    "category": "Personal"
+  },
+  {
     "title": "Apple Maps",
     "url": "https://maps.apple.com",
     "category": "Personal"
@@ -32,6 +42,11 @@
   {
     "title": "Google Forms",
     "url": "https://docs.google.com/forms/u/0/",
+    "category": "Personal"
+  },
+  {
+    "title": "Google Maps",
+    "url": "https://www.google.com/maps/",
     "category": "Personal"
   },
   {
