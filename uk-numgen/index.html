@@ -130,7 +130,7 @@ render();
 el.onclick=e=>{e.preventDefault();doCopy()};
 gb.onclick=function(){clearTimeout(gm);render();gs.textContent='Regenerated';gb.classList.remove('regen');gb.offsetWidth;gb.classList.add('regen');gm=setTimeout(function(){gs.textContent='Regenerate';gb.classList.remove('regen')},800)};
 cb.onclick=doCopy;
-document.addEventListener('keydown',function(e){var t=document.activeElement&&document.activeElement.tagName;if(t==='INPUT'||t==='TEXTAREA')return;if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key===' '||e.key==='Enter'){e.preventDefault();gb.click()}if(e.key==='c'){e.preventDefault();doCopy()}});
+document.addEventListener('keydown',function(e){var t=document.activeElement&&document.activeElement.tagName;if(t==='INPUT'||t==='TEXTAREA')return;if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='1'){location.href='/';return}if(e.key==='2'){location.href='/projects';return}if(e.key===' '||e.key==='Enter'){e.preventDefault();gb.click()}if(e.key==='c'){e.preventDefault();doCopy()}});
 </script>
 </body>
 </html>
