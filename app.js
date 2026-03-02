@@ -288,18 +288,13 @@ function showPost(slug){
   while(el.firstChild)el.removeChild(el.firstChild);
   function render(html){
     if(ver!==postVer)return;
-    var back=document.createElement('a');
-    back.className='post-back';
-    back.href='/updates';
-    back.title='Back to all updates';
-    back.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>Back';
-    // innerHTML required for rendered markdown — source: first-party .md files
     var content=document.createElement('div');
     content.className='pcontent';
+    // Safe: html is parsed from first-party .md files committed by site owner
     content.innerHTML=html;
     var h1=content.querySelector('h1');
     if(h1)document.title='DS | '+h1.textContent;
-    el.appendChild(back);el.appendChild(content);
+    el.appendChild(content);
     window.scrollTo(0,0);
   }
   if(postCache[slug]){render(postCache[slug]);return}

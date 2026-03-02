@@ -220,18 +220,6 @@ body{
 /* hover/active shared with .pcard above */
 .ucard .ut{font-size:1.0625rem;font-weight:600;color:var(--t1);margin-bottom:4px}
 .ucard .ud{font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.02em}
-.post-back{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font:500 .8125rem/1 var(--font);
-  color:var(--t3);
-  cursor:pointer;
-  margin-bottom:16px;
-  transition:color .15s;
-  text-decoration:none
-}
-.post-back:hover{color:var(--t1)}
 .pcontent{
   padding:16px 20px;
   background:var(--card);

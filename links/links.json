@@ -185,7 +185,7 @@
     "category": "Initiatives"
   },
   {
-    "title": "Certificates, Identifiers & Profiles",
+    "title": "Apple Certificates, Identifiers & Profiles",
     "url": "https://developer.apple.com/account/resources/identifiers/list",
     "category": "Initiatives"
   },
@@ -255,14 +255,14 @@
     "category": "Initiatives"
   },
   {
-    "title": "Swift Tutorial",
+    "title": "Develop in Swift",
     "url": "https://developer.apple.com/tutorials/develop-in-swift/",
     "category": "Initiatives"
   },
   {
     "title": "Warwick Residence Hubs",
     "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs/",
-    "category": "Initiatives"
+    "category": "Miscellaneous"
   },
   {
     "title": "Academic Phrasebank",
@@ -372,22 +372,22 @@
   {
     "title": "EchoVideo - IB3960 Financial Statement Analysis & Security Valuation",
     "url": "https://echo360.org.uk/section/24b2d570-e52a-4bd5-803b-bccd8644d811/home",
-    "category": "Modules"
+    "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3G40 Law for Entrepreneurs",
     "url": "https://echo360.org.uk/section/6d900cef-d4b4-4807-bb3d-cfffc1d9897d/home",
-    "category": "Modules"
+    "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3N20 Decision Making in Entrepreneurship",
     "url": "https://echo360.org.uk/section/1cca2155-aa96-4387-a170-dc9acba06d55/home",
-    "category": "Modules"
+    "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3N90 Managing People in a Complex World",
     "url": "https://echo360.org.uk/section/c8302b8e-e7d8-4531-be04-048d16a96dea/home",
-    "category": "Modules"
+    "category": "Miscellaneous"
   },
   {
     "title": "IB3960 Financial Statement Analysis & Security Valuation",
