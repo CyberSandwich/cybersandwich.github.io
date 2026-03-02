@@ -512,9 +512,16 @@ document.addEventListener('keydown',e=>{
     }
     return;
   }
+  var tabs=qa('.tabs button'),tabIds=['clock','alarm','sw','timer'];
   if(e.key==='1'){location.href='/';return}
-  if(e.key>='2'&&e.key<='5'){var btn=qa('.tabs button')[+e.key-2];if(btn){btn.click()};return}
-  if(e.key===' '||e.code==='Space'){
+  if(e.key>='2'&&e.key<='5'){if(tabs[+e.key-2])tabs[+e.key-2].click();return}
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+    var ci=tabIds.indexOf(q('.tabs button.active')?.dataset.tab);
+    ci+=e.key==='ArrowRight'?1:-1;
+    if(ci<0)ci=tabIds.length-1;if(ci>=tabIds.length)ci=0;
+    tabs[ci].click();return;
+  }
+  if(e.key===' '||e.key==='Enter'){
     var active=q('.tabs button.active');
     if(active?.dataset.tab==='sw'){e.preventDefault();swToggle()}
   }
