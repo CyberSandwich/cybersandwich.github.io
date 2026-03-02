@@ -506,7 +506,7 @@ function kbGetCards(){
   var at=q('.tabs button.active')?.dataset.tab;
   if(at==='alarm')return [].slice.call(qa('.alarm-card'));
   if(at==='sw')return [].slice.call(qa('.laps .l'));
-  if(at==='timer'&&tFullId===null)return [].slice.call(qa('.t-card'));
+  if(at==='timer'&&tFullId===null)return [].slice.call(qa('.t-chips button'));
   return[];
 }
 function kbClear(remember){
@@ -549,6 +549,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='j'||e.key==='ArrowDown'||e.key==='k'||e.key==='ArrowUp'){
     e.preventDefault();kbMove((e.key==='j'||e.key==='ArrowDown')?1:-1);return;
   }
+  if(e.key==='Enter'&&kbIdx>=0&&kbCards[kbIdx]){e.preventDefault();kbCards[kbIdx].click();kbClear();return}
   if(at==='sw'){
     if(e.key===' '||e.key==='Enter'){e.preventDefault();swToggle();return}
     if(e.key==='r'){if(swOn)swStop();swLap();return}
