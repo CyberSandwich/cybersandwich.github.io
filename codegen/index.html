@@ -1258,7 +1258,8 @@ document.addEventListener('keydown',function(e){
   if(e.altKey)return;
   var tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape'){document.activeElement.blur()}return}
-  if(e.key>='1'&&e.key<='3'){switchTab(['qr','bc','az'][+e.key-1]);return}
+  if(e.key==='1'){location.href='/';return}
+  if(e.key>='2'&&e.key<='4'){switchTab(['qr','bc','az'][+e.key-2]);return}
   if(e.key==='/'){e.preventDefault();var inp=$({qr:'qrIn',bc:'bcIn',az:'azIn'}[curTab]);if(inp)inp.focus();return}
   if((e.key==='Enter'||e.key===' ')&&document.activeElement.classList.contains('preview')){e.preventDefault();document.activeElement.click();return}
   if(e.key==='Escape'){var n=document.querySelector('.notif');if(n)n.click()}

@@ -512,7 +512,8 @@ document.addEventListener('keydown',e=>{
     }
     return;
   }
-  if(e.key>='1'&&e.key<='4'){var btn=qa('.tabs button')[+e.key-1];if(btn){btn.click()};return}
+  if(e.key==='1'){location.href='/';return}
+  if(e.key>='2'&&e.key<='5'){var btn=qa('.tabs button')[+e.key-2];if(btn){btn.click()};return}
   if(e.key===' '||e.code==='Space'){
     var active=q('.tabs button.active');
     if(active?.dataset.tab==='sw'){e.preventDefault();swToggle()}
