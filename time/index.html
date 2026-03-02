@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
 <title>Clock</title>
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" href="data:,">
@@ -20,7 +21,7 @@
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
 }
 html{height:100%;overflow-x:hidden}
-body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 .tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.45)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
@@ -92,7 +93,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .t-setup{display:flex;flex-direction:column;align-items:center;padding:clamp(24px,5vh,56px) 0 clamp(20px,3vh,32px)}
 .t-input{display:flex;align-items:center;gap:clamp(4px,1.2vw,10px);margin-bottom:clamp(24px,4vh,40px)}
 .t-digit{display:flex;flex-direction:column;align-items:center;gap:8px}
-.t-digit input{width:2.6ch;padding:clamp(10px,2vw,20px) 4px;text-align:center;border:1.5px solid var(--bdr);border-radius:16px;font:400 clamp(3rem,9vw,6rem)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--t1);background:var(--card);outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.03);-moz-appearance:textfield}
+.t-digit input{width:2.6ch;padding:clamp(10px,2vw,20px) 4px;text-align:center;border:1.5px solid var(--bdr);border-radius:16px;font:400 clamp(3rem,9vw,6rem)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--t1);background:var(--card);outline:none;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.03);-moz-appearance:textfield;touch-action:manipulation}
 .t-digit input::-webkit-inner-spin-button,.t-digit input::-webkit-outer-spin-button{-webkit-appearance:none}
 .t-digit input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)}
 .t-digit label{font-size:.6875rem;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
@@ -134,6 +135,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.18)}
 @media(hover:none){.ac-del{opacity:1}}
+:focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -499,11 +501,23 @@ document.addEventListener('visibilitychange',()=>{
   if(!document.hidden){if(tInt){cancelAnimationFrame(tInt);tInt=null}tTickAll();checkSound()}
 });
 document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT')return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  var tag=e.target.tagName;
+  if(tag==='INPUT'){
+    if(e.key==='Enter'){
+      e.preventDefault();
+      var active=q('.tabs button.active');
+      if(active?.dataset.tab==='alarm')saveAlarm();
+      else if(active?.dataset.tab==='timer')tStartCustom();
+    }
+    return;
+  }
+  if(e.key>='1'&&e.key<='4'){var btn=qa('.tabs button')[+e.key-1];if(btn){btn.click()};return}
   if(e.key===' '||e.code==='Space'){
-    const active=q('.tabs button.active');
+    var active=q('.tabs button.active');
     if(active?.dataset.tab==='sw'){e.preventDefault();swToggle()}
   }
+  if(e.key==='Escape'&&tFullId!==null){e.preventDefault();tExitFull()}
 });
 load();tick();initAlarmTime();renderAlarms();
 setInterval(()=>{if($('v-clock').classList.contains('active'))tick();chkAlarms()},1000);
