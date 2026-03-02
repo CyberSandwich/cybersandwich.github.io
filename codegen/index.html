@@ -1144,16 +1144,25 @@ function decodeBarcodeImg(img){
   w=Math.max(1,w);h=Math.max(1,h);
   scanC.width=w;scanC.height=h;
   scanCtx.drawImage(img,0,0,w,h);
-  var fmts=['code-128','ean-13','code-39'];
+  var all=['code-128','ean-13','code-39'];
+  var primary=all[curFmt]||all[0];
+  var fmts=[primary].concat(all.filter(function(f){return f!==primary}));
   var idx=0;
   function tryNext(){
     if(idx>=fmts.length)return Promise.resolve(null);
+    var fmt=fmts[idx++];
     var d=scanCtx.getImageData(0,0,w,h);
-    return javascriptBarcodeReader({image:d,barcode:fmts[idx++],options:{useAdaptiveThreshold:true}}).then(function(v){
-      return v?{rawValue:v}:tryNext();
+    return javascriptBarcodeReader({image:d,barcode:fmt,options:{useAdaptiveThreshold:true}}).then(function(v){
+      if(!v||v.indexOf('?')!==-1)return tryNext();
+      if(fmt==='ean-13'&&/^\d{12}$/.test(v))v=ean13fix(v);
+      return{rawValue:v};
     }).catch(function(){return tryNext()});
   }
   return tryNext();
+}
+function ean13fix(d){
+  var s=0;for(var i=0;i<12;i++)s+=(d.charCodeAt(i)-48)*(i%2===0?3:1);
+  return((10-s%10)%10)+d;
 }
 function scanImage(blob){
   return createImageBitmap(blob).then(decodeImg).catch(function(){
