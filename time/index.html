@@ -521,11 +521,19 @@ document.addEventListener('keydown',e=>{
     if(ci<0)ci=tabIds.length-1;if(ci>=tabIds.length)ci=0;
     tabs[ci].click();return;
   }
+  var at=q('.tabs button.active')?.dataset.tab;
   if(e.key===' '||e.key==='Enter'){
-    var active=q('.tabs button.active');
-    if(active?.dataset.tab==='sw'){e.preventDefault();swToggle()}
+    e.preventDefault();
+    if(at==='sw')swToggle();
+    else if(at==='timer'&&tFullId!==null)tToggle(tFullId);
+    else if(at==='alarm')saveAlarm();
   }
-  if(e.key==='Escape'&&tFullId!==null){e.preventDefault();tExitFull()}
+  if(e.key==='Escape'){
+    e.preventDefault();
+    if(at==='sw')swLap();
+    else if(at==='timer'&&tFullId!==null){tRemove(tFullId)}
+    else if(at==='timer')tExitFull();
+  }
 });
 load();tick();initAlarmTime();renderAlarms();
 setInterval(()=>{if($('v-clock').classList.contains('active'))tick();chkAlarms()},1000);
