@@ -550,6 +550,12 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();kbMove((e.key==='j'||e.key==='ArrowDown')?1:-1);return;
   }
   if(e.key==='Enter'&&kbIdx>=0&&kbCards[kbIdx]){e.preventDefault();kbCards[kbIdx].click();kbClear();return}
+  if(at==='clock'&&(e.key==='Enter'||e.key==='c')){
+    e.preventDefault();
+    var now=new Date();
+    navigator.clipboard.writeText(pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds()));
+    return;
+  }
   if(at==='sw'){
     if(e.key===' '||e.key==='Enter'){e.preventDefault();swToggle();return}
     if(e.key==='r'){if(swOn)swStop();swLap();return}
