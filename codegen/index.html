@@ -888,6 +888,8 @@ function initSettings(container,groups){
 
       g._rebuild=buildChips;
       g._reset=function(){fmtIdx=g.def;iconWrap.innerHTML=getIcon(g.def);nameSpan.textContent=g.formats[g.def];buildChips();g.onChange(g.def)};
+      g._set=function(i){if(i===fmtIdx||i<0||i>=g.formats.length||(g.hide&&g.hide(i)))return;fmtIdx=i;iconWrap.innerHTML=getIcon(fmtIdx);nameSpan.style.opacity='.3';setTimeout(function(){nameSpan.textContent=g.formats[fmtIdx];nameSpan.style.opacity='1'},100);buildChips();g.onChange(fmtIdx)};
+      g._cur=function(){return fmtIdx};
       row.appendChild(chips);
 
     }else{
@@ -917,6 +919,7 @@ function initSettings(container,groups){
           chips.querySelectorAll('.chip').forEach(function(c,i){var a=i===g.def;c.classList.toggle('active',a);c.setAttribute('aria-pressed',a?'true':'false')});
           g.onChange(g.def);
         };
+        g._next=function(){var cur=0;chips.querySelectorAll('.chip').forEach(function(c,i){if(c.classList.contains('active'))cur=i});chips.querySelectorAll('.chip')[(cur+1)%g.opts.length].click()};
         row.appendChild(chips);
 
       }else if(g.type==='stepper'){
@@ -938,6 +941,8 @@ function initSettings(container,groups){
         minus.addEventListener('click',function(){if(idx>0){idx--;upd()}});
         plus.addEventListener('click',function(){if(idx<g.steps.length-1){idx++;upd()}});
         g._reset=function(){idx=g.def;upd()};
+        g._inc=function(){if(idx<g.steps.length-1){idx++;upd()}};
+        g._dec=function(){if(idx>0){idx--;upd()}};
         minus.disabled=g.def===0;
         plus.disabled=g.def===g.steps.length-1;
         stepper.appendChild(minus);stepper.appendChild(plus);
@@ -975,7 +980,7 @@ initSettings($('qrCh2'),qrGroups2);
 /* Barcode Settings */
 var bcGroups1=[
   {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBCS()}},
-  {type:'format',icons:[IC.type,IC.clear],formats:['On','Off'],def:1,onChange:function(i){bcS.text=i;genBCS()}},
+  {type:'format',icons:[IC.type,IC.clear],formats:['Text On','Text Off'],def:1,onChange:function(i){bcS.text=i;genBCS()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBCS()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&bcS.fmt===2},onChange:function(i){bcS.style=i;updatePvStyle(bcPv,i);genBCS()}}
 ];
@@ -1264,8 +1269,24 @@ document.addEventListener('keydown',function(e){
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){var ci=tabs.indexOf(curTab);ci+=e.key==='ArrowRight'?1:-1;if(ci<0)ci=tabs.length-1;if(ci>=tabs.length)ci=0;switchTab(tabs[ci]);return}
   if(e.key==='/'){e.preventDefault();var inp=$({qr:'qrIn',bc:'bcIn',az:'azIn'}[curTab]);if(inp)inp.focus();return}
   if((e.key==='Enter'||e.key===' ')&&document.activeElement.classList.contains('preview')){e.preventDefault();document.activeElement.click();return}
-  if(e.key==='c'){tabBtn('Cp').click();return}
-  if(e.key==='s'){tabBtn('Dl').click();return}
+  var g1=curTab==='qr'?qrGroups1:curTab==='bc'?bcGroups1:azGroups1;
+  var g2=curTab==='qr'?qrGroups2:curTab==='bc'?bcGroups2:azGroups2;
+  var styleG=curTab==='bc'?g1[3]:g1[2];
+  var marginG=curTab==='bc'?g1[2]:g1[1];
+  if(e.key==='l'){styleG._set(0);return}
+  if(e.key==='d'){styleG._set(1);return}
+  if(e.key==='c'){styleG._set(2);return}
+  if(e.key==='p'){g2[0]._set(0);return}
+  if(e.key==='s'){g2[0]._set(1);return}
+  if(e.key==='j'){g2[0]._set(2);return}
+  if(e.key==='='){if(curTab!=='bc')g1[0]._inc();return}
+  if(e.key==='-'){if(curTab!=='bc')g1[0]._dec();return}
+  if(e.key===']'){marginG._inc();return}
+  if(e.key==='['){marginG._dec();return}
+  if(e.key==='h'&&curTab==='bc'){g1[0]._next();return}
+  if(e.key==='t'&&curTab==='bc'){g1[1]._set(g1[1]._cur()===0?1:0);return}
+  if(e.key===';'){g2[1]._dec();return}
+  if(e.key==='\''){g2[1]._inc();return}
   if(e.key==='v'){tabBtn('Ps').click();return}
   if(e.key==='r'){tabBtn('Rs').click();return}
   if(e.key==='Escape'){var n=document.querySelector('.notif');if(n)n.click()}
