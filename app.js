@@ -538,7 +538,7 @@ qrOverlay.setAttribute('role','dialog');
 qrOverlay.setAttribute('aria-modal','true');
 qrOverlay.setAttribute('aria-label','QR Code');
 var qrCard=document.createElement('div');qrCard.className='qr-card';
-var qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';qrImg.width=32;qrImg.height=32;
+var qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';qrImg.width=23;qrImg.height=23;
 qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
 
 var qrOpen=false;
