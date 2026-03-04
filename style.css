@@ -499,8 +499,8 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 .qr-card{
   background:#fff;
   border-radius:20px;
-  padding:16px;
-  width:min(280px,70vmin);aspect-ratio:1;
+  padding:10px;
+  width:min(340px,80vmin);aspect-ratio:1;
   box-shadow:0 8px 40px rgba(0,0,0,.16),0 2px 12px rgba(0,0,0,.08);
   display:flex;align-items:center;justify-content:center;
   transform:scale(.92);opacity:0;
