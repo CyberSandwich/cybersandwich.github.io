@@ -210,6 +210,11 @@
     "category": "Initiatives"
   },
   {
+    "title": "GitHub",
+    "url": "https://github.com",
+    "category": "Initiatives"
+  },
+  {
     "title": "Google Analytics",
     "url": "https://analytics.google.com/",
     "category": "Initiatives"
@@ -387,6 +392,16 @@
   {
     "title": "EchoVideo - IB3N90 Managing People in a Complex World",
     "url": "https://echo360.org.uk/section/c8302b8e-e7d8-4531-be04-048d16a96dea/home",
+    "category": "Miscellaneous"
+  },
+  {
+    "title": "WBS Outstanding Contribution to Pastoral Care Awards 2026",
+    "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/pastoral-26/",
+    "category": "Miscellaneous"
+  },
+  {
+    "title": "WBS Outstanding Contribution to Teaching Awards 2026",
+    "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/octa-2026/",
     "category": "Miscellaneous"
   },
   {
