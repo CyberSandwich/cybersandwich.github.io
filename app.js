@@ -508,6 +508,7 @@ var cmdItems=null;
 
 function openCmd(){
   if(cmdOpen)return;
+  if(qrOpen)closeQR();
   cmdOpen=true;
   cmdInput.value='';
   cmdResults.textContent='';
@@ -530,6 +531,36 @@ function closeCmd(){
 cmdOverlay.addEventListener('click',function(e){
   if(e.target===cmdOverlay)closeCmd();
 });
+
+var qrOverlay=document.createElement('div');
+qrOverlay.className='qr-overlay';
+qrOverlay.setAttribute('role','dialog');
+qrOverlay.setAttribute('aria-modal','true');
+qrOverlay.setAttribute('aria-label','QR Code');
+var qrCard=document.createElement('div');qrCard.className='qr-card';
+var qrImg=document.createElement('img');qrImg.src='/docs/qr-homepage.png';qrImg.alt='QR code to saputra.co.uk';qrImg.width=32;qrImg.height=32;
+qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
+
+var qrOpen=false;
+function openQR(){
+  if(qrOpen)return;
+  if(cmdOpen)closeCmd();
+  qrOpen=true;
+  document.body.style.overflow='hidden';
+  qrOverlay.classList.add('open');
+}
+function closeQR(){
+  if(!qrOpen)return;
+  qrOpen=false;
+  document.body.style.overflow='';
+  qrOverlay.classList.remove('open');
+}
+var nameCard=$('.name-card');
+if(nameCard){
+  nameCard.addEventListener('click',function(e){e.preventDefault();openQR()});
+  nameCard.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openQR()}});
+}
+qrOverlay.addEventListener('click',function(e){if(e.target===qrOverlay)closeQR()});
 
 function cmdBuildItems(){
   var items=[];
@@ -686,6 +717,8 @@ document.addEventListener('keydown',function(e){
 
   if(cmdOpen)return;
 
+  if(qrOpen){if(e.key==='Escape')closeQR();return}
+
   var tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'){
     if(e.key==='Escape'){document.activeElement.blur();kbClear()}
@@ -745,7 +778,7 @@ document.addEventListener('keydown',function(e){
 });
 
 // Init
-window.addEventListener('popstate',function(){closeCmd();kbClear();route()});
+window.addEventListener('popstate',function(){closeCmd();closeQR();kbClear();route()});
 route();
 
 // Prefetch all data during idle time so tab switches are instant
