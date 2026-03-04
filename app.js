@@ -538,13 +538,14 @@ qrOverlay.setAttribute('role','dialog');
 qrOverlay.setAttribute('aria-modal','true');
 qrOverlay.setAttribute('aria-label','QR Code');
 var qrCard=document.createElement('div');qrCard.className='qr-card';
-var qrImg=document.createElement('img');qrImg.src='/docs/qr-homepage.png';qrImg.alt='QR code to saputra.co.uk';qrImg.width=32;qrImg.height=32;
+var qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';qrImg.width=32;qrImg.height=32;
 qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
 
 var qrOpen=false;
 function openQR(){
   if(qrOpen)return;
   if(cmdOpen)closeCmd();
+  if(!qrImg.src)qrImg.src='/qr-homepage.png';
   qrOpen=true;
   document.body.style.overflow='hidden';
   qrOverlay.classList.add('open');
