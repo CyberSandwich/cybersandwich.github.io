@@ -181,7 +181,6 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
     <div class="actions" id="qrAct"></div>
     <div class="settings" id="qrCh1"></div>
     <div class="settings" id="qrCh2"></div>
-    <div class="settings" id="qrScan" style="display:none"></div>
   </section>
   <section id="v-bc" class="view" role="tabpanel" aria-labelledby="tab-bc">
     <div class="preview" id="bcPv" role="button" tabindex="0" aria-label="Copy Barcode"><canvas id="bcC" aria-hidden="true"></canvas></div>
@@ -1011,7 +1010,7 @@ $('bcPs').onclick=function(){handlePaste(this)};
 var camStream=null,camVideo=null,camWrap=null,camScanning=false,camRow=null,camLbl=null;
 (function(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
-  var card=$('qrScan');card.style.display='';
+  var card=$('qrCh2');
   var row=document.createElement('div');row.className='srow';
   var lbl=document.createElement('div');lbl.className='slbl';
   var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
