@@ -534,7 +534,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       const start=clamp(beforeStart,0,prev.length);
       const oldEnd=clamp(beforeEnd,start,prev.length);
       const newEnd=clamp(oldEnd+(next.length-prev.length),start,next.length);
-      if(suffixEqual(prev,next,oldEnd,newEnd)){
+      if(start<=next.length&&suffixEqual(prev,next,oldEnd,newEnd)){
         applyDelta(next,start,oldEnd,newEnd);
         applied=true;
       }
