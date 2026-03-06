@@ -148,7 +148,7 @@ body{
 .drop-overlay.active{opacity:1;pointer-events:auto}
 .fx-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%)}
 nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center}
-.tabs{display:flex;background:var(--tab-bg);border-radius:var(--rr);padding:5px;box-shadow:var(--tab-shadow);border:1px solid var(--tab-border)}
+.tabs{display:flex;background:var(--tab-bg);border-radius:var(--rr);padding:5px;box-shadow:var(--tab-shadow);border:1px solid var(--tab-border);max-width:calc(100vw - 40px)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
 .tabs a{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
 .tabs a.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -159,7 +159,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));displ
 .theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px;border:none;border-radius:50%;cursor:pointer;color:var(--t3);background:none;transition:color .15s}
 .theme-toggle:active{opacity:.7}
 @media(hover:hover){.theme-toggle:hover{color:var(--t1)}}
-@media(max-width:480px){.tabs a{padding:14px 16px;font-size:.8125rem}}
+@media(max-width:480px){.tabs a{padding:14px 16px;font-size:.8125rem}.tabs{max-width:calc(100vw - 28px)}}
 .notif{
   z-index:9;
   padding:0 20px calc(86px + env(safe-area-inset-bottom,0px));

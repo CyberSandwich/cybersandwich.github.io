@@ -325,7 +325,8 @@ nav{
   border-radius:var(--rr);
   padding:5px;
   box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
-  border:1px solid rgba(255,255,255,.45)
+  border:1px solid rgba(255,255,255,.45);
+  max-width:calc(100vw - 40px)
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
   .tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
@@ -352,6 +353,7 @@ nav{
 /* Responsive */
 @media(max-width:480px){
   .tabs a{padding:14px 16px;font-size:.8125rem}
+  .tabs{max-width:calc(100vw - 28px)}
 }
 
 /* Animations */
