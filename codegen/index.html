@@ -1053,7 +1053,9 @@ function camLoop(){
       if(r&&r.rawValue){
         var val=r.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
         setInput(val);navigator.clipboard.writeText(val).catch(function(){});
-        notify(display,true);stopCam();return;
+        var cpBtn=$('qrCp');
+        notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')}).catch(function(){})});
+        stopCam();return;
       }
       if(camScanning)requestAnimationFrame(camLoop);
     }).catch(function(){if(camScanning)requestAnimationFrame(camLoop)});
