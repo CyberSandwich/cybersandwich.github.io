@@ -528,8 +528,8 @@ function openCmd(){
   cmdIdx=-1;
   cmdItems=cmdBuildItems();
   document.body.style.overflow='hidden';
+  cmdOverlay.style.visibility='visible';
   cmdOverlay.classList.add('open');
-  void cmdOverlay.offsetHeight;
   cmdInput.focus();
 }
 
@@ -540,6 +540,7 @@ function closeCmd(){
   document.body.style.overflow='';
   cmdOverlay.classList.remove('open');
   cmdInput.blur();
+  setTimeout(function(){if(!cmdOpen)cmdOverlay.style.visibility=''},150);
 }
 
 cmdOverlay.addEventListener('click',function(e){
@@ -732,7 +733,7 @@ document.addEventListener('keydown',function(e){
     return;
   }
 
-  if(cmdOpen)return;
+  if(cmdOpen){if(e.key==='Escape')closeCmd();return}
 
   if(qrOpen){if(e.key==='Escape')closeQR();return}
 
