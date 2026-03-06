@@ -529,6 +529,7 @@ function openCmd(){
   cmdItems=cmdBuildItems();
   document.body.style.overflow='hidden';
   cmdOverlay.classList.add('open');
+  void cmdOverlay.offsetHeight;
   cmdInput.focus();
 }
 

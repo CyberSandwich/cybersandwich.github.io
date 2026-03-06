@@ -130,11 +130,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     let t;try{t=localStorage.getItem(THEME_KEY);}catch(_){}
     setTheme(t&&THEMES.includes(t)?t:'light');
   })();
+  themeBtn.addEventListener('pointerdown',(e)=>{e.preventDefault()});
   themeBtn.addEventListener('click',()=>{
     const cur=document.documentElement.getAttribute('data-theme')||'light';
     const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];
     setTheme(next);
-    editor.focus();
   });
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)return;
