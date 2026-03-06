@@ -41,7 +41,7 @@ html[data-theme="sepia"]{
 }
 html{height:100%;overflow-x:hidden}
 body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;-webkit-tap-highlight-color:transparent;transition:background .3s,color .3s}
-.theme-toggle{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--tab-border);border-radius:50%;cursor:pointer;color:var(--t3);background:var(--tab-bg);box-shadow:var(--tab-shadow);transition:color .15s}
+.theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px 22px;border:1px solid var(--tab-border);border-radius:var(--rr);cursor:pointer;color:var(--t3);background:var(--tab-bg);box-shadow:var(--tab-shadow);transition:color .15s}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.theme-toggle{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
 .theme-toggle:active{opacity:.7}
 @media(hover:hover){.theme-toggle:hover{color:var(--t1)}}
