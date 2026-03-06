@@ -135,11 +135,6 @@
     "category": "Personal"
   },
   {
-    "title": "iTerm2",
-    "url": "https://iterm2.com/index.html",
-    "category": "Personal"
-  },
-  {
     "title": "LinkedIn",
     "url": "https://www.linkedin.com",
     "category": "Personal"
@@ -182,11 +177,6 @@
   {
     "title": "Neal Fun",
     "url": "https://neal.fun",
-    "category": "Personal"
-  },
-  {
-    "title": "Neovim",
-    "url": "https://neovim.io",
     "category": "Personal"
   },
   {
@@ -252,11 +242,6 @@
   {
     "title": "TinyWow",
     "url": "https://tinywow.com",
-    "category": "Personal"
-  },
-  {
-    "title": "tmux",
-    "url": "https://github.com/tmux/tmux/wiki",
     "category": "Personal"
   },
   {
@@ -350,6 +335,11 @@
     "category": "Initiatives"
   },
   {
+    "title": "iTerm2",
+    "url": "https://iterm2.com/index.html",
+    "category": "Initiatives"
+  },
+  {
     "title": "Menuva Admin Portal",
     "url": "https://admin.menuva.co.uk",
     "category": "Initiatives"
@@ -370,6 +360,11 @@
     "category": "Initiatives"
   },
   {
+    "title": "Neovim",
+    "url": "https://neovim.io",
+    "category": "Initiatives"
+  },
+  {
     "title": "SF Symbols",
     "url": "https://developer.apple.com/sf-symbols/",
     "category": "Initiatives"
@@ -377,6 +372,11 @@
   {
     "title": "Startium",
     "url": "https://warwick.startium.co.uk/community",
+    "category": "Initiatives"
+  },
+  {
+    "title": "tmux",
+    "url": "https://github.com/tmux/tmux/wiki",
     "category": "Initiatives"
   },
   {
