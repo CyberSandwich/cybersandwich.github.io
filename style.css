@@ -333,9 +333,9 @@ nav{
 }
 .tabs a{
   background:none;
-  padding:12px 22px;
+  padding:12px clamp(10px,3vw,22px);
   border-radius:var(--rr);
-  font:500 .875rem/1 var(--font);
+  font:500 clamp(.75rem,2.2vw,.875rem)/1 var(--font);
   color:var(--t3);
   cursor:pointer;
   transition:color .15s,background .15s,box-shadow .15s;
@@ -352,7 +352,6 @@ nav{
 
 /* Responsive */
 @media(max-width:480px){
-  .tabs a{padding:14px 16px;font-size:.8125rem}
   .tabs{max-width:calc(100vw - 28px)}
 }
 

@@ -99,8 +99,8 @@ nav{
   .tabs{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
 }
 .tabs a{
-  padding:12px 22px;border-radius:50px;
-  font:500 .875rem/1 var(--font);
+  padding:12px clamp(10px,3vw,22px);border-radius:50px;
+  font:500 clamp(.75rem,2.2vw,.875rem)/1 var(--font);
   color:var(--t3);
   transition:color .15s,background .15s,box-shadow .15s;
   white-space:nowrap;text-decoration:none
@@ -115,7 +115,7 @@ nav{
 .theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px;border:none;border-radius:50%;cursor:pointer;color:var(--t3);background:none;transition:color .15s}
 .theme-toggle:active{opacity:.7}
 @media(hover:hover){.theme-toggle:hover{color:var(--t1)}}
-@media(max-width:480px){.tabs a{padding:14px 16px;font-size:.8125rem}.tabs{max-width:calc(100vw - 28px)}}
+@media(max-width:480px){.tabs{max-width:calc(100vw - 28px)}}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
