@@ -12,6 +12,12 @@
     "category": "Web"
   },
   {
+    "title": "AztecGen",
+    "subtitle": "Aztec Code Generator",
+    "url": "/aztecgen/",
+    "category": "Web"
+  },
+  {
     "title": "CodeGen",
     "subtitle": "QR Code & Barcode Tool",
     "url": "/codegen/",
