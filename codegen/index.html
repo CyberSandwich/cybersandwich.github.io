@@ -798,7 +798,7 @@ function updatePvStyle(pv,style){
 
 /* QR Settings */
 var qrGroups1=[
-  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;qrS.exactSz=0;genQRS()}},
+  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;genQRS()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;qrS.exactSz=0;genQRS()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&qrS.fmt===2},onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQRS()}}
 ];

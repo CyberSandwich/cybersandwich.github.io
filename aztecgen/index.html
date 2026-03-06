@@ -638,7 +638,7 @@ function updatePvStyle(pv,style){
 
 /* Aztec Settings */
 var azGroups1=[
-  {type:'stepper',icon:IC.shield,steps:[23,36,50,75],def:0,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){azS.ec=i;azS.exactSz=0;genAZS()}},
+  {type:'stepper',icon:IC.shield,steps:[23,36,50,75],def:0,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){azS.ec=i;genAZS()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){azS.marginIdx=i;azS.exactSz=0;genAZS()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&azS.fmt===2},onChange:function(i){azS.style=i;updatePvStyle(azPv,i);genAZS()}}
 ];
