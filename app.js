@@ -478,19 +478,29 @@ var themeOrder=['light','sepia','dark'];
 var themeColors={light:'#FAFAFA',sepia:'#F5EDDA',dark:'#1C1C1E'};
 function setThemeLabel(t){if(themeLabel)themeLabel.textContent='Theme: '+t[0].toUpperCase()+t.slice(1)}
 function curTheme(){return document.documentElement.getAttribute('data-theme')||'light'}
+function applyTheme(t){
+  if(t==='light'){document.documentElement.removeAttribute('data-theme')}
+  else{document.documentElement.setAttribute('data-theme',t)}
+  setThemeLabel(t);
+  var mt=$('meta[name="theme-color"]');if(mt)mt.content=themeColors[t];
+  var ms=$('meta[name="color-scheme"]');if(ms)ms.content=t==='dark'?'dark':'light';
+}
 if(themeBtn){
   setThemeLabel(curTheme());
   themeBtn.addEventListener('click',function(e){
     e.preventDefault();
     var cur=curTheme();
     var next=themeOrder[(themeOrder.indexOf(cur)+1)%themeOrder.length];
-    if(next==='light'){document.documentElement.removeAttribute('data-theme');localStorage.removeItem('theme')}
-    else{document.documentElement.setAttribute('data-theme',next);localStorage.setItem('theme',next)}
-    setThemeLabel(next);
-    var mt=$('meta[name="theme-color"]');if(mt)mt.content=themeColors[next];
-    var ms=$('meta[name="color-scheme"]');if(ms)ms.content=next==='dark'?'dark':'light';
+    if(next==='light')localStorage.removeItem('theme');
+    else localStorage.setItem('theme',next);
+    applyTheme(next);
   });
 }
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden)return;
+  var stored=localStorage.getItem('theme')||'light';
+  if(stored!==curTheme())applyTheme(stored);
+});
 
 // Command palette
 var cmdOverlay=document.createElement('div');cmdOverlay.className='cmd-overlay';
