@@ -808,8 +808,8 @@ document.addEventListener('keydown',function(e){
   if(e.altKey)return;
   var tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape'){document.activeElement.blur()}return}
-  if(e.key==='1'){location.href='/';return}
-  if(e.key==='2'){location.href='/projects';return}
+  if(e.key==='1'||e.key==='ArrowLeft'){location.href='/';return}
+  if(e.key==='2'||e.key==='ArrowRight'){location.href='/projects';return}
   if(e.key==='/'){e.preventDefault();azIn.focus();return}
   if((e.key==='Enter'||e.key===' ')&&document.activeElement.classList.contains('preview')){e.preventDefault();document.activeElement.click();return}
   if(e.key==='l'){azGroups1[2]._set(0);return}
