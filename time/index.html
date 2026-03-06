@@ -303,7 +303,7 @@ let audioCtx,sndInt,fired=null,firedTid=null,lastChk='';
 function save(){localStorage.setItem('clk',JSON.stringify({alarms,aNextId}))}
 function load(){try{const d=JSON.parse(localStorage.getItem('clk'));if(d){alarms=d.alarms||[];aNextId=d.aNextId||0}}catch(e){}}
 q('.tabs').addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b)return;
+  const b=e.target.closest('button[data-tab]');if(!b)return;
   if(swRaf){cancelAnimationFrame(swRaf);swRaf=null}
   qa('.tabs button').forEach(t=>t.classList.remove('active'));
   qa('.view').forEach(v=>v.classList.remove('active'));
