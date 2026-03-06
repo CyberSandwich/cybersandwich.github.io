@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>Wright</title>
+<title>Wrighter</title>
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
 <style>
@@ -172,7 +172,7 @@ nav{
 <body>
 <main class="wrap">
   <header class="hd">
-    <h1>Wright</h1>
+    <h1>Wrighter</h1>
     <p>Minimal markdown editor with local autosave and keyboard formatting.</p>
   </header>
 
@@ -186,7 +186,7 @@ nav{
   </section>
 </main>
 
-<div class="status-pill" id="status" aria-live="polite">0 Words - 0m 0s</div>
+<div class="status-pill" id="status" aria-live="polite">0 Words - 0 Letters - 0m 0s</div>
 
 <nav>
   <div class="tabs">
@@ -199,8 +199,8 @@ nav{
 (()=>{
   'use strict';
 
-  const STORAGE_TEXT_KEY='wright:draft:v1';
-  const STORAGE_STATE_KEY='wright:state:v1';
+  const STORAGE_TEXT_KEY='wrighter:draft:v1';
+  const STORAGE_STATE_KEY='wrighter:state:v1';
   const SPEAKING_WPM=130;
   const EDIT_DEBOUNCE_MS=220;
   const METRICS_DEBOUNCE_MS=120;
@@ -226,6 +226,11 @@ nav{
     return words?words.length:0;
   }
 
+  function countLetters(text){
+    const letters=text.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g);
+    return letters?letters.length:0;
+  }
+
   function estimateSpokenDuration(words){
     const totalSeconds=Math.round(words/SPEAKING_WPM*60);
     const minutes=Math.floor(totalSeconds/60);
@@ -235,7 +240,8 @@ nav{
 
   function updateStatusNow(){
     const words=countWords(editor.value);
-    status.textContent=`${words} Words - ${estimateSpokenDuration(words)}`;
+    const letters=countLetters(editor.value);
+    status.textContent=`${words} Words - ${letters} Letters - ${estimateSpokenDuration(words)}`;
   }
 
   function clamp(n,min,max){
