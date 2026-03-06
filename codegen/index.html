@@ -1040,32 +1040,38 @@ function setInput(text){
 $('qrPs').onclick=function(){handlePaste(this)};
 $('bcPs').onclick=function(){handlePaste(this)};
 
-/* Camera scanning (QR only) */
-var camStream=null,camVideo=null,camWrap=null,camScanning=false,camRow=null,camLbl=null;
+/* Camera scanning */
+var camStream=null,camVideo=null,camWrap=null,camScanning=false;
+var camCards={},camRows={},camLbls={};
 (function(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
-  var anchor=$('qrCh2');
-  var scanCard=document.createElement('div');scanCard.className='settings';
-  anchor.parentNode.insertBefore(scanCard,anchor.nextSibling);
-  var row=document.createElement('div');row.className='srow';
-  var lbl=document.createElement('div');lbl.className='slbl';
-  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox','0 0 24 24');
-  var p1=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p1.setAttribute('d','M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z');
-  var c1=document.createElementNS('http://www.w3.org/2000/svg','circle');
-  c1.setAttribute('cx','12');c1.setAttribute('cy','13');c1.setAttribute('r','4');
-  svg.appendChild(p1);svg.appendChild(c1);lbl.appendChild(svg);
-  var sp=document.createElement('span');sp.textContent='Scan';lbl.appendChild(sp);
-  row.appendChild(lbl);scanCard.appendChild(row);
   camWrap=document.createElement('div');camWrap.className='settings cam-wrap';camWrap.style.display='none';
   camVideo=document.createElement('video');camVideo.setAttribute('playsinline','');camVideo.setAttribute('autoplay','');camVideo.muted=true;
-  camWrap.appendChild(camVideo);scanCard.parentNode.insertBefore(camWrap,scanCard.nextSibling);
-  camRow=row;camLbl=sp;
-  row.addEventListener('click',function(){if(camScanning)stopCam();else startCam()});
+  camWrap.appendChild(camVideo);
+  ['qr','bc'].forEach(function(tab){
+    var anchor=$(tab+'Ch2');
+    var card=document.createElement('div');card.className='settings';
+    anchor.parentNode.insertBefore(card,anchor.nextSibling);
+    var row=document.createElement('div');row.className='srow';
+    var lbl=document.createElement('div');lbl.className='slbl';
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    var p1=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p1.setAttribute('d','M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z');
+    var c1=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c1.setAttribute('cx','12');c1.setAttribute('cy','13');c1.setAttribute('r','4');
+    svg.appendChild(p1);svg.appendChild(c1);lbl.appendChild(svg);
+    var sp=document.createElement('span');sp.textContent='Scan';lbl.appendChild(sp);
+    row.appendChild(lbl);card.appendChild(row);
+    camCards[tab]=card;camRows[tab]=row;camLbls[tab]=sp;
+    row.addEventListener('click',function(){if(camScanning)stopCam();else startCam()});
+  });
 })();
 function startCam(){
-  camScanning=true;camLbl.textContent='Stop';camRow.classList.add('cam-active');
+  camScanning=true;
+  var lbl=camLbls[curTab],row=camRows[curTab],card=camCards[curTab];
+  lbl.textContent='Stop';row.classList.add('cam-active');
+  card.parentNode.insertBefore(camWrap,card.nextSibling);
   camWrap.style.display='';
   navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:640},height:{ideal:640}}}).then(function(stream){
     camStream=stream;camVideo.srcObject=stream;camVideo.play();requestAnimationFrame(camLoop);
@@ -1077,19 +1083,29 @@ function camLoop(){
   var now=performance.now();
   if(now-camLastT>250&&camVideo.readyState>=2){
     camLastT=now;
-    var fn=bcDetQR?function(){return bcDetQR.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
-      loadJsQR();if(typeof jsQR==='undefined')return Promise.resolve(null);
-      var w=camVideo.videoWidth,h=camVideo.videoHeight,max=800;
-      if(w>max||h>max){var s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
-      w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;scanCtx.drawImage(camVideo,0,0,w,h);
-      var d=scanCtx.getImageData(0,0,w,h),r=jsQR(d.data,d.width,d.height);
-      return Promise.resolve(r?{rawValue:r.data}:null);
-    };
+    var fn;
+    if(curTab==='qr'){
+      fn=bcDetQR?function(){return bcDetQR.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
+        loadJsQR();if(typeof jsQR==='undefined')return Promise.resolve(null);
+        var w=camVideo.videoWidth,h=camVideo.videoHeight,max=800;
+        if(w>max||h>max){var s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+        w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;scanCtx.drawImage(camVideo,0,0,w,h);
+        var d=scanCtx.getImageData(0,0,w,h),r=jsQR(d.data,d.width,d.height);
+        return Promise.resolve(r?{rawValue:r.data}:null);
+      };
+    }else{
+      fn=bcDetBC?function(){return bcDetBC.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
+        var w=camVideo.videoWidth,h=camVideo.videoHeight,max=800;
+        if(w>max||h>max){var sc=max/Math.max(w,h);w=Math.round(w*sc);h=Math.round(h*sc)}
+        w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;scanCtx.drawImage(camVideo,0,0,w,h);
+        return decodeBarcodeImg(scanC);
+      };
+    }
     fn().then(function(r){
       if(r&&r.rawValue){
         var val=r.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
         setInput(val);navigator.clipboard.writeText(val).catch(function(){});
-        var cpBtn=$('qrCp');
+        var cpBtn=$(curTab+'Cp');
         notify(display,true,function(){navigator.clipboard.writeText(val).then(function(){feedback(cpBtn,'ok','Copied')}).catch(function(){})});
         stopCam();return;
       }
@@ -1101,7 +1117,10 @@ function camLoop(){
 }
 function stopCam(){
   camScanning=false;if(camWrap)camWrap.style.display='none';
-  if(camLbl)camLbl.textContent='Scan';if(camRow)camRow.classList.remove('cam-active');
+  ['qr','bc'].forEach(function(tab){
+    if(camLbls[tab])camLbls[tab].textContent='Scan';
+    if(camRows[tab])camRows[tab].classList.remove('cam-active');
+  });
   if(camStream){camStream.getTracks().forEach(function(t){t.stop()});camStream=null}
   if(camVideo)camVideo.srcObject=null;
 }
