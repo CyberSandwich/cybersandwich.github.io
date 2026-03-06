@@ -447,13 +447,13 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 .cmd-overlay{
   position:fixed;inset:0;z-index:100;
   background:rgba(0,0,0,.25);
-  opacity:0;visibility:hidden;
-  transition:opacity .15s,visibility .15s
+  opacity:0;pointer-events:none;
+  transition:opacity .15s
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
   .cmd-overlay{backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);background:rgba(0,0,0,.18)}
 }
-.cmd-overlay.open{opacity:1;visibility:visible}
+.cmd-overlay.open{opacity:1;pointer-events:auto}
 .cmd-palette{
   position:absolute;
   top:min(20vh,160px);
