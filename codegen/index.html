@@ -377,8 +377,6 @@ var bcCtx=bcC.getContext('2d');
 var jpgCtx=jpgC.getContext('2d',{alpha:false});
 var expC=document.createElement('canvas'),expCtx;
 var qrExpC=document.createElement('canvas'),qrExpCtx;
-var bcDetQR,bcDetBC;try{bcDetQR=new BarcodeDetector({formats:['qr_code']})}catch(e){bcDetQR=null}
-try{bcDetBC=new BarcodeDetector({formats:['code_128','ean_13','ean_8','upc_a','upc_e','code_39','itf']})}catch(e){bcDetBC=null}
 function qrText(){return qrIn.value.trim()||'saputra.co.uk'}
 function bcText(){return bcIn.value.trim()||FMT[curFmt].p}
 function reGen(force){if(curTab==='qr')genQR(force);else genBC(force)}
@@ -1018,11 +1016,7 @@ var scanC=document.createElement('canvas');
 var scanCtx=scanC.getContext('2d',{willReadFrequently:true});
 function decodeImg(img){
   if(!img||!img.width||!img.height)return Promise.resolve(null);
-  if(curTab==='bc'){
-    if(bcDetBC)return bcDetBC.detect(img).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null});
-    return decodeBarcodeImg(img);
-  }
-  if(bcDetQR)return bcDetQR.detect(img).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null});
+  if(curTab==='bc')return decodeBarcodeImg(img);
   loadJsQR();
   if(typeof jsQR==='undefined')return Promise.resolve(null);
   var w=img.width,h=img.height,max=800;
@@ -1126,7 +1120,7 @@ function camLoop(){
     camLastT=now;
     var fn;
     if(curTab==='qr'){
-      fn=bcDetQR?function(){return bcDetQR.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
+      fn=function(){
         loadJsQR();if(typeof jsQR==='undefined')return Promise.resolve(null);
         var w=camVideo.videoWidth,h=camVideo.videoHeight,max=800;
         if(w>max||h>max){var s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
@@ -1135,11 +1129,11 @@ function camLoop(){
         return Promise.resolve(r?{rawValue:r.data}:null);
       };
     }else{
-      fn=bcDetBC?function(){return bcDetBC.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
+      fn=function(){
         var w=camVideo.videoWidth,h=camVideo.videoHeight,max=1024;
         if(w>max||h>max){var sc=max/Math.max(w,h);w=Math.round(w*sc);h=Math.round(h*sc)}
         w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;
-        scanCtx.filter='contrast(1.5) grayscale(1)';scanCtx.drawImage(camVideo,0,0,w,h);scanCtx.filter='none';
+        scanCtx.drawImage(camVideo,0,0,w,h);
         return decodeBarcodeImg(scanC);
       };
     }
