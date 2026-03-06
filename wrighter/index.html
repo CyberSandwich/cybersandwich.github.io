@@ -10,57 +10,54 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#FAFAFA;--bg2:#F5F5F5;--card:#FFF;
+  --bg:#FAFAFA;--bg2:#F5F5F5;
   --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;
-  --bdr:#EAEAEA;--rr:50px;
+  --rr:50px;
   --shadow:0 1px 3px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
   --mono:'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace
 }
+html,body{height:100%}
 body{
   font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   background:var(--bg);color:var(--t1);
   min-height:100vh;min-height:100dvh;
-  display:flex;justify-content:center;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation
 }
-.w{width:100%;max-width:860px;padding:18px 18px calc(186px + env(safe-area-inset-bottom,0px))}
-.panel{
-  background:var(--card);border:1px solid var(--bdr);border-radius:20px;
-  box-shadow:var(--shadow);overflow:hidden
+#drop-zone{
+  position:relative;height:100dvh;overflow:hidden;
+  padding-bottom:calc(130px + env(safe-area-inset-bottom,0px));
+  transition:background .15s
 }
-.panel+.panel{margin-top:12px}
-#drop-zone.drag-over{border-color:#D5D5D5;box-shadow:0 0 0 4px rgba(0,0,0,.03),var(--shadow)}
+#drop-zone.drag-over{background:rgba(0,0,0,.02)}
+.render,#editor{
+  position:absolute;inset:0;
+  padding:20px 18px calc(146px + env(safe-area-inset-bottom,0px));
+  overflow:auto
+}
+.render{pointer-events:none;font:400 1.02rem/1.65 var(--font)}
 #editor{
-  width:100%;height:min(50dvh,520px);border:0;outline:none;
-  background:var(--card);color:var(--t1);
-  font:400 1rem/1.6 var(--mono);
-  padding:14px 16px;resize:vertical
+  border:0;background:transparent;outline:none;resize:none;
+  font:400 1.02rem/1.65 var(--font);
+  color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--t1)
 }
-.hint{
-  border-top:1px solid var(--bdr);padding:9px 14px;
-  font:500 .8125rem/1.2 var(--font);color:var(--t3)
-}
-.preview{
-  padding:14px 16px;min-height:180px;max-height:44dvh;
-  overflow:auto;font:400 .98rem/1.65 var(--font)
-}
-.preview h1,.preview h2,.preview h3{line-height:1.3;letter-spacing:-.01em;margin:0 0 10px}
-.preview h1{font-size:1.5rem}
-.preview h2{font-size:1.3rem}
-.preview h3{font-size:1.15rem}
-.preview p{margin:0 0 10px}
-.preview ul,.preview ol{margin:0 0 12px 22px}
-.preview li{margin:0 0 6px}
-.preview ul.check{list-style:none;margin-left:0}
-.preview ul.check li{display:flex;align-items:flex-start;gap:8px}
-.preview ul.check input{margin-top:4px}
-.preview code{font:500 .9em/1.4 var(--mono);background:var(--bg2);padding:1px 5px;border-radius:6px}
-.preview pre{background:var(--bg2);padding:12px;border-radius:10px;overflow:auto;margin:0 0 12px}
-.preview pre code{background:none;padding:0}
-.preview blockquote{margin:0 0 12px;padding-left:12px;border-left:3px solid #E0E0E0;color:var(--t2)}
-.preview a{color:inherit}
-.preview .ph{color:var(--t3)}
+#editor::selection{background:rgba(59,130,246,.24);color:transparent}
+#editor::placeholder{color:#B6B6B6;-webkit-text-fill-color:#B6B6B6}
+.render h1,.render h2,.render h3{line-height:1.28;letter-spacing:-.01em;margin:0 0 10px}
+.render h1{font-size:1.6rem}
+.render h2{font-size:1.35rem}
+.render h3{font-size:1.15rem}
+.render p{margin:0 0 10px;color:var(--t1)}
+.render ul,.render ol{margin:0 0 12px 22px}
+.render li{margin:0 0 6px}
+.render ul.check{list-style:none;margin-left:0}
+.render ul.check li{display:flex;align-items:flex-start;gap:8px}
+.render ul.check input{margin-top:4px}
+.render code{font:500 .92em/1.4 var(--mono);background:var(--bg2);padding:1px 5px;border-radius:6px}
+.render pre{background:var(--bg2);padding:12px;border-radius:10px;overflow:auto;margin:0 0 12px}
+.render pre code{background:none;padding:0}
+.render blockquote{margin:0 0 12px;padding-left:12px;border-left:3px solid #E0E0E0;color:var(--t2)}
+.render a{color:inherit}
 .fx-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%)}
 .metrics{z-index:9;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px))}
 .metrics-pill{
@@ -86,21 +83,19 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 .tabs a.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active{opacity:.7}
 @media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
-@media(max-width:480px){.w{padding:14px 14px calc(182px + env(safe-area-inset-bottom,0px))}.tabs a{padding:14px 16px;font-size:.8125rem}}
+@media(max-width:480px){
+  .render,#editor{padding:16px 14px calc(146px + env(safe-area-inset-bottom,0px))}
+  .tabs a{padding:14px 16px;font-size:.8125rem}
+}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<main class="w">
-  <section class="panel" id="drop-zone" aria-label="Markdown Editor Drop Area">
-    <label for="editor" style="position:absolute;left:-9999px">Markdown Editor</label>
-    <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="# Start Writing\n\nDrop A .md File To Replace This Draft."></textarea>
-    <p class="hint">Drop `.md` To Overwrite Draft</p>
-  </section>
-  <section class="panel">
-    <div id="preview" class="preview" aria-live="polite"></div>
-  </section>
+<main id="drop-zone" aria-label="Markdown Editor">
+  <label for="editor" style="position:absolute;left:-9999px">Markdown Editor</label>
+  <div id="render" class="render" aria-hidden="true"></div>
+  <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Start Writing"></textarea>
 </main>
 
 <div class="metrics fx-bottom"><div class="metrics-pill" id="status" aria-live="polite">0 Words - 0 Letters - 0m 0s</div></div>
@@ -123,7 +118,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
   const METRICS_MS=120;
 
   const editor=document.getElementById('editor');
-  const preview=document.getElementById('preview');
+  const render=document.getElementById('render');
   const status=document.getElementById('status');
   const dropZone=document.getElementById('drop-zone');
 
@@ -133,7 +128,6 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
   }
 
   function clamp(n,min,max){return Math.min(max,Math.max(min,n));}
-
   function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
   function inlineMd(s){
@@ -147,6 +141,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
   }
 
   function parseMd(src){
+    if(!src.trim())return '';
     const lines=src.replace(/\r\n?/g,'\n').split('\n');
     let out=[];
     let inUl=false,inOl=false,inBq=false,inCode=false;
@@ -173,7 +168,11 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
       if(inBq){out.push('</blockquote>');inBq=false;}
 
       m=line.match(/^- \[([ xX])\]\s+(.+)$/);
-      if(m){if(!inUl){if(inOl){out.push('</ol>');inOl=false;}out.push('<ul class="check">');inUl=true;}out.push('<li><input type="checkbox" disabled'+(m[1].toLowerCase()==='x'?' checked':'')+'><span>'+inlineMd(m[2])+'</span></li>');continue;}
+      if(m){
+        if(!inUl){if(inOl){out.push('</ol>');inOl=false;}out.push('<ul class="check">');inUl=true;}
+        out.push('<li><input type="checkbox" disabled'+(m[1].toLowerCase()==='x'?' checked':'')+'><span>'+inlineMd(m[2])+'</span></li>');
+        continue;
+      }
 
       m=line.match(/^[-*+]\s+(.+)$/);
       if(m){if(!inUl){if(inOl){out.push('</ol>');inOl=false;}out.push('<ul>');inUl=true;}out.push('<li>'+inlineMd(m[1])+'</li>');continue;}
@@ -187,7 +186,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 
     if(inCode)out.push('<pre><code>'+esc(codeBuf.join('\n'))+'</code></pre>');
     closeBlocks();
-    return out.join('')||'<p class="ph">Preview</p>';
+    return out.join('');
   }
 
   function countWords(text){
@@ -210,7 +209,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
     const words=countWords(text);
     const letters=countLetters(text);
     status.textContent=words+' Words - '+letters+' Letters - '+estimateSpokenDuration(words);
-    preview.innerHTML=parseMd(text);
+    render.innerHTML=parseMd(text);
   }
 
   function saveNow(){
@@ -268,6 +267,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
     const wrapped=selected.startsWith(marker)&&selected.endsWith(marker)&&selected.length>=marker.length*2;
     const toggled=wrapped?selected.slice(marker.length,selected.length-marker.length):marker+selected+marker;
     const next=value.slice(0,start)+toggled+value.slice(end);
+
     if(wrapped){applyEditorValue(next,start,start+toggled.length);return;}
     applyEditorValue(next,start+marker.length,start+toggled.length-marker.length);
   }
@@ -339,10 +339,12 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
     updateMetricsNow();
   }
 
+  function syncScroll(){render.scrollTop=editor.scrollTop;render.scrollLeft=editor.scrollLeft;queueState();}
+
   editor.addEventListener('input',()=>{queueSave();queueState();queueMetrics();});
   editor.addEventListener('keyup',queueState);
   editor.addEventListener('click',queueState);
-  editor.addEventListener('scroll',queueState,{passive:true});
+  editor.addEventListener('scroll',syncScroll,{passive:true});
 
   editor.addEventListener('keydown',event=>{
     if(event.isComposing||event.altKey)return;
@@ -361,7 +363,6 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
   });
 
   let dragDepth=0;
-
   function hasFiles(dt){return !!dt&&Array.from(dt.types||[]).includes('Files');}
 
   dropZone.addEventListener('dragenter',event=>{
@@ -416,6 +417,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
     requestAnimationFrame(()=>{
       editor.setSelectionRange(start,end);
       editor.scrollTop=Math.max(0,Number(restoredState.scroll)||0);
+      syncScroll();
     });
   }
 
