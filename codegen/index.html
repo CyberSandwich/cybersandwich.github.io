@@ -1072,8 +1072,8 @@ $('qrPs').onclick=function(){handlePaste(this)};
 $('bcPs').onclick=function(){handlePaste(this)};
 
 /* Camera scanning */
-var camStream=null,camVideo=null,camWrap=null,camScanning=false;
-var camCards={},camRows={},camLbls={};
+var camStream=null,camVideo=null,camWrap=null,camScanning=false,camFacing='environment';
+var camCards={},camRows={},camLbls={},camChips={};
 (function(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
   camWrap=document.createElement('div');camWrap.className='settings cam-wrap';camWrap.style.display='none';
@@ -1094,8 +1094,12 @@ var camCards={},camRows={},camLbls={};
     svg.appendChild(p1);svg.appendChild(c1);lbl.appendChild(svg);
     var sp=document.createElement('span');sp.textContent='Scan';lbl.appendChild(sp);
     row.appendChild(lbl);card.appendChild(row);
-    camCards[tab]=card;camRows[tab]=row;camLbls[tab]=sp;
-    row.addEventListener('click',function(){if(camScanning)stopCam();else startCam()});
+    var chipWrap=document.createElement('div');chipWrap.className='schips';chipWrap.style.display='none';
+    var chip=document.createElement('button');chip.type='button';chip.className='chip';chip.textContent='Front Camera';
+    chip.addEventListener('click',function(e){e.stopPropagation();switchCam()});
+    chipWrap.appendChild(chip);row.appendChild(chipWrap);
+    camCards[tab]=card;camRows[tab]=row;camLbls[tab]=sp;camChips[tab]=chip;chipWrap._wrap=chipWrap;chip._wrap=chipWrap;
+    row.addEventListener('click',function(e){if(e.target===chip||e.target===chipWrap)return;if(camScanning)stopCam();else startCam()});
   });
 })();
 function startCam(){
@@ -1104,8 +1108,9 @@ function startCam(){
   lbl.textContent='Stop';row.classList.add('cam-active');
   card.parentNode.insertBefore(camWrap,card.nextSibling);
   camWrap.style.display='';
+  var chipEl=camChips[curTab];chipEl.textContent=camFacing==='environment'?'Front Camera':'Rear Camera';chipEl._wrap.style.display='';
   var isBC=curTab==='bc';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:isBC?1920:1280},height:{ideal:isBC?1080:1280}}}).then(function(stream){
+  navigator.mediaDevices.getUserMedia({video:{facingMode:camFacing,width:{ideal:isBC?1920:1280},height:{ideal:isBC?1080:1280}}}).then(function(stream){
     camStream=stream;camVideo.srcObject=stream;camVideo.play();
     var track=stream.getVideoTracks()[0];
     if(track){try{track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(e){}}
@@ -1151,11 +1156,18 @@ function camLoop(){
   }
   requestAnimationFrame(camLoop);
 }
+function switchCam(){
+  camFacing=camFacing==='environment'?'user':'environment';
+  if(camStream){camStream.getTracks().forEach(function(t){t.stop()});camStream=null}
+  if(camVideo)camVideo.srcObject=null;
+  camScanning=false;startCam();
+}
 function stopCam(){
-  camScanning=false;if(camWrap)camWrap.style.display='none';
+  camScanning=false;camFacing='environment';if(camWrap)camWrap.style.display='none';
   ['qr','bc'].forEach(function(tab){
     if(camLbls[tab])camLbls[tab].textContent='Scan';
     if(camRows[tab])camRows[tab].classList.remove('cam-active');
+    if(camChips[tab])camChips[tab]._wrap.style.display='none';
   });
   if(camStream){camStream.getTracks().forEach(function(t){t.stop()});camStream=null}
   if(camVideo)camVideo.srcObject=null;
