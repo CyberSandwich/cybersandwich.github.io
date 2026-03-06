@@ -373,22 +373,11 @@ nav{
   .cve,.pcard,.ucard,.pcontent{break-inside:avoid}
 }
 
-/* Appearance row */
-.links-label{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:14px 20px;
-  font-size:.9375rem;
-  font-weight:500;
-  color:var(--t2);
-  flex:1;min-width:0
-}
-.links-label svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
-.links-label .icon-sun,.links-label .icon-moon,.links-label .icon-sunset{display:none}
-html:not([data-theme]) .links-label .icon-sun,html[data-theme="light"] .links-label .icon-sun{display:inline}
-html[data-theme="sepia"] .links-label .icon-sunset{display:inline}
-html[data-theme="dark"] .links-label .icon-moon{display:inline}
+/* Theme toggle icons */
+.icon-sun,.icon-moon,.icon-sunset{display:none}
+html:not([data-theme]) .icon-sun,html[data-theme="light"] .icon-sun{display:inline}
+html[data-theme="sepia"] .icon-sunset{display:inline}
+html[data-theme="dark"] .icon-moon{display:inline}
 
 /* Sepia Mode */
 html[data-theme="sepia"]{
