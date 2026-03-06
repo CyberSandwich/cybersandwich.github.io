@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FAFAFA">
 <title>Wrighter</title>
 <link rel="icon" type="image/png" href="/ds-favicon.png">
@@ -17,22 +17,27 @@
 <meta name="twitter:card" content="summary">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#FAFAFA;--t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--rr:50px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace}
+:root{--bg:#FAFAFA;--t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--sel:rgba(59,130,246,.18);--tab-bg:rgba(245,245,245,.92);--tab-blur:rgba(255,255,255,.35);--tab-border:rgba(255,255,255,.45);--tab-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);--tab-active:rgba(50,50,52,.85);--tab-active-c:#fff;--rr:50px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace}
+html[data-theme="dark"]{--bg:#1A1A1A;--t1:#D4D4D4;--t2:#8A8A8A;--t3:#5A5A5A;--sel:rgba(59,130,246,.28);--tab-bg:rgba(38,38,38,.92);--tab-blur:rgba(30,30,30,.55);--tab-border:rgba(255,255,255,.06);--tab-shadow:0 2px 6px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.3);--tab-active:rgba(255,255,255,.12);--tab-active-c:#E4E4E4}
+html[data-theme="sepia"]{--bg:#F5EDDA;--t1:#5B4636;--t2:#8B7355;--t3:#AB9B85;--sel:rgba(139,115,85,.18);--tab-bg:rgba(240,232,216,.92);--tab-blur:rgba(245,237,218,.55);--tab-border:rgba(255,255,255,.35);--tab-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);--tab-active:rgba(91,70,54,.8);--tab-active-c:#F5EDDA}
 html,body{height:100%}
-body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg);color:var(--t1);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-main{min-height:100vh;min-height:100dvh;padding:0 calc(40px + env(safe-area-inset-right,0px)) 0 calc(40px + env(safe-area-inset-left,0px));transition:background .12s}
+body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg);color:var(--t1);-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .3s,color .3s}
+main{min-height:100vh;min-height:100dvh;padding:0 calc(40px + env(safe-area-inset-right,0px)) 0 calc(40px + env(safe-area-inset-left,0px));transition:background .3s}
 main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset:-12px}
-#editor{display:block;width:100%;height:100dvh;min-height:240px;padding:24px 0 calc(176px + env(safe-area-inset-bottom,0px));border:none;outline:0;resize:none;background:transparent;background-clip:padding-box;color:var(--t1);caret-color:var(--t1);font:400 20px/34px var(--mono);-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+#editor{display:block;width:100%;height:100dvh;min-height:240px;padding:24px 0 calc(176px + env(safe-area-inset-bottom,0px));border:none;outline:0;resize:none;background:transparent;background-clip:padding-box;color:var(--t1);caret-color:var(--t1);font:400 22px/42px var(--mono);-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;transition:color .3s}
 #editor{scrollbar-width:none;-ms-overflow-style:none}
 #editor::-webkit-scrollbar{display:none}
-#editor::selection{background:rgba(59,130,246,.18);color:inherit}.metrics{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px))}
+#editor::selection{background:var(--sel);color:inherit}.metrics{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px))}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
-.tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.45);width:max-content;max-width:calc(100vw - 40px)}
-@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
+.tabs{display:flex;background:var(--tab-bg);border-radius:var(--rr);padding:5px;box-shadow:var(--tab-shadow);border:1px solid var(--tab-border);width:max-content;max-width:calc(100vw - 40px)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
 .metric-pill{max-width:none}
+.theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px 14px;border:none;border-radius:var(--rr);cursor:pointer;color:var(--t3);background:none;transition:color .15s}
+.theme-toggle:active{opacity:.7}
+@media(hover:hover){.theme-toggle:hover{color:var(--t1)}}
 .metric-label{display:block;padding:8px 12px;border-radius:var(--rr);text-align:center;font:500 .75rem/1 var(--font);color:var(--t2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .tabs a{background:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
-.tabs a.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.tabs a.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active{opacity:.7}
 @media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
 @media(max-width:480px){main{padding:0 calc(28px + env(safe-area-inset-right,0px)) 0 calc(28px + env(safe-area-inset-left,0px))}#editor{height:100dvh}.metrics{gap:6px;padding-inline:14px}.tabs a,.metric-label{padding:14px 16px;font-size:.8125rem}.tabs{max-width:calc(100vw - 28px)}}
@@ -57,6 +62,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   <div class="tabs">
     <a href="/">Home</a>
     <a href="/projects" class="active">Projects</a>
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button>
   </div>
 </nav>
 
@@ -68,7 +74,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   const KEY_STATE='wrighter:state:v4';
   const DB_NAME='wrighter-db';
   const DB_STORE='kv';
-  const WPM=130;
+  const LPM=550;
   const SAVE_MS=140;
   const SAVE_TEXT=1;
   const SAVE_STATE=2;
@@ -94,6 +100,41 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   const lettersOut=document.getElementById('letters');
   const timeOut=document.getElementById('time');
   const drop=document.getElementById('drop');
+  const themeBtn=document.getElementById('theme-btn');
+  const THEMES=['light','sepia','dark'];
+  const THEME_KEY='wrighter:theme';
+  const META_THEME=document.querySelector('meta[name="theme-color"]');
+  const THEME_COLORS={light:'#FAFAFA',dark:'#1A1A1A',sepia:'#F5EDDA'};
+
+  const THEME_ICONS={
+    sepia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>',
+    dark:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/></svg>',
+    light:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+  };
+  function setThemeIcon(next){
+    themeBtn.textContent='';
+    const tmp=document.createElement('div');
+    tmp.innerHTML=THEME_ICONS[next];
+    themeBtn.appendChild(tmp.firstChild);
+  }
+  function setTheme(t){
+    if(t==='light')document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme',t);
+    META_THEME.content=THEME_COLORS[t];
+    const next=THEMES[(THEMES.indexOf(t)+1)%THEMES.length];
+    setThemeIcon(next);
+    try{localStorage.setItem(THEME_KEY,t);}catch(_){}
+  }
+  (function(){
+    let t;try{t=localStorage.getItem(THEME_KEY);}catch(_){}
+    setTheme(t&&THEMES.includes(t)?t:'light');
+  })();
+  themeBtn.addEventListener('click',()=>{
+    const cur=document.documentElement.getAttribute('data-theme')||'light';
+    const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];
+    setTheme(next);
+    editor.focus();
+  });
 
   let rafId=0;
   let beforeInput=0;
@@ -108,6 +149,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   let textRev=0;
   let words=0;
   let letters=0;
+  let nonSpace=0;
   let shownWords=-1;
   let shownLetters=-1;
   let shownSec=-1;
@@ -121,8 +163,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   let pendingMask=0;
   let pendingText='';
   let pendingState='';
-  const oldCounts={w:0,l:0};
-  const newCounts={w:0,l:0};
+  const oldCounts={w:0,l:0,ns:0};
+  const newCounts={w:0,l:0,ns:0};
 
   const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 
@@ -275,6 +317,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   function countRange(text,start,end,out){
     let w=0;
     let l=0;
+    let ns=0;
     let inWord=false;
     for(let i=start;i<end;){
       const code=text.codePointAt(i);
@@ -282,6 +325,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       const letter=isLetter(code);
       const core=letter||(code>=CODE_0&&code<=CODE_9);
       if(code!==10&&code!==13)l++;
+      if(code!==10&&code!==13&&code!==32&&code!==9)ns++;
       if(isCJK(code)){
         inWord=false;
         w++;
@@ -302,6 +346,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     }
     out.w=w;
     out.l=l;
+    out.ns=ns;
   }
 
   function expandLeft(text,index){
@@ -321,6 +366,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     countRange(text,0,text.length,newCounts);
     words=newCounts.w;
     letters=newCounts.l;
+    nonSpace=newCounts.ns;
     textCache=text;
     textRev++;
   }
@@ -335,7 +381,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     countRange(next,newL,newR,newCounts);
     words+=newCounts.w-oldCounts.w;
     letters+=newCounts.l-oldCounts.l;
-    if(words<0||letters<0){recountAll(next);return;}
+    nonSpace+=newCounts.ns-oldCounts.ns;
+    if(words<0||letters<0||nonSpace<0){recountAll(next);return;}
     textCache=next;
     textRev++;
   }
@@ -363,7 +410,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 
   function paint(){
     rafId=0;
-    const sec=Math.round(words*60/WPM);
+    const sec=Math.round(nonSpace*60/LPM);
     if(words!==shownWords){
       shownWords=words;
       wordsOut.textContent=words+(words===1?' Word':' Words');
@@ -508,7 +555,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   editor.addEventListener('click',()=>queuePersist(SAVE_STATE));
 
   editor.addEventListener('keydown',event=>{
-    if(event.key==='Tab'){
+    if(event.key==='Tab'&&!event.shiftKey){
       event.preventDefault();
       const s=editor.selectionStart;
       const e=editor.selectionEnd;
@@ -516,6 +563,18 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       editor.value=v.substring(0,s)+'  '+v.substring(e);
       editor.selectionStart=editor.selectionEnd=s+2;
       onInput();
+      return;
+    }
+    if(event.key==='Tab'&&event.shiftKey){
+      event.preventDefault();
+      const s=editor.selectionStart;
+      const v=editor.value;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      if(v[ls]===' '&&v[ls+1]===' '){
+        editor.value=v.substring(0,ls)+v.substring(ls+2);
+        editor.selectionStart=editor.selectionEnd=Math.max(ls,s-2);
+        onInput();
+      }
       return;
     }
     if(event.key==='Enter'){
@@ -538,7 +597,14 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     if(!event.shiftKey&&!event.altKey&&event.code==='KeyS'){
       event.preventDefault();
       flush(true);
-      queuePaint();
+      const blob=new Blob([editor.value],{type:'text/plain'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      const fname=editor.value.trim().split(/\s+/).slice(0,5).join('_').toLowerCase().replace(/[^a-z0-9_]/g,'')||'wrighter';
+      a.download=fname+'.txt';
+      a.click();
+      URL.revokeObjectURL(url);
       return;
     }
     if(event.shiftKey&&!event.altKey&&event.code==='KeyK'){
@@ -550,6 +616,40 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       const lineEnd=le<0?v.length:le+1;
       editor.value=v.substring(0,ls)+v.substring(lineEnd);
       editor.selectionStart=editor.selectionEnd=Math.min(ls,editor.value.length);
+      onInput();
+      return;
+    }
+    if(event.shiftKey&&!event.altKey&&event.code==='ArrowUp'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',s);
+      if(ls===0)return;
+      const prevLs=v.lastIndexOf('\n',ls-2)+1;
+      const prevLine=v.substring(prevLs,ls);
+      const curLine=v.substring(ls,le<0?v.length:le+1);
+      const atEnd=le<0;
+      const swap=atEnd?curLine+'\n'+prevLine.replace(/\n$/,''):curLine+prevLine;
+      editor.value=v.substring(0,prevLs)+swap+v.substring(atEnd?v.length:le+1);
+      editor.selectionStart=editor.selectionEnd=s-prevLine.length;
+      onInput();
+      return;
+    }
+    if(event.shiftKey&&!event.altKey&&event.code==='ArrowDown'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',s);
+      if(le<0)return;
+      const nextLe=v.indexOf('\n',le+1);
+      const curLine=v.substring(ls,le+1);
+      const nextLine=v.substring(le+1,nextLe<0?v.length:nextLe+1);
+      const atEnd=nextLe<0;
+      const swap=atEnd?nextLine+'\n'+curLine.replace(/\n$/,''):nextLine+curLine;
+      editor.value=v.substring(0,ls)+swap+v.substring(atEnd?v.length:nextLe+1);
+      editor.selectionStart=editor.selectionEnd=s+nextLine.length+(atEnd?1:0);
       onInput();
       return;
     }
@@ -565,6 +665,97 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       editor.value=v.substring(0,pos)+ins+v.substring(pos);
       editor.selectionStart=editor.selectionEnd=s+ins.length;
       onInput();
+      return;
+    }
+    if(!event.shiftKey&&!event.altKey&&event.code==='KeyL'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',s);
+      editor.selectionStart=ls;
+      editor.selectionEnd=le<0?v.length:le+1;
+      return;
+    }
+    if(!event.shiftKey&&!event.altKey&&event.code==='Enter'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const le=v.indexOf('\n',s);
+      const pos=le<0?v.length:le;
+      editor.value=v.substring(0,pos)+'\n'+v.substring(pos);
+      editor.selectionStart=editor.selectionEnd=pos+1;
+      onInput();
+      return;
+    }
+    if(event.shiftKey&&!event.altKey&&event.code==='Enter'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      editor.value=v.substring(0,ls)+'\n'+v.substring(ls);
+      editor.selectionStart=editor.selectionEnd=ls;
+      onInput();
+      return;
+    }
+    if(!event.shiftKey&&!event.altKey&&event.code==='KeyJ'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const le=v.indexOf('\n',s);
+      if(le<0)return;
+      const nextNonSpace=v.substring(le+1).match(/^[ \t]*/)[0].length;
+      editor.value=v.substring(0,le)+' '+v.substring(le+1+nextNonSpace);
+      editor.selectionStart=editor.selectionEnd=le+1;
+      onInput();
+      return;
+    }
+    if(!event.shiftKey&&!event.altKey&&event.code==='BracketRight'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const e=editor.selectionEnd;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',e-1);
+      const block=v.substring(ls,le<0?v.length:le);
+      const indented=block.split('\n').map(l=>'  '+l).join('\n');
+      editor.value=v.substring(0,ls)+indented+v.substring(le<0?v.length:le);
+      editor.selectionStart=s+2;
+      editor.selectionEnd=e+(indented.length-block.length);
+      onInput();
+      return;
+    }
+    if(!event.shiftKey&&!event.altKey&&event.code==='BracketLeft'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const e=editor.selectionEnd;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',e-1);
+      const block=v.substring(ls,le<0?v.length:le);
+      const outdented=block.split('\n').map(l=>l.startsWith('  ')?l.substring(2):l.replace(/^[ \t]/,'')).join('\n');
+      const diff=block.length-outdented.length;
+      if(!diff)return;
+      editor.value=v.substring(0,ls)+outdented+v.substring(le<0?v.length:le);
+      const firstLineDiff=block.split('\n')[0].length-outdented.split('\n')[0].length;
+      editor.selectionStart=Math.max(ls,s-firstLineDiff);
+      editor.selectionEnd=e-diff;
+      onInput();
+      return;
+    }
+    if(!event.shiftKey&&!event.altKey&&event.code==='KeyD'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const e=editor.selectionEnd;
+      if(s===e){
+        const wl=v.substring(0,s).search(/\w+$/);
+        const wr=v.substring(s).search(/\W/);
+        const ws=wl<0?s:wl;
+        const we=wr<0?v.length:s+wr;
+        editor.selectionStart=ws;
+        editor.selectionEnd=we;
+      }
       return;
     }
   });
