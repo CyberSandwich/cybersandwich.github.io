@@ -109,6 +109,7 @@ document.addEventListener('click',function(e){
   var page=parts[0];
   if(!page||validPages.indexOf(page)!==-1){
     e.preventDefault();
+    if(href===location.pathname&&(href==='/'||page==='home')){openCmd();return}
     if(href!==location.pathname)history.pushState(null,'',href);
     route();
   }
