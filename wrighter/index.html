@@ -49,7 +49,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 <body>
 <main id="drop" aria-label="Plain Text Editor" aria-dropeffect="copy">
   <label for="editor" style="position:absolute;left:-9999px">Plain Text Editor</label>
-  <textarea id="editor" aria-multiline="true" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  <textarea id="editor" aria-multiline="true" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" autofocus></textarea>
 </main>
 
 <div class="metrics">
@@ -838,6 +838,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       storedState=state;
       restoreState(state);
     }
+    editor.focus();
     paint();
   }).catch(()=>{
     recountAll(editor.value);
