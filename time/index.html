@@ -627,6 +627,7 @@ document.addEventListener('keydown',e=>{
   if(at==='alarm'){
     if(e.key===' '||e.key==='Enter'){e.preventDefault();saveAlarm();return}
   }
+  if(e.key==='t'){setTheme(THEMES[(THEMES.indexOf(document.documentElement.getAttribute('data-theme')||'light')+1)%THEMES.length]);return}
   if(e.key==='Escape'){if(kbIdx>=0){kbClear();return}}
 });
 load();tick();initAlarmTime();renderAlarms();
