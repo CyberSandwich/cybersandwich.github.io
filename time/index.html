@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>Clock</title>
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" href="data:,">
@@ -18,15 +18,37 @@
   --ok:#2D7D46;--err:#C41E3A;
   --r:14px;--rr:50px;
   --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
-  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
+  --tab-bg:rgba(245,245,245,.92);--tab-blur:rgba(255,255,255,.35);--tab-border:rgba(255,255,255,.45);--tab-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);--tab-active:rgba(50,50,52,.85);--tab-active-c:#fff
+}
+html[data-theme="dark"]{
+  --bg:#1A1A1A;--bg2:#2A2A2A;--bg3:#333;
+  --card:#242424;
+  --t1:#D4D4D4;--t2:#8A8A8A;--t3:#5A5A5A;--t4:#444;
+  --bdr:#333;--bdr2:#2A2A2A;
+  --acc:#A0A0A2;--accl:rgba(160,160,162,.08);
+  --ok:#4ADE80;--err:#F87171;
+  --tab-bg:rgba(38,38,38,.92);--tab-blur:rgba(30,30,30,.55);--tab-border:rgba(255,255,255,.06);--tab-shadow:0 2px 6px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.3);--tab-active:rgba(255,255,255,.12);--tab-active-c:#E4E4E4
+}
+html[data-theme="sepia"]{
+  --bg:#F5EDDA;--bg2:#EDE5D0;--bg3:#E5DDCA;
+  --card:#FAF4E6;
+  --t1:#5B4636;--t2:#8B7355;--t3:#AB9B85;--t4:#C8B99E;
+  --bdr:#DDD4C0;--bdr2:#E8E0CE;
+  --acc:#6B5744;--accl:rgba(107,87,68,.08);
+  --ok:#2D7D46;--err:#C41E3A;
+  --tab-bg:rgba(240,232,216,.92);--tab-blur:rgba(245,237,218,.55);--tab-border:rgba(255,255,255,.35);--tab-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);--tab-active:rgba(91,70,54,.8);--tab-active-c:#F5EDDA
 }
 html{height:100%;overflow-x:hidden}
-body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;-webkit-tap-highlight-color:transparent;transition:background .3s,color .3s}
+.theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px 14px;border:none;border-radius:var(--rr);cursor:pointer;color:var(--t3);background:none;transition:color .15s}
+.theme-toggle:active{opacity:.7}
+@media(hover:hover){.theme-toggle:hover{color:var(--t1)}}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
-.tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.45)}
-@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
+.tabs{display:flex;background:var(--tab-bg);border-radius:var(--rr);padding:5px;box-shadow:var(--tab-shadow);border:1px solid var(--tab-border)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
 .tabs a,.tabs button{background:none;border:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
-.tabs button.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.tabs button.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active,.tabs button:active{opacity:.7}
 @media(hover:hover){.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}}
 @media(max-width:480px){.tabs a,.tabs button{padding:14px 16px;font-size:.8125rem}}
@@ -34,17 +56,17 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .view{display:none}.view.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @media(min-width:768px){main{padding:32px 48px 100px}}
-#v-clock{position:fixed;inset:0;align-items:center;justify-content:center;background:var(--bg)}
+#v-clock{position:fixed;inset:0;align-items:center;justify-content:center;background:var(--bg);transition:background .3s}
 #v-clock.active{display:flex;animation:none}
 .hero-time{font-size:clamp(4rem,14vw,12rem);font-variant-numeric:tabular-nums;letter-spacing:-.04em;line-height:1;text-align:center;user-select:none}
 .hero-sec{color:var(--t3)}
 .btn{padding:14px 28px;border:none;border-radius:var(--rr);font:600 .9375rem/1 var(--font);cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s;touch-action:manipulation}
-.btn-p{background:#48484A;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.12)}
-.btn-p:hover{background:#3A3A3C;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.btn-p{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.btn-p:hover{box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .btn-p:active,.btn-s:active,.btn-stop:active{transform:scale(.985)}
 .btn-p:disabled{opacity:.35;cursor:not-allowed;transform:none}
 .btn-s{background:var(--bg3);color:var(--t2)}
-.btn-s:hover{background:#E5E5EA}
+.btn-s:hover{background:var(--bg2)}
 .btn-stop{background:#CF4050;color:#fff;box-shadow:0 4px 14px rgba(207,64,80,.3)}
 .btn-stop:hover{background:#BE3948}
 .alarm-form{display:flex;flex-direction:column;align-items:center;padding:clamp(24px,6vh,48px) 0 clamp(20px,4vh,32px)}
@@ -72,7 +94,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .fire-time{font-size:2.75rem;margin-bottom:4px}
 .fire-label{font-size:.9375rem;color:var(--t2);margin-bottom:32px}
 .fire-btns button{width:100%}
-#v-sw{position:fixed;inset:0;overflow:hidden;padding:20px 24px 0;background:var(--bg)}
+#v-sw{position:fixed;inset:0;overflow:hidden;padding:20px 24px 0;background:var(--bg);transition:background .3s}
 #v-sw.active{animation:none}
 .sw-wrap{display:flex;flex-direction:column;align-items:center;height:100%;max-width:960px;margin:0 auto;padding-bottom:80px}
 .sw-hero{display:flex;align-items:center;justify-content:center;width:100%;height:38vh;flex-shrink:0}
@@ -100,7 +122,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 .t-colon{font-size:clamp(2rem,6vw,4rem);color:var(--t4)}
 .t-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:clamp(20px,4vh,36px);max-width:540px}
 .t-chips button{padding:11px 24px;border:1.5px solid var(--bdr);border-radius:var(--rr);background:var(--card);font:500 .875rem/1 var(--font);color:var(--t2);cursor:pointer;transition:border-color .15s,color .15s,background .15s,box-shadow .15s,transform .1s;box-shadow:0 1px 2px rgba(0,0,0,.03);touch-action:manipulation}
-.t-chips button:hover{border-color:var(--acc);color:var(--acc);background:var(--accl);box-shadow:0 2px 8px rgba(72,72,74,.1)}
+.t-chips button:hover{border-color:var(--acc);color:var(--acc);background:var(--accl);box-shadow:0 2px 8px var(--accl)}
 .t-chips button:active{transform:scale(.96)}
 .t-setup-btns{display:flex;gap:10px;width:100%;max-width:440px}
 .t-setup-btns .btn{flex:1;padding:16px 28px;font-size:1rem}
@@ -148,6 +170,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
     <button data-tab="alarm">Alarm</button>
     <button data-tab="sw">Stopwatch</button>
     <button data-tab="timer">Timer</button>
+    <button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button>
   </div>
 </nav>
 <section id="v-clock" class="view active" role="tabpanel">
@@ -250,6 +273,25 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
   </div>
 </div>
 <script>
+const THEMES=['light','sepia','dark'],THEME_KEY='clk:theme',META_THEME=document.querySelector('meta[name="theme-color"]'),THEME_COLORS={light:'#FAFAFA',dark:'#1A1A1A',sepia:'#F5EDDA'};
+const THEME_ICONS={
+  sepia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>',
+  dark:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/></svg>',
+  light:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+};
+function setThemeIcon(next){const b=document.getElementById('theme-btn');b.replaceChildren();const d=document.createElement('template');d.innerHTML=THEME_ICONS[next];b.appendChild(d.content)}
+function setTheme(t){
+  if(t==='light')document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme',t);
+  META_THEME.content=THEME_COLORS[t];
+  setThemeIcon(THEMES[(THEMES.indexOf(t)+1)%THEMES.length]);
+  try{localStorage.setItem(THEME_KEY,t)}catch(_){}
+}
+(function(){let t;try{t=localStorage.getItem(THEME_KEY)}catch(_){}setTheme(t&&THEMES.includes(t)?t:'light')})();
+document.getElementById('theme-btn').addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme')||'light';
+  setTheme(THEMES[(THEMES.indexOf(cur)+1)%THEMES.length]);
+});
 const CIRC=565.49,$=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),q=s=>document.querySelector(s),qa=s=>document.querySelectorAll(s);
 const SA='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"';
 const SVG_X='<svg '+SA+'><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
