@@ -259,9 +259,15 @@ var bcS={height:0,text:1,sizeIdx:6,marginIdx:5,style:0,fmt:0};
 
 /* Format data */
 var FMT=[
-  {l:'Code 128',p:'1234'},
-  {l:'EAN-13',p:'5901234123457'},
-  {l:'Code 39',p:'CODE39'}
+  {l:'Code 128',p:'1234',f:'CODE128'},
+  {l:'EAN-13',p:'5901234123457',f:'EAN13'},
+  {l:'EAN-8',p:'96385074',f:'EAN8'},
+  {l:'UPC-A',p:'123456789012',f:'UPC'},
+  {l:'UPC-E',p:'01234565',f:'UPCE'},
+  {l:'Code 39',p:'CODE39',f:'CODE39'},
+  {l:'ITF-14',p:'98249880215005',f:'ITF14'},
+  {l:'ITF',p:'1234',f:'ITF'},
+  {l:'MSI',p:'1234',f:'MSI'}
 ];
 var curFmt=0;
 
@@ -589,7 +595,7 @@ function exportBC(){
   var st=STYLES[bcS.style];
   var targetW=BCSIZES[bcS.sizeIdx];
   var mg=MARGINS[bcS.marginIdx];
-  var fmt=['CODE128','EAN13','CODE39'][curFmt];
+  var fmt=FMT[curFmt].f;
   var heights=[50,80,120];
   var probe=document.createElement('canvas');
   try{JsBarcode(probe,text,{format:fmt,width:1,height:1,margin:0,displayValue:false})}catch(e){return null}
@@ -626,7 +632,7 @@ function bcSVG(){
   var st=STYLES[bcS.style];
   var targetW=BCSIZES[bcS.sizeIdx];
   var mg=MARGINS[bcS.marginIdx];
-  var fmt=['CODE128','EAN13','CODE39'][curFmt];
+  var fmt=FMT[curFmt].f;
   var heights=[50,80,120];
   var probe=document.createElement('canvas');
   try{JsBarcode(probe,text,{format:fmt,width:1,height:1,margin:0,displayValue:false})}catch(e){return null}
