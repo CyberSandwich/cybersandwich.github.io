@@ -335,7 +335,7 @@ var jpgCtx=jpgC.getContext('2d',{alpha:false});
 var expC=document.createElement('canvas'),expCtx;
 var qrExpC=document.createElement('canvas'),qrExpCtx;
 var bcDetQR,bcDetBC;try{bcDetQR=new BarcodeDetector({formats:['qr_code']})}catch(e){bcDetQR=null}
-try{bcDetBC=new BarcodeDetector({formats:['code_128','ean_13','code_39']})}catch(e){bcDetBC=null}
+try{bcDetBC=new BarcodeDetector({formats:['code_128','ean_13','ean_8','upc_a','upc_e','code_39','itf']})}catch(e){bcDetBC=null}
 function qrText(){return qrIn.value.trim()||'saputra.co.uk'}
 function bcText(){return bcIn.value.trim()||FMT[curFmt].p}
 function reGen(force){if(curTab==='qr')genQR(force);else genBC(force)}
@@ -1074,15 +1074,19 @@ function startCam(){
   lbl.textContent='Stop';row.classList.add('cam-active');
   card.parentNode.insertBefore(camWrap,card.nextSibling);
   camWrap.style.display='';
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:640},height:{ideal:640}}}).then(function(stream){
-    camStream=stream;camVideo.srcObject=stream;camVideo.play();requestAnimationFrame(camLoop);
+  var isBC=curTab==='bc';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:isBC?1920:1280},height:{ideal:isBC?1080:1280}}}).then(function(stream){
+    camStream=stream;camVideo.srcObject=stream;camVideo.play();
+    var track=stream.getVideoTracks()[0];
+    if(track){try{track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(e){}}
+    requestAnimationFrame(camLoop);
   }).catch(function(){notify('Camera Access Denied',false);stopCam()});
 }
 var camLastT=0;
 function camLoop(){
   if(!camScanning)return;
   var now=performance.now();
-  if(now-camLastT>250&&camVideo.readyState>=2){
+  if(now-camLastT>150&&camVideo.readyState>=2){
     camLastT=now;
     var fn;
     if(curTab==='qr'){
@@ -1096,9 +1100,10 @@ function camLoop(){
       };
     }else{
       fn=bcDetBC?function(){return bcDetBC.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
-        var w=camVideo.videoWidth,h=camVideo.videoHeight,max=800;
+        var w=camVideo.videoWidth,h=camVideo.videoHeight,max=1024;
         if(w>max||h>max){var sc=max/Math.max(w,h);w=Math.round(w*sc);h=Math.round(h*sc)}
-        w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;scanCtx.drawImage(camVideo,0,0,w,h);
+        w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;
+        scanCtx.filter='contrast(1.5) grayscale(1)';scanCtx.drawImage(camVideo,0,0,w,h);scanCtx.filter='none';
         return decodeBarcodeImg(scanC);
       };
     }
