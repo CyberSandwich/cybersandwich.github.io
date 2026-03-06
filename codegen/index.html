@@ -775,6 +775,7 @@ function initSettings(container,groups){
         g._inc=function(){if(idx<g.steps.length-1){idx++;upd()}};
         g._dec=function(){if(idx>0){idx--;upd()}};
         g._setIdx=function(i){if(i>=0&&i<g.steps.length){idx=i;upd()}};
+        g._setVal=function(v){var i=g.steps.indexOf(v);if(i<0){for(i=0;i<g.steps.length;i++){if(g.steps[i]>v)break}g.steps.splice(i,0,v)}idx=i;sp.textContent=g.format(v);minus.disabled=idx===0;plus.disabled=idx===g.steps.length-1};
         minus.disabled=g.def===0;
         plus.disabled=g.def===g.steps.length-1;
         stepper.appendChild(minus);stepper.appendChild(plus);
@@ -1088,6 +1089,7 @@ document.addEventListener('keydown',function(e){
     var qr=getCachedMatrix(qrText(),qrS.ec);
     if(qr){
       marginG._setIdx(0);
+      g2[1]._setVal(qr.count);
       qrS.exactSz=qr.count;
       notify(qr.count+' \u00D7 '+qr.count,true);
     }
