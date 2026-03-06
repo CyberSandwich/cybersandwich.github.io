@@ -166,6 +166,8 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 @keyframes pvPop{from{transform:scale(.97)}to{transform:scale(1)}}
 ::selection{background:rgba(72,72,74,.15)}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
+.cam-wrap{border-top:1px solid var(--bdr2)}.cam-wrap video{width:100%;display:block;background:#000}
+.cam-active span{color:#C41E3A!important}.cam-active .slbl svg{color:#C41E3A!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -179,6 +181,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
     <div class="actions" id="qrAct"></div>
     <div class="settings" id="qrCh1"></div>
     <div class="settings" id="qrCh2"></div>
+    <div class="settings" id="qrScan" style="display:none"></div>
   </section>
   <section id="v-bc" class="view" role="tabpanel" aria-labelledby="tab-bc">
     <div class="preview" id="bcPv" role="button" tabindex="0" aria-label="Copy Barcode"><canvas id="bcC" aria-hidden="true"></canvas></div>
@@ -275,7 +278,8 @@ var IC={
   png:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
   svg:'<svg viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"/></svg>',
   jpeg:'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
-  reset:'<svg viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>'
+  reset:'<svg viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>',
+  cam:'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
 };
 var ACT_SVG={
   paste:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
@@ -382,6 +386,7 @@ var curTab='qr';
 
 function switchTab(id){
   if(id===curTab)return;
+  stopCam();
   curTab=id;
   document.title='CodeGen | '+(id==='qr'?'QR':'Barcode');
   tabBtns.forEach(function(t){var a=t.dataset.tab===id;t.classList.toggle('active',a);t.setAttribute('aria-selected',a)});
@@ -996,6 +1001,68 @@ function setInput(text){
 $('qrPs').onclick=function(){handlePaste(this)};
 $('bcPs').onclick=function(){handlePaste(this)};
 
+/* Camera scanning (QR only) */
+var camStream=null,camVideo=null,camWrap=null,camScanning=false,camRow=null,camLbl=null;
+(function(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
+  var card=$('qrScan');card.style.display='';
+  var row=document.createElement('div');row.className='srow';
+  var lbl=document.createElement('div');lbl.className='slbl';
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 24 24');
+  var p1=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p1.setAttribute('d','M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z');
+  var c1=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c1.setAttribute('cx','12');c1.setAttribute('cy','13');c1.setAttribute('r','4');
+  svg.appendChild(p1);svg.appendChild(c1);lbl.appendChild(svg);
+  var sp=document.createElement('span');sp.textContent='Scan';lbl.appendChild(sp);
+  row.appendChild(lbl);card.appendChild(row);
+  camWrap=document.createElement('div');camWrap.className='cam-wrap';camWrap.style.display='none';
+  camVideo=document.createElement('video');camVideo.setAttribute('playsinline','');camVideo.setAttribute('autoplay','');camVideo.muted=true;
+  camWrap.appendChild(camVideo);card.appendChild(camWrap);
+  camRow=row;camLbl=sp;
+  row.addEventListener('click',function(){if(camScanning)stopCam();else startCam()});
+})();
+function startCam(){
+  camScanning=true;camLbl.textContent='Stop';camRow.classList.add('cam-active');
+  camWrap.style.display='';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:640},height:{ideal:640}}}).then(function(stream){
+    camStream=stream;camVideo.srcObject=stream;camVideo.play();requestAnimationFrame(camLoop);
+  }).catch(function(){notify('Camera Access Denied',false);stopCam()});
+}
+var camLastT=0;
+function camLoop(){
+  if(!camScanning)return;
+  var now=performance.now();
+  if(now-camLastT>250&&camVideo.readyState>=2){
+    camLastT=now;
+    var fn=bcDetQR?function(){return bcDetQR.detect(camVideo).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null})}:function(){
+      loadJsQR();if(typeof jsQR==='undefined')return Promise.resolve(null);
+      var w=camVideo.videoWidth,h=camVideo.videoHeight,max=800;
+      if(w>max||h>max){var s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+      w=Math.max(1,w);h=Math.max(1,h);scanC.width=w;scanC.height=h;scanCtx.drawImage(camVideo,0,0,w,h);
+      var d=scanCtx.getImageData(0,0,w,h),r=jsQR(d.data,d.width,d.height);
+      return Promise.resolve(r?{rawValue:r.data}:null);
+    };
+    fn().then(function(r){
+      if(r&&r.rawValue){
+        var val=r.rawValue,display=val.length>40?val.substring(0,37)+'...':val;
+        setInput(val);navigator.clipboard.writeText(val).catch(function(){});
+        notify(display,true);stopCam();return;
+      }
+      if(camScanning)requestAnimationFrame(camLoop);
+    }).catch(function(){if(camScanning)requestAnimationFrame(camLoop)});
+    return;
+  }
+  requestAnimationFrame(camLoop);
+}
+function stopCam(){
+  camScanning=false;if(camWrap)camWrap.style.display='none';
+  if(camLbl)camLbl.textContent='Scan';if(camRow)camRow.classList.remove('cam-active');
+  if(camStream){camStream.getTracks().forEach(function(t){t.stop()});camStream=null}
+  if(camVideo)camVideo.srcObject=null;
+}
+
 /* Preview tap-to-copy */
 var qrCpBtn=$('qrCp'),bcCpBtn=$('bcCp');
 qrPv.addEventListener('click',function(){qrCpBtn.click()});
@@ -1026,7 +1093,7 @@ function resetAll(btn,groups,input){
   feedback(btn,'rs-fb','Done');
 }
 var qrAllGroups=qrGroups1.concat(qrGroups2),bcAllGroups=bcGroups1.concat(bcGroups2);
-$('qrRs').onclick=function(){resetAll(this,qrAllGroups,qrIn)};
+$('qrRs').onclick=function(){stopCam();resetAll(this,qrAllGroups,qrIn)};
 $('bcRs').onclick=function(){resetAll(this,bcAllGroups,bcIn)};
 
 /* Drag and Drop */
