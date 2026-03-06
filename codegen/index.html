@@ -585,37 +585,38 @@ function genBC(force){
 }
 function gtin(d,len){var s=0;for(var i=0;i<len-1;i++)s+=+(d[i])*(3-i%2*2);return(10*Math.ceil(s/10)-s)=== +(d[len-1])}
 function validateBC(text,fmt){
-  var f=fmt.f,n=fmt.l;
+  var f=fmt.f,n=fmt.l,len=text.length;
+  var noDigit=n+' Requires Numeric Input';
   if(f==='EAN13'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
-    if(text.length!==13)return n+': Must Be 13 Digits (Got '+text.length+')';
-    if(!gtin(text,13))return n+': Invalid Check Digit (Last Digit)';
+    if(!/^\d+$/.test(text))return noDigit;
+    if(len!==13)return n+' Requires Exactly 13 Digits, Currently '+len;
+    if(!gtin(text,13))return n+' Check Digit Mismatch, Verify Last Digit';
   }else if(f==='EAN8'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
-    if(text.length!==8)return n+': Must Be 8 Digits (Got '+text.length+')';
-    if(!gtin(text,8))return n+': Invalid Check Digit (Last Digit)';
+    if(!/^\d+$/.test(text))return noDigit;
+    if(len!==8)return n+' Requires Exactly 8 Digits, Currently '+len;
+    if(!gtin(text,8))return n+' Check Digit Mismatch, Verify Last Digit';
   }else if(f==='UPC'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
-    if(text.length!==12)return n+': Must Be 12 Digits (Got '+text.length+')';
-    if(!gtin(text,12))return n+': Invalid Check Digit (Last Digit)';
+    if(!/^\d+$/.test(text))return noDigit;
+    if(len!==12)return n+' Requires Exactly 12 Digits, Currently '+len;
+    if(!gtin(text,12))return n+' Check Digit Mismatch, Verify Last Digit';
   }else if(f==='UPCE'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
-    if(text.length!==8&&text.length!==6)return n+': Must Be 6 Or 8 Digits (Got '+text.length+')';
+    if(!/^\d+$/.test(text))return noDigit;
+    if(len!==8&&len!==6)return n+' Requires 6 Or 8 Digits, Currently '+len;
   }else if(f==='ITF14'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
-    if(text.length!==14)return n+': Must Be 14 Digits (Got '+text.length+')';
-    if(!gtin(text,14))return n+': Invalid Check Digit (Last Digit)';
+    if(!/^\d+$/.test(text))return noDigit;
+    if(len!==14)return n+' Requires Exactly 14 Digits, Currently '+len;
+    if(!gtin(text,14))return n+' Check Digit Mismatch, Verify Last Digit';
   }else if(f==='ITF'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
-    if(text.length%2!==0)return n+': Must Be Even Number Of Digits (Got '+text.length+')';
+    if(!/^\d+$/.test(text))return noDigit;
+    if(len%2!==0)return n+' Requires An Even Number Of Digits, Currently '+len;
   }else if(f==='MSI'){
-    if(!/^\d+$/.test(text))return n+': Digits Only';
+    if(!/^\d+$/.test(text))return noDigit;
   }else if(f==='CODE39'){
-    if(!/^[0-9A-Z\-. $/+%]+$/.test(text))return n+': Only A-Z, 0-9, - . $ / + % Space';
+    if(!/^[0-9A-Z\-. $/+%]+$/.test(text))return n+' Accepts Uppercase A-Z, 0-9, And - . $ / + %';
   }else if(f==='CODE128'){
-    if(!/^[\x00-\x7F]+$/.test(text))return n+': ASCII Characters Only';
+    if(!/^[\x00-\x7F]+$/.test(text))return n+' Accepts Standard ASCII Characters Only';
   }
-  return 'Invalid Data For '+n;
+  return n+' Cannot Encode This Input';
 }
 
 var genBCD=debounce(genBC,300);
