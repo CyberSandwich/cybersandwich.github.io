@@ -1010,7 +1010,9 @@ $('bcPs').onclick=function(){handlePaste(this)};
 var camStream=null,camVideo=null,camWrap=null,camScanning=false,camRow=null,camLbl=null;
 (function(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return;
-  var card=$('qrCh2');
+  var anchor=$('qrCh2');
+  var scanCard=document.createElement('div');scanCard.className='settings';
+  anchor.parentNode.insertBefore(scanCard,anchor.nextSibling);
   var row=document.createElement('div');row.className='srow';
   var lbl=document.createElement('div');lbl.className='slbl';
   var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -1021,10 +1023,10 @@ var camStream=null,camVideo=null,camWrap=null,camScanning=false,camRow=null,camL
   c1.setAttribute('cx','12');c1.setAttribute('cy','13');c1.setAttribute('r','4');
   svg.appendChild(p1);svg.appendChild(c1);lbl.appendChild(svg);
   var sp=document.createElement('span');sp.textContent='Scan';lbl.appendChild(sp);
-  row.appendChild(lbl);card.appendChild(row);
+  row.appendChild(lbl);scanCard.appendChild(row);
   camWrap=document.createElement('div');camWrap.className='settings cam-wrap';camWrap.style.display='none';
   camVideo=document.createElement('video');camVideo.setAttribute('playsinline','');camVideo.setAttribute('autoplay','');camVideo.muted=true;
-  camWrap.appendChild(camVideo);card.parentNode.insertBefore(camWrap,card.nextSibling);
+  camWrap.appendChild(camVideo);scanCard.parentNode.insertBefore(camWrap,scanCard.nextSibling);
   camRow=row;camLbl=sp;
   row.addEventListener('click',function(){if(camScanning)stopCam();else startCam()});
 })();
