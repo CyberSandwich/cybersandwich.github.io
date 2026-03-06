@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Wright</title>
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/ds-favicon.png">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAFAFA;
+  --bg2:#F5F5F5;
+  --card:#FFF;
+  --t1:#1A1A1A;
+  --t2:#6B6B6B;
+  --t3:#9A9A9A;
+  --bdr:#E7E7E7;
+  --pill:#F2F2F2;
+  --acc:#3B82F6;
+  --rr:22px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
+  --mono:'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.05)
+}
+body{
+  font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  background:linear-gradient(180deg,#FFF 0%,var(--bg) 40%,#F6F6F6 100%);
+  color:var(--t1);
+  min-height:100vh;
+  min-height:100dvh;
+  -webkit-tap-highlight-color:transparent
+}
+.wrap{
+  width:min(960px,100%);
+  margin:0 auto;
+  padding:clamp(18px,4vw,34px);
+  padding-bottom:calc(168px + env(safe-area-inset-bottom,0px))
+}
+.hd{
+  margin-bottom:14px
+}
+.hd h1{
+  font-size:clamp(1.45rem,2.8vw,2rem);
+  letter-spacing:-.02em;
+  margin-bottom:6px
+}
+.hd p{
+  font-size:.95rem;
+  color:var(--t2)
+}
+.card{
+  background:rgba(255,255,255,.86);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:var(--shadow);
+  border-radius:var(--rr);
+  padding:clamp(12px,2vw,18px);
+  transition:border-color .15s,box-shadow .15s,transform .2s;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px)
+}
+.card.drag-over{
+  border-color:#CFCFCF;
+  box-shadow:0 0 0 4px rgba(0,0,0,.04),var(--shadow)
+}
+textarea{
+  width:100%;
+  min-height:clamp(320px,62vh,820px);
+  border:1px solid var(--bdr);
+  border-radius:18px;
+  background:var(--card);
+  color:var(--t1);
+  font:400 1rem/1.6 var(--mono);
+  resize:vertical;
+  padding:16px 16px 18px;
+  outline:none;
+  transition:border-color .15s,box-shadow .15s
+}
+textarea::placeholder{color:#B3B3B3}
+textarea:focus{border-color:#CACACA;box-shadow:0 0 0 4px rgba(0,0,0,.045)}
+.meta{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap
+}
+.meta .drop{
+  color:var(--t2);
+  font-size:.86rem
+}
+.meta .keys{
+  font-size:.8rem;
+  color:var(--t3);
+  background:var(--pill);
+  border:1px solid #ECECEC;
+  padding:6px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+  overflow-x:auto;
+  max-width:100%
+}
+.status-pill{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(90px + env(safe-area-inset-bottom,0px));
+  z-index:11;
+  background:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.75);
+  border-radius:999px;
+  padding:9px 14px;
+  font:600 .82rem/1 var(--font);
+  color:var(--t2);
+  box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
+  white-space:nowrap
+}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .status-pill{backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35)}
+}
+nav{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10;
+  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))
+}
+.tabs{
+  display:flex;
+  background:rgba(245,245,245,.92);
+  border-radius:50px;
+  padding:5px;
+  box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
+  border:1px solid rgba(255,255,255,.45)
+}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
+}
+.tabs a{
+  padding:12px 22px;
+  border-radius:50px;
+  font:500 .875rem/1 var(--font);
+  color:var(--t3);
+  transition:color .15s,background .15s,box-shadow .15s;
+  white-space:nowrap;
+  text-decoration:none
+}
+.tabs a.active{
+  background:rgba(50,50,52,.85);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.15)
+}
+.tabs a:active{opacity:.7}
+@media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
+@media(max-width:680px){
+  .wrap{padding-top:16px}
+  .meta{align-items:flex-start}
+  .meta .keys{font-size:.76rem}
+}
+@media(max-width:480px){.tabs a{padding:14px 16px;font-size:.8125rem}}
+:focus{outline:2px solid var(--acc);outline-offset:3px}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hd">
+    <h1>Wright</h1>
+    <p>Minimal markdown editor with local autosave and keyboard formatting.</p>
+  </header>
+
+  <section class="card" id="drop-zone" aria-label="Markdown editor drop area">
+    <label for="editor" class="sr-only" style="position:absolute;left:-9999px">Markdown editor</label>
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="# Start writing\n\nDrop a .md file here to replace this draft."></textarea>
+    <div class="meta" aria-hidden="true">
+      <span class="drop">Drop `.md` or markdown text files to overwrite.</span>
+      <span class="keys" id="shortcut-hint"></span>
+    </div>
+  </section>
+</main>
+
+<div class="status-pill" id="status" aria-live="polite">0 Words - 0m 0s</div>
+
+<nav>
+  <div class="tabs">
+    <a href="/">Home</a>
+    <a href="/projects" class="active">Projects</a>
+  </div>
+</nav>
+
+<script>
+(()=>{
+  'use strict';
+
+  const STORAGE_TEXT_KEY='wright:draft:v1';
+  const STORAGE_STATE_KEY='wright:state:v1';
+  const SPEAKING_WPM=130;
+  const EDIT_DEBOUNCE_MS=220;
+  const METRICS_DEBOUNCE_MS=120;
+
+  const editor=document.getElementById('editor');
+  const status=document.getElementById('status');
+  const dropZone=document.getElementById('drop-zone');
+  const shortcutHint=document.getElementById('shortcut-hint');
+  const isMac=/Mac|iPhone|iPad|iPod/i.test(navigator.platform)||/Mac/i.test(navigator.userAgent);
+
+  shortcutHint.textContent=`${isMac?'Cmd':'Ctrl'}+B Bold · ${isMac?'Cmd':'Ctrl'}+I Italic · ${isMac?'Cmd':'Ctrl'}+Shift+K Strike · ${isMac?'Cmd':'Ctrl'}+1/2/3 Heading · ${isMac?'Cmd':'Ctrl'}+4 Body · ${isMac?'Cmd':'Ctrl'}+Shift+7 Checklist`;
+
+  function debounce(fn,delay){
+    let timer=0;
+    return(...args)=>{
+      window.clearTimeout(timer);
+      timer=window.setTimeout(()=>fn(...args),delay);
+    };
+  }
+
+  function countWords(text){
+    const words=text.match(/[A-Za-z0-9À-ÖØ-öø-ÿ]+(?:['’_-][A-Za-z0-9À-ÖØ-öø-ÿ]+)*/g);
+    return words?words.length:0;
+  }
+
+  function estimateSpokenDuration(words){
+    const totalSeconds=Math.round(words/SPEAKING_WPM*60);
+    const minutes=Math.floor(totalSeconds/60);
+    const seconds=totalSeconds%60;
+    return `${minutes}m ${seconds}s`;
+  }
+
+  function updateStatusNow(){
+    const words=countWords(editor.value);
+    status.textContent=`${words} Words - ${estimateSpokenDuration(words)}`;
+  }
+
+  function clamp(n,min,max){
+    return Math.min(max,Math.max(min,n));
+  }
+
+  function saveNow(){
+    try{localStorage.setItem(STORAGE_TEXT_KEY,editor.value)}catch(_){/* ignore quota/private mode errors */}
+  }
+
+  function saveStateNow(){
+    try{
+      const len=editor.value.length;
+      localStorage.setItem(STORAGE_STATE_KEY,JSON.stringify({
+        start:clamp(editor.selectionStart,0,len),
+        end:clamp(editor.selectionEnd,0,len),
+        scroll:Math.max(0,editor.scrollTop|0)
+      }));
+    }catch(_){/* ignore quota/private mode errors */}
+  }
+
+  const queueSave=debounce(saveNow,EDIT_DEBOUNCE_MS);
+  const queueStatus=debounce(updateStatusNow,METRICS_DEBOUNCE_MS);
+  const queueState=debounce(saveStateNow,EDIT_DEBOUNCE_MS);
+
+  function applyEditorValue(nextValue,selectionStart,selectionEnd){
+    editor.value=nextValue;
+    editor.focus();
+    editor.setSelectionRange(selectionStart,selectionEnd);
+    queueSave();
+    queueState();
+    queueStatus();
+  }
+
+  function getSelectionBlock(){
+    const value=editor.value;
+    const start=editor.selectionStart;
+    const end=editor.selectionEnd;
+    const lineStart=value.lastIndexOf('\n',start-1)+1;
+    let lineEnd=value.indexOf('\n',end);
+    if(lineEnd===-1)lineEnd=value.length;
+    return{value,start,end,lineStart,lineEnd,block:value.slice(lineStart,lineEnd)};
+  }
+
+  function toggleWrap(marker){
+    const value=editor.value;
+    let start=editor.selectionStart;
+    let end=editor.selectionEnd;
+
+    if(start===end){
+      let wordStart=start;
+      let wordEnd=end;
+      while(wordStart>0&&/[^\s\n]/.test(value[wordStart-1]))wordStart--;
+      while(wordEnd<value.length&&/[^\s\n]/.test(value[wordEnd]))wordEnd++;
+
+      if(wordStart!==wordEnd){
+        start=wordStart;
+        end=wordEnd;
+      }else{
+        const next=value.slice(0,start)+marker+marker+value.slice(end);
+        applyEditorValue(next,start+marker.length,start+marker.length);
+        return;
+      }
+    }
+
+    const selected=value.slice(start,end);
+    const isWrapped=selected.startsWith(marker)&&selected.endsWith(marker)&&selected.length>=marker.length*2;
+    const toggled=isWrapped?selected.slice(marker.length,selected.length-marker.length):`${marker}${selected}${marker}`;
+    const next=value.slice(0,start)+toggled+value.slice(end);
+
+    if(isWrapped){
+      applyEditorValue(next,start,start+toggled.length);
+      return;
+    }
+    applyEditorValue(next,start+marker.length,start+toggled.length-marker.length);
+  }
+
+  function toggleHeading(level){
+    const prefix=`${'#'.repeat(level)} `;
+    const headingPattern=/^#{1,6}\s+/;
+    const{value,lineStart,lineEnd,block}=getSelectionBlock();
+    const lines=block.split('\n');
+    const nonEmptyLines=lines.filter(line=>line.trim());
+    if(!nonEmptyLines.length)return;
+
+    const allPrefixed=nonEmptyLines.every(line=>line.startsWith(prefix));
+    const replaced=lines.map(line=>{
+      if(!line.trim())return line;
+      if(allPrefixed)return line.startsWith(prefix)?line.slice(prefix.length):line;
+      return prefix+line.replace(headingPattern,'');
+    }).join('\n');
+
+    const next=value.slice(0,lineStart)+replaced+value.slice(lineEnd);
+    applyEditorValue(next,lineStart,lineStart+replaced.length);
+  }
+
+  function clearHeading(){
+    const headingPattern=/^#{1,6}\s+/;
+    const{value,lineStart,lineEnd,block}=getSelectionBlock();
+    const lines=block.split('\n');
+    const nonEmptyLines=lines.filter(line=>line.trim());
+    if(!nonEmptyLines.length)return;
+
+    const replaced=lines.map(line=>line.trim()?line.replace(headingPattern,''):line).join('\n');
+    const next=value.slice(0,lineStart)+replaced+value.slice(lineEnd);
+    applyEditorValue(next,lineStart,lineStart+replaced.length);
+  }
+
+  function toggleChecklist(){
+    const checklistPattern=/^\s*-\s\[(?: |x|X)\]\s+/;
+    const listPattern=/^\s*(?:[-*+]\s+|\d+\.\s+)/;
+    const{value,lineStart,lineEnd,block}=getSelectionBlock();
+    const lines=block.split('\n');
+    const nonEmptyLines=lines.filter(line=>line.trim());
+    if(!nonEmptyLines.length)return;
+
+    const allChecklist=nonEmptyLines.every(line=>checklistPattern.test(line));
+    const replaced=lines.map(line=>{
+      if(!line.trim())return line;
+      if(allChecklist)return line.replace(checklistPattern,'');
+      return `- [ ] ${line.replace(checklistPattern,'').replace(listPattern,'')}`;
+    }).join('\n');
+
+    const next=value.slice(0,lineStart)+replaced+value.slice(lineEnd);
+    applyEditorValue(next,lineStart,lineStart+replaced.length);
+  }
+
+  function isMarkdownFile(file){
+    const name=(file&&file.name?file.name:'').toLowerCase();
+    const type=(file&&file.type?file.type:'').toLowerCase();
+    return/\.(md|markdown|mdown|mkd|txt)$/.test(name)||type.includes('markdown')||type.startsWith('text/');
+  }
+
+  function setEditorFromImport(content){
+    const next=String(content||'');
+    editor.value=next;
+    const end=next.length;
+    editor.focus();
+    editor.setSelectionRange(end,end);
+    saveNow();
+    saveStateNow();
+    updateStatusNow();
+  }
+
+  editor.addEventListener('input',()=>{
+    queueSave();
+    queueState();
+    queueStatus();
+  });
+
+  editor.addEventListener('keyup',queueState);
+  editor.addEventListener('click',queueState);
+  editor.addEventListener('scroll',queueState,{passive:true});
+
+  editor.addEventListener('keydown',event=>{
+    if(event.isComposing||event.altKey)return;
+    const mod=event.metaKey||event.ctrlKey;
+    if(!mod)return;
+
+    const code=event.code;
+
+    if(code==='KeyB'){
+      event.preventDefault();
+      toggleWrap('**');
+      return;
+    }
+
+    if(code==='KeyI'){
+      event.preventDefault();
+      toggleWrap('*');
+      return;
+    }
+
+    if(event.shiftKey&&(code==='KeyK'||code==='KeyX')){
+      event.preventDefault();
+      toggleWrap('~~');
+      return;
+    }
+
+    if(!event.shiftKey&&code==='Digit1'){
+      event.preventDefault();
+      toggleHeading(1);
+      return;
+    }
+
+    if(!event.shiftKey&&code==='Digit2'){
+      event.preventDefault();
+      toggleHeading(2);
+      return;
+    }
+
+    if(!event.shiftKey&&code==='Digit3'){
+      event.preventDefault();
+      toggleHeading(3);
+      return;
+    }
+
+    if(!event.shiftKey&&code==='Digit4'){
+      event.preventDefault();
+      clearHeading();
+      return;
+    }
+
+    if(event.shiftKey&&(code==='Digit7'||code==='KeyL'||code==='Digit9')){
+      event.preventDefault();
+      toggleChecklist();
+    }
+  });
+
+  let dragDepth=0;
+
+  function hasFiles(dataTransfer){
+    return !!dataTransfer&&Array.from(dataTransfer.types||[]).includes('Files');
+  }
+
+  dropZone.addEventListener('dragenter',event=>{
+    if(!hasFiles(event.dataTransfer))return;
+    event.preventDefault();
+    dragDepth++;
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragover',event=>{
+    if(!hasFiles(event.dataTransfer))return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect='copy';
+  });
+
+  dropZone.addEventListener('dragleave',event=>{
+    if(!hasFiles(event.dataTransfer))return;
+    event.preventDefault();
+    dragDepth=Math.max(0,dragDepth-1);
+    if(dragDepth===0)dropZone.classList.remove('drag-over');
+  });
+
+  dropZone.addEventListener('drop',async event=>{
+    event.preventDefault();
+    dragDepth=0;
+    dropZone.classList.remove('drag-over');
+
+    const dataTransfer=event.dataTransfer;
+    if(!dataTransfer)return;
+
+    const file=Array.from(dataTransfer.files||[]).find(isMarkdownFile);
+    if(file){
+      const text=await file.text();
+      setEditorFromImport(text);
+      return;
+    }
+
+    const plainText=dataTransfer.getData('text/plain');
+    if(plainText)setEditorFromImport(plainText);
+  });
+
+  window.addEventListener('dragover',event=>{
+    if(hasFiles(event.dataTransfer))event.preventDefault();
+  });
+
+  window.addEventListener('drop',event=>{
+    if(hasFiles(event.dataTransfer)&&!dropZone.contains(event.target))event.preventDefault();
+  });
+
+  let restoredState=null;
+  try{
+    const saved=localStorage.getItem(STORAGE_TEXT_KEY);
+    if(saved!==null)editor.value=saved;
+    const rawState=localStorage.getItem(STORAGE_STATE_KEY);
+    if(rawState)restoredState=JSON.parse(rawState);
+  }catch(_){/* ignore storage access errors */}
+
+  if(restoredState&&typeof restoredState==='object'){
+    const len=editor.value.length;
+    const start=clamp(Number(restoredState.start)||0,0,len);
+    const end=clamp(Number(restoredState.end)||start,0,len);
+    requestAnimationFrame(()=>{
+      editor.setSelectionRange(start,end);
+      editor.scrollTop=Math.max(0,Number(restoredState.scroll)||0);
+    });
+  }
+
+  window.addEventListener('pagehide',()=>{
+    saveNow();
+    saveStateNow();
+  });
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'){
+      saveNow();
+      saveStateNow();
+    }
+  });
+
+  updateStatusNow();
+})();
+</script>
+</body>
+</html>

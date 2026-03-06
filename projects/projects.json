@@ -30,6 +30,12 @@
     "category": "Web"
   },
   {
+    "title": "Wright",
+    "subtitle": "A Minimal Markdown Text Editor",
+    "url": "/wright/",
+    "category": "Web"
+  },
+  {
     "title": "Project Convergence",
     "subtitle": "Stealth Mode",
     "url": "#",
@@ -44,12 +50,6 @@
   {
     "title": "Whisp",
     "subtitle": "Offline Audio Transcription With Whisper Models",
-    "url": "#",
-    "category": "In Development"
-  },
-  {
-    "title": "Wright",
-    "subtitle": "A Minimal Markdown Text Editor",
     "url": "#",
     "category": "In Development"
   }
