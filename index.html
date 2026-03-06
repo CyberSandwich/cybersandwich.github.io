@@ -16,9 +16,9 @@
 <meta name="twitter:description" content="Duke DJ Saputra's Personal Site">
 <title>Duke Saputra</title>
 <meta name="referrer" content="no-referrer-when-downgrade">
-<script>if(localStorage.getItem('theme')==='dark'){document.documentElement.setAttribute('data-theme','dark');document.querySelector('meta[name="theme-color"]').content='#1C1C1E';document.querySelector('meta[name="color-scheme"]').content='dark'}</script>
-<link rel="stylesheet" href="style.css?v=76">
-<link rel="preload" href="app.js?v=69" as="script">
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||t==='sepia'){document.documentElement.setAttribute('data-theme',t);var c=t==='dark'?'#1C1C1E':'#F5EDDA';document.querySelector('meta[name="theme-color"]').content=c;if(t==='dark')document.querySelector('meta[name="color-scheme"]').content='dark';var l=document.getElementById('theme-label');if(l)l.textContent='Theme: '+t[0].toUpperCase()+t.slice(1)}})()</script>
+<link rel="stylesheet" href="style.css?v=77">
+<link rel="preload" href="app.js?v=70" as="script">
 <link rel="dns-prefetch" href="https://wa.me">
 <link rel="dns-prefetch" href="https://linkedin.com">
 <link rel="dns-prefetch" href="https://fantastical.app">
@@ -58,7 +58,7 @@
   </div>
 
   <div class="links">
-    <div class="copy-row"><span class="links-label"><svg class="icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Appearance</span><button id="theme-toggle" class="copy-btn" aria-label="Toggle dark mode">Dark</button></div>
+    <a href="#" id="theme-toggle" class="theme-row" role="button" aria-label="Cycle theme"><span class="links-label"><svg class="icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="icon-sunset" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></svg><svg class="icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span id="theme-label">Theme: Light</span></span></a>
   </div>
 
 </section>
@@ -104,6 +104,6 @@
   </div>
 </nav>
 
-<script src="app.js?v=69" defer></script>
+<script src="app.js?v=70" defer></script>
 </body>
 </html>

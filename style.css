@@ -385,8 +385,44 @@ nav{
   flex:1;min-width:0
 }
 .links-label svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
-html:not([data-theme="dark"]) .links-label .icon-moon{display:none}
-html[data-theme="dark"] .links-label .icon-sun{display:none}
+.links-label .icon-sun,.links-label .icon-moon,.links-label .icon-sunset{display:none}
+html:not([data-theme]) .links-label .icon-sun,html[data-theme="light"] .links-label .icon-sun{display:inline}
+html[data-theme="sepia"] .links-label .icon-sunset{display:inline}
+html[data-theme="dark"] .links-label .icon-moon{display:inline}
+
+/* Sepia Mode */
+html[data-theme="sepia"]{
+  --bg:#F5EDDA;--bg2:#EDE5D0;
+  --card:#FAF4E6;
+  --t1:#5B4636;--t2:#8B7355;--t3:#AB9B85;--t4:#C8B99E;
+  --bdr:#DDD4C0;--bdr2:#E8E0CE;
+  --acc:#A67B5B;
+  --shadow:0 1px 3px rgba(91,70,54,.06),0 4px 12px rgba(91,70,54,.06)
+}
+html[data-theme="sepia"] ::-webkit-scrollbar-thumb{background:rgba(91,70,54,.15)}
+html[data-theme="sepia"] ::-webkit-scrollbar-thumb:hover{background:rgba(91,70,54,.25)}
+html[data-theme="sepia"] ::selection{background:rgba(166,123,91,.2)}
+html[data-theme="sepia"] .vcf-link a{background:#6B5744;color:#F5EDDA}
+html[data-theme="sepia"] .vcf-link a:hover{background:#5B4636}
+html[data-theme="sepia"] .copy-btn.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
+html[data-theme="sepia"] .tabs{background:rgba(240,232,216,.92);border-color:rgba(255,255,255,.35);box-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  html[data-theme="sepia"] .tabs{background:rgba(245,237,218,.55)}
+}
+html[data-theme="sepia"] .tabs a.active{background:rgba(91,70,54,.8);color:#F5EDDA}
+html[data-theme="sepia"] .search{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="sepia"] .cmd-overlay{background:rgba(91,70,54,.25)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  html[data-theme="sepia"] .cmd-overlay{background:rgba(91,70,54,.18)}
+}
+html[data-theme="sepia"] .cmd-input,html[data-theme="sepia"] .cmd-results{box-shadow:0 8px 40px rgba(91,70,54,.15),0 2px 12px rgba(91,70,54,.1)}
+html[data-theme="sepia"] .cmd-input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="sepia"] .cmd-row-type{background:var(--bg)}
+html[data-theme="sepia"] .qr-overlay{background:rgba(91,70,54,.25)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  html[data-theme="sepia"] .qr-overlay{background:rgba(91,70,54,.18)}
+}
+html[data-theme="sepia"] .qr-card{box-shadow:0 8px 40px rgba(91,70,54,.15),0 2px 12px rgba(91,70,54,.1)}
 
 /* Dark Mode */
 html[data-theme="dark"]{
