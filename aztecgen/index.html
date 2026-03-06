@@ -827,11 +827,8 @@ document.addEventListener('keydown',function(e){
     var az=getCachedAztec(azText(),azS.ec);
     if(az){
       azGroups1[1]._setIdx(0);
-      var target=QRSIZES[azS.sizeIdx];
-      var modPx=Math.max(1,Math.round(target/az.count));
-      var exact=modPx*az.count;
-      azS.exactSz=exact;
-      notify(exact+' \u00D7 '+exact+' ('+modPx+'px/module)',true);
+      azS.exactSz=az.count;
+      notify(az.count+' \u00D7 '+az.count,true);
     }
     return;
   }

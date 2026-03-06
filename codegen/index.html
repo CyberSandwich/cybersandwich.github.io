@@ -1088,11 +1088,8 @@ document.addEventListener('keydown',function(e){
     var qr=getCachedMatrix(qrText(),qrS.ec);
     if(qr){
       marginG._setIdx(0);
-      var target=QRSIZES[qrS.sizeIdx];
-      var modPx=Math.max(1,Math.round(target/qr.count));
-      var exact=modPx*qr.count;
-      qrS.exactSz=exact;
-      notify(exact+' \u00D7 '+exact+' ('+modPx+'px/module)',true);
+      qrS.exactSz=qr.count;
+      notify(qr.count+' \u00D7 '+qr.count,true);
     }
     return;
   }
