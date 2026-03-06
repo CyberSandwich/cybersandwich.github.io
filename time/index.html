@@ -292,6 +292,11 @@ document.getElementById('theme-btn').addEventListener('click',()=>{
   const cur=document.documentElement.getAttribute('data-theme')||'light';
   setTheme(THEMES[(THEMES.indexOf(cur)+1)%THEMES.length]);
 });
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)return;
+  const stored=localStorage.getItem(THEME_KEY)||'light';
+  if(stored!==(document.documentElement.getAttribute('data-theme')||'light'))setTheme(stored);
+});
 const CIRC=565.49,$=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),q=s=>document.querySelector(s),qa=s=>document.querySelectorAll(s);
 const SA='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"';
 const SVG_X='<svg '+SA+'><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';

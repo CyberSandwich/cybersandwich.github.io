@@ -135,6 +135,12 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     setTheme(next);
     editor.focus();
   });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)return;
+    let stored;try{stored=localStorage.getItem(THEME_KEY);}catch(_){}
+    stored=stored&&THEMES.includes(stored)?stored:'light';
+    if(stored!==(document.documentElement.getAttribute('data-theme')||'light'))setTheme(stored);
+  });
 
   let rafId=0;
   let beforeInput=0;
