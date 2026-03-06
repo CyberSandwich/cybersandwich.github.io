@@ -185,6 +185,11 @@
     "category": "Personal"
   },
   {
+    "title": "Neovim",
+    "url": "https://neovim.io",
+    "category": "Personal"
+  },
+  {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
     "category": "Personal"
@@ -247,6 +252,11 @@
   {
     "title": "TinyWow",
     "url": "https://tinywow.com",
+    "category": "Personal"
+  },
+  {
+    "title": "tmux",
+    "url": "https://github.com/tmux/tmux/wiki",
     "category": "Personal"
   },
   {
