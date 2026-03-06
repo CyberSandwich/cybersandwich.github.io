@@ -8,187 +8,104 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#FAFAFA;
-  --bg2:#F5F5F5;
-  --card:#FFF;
-  --t1:#1A1A1A;
-  --t2:#6B6B6B;
-  --t3:#9A9A9A;
-  --bdr:#E7E7E7;
-  --pill:#F2F2F2;
-  --acc:#3B82F6;
-  --rr:22px;
+  --bg:#FAFAFA;--bg2:#F5F5F5;--card:#FFF;
+  --t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;
+  --bdr:#EAEAEA;--rr:50px;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
-  --mono:'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace;
-  --shadow:0 1px 3px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.05)
+  --mono:'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace
 }
 body{
-  font-family:var(--font);
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  background:linear-gradient(180deg,#FFF 0%,var(--bg) 40%,#F6F6F6 100%);
-  color:var(--t1);
-  min-height:100vh;
-  min-height:100dvh;
-  -webkit-tap-highlight-color:transparent
+  font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  background:var(--bg);color:var(--t1);
+  min-height:100vh;min-height:100dvh;
+  display:flex;justify-content:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation
 }
-.wrap{
-  width:min(960px,100%);
-  margin:0 auto;
-  padding:clamp(18px,4vw,34px);
-  padding-bottom:calc(168px + env(safe-area-inset-bottom,0px))
+.w{width:100%;max-width:860px;padding:18px 18px calc(186px + env(safe-area-inset-bottom,0px))}
+.panel{
+  background:var(--card);border:1px solid var(--bdr);border-radius:20px;
+  box-shadow:var(--shadow);overflow:hidden
 }
-.hd{
-  margin-bottom:14px
-}
-.hd h1{
-  font-size:clamp(1.45rem,2.8vw,2rem);
-  letter-spacing:-.02em;
-  margin-bottom:6px
-}
-.hd p{
-  font-size:.95rem;
-  color:var(--t2)
-}
-.card{
-  background:rgba(255,255,255,.86);
-  border:1px solid rgba(255,255,255,.75);
-  box-shadow:var(--shadow);
-  border-radius:var(--rr);
-  padding:clamp(12px,2vw,18px);
-  transition:border-color .15s,box-shadow .15s,transform .2s;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px)
-}
-.card.drag-over{
-  border-color:#CFCFCF;
-  box-shadow:0 0 0 4px rgba(0,0,0,.04),var(--shadow)
-}
-textarea{
-  width:100%;
-  min-height:clamp(320px,62vh,820px);
-  border:1px solid var(--bdr);
-  border-radius:18px;
-  background:var(--card);
-  color:var(--t1);
+.panel+.panel{margin-top:12px}
+#drop-zone.drag-over{border-color:#D5D5D5;box-shadow:0 0 0 4px rgba(0,0,0,.03),var(--shadow)}
+#editor{
+  width:100%;height:min(50dvh,520px);border:0;outline:none;
+  background:var(--card);color:var(--t1);
   font:400 1rem/1.6 var(--mono);
-  resize:vertical;
-  padding:16px 16px 18px;
-  outline:none;
-  transition:border-color .15s,box-shadow .15s
+  padding:14px 16px;resize:vertical
 }
-textarea::placeholder{color:#B3B3B3}
-textarea:focus{border-color:#CACACA;box-shadow:0 0 0 4px rgba(0,0,0,.045)}
-.meta{
-  margin-top:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap
+.hint{
+  border-top:1px solid var(--bdr);padding:9px 14px;
+  font:500 .8125rem/1.2 var(--font);color:var(--t3)
 }
-.meta .drop{
-  color:var(--t2);
-  font-size:.86rem
+.preview{
+  padding:14px 16px;min-height:180px;max-height:44dvh;
+  overflow:auto;font:400 .98rem/1.65 var(--font)
 }
-.meta .keys{
-  font-size:.8rem;
-  color:var(--t3);
-  background:var(--pill);
-  border:1px solid #ECECEC;
-  padding:6px 10px;
-  border-radius:999px;
-  white-space:nowrap;
-  overflow-x:auto;
-  max-width:100%
+.preview h1,.preview h2,.preview h3{line-height:1.3;letter-spacing:-.01em;margin:0 0 10px}
+.preview h1{font-size:1.5rem}
+.preview h2{font-size:1.3rem}
+.preview h3{font-size:1.15rem}
+.preview p{margin:0 0 10px}
+.preview ul,.preview ol{margin:0 0 12px 22px}
+.preview li{margin:0 0 6px}
+.preview ul.check{list-style:none;margin-left:0}
+.preview ul.check li{display:flex;align-items:flex-start;gap:8px}
+.preview ul.check input{margin-top:4px}
+.preview code{font:500 .9em/1.4 var(--mono);background:var(--bg2);padding:1px 5px;border-radius:6px}
+.preview pre{background:var(--bg2);padding:12px;border-radius:10px;overflow:auto;margin:0 0 12px}
+.preview pre code{background:none;padding:0}
+.preview blockquote{margin:0 0 12px;padding-left:12px;border-left:3px solid #E0E0E0;color:var(--t2)}
+.preview a{color:inherit}
+.preview .ph{color:var(--t3)}
+.fx-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%)}
+.metrics{z-index:9;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px))}
+.metrics-pill{
+  display:flex;align-items:center;justify-content:center;
+  padding:12px 22px;border-radius:var(--rr);
+  font:500 .875rem/1 var(--font);white-space:nowrap;color:var(--t2);
+  background:rgba(255,255,255,.95);border:1px solid #EDEDED;box-shadow:var(--shadow)
 }
-.status-pill{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:calc(90px + env(safe-area-inset-bottom,0px));
-  z-index:11;
-  background:rgba(255,255,255,.85);
-  border:1px solid rgba(255,255,255,.75);
-  border-radius:999px;
-  padding:9px 14px;
-  font:600 .82rem/1 var(--font);
-  color:var(--t2);
-  box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
-  white-space:nowrap
-}
-@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  .status-pill{backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35)}
-}
-nav{
-  position:fixed;
-  bottom:0;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:10;
-  padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))
-}
+nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 .tabs{
-  display:flex;
-  background:rgba(245,245,245,.92);
-  border-radius:50px;
-  padding:5px;
-  box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
-  border:1px solid rgba(255,255,255,.45)
+  display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;
+  border:1px solid rgba(255,255,255,.45);box-shadow:var(--shadow)
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
   .tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
 }
 .tabs a{
-  padding:12px 22px;
-  border-radius:50px;
-  font:500 .875rem/1 var(--font);
-  color:var(--t3);
+  padding:12px 22px;border-radius:var(--rr);
+  font:500 .875rem/1 var(--font);color:var(--t3);
   transition:color .15s,background .15s,box-shadow .15s;
-  white-space:nowrap;
-  text-decoration:none
+  white-space:nowrap;text-decoration:none
 }
-.tabs a.active{
-  background:rgba(50,50,52,.85);
-  color:#fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.15)
-}
+.tabs a.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active{opacity:.7}
 @media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
-@media(max-width:680px){
-  .wrap{padding-top:16px}
-  .meta{align-items:flex-start}
-  .meta .keys{font-size:.76rem}
-}
-@media(max-width:480px){.tabs a{padding:14px 16px;font-size:.8125rem}}
-:focus{outline:2px solid var(--acc);outline-offset:3px}
-:focus:not(:focus-visible){outline:none}
-:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+@media(max-width:480px){.w{padding:14px 14px calc(182px + env(safe-area-inset-bottom,0px))}.tabs a{padding:14px 16px;font-size:.8125rem}}
+:focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <header class="hd">
-    <h1>Wrighter</h1>
-    <p>Minimal markdown editor with local autosave and keyboard formatting.</p>
-  </header>
-
-  <section class="card" id="drop-zone" aria-label="Markdown editor drop area">
-    <label for="editor" class="sr-only" style="position:absolute;left:-9999px">Markdown editor</label>
-    <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="# Start writing\n\nDrop a .md file here to replace this draft."></textarea>
-    <div class="meta" aria-hidden="true">
-      <span class="drop">Drop `.md` or markdown text files to overwrite.</span>
-      <span class="keys" id="shortcut-hint"></span>
-    </div>
+<main class="w">
+  <section class="panel" id="drop-zone" aria-label="Markdown Editor Drop Area">
+    <label for="editor" style="position:absolute;left:-9999px">Markdown Editor</label>
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="# Start Writing\n\nDrop A .md File To Replace This Draft."></textarea>
+    <p class="hint">Drop `.md` To Overwrite Draft</p>
+  </section>
+  <section class="panel">
+    <div id="preview" class="preview" aria-live="polite"></div>
   </section>
 </main>
 
-<div class="status-pill" id="status" aria-live="polite">0 Words - 0 Letters - 0m 0s</div>
+<div class="metrics fx-bottom"><div class="metrics-pill" id="status" aria-live="polite">0 Words - 0 Letters - 0m 0s</div></div>
 
-<nav>
+<nav class="fx-bottom">
   <div class="tabs">
     <a href="/">Home</a>
     <a href="/projects" class="active">Projects</a>
@@ -202,23 +119,75 @@ nav{
   const STORAGE_TEXT_KEY='wrighter:draft:v1';
   const STORAGE_STATE_KEY='wrighter:state:v1';
   const SPEAKING_WPM=130;
-  const EDIT_DEBOUNCE_MS=220;
-  const METRICS_DEBOUNCE_MS=120;
+  const SAVE_MS=220;
+  const METRICS_MS=120;
 
   const editor=document.getElementById('editor');
+  const preview=document.getElementById('preview');
   const status=document.getElementById('status');
   const dropZone=document.getElementById('drop-zone');
-  const shortcutHint=document.getElementById('shortcut-hint');
-  const isMac=/Mac|iPhone|iPad|iPod/i.test(navigator.platform)||/Mac/i.test(navigator.userAgent);
-
-  shortcutHint.textContent=`${isMac?'Cmd':'Ctrl'}+B Bold · ${isMac?'Cmd':'Ctrl'}+I Italic · ${isMac?'Cmd':'Ctrl'}+Shift+K Strike · ${isMac?'Cmd':'Ctrl'}+1/2/3 Heading · ${isMac?'Cmd':'Ctrl'}+4 Body · ${isMac?'Cmd':'Ctrl'}+Shift+7 Checklist`;
 
   function debounce(fn,delay){
-    let timer=0;
-    return(...args)=>{
-      window.clearTimeout(timer);
-      timer=window.setTimeout(()=>fn(...args),delay);
-    };
+    let t=0;
+    return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),delay)};
+  }
+
+  function clamp(n,min,max){return Math.min(max,Math.max(min,n));}
+
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function inlineMd(s){
+    s=esc(s);
+    s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+    s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    s=s.replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
+    s=s.replace(/~~([^~]+)~~/g,'<del>$1</del>');
+    s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    return s;
+  }
+
+  function parseMd(src){
+    const lines=src.replace(/\r\n?/g,'\n').split('\n');
+    let out=[];
+    let inUl=false,inOl=false,inBq=false,inCode=false;
+    let codeBuf=[];
+
+    function closeLists(){if(inUl){out.push('</ul>');inUl=false;}if(inOl){out.push('</ol>');inOl=false;}}
+    function closeBlocks(){closeLists();if(inBq){out.push('</blockquote>');inBq=false;}}
+
+    for(const line of lines){
+      if(inCode){
+        if(/^```/.test(line)){out.push('<pre><code>'+esc(codeBuf.join('\n'))+'</code></pre>');inCode=false;codeBuf=[];}
+        else codeBuf.push(line);
+        continue;
+      }
+
+      if(/^```/.test(line)){closeBlocks();inCode=true;codeBuf=[];continue;}
+      if(!line.trim()){closeBlocks();continue;}
+
+      let m=line.match(/^(#{1,6})\s+(.+)$/);
+      if(m){closeBlocks();const n=m[1].length;out.push('<h'+n+'>'+inlineMd(m[2].trim())+'</h'+n+'>');continue;}
+
+      m=line.match(/^>\s?(.*)$/);
+      if(m){closeLists();if(!inBq){out.push('<blockquote>');inBq=true;}out.push('<p>'+inlineMd(m[1])+'</p>');continue;}
+      if(inBq){out.push('</blockquote>');inBq=false;}
+
+      m=line.match(/^- \[([ xX])\]\s+(.+)$/);
+      if(m){if(!inUl){if(inOl){out.push('</ol>');inOl=false;}out.push('<ul class="check">');inUl=true;}out.push('<li><input type="checkbox" disabled'+(m[1].toLowerCase()==='x'?' checked':'')+'><span>'+inlineMd(m[2])+'</span></li>');continue;}
+
+      m=line.match(/^[-*+]\s+(.+)$/);
+      if(m){if(!inUl){if(inOl){out.push('</ol>');inOl=false;}out.push('<ul>');inUl=true;}out.push('<li>'+inlineMd(m[1])+'</li>');continue;}
+
+      m=line.match(/^\d+\.\s+(.+)$/);
+      if(m){if(!inOl){if(inUl){out.push('</ul>');inUl=false;}out.push('<ol>');inOl=true;}out.push('<li>'+inlineMd(m[1])+'</li>');continue;}
+
+      closeLists();
+      out.push('<p>'+inlineMd(line.trim())+'</p>');
+    }
+
+    if(inCode)out.push('<pre><code>'+esc(codeBuf.join('\n'))+'</code></pre>');
+    closeBlocks();
+    return out.join('')||'<p class="ph">Preview</p>';
   }
 
   function countWords(text){
@@ -233,23 +202,19 @@ nav{
 
   function estimateSpokenDuration(words){
     const totalSeconds=Math.round(words/SPEAKING_WPM*60);
-    const minutes=Math.floor(totalSeconds/60);
-    const seconds=totalSeconds%60;
-    return `${minutes}m ${seconds}s`;
+    return Math.floor(totalSeconds/60)+'m '+(totalSeconds%60)+'s';
   }
 
-  function updateStatusNow(){
-    const words=countWords(editor.value);
-    const letters=countLetters(editor.value);
-    status.textContent=`${words} Words - ${letters} Letters - ${estimateSpokenDuration(words)}`;
-  }
-
-  function clamp(n,min,max){
-    return Math.min(max,Math.max(min,n));
+  function updateMetricsNow(){
+    const text=editor.value;
+    const words=countWords(text);
+    const letters=countLetters(text);
+    status.textContent=words+' Words - '+letters+' Letters - '+estimateSpokenDuration(words);
+    preview.innerHTML=parseMd(text);
   }
 
   function saveNow(){
-    try{localStorage.setItem(STORAGE_TEXT_KEY,editor.value)}catch(_){/* ignore quota/private mode errors */}
+    try{localStorage.setItem(STORAGE_TEXT_KEY,editor.value);}catch(_){}
   }
 
   function saveStateNow(){
@@ -260,12 +225,12 @@ nav{
         end:clamp(editor.selectionEnd,0,len),
         scroll:Math.max(0,editor.scrollTop|0)
       }));
-    }catch(_){/* ignore quota/private mode errors */}
+    }catch(_){}
   }
 
-  const queueSave=debounce(saveNow,EDIT_DEBOUNCE_MS);
-  const queueStatus=debounce(updateStatusNow,METRICS_DEBOUNCE_MS);
-  const queueState=debounce(saveStateNow,EDIT_DEBOUNCE_MS);
+  const queueSave=debounce(saveNow,SAVE_MS);
+  const queueState=debounce(saveStateNow,SAVE_MS);
+  const queueMetrics=debounce(updateMetricsNow,METRICS_MS);
 
   function applyEditorValue(nextValue,selectionStart,selectionEnd){
     editor.value=nextValue;
@@ -273,7 +238,7 @@ nav{
     editor.setSelectionRange(selectionStart,selectionEnd);
     queueSave();
     queueState();
-    queueStatus();
+    queueMetrics();
   }
 
   function getSelectionBlock(){
@@ -292,42 +257,30 @@ nav{
     let end=editor.selectionEnd;
 
     if(start===end){
-      let wordStart=start;
-      let wordEnd=end;
+      let wordStart=start,wordEnd=end;
       while(wordStart>0&&/[^\s\n]/.test(value[wordStart-1]))wordStart--;
       while(wordEnd<value.length&&/[^\s\n]/.test(value[wordEnd]))wordEnd++;
-
-      if(wordStart!==wordEnd){
-        start=wordStart;
-        end=wordEnd;
-      }else{
-        const next=value.slice(0,start)+marker+marker+value.slice(end);
-        applyEditorValue(next,start+marker.length,start+marker.length);
-        return;
-      }
+      if(wordStart!==wordEnd){start=wordStart;end=wordEnd;}
+      else{const next=value.slice(0,start)+marker+marker+value.slice(end);applyEditorValue(next,start+marker.length,start+marker.length);return;}
     }
 
     const selected=value.slice(start,end);
-    const isWrapped=selected.startsWith(marker)&&selected.endsWith(marker)&&selected.length>=marker.length*2;
-    const toggled=isWrapped?selected.slice(marker.length,selected.length-marker.length):`${marker}${selected}${marker}`;
+    const wrapped=selected.startsWith(marker)&&selected.endsWith(marker)&&selected.length>=marker.length*2;
+    const toggled=wrapped?selected.slice(marker.length,selected.length-marker.length):marker+selected+marker;
     const next=value.slice(0,start)+toggled+value.slice(end);
-
-    if(isWrapped){
-      applyEditorValue(next,start,start+toggled.length);
-      return;
-    }
+    if(wrapped){applyEditorValue(next,start,start+toggled.length);return;}
     applyEditorValue(next,start+marker.length,start+toggled.length-marker.length);
   }
 
   function toggleHeading(level){
-    const prefix=`${'#'.repeat(level)} `;
+    const prefix='#'.repeat(level)+' ';
     const headingPattern=/^#{1,6}\s+/;
     const{value,lineStart,lineEnd,block}=getSelectionBlock();
     const lines=block.split('\n');
-    const nonEmptyLines=lines.filter(line=>line.trim());
-    if(!nonEmptyLines.length)return;
+    const nonEmpty=lines.filter(line=>line.trim());
+    if(!nonEmpty.length)return;
 
-    const allPrefixed=nonEmptyLines.every(line=>line.startsWith(prefix));
+    const allPrefixed=nonEmpty.every(line=>line.startsWith(prefix));
     const replaced=lines.map(line=>{
       if(!line.trim())return line;
       if(allPrefixed)return line.startsWith(prefix)?line.slice(prefix.length):line;
@@ -342,8 +295,8 @@ nav{
     const headingPattern=/^#{1,6}\s+/;
     const{value,lineStart,lineEnd,block}=getSelectionBlock();
     const lines=block.split('\n');
-    const nonEmptyLines=lines.filter(line=>line.trim());
-    if(!nonEmptyLines.length)return;
+    const nonEmpty=lines.filter(line=>line.trim());
+    if(!nonEmpty.length)return;
 
     const replaced=lines.map(line=>line.trim()?line.replace(headingPattern,''):line).join('\n');
     const next=value.slice(0,lineStart)+replaced+value.slice(lineEnd);
@@ -355,14 +308,14 @@ nav{
     const listPattern=/^\s*(?:[-*+]\s+|\d+\.\s+)/;
     const{value,lineStart,lineEnd,block}=getSelectionBlock();
     const lines=block.split('\n');
-    const nonEmptyLines=lines.filter(line=>line.trim());
-    if(!nonEmptyLines.length)return;
+    const nonEmpty=lines.filter(line=>line.trim());
+    if(!nonEmpty.length)return;
 
-    const allChecklist=nonEmptyLines.every(line=>checklistPattern.test(line));
+    const allChecklist=nonEmpty.every(line=>checklistPattern.test(line));
     const replaced=lines.map(line=>{
       if(!line.trim())return line;
       if(allChecklist)return line.replace(checklistPattern,'');
-      return `- [ ] ${line.replace(checklistPattern,'').replace(listPattern,'')}`;
+      return '- [ ] '+line.replace(checklistPattern,'').replace(listPattern,'');
     }).join('\n');
 
     const next=value.slice(0,lineStart)+replaced+value.slice(lineEnd);
@@ -383,15 +336,10 @@ nav{
     editor.setSelectionRange(end,end);
     saveNow();
     saveStateNow();
-    updateStatusNow();
+    updateMetricsNow();
   }
 
-  editor.addEventListener('input',()=>{
-    queueSave();
-    queueState();
-    queueStatus();
-  });
-
+  editor.addEventListener('input',()=>{queueSave();queueState();queueMetrics();});
   editor.addEventListener('keyup',queueState);
   editor.addEventListener('click',queueState);
   editor.addEventListener('scroll',queueState,{passive:true});
@@ -402,60 +350,19 @@ nav{
     if(!mod)return;
 
     const code=event.code;
-
-    if(code==='KeyB'){
-      event.preventDefault();
-      toggleWrap('**');
-      return;
-    }
-
-    if(code==='KeyI'){
-      event.preventDefault();
-      toggleWrap('*');
-      return;
-    }
-
-    if(event.shiftKey&&(code==='KeyK'||code==='KeyX')){
-      event.preventDefault();
-      toggleWrap('~~');
-      return;
-    }
-
-    if(!event.shiftKey&&code==='Digit1'){
-      event.preventDefault();
-      toggleHeading(1);
-      return;
-    }
-
-    if(!event.shiftKey&&code==='Digit2'){
-      event.preventDefault();
-      toggleHeading(2);
-      return;
-    }
-
-    if(!event.shiftKey&&code==='Digit3'){
-      event.preventDefault();
-      toggleHeading(3);
-      return;
-    }
-
-    if(!event.shiftKey&&code==='Digit4'){
-      event.preventDefault();
-      clearHeading();
-      return;
-    }
-
-    if(event.shiftKey&&(code==='Digit7'||code==='KeyL'||code==='Digit9')){
-      event.preventDefault();
-      toggleChecklist();
-    }
+    if(code==='KeyB'){event.preventDefault();toggleWrap('**');return;}
+    if(code==='KeyI'){event.preventDefault();toggleWrap('*');return;}
+    if(event.shiftKey&&(code==='KeyK'||code==='KeyX')){event.preventDefault();toggleWrap('~~');return;}
+    if(!event.shiftKey&&code==='Digit1'){event.preventDefault();toggleHeading(1);return;}
+    if(!event.shiftKey&&code==='Digit2'){event.preventDefault();toggleHeading(2);return;}
+    if(!event.shiftKey&&code==='Digit3'){event.preventDefault();toggleHeading(3);return;}
+    if(!event.shiftKey&&code==='Digit4'){event.preventDefault();clearHeading();return;}
+    if(event.shiftKey&&(code==='Digit7'||code==='KeyL'||code==='Digit9')){event.preventDefault();toggleChecklist();}
   });
 
   let dragDepth=0;
 
-  function hasFiles(dataTransfer){
-    return !!dataTransfer&&Array.from(dataTransfer.types||[]).includes('Files');
-  }
+  function hasFiles(dt){return !!dt&&Array.from(dt.types||[]).includes('Files');}
 
   dropZone.addEventListener('dragenter',event=>{
     if(!hasFiles(event.dataTransfer))return;
@@ -481,28 +388,18 @@ nav{
     event.preventDefault();
     dragDepth=0;
     dropZone.classList.remove('drag-over');
+    const dt=event.dataTransfer;
+    if(!dt)return;
 
-    const dataTransfer=event.dataTransfer;
-    if(!dataTransfer)return;
+    const file=Array.from(dt.files||[]).find(isMarkdownFile);
+    if(file){setEditorFromImport(await file.text());return;}
 
-    const file=Array.from(dataTransfer.files||[]).find(isMarkdownFile);
-    if(file){
-      const text=await file.text();
-      setEditorFromImport(text);
-      return;
-    }
-
-    const plainText=dataTransfer.getData('text/plain');
-    if(plainText)setEditorFromImport(plainText);
+    const plain=dt.getData('text/plain');
+    if(plain)setEditorFromImport(plain);
   });
 
-  window.addEventListener('dragover',event=>{
-    if(hasFiles(event.dataTransfer))event.preventDefault();
-  });
-
-  window.addEventListener('drop',event=>{
-    if(hasFiles(event.dataTransfer)&&!dropZone.contains(event.target))event.preventDefault();
-  });
+  window.addEventListener('dragover',event=>{if(hasFiles(event.dataTransfer))event.preventDefault();});
+  window.addEventListener('drop',event=>{if(hasFiles(event.dataTransfer)&&!dropZone.contains(event.target))event.preventDefault();});
 
   let restoredState=null;
   try{
@@ -510,7 +407,7 @@ nav{
     if(saved!==null)editor.value=saved;
     const rawState=localStorage.getItem(STORAGE_STATE_KEY);
     if(rawState)restoredState=JSON.parse(rawState);
-  }catch(_){/* ignore storage access errors */}
+  }catch(_){}
 
   if(restoredState&&typeof restoredState==='object'){
     const len=editor.value.length;
@@ -522,19 +419,10 @@ nav{
     });
   }
 
-  window.addEventListener('pagehide',()=>{
-    saveNow();
-    saveStateNow();
-  });
+  window.addEventListener('pagehide',()=>{saveNow();saveStateNow();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){saveNow();saveStateNow();}});
 
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='hidden'){
-      saveNow();
-      saveStateNow();
-    }
-  });
-
-  updateStatusNow();
+  updateMetricsNow();
 })();
 </script>
 </body>
