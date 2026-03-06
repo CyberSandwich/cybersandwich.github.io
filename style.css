@@ -333,9 +333,9 @@ nav{
 }
 .tabs a{
   background:none;
-  padding:12px clamp(10px,3vw,22px);
+  padding:12px clamp(12px,3.5vw,22px);
   border-radius:var(--rr);
-  font:500 clamp(.75rem,2.2vw,.875rem)/1 var(--font);
+  font:500 clamp(.8125rem,2.8vw,.875rem)/1 var(--font);
   color:var(--t3);
   cursor:pointer;
   transition:color .15s,background .15s,box-shadow .15s;
@@ -351,8 +351,8 @@ nav{
 @media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
 
 /* Responsive */
-@media(max-width:480px){
-  .tabs{max-width:calc(100vw - 28px)}
+@media(max-width:390px){
+  .tabs{max-width:calc(100vw - 20px)}
 }
 
 /* Animations */
