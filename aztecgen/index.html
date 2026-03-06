@@ -488,7 +488,7 @@ function genAZ(force){
   if(!force&&key===azKey)return;
   azKey=key;
   var az=getCachedAztec(text,azS.ec);
-  if(!az)return;
+  if(!az){azCtx.clearRect(0,0,azC.width,azC.height);notify('Input Too Long',false);return}
   var st=STYLES[azS.style];
   var dpr=window.devicePixelRatio||2;
   var sz=Math.max(1,Math.round(w*dpr));
