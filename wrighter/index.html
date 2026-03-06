@@ -7,36 +7,44 @@
 <meta name="theme-color" content="#FAFAFA">
 <title>Wrighter</title>
 <link rel="icon" type="image/png" href="/ds-favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wrighter">
+<meta name="description" content="A minimal, distraction-free plain text editor.">
+<meta property="og:title" content="Wrighter">
+<meta property="og:description" content="A minimal, distraction-free plain text editor.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#FAFAFA;--t1:#1A1A1A;--t2:#6B6B6B;--t3:#9A9A9A;--rr:50px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace}
 html,body{height:100%}
 body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg);color:var(--t1);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-main{min-height:100vh;min-height:100dvh;padding:20px;transition:background .12s}
-main.drag{background:rgba(0,0,0,.02)}
-#editor{display:block;width:100%;height:calc(100dvh - 40px);min-height:240px;padding:14px 0 calc(176px + env(safe-area-inset-bottom,0px));border:1px solid transparent;outline:0;resize:none;background:transparent;background-clip:padding-box;color:var(--t1);caret-color:var(--t1);font:400 20px/34px var(--mono)}
+main{min-height:100vh;min-height:100dvh;padding:0 calc(40px + env(safe-area-inset-right,0px)) 0 calc(40px + env(safe-area-inset-left,0px));transition:background .12s}
+main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset:-12px}
+#editor{display:block;width:100%;height:100dvh;min-height:240px;padding:24px 0 calc(176px + env(safe-area-inset-bottom,0px));border:none;outline:0;resize:none;background:transparent;background-clip:padding-box;color:var(--t1);caret-color:var(--t1);font:400 20px/34px var(--mono);-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
 #editor{scrollbar-width:none;-ms-overflow-style:none}
 #editor::-webkit-scrollbar{display:none}
-#editor::selection{background:rgba(59,130,246,.18)}
-.metrics{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px))}
+#editor::selection{background:rgba(59,130,246,.18);color:inherit}.metrics{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:8px;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px))}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 .tabs{display:flex;background:rgba(245,245,245,.92);border-radius:var(--rr);padding:5px;box-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(255,255,255,.45);width:max-content;max-width:calc(100vw - 40px)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:rgba(255,255,255,.35);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
 .metric-pill{max-width:none}
-.metric-label{display:block;padding:12px 16px;border-radius:var(--rr);text-align:center;font:500 .875rem/1 var(--font);color:var(--t2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.metric-label{display:block;padding:8px 12px;border-radius:var(--rr);text-align:center;font:500 .75rem/1 var(--font);color:var(--t2);white-space:nowrap;font-variant-numeric:tabular-nums}
 .tabs a{background:none;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
 .tabs a.active{background:rgba(50,50,52,.85);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active{opacity:.7}
 @media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
-@media(max-width:480px){main{padding:16px 14px}#editor{height:calc(100dvh - 32px)}.metrics{gap:6px;padding-inline:14px}.tabs a,.metric-label{padding:14px 16px;font-size:.8125rem}.tabs{max-width:calc(100vw - 28px)}}
+@media(max-width:480px){main{padding:0 calc(28px + env(safe-area-inset-right,0px)) 0 calc(28px + env(safe-area-inset-left,0px))}#editor{height:100dvh}.metrics{gap:6px;padding-inline:14px}.tabs a,.metric-label{padding:14px 16px;font-size:.8125rem}.tabs{max-width:calc(100vw - 28px)}}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+@media(print){.metrics,nav{display:none!important}main{padding:0}#editor{height:auto;padding:10mm;font:400 12pt/1.8 var(--mono);color:#000;white-space:pre-wrap;word-wrap:break-word}@page{margin:15mm}}
 </style>
 </head>
 <body>
-<main id="drop" aria-label="Plain Text Editor">
+<main id="drop" aria-label="Plain Text Editor" aria-dropeffect="copy">
   <label for="editor" style="position:absolute;left:-9999px">Plain Text Editor</label>
-  <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  <textarea id="editor" aria-multiline="true" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
 </main>
 
 <div class="metrics">
@@ -106,6 +114,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   let storedText='';
   let storedState='';
   let dbPromise=0;
+  let dbFailed=false;
+  let composing=false;
   let writeToken=0;
   let writeBusy=false;
   let pendingMask=0;
@@ -126,7 +136,9 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   }
 
   function safeSetLocal(key,value){
-    try{localStorage.setItem(key,value);}catch(_){ }
+    try{localStorage.setItem(key,value);}catch(_){
+      try{localStorage.removeItem(key);}catch(e){}
+    }
   }
 
   function clearDb(){
@@ -135,6 +147,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 
   function openDb(){
     if(dbPromise)return dbPromise;
+    if(dbFailed)return Promise.resolve(null);
     if(!('indexedDB' in window))return Promise.resolve(null);
     dbPromise=new Promise(resolve=>{
       let req;
@@ -153,7 +166,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       req.onblocked=()=>resolve(null);
     });
     return dbPromise.then(db=>{
-      if(!db)dbPromise=0;
+      if(!db){dbPromise=0;dbFailed=true;}
       return db;
     });
   }
@@ -243,6 +256,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     return(code>=CODE_A&&code<=CODE_Z)||(code>=CODE_a&&code<=CODE_z)||(code>=LAT_A&&code<=LAT_B)||(code>=LAT_C&&code<=LAT_D)||(code>=LAT_E&&code<=LAT_F);
   }
 
+  function isCJK(code){
+    return(code>=0x4E00&&code<=0x9FFF)||(code>=0x3400&&code<=0x4DBF)||(code>=0x3040&&code<=0x309F)||(code>=0x30A0&&code<=0x30FF)||(code>=0xAC00&&code<=0xD7AF);
+  }
+
   function isWordCore(code){
     return(code>=CODE_0&&code<=CODE_9)||isLetter(code);
   }
@@ -259,20 +276,29 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     let w=0;
     let l=0;
     let inWord=false;
-    for(let i=start;i<end;i++){
-      const code=text.charCodeAt(i);
+    for(let i=start;i<end;){
+      const code=text.codePointAt(i);
+      const step=code>0xFFFF?2:1;
       const letter=isLetter(code);
       const core=letter||(code>=CODE_0&&code<=CODE_9);
       if(code!==10&&code!==13)l++;
+      if(isCJK(code)){
+        inWord=false;
+        w++;
+        i+=step;
+        continue;
+      }
       if(core){
         if(!inWord){w++;inWord=true;}
+        i+=step;
         continue;
       }
       if(inWord&&isJoiner(code)){
-        const next=i+1<end?text.charCodeAt(i+1):0;
-        if((next>=CODE_0&&next<=CODE_9)||isLetter(next))continue;
+        const nc=i+step<end?text.codePointAt(i+step):0;
+        if((nc>=CODE_0&&nc<=CODE_9)||isLetter(nc)){i+=step;continue;}
       }
       inWord=false;
+      i+=step;
     }
     out.w=w;
     out.l=l;
@@ -340,11 +366,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     const sec=Math.round(words*60/WPM);
     if(words!==shownWords){
       shownWords=words;
-      wordsOut.textContent=words+' Words';
+      wordsOut.textContent=words+(words===1?' Word':' Words');
     }
     if(letters!==shownLetters){
       shownLetters=letters;
-      lettersOut.textContent=letters+' Letters';
+      lettersOut.textContent=letters+(letters===1?' Letter':' Letters');
     }
     if(sec!==shownSec){
       shownSec=sec;
@@ -408,7 +434,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   }
 
   function setText(text){
-    const next=String(text||'');
+    const next=String(text||'').replace(/\r\n?/g,'\n');
     if(next===textCache)return;
     editor.value=next;
     const end=next.length;
@@ -423,7 +449,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   function isTextFile(file){
     const name=(file&&file.name?file.name:'').toLowerCase();
     const type=(file&&file.type?file.type:'').toLowerCase();
-    return type.startsWith('text/')||/\.(txt|text|md|markdown|mdown|mkd|log|csv|json|xml|html|css|js)$/.test(name);
+    return type.startsWith('text/')||type==='application/json'||type==='application/xml'||type==='application/javascript'||/\.(txt|text|md|markdown|mdown|mkd|log|csv|tsv|json|jsonl|xml|html|htm|css|js|mjs|cjs|ts|tsx|jsx|vcf|ics|yaml|yml|toml|ini|cfg|conf|env|sh|bash|zsh|fish|bat|cmd|ps1|py|rb|rs|go|java|kt|kts|c|h|cpp|hpp|cs|swift|m|mm|r|pl|pm|lua|php|sql|graphql|gql|svg|tex|bib|rtf|org|rst|adoc|diff|patch|gitignore|gitattributes|editorconfig|prettierrc|eslintrc|babelrc|dockerfile|makefile|cmake|gradle|properties|plist|lock)$/.test(name);
   }
 
   function hasFiles(dt){
@@ -439,12 +465,14 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     requestAnimationFrame(()=>{
       const lh=editorLineHeight();
       const snapped=Math.max(0,Math.round(scroll/lh)*lh);
+      const maxScroll=editor.scrollHeight-editor.clientHeight;
       editor.setSelectionRange(start,end);
-      editor.scrollTop=snapped;
+      editor.scrollTop=Math.min(snapped,Math.max(0,maxScroll));
     });
   }
 
   function onInput(){
+    if(composing)return;
     touched=1;
     const next=editor.value;
     let applied=false;
@@ -464,6 +492,9 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     queuePersist(SAVE_TEXT|SAVE_STATE);
   }
 
+  editor.addEventListener('compositionstart',()=>{composing=true;});
+  editor.addEventListener('compositionend',()=>{composing=false;onInput();});
+
   editor.addEventListener('beforeinput',()=>{
     beforeInput=1;
     beforeRev=textRev;
@@ -477,10 +508,64 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   editor.addEventListener('click',()=>queuePersist(SAVE_STATE));
 
   editor.addEventListener('keydown',event=>{
-    if((event.metaKey||event.ctrlKey)&&!event.shiftKey&&!event.altKey&&event.code==='KeyS'){
+    if(event.key==='Tab'){
+      event.preventDefault();
+      const s=editor.selectionStart;
+      const e=editor.selectionEnd;
+      const v=editor.value;
+      editor.value=v.substring(0,s)+'  '+v.substring(e);
+      editor.selectionStart=editor.selectionEnd=s+2;
+      onInput();
+      return;
+    }
+    if(event.key==='Enter'){
+      const s=editor.selectionStart;
+      const v=editor.value;
+      const lineStart=v.lastIndexOf('\n',s-1)+1;
+      const m=v.slice(lineStart,s).match(/^[ \t]*/);
+      const indent=m?m[0]:'';
+      if(indent){
+        event.preventDefault();
+        const e=editor.selectionEnd;
+        editor.value=v.substring(0,s)+'\n'+indent+v.substring(e);
+        editor.selectionStart=editor.selectionEnd=s+1+indent.length;
+        onInput();
+      }
+      return;
+    }
+    const mod=event.metaKey||event.ctrlKey;
+    if(!mod)return;
+    if(!event.shiftKey&&!event.altKey&&event.code==='KeyS'){
       event.preventDefault();
       flush(true);
       queuePaint();
+      return;
+    }
+    if(event.shiftKey&&!event.altKey&&event.code==='KeyK'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',s);
+      const lineEnd=le<0?v.length:le+1;
+      editor.value=v.substring(0,ls)+v.substring(lineEnd);
+      editor.selectionStart=editor.selectionEnd=Math.min(ls,editor.value.length);
+      onInput();
+      return;
+    }
+    if(event.shiftKey&&!event.altKey&&event.code==='KeyD'){
+      event.preventDefault();
+      const v=editor.value;
+      const s=editor.selectionStart;
+      const ls=v.lastIndexOf('\n',s-1)+1;
+      const le=v.indexOf('\n',s);
+      const line=v.substring(ls,le<0?v.length:le);
+      const ins='\n'+line;
+      const pos=le<0?v.length:le;
+      editor.value=v.substring(0,pos)+ins+v.substring(pos);
+      editor.selectionStart=editor.selectionEnd=s+ins.length;
+      onInput();
+      return;
     }
   });
 
@@ -512,7 +597,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     if(!dt)return;
 
     const file=Array.from(dt.files||[]).find(isTextFile);
-    if(file){setText(await file.text());return;}
+    if(file){try{setText(await file.text());}catch(_){}return;}
 
     const plain=dt.getData('text/plain');
     if(plain)setText(plain);
@@ -531,6 +616,18 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   });
   window.addEventListener('pagehide',()=>flush(true));
   window.addEventListener('beforeunload',()=>flush(true),{capture:true});
+
+  window.addEventListener('storage',event=>{
+    if(event.key===KEY_TEXT&&!document.hasFocus()){
+      const next=event.newValue;
+      if(next!==null&&next!==editor.value){
+        editor.value=next;
+        storedText=next;
+        recountAll(next);
+        queuePaint();
+      }
+    }
+  });
 
   Promise.all([readPersisted(KEY_TEXT),readPersisted(KEY_STATE)]).then(values=>{
     const text=values[0];
