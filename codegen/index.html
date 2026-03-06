@@ -251,7 +251,7 @@ var NF='Nothing Found';
 var TOUCH_MSG='ontouchstart' in window?'Long-Press Input Box to Paste Images':'Use \u2318V to Paste Images';
 
 /* State */
-var qrS={ec:2,sizeIdx:16,marginIdx:4,style:0,fmt:0};
+var qrS={ec:2,sizeIdx:16,marginIdx:4,style:0,fmt:0,exactSz:0};
 var bcS={height:0,text:1,sizeIdx:6,marginIdx:5,style:0,fmt:0};
 
 /* Format data */
@@ -475,9 +475,9 @@ function hiResQR(){
   var qr=getCachedMatrix(text,qrS.ec);
   if(!qr)return null;
   var st=STYLES[qrS.style];
-  var exportSz=QRSIZES[qrS.sizeIdx];
+  var exportSz=qrS.exactSz||QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
-  var exportMargin=Math.round(MARGINS[qrS.marginIdx]/w*exportSz);
+  var exportMargin=qrS.exactSz?0:Math.round(MARGINS[qrS.marginIdx]/w*exportSz);
   if(!qrExpCtx)qrExpCtx=qrExpC.getContext('2d');
   qrExpC.width=exportSz;qrExpC.height=exportSz;
   drawQR(qrExpCtx,qr,st,exportSz,exportMargin);
@@ -517,9 +517,9 @@ function getQRMatrix(text,ecLevel){
 function qrSVG(){
   var text=qrText();
   var st=STYLES[qrS.style];
-  var exportSz=QRSIZES[qrS.sizeIdx];
+  var exportSz=qrS.exactSz||QRSIZES[qrS.sizeIdx];
   var w=qrC.offsetWidth||300;
-  var exportMargin=Math.round(MARGINS[qrS.marginIdx]/w*exportSz);
+  var exportMargin=qrS.exactSz?0:Math.round(MARGINS[qrS.marginIdx]/w*exportSz);
   var qr=getCachedMatrix(text,qrS.ec);
   var modSz=(exportSz-2*exportMargin)/qr.count;
   var p=['<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+exportSz+' '+exportSz+'" width="'+exportSz+'" height="'+exportSz+'">'];
@@ -774,6 +774,7 @@ function initSettings(container,groups){
         g._reset=function(){idx=g.def;upd()};
         g._inc=function(){if(idx<g.steps.length-1){idx++;upd()}};
         g._dec=function(){if(idx>0){idx--;upd()}};
+        g._setIdx=function(i){if(i>=0&&i<g.steps.length){idx=i;upd()}};
         minus.disabled=g.def===0;
         plus.disabled=g.def===g.steps.length-1;
         stepper.appendChild(minus);stepper.appendChild(plus);
@@ -797,14 +798,14 @@ function updatePvStyle(pv,style){
 
 /* QR Settings */
 var qrGroups1=[
-  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;genQRS()}},
-  {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;genQRS()}},
+  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;qrS.exactSz=0;genQRS()}},
+  {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;qrS.exactSz=0;genQRS()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&qrS.fmt===2},onChange:function(i){qrS.style=i;updatePvStyle(qrPv,i);genQRS()}}
 ];
 initSettings($('qrCh1'),qrGroups1);
 var qrGroups2=[
   {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){qrS.fmt=i;qrGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&qrS.style===2)resetGroup(qrGroups1[2]);else qrGroups1[2]._rebuild()}},
-  {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:15,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i}}
+  {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:15,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i;qrS.exactSz=0}}
 ];
 initSettings($('qrCh2'),qrGroups2);
 
@@ -1083,6 +1084,18 @@ document.addEventListener('keydown',function(e){
   if(e.key==='['){marginG._dec();return}
   if(e.key==='h'&&curTab==='bc'){g1[0]._next();return}
   if(e.key==='t'&&curTab==='bc'){g1[1]._set(g1[1]._cur()===0?1:0);return}
+  if(e.key==='o'&&curTab==='qr'){
+    var qr=getCachedMatrix(qrText(),qrS.ec);
+    if(qr){
+      marginG._setIdx(0);
+      var target=QRSIZES[qrS.sizeIdx];
+      var modPx=Math.max(1,Math.round(target/qr.count));
+      var exact=modPx*qr.count;
+      qrS.exactSz=exact;
+      notify(exact+' \u00D7 '+exact+' ('+modPx+'px/module)',true);
+    }
+    return;
+  }
   if(e.key===';'){g2[1]._dec();return}
   if(e.key==='\''){g2[1]._inc();return}
   if(e.key==='v'){tabBtn('Ps').click();return}
