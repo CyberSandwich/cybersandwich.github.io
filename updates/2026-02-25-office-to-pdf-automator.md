@@ -1,32 +1,24 @@
 # Office to PDF (Automator)
 
-Every organization has its own preferred document format. Microsoft Office dominates corporate environments, Apple's iWork suite handles personal productivity on macOS, and when the time comes to share something with someone who uses neither, PDF is the format everyone can actually open.
-
-The usual conversion path involves opening each file in its native application, choosing File > Export as PDF, and saving manually. This works for one or two files, but it scales poorly when you have a folder with ten or twenty documents waiting to go out.
+This script batch-converts Microsoft Office and Apple iWork files to PDF from Finder's right-click menu as an Automator Quick Action. It handles font linking, per-format export filters, and optional PDF compression.
 
 ## Two Conversion Engines
 
-This script handles both Microsoft Office formats (doc, docx, ppt, pptx, xls, xlsx, and their macro-enabled variants) and Apple iWork formats (Pages, Numbers, Keynote). It picks a different conversion engine depending on what you feed it.
+Office formats (doc, docx, ppt, pptx, xls, xlsx, and their macro-enabled variants) go through LibreOffice in headless mode with a temporary user profile per session to avoid conflicts with any running instance. Each format type gets its own PDF export filter: `writer_pdf_Export` for documents, `impress_pdf_Export` for presentations, `calc_pdf_Export` for spreadsheets.
 
-Office formats go through LibreOffice in headless mode. LibreOffice creates a temporary user profile for each conversion session, which avoids conflicts with any running instance and sidesteps the lock file issues that plague automated workflows. Each format type gets its own PDF export filter: `writer_pdf_Export` for documents, `impress_pdf_Export` for presentations, `calc_pdf_Export` for spreadsheets.
+Apple formats (Pages, Numbers, Keynote) go through their native applications via AppleScript. The script tracks whether each application was already running and only quits applications it launched itself.
 
-Apple formats go through their native applications via AppleScript. Pages, Numbers, and Keynote each have built-in PDF export commands that produce output identical to what you would get from File > Export as PDF. The script tracks whether each application was already running before conversion, and only quits applications that it launched itself. If Keynote was already open with your presentation, it stays open after the conversion finishes.
+## Font Linking
 
-## The Font Problem
+On first run, the script scans font directories inside any installed Microsoft Office applications (Word, PowerPoint, Excel, Outlook, OneNote) and symlinks those fonts into `~/Library/Fonts`. This makes them available system-wide, including to LibreOffice, without copying the original files. A marker file at `~/.office_fonts_linked` tracks completion so it only runs once.
 
-The biggest source of broken conversions is missing fonts. A Word document created on Windows with Calibri body text and Cambria headings will render with substituted fonts on a Mac that has never installed Microsoft Office. The layout shifts, line breaks move, tables reflow, and the resulting PDF looks nothing like the original.
-
-The script handles this automatically on first run. It scans the font directories inside any installed Microsoft Office applications (Word, PowerPoint, Excel, Outlook, OneNote) and creates symbolic links from those embedded fonts into `~/Library/Fonts`. This makes the fonts available system-wide, including to LibreOffice, without copying or modifying the original font files. A marker file at `~/.office_fonts_linked` tracks whether this step has been completed, so it only runs once.
-
-If you do not have any Microsoft Office applications installed, the font linking step simply finds nothing and moves on. LibreOffice ships with its own set of metric-compatible substitution fonts (Liberation Sans, Liberation Serif), which cover the most common Office typefaces reasonably well.
+If no Microsoft Office applications are installed, the step finds nothing and moves on. LibreOffice ships with metric-compatible substitution fonts (Liberation Sans, Liberation Serif) that cover the most common Office typefaces.
 
 ## PDF Compression
 
-After conversion, the raw PDFs from LibreOffice and Apple's apps are often larger than necessary. LibreOffice in particular tends to produce uncompressed or poorly compressed object streams.
+The script passes each PDF through qpdf as a post-processing step. qpdf regenerates object streams, recompresses all FLATE streams at level 9, and linearizes the output for progressive web loading. If the compressed version is smaller, it replaces the original. If not, the original is kept.
 
-The script passes each PDF through qpdf as a post-processing step. qpdf regenerates object streams, recompresses all FLATE streams at maximum compression level, and linearizes the output for fast web viewing (the PDF loads progressively when opened over a network). If the compressed version is smaller, it replaces the original. If compression somehow makes the file larger (this can happen with already-optimized PDFs), the original is kept as is.
-
-Compression is optional. If qpdf is not installed, conversions still work; the PDFs just won't be as compact.
+qpdf is optional. If not installed, conversions still produce valid PDFs without compression.
 
 ## How to Set It Up
 

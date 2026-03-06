@@ -1,22 +1,20 @@
 # HEIC Optimization (Automator)
 
-HEIC is what happens when you take a video codec and use it to compress a single frame. The container is HEIF (High Efficiency Image Format), and the compression inside is HEVC (H.265), the same codec that powers 4K video streaming. Apple adopted it as the default camera format starting with iOS 11 and macOS High Sierra, which means most iPhone photos taken since 2017 are already HEIC. The format consistently produces files 40 to 50 percent smaller than equivalent quality JPEG, and it supports features like embedded thumbnails, depth maps, and HDR metadata that JPEG simply cannot represent.
+This script compresses images to optimized HEIC using ImageMagick for preprocessing and heif-enc (libheif/x265) for encoding, accessible from Finder's right-click menu as an Automator Quick Action. HEIC uses HEVC (H.265) compression and produces files 40 to 50 percent smaller than equivalent quality JPEG, with support for embedded thumbnails, depth maps, and HDR metadata.
 
-## Why the Pipeline Looks Different
+## How the Pipeline Differs
 
-Unlike the JPEG and PNG optimizers in this series, the HEIC pipeline has a constraint that shapes everything: `heif-enc` cannot read from stdin. Most image tools accept piped input, which lets you chain ImageMagick directly into the encoder. `heif-enc` needs a real file on disk, and it uses the file extension to detect the input format. This means the script writes an intermediate PNG to a temp directory before encoding, rather than streaming through a pipe.
+`heif-enc` cannot read from stdin and uses the file extension to detect input format, so the script writes an intermediate PNG to a temp directory rather than streaming through a pipe.
 
-The quality scale also works differently from JPEG. HEIC quality 50 is roughly equivalent to JPEG quality 80 to 85 in perceptual terms, because the underlying x265 encoder maps the quality value to a CRF (Constant Rate Factor) internally. The default of 40 in this script targets roughly JPEG 70 to 75 territory, which is aggressive but produces clean results thanks to the SSIM tuning.
+The quality scale is not comparable to JPEG. HEIC quality 50 is roughly equivalent to JPEG quality 80 to 85 perceptually, because the x265 encoder maps the quality value to a CRF internally. The default of 40 targets roughly JPEG 70 to 75 territory.
 
-One useful feature of HEIC is the embedded thumbnail. The script generates a 200px preview image stored inside the HEIC container itself, which means Finder and Photos can display a preview without decoding the full resolution image. This makes browsing large photo libraries noticeably faster.
+The script also generates a 200px embedded thumbnail inside the HEIC container, so Finder and Photos can display previews without decoding the full resolution image.
 
 ## How the Pipeline Works
 
-**Stage 1: ImageMagick** preprocesses the input into a clean 8-bit PNG intermediate. It auto-orients from EXIF data, flattens transparency to a solid background (HEIC supports alpha through a separate auxiliary image, but that adds significant file size for photo workflows), normalizes to sRGB, caps resolution at 2560px, strips metadata, and forces 8-bit depth. That last part matters: without it, ImageMagick will sometimes write 16-bit PNG from TIFF or HEIC sources, which `heif-enc` would then encode as 10-bit. For 8-bit source material, that just inflates the file with no visual benefit.
+**Stage 1: ImageMagick** preprocesses the input into a clean 8-bit PNG intermediate. It auto-orients from EXIF data, flattens transparency to a solid background (HEIC alpha is a separate auxiliary image that adds significant file size), normalizes to sRGB, caps resolution at 2560px, strips metadata, and forces 8-bit depth. Without the 8-bit force, ImageMagick will sometimes write 16-bit PNG from TIFF or HEIC sources, which `heif-enc` would then encode as 10-bit with no visual benefit.
 
-**Stage 2: heif-enc** encodes the intermediate PNG into HEIC using the x265 encoder. The preset is set to "slow", which is the sweet spot for still images according to libheif benchmarks. Going slower than "slow" gives negligible compression gains while significantly increasing encode time. The SSIM tuning optimizes for structural similarity, prioritizing how the image looks to human eyes over raw pixel accuracy.
-
-This is wrapped as an Automator Quick Action, so it runs directly from Finder's right-click menu.
+**Stage 2: heif-enc** encodes the intermediate PNG into HEIC using x265. The preset is "slow", the sweet spot for still images per libheif benchmarks. Slower presets give negligible gains. SSIM tuning optimizes for structural similarity over raw pixel accuracy.
 
 ## How to Set It Up
 
@@ -293,7 +291,7 @@ HEIC is natively supported on macOS 10.13+, iOS 11+, Windows 10 (with the HEVC e
 
 **QUALITY** controls the x265 encoder's rate factor. The scale is not directly comparable to JPEG: HEIC quality 40 produces results perceptually similar to JPEG quality 70 to 75, and HEIC quality 50 is closer to JPEG quality 80 to 85. The default of 40 is aggressive but holds up well with SSIM tuning enabled.
 
-**PRESET** sets the x265 encoding speed. The default of "slow" is the recommended setting for still images based on libheif benchmarks. Presets slower than "slow" offer negligible compression improvement while taking significantly longer. Faster presets like "medium" or "fast" will encode quicker but produce larger files.
+**PRESET** sets the x265 encoding speed. "slow" is optimal for still images per libheif benchmarks. Slower presets offer negligible improvement. Faster presets like "medium" or "fast" encode quicker but produce larger files.
 
 **TUNE** selects the perceptual optimization strategy. The default "ssim" optimizes for structural similarity, which works well for most photos. Switch to "grain" if you are working with noisy or film-scanned images and want to preserve that texture.
 

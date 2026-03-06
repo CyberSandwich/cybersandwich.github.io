@@ -1,6 +1,8 @@
 # PNG Optimization (Automator)
 
-PNG optimization works differently from JPEG optimization. JPEG is inherently lossy, so the challenge there is finding the right quality threshold. PNG is lossless, which means the file faithfully stores every pixel. The opportunity for savings comes from reducing the number of *unique* colors in the image (palette quantization) and then recompressing the result with better algorithms than what most tools use by default.
+This script compresses images to optimized PNG using a three-stage pipeline: ImageMagick for preprocessing, pngquant for lossy palette reduction, and oxipng for lossless recompression. It runs from Finder's right-click menu as an Automator Quick Action.
+
+PNG is lossless, so the savings come from reducing the number of *unique* colors (palette quantization) and then recompressing the result with better algorithms than what most tools use by default.
 
 ## How the Pipeline Works
 
@@ -12,9 +14,7 @@ The script runs three tools in sequence, each handling a distinct stage.
 
 **Stage 3: oxipng** applies lossless recompression. It re-encodes the DEFLATE stream with optimized parameters, selects better PNG filter strategies, and strips any remaining non-critical chunks. This typically shaves off another 5 to 15 percent on top of what pngquant saved.
 
-One thing to note about JPEG inputs: the script will process them (useful for transparency compositing workflows), but converting a lossy format to lossless will increase file size. The notification flags this so you know the size comparison is not meaningful in that case.
-
-This is wrapped as an Automator Quick Action, so you can run it directly from Finder's right-click menu.
+JPEG inputs will be processed (useful for transparency compositing workflows), but converting a lossy format to lossless will increase file size. The notification flags this.
 
 ## How to Set It Up
 

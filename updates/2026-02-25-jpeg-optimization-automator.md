@@ -1,16 +1,10 @@
 # JPEG Optimization (Automator)
 
-Photos from phones and cameras are typically 5-15MB each. Most of that data is perceptually redundant, and the file sizes add up when you're storing or sharing hundreds of them.
+This script compresses images to optimized JPEG using ImageMagick for preprocessing and mozjpeg for encoding, accessible from Finder's right-click menu as an Automator Quick Action.
 
-## The Approach
+ImageMagick auto-orients from EXIF data, flattens transparency, normalizes to sRGB, caps resolution at 2560px, and strips metadata. The result gets piped to mozjpeg as a lossless intermediate.
 
-This script pairs two tools: ImageMagick for preprocessing and mozjpeg for compression.
-
-ImageMagick handles preprocessing: auto-orienting from EXIF data, flattening transparency for formats like PNG, normalizing to sRGB colorspace, capping resolution at 2560px, and stripping metadata. The result gets piped to mozjpeg as a lossless intermediate.
-
-mozjpeg handles the compression using MS-SSIM tuning, which optimizes for how humans perceive image quality rather than raw pixel differences. At quality 75 with its MS-SSIM quantization table, typical savings are 60-90% with no visible quality loss.
-
-Wrapping this in an Automator Quick Action makes it accessible from Finder's right-click menu without needing the terminal.
+mozjpeg encodes using MS-SSIM tuning, which optimizes for perceived quality rather than raw pixel differences. At quality 75 with its MS-SSIM quantization table, typical savings are 60-90% with no visible quality loss.
 
 ## How to Set It Up
 
