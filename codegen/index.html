@@ -166,7 +166,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px))}
 @keyframes pvPop{from{transform:scale(.97)}to{transform:scale(1)}}
 ::selection{background:rgba(72,72,74,.15)}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
-.cam-wrap{border-top:1px solid var(--bdr2)}.cam-wrap video{width:100%;display:block;background:#000}
+.cam-wrap{padding:0}.cam-wrap video{width:100%;display:block;border-radius:20px;background:#000}
 .cam-active span{color:#C41E3A!important}.cam-active .slbl svg{color:#C41E3A!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -1022,9 +1022,9 @@ var camStream=null,camVideo=null,camWrap=null,camScanning=false,camRow=null,camL
   svg.appendChild(p1);svg.appendChild(c1);lbl.appendChild(svg);
   var sp=document.createElement('span');sp.textContent='Scan';lbl.appendChild(sp);
   row.appendChild(lbl);card.appendChild(row);
-  camWrap=document.createElement('div');camWrap.className='cam-wrap';camWrap.style.display='none';
+  camWrap=document.createElement('div');camWrap.className='settings cam-wrap';camWrap.style.display='none';
   camVideo=document.createElement('video');camVideo.setAttribute('playsinline','');camVideo.setAttribute('autoplay','');camVideo.muted=true;
-  camWrap.appendChild(camVideo);card.appendChild(camWrap);
+  camWrap.appendChild(camVideo);card.parentNode.insertBefore(camWrap,card.nextSibling);
   camRow=row;camLbl=sp;
   row.addEventListener('click',function(){if(camScanning)stopCam();else startCam()});
 })();
