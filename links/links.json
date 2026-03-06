@@ -6,7 +6,7 @@
   },
   {
     "title": "Amazon UK - Contact Support",
-    "url": "https://www.amazon.co.uk/message-us?ref_=fs_hub_gateway_mu&amp&paradigm=foresight&amp&muClientName=foresight&amp&mu_params=%7B%22hubSushiSessionId%22%3A%22a82ff59f-0eb3-4bf2-ba69-9cde9122b2da%22%7D&sig=8f2e35d0-cf83-4a2e-a08d-55f673ed6b15#",
+    "url": "https://www.amazon.co.uk/hz/contact-us/foresight/hubgateway",
     "category": "Personal"
   },
   {
@@ -25,6 +25,21 @@
     "category": "Personal"
   },
   {
+    "title": "camelcamelcamel",
+    "url": "https://uk.camelcamelcamel.com",
+    "category": "Personal"
+  },
+  {
+    "title": "ChatGPT",
+    "url": "https://chatgpt.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Claude Code (Web)",
+    "url": "https://claude.ai/code",
+    "category": "Personal"
+  },
+  {
     "title": "Claude Status",
     "url": "https://status.claude.com",
     "category": "Personal"
@@ -35,13 +50,48 @@
     "category": "Personal"
   },
   {
+    "title": "Cloudflare Registrar",
+    "url": "https://www.cloudflare.com/en-gb/products/registrar/",
+    "category": "Personal"
+  },
+  {
     "title": "Cobalt",
     "url": "https://cobalt.tools/",
     "category": "Personal"
   },
   {
+    "title": "Codex (Web)",
+    "url": "https://chatgpt.com/codex",
+    "category": "Personal"
+  },
+  {
     "title": "Departures (Testflight)",
     "url": "https://departures.to/",
+    "category": "Personal"
+  },
+  {
+    "title": "Financial Times",
+    "url": "https://www.ft.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Financial Times (Lex)",
+    "url": "https://www.ft.com/lex",
+    "category": "Personal"
+  },
+  {
+    "title": "Gemini",
+    "url": "https://gemini.google.com/app",
+    "category": "Personal"
+  },
+  {
+    "title": "GoDaddy",
+    "url": "https://www.godaddy.com",
+    "category": "Personal"
+  },
+  {
+    "title": "Google AI Mode",
+    "url": "https://www.google.com/search?udm=50&aep=46&source=25q2-US-SearchSites-Site-CTA",
     "category": "Personal"
   },
   {
@@ -85,8 +135,23 @@
     "category": "Personal"
   },
   {
+    "title": "iTerm2",
+    "url": "https://iterm2.com/index.html",
+    "category": "Personal"
+  },
+  {
+    "title": "LinkedIn",
+    "url": "https://www.linkedin.com",
+    "category": "Personal"
+  },
+  {
     "title": "Microsoft Excel",
     "url": "https://excel.cloud.microsoft",
+    "category": "Personal"
+  },
+  {
+    "title": "Microsoft Forms",
+    "url": "https://forms.cloud.microsoft/Pages/DesignPageV2.aspx?origin=Marketing&culture=en-us&country=us",
     "category": "Personal"
   },
   {
@@ -130,6 +195,11 @@
     "category": "Personal"
   },
   {
+    "title": "Perplexity",
+    "url": "https://www.perplexity.ai",
+    "category": "Personal"
+  },
+  {
     "title": "Pexels",
     "url": "https://www.pexels.com",
     "category": "Personal"
@@ -145,8 +215,33 @@
     "category": "Personal"
   },
   {
+    "title": "Squarespace Domains",
+    "url": "https://account.squarespace.com/domains",
+    "category": "Personal"
+  },
+  {
+    "title": "Starry Mart",
+    "url": "https://starrymart.co.uk",
+    "category": "Personal"
+  },
+  {
+    "title": "StudentBeans",
+    "url": "https://www.studentbeans.com/uk",
+    "category": "Personal"
+  },
+  {
     "title": "Tesco Clubcard",
     "url": "https://secure.tesco.com/clubcard/myvouchers",
+    "category": "Personal"
+  },
+  {
+    "title": "TFL Tube Map",
+    "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
+    "category": "Personal"
+  },
+  {
+    "title": "TIME.IS",
+    "url": "https://time.is",
     "category": "Personal"
   },
   {
@@ -157,6 +252,11 @@
   {
     "title": "UK E-Visa",
     "url": "https://view-immigration-status.service.gov.uk/status",
+    "category": "Personal"
+  },
+  {
+    "title": "UNiDAYS",
+    "url": "https://www.myunidays.com/GB/en-GB",
     "category": "Personal"
   },
   {
@@ -177,6 +277,16 @@
   {
     "title": "Webpage Archive",
     "url": "https://archive.ph",
+    "category": "Personal"
+  },
+  {
+    "title": "What is my IP Address",
+    "url": "https://whatismyipaddress.com",
+    "category": "Personal"
+  },
+  {
+    "title": "YouTube (Subscriptions)",
+    "url": "https://www.youtube.com/feed/subscriptions",
     "category": "Personal"
   },
   {
