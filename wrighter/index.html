@@ -844,6 +844,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     recountAll(editor.value);
     paint();
   });
+
+  document.querySelector('.tabs a.active').addEventListener('click',e=>{
+    e.preventDefault();
+    setText('');
+  });
 })();
 </script>
 </body>
