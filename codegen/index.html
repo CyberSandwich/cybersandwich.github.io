@@ -195,6 +195,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));displ
 </style>
 </head>
 <body>
+<main>
 <div class="w">
   <section id="v-qr" class="view active" role="tabpanel" aria-labelledby="tab-qr">
     <div class="preview" id="qrPv" role="button" tabindex="0" aria-label="Copy QR Code"><canvas id="qrC" aria-hidden="true"></canvas></div>
@@ -219,6 +220,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));displ
 
   <div id="dropOv" class="drop-overlay" role="status" aria-live="assertive">Drop Image to Scan</div>
 </div>
+</main>
 <nav class="fx-bottom">
   <div class="tabs" role="tablist" aria-label="Generator">
     <a href="/" role="link" aria-label="Back to Home">Home</a>
@@ -293,7 +295,6 @@ var BCSIZES=[256,400,512,600,800,1000,1080,1200,1500,2000];
 var MARGINS=[0,8,16,24,32,48,64];
 var FMTS=['PNG','SVG','JPEG'];
 var NF='Nothing Found';
-var TOUCH_MSG='ontouchstart' in window?'Long-Press Input Box to Paste Images':'Use \u2318V to Paste Images';
 
 /* State */
 var qrS={ec:2,sizeIdx:16,marginIdx:4,style:0,fmt:0,exactSz:0};
@@ -836,7 +837,7 @@ function initSettings(container,groups){
           chips.querySelectorAll('.chip').forEach(function(c,i){var a=i===g.def;c.classList.toggle('active',a);c.setAttribute('aria-pressed',a?'true':'false')});
           g.onChange(g.def);
         };
-        g._next=function(){var cur=0;chips.querySelectorAll('.chip').forEach(function(c,i){if(c.classList.contains('active'))cur=i});chips.querySelectorAll('.chip')[(cur+1)%g.opts.length].click()};
+        g._next=function(){var cl=chips.querySelectorAll('.chip'),cur=0;cl.forEach(function(c,i){if(c.classList.contains('active'))cur=i});cl[(cur+1)%g.opts.length].click()};
         row.appendChild(chips);
 
       }else if(g.type==='stepper'){
@@ -987,7 +988,7 @@ function handlePaste(btn){
         for(var y=0;y<it.types.length;y++){if(it.types[y].indexOf('image/')===0){imgType=it.types[y];break}}
         if(imgType){it.getType(imgType).then(function(blob){scanImage(blob).then(onScanResult).catch(function(){scanFail(btn)})});return}
       }
-      feedback(btn,'err-fb',NF);notify(TOUCH_MSG,false);
+      feedback(btn,'err-fb',NF);
     }).catch(function(){feedback(btn,'err-fb','No Access')});
   }
   if(!navigator.clipboard){feedback(btn,'err-fb','No Access');return}
@@ -1199,6 +1200,7 @@ document.addEventListener('paste',function(e){
 /* Reset */
 function resetAll(btn,groups,input){
   input.value='';if(input.tagName==='TEXTAREA')autoGrow(input);
+  groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
   groups.forEach(function(g){if(g._reset)resetGroup(g)});
   feedback(btn,'rs-fb','Done');
 }

@@ -380,7 +380,8 @@ function scoreWord(w,t,nf){
     return 2;
   }
   if(nf)return 0;
-  for(let qi=0,ti=0,first=-1,last=0;ti<t.length&&qi<w.length;ti++){
+  let qi=0,first=-1,last=0;
+  for(let ti=0;ti<t.length&&qi<w.length;ti++){
     if(t[ti]===w[qi]){if(first<0)first=ti;last=ti;qi++}
   }
   if(qi<w.length)return 0;

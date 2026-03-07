@@ -120,7 +120,7 @@ body{
 .vcf-link a:hover{background:#3A3A3C;color:#fff}
 
 /* Project Card */
-.pcard,.cve,.ucard{scroll-margin:8px 0 100px}
+.pcard,.cve,.ucard{scroll-margin-top:60px}
 .pcard{
   display:flex;
   align-items:center;

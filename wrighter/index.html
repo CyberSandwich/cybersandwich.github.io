@@ -134,6 +134,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   themeBtn.addEventListener('click',()=>{
     const cur=document.documentElement.getAttribute('data-theme')||'light';
     const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];
+    cachedLH=0;
     setTheme(next);
   });
   document.addEventListener('visibilitychange',()=>{
@@ -174,10 +175,13 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   const newCounts={w:0,l:0,ns:0};
 
   const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+  function getLineStart(v,s){return v.lastIndexOf('\n',s-1)+1}
+  function getLineEnd(v,s){var i=v.indexOf('\n',s);return i<0?v.length:i}
 
+  var cachedLH=0;
   function editorLineHeight(){
-    const h=parseFloat(getComputedStyle(editor).lineHeight);
-    return h>0?h:34;
+    if(!cachedLH){var s=getComputedStyle(editor);cachedLH=parseFloat(s.lineHeight)||parseFloat(s.fontSize)*1.5}
+    return cachedLH;
   }
 
   function safeGetLocal(key){
@@ -576,7 +580,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const s=editor.selectionStart;
       const v=editor.value;
-      const ls=v.lastIndexOf('\n',s-1)+1;
+      const ls=getLineStart(v,s);
       if(v[ls]===' '&&v[ls+1]===' '){
         editor.value=v.substring(0,ls)+v.substring(ls+2);
         editor.selectionStart=editor.selectionEnd=Math.max(ls,s-2);
@@ -587,7 +591,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     if(event.key==='Enter'){
       const s=editor.selectionStart;
       const v=editor.value;
-      const lineStart=v.lastIndexOf('\n',s-1)+1;
+      const lineStart=getLineStart(v,s);
       const m=v.slice(lineStart,s).match(/^[ \t]*/);
       const indent=m?m[0]:'';
       if(indent){
@@ -618,7 +622,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const ls=v.lastIndexOf('\n',s-1)+1;
+      const ls=getLineStart(v,s);
       const le=v.indexOf('\n',s);
       const lineEnd=le<0?v.length:le+1;
       editor.value=v.substring(0,ls)+v.substring(lineEnd);
@@ -630,10 +634,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const ls=v.lastIndexOf('\n',s-1)+1;
+      const ls=getLineStart(v,s);
       const le=v.indexOf('\n',s);
       if(ls===0)return;
-      const prevLs=v.lastIndexOf('\n',ls-2)+1;
+      const prevLs=getLineStart(v,ls-1);
       const prevLine=v.substring(prevLs,ls);
       const curLine=v.substring(ls,le<0?v.length:le+1);
       const atEnd=le<0;
@@ -647,7 +651,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const ls=v.lastIndexOf('\n',s-1)+1;
+      const ls=getLineStart(v,s);
       const le=v.indexOf('\n',s);
       if(le<0)return;
       const nextLe=v.indexOf('\n',le+1);
@@ -664,11 +668,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const ls=v.lastIndexOf('\n',s-1)+1;
-      const le=v.indexOf('\n',s);
-      const line=v.substring(ls,le<0?v.length:le);
+      const ls=getLineStart(v,s);
+      const le=getLineEnd(v,s);
+      const line=v.substring(ls,le);
       const ins='\n'+line;
-      const pos=le<0?v.length:le;
+      const pos=le;
       editor.value=v.substring(0,pos)+ins+v.substring(pos);
       editor.selectionStart=editor.selectionEnd=s+ins.length;
       onInput();
@@ -678,7 +682,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const ls=v.lastIndexOf('\n',s-1)+1;
+      const ls=getLineStart(v,s);
       const le=v.indexOf('\n',s);
       editor.selectionStart=ls;
       editor.selectionEnd=le<0?v.length:le+1;
@@ -688,8 +692,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const le=v.indexOf('\n',s);
-      const pos=le<0?v.length:le;
+      const pos=getLineEnd(v,s);
       editor.value=v.substring(0,pos)+'\n'+v.substring(pos);
       editor.selectionStart=editor.selectionEnd=pos+1;
       onInput();
@@ -699,7 +702,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       event.preventDefault();
       const v=editor.value;
       const s=editor.selectionStart;
-      const ls=v.lastIndexOf('\n',s-1)+1;
+      const ls=getLineStart(v,s);
       editor.value=v.substring(0,ls)+'\n'+v.substring(ls);
       editor.selectionStart=editor.selectionEnd=ls;
       onInput();
@@ -722,11 +725,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       const v=editor.value;
       const s=editor.selectionStart;
       const e=editor.selectionEnd;
-      const ls=v.lastIndexOf('\n',s-1)+1;
-      const le=v.indexOf('\n',e-1);
-      const block=v.substring(ls,le<0?v.length:le);
+      const ls=getLineStart(v,s);
+      const le=getLineEnd(v,e-1);
+      const block=v.substring(ls,le);
       const indented=block.split('\n').map(l=>'  '+l).join('\n');
-      editor.value=v.substring(0,ls)+indented+v.substring(le<0?v.length:le);
+      editor.value=v.substring(0,ls)+indented+v.substring(le);
       editor.selectionStart=s+2;
       editor.selectionEnd=e+(indented.length-block.length);
       onInput();
@@ -737,13 +740,13 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
       const v=editor.value;
       const s=editor.selectionStart;
       const e=editor.selectionEnd;
-      const ls=v.lastIndexOf('\n',s-1)+1;
-      const le=v.indexOf('\n',e-1);
-      const block=v.substring(ls,le<0?v.length:le);
+      const ls=getLineStart(v,s);
+      const le=getLineEnd(v,e-1);
+      const block=v.substring(ls,le);
       const outdented=block.split('\n').map(l=>l.startsWith('  ')?l.substring(2):l.replace(/^[ \t]/,'')).join('\n');
       const diff=block.length-outdented.length;
       if(!diff)return;
-      editor.value=v.substring(0,ls)+outdented+v.substring(le<0?v.length:le);
+      editor.value=v.substring(0,ls)+outdented+v.substring(le);
       const firstLineDiff=block.split('\n')[0].length-outdented.split('\n')[0].length;
       editor.selectionStart=Math.max(ls,s-firstLineDiff);
       editor.selectionEnd=e-diff;
@@ -846,6 +849,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     paint();
   });
 
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.addEventListener('click',function(e){
+      if(editor.value.trim()&&!confirm('Leave? Unsaved text will be lost.')){e.preventDefault();e.stopImmediatePropagation();}
+    });
+  });
   document.querySelector('.tabs a.active').addEventListener('click',e=>{
     e.preventDefault();
     setText('');

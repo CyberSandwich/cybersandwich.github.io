@@ -115,7 +115,7 @@ body{
 }
 .step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
 .step-btn:active:not(:disabled){transform:scale(.9)}
-.step-btn:disabled{opacity:.3;cursor:default}
+.step-btn:disabled{opacity:.3;cursor:default;pointer-events:none}
 .slbl svg,.id,.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .ic{stroke-width:2.5;display:none}
 .ok{background:#DCFCE7!important}
@@ -277,9 +277,9 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
 <script>
 var THEMES=['light','sepia','dark'],THEME_COLORS={light:'#FAFAFA',dark:'#1C1C1E',sepia:'#F5EDDA'};
 var THEME_ICONS={
-  sepia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>',
-  dark:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/></svg>',
-  light:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+  sepia:'<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>',
+  dark:'<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/></svg>',
+  light:'<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
 };
 function _curTheme(){return document.documentElement.getAttribute('data-theme')||'light'}
 function _setThemeIcon(next){var b=document.getElementById('theme-btn');b.replaceChildren();var d=document.createElement('template');d.innerHTML=THEME_ICONS[next];b.appendChild(d.content)}
@@ -309,16 +309,16 @@ var azS={ec:0,sizeIdx:16,marginIdx:4,style:0,fmt:0,exactSz:0};
 
 /* Icons */
 var IC={
-  shield:'<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-  maximize:'<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7M3 21l7-7"/></svg>',
-  crop:'<svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>',
-  sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
-  moon:'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
-  clear:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>',
-  png:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
-  svg:'<svg viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"/></svg>',
-  jpeg:'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
-  reset:'<svg viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>'
+  shield:'<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  maximize:'<svg aria-hidden="true" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7M3 21l7-7"/></svg>',
+  crop:'<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>',
+  sun:'<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+  moon:'<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+  clear:'<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>',
+  png:'<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
+  svg:'<svg aria-hidden="true" viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"/></svg>',
+  jpeg:'<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  reset:'<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>'
 };
 var ACT_SVG={
   paste:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
@@ -360,14 +360,12 @@ var azIn=$('azIn'),azC=$('azC'),azPv=$('azPv');
 
 /* Utilities */
 var dlA=document.createElement('a');
-var jpgC=document.createElement('canvas');
 var azCtx=azC.getContext('2d');
-var jpgCtx=jpgC.getContext('2d',{alpha:false});
 var azExpC=document.createElement('canvas'),azExpCtx;
 var bcDetAZ;try{bcDetAZ=new BarcodeDetector({formats:['aztec']})}catch(e){bcDetAZ=null}
 
 function azText(){return azIn.value.trim()||'saputra.co.uk'}
-function debounce(fn,ms){var t,last=0;return function(){clearTimeout(t);var now=Date.now();if(now-last>=ms){last=now;requestAnimationFrame(fn)}else{t=setTimeout(function(){last=Date.now();fn()},ms-(now-last))}}}
+function debounce(fn,ms){var t,last=0;return function(){clearTimeout(t);var now=Date.now();if(now-last>=ms){last=now;fn()}else{t=setTimeout(function(){last=Date.now();fn()},ms)}}}
 function autoGrow(el){requestAnimationFrame(function(){el.style.height='auto';var h=el.scrollHeight;el.style.height=h+'px';el.classList.toggle('scroll',h>=140)})}
 function pvPop(el){el.style.animation='none';el.offsetHeight;el.style.animation='pvPop .2s cubic-bezier(.34,1.56,.64,1)'}
 
@@ -720,7 +718,7 @@ function dlName(fallback){
 function dlBlob(blob,name,btn){
   var url=URL.createObjectURL(blob);
   dlA.download=name;dlA.href=url;dlA.click();
-  setTimeout(function(){URL.revokeObjectURL(url)},1e4);
+  setTimeout(function(){URL.revokeObjectURL(url)},6e4);
   feedback(btn,'dl-fb','Downloaded');
 }
 
@@ -728,6 +726,7 @@ function downloadExport(canvas,svgStr,fmt,name,btn){
   if(fmt===1&&svgStr){
     dlBlob(new Blob([svgStr],{type:'image/svg+xml'}),name+'.svg',btn);
   }else if(fmt===2&&canvas){
+    var jpgC=document.createElement('canvas'),jpgCtx=jpgC.getContext('2d',{alpha:false});
     jpgC.width=canvas.width;jpgC.height=canvas.height;
     jpgCtx.fillStyle='#FFFFFF';jpgCtx.fillRect(0,0,jpgC.width,jpgC.height);
     jpgCtx.drawImage(canvas,0,0);
@@ -771,8 +770,6 @@ function handlePaste(btn){
   }).catch(tryImages);
 }
 
-var scanC=document.createElement('canvas');
-var scanCtx=scanC.getContext('2d',{willReadFrequently:true});
 function decodeImg(img){
   if(!img||!img.width||!img.height)return Promise.resolve(null);
   if(bcDetAZ)return bcDetAZ.detect(img).then(function(r){return r.length>0?r[0]:null}).catch(function(){return null});
