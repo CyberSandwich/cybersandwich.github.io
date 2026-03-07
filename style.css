@@ -469,7 +469,7 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
   display:flex;flex-direction:column;gap:10px;
   transition:transform .15s cubic-bezier(.2,.9,.3,1),opacity .15s;
   opacity:0;
-  contain:layout style paint
+  contain:layout style
 }
 .cmd-overlay.open .cmd-palette{transform:translateX(-50%) scale(1);opacity:1}
 .cmd-input-wrap{position:relative}
