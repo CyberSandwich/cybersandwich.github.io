@@ -132,7 +132,8 @@ body{
   text-decoration:none;
   color:var(--t1);
   transition:box-shadow .15s,transform .1s;
-  margin-bottom:14px
+  margin-bottom:14px;
+  contain:content
 }
 .pcard:hover,.ucard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
 .pcard:active,.ucard:active{transform:translateY(-1px) scale(.985)}
@@ -161,7 +162,8 @@ body{
   background:var(--card);
   border-radius:20px;
   box-shadow:var(--shadow);
-  margin-bottom:14px
+  margin-bottom:14px;
+  contain:content
 }
 .cve .co{font-size:1rem;font-weight:700;color:var(--t1);letter-spacing:-.01em}
 .cve .cr{font-size:.875rem;color:var(--t2);margin-top:2px}
@@ -215,7 +217,8 @@ body{
   margin-bottom:14px;
   text-decoration:none;
   color:var(--t1);
-  transition:box-shadow .15s,transform .1s
+  transition:box-shadow .15s,transform .1s;
+  contain:content
 }
 /* hover/active shared with .pcard above */
 .ucard .ut{font-size:1.0625rem;font-weight:600;color:var(--t1);margin-bottom:4px}
@@ -226,7 +229,8 @@ body{
   border-radius:18px;
   box-shadow:var(--shadow);
   margin-bottom:12px;
-  animation:fadeIn .25s ease
+  animation:fadeIn .25s ease;
+  contain:content
 }
 .pcontent>:last-child{margin-bottom:0}
 .pcontent h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
@@ -277,7 +281,7 @@ body{
 .search:focus{border-color:var(--t4);box-shadow:0 0 0 4px rgba(0,0,0,.04)}
 .search::placeholder{color:var(--t4)}
 .search-wrap{display:none;position:relative;margin-bottom:20px}
-.search-x{
+.search-x,.cmd-x{
   display:none;
   position:absolute;
   right:14px;
@@ -295,8 +299,8 @@ body{
   padding:0;
   transition:background .15s,color .15s
 }
-.search-x:hover{background:var(--bdr);color:var(--t2)}
-.search-x::before,.search-x::after{
+.search-x:hover,.cmd-x:hover{background:var(--bdr);color:var(--t2)}
+.search-x::before,.search-x::after,.cmd-x::before,.cmd-x::after{
   content:'';
   position:absolute;
   width:10px;
@@ -304,8 +308,9 @@ body{
   background:currentColor;
   border-radius:1px
 }
-.search-x::before{transform:rotate(45deg)}
-.search-x::after{transform:rotate(-45deg)}
+.search-x::before,.cmd-x::before{transform:rotate(45deg)}
+.search-x::after,.cmd-x::after{transform:rotate(-45deg)}
+.cmd-x{z-index:1}
 
 /* Empty State */
 .empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:.875rem;background:none;box-shadow:none}
@@ -463,40 +468,11 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
   max-width:480px;
   display:flex;flex-direction:column;gap:10px;
   transition:transform .15s cubic-bezier(.2,.9,.3,1),opacity .15s;
-  opacity:0
+  opacity:0;
+  contain:layout style paint
 }
 .cmd-overlay.open .cmd-palette{transform:translateX(-50%) scale(1);opacity:1}
 .cmd-input-wrap{position:relative}
-.cmd-x{
-  display:none;
-  position:absolute;
-  right:14px;
-  top:50%;
-  transform:translateY(-50%);
-  width:22px;
-  height:22px;
-  border:none;
-  border-radius:50%;
-  background:var(--bg2);
-  color:var(--t3);
-  cursor:pointer;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-  transition:background .15s,color .15s;
-  z-index:1
-}
-.cmd-x:hover{background:var(--bdr);color:var(--t2)}
-.cmd-x::before,.cmd-x::after{
-  content:'';
-  position:absolute;
-  width:10px;
-  height:1.5px;
-  background:currentColor;
-  border-radius:1px
-}
-.cmd-x::before{transform:rotate(45deg)}
-.cmd-x::after{transform:rotate(-45deg)}
 .cmd-input{
   display:block;width:100%;
   padding:14px 42px 14px 44px;
