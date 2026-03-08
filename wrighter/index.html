@@ -142,6 +142,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     let stored;try{stored=localStorage.getItem(THEME_KEY);}catch(_){}
     stored=stored&&THEMES.includes(stored)?stored:'light';
     if(stored!==(document.documentElement.getAttribute('data-theme')||'light'))setTheme(stored);
+    const n=document.querySelector('nav');if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
   });
 
   let rafId=0;

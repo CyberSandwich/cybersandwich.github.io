@@ -157,7 +157,7 @@ function setTheme(t){
 }
 (function(){var t;try{t=localStorage.getItem('theme')}catch(_){}setTheme(t&&THEMES.includes(t)?t:'light')})();
 document.getElementById('theme-btn').addEventListener('click',function(){setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length])});
-document.addEventListener('visibilitychange',function(){if(document.hidden)return;var s=localStorage.getItem('theme')||'light';if(s!==curTheme())setTheme(s)});
+document.addEventListener('visibilitychange',function(){if(document.hidden)return;var s=localStorage.getItem('theme')||'light';if(s!==curTheme())setTheme(s);var n=document.querySelector('nav');if(n){n.style.display='none';n.offsetHeight;n.style.display=''}});
 var $=s=>document.getElementById(s),
 /* reserved/invalid UK 07 area codes */ X=new Set([700,781,797,829,839,911,924,937]),
 el=$('n'),gb=$('g'),gs=$('gl'),cb=$('c'),si=$('ci'),sk=$('ck'),sl=$('cl'),gm,cm,cur;

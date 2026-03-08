@@ -283,7 +283,7 @@ function _setTheme(t){
 }
 (function(){var t;try{t=localStorage.getItem('theme')}catch(_){}_setTheme(t&&THEMES.includes(t)?t:'light')})();
 document.getElementById('theme-btn').addEventListener('click',function(){_setTheme(THEMES[(THEMES.indexOf(_curTheme())+1)%THEMES.length])});
-document.addEventListener('visibilitychange',function(){if(document.hidden)return;var s=localStorage.getItem('theme')||'light';if(s!==_curTheme())_setTheme(s)});
+document.addEventListener('visibilitychange',function(){if(document.hidden)return;var s=localStorage.getItem('theme')||'light';if(s!==_curTheme())_setTheme(s);var n=document.querySelector('nav');if(n){n.style.display='none';n.offsetHeight;n.style.display=''}});
 
 var $=function(s){return document.getElementById(s)};
 var tm={},toastT,toastFadeT;

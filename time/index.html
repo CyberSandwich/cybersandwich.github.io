@@ -296,6 +296,7 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden)return;
   const stored=localStorage.getItem(THEME_KEY)||'light';
   if(stored!==(document.documentElement.getAttribute('data-theme')||'light'))setTheme(stored);
+  const n=document.querySelector('nav');if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
 });
 const CIRC=565.49,$=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),q=s=>document.querySelector(s),qa=s=>document.querySelectorAll(s);
 const SA='aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"';
