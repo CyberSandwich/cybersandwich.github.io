@@ -502,6 +502,9 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden)return;
   const stored=localStorage.getItem('theme')||'light';
   if(stored!==curTheme())applyTheme(stored);
+  // iOS Safari: force nav repaint after tab switch to restore touch hit-testing
+  const n=document.querySelector('nav');
+  if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
 },{passive:true});
 
 // Command palette
