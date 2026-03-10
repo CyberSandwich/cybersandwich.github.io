@@ -290,8 +290,18 @@
     "category": "Initiatives"
   },
   {
+    "title": "Apple Developer - Expedited Review",
+    "url": "https://developer.apple.com/contact/app-store/?topic=expedite",
+    "category": "Initiatives"
+  },
+  {
     "title": "CS50x 2026 Lectures",
     "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Develop in Swift",
+    "url": "https://developer.apple.com/tutorials/develop-in-swift/",
     "category": "Initiatives"
   },
   {
@@ -373,16 +383,6 @@
     "title": "tmux",
     "url": "https://github.com/tmux/tmux/wiki",
     "category": "Initiatives"
-  },
-  {
-    "title": "Develop in Swift",
-    "url": "https://developer.apple.com/tutorials/develop-in-swift/",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Warwick Residence Hubs",
-    "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs/",
-    "category": "Miscellaneous"
   },
   {
     "title": "Academic Phrasebank",
@@ -490,6 +490,26 @@
     "category": "Academic"
   },
   {
+    "title": "IB3960 Financial Statement Analysis & Security Valuation",
+    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3G40 Law for Entrepreneurs",
+    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3N20 Decision Making in Entrepreneurship",
+    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3N90 Managing People in a Complex World",
+    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
+    "category": "Modules"
+  },
+  {
     "title": "EchoVideo - IB3960 Financial Statement Analysis & Security Valuation",
     "url": "https://echo360.org.uk/section/24b2d570-e52a-4bd5-803b-bccd8644d811/home",
     "category": "Miscellaneous"
@@ -510,6 +530,11 @@
     "category": "Miscellaneous"
   },
   {
+    "title": "Warwick Residence Hubs",
+    "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs/",
+    "category": "Miscellaneous"
+  },
+  {
     "title": "WBS Outstanding Contribution to Pastoral Care Awards 2026",
     "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/pastoral-26/",
     "category": "Miscellaneous"
@@ -518,25 +543,5 @@
     "title": "WBS Outstanding Contribution to Teaching Awards 2026",
     "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/octa-2026/",
     "category": "Miscellaneous"
-  },
-  {
-    "title": "IB3960 Financial Statement Analysis & Security Valuation",
-    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3G40 Law for Entrepreneurs",
-    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3N90 Managing People in a Complex World",
-    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
-    "category": "Modules"
   }
 ]
