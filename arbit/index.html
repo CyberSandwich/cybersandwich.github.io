@@ -37,12 +37,14 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .w{max-width:440px;padding:20px 20px 100px;width:100%}
 .res{background:var(--num-bg);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:14px;min-height:72px;display:flex;align-items:center;justify-content:center;transition:background .3s}
 #r{font:600 clamp(1.4rem,8vw,2.25rem)/1.2 var(--font);text-align:center;color:#fff;word-break:break-word;transition:font-size .15s}
-.mode-row{display:flex;align-items:center;padding:7px 0 7px 20px}
+.mode-row{display:flex;align-items:center;padding:10px 14px 10px 20px}
 .mode-row svg{width:18px;height:18px;color:var(--t4);flex-shrink:0}
 .mode-row span{flex:1;font:500 .9375rem/1 var(--font);color:var(--t2);margin-left:12px}
-.links .toggle-pill{display:inline;width:auto;padding:8px 16px;margin:0 14px 0 0;border-radius:50px;border:1px solid var(--bdr2);font:500 .75rem/1 var(--font);color:var(--t3);background:none;flex-shrink:0;min-width:58px;text-align:center;transition:.2s ease}
+.links .toggle-pill{padding:8px 16px;border-radius:50px;border:1px solid var(--bdr2);font:500 .75rem/1 var(--font);color:var(--t3);background:none;flex-shrink:0;min-width:58px;text-align:center;transition:.2s ease}
 .links .toggle-pill:active{opacity:.7}
-.links .toggle-pill.toggled{background:#DCFCE7;color:#34D399;border-color:#A7F3D0}
+.links .toggle-pill.toggled{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:pop .35s ease}
+.links .toggle-pill.toggled svg{width:14px;height:14px;display:block;margin:0 auto;color:inherit}
+.links .toggle-pill.toggled polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
 .inp{display:flex;gap:8px;margin-bottom:14px}
 .inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
 .inp input:focus{border-color:var(--t4)}
@@ -84,6 +86,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 .fi{animation:fi .25s ease}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(hover:hover){
@@ -101,10 +104,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 <body>
 <div class="w">
   <div class="res" aria-live="polite">
-    <div id="r"></div>
+    <div id="r">-</div>
   </div>
   <div class="inp">
-    <input id="inp" type="text" autocomplete="off">
+    <input id="inp" type="text" autocomplete="off" placeholder="Option 1">
     <button id="add-btn" aria-label="Add Item"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div class="links">
@@ -153,7 +156,7 @@ document.getElementById('theme-btn').addEventListener('click',function(){setThem
 document.addEventListener('visibilitychange',function(){if(document.hidden)return;var s=localStorage.getItem('theme')||'light';if(s!==curTheme())setTheme(s);var n=document.querySelector('nav');if(n){n.style.display='none';n.offsetHeight;n.style.display=''}});
 function $(id){return document.getElementById(id)}
 var items=[],mode=false,picked=null;
-var pickTimer=null,resetTimer=null,copyTimer=null,hiTimer=null;
+var pickTimer=null,resetTimer=null,copyTimer=null,hiTimer=null,modeTimer2=null;
 function load(){try{var r=localStorage.getItem('arbit-items');if(r){var p=JSON.parse(r);if(Array.isArray(p))items=p}var m=localStorage.getItem('arbit-mode');if(m==='true')mode=true}catch(_){}}
 function save(){try{localStorage.setItem('arbit-items',JSON.stringify(items));localStorage.setItem('arbit-mode',mode?'true':'false')}catch(_){}}
 function render(){
@@ -175,6 +178,7 @@ function render(){
     }
   }
   $('pick-btn').disabled=items.length<2;
+  $('inp').placeholder='Option '+(items.length+1);
 }
 function addItem(text){
   var t=text.trim();if(!t)return;
@@ -218,24 +222,40 @@ function doPick(){
     setTimeout(function(){
       var ci=items.indexOf(picked);
       if(ci!==-1){items.splice(ci,1);save();render()}
-      if(items.length===0){$('r').textContent='';sizeResult('');picked=null}
+      if(items.length===0){$('r').textContent='-';sizeResult('-');picked=null}
     },350);
   }
 }
 function doReset(){
-  items=[];mode=false;picked=null;$('r').textContent='';sizeResult('');save();render();updateModeUI();
+  items=[];mode=false;picked=null;$('r').textContent='-';sizeResult('-');save();render();updateModeUI();
   var rb=$('reset-btn'),rl=$('rl');
   if(resetTimer){clearTimeout(resetTimer);rb.classList.remove('rs-fb');rl.textContent='Reset'}
   rl.textContent='Done';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-fb');
   resetTimer=setTimeout(function(){rb.classList.remove('rs-fb');rl.textContent='Reset'},1500);
 }
 var modeTimer=null;
+function mkCheck(){
+  var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');
+  s.setAttribute('stroke-width','2.5');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');
+  var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points','4 12 9 17 20 6');
+  s.appendChild(p);return s;
+}
 function toggleMode(){
   mode=!mode;save();updateModeUI();
   var tb=$('mode-btn');
-  if(modeTimer){clearTimeout(modeTimer);tb.classList.remove('toggled')}
-  tb.classList.remove('toggled');tb.offsetWidth;tb.classList.add('toggled');
-  modeTimer=setTimeout(function(){tb.classList.remove('toggled')},800);
+  if(modeTimer){clearTimeout(modeTimer);clearTimeout(modeTimer2);tb.classList.remove('toggled');tb.textContent='Toggle';tb.style.opacity=''}
+  tb.classList.remove('toggled');tb.offsetWidth;
+  tb.textContent='';tb.appendChild(mkCheck());
+  tb.classList.add('toggled');
+  modeTimer=setTimeout(function(){
+    tb.style.opacity='0';
+    modeTimer2=setTimeout(function(){
+      tb.classList.remove('toggled');
+      tb.textContent='Toggle';
+      tb.style.opacity='';
+    },200);
+  },1500);
 }
 function updateModeUI(){var ik=$('mi-keep'),ir=$('mi-rm'),ml=$('ml');if(mode){ik.style.display='none';ir.style.display='';ml.textContent='Remove on Pick'}else{ik.style.display='';ir.style.display='none';ml.textContent='Keep on Pick'}}
 function doCopy(){
