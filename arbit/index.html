@@ -32,16 +32,17 @@ html[data-theme="sepia"]{
   --tab-bg:rgba(240,232,216,.92);--tab-blur:rgba(245,237,218,.55);--tab-border:rgba(255,255,255,.35);--tab-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);--tab-active:rgba(91,70,54,.8);--tab-active-c:#F5EDDA
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:var(--bg);color:var(--t1);transition:background .3s,color .3s;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:var(--bg);color:var(--t1);transition:background .3s,color .3s;min-height:100vh;min-height:100dvh;display:flex;align-items:flex-start;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .w{max-width:440px;padding:20px 20px 100px;width:100%}
-.res{background:var(--num-bg);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:14px;cursor:pointer;transition:background .3s;position:relative;overflow:hidden}
-#r{font:600 clamp(1.4rem,8vw,2.25rem)/1 var(--font);text-align:center;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .2s}
+.res{background:var(--num-bg);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:14px;cursor:pointer;transition:background .3s;text-align:center}
+#r{font:600 clamp(1.4rem,8vw,2.25rem)/1.2 var(--font);text-align:center;color:#fff;word-break:break-word;transition:font-size .15s}
 .res:active{opacity:.7}
-.res .copy-check{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
-.res .copy-check svg{width:40px;height:40px;color:#34D399}
-.res.copied .copy-check{opacity:1}
-.res.copied #r{opacity:0}
+.res-copy{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:none;color:rgba(255,255,255,.5);font:500 .75rem/1 var(--font);cursor:pointer;transition:color .15s,border-color .15s}
+.res-copy:active{opacity:.7}
+.res-copy svg{width:14px;height:14px}
+.res-copy.copied{color:#34D399;border-color:#34D399}
+.res-copy.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
 .inp{display:flex;gap:8px;margin-bottom:14px}
 .inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
 .inp input::placeholder{color:var(--t4)}
@@ -58,9 +59,6 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .rs-fb{background:#FEF9C3!important;color:#CA8A04!important}
 .rs-fb svg{color:#CA8A04!important;animation:spin .4s ease}
 .rs-fb span{color:#CA8A04}
-.mode-val{margin-left:auto;font:600 .75rem/1 var(--font);padding:4px 10px;border-radius:50px;background:var(--bg2);color:var(--t3);transition:background .15s,color .15s}
-.mode-val.on{background:#DCFCE7;color:#34D399}
-.count{font:500 .75rem/1 var(--font);color:var(--t3);padding:0 4px;margin-bottom:6px}
 .items{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
 .item{display:flex;align-items:center;padding:12px 16px 12px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.3 var(--font);color:var(--t1);word-break:break-word;transition:background .3s}
 .item:last-child{border-bottom:none}
@@ -90,6 +88,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   .links button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
   .inp button:hover{color:var(--t1)}
   .item .del:hover{color:var(--t2);background:var(--bg2)}
+  .res-copy:hover{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.4)}
   .tabs a:hover:not(.active){color:var(--t2)}
   .theme-toggle:hover{color:var(--t1)}
 }
@@ -101,18 +100,17 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 <div class="w">
   <div class="res" id="res-card" aria-live="polite">
     <div id="r">?</div>
-    <div class="copy-check"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></div>
+    <button id="copy-btn" class="res-copy" aria-label="Copy Result"><svg id="cb-i" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="cb-ck" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cb-l">Copy</span></button>
   </div>
   <div class="inp">
-    <input id="inp" type="text" placeholder="Add Item" autocomplete="off">
+    <input id="inp" type="text" autocomplete="off">
     <button id="add-btn" aria-label="Add Item"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div class="links">
     <button id="pick-btn" disabled aria-label="Pick Random"><svg id="pi" width="18" height="18" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><path d="M4 20L21 3"/><polyline points="21 16 21 21 16 21"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg><svg id="pc" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pl">Pick Random</span></button>
-    <button id="mode-btn" aria-label="Toggle Remove on Pick"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Remove on Pick</span><span class="mode-val" id="mode-val">Off</span></button>
+    <button id="mode-btn" aria-label="Toggle Pick Mode"><svg id="mi-keep" width="18" height="18" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><svg id="mi-rm" width="18" height="18" viewBox="0 0 24 24" style="display:none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span id="ml">Keep on Pick</span></button>
     <button id="reset-btn" aria-label="Reset"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rl">Reset</span></button>
   </div>
-  <div class="count" id="count" style="display:none"></div>
   <div class="items" id="items" style="display:none"></div>
 </div>
 <div class="drop-overlay" id="drop-overlay">
@@ -151,12 +149,11 @@ var pickTimer=null,resetTimer=null,copyTimer=null,hiTimer=null;
 function load(){try{var r=localStorage.getItem('arbit-items');if(r){var p=JSON.parse(r);if(Array.isArray(p))items=p}var m=localStorage.getItem('arbit-mode');if(m==='true')mode=true}catch(_){}}
 function save(){try{localStorage.setItem('arbit-items',JSON.stringify(items));localStorage.setItem('arbit-mode',mode?'true':'false')}catch(_){}}
 function render(){
-  var c=$('items'),cl=$('count');
+  var c=$('items');
   c.textContent='';
-  if(items.length===0){c.style.display='none';cl.style.display='none'}
+  if(items.length===0){c.style.display='none'}
   else{
-    c.style.display='';cl.style.display='';
-    cl.textContent=items.length+' Item'+(items.length!==1?'s':'');
+    c.style.display='';
     for(var i=0;i<items.length;i++){
       var row=document.createElement('div');row.className='item';row.setAttribute('data-idx',i);
       var s=document.createElement('span');s.textContent=items[i];
@@ -185,12 +182,19 @@ function addItem(text){
 }
 function addBulk(text){var parts=text.split(/[,\n]/);for(var i=0;i<parts.length;i++){var t=parts[i].trim();if(t)addItem(t)}}
 function removeItem(idx){items.splice(idx,1);save();render()}
+function sizeResult(text){
+  var el=$('r'),len=text.length;
+  if(len>30)el.style.fontSize='clamp(.9rem,4vw,1.25rem)';
+  else if(len>20)el.style.fontSize='clamp(1rem,5vw,1.5rem)';
+  else if(len>12)el.style.fontSize='clamp(1.2rem,6vw,1.75rem)';
+  else el.style.fontSize='';
+}
 function doPick(){
   if(items.length<2)return;
   var arr=new Uint32Array(1);crypto.getRandomValues(arr);
   var idx=arr[0]%items.length;picked=items[idx];
   var rEl=$('r');rEl.classList.remove('fi');rEl.offsetWidth;
-  rEl.textContent=picked;rEl.classList.add('fi');
+  rEl.textContent=picked;sizeResult(picked);rEl.classList.add('fi');
   var row=$('items').querySelector('[data-idx="'+idx+'"]');
   if(hiTimer)clearTimeout(hiTimer);
   var allRows=$('items').querySelectorAll('.item');
@@ -202,30 +206,31 @@ function doPick(){
   pi.style.display='none';pc.style.display='';pl.textContent=picked;
   pb.classList.remove('ok');pb.offsetWidth;pb.classList.add('ok');
   pickTimer=setTimeout(function(){pb.classList.remove('ok');pi.style.display='';pc.style.display='none';pl.textContent='Pick Random'},800);
+  doCopy();
   if(mode){
     setTimeout(function(){
       var ci=items.indexOf(picked);
       if(ci!==-1){items.splice(ci,1);save();render()}
-      if(items.length===0){$('r').textContent='?';picked=null}
+      if(items.length===0){$('r').textContent='?';sizeResult('?');picked=null}
     },350);
   }
 }
 function doReset(){
-  items=[];mode=false;picked=null;$('r').textContent='?';save();render();updateModeUI();
+  items=[];mode=false;picked=null;$('r').textContent='?';sizeResult('?');save();render();updateModeUI();
   var rb=$('reset-btn'),rl=$('rl');
   if(resetTimer){clearTimeout(resetTimer);rb.classList.remove('rs-fb');rl.textContent='Reset'}
   rl.textContent='Done';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-fb');
   resetTimer=setTimeout(function(){rb.classList.remove('rs-fb');rl.textContent='Reset'},1500);
 }
 function toggleMode(){mode=!mode;save();updateModeUI()}
-function updateModeUI(){var mv=$('mode-val');if(mode){mv.textContent='On';mv.classList.add('on')}else{mv.textContent='Off';mv.classList.remove('on')}}
+function updateModeUI(){var ik=$('mi-keep'),ir=$('mi-rm'),ml=$('ml');if(mode){ik.style.display='none';ir.style.display='';ml.textContent='Remove on Pick'}else{ik.style.display='';ir.style.display='none';ml.textContent='Keep on Pick'}}
 function doCopy(){
   if(!picked)return;
-  var rc=$('res-card');
-  if(copyTimer){clearTimeout(copyTimer);rc.classList.remove('copied')}
+  var ci=$('cb-i'),ck=$('cb-ck'),cl=$('cb-l'),btn=$('copy-btn');
+  if(copyTimer){clearTimeout(copyTimer);btn.classList.remove('copied');ci.style.display='';ck.style.display='none';cl.textContent='Copy'}
   navigator.clipboard.writeText(picked).then(function(){
-    rc.classList.add('copied');
-    copyTimer=setTimeout(function(){rc.classList.remove('copied')},800);
+    ci.style.display='none';ck.style.display='';cl.textContent='Copied';btn.classList.add('copied');
+    copyTimer=setTimeout(function(){btn.classList.remove('copied');ci.style.display='';ck.style.display='none';cl.textContent='Copy'},800);
   },function(){});
 }
 $('add-btn').addEventListener('click',function(){
