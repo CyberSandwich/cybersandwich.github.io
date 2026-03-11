@@ -55,7 +55,12 @@ body{
   margin:0 auto 24px;
   text-align:center;
   text-decoration:none;
-  cursor:pointer
+  cursor:pointer;
+  background:none;
+  border:none;
+  padding:0;
+  -webkit-appearance:none;
+  appearance:none
 }
 
 /* Section Title */
