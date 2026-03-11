@@ -214,7 +214,6 @@ function doPick(){
   pi.style.display='none';pc.style.display='';pl.textContent=picked;
   pb.classList.remove('ok');pb.offsetWidth;pb.classList.add('ok');
   pickTimer=setTimeout(function(){pb.classList.remove('ok');pi.style.display='';pc.style.display='none';pl.textContent='Pick Random'},800);
-  doCopy();
   if(mode){
     setTimeout(function(){
       var ci=items.indexOf(picked);
