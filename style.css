@@ -21,6 +21,10 @@ body{
   touch-action:manipulation
 }
 
+/* Skip Link */
+.skip-link{position:absolute;top:-100%;left:50%;transform:translateX(-50%);padding:12px 24px;background:var(--card);border-radius:0 0 12px 12px;box-shadow:var(--shadow);font:500 .875rem/1 var(--font);color:var(--t1);z-index:100;transition:top .2s}
+.skip-link:focus{top:0}
+
 /* Scrollbars */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -94,7 +98,7 @@ body{
 .copy-row:hover a{color:var(--t1)}
 .copy-row a{flex:1;min-width:0;border-bottom:none}
 .copy-row a:hover{background:none}
-.links>.copy-row:last-child,.links>:last-child.copy-row{border-bottom:none}
+.links>.copy-row:last-child{border-bottom:none}
 .copy-btn{
   padding:8px 16px;
   margin-right:14px;
@@ -107,7 +111,7 @@ body{
   flex-shrink:0;
   min-width:58px;
   text-align:center;
-  transition:background .2s ease,color .2s ease,border-color .2s ease,opacity .2s ease
+  transition:.2s ease
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 .copy-btn.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
@@ -137,6 +141,7 @@ body{
 }
 .pcard:hover,.ucard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
 .pcard:active,.ucard:active{transform:translateY(-1px) scale(.985)}
+@media(hover:hover){.pcard,.cve,.ucard{will-change:transform}}
 .pcard .pinf{flex:1;min-width:0}
 .pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pcard .pd{font-size:.8125rem;color:var(--t3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -263,7 +268,7 @@ body{
   margin:12px 0;
   color:var(--t3)
 }
-.pcontent img{max-width:100%;border-radius:12px;margin:12px 0}
+.pcontent img{max-width:100%;height:auto;border-radius:12px;margin:12px 0;aspect-ratio:auto}
 
 /* Search */
 .search{
@@ -431,8 +436,8 @@ html[data-theme="dark"]{
 html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)}
 html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
 html[data-theme="dark"] ::selection{background:rgba(100,181,246,.2)}
-html[data-theme="dark"] .vcf-link a{background:#3A3A3C}
-html[data-theme="dark"] .vcf-link a:hover{background:#48484A}
+html[data-theme="dark"] .vcf-link a{background:#48484A}
+html[data-theme="dark"] .vcf-link a:hover{background:#58585A}
 html[data-theme="dark"] .copy-btn.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
 html[data-theme="dark"] .tabs{background:rgba(44,44,46,.92);border-color:rgba(255,255,255,.06);box-shadow:0 2px 6px rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.18)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
@@ -553,5 +558,5 @@ html[data-theme="dark"] .qr-card{box-shadow:0 8px 40px rgba(0,0,0,.4),0 2px 12px
 /* Reduced Motion */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
-  html{scroll-behavior:auto}
+  html{scroll-behavior:auto!important}
 }
