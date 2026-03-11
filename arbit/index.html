@@ -111,8 +111,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
     <button id="pick-btn" disabled aria-label="Pick Random"><svg id="pi" width="18" height="18" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><path d="M4 20L21 3"/><polyline points="21 16 21 21 16 21"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg><svg id="pc" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pl">Pick Random</span></button>
     <div class="mode-row">
       <svg id="mi-keep" width="18" height="18" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><svg id="mi-rm" width="18" height="18" viewBox="0 0 24 24" style="display:none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-      <span id="ml">Keep on Pick</span>
-      <button id="mode-btn" class="toggle-pill" aria-label="Toggle Remove on Pick">Toggle</button>
+      <span id="ml">Keep Picked</span>
+      <button id="mode-btn" class="toggle-pill" aria-label="Toggle Remove Picked">Toggle</button>
     </div>
   </div>
   <div class="links">
@@ -254,7 +254,7 @@ function toggleMode(){
     },200);
   },1500);
 }
-function updateModeUI(){var ik=$('mi-keep'),ir=$('mi-rm'),ml=$('ml');if(mode){ik.style.display='none';ir.style.display='';ml.textContent='Remove on Pick'}else{ik.style.display='';ir.style.display='none';ml.textContent='Keep on Pick'}}
+function updateModeUI(){var ik=$('mi-keep'),ir=$('mi-rm'),ml=$('ml');if(mode){ik.style.display='none';ir.style.display='';ml.textContent='Remove Picked'}else{ik.style.display='';ir.style.display='none';ml.textContent='Keep Picked'}}
 function doCopy(){
   if(!picked)return;
   var ci=$('cb-i'),ck=$('cb-ck'),cl=$('cb-l'),btn=$('copy-btn');
