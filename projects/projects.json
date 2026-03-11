@@ -18,6 +18,12 @@
     "category": "Web"
   },
   {
+    "title": "Arbit",
+    "subtitle": "Random Picker Tool",
+    "url": "/arbit/",
+    "category": "Web"
+  },
+  {
     "title": "CodeGen",
     "subtitle": "QR Code & Barcode Tool",
     "url": "/codegen/",
