@@ -35,17 +35,17 @@ html[data-theme="sepia"]{
 body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:var(--bg);color:var(--t1);transition:background .3s,color .3s;min-height:100vh;min-height:100dvh;display:flex;align-items:flex-start;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .w{max-width:440px;padding:20px 20px 100px;width:100%}
-.res{background:var(--num-bg);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:14px;cursor:pointer;transition:background .3s;text-align:center}
+.res{background:var(--num-bg);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:14px;min-height:72px;display:flex;align-items:center;justify-content:center;transition:background .3s}
 #r{font:600 clamp(1.4rem,8vw,2.25rem)/1.2 var(--font);text-align:center;color:#fff;word-break:break-word;transition:font-size .15s}
-.res:active{opacity:.7}
-.res-copy{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:none;color:rgba(255,255,255,.5);font:500 .75rem/1 var(--font);cursor:pointer;transition:color .15s,border-color .15s}
-.res-copy:active{opacity:.7}
-.res-copy svg{width:14px;height:14px}
-.res-copy.copied{color:#34D399;border-color:#34D399}
-.res-copy.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.pick-row{display:flex;align-items:center}
+.pick-row button{border-bottom:none}
+.toggle-pill{width:auto;padding:8px 16px;margin-right:14px;border-radius:50px;border:1px solid var(--bdr2);font:500 .75rem/1 var(--font);color:var(--t3);background:none;flex-shrink:0;min-width:58px;text-align:center;transition:.2s ease}
+.toggle-pill:active{opacity:.7}
+.toggle-pill.on{background:#FEE2E2;color:#EF4444;border-color:#FECACA}
+html[data-theme="dark"] .toggle-pill.on{background:rgba(239,68,68,.15);color:#F87171;border-color:rgba(239,68,68,.3)}
+html[data-theme="sepia"] .toggle-pill.on{background:rgba(220,38,38,.08);color:#DC2626;border-color:rgba(220,38,38,.15)}
 .inp{display:flex;gap:8px;margin-bottom:14px}
 .inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
-.inp input::placeholder{color:var(--t4)}
 .inp input:focus{border-color:var(--t4)}
 .inp button{width:44px;height:44px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
 .links{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
@@ -88,7 +88,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
   .links button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
   .inp button:hover{color:var(--t1)}
   .item .del:hover{color:var(--t2);background:var(--bg2)}
-  .res-copy:hover{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.4)}
+  .toggle-pill:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
+  .toggle-pill.on:hover{background:#FECACA;color:#DC2626}
   .tabs a:hover:not(.active){color:var(--t2)}
   .theme-toggle:hover{color:var(--t1)}
 }
@@ -98,17 +99,21 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 </head>
 <body>
 <div class="w">
-  <div class="res" id="res-card" aria-live="polite">
-    <div id="r">?</div>
-    <button id="copy-btn" class="res-copy" aria-label="Copy Result"><svg id="cb-i" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="cb-ck" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cb-l">Copy</span></button>
+  <div class="res" aria-live="polite">
+    <div id="r"></div>
   </div>
   <div class="inp">
     <input id="inp" type="text" autocomplete="off">
     <button id="add-btn" aria-label="Add Item"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div class="links">
-    <button id="pick-btn" disabled aria-label="Pick Random"><svg id="pi" width="18" height="18" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><path d="M4 20L21 3"/><polyline points="21 16 21 21 16 21"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg><svg id="pc" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pl">Pick Random</span></button>
-    <button id="mode-btn" aria-label="Toggle Pick Mode"><svg id="mi-keep" width="18" height="18" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><svg id="mi-rm" width="18" height="18" viewBox="0 0 24 24" style="display:none"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span id="ml">Keep on Pick</span></button>
+    <div class="pick-row">
+      <button id="pick-btn" disabled aria-label="Pick Random"><svg id="pi" width="18" height="18" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><path d="M4 20L21 3"/><polyline points="21 16 21 21 16 21"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg><svg id="pc" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pl">Pick Random</span></button>
+      <button id="mode-btn" class="toggle-pill" aria-label="Toggle Remove on Pick">Toggle</button>
+    </div>
+  </div>
+  <div class="links">
+    <button id="copy-btn" aria-label="Copy Result"><svg id="cb-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="cb-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cb-l">Copy</span></button>
     <button id="reset-btn" aria-label="Reset"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rl">Reset</span></button>
   </div>
   <div class="items" id="items" style="display:none"></div>
@@ -211,26 +216,27 @@ function doPick(){
     setTimeout(function(){
       var ci=items.indexOf(picked);
       if(ci!==-1){items.splice(ci,1);save();render()}
-      if(items.length===0){$('r').textContent='?';sizeResult('?');picked=null}
+      if(items.length===0){$('r').textContent='';sizeResult('');picked=null}
     },350);
   }
 }
 function doReset(){
-  items=[];mode=false;picked=null;$('r').textContent='?';sizeResult('?');save();render();updateModeUI();
+  items=[];mode=false;picked=null;$('r').textContent='';sizeResult('');save();render();updateModeUI();
   var rb=$('reset-btn'),rl=$('rl');
   if(resetTimer){clearTimeout(resetTimer);rb.classList.remove('rs-fb');rl.textContent='Reset'}
   rl.textContent='Done';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-fb');
   resetTimer=setTimeout(function(){rb.classList.remove('rs-fb');rl.textContent='Reset'},1500);
 }
 function toggleMode(){mode=!mode;save();updateModeUI()}
-function updateModeUI(){var ik=$('mi-keep'),ir=$('mi-rm'),ml=$('ml');if(mode){ik.style.display='none';ir.style.display='';ml.textContent='Remove on Pick'}else{ik.style.display='';ir.style.display='none';ml.textContent='Keep on Pick'}}
+function updateModeUI(){var tb=$('mode-btn');if(mode)tb.classList.add('on');else tb.classList.remove('on')}
 function doCopy(){
   if(!picked)return;
   var ci=$('cb-i'),ck=$('cb-ck'),cl=$('cb-l'),btn=$('copy-btn');
-  if(copyTimer){clearTimeout(copyTimer);btn.classList.remove('copied');ci.style.display='';ck.style.display='none';cl.textContent='Copy'}
+  if(copyTimer){clearTimeout(copyTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy'}
   navigator.clipboard.writeText(picked).then(function(){
-    ci.style.display='none';ck.style.display='';cl.textContent='Copied';btn.classList.add('copied');
-    copyTimer=setTimeout(function(){btn.classList.remove('copied');ci.style.display='';ck.style.display='none';cl.textContent='Copy'},800);
+    ci.style.display='none';ck.style.display='';cl.textContent='Copied';
+    btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+    copyTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy'},800);
   },function(){});
 }
 $('add-btn').addEventListener('click',function(){
@@ -246,11 +252,13 @@ $('inp').addEventListener('paste',function(){
 $('pick-btn').addEventListener('click',doPick);
 $('mode-btn').addEventListener('click',toggleMode);
 $('reset-btn').addEventListener('click',doReset);
-$('res-card').addEventListener('click',doCopy);
+$('copy-btn').addEventListener('click',doCopy);
 document.addEventListener('keydown',function(e){
   var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
   if(e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;
   if(e.key===' '||e.key==='Enter'){e.preventDefault();doPick()}
+  else if(e.key==='c'){e.preventDefault();doCopy()}
+  else if(e.key==='p')toggleMode();
   else if(e.key==='r')doReset();
   else if(e.key==='t')setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length]);
   else if(e.key==='1'||e.key==='ArrowLeft')window.location.href='/';
