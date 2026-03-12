@@ -90,6 +90,12 @@
     "category": "Personal"
   },
   {
+    "title": "Facebook",
+    "url": "https://www.facebook.com/",
+    "icon": "users",
+    "category": "Personal"
+  },
+  {
     "title": "Financial Times",
     "url": "https://www.ft.com",
     "icon": "newspaper",
@@ -165,6 +171,12 @@
     "title": "iCloud",
     "url": "https://www.icloud.com",
     "icon": "cloud",
+    "category": "Personal"
+  },
+  {
+    "title": "Instagram",
+    "url": "https://www.instagram.com/",
+    "icon": "camera",
     "category": "Personal"
   },
   {
@@ -252,6 +264,12 @@
     "category": "Personal"
   },
   {
+    "title": "Reddit",
+    "url": "https://www.reddit.com/",
+    "icon": "message",
+    "category": "Personal"
+  },
+  {
     "title": "Smallpdf",
     "url": "https://smallpdf.com/pdf-tools",
     "icon": "file",
@@ -285,6 +303,12 @@
     "title": "TFL Tube Map",
     "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
     "icon": "map",
+    "category": "Personal"
+  },
+  {
+    "title": "TikTok",
+    "url": "https://www.tiktok.com/",
+    "icon": "video",
     "category": "Personal"
   },
   {
@@ -333,6 +357,12 @@
     "title": "What is my IP Address",
     "url": "https://whatismyipaddress.com",
     "icon": "globe",
+    "category": "Personal"
+  },
+  {
+    "title": "X (Twitter)",
+    "url": "https://x.com/",
+    "icon": "message",
     "category": "Personal"
   },
   {
@@ -598,6 +628,90 @@
     "url": "https://my.wbs.ac.uk/-/profile/me/academic-record/",
     "icon": "file",
     "category": "Academic"
+  },
+  {
+    "title": "Bright Network Internships",
+    "url": "https://www.brightnetwork.co.uk/internships/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "e4s",
+    "url": "https://www.e4s.co.uk/search/internship-jobs",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Glassdoor",
+    "url": "https://www.glassdoor.co.in/Job/index.htm",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "GRADCRACKER",
+    "url": "https://www.gradcracker.com/search/all-disciplines/engineering-work-placements-internships",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "HIGHERiN Internships",
+    "url": "https://higherin.com/search-jobs/internships",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Indeed",
+    "url": "https://uk.indeed.com/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Internwise",
+    "url": "https://www.internwise.co.uk/internship-search",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "LinkedIn",
+    "url": "https://www.linkedin.com/feed/",
+    "icon": "users",
+    "category": "Career"
+  },
+  {
+    "title": "milkround",
+    "url": "https://www.milkround.com/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "step",
+    "url": "https://www.step.org.uk/opportunity-search/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "targetjobs Internships",
+    "url": "https://targetjobs.co.uk/internships",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Trackr UK Finance Summer Internships",
+    "url": "https://app.the-trackr.com/uk-finance/summer-internships",
+    "icon": "trending",
+    "category": "Career"
+  },
+  {
+    "title": "Trackr UK Law Training Contracts",
+    "url": "https://app.the-trackr.com/uk-law/training-contracts",
+    "icon": "trending",
+    "category": "Career"
+  },
+  {
+    "title": "Trackr UK Technology Summer Internships",
+    "url": "https://app.the-trackr.com/uk-technology/summer-internships",
+    "icon": "trending",
+    "category": "Career"
   },
   {
     "title": "IB3960 Financial Statement Analysis & Security Valuation",
