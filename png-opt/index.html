@@ -31,18 +31,13 @@ html[data-theme="sepia"]{
   --tab-bg:rgba(240,232,216,.92);--tab-blur:rgba(245,237,218,.55);--tab-border:rgba(255,255,255,.35);--tab-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);--tab-active:rgba(91,70,54,.8);--tab-active-c:#F5EDDA
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:var(--bg);color:var(--t1);transition:background .3s,color .3s;min-height:100vh;min-height:100dvh;display:flex;align-items:flex-start;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:var(--bg);color:var(--t1);transition:background .3s,color .3s;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body.has-files{align-items:flex-start;cursor:default}
 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .w{max-width:440px;padding:20px 20px 100px;width:100%}
-.zone{border:2px dashed var(--bdr);border-radius:20px;padding:48px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:14px}
-.zone:hover,.zone.drag{border-color:var(--t4);background:var(--bg2)}
-.zone svg{color:var(--t4);margin-bottom:12px}
-.zone-t{font:600 1rem/1 var(--font);color:var(--t2);margin-bottom:6px}
-.zone-s{font:400 .8125rem/1 var(--font);color:var(--t3)}
-.zone input{display:none}
-.zone.mini{padding:16px 20px;border-style:solid;border-color:var(--bdr2);background:var(--card);border-radius:20px;box-shadow:var(--shadow)}
-.zone.mini svg{display:none}.zone.mini .zone-t{font:500 .9375rem/1 var(--font);color:var(--t2);margin:0}
-.zone.mini .zone-s{display:none}
+.zone{border:2px dashed var(--bdr);border-radius:20px;padding:48px;text-align:center;transition:border-color .2s,background .2s}
+.zone:hover{border-color:var(--t4);background:var(--bg2)}
+.zone svg{color:var(--t4)}
 .sum{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:20px;margin-bottom:14px;display:none}
 .sum-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
 .sum-count{font:600 .9375rem/1 var(--font);color:var(--t1)}
@@ -89,8 +84,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 @media(hover:hover){
   .links>button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
   .fc-dl:hover{background:var(--bg2);color:var(--t1)}
-  .zone:hover:not(.mini){border-color:var(--t4);background:var(--bg2)}
-  .zone.mini:hover{background:var(--bg2)}
+  .zone:hover{border-color:var(--t4);background:var(--bg2)}
   .tabs a:hover:not(.active){color:var(--t2)}
   .theme-toggle:hover{color:var(--t1)}
 }
@@ -102,10 +96,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 <div class="w">
   <div id="zone" class="zone" role="button" tabindex="0" aria-label="Upload Images">
     <svg width="48" height="48" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
-    <div class="zone-t">Drop Images Here</div>
-    <div class="zone-s">Or Tap to Browse</div>
-    <input id="fin" type="file" accept="image/*" multiple>
   </div>
+  <input id="fin" type="file" accept="image/*" multiple style="display:none">
   <div id="sum" class="sum">
     <div class="sum-top">
       <span id="sum-count" class="sum-count"></span>
@@ -246,7 +238,7 @@ function initOX(){
   }catch(e){console.warn('oxipng init:',e);return false}
 }
 
-var queue=[],processing=false,results=[],notifTimer=null,wasmInited=false;
+var queue=[],processing=false,results=[],notifTimer=null,wasmInited=false,abortGen=0;
 
 function showNotif(msg){
   var el=$('notif');el.textContent=msg;el.classList.add('show');
@@ -332,27 +324,36 @@ function downloadAll(){
 }
 
 async function processFile(file,card){
+  function aborted(){return !card.isConnected}
   updateCard(card,'Decoding...',5);await tick();
+  if(aborted())throw new Error('Cancelled');
   var bmp;
   try{bmp=await createImageBitmap(file)}
   catch(e){throw new Error('Failed to Decode')}
+  if(aborted()){bmp.close();throw new Error('Cancelled')}
   var cw=bmp.width,ch=bmp.height,maxDim=2560;
   if(Math.max(cw,ch)>maxDim){var sc=maxDim/Math.max(cw,ch);cw=Math.round(cw*sc);ch=Math.round(ch*sc)}
   updateCard(card,'Processing...',10);await tick();
+  if(aborted()){bmp.close();throw new Error('Cancelled')}
   var cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
   var ctx=cv.getContext('2d');ctx.drawImage(bmp,0,0,cw,ch);bmp.close();
   var rgba=ctx.getImageData(0,0,cw,ch).data;
   updateCard(card,'Encoding...',20);await tick();
+  if(aborted())throw new Error('Cancelled');
   var canvasBlob=await new Promise(function(r){cv.toBlob(r,'image/png')});
+  if(aborted())throw new Error('Cancelled');
   var canvasPng=new Uint8Array(await canvasBlob.arrayBuffer());
+  if(aborted())throw new Error('Cancelled');
   var bestPng=canvasPng;
   if(iqWasm){
     updateCard(card,'Quantizing...',30);await tick();
+    if(aborted())throw new Error('Cancelled');
     try{var iqPng=iqWasm.quantize(rgba,cw,ch);if(iqPng.length<bestPng.length)bestPng=iqPng}
     catch(e){console.warn('quantize:',e)}
   }
   if(oxWasm){
     updateCard(card,'Optimizing...',70);await tick();
+    if(aborted())throw new Error('Cancelled');
     try{var oxPng=oxWasm.optimise(bestPng);if(oxPng.length<bestPng.length)bestPng=oxPng}
     catch(e){console.warn('oxipng:',e)}
   }
@@ -380,44 +381,45 @@ function enqueue(fileList){
 
 async function drain(){
   processing=true;
+  var gen=abortGen;
   if(!wasmInited){
     wasmInited=true;
     var iq=initIQ(),ox=initOX();
     if(!iq&&!ox)showNotif('Canvas-Only Mode');
   }
-  while(queue.length){
+  while(queue.length&&gen===abortGen){
     var item=queue.shift();
     try{
       var blob=await processFile(item.file,item.card);
+      if(gen!==abortGen)break;
       completeCard(item.card,blob);
       results.push({origSize:item.file.size,blob:blob,outName:item.card._outName});
     }catch(e){
+      if(gen!==abortGen)break;
       errorCard(item.card,e.message||'Processing Failed');
       results.push({origSize:item.file.size,blob:null,outName:''});
     }
     updateSummary();
   }
-  processing=false;
-  updateActions();
+  if(gen===abortGen){processing=false;updateActions()}
 }
 
 function updateActions(){
   var hasFiles=results.length>0||queue.length>0;
   $('acts').style.display=hasFiles?'':'none';
-  var z=$('zone');
-  if(hasFiles){z.className='zone mini';z.querySelector('.zone-t').textContent='Add More Images'}
-  else{z.className='zone';z.querySelector('.zone-t').textContent='Drop Images Here'}
+  $('zone').style.display=hasFiles?'none':'';
+  document.body.classList.toggle('has-files',hasFiles);
   $('dl-all').disabled=!results.some(function(r){return r.blob});
 }
 
 function clearAll(){
-  queue=[];results=[];processing=false;
+  abortGen++;queue=[];results=[];processing=false;
   $('files').textContent='';$('sum').style.display='none';
   updateActions();showNotif('Cleared');
 }
 
 var fin=$('fin');
-$('zone').addEventListener('click',function(){fin.click()});
+document.body.addEventListener('click',function(e){if(!document.body.classList.contains('has-files')&&!e.target.closest('nav'))fin.click()});
 $('zone').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fin.click()}});
 fin.addEventListener('change',function(){if(fin.files.length)enqueue(fin.files);fin.value=''});
 $('dl-all').addEventListener('click',downloadAll);
