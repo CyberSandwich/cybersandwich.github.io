@@ -9,6 +9,9 @@ on:
       body:
         description: 'Post content (Markdown)'
         required: true
+      icon:
+        description: 'Icon name from ICONS map (optional)'
+        required: false
 
 permissions:
   contents: write

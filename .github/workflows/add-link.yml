@@ -21,6 +21,9 @@ on:
           - Modules
           - Community
           - Miscellaneous
+      icon:
+        description: 'Icon name from ICONS map (optional)'
+        required: false
 
 permissions:
   contents: write
@@ -58,6 +61,7 @@ jobs:
           TITLE: ${{ github.event.inputs.title }}
           URL: ${{ github.event.inputs.url }}
           CATEGORY: ${{ github.event.inputs.category }}
+          ICON: ${{ github.event.inputs.icon }}
         run: |
           python3 << 'PYEOF'
           import json, os, sys
@@ -65,6 +69,7 @@ jobs:
           title = os.environ['TITLE'].strip()
           url = os.environ['URL'].strip()
           category = os.environ['CATEGORY'].strip()
+          icon = os.environ.get('ICON', '').strip()
 
           with open('links/links.json') as f:
               data = json.load(f)
@@ -81,7 +86,10 @@ jobs:
                   print(f"::error::Duplicate title in {category}: '{entry['title']}'")
                   sys.exit(1)
 
-          data.append({'title': title, 'url': url, 'category': category})
+          entry = {'title': title, 'url': url, 'category': category}
+          if icon:
+              entry['icon'] = icon
+          data.append(entry)
 
           # Sort alphabetically by title within each category, preserving category order
           categories = ['Personal', 'Career', 'Initiatives', 'Academic', 'Modules', 'Community', 'Miscellaneous']
