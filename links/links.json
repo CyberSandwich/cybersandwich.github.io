@@ -2,566 +2,679 @@
   {
     "title": "Amazon UK",
     "url": "https://www.amazon.co.uk",
+    "icon": "cart",
     "category": "Personal"
   },
   {
     "title": "Amazon UK - Contact Support",
     "url": "https://www.amazon.co.uk/hz/contact-us/foresight/hubgateway",
+    "icon": "cart",
     "category": "Personal"
   },
   {
     "title": "Apple Maps",
     "url": "https://maps.apple.com",
+    "icon": "map",
     "category": "Personal"
   },
   {
     "title": "Apple Security Releases",
     "url": "https://support.apple.com/en-us/100100",
+    "icon": "shield",
     "category": "Personal"
   },
   {
     "title": "ASK4 Device Management",
     "url": "https://myaccount.ask4.com/broadband.php",
+    "icon": "globe",
     "category": "Personal"
   },
   {
     "title": "camelcamelcamel",
     "url": "https://uk.camelcamelcamel.com",
+    "icon": "trending",
     "category": "Personal"
   },
   {
     "title": "ChatGPT",
     "url": "https://chatgpt.com",
+    "icon": "message",
     "category": "Personal"
   },
   {
     "title": "Claude Code (Web)",
     "url": "https://claude.ai/code",
+    "icon": "code",
     "category": "Personal"
   },
   {
     "title": "Claude Status",
     "url": "https://status.claude.com",
+    "icon": "activity",
     "category": "Personal"
   },
   {
     "title": "Claude Usage",
     "url": "https://claude.ai/settings/usage",
+    "icon": "trending",
     "category": "Personal"
   },
   {
     "title": "Cloudflare Registrar",
     "url": "https://www.cloudflare.com/en-gb/products/registrar/",
+    "icon": "cloud",
     "category": "Personal"
   },
   {
     "title": "Cobalt",
     "url": "https://cobalt.tools/",
+    "icon": "download",
     "category": "Personal"
   },
   {
     "title": "Codex (Web)",
     "url": "https://chatgpt.com/codex",
+    "icon": "code",
     "category": "Personal"
   },
   {
     "title": "Departures (Testflight)",
     "url": "https://departures.to/",
+    "icon": "plane",
     "category": "Personal"
   },
   {
     "title": "Financial Times",
     "url": "https://www.ft.com",
+    "icon": "newspaper",
     "category": "Personal"
   },
   {
     "title": "Financial Times (Lex)",
     "url": "https://www.ft.com/lex",
+    "icon": "newspaper",
     "category": "Personal"
   },
   {
     "title": "Gemini",
     "url": "https://gemini.google.com/app",
+    "icon": "message",
     "category": "Personal"
   },
   {
     "title": "GoDaddy",
     "url": "https://www.godaddy.com",
+    "icon": "globe",
     "category": "Personal"
   },
   {
     "title": "Google AI Mode",
     "url": "https://www.google.com/search?udm=50&aep=46&source=25q2-US-SearchSites-Site-CTA",
+    "icon": "message",
     "category": "Personal"
   },
   {
     "title": "Google Docs",
     "url": "https://docs.google.com/document/",
+    "icon": "doc",
     "category": "Personal"
   },
   {
     "title": "Google Forms",
     "url": "https://docs.google.com/forms/",
+    "icon": "clipboard",
     "category": "Personal"
   },
   {
     "title": "Google Maps",
     "url": "https://www.google.com/maps/",
+    "icon": "map",
     "category": "Personal"
   },
   {
     "title": "Google Sheets",
     "url": "https://docs.google.com/spreadsheets/",
+    "icon": "table",
     "category": "Personal"
   },
   {
     "title": "Google Slides",
     "url": "https://docs.google.com/presentation/",
+    "icon": "presentation",
     "category": "Personal"
   },
   {
     "title": "Google Vids",
     "url": "https://docs.google.com/videos/",
+    "icon": "video",
     "category": "Personal"
   },
   {
     "title": "Have I Been Pwned",
     "url": "https://haveibeenpwned.com",
+    "icon": "shield",
     "category": "Personal"
   },
   {
     "title": "iCloud",
     "url": "https://www.icloud.com",
+    "icon": "cloud",
     "category": "Personal"
   },
   {
     "title": "LinkedIn",
     "url": "https://www.linkedin.com",
+    "icon": "users",
     "category": "Personal"
   },
   {
     "title": "Microsoft Excel",
     "url": "https://excel.cloud.microsoft",
+    "icon": "table",
     "category": "Personal"
   },
   {
     "title": "Microsoft Forms",
     "url": "https://forms.cloud.microsoft/Pages/DesignPageV2.aspx?origin=Marketing&culture=en-us&country=us",
+    "icon": "clipboard",
     "category": "Personal"
   },
   {
     "title": "Microsoft Outlook",
     "url": "https://outlook.office.com/mail/",
+    "icon": "mail",
     "category": "Personal"
   },
   {
     "title": "Microsoft PowerPoint",
     "url": "https://powerpoint.cloud.microsoft",
+    "icon": "presentation",
     "category": "Personal"
   },
   {
     "title": "Microsoft Teams",
     "url": "https://teams.microsoft.com/v2/",
+    "icon": "users",
     "category": "Personal"
   },
   {
     "title": "Microsoft Word",
     "url": "https://word.cloud.microsoft",
+    "icon": "doc",
     "category": "Personal"
   },
   {
     "title": "Monkeytype",
     "url": "https://monkeytype.com/",
+    "icon": "keyboard",
     "category": "Personal"
   },
   {
     "title": "Neal Fun",
     "url": "https://neal.fun",
+    "icon": "wand",
     "category": "Personal"
   },
   {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
+    "icon": "pen",
     "category": "Personal"
   },
   {
     "title": "OpenAI Whisper",
     "url": "https://github.com/openai/whisper",
+    "icon": "mic",
     "category": "Personal"
   },
   {
     "title": "Perplexity",
     "url": "https://www.perplexity.ai",
+    "icon": "search",
     "category": "Personal"
   },
   {
     "title": "Pexels",
     "url": "https://www.pexels.com",
+    "icon": "camera",
     "category": "Personal"
   },
   {
     "title": "Photopea",
     "url": "https://www.photopea.com/",
+    "icon": "image",
     "category": "Personal"
   },
   {
     "title": "Smallpdf",
     "url": "https://smallpdf.com/pdf-tools",
+    "icon": "file",
     "category": "Personal"
   },
   {
     "title": "Squarespace Domains",
     "url": "https://account.squarespace.com/domains",
+    "icon": "globe",
     "category": "Personal"
   },
   {
     "title": "Starry Mart",
     "url": "https://starrymart.co.uk",
+    "icon": "cart",
     "category": "Personal"
   },
   {
     "title": "StudentBeans",
     "url": "https://www.studentbeans.com/uk",
+    "icon": "tag",
     "category": "Personal"
   },
   {
     "title": "Tesco Clubcard",
     "url": "https://secure.tesco.com/clubcard/myvouchers",
+    "icon": "tag",
     "category": "Personal"
   },
   {
     "title": "TFL Tube Map",
     "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
+    "icon": "map",
     "category": "Personal"
   },
   {
     "title": "TIME.IS",
     "url": "https://time.is",
+    "icon": "clock",
     "category": "Personal"
   },
   {
     "title": "TinyWow",
     "url": "https://tinywow.com",
+    "icon": "wand",
     "category": "Personal"
   },
   {
     "title": "UK E-Visa",
     "url": "https://view-immigration-status.service.gov.uk/status",
+    "icon": "globe",
     "category": "Personal"
   },
   {
     "title": "UNiDAYS",
     "url": "https://www.myunidays.com/GB/en-GB",
+    "icon": "tag",
     "category": "Personal"
   },
   {
     "title": "VirusTotal",
     "url": "https://www.virustotal.com/gui/home/upload",
+    "icon": "shield",
     "category": "Personal"
   },
   {
     "title": "Wayback Machine",
     "url": "https://archive.org",
+    "icon": "archive",
     "category": "Personal"
   },
   {
     "title": "Webpage Archive",
     "url": "https://archive.ph",
+    "icon": "archive",
     "category": "Personal"
   },
   {
     "title": "What is my IP Address",
     "url": "https://whatismyipaddress.com",
+    "icon": "globe",
     "category": "Personal"
   },
   {
     "title": "YouTube (Subscriptions)",
     "url": "https://www.youtube.com/feed/subscriptions",
+    "icon": "video",
     "category": "Personal"
   },
   {
     "title": "App Store Connect",
     "url": "https://appstoreconnect.apple.com/",
+    "icon": "phone",
     "category": "Initiatives"
   },
   {
     "title": "Apple Certificates, Identifiers & Profiles",
     "url": "https://developer.apple.com/account/resources/identifiers/list",
+    "icon": "shield",
     "category": "Initiatives"
   },
   {
     "title": "Apple Developer - Expedited Review",
     "url": "https://developer.apple.com/contact/app-store/?topic=expedite",
+    "icon": "rocket",
     "category": "Initiatives"
   },
   {
     "title": "CS50x 2026 Lectures",
     "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
+    "icon": "video",
     "category": "Initiatives"
   },
   {
     "title": "Develop in Swift",
     "url": "https://developer.apple.com/tutorials/develop-in-swift/",
+    "icon": "code",
     "category": "Initiatives"
   },
   {
     "title": "Device Mockup",
     "url": "https://device-mockup-generator.garylaw.me/",
+    "icon": "phone",
     "category": "Initiatives"
   },
   {
     "title": "Facebook Ads Manager",
     "url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit/standalone",
+    "icon": "megaphone",
     "category": "Initiatives"
   },
   {
     "title": "Firebase Console",
     "url": "https://console.firebase.google.com",
+    "icon": "flame",
     "category": "Initiatives"
   },
   {
     "title": "Ghostty",
     "url": "https://ghostty.org/",
+    "icon": "terminal",
     "category": "Initiatives"
   },
   {
     "title": "GitHub",
     "url": "https://github.com",
+    "icon": "code",
     "category": "Initiatives"
   },
   {
     "title": "Google Analytics",
     "url": "https://analytics.google.com/",
+    "icon": "trending",
     "category": "Initiatives"
   },
   {
     "title": "Google Cloud Storage Buckets",
     "url": "https://console.cloud.google.com/storage/",
+    "icon": "cloud",
     "category": "Initiatives"
   },
   {
     "title": "Human Interface Guidelines",
     "url": "https://developer.apple.com/design/human-interface-guidelines",
+    "icon": "layout",
     "category": "Initiatives"
   },
   {
     "title": "iTerm2",
     "url": "https://iterm2.com/index.html",
+    "icon": "terminal",
     "category": "Initiatives"
   },
   {
     "title": "Menuva Admin Portal",
     "url": "https://admin.menuva.co.uk",
+    "icon": "utensils",
     "category": "Initiatives"
   },
   {
     "title": "menuva my.wbs Feature",
     "url": "https://my.wbs.ac.uk/-/academic/20778/item/id/1927732/#/",
+    "icon": "newspaper",
     "category": "Initiatives"
   },
   {
     "title": "menuva University of Warwick Feature",
     "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/",
+    "icon": "newspaper",
     "category": "Initiatives"
   },
   {
     "title": "menuva WBS Feature",
     "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/",
+    "icon": "newspaper",
     "category": "Initiatives"
   },
   {
     "title": "Neovim",
     "url": "https://neovim.io",
+    "icon": "code",
     "category": "Initiatives"
   },
   {
     "title": "SF Symbols",
     "url": "https://developer.apple.com/sf-symbols/",
+    "icon": "layout",
     "category": "Initiatives"
   },
   {
     "title": "Startium",
     "url": "https://warwick.startium.co.uk/community",
+    "icon": "rocket",
     "category": "Initiatives"
   },
   {
     "title": "tmux",
     "url": "https://github.com/tmux/tmux/wiki",
+    "icon": "terminal",
     "category": "Initiatives"
   },
   {
     "title": "Academic Phrasebank",
     "url": "https://www.phrasebank.manchester.ac.uk/",
+    "icon": "book",
     "category": "Academic"
   },
   {
     "title": "GradIntelligence",
     "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
+    "icon": "trending",
     "category": "Academic"
   },
   {
     "title": "Lettuce Meet",
     "url": "https://lettucemeet.com",
+    "icon": "calendar",
     "category": "Academic"
   },
   {
     "title": "mini.my.wbs",
     "url": "https://mini-my.wbs.ac.uk",
+    "icon": "school",
     "category": "Academic"
   },
   {
     "title": "my.wbs",
     "url": "https://my.wbs.ac.uk/-/academic/homepage/",
+    "icon": "school",
     "category": "Academic"
   },
   {
     "title": "MyBib",
     "url": "https://www.mybib.com/#/projects/",
+    "icon": "book",
     "category": "Academic"
   },
   {
     "title": "Questionmark Exam Portal",
     "url": "https://ondemand.questionmark.eu/home/610141/assessments",
+    "icon": "clipboard",
     "category": "Academic"
   },
   {
     "title": "QuillBot",
     "url": "https://quillbot.com/grammar-check",
+    "icon": "pen",
     "category": "Academic"
   },
   {
     "title": "Scopus",
     "url": "https://www.scopus.com/search/form.uri?display=basic#basic",
+    "icon": "search",
     "category": "Academic"
   },
   {
     "title": "Tabula",
     "url": "https://tabula.warwick.ac.uk/",
+    "icon": "doc",
     "category": "Academic"
   },
   {
     "title": "University of Warwick Past Papers",
     "url": "https://warwick.ac.uk/services/exampapers/",
+    "icon": "doc",
     "category": "Academic"
   },
   {
     "title": "University of Warwick Room Booking",
     "url": "https://abs.warwick.ac.uk/wrb2526/default.aspx",
+    "icon": "door",
     "category": "Academic"
   },
   {
     "title": "Warwick Alternative Exam Portal",
     "url": "https://altexams.warwick.ac.uk/assessments",
+    "icon": "clipboard",
     "category": "Academic"
   },
   {
     "title": "Warwick e:Vision",
     "url": "https://warwick.ac.uk/evision",
+    "icon": "eye",
     "category": "Academic"
   },
   {
     "title": "Warwick Interactive Map",
     "url": "https://use.mazemap.com/#v=1&config=Warwick&campusid=2188&zlevel=1&center=-1.562515,52.382145&zoom=14.7",
+    "icon": "map",
     "category": "Academic"
   },
   {
     "title": "Warwick Module Search",
     "url": "https://courses.warwick.ac.uk/",
+    "icon": "search",
     "category": "Academic"
   },
   {
     "title": "Warwick Print",
     "url": "https://mobileprint.warwick.ac.uk/",
+    "icon": "printer",
     "category": "Academic"
   },
   {
     "title": "Warwick Printer Credits",
     "url": "https://printercredits.warwick.ac.uk/",
+    "icon": "printer",
     "category": "Academic"
   },
   {
     "title": "WBS 0.002d Room Booking",
     "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002d/?start=05082024&view=week&selectedResource=8a17841a5ec3d40a015ec3fa2bb2027e",
+    "icon": "door",
     "category": "Academic"
   },
   {
     "title": "WBS 0.002e Room Booking",
     "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
+    "icon": "door",
     "category": "Academic"
   },
   {
     "title": "WBS Academic Record",
     "url": "https://my.wbs.ac.uk/-/profile/me/academic-record/",
+    "icon": "file",
     "category": "Academic"
   },
   {
     "title": "IB3960 Financial Statement Analysis & Security Valuation",
     "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
+    "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "IB3G40 Law for Entrepreneurs",
     "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "IB3N20 Decision Making in Entrepreneurship",
     "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
+    "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "IB3N90 Managing People in a Complex World",
     "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
+    "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "Curiositea Allergens",
     "url": "https://allergymenu.app/menu/WSU741",
+    "icon": "alert",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3960 Financial Statement Analysis & Security Valuation",
     "url": "https://echo360.org.uk/section/24b2d570-e52a-4bd5-803b-bccd8644d811/home",
+    "icon": "video",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3G40 Law for Entrepreneurs",
     "url": "https://echo360.org.uk/section/6d900cef-d4b4-4807-bb3d-cfffc1d9897d/home",
+    "icon": "video",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3N20 Decision Making in Entrepreneurship",
     "url": "https://echo360.org.uk/section/1cca2155-aa96-4387-a170-dc9acba06d55/home",
+    "icon": "video",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3N90 Managing People in a Complex World",
     "url": "https://echo360.org.uk/section/c8302b8e-e7d8-4531-be04-048d16a96dea/home",
+    "icon": "video",
     "category": "Miscellaneous"
   },
   {
     "title": "The Dirty Duck Allergens",
     "url": "https://allergymenu.app/menu/WSU051",
+    "icon": "alert",
     "category": "Miscellaneous"
   },
   {
     "title": "The Food Station Allergens",
     "url": "https://allergymenu.app/menu/WSU137",
+    "icon": "alert",
     "category": "Miscellaneous"
   },
   {
     "title": "Warwick Residence Hubs",
     "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs/",
+    "icon": "home",
     "category": "Miscellaneous"
   },
   {
     "title": "WBS Outstanding Contribution to Pastoral Care Awards 2026",
     "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/pastoral-26/",
+    "icon": "award",
     "category": "Miscellaneous"
   },
   {
     "title": "WBS Outstanding Contribution to Teaching Awards 2026",
     "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/octa-2026/",
+    "icon": "award",
     "category": "Miscellaneous"
   }
 ]
