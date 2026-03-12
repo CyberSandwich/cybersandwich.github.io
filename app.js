@@ -160,6 +160,22 @@ const PROJECT_ICONS={
 'Whisp':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><path d="M12 19v3"/></svg>'
 };
 
+// Post icons — reusable named icons for blog posts, safe for innerHTML
+const POST_ICONS={
+'keyboard':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M6 8h2m4 0h2m4 0h2"/><path d="M6 12h12"/><path d="M9 16h6"/></svg>',
+'camera':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
+'image':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>',
+'file':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7z"/><path d="M14 2v4a1 1 0 001 1h3"/><path d="M10 13h4"/><path d="M10 17h4"/></svg>',
+'layers':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/></svg>',
+'post':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>'
+};
+
+// Default fallback icons
+const DEFAULT_PROJECT_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg>';
+
+// Shared icon renderer — all SVGs are hardcoded constants, safe for innerHTML
+function mkIcon(svg){const ic=document.createElement('div');ic.className='picon';ic.innerHTML=svg;return ic}
+
 // Render categorized cards (projects & links)
 function showCards(cfg){
   const el=$(cfg.el);
@@ -184,8 +200,7 @@ function showCards(cfg){
           a.href=mailtoUrl(x.title);
         }else{a.href=x.url;a.target='_blank';a.rel='noopener noreferrer'}
         a.setAttribute('data-q',(x.title+' '+cfg.sub(x)+' '+x.category).toLowerCase());
-        // Icon: cfg.icon returns hardcoded SVG from PROJECT_ICONS — safe for innerHTML
-        if(cfg.icon){const svg=cfg.icon(x);if(svg){const ic=document.createElement('div');ic.className='picon';ic.innerHTML=svg;a.appendChild(ic)}}
+        if(cfg.icon){a.appendChild(mkIcon(cfg.icon(x)))}
         const inf=document.createElement('div');inf.className='pinf';
         const pt=document.createElement('div');pt.className='pt';pt.textContent=x.title;
         const pd=document.createElement('div');pd.className='pd';pd.textContent=cfg.sub(x);
@@ -200,7 +215,7 @@ function showCards(cfg){
   });
 }
 
-function showProjects(){showCards({el:'#plist',data:projects,get:getProjects,cats:projectCategories,si:'#psearch',sub:x=>x.subtitle,icon:x=>PROJECT_ICONS[x.title]})}
+function showProjects(){showCards({el:'#plist',data:projects,get:getProjects,cats:projectCategories,si:'#psearch',sub:x=>x.subtitle,icon:x=>PROJECT_ICONS[x.title]||DEFAULT_PROJECT_ICON})}
 function showLinks(){showCards({el:'#llist',data:links,get:getLinks,cats:linkCategories,si:'#lsearch',sub:x=>cleanUrl(x.url)})}
 
 // Render CV
@@ -291,9 +306,11 @@ function showList(){
       a.className='ucard';
       a.href='/updates/'+x.file.replace('.md','');
       a.setAttribute('data-q',(x.title+' '+x.date).toLowerCase());
+      a.appendChild(mkIcon(POST_ICONS[x.icon]||POST_ICONS['post']));
+      const inf=document.createElement('div');inf.className='uinf';
       const t=document.createElement('div');t.className='ut';t.textContent=x.title;
       const d=document.createElement('div');d.className='ud';d.textContent=fmtDate(x.date);
-      a.appendChild(t);a.appendChild(d);sec.appendChild(a);
+      inf.appendChild(t);inf.appendChild(d);a.appendChild(inf);sec.appendChild(a);
     });
     const si=$('#usearch');
     if(si&&si.value){filterList(si,el);const x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}

@@ -221,7 +221,9 @@ body{
 
 /* Updates */
 .ucard{
-  display:block;
+  display:flex;
+  align-items:center;
+  gap:18px;
   padding:22px 24px;
   background:var(--card);
   border-radius:20px;
@@ -233,7 +235,8 @@ body{
   contain:content
 }
 /* hover/active shared with .pcard above */
-.ucard .ut{font-size:1.0625rem;font-weight:600;color:var(--t1);margin-bottom:4px}
+.uinf{flex:1;min-width:0}
+.ucard .ut{font-size:1.0625rem;font-weight:600;color:var(--t1);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ucard .ud{font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.02em}
 .pcontent{
   padding:16px 20px;
