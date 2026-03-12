@@ -42,6 +42,12 @@
     "category": "Web"
   },
   {
+    "title": "PNG-Opt",
+    "subtitle": "PNG Image Optimizer",
+    "url": "/png-opt/",
+    "category": "Web"
+  },
+  {
     "title": "Wrighter",
     "subtitle": "Minimal Plain Text Editor",
     "url": "/wrighter/",
