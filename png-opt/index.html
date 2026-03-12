@@ -55,7 +55,8 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .fc-fill{height:100%;background:var(--t4);border-radius:4px;transition:width .3s ease;width:0}
 .fc-stage{font:400 .75rem/1 var(--font);color:var(--t3);margin-top:6px}
 .fc-sizes{font:400 .8125rem/1 var(--font);color:var(--t3);margin-top:6px}
-.fc-dl{display:block;width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t2);cursor:pointer;text-align:center;transition:background .2s,color .15s}
+.fc-acts{display:flex;gap:8px;margin-top:10px}
+.fc-acts button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t2);cursor:pointer;text-align:center;transition:background .2s,color .15s}
 .links{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .links>button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s,color .15s}
 .links>button:last-child{border-bottom:none}
@@ -83,7 +84,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(hover:hover){
   .links>button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
-  .fc-dl:hover{background:var(--bg2);color:var(--t1)}
+  .fc-acts button:hover{background:var(--bg2);color:var(--t1)}
   .zone:hover{border-color:var(--t4);background:var(--bg2)}
   .tabs a:hover:not(.active){color:var(--t2)}
   .theme-toggle:hover{color:var(--t1)}
@@ -281,10 +282,13 @@ function completeCard(card,blob){
   var sizes=document.createElement('div');sizes.className='fc-sizes';
   sizes.textContent=fmtSize(origSize)+' \u2192 '+fmtSize(newSize);
   card.appendChild(sizes);
-  var dl=document.createElement('button');dl.className='fc-dl';dl.textContent='Download';
+  var acts=document.createElement('div');acts.className='fc-acts';
+  var dl=document.createElement('button');dl.textContent='Download';
   var outName=card._name.replace(/\.[^.]+$/,'')+'_optimized.png';
   dl.addEventListener('click',function(){downloadBlob(blob,outName)});
-  card.appendChild(dl);
+  var cp=document.createElement('button');cp.textContent='Copy';
+  cp.addEventListener('click',function(){copyBlob(blob,cp)});
+  acts.appendChild(dl);acts.appendChild(cp);card.appendChild(acts);
   card._blob=blob;card._outName=outName;
 }
 
@@ -321,6 +325,41 @@ function downloadAll(){
   var i=0;
   function next(){if(i>=items.length)return;downloadBlob(items[i].blob,items[i].outName);i++;setTimeout(next,200)}
   next();
+}
+
+function copyBlob(blob,btn){
+  if(!navigator.clipboard||!navigator.clipboard.write){showNotif('Clipboard Not Available');return}
+  navigator.clipboard.write([
+    new ClipboardItem({'image/png':blob})
+  ]).then(function(){
+    btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy'},1500);
+  }).catch(function(){showNotif('Copy Failed')});
+}
+
+function copyTopImage(){
+  var cards=$('files').children;
+  for(var i=0;i<cards.length;i++){
+    if(cards[i]._blob){
+      var cp=cards[i].querySelector('.fc-acts button:last-child');
+      if(cp)copyBlob(cards[i]._blob,cp);
+      return;
+    }
+  }
+}
+
+function pasteImage(){
+  if(!navigator.clipboard||!navigator.clipboard.read)return;
+  navigator.clipboard.read().then(function(items){
+    items.forEach(function(item){
+      item.types.forEach(function(type){
+        if(type.startsWith('image/')){
+          item.getType(type).then(function(blob){
+            enqueue([new File([blob],'clipboard.'+type.split('/')[1],{type:type})]);
+          });
+        }
+      });
+    });
+  }).catch(function(){});
 }
 
 async function processFile(file,card){
@@ -444,30 +483,22 @@ document.addEventListener('paste',function(e){
 
 document.addEventListener('keydown',function(e){
   var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
-  if(e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;
+  var mod=e.metaKey||e.ctrlKey;
+  if(mod&&!e.altKey&&!e.shiftKey){
+    if(e.key==='s'){e.preventDefault();downloadAll();return}
+    if(e.key==='c'){e.preventDefault();copyTopImage();return}
+    if(e.key==='v'){e.preventDefault();pasteImage();return}
+    return;
+  }
+  if(e.altKey||e.shiftKey)return;
   if(e.key===' '||e.key==='Enter'){e.preventDefault();fin.click()}
-  else if(e.key==='d'){e.preventDefault();downloadAll()}
-  else if(e.key==='r'){e.preventDefault();clearAll()}
+  else if(e.key==='s'||e.key==='d'){e.preventDefault();downloadAll()}
+  else if(e.key==='c'){e.preventDefault();copyTopImage()}
+  else if(e.key==='v'){e.preventDefault();pasteImage()}
+  else if(e.key==='r'||e.key==='Escape'){e.preventDefault();clearAll()}
   else if(e.key==='t')setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length]);
   else if(e.key==='1'||e.key==='ArrowLeft')window.location.href='/';
   else if(e.key==='2'||e.key==='ArrowRight')window.location.href='/projects';
-  else if(e.key==='v'){
-    e.preventDefault();
-    if(navigator.clipboard&&navigator.clipboard.read){
-      navigator.clipboard.read().then(function(items){
-        items.forEach(function(item){
-          item.types.forEach(function(type){
-            if(type.startsWith('image/')){
-              item.getType(type).then(function(blob){
-                enqueue([new File([blob],'clipboard.'+type.split('/')[1],{type:type})]);
-              });
-            }
-          });
-        });
-      }).catch(function(){});
-    }
-  }
-  else if(e.key==='Escape')hideNotif();
 });
 </script>
 </body>
