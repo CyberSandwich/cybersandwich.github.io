@@ -150,6 +150,8 @@ body{
 .pcard .pinf{flex:1;min-width:0}
 .pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pcard .pd{font-size:.8125rem;color:var(--t3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picon{width:36px;height:36px;border-radius:12px;background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.picon svg{width:18px;height:18px;color:var(--t3)}
 .pcard .arr{color:var(--t4);flex-shrink:0}
 .pcard .arr svg{width:18px;height:18px}
 
