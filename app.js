@@ -138,7 +138,7 @@ const getPosts=makeLoader('/updates/posts.json',d=>{
 });
 
 const projectCategories=['Mobile','Web','Extensions','In Development'];
-const linkCategories=['Modules','Career','Initiatives','Academic','Community','Personal','Miscellaneous'];
+const linkCategories=['Modules','Initiatives','Academic','Career','Community','Personal','Miscellaneous'];
 
 // Chevron SVG for card arrows
 const CHEVRON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
