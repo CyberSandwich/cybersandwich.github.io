@@ -49,6 +49,14 @@ jobs:
           python3 << 'PYEOF'
           import json, os, re, glob
 
+          # Load existing icons to preserve them
+          existing_icons = {}
+          if os.path.exists('updates/posts.json'):
+              with open('updates/posts.json') as f:
+                  for p in json.load(f):
+                      if p.get('icon'):
+                          existing_icons[p['file']] = p['icon']
+
           posts = []
           for filepath in sorted(glob.glob('updates/*.md')):
               basename = os.path.basename(filepath)
@@ -82,16 +90,18 @@ jobs:
               # Word count (excluding frontmatter and headings)
               words = len(re.sub(r'^#+ .+$', '', content_body, flags=re.MULTILINE).split())
 
-              posts.append({
+              entry = {
                   'date': date_val,
                   'title': title_val,
                   'file': basename,
                   'words': words
-              })
+              }
+              if basename in existing_icons:
+                  entry['icon'] = existing_icons[basename]
+              posts.append(entry)
 
-          # Sort by date descending, then title ascending
-          posts.sort(key=lambda x: (-x['date'].replace('-', '').__len__(), x['date']), reverse=True)
-          posts.sort(key=lambda x: x['date'], reverse=True)
+          # Sort: newest date first, then alphabetically by title within same date
+          posts.sort(key=lambda x: (-int(x['date'].replace('-', '')), x['title']))
 
           with open('updates/posts.json', 'w') as f:
               json.dump(posts, f, indent=2)

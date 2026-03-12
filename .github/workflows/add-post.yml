@@ -48,9 +48,10 @@ jobs:
         env:
           TITLE: ${{ github.event.inputs.title }}
           BODY: ${{ github.event.inputs.body }}
+          ICON: ${{ github.event.inputs.icon }}
         run: |
           python3 << 'PYEOF'
-          import os, re, datetime, sys
+          import os, re, datetime, sys, json
 
           title = os.environ['TITLE'].strip()
           body = os.environ['BODY']
@@ -75,6 +76,27 @@ jobs:
 
           word_count = len(body.split())
           print(f"✓ Created {filename} ({word_count} words)")
+
+          # Update posts.json
+          manifest_path = 'updates/posts.json'
+          if os.path.exists(manifest_path):
+              with open(manifest_path) as f:
+                  manifest = json.load(f)
+          else:
+              manifest = []
+
+          entry = {'date': date, 'title': title, 'file': os.path.basename(filename), 'words': word_count}
+          icon = os.environ.get('ICON', '').strip()
+          if icon:
+              entry['icon'] = icon
+          manifest.append(entry)
+
+          # Sort: newest date first, then alphabetically by title within same date
+          manifest.sort(key=lambda x: (-int(x['date'].replace('-', '')), x['title']))
+
+          with open(manifest_path, 'w') as f:
+              json.dump(manifest, f, indent=2)
+              f.write('\n')
           PYEOF
 
       - name: Commit and push

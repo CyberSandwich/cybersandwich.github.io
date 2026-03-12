@@ -86,9 +86,10 @@ jobs:
                   print(f"::error::Duplicate title in {category}: '{entry['title']}'")
                   sys.exit(1)
 
-          entry = {'title': title, 'url': url, 'category': category}
+          entry = {'title': title, 'url': url}
           if icon:
               entry['icon'] = icon
+          entry['category'] = category
           data.append(entry)
 
           # Sort alphabetically by title within each category, preserving category order

@@ -53,8 +53,8 @@ jobs:
             echo "::error::Subtitle must be between 1 and 200 characters"
             exit 1
           fi
-          if [ "$URL" != "#" ] && ! echo "$URL" | grep -qE '^(https?://|mailto:)'; then
-            echo "::error::URL must start with http://, https://, mailto:, or be '#' for stealth"
+          if [ "$URL" != "#" ] && ! echo "$URL" | grep -qE '^(https?://|mailto:|/)'; then
+            echo "::error::URL must start with http://, https://, mailto:, / (relative), or be '#' for stealth"
             exit 1
           fi
 
