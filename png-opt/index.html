@@ -302,20 +302,25 @@ function completeCard(card,blob){
   var pct=Math.round((1-newSize/origSize)*100);
   card._fill.parentNode.remove();card._stage.remove();card._orig.remove();
   var save=document.createElement('span');
-  save.className=pct>=0?'fc-save':'fc-grow';
-  save.textContent=(pct>=0?'-':'+')+Math.abs(pct)+'%';
+  save.className=pct>0?'fc-save':'fc-grow';
+  save.textContent=(pct>0?'-':'+')+Math.abs(pct)+'%';
   card._top.appendChild(save);
   var sizes=document.createElement('div');sizes.className='fc-sizes';
   sizes.textContent=fmtSize(origSize)+' \u2192 '+fmtSize(newSize);
   card.appendChild(sizes);
-  var acts=document.createElement('div');acts.className='fc-acts';
-  var dl=document.createElement('button');dl.textContent='Download';
-  var outName=card._name.replace(/\.[^.]+$/,'')+'_optimized.png';
-  dl.addEventListener('click',function(){downloadBlob(blob,outName)});
-  var cp=document.createElement('button');cp.textContent='Copy';
-  cp.addEventListener('click',function(){copyBlob(blob,cp)});
-  acts.appendChild(dl);acts.appendChild(cp);card.appendChild(acts);
-  card._blob=blob;card._outName=outName;
+  if(pct>0){
+    var acts=document.createElement('div');acts.className='fc-acts';
+    var dl=document.createElement('button');dl.textContent='Download';
+    var outName=card._name.replace(/\.[^.]+$/,'')+'_optimized.png';
+    dl.addEventListener('click',function(){downloadBlob(blob,outName)});
+    var cp=document.createElement('button');cp.textContent='Copy';
+    cp.addEventListener('click',function(){copyBlob(blob,cp)});
+    acts.appendChild(dl);acts.appendChild(cp);card.appendChild(acts);
+    card._blob=blob;card._outName=outName;
+  }else{
+    var note=document.createElement('div');note.className='fc-sizes';
+    note.textContent='Already Optimal';card.appendChild(note);
+  }
 }
 
 function errorCard(card,msg){
@@ -470,7 +475,8 @@ async function drain(){
       var blob=await processFile(item.file,item.card);
       if(gen!==abortGen)break;
       completeCard(item.card,blob);
-      results.push({origSize:item.file.size,blob:blob,outName:item.card._outName});
+      var grew=blob.size>=item.file.size;
+      results.push({origSize:item.file.size,blob:grew?null:blob,outName:grew?'':item.card._outName});
     }catch(e){
       if(gen!==abortGen)break;
       errorCard(item.card,e.message||'Processing Failed');
