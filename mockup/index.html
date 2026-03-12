@@ -212,9 +212,11 @@ renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 sceneEl.appendChild(renderer.domElement);
 
-/* PBR environment for realistic metallic reflections */
+
+/* Subtle environment for metallic reflections — low intensity for drama */
 var pmrem=new THREE.PMREMGenerator(renderer);
 scene.environment=pmrem.fromScene(new RoomEnvironment()).texture;
+scene.environmentIntensity=0.25;
 pmrem.dispose();
 
 var controls=new OrbitControls(camera,renderer.domElement);
@@ -229,19 +231,22 @@ controls.minAzimuthAngle=-MAX_A*DEG;
 controls.maxAzimuthAngle=MAX_A*DEG;
 controls.addEventListener('change',updateAngles);
 
-/* Lighting — 3-point setup matching reference quality */
-scene.add(new THREE.AmbientLight(0xffffff,0.5));
-var keyL=new THREE.DirectionalLight(0xffffff,1.0);keyL.position.set(1,1,2);keyL.castShadow=true;scene.add(keyL);
-var fillL=new THREE.DirectionalLight(0xffffff,0.3);fillL.position.set(-1,0.5,-1);scene.add(fillL);
-var rimL=new THREE.DirectionalLight(0xffffff,0.2);rimL.position.set(0,-1,-1);scene.add(rimL);
+/* Lighting — dramatic 3-point setup */
+scene.add(new THREE.AmbientLight(0xffffff,0.2));
+var keyL=new THREE.DirectionalLight(0xffffff,1.2);keyL.position.set(1,1,2);keyL.castShadow=true;scene.add(keyL);
+var fillL=new THREE.DirectionalLight(0xffffff,0.4);fillL.position.set(-1,0.5,-1);scene.add(fillL);
+var rimL=new THREE.DirectionalLight(0xffffff,0.3);rimL.position.set(0,-1,-1);scene.add(rimL);
 
 /* Screen canvas texture */
 var scrCanvas=document.createElement('canvas');
-var scrS=2;
+var scrS=4;
 scrCanvas.width=PW*scrS;scrCanvas.height=PH*scrS;
 var scrCtx=scrCanvas.getContext('2d');
 var scrTex=new THREE.CanvasTexture(scrCanvas);
 scrTex.colorSpace=THREE.SRGBColorSpace;
+scrTex.minFilter=THREE.LinearFilter;
+scrTex.magFilter=THREE.LinearFilter;
+scrTex.generateMipmaps=false;
 
 function rrPath(ctx,x,y,w,h,r){
 r=Math.min(r,w/2,h/2);
@@ -298,8 +303,12 @@ var mats=Array.isArray(child.material)?child.material:[child.material];
 mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=0.8;m.roughness=0.2;m.side=THREE.DoubleSide;m.needsUpdate=true}})
 }});
 scene.add(gltf.scene);
-/* Screen overlay */
+/* Screen overlay — normalize UVs to 0-1 (ShapeGeometry uses raw coords) */
 var geom=new THREE.ShapeGeometry(rrShape(SCR_W,SCR_H,SCR_CR));
+var uvAttr=geom.attributes.uv;
+for(var i=0;i<uvAttr.count;i++){
+uvAttr.setXY(i,(uvAttr.getX(i)+SCR_W/2)/SCR_W,(uvAttr.getY(i)+SCR_H/2)/SCR_H)}
+uvAttr.needsUpdate=true;
 var mat=new THREE.MeshBasicMaterial({map:scrTex,transparent:true});
 screenMesh=new THREE.Mesh(geom,mat);
 screenMesh.position.set(0,0,SCR_Z+SCR_OFF);
