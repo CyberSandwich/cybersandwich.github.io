@@ -24,6 +24,12 @@
     "category": "Personal"
   },
   {
+    "title": "Claude",
+    "url": "https://claude.ai/",
+    "icon": "message",
+    "category": "Personal"
+  },
+  {
     "title": "ASK4 Device Management",
     "url": "https://myaccount.ask4.com/broadband.php",
     "icon": "globe",
