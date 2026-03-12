@@ -458,7 +458,7 @@ function clearAll(){
 }
 
 var fin=$('fin');
-document.body.addEventListener('click',function(e){if(!document.body.classList.contains('has-files')&&!e.target.closest('nav'))fin.click()});
+document.body.addEventListener('click',function(e){if(!document.body.classList.contains('has-files')&&!e.target.closest('nav,button,a'))fin.click()});
 $('zone').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fin.click()}});
 fin.addEventListener('change',function(){if(fin.files.length)enqueue(fin.files);fin.value=''});
 $('dl-all').addEventListener('click',downloadAll);
