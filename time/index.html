@@ -306,6 +306,7 @@ let alarms=[],aNextId=0;
 let swOn=false,swT0=0,swE=0,swLaps=[],swRaf=null,swLastDisplay='';
 let timers=[],tNextId=0,tArcRaf=null,tFullId=null;
 let audioCtx,sndInt,fired=null,firedTid=null,lastChk='';
+const heroHM=$('heroHM'),heroS=$('heroS'),swMainEl=$('swMain'),swMsEl=$('swMs');
 function save(){localStorage.setItem('clk',JSON.stringify({alarms,aNextId}))}
 function load(){try{const d=JSON.parse(localStorage.getItem('clk'));if(d){alarms=d.alarms||[];aNextId=d.aNextId||0}}catch(e){}}
 function switchTab(name){
@@ -313,6 +314,7 @@ function switchTab(name){
   qa('.tabs button').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   qa('.view').forEach(v=>v.classList.toggle('active',v.id==='v-'+name));
   kbClear();
+  if(name==='clock')tick();
   if(name==='sw'&&swOn)swTick();
 }
 q('.tabs').addEventListener('click',e=>{
@@ -320,9 +322,9 @@ q('.tabs').addEventListener('click',e=>{
   switchTab(b.dataset.tab);
 });
 function tick(){
-  const now=new Date();
-  $('heroHM').textContent=pad(now.getHours())+':'+pad(now.getMinutes());
-  $('heroS').textContent=':'+pad(now.getSeconds());
+  const now=new Date(),hm=pad(now.getHours())+':'+pad(now.getMinutes());
+  if(heroHM.textContent!==hm)heroHM.textContent=hm;
+  heroS.textContent=':'+pad(now.getSeconds());
 }
 function initAlarmTime(){
   const now=new Date();
@@ -404,16 +406,17 @@ function swStop(){
   $('swBtnL').textContent='Reset';$('swBtnL').ariaLabel='Reset stopwatch';
 }
 function swLap(){
-  if(!swOn){swE=0;swLaps=[];swLastDisplay='';$('swMain').textContent='00:00';$('swMs').textContent='.00';$('swBtnL').disabled=true;$('swBtnL').textContent='Lap';$('swBtnL').ariaLabel='Lap';$('lapWrap').style.display='none';return}
+  if(!swOn){swE=0;swLaps=[];swLastDisplay='';swMainEl.textContent='00:00';swMsEl.textContent='.00';$('swBtnL').disabled=true;$('swBtnL').textContent='Lap';$('swBtnL').ariaLabel='Lap';$('lapWrap').style.display='none';return}
   const tot=performance.now()-swT0,prev=swLaps.reduce((s,l)=>s+l,0);
   swLaps.push(tot-prev);renderLaps();
 }
 function decomp(ms){const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);return{h,m,s,cs}}
 function fmtSw(ms){const d=decomp(ms);return(d.h>0?d.h+':'+pad(d.m)+':'+pad(d.s):pad(d.m)+':'+pad(d.s))+'.'+pad(d.cs)}
-function swTick(){
+function swTick(ts){
   if(!swOn)return;
-  var display=fmtSw(performance.now()-swT0);
-  if(display!==swLastDisplay){swLastDisplay=display;var p=display.lastIndexOf('.');$('swMain').textContent=display.slice(0,p);$('swMs').textContent=display.slice(p)}
+  if(!ts)ts=performance.now();
+  var display=fmtSw(ts-swT0);
+  if(display!==swLastDisplay){swLastDisplay=display;var p=display.lastIndexOf('.');swMainEl.textContent=display.slice(0,p);swMsEl.textContent=display.slice(p)}
   swRaf=requestAnimationFrame(swTick);
 }
 function fmtLap(ms){
@@ -622,7 +625,7 @@ document.addEventListener('keydown',e=>{
 });
 $('fireOv').addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDefault();$('fireOv').querySelector('.btn').focus()}});
 load();tick();initAlarmTime();renderAlarms();
-setInterval(()=>{if(document.hidden)return;if($('v-clock').classList.contains('active'))tick();chkAlarms()},1000);
+(function clockLoop(){if(!document.hidden){tick();chkAlarms()}setTimeout(clockLoop,1000-Date.now()%1000)})();
 document.addEventListener('click',()=>initAudio(),{once:true});
 </script>
 </body>
