@@ -445,7 +445,7 @@ function limitLen(id,n){$(id).addEventListener('input',()=>{const v=$(id);if(v.v
 ['afH','afM'].forEach((id,i)=>{$(id).addEventListener('blur',()=>{$(id).value=pad(Math.max(0,Math.min(i?59:23,parseInt($(id).value)||0)))});limitLen(id,2)});
 function arcOff(t){return CIRC*(1-(t.dur>0?t.rem/t.dur:0))}
 function fmtTimer(rem){
-  const ts=Math.floor(rem),h=Math.floor(ts/3600),m=Math.floor((ts%3600)/60),s=ts%60;
+  const ts=Math.ceil(rem),h=Math.floor(ts/3600),m=Math.floor((ts%3600)/60),s=ts%60;
   if(h>0)return h+':'+pad(m)+':'+pad(s);
   if(m>0)return m+':'+pad(s);
   return '0:'+pad(s);
