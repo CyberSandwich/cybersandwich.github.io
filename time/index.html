@@ -304,7 +304,7 @@ const SVG_X='<svg '+SA+'><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6
 const SVG_EXPAND='<svg '+SA+' stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
 let alarms=[],aNextId=0;
 let swOn=false,swT0=0,swE=0,swLaps=[],swRaf=null,swLastDisplay='';
-let timers=[],tNextId=0,tArcRaf=null,tTextTO=null,tFullId=null;
+let timers=[],tNextId=0,tArcRaf=null,tFullId=null;
 let audioCtx,sndInt,fired=null,firedTid=null,lastChk='';
 function save(){localStorage.setItem('clk',JSON.stringify({alarms,aNextId}))}
 function load(){try{const d=JSON.parse(localStorage.getItem('clk'));if(d){alarms=d.alarms||[];aNextId=d.aNextId||0}}catch(e){}}
@@ -463,7 +463,7 @@ function tStartCustom(){
   tClear();tGo(sec);
 }
 function tHasActive(){return timers.some(t=>!t.done&&!t.paused)}
-function tEnsureLoops(){if(!tArcRaf)tArcRaf=requestAnimationFrame(tTickArcs);if(!tTextTO)tTextTO=setTimeout(tTickText,1000)}
+function tEnsureLoops(){if(!tArcRaf)tArcRaf=requestAnimationFrame(tTickArcs)}
 function tTickArcs(){
   tArcRaf=null;
   if(!timers.length)return;
@@ -476,21 +476,10 @@ function tTickArcs(){
   timers.forEach(t=>{
     if(t.done)return;
     const card=$('t'+t.id);
-    if(card)card.querySelector('.tc-arc').style.strokeDashoffset=arcOff(t);
+    if(card){card.querySelector('.tc-arc').style.strokeDashoffset=arcOff(t);const txt=fmtTimer(t.rem),el=card.querySelector('.tc-val');if(el.textContent!==txt)el.textContent=txt}
   });
-  if(tFullId!==null){const t=timers.find(x=>x.id===tFullId);if(t&&!t.done)$('tfArc').style.strokeDashoffset=arcOff(t)}
+  if(tFullId!==null){const t=timers.find(x=>x.id===tFullId);if(t&&!t.done){$('tfArc').style.strokeDashoffset=arcOff(t);const txt=fmtTimer(t.rem);if($('tfVal').textContent!==txt)$('tfVal').textContent=txt}}
   if(any)tArcRaf=requestAnimationFrame(tTickArcs);
-}
-function tTickText(){
-  tTextTO=null;
-  if(!timers.length)return;
-  timers.forEach(t=>{
-    if(t.done)return;
-    const card=$('t'+t.id);
-    if(card)card.querySelector('.tc-val').textContent=fmtTimer(t.rem);
-  });
-  if(tFullId!==null){const t=timers.find(x=>x.id===tFullId);if(t&&!t.done)$('tfVal').textContent=fmtTimer(t.rem)}
-  if(tHasActive())tTextTO=setTimeout(tTickText,1000);
 }
 function tFinish(t){
   t.done=true;t.rem=0;
@@ -520,7 +509,7 @@ function tRemove(id){
   if(tFullId===id)tExitFull();
   timers=timers.filter(t=>t.id!==id);
   renderTimerGrid();checkSound();
-  if(!tHasActive()){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(tTextTO){clearTimeout(tTextTO);tTextTO=null}}
+  if(!tHasActive()){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}}
 }
 function renderTimerGrid(){
   const grid=$('tGrid');
@@ -550,7 +539,7 @@ function updateFullView(){
   $('tfBtns').innerHTML=tBtns(t);
 }
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(tTextTO){clearTimeout(tTextTO);tTextTO=null}if(timers.length){tTickArcs();tTickText()}checkSound()}
+  if(!document.hidden){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(timers.length)tTickArcs();checkSound()}
 });
 var kbIdx=-1,kbCards=[],kbPrev=-1;
 function kbGetCards(){
