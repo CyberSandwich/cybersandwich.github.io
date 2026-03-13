@@ -12,6 +12,12 @@
     "category": "Personal"
   },
   {
+    "title": "Apple Captive Portal",
+    "url": "http://captive.apple.com",
+    "icon": "wifi",
+    "category": "Personal"
+  },
+  {
     "title": "Apple Maps",
     "url": "https://maps.apple.com",
     "icon": "map",
