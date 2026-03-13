@@ -455,9 +455,14 @@ function tBtns(t){
     ?'<button class="btn btn-p" onclick="tRemove('+t.id+')">Dismiss</button>'
     :'<button class="btn btn-s" onclick="tRemove('+t.id+')">Cancel</button><button class="btn btn-p" onclick="tToggle('+t.id+')">'+(t.paused?'Resume':'Pause')+'</button>';
 }
+function tScheduleBg(t){
+  if(t._bgTO)clearTimeout(t._bgTO);
+  if(t.done||t.paused)return;
+  t._bgTO=setTimeout(()=>{t._bgTO=null;if(t.done||t.paused)return;t.rem=Math.max(0,(t.end-performance.now())/1000);if(t.rem<=0)tFinish(t)},t.rem*1000+50);
+}
 function tGo(sec){
-  timers.push({id:++tNextId,dur:sec,rem:sec,end:performance.now()+sec*1000,paused:false,done:false,_card:null,_arc:null,_val:null});
-  renderTimerGrid();tEnsureLoops();tEnterFull(tNextId);
+  const t={id:++tNextId,dur:sec,rem:sec,end:performance.now()+sec*1000,paused:false,done:false,_card:null,_arc:null,_val:null,_bgTO:null};
+  timers.push(t);renderTimerGrid();tEnsureLoops();tScheduleBg(t);tEnterFull(t.id);
 }
 function tClear(){$('cH').value='';$('cM').value='';$('cS').value=''}
 function tStartCustom(){
@@ -484,6 +489,7 @@ function tTickArcs(ts){
 }
 function tFinish(t){
   t.done=true;t.rem=0;
+  if(t._bgTO){clearTimeout(t._bgTO);t._bgTO=null}
   if(t._card){
     t._card.classList.add('done');
     t._val.textContent='0:00';
@@ -499,13 +505,14 @@ function tFinish(t){
 
 function tToggle(id){
   const t=timers.find(x=>x.id===id);if(!t||t.done)return;
-  if(t.paused){t.end=performance.now()+t.rem*1000;t.paused=false;tEnsureLoops()}
-  else{t.paused=true}
+  if(t.paused){t.end=performance.now()+t.rem*1000;t.paused=false;tEnsureLoops();tScheduleBg(t)}
+  else{t.paused=true;if(t._bgTO){clearTimeout(t._bgTO);t._bgTO=null}}
   if(t._card)t._card.querySelector('.tc-btns .btn-p').textContent=t.paused?'Resume':'Pause';
   if(tFullId===id)updateFullView();
 }
 function tRemove(id){
   if(tFullId===id)tExitFull();
+  const rm=timers.find(t=>t.id===id);if(rm&&rm._bgTO){clearTimeout(rm._bgTO);rm._bgTO=null}
   timers=timers.filter(t=>t.id!==id);
   renderTimerGrid();checkSound();
   if(!tHasActive()){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}}
