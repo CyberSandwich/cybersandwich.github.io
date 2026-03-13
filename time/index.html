@@ -442,7 +442,7 @@ function limitLen(id,n){$(id).addEventListener('input',()=>{const v=$(id);if(v.v
 ['afH','afM'].forEach((id,i)=>{$(id).addEventListener('blur',()=>{$(id).value=pad(Math.max(0,Math.min(i?59:23,parseInt($(id).value)||0)))});limitLen(id,2)});
 function arcOff(t){return CIRC*(1-(t.dur>0?t.rem/t.dur:0))}
 function fmtTimer(rem){
-  const ts=Math.ceil(rem),h=Math.floor(ts/3600),m=Math.floor((ts%3600)/60),s=ts%60;
+  const ts=Math.floor(rem),h=Math.floor(ts/3600),m=Math.floor((ts%3600)/60),s=ts%60;
   if(h>0)return h+':'+pad(m)+':'+pad(s);
   if(m>0)return m+':'+pad(s);
   return '0:'+pad(s);
@@ -453,7 +453,7 @@ function tBtns(t){
     :'<button class="btn btn-s" onclick="tRemove('+t.id+')">Cancel</button><button class="btn btn-p" onclick="tToggle('+t.id+')">'+(t.paused?'Resume':'Pause')+'</button>';
 }
 function tGo(sec){
-  timers.push({id:++tNextId,dur:sec,rem:sec,end:Date.now()+sec*1000,paused:false,done:false});
+  timers.push({id:++tNextId,dur:sec,rem:sec,end:performance.now()+sec*1000,paused:false,done:false,_card:null,_arc:null,_val:null});
   renderTimerGrid();tEnsureLoops();tEnterFull(tNextId);
 }
 function tClear(){$('cH').value='';$('cM').value='';$('cS').value=''}
@@ -464,31 +464,28 @@ function tStartCustom(){
 }
 function tHasActive(){return timers.some(t=>!t.done&&!t.paused)}
 function tEnsureLoops(){if(!tArcRaf)tArcRaf=requestAnimationFrame(tTickArcs)}
-function tTickArcs(){
+function tTickArcs(ts){
   tArcRaf=null;
   if(!timers.length)return;
-  const now=Date.now();let any=false;
+  if(!ts)ts=performance.now();
+  let any=false;const inFull=tFullId!==null;
   timers.forEach(t=>{
     if(t.done||t.paused)return;
-    t.rem=Math.max(0,(t.end-now)/1000);
-    if(t.rem<=0)tFinish(t);else any=true;
+    t.rem=Math.max(0,(t.end-ts)/1000);
+    if(t.rem<=0){tFinish(t);return}
+    any=true;
+    if(!inFull&&t._arc){t._arc.style.strokeDashoffset=arcOff(t);const txt=fmtTimer(t.rem);if(t._val.textContent!==txt)t._val.textContent=txt}
+    if(t.id===tFullId){$('tfArc').style.strokeDashoffset=arcOff(t);const txt=fmtTimer(t.rem);if($('tfVal').textContent!==txt)$('tfVal').textContent=txt}
   });
-  timers.forEach(t=>{
-    if(t.done)return;
-    const card=$('t'+t.id);
-    if(card){card.querySelector('.tc-arc').style.strokeDashoffset=arcOff(t);const txt=fmtTimer(t.rem),el=card.querySelector('.tc-val');if(el.textContent!==txt)el.textContent=txt}
-  });
-  if(tFullId!==null){const t=timers.find(x=>x.id===tFullId);if(t&&!t.done){$('tfArc').style.strokeDashoffset=arcOff(t);const txt=fmtTimer(t.rem);if($('tfVal').textContent!==txt)$('tfVal').textContent=txt}}
   if(any)tArcRaf=requestAnimationFrame(tTickArcs);
 }
 function tFinish(t){
   t.done=true;t.rem=0;
-  const card=$('t'+t.id);
-  if(card){
-    card.classList.add('done');
-    card.querySelector('.tc-val').textContent='0:00';
-    card.querySelector('.tc-arc').style.strokeDashoffset=CIRC;
-    card.querySelector('.tc-btns').innerHTML=tBtns(t);
+  if(t._card){
+    t._card.classList.add('done');
+    t._val.textContent='0:00';
+    t._arc.style.strokeDashoffset=CIRC;
+    t._card.querySelector('.tc-btns').innerHTML=tBtns(t);
   }
   if(tFullId===t.id)updateFullView();
   const inFull=tFullId===t.id&&$('v-timer').classList.contains('active');
@@ -499,10 +496,9 @@ function tFinish(t){
 
 function tToggle(id){
   const t=timers.find(x=>x.id===id);if(!t||t.done)return;
-  if(t.paused){t.end=Date.now()+t.rem*1000;t.paused=false;tEnsureLoops()}
+  if(t.paused){t.end=performance.now()+t.rem*1000;t.paused=false;tEnsureLoops()}
   else{t.paused=true}
-  const card=$('t'+id);
-  if(card)card.querySelector('.tc-btns .btn-p').textContent=t.paused?'Resume':'Pause';
+  if(t._card)t._card.querySelector('.tc-btns .btn-p').textContent=t.paused?'Resume':'Pause';
   if(tFullId===id)updateFullView();
 }
 function tRemove(id){
@@ -518,6 +514,7 @@ function renderTimerGrid(){
     const time=fmtTimer(t.rem),off=arcOff(t),dc=t.done?' done':'';
     return '<div class="t-card'+dc+'" id="t'+t.id+'"><button class="t-expand" onclick="tEnterFull('+t.id+')" title="Full screen" aria-label="Expand timer">'+SVG_EXPAND+'</button><div class="tc-ring"><svg aria-hidden="true" viewBox="0 0 200 200"><circle class="tc-track" cx="100" cy="100" r="90" fill="none" stroke="var(--acc)" stroke-width="5"/><circle class="tc-arc" cx="100" cy="100" r="90" fill="none" stroke="var(--acc)" stroke-width="5" stroke-dasharray="'+CIRC+'" stroke-dashoffset="'+off+'" stroke-linecap="round" transform="rotate(-90 100 100)"/></svg><div class="tc-center"><div class="tc-val">'+time+'</div></div></div><div class="tc-btns">'+tBtns(t)+'</div></div>';
   }).join('');
+  timers.forEach(t=>{const c=$('t'+t.id);if(c){t._card=c;t._arc=c.querySelector('.tc-arc');t._val=c.querySelector('.tc-val')}});
 }
 function tEnterFull(id){
   tFullId=id;
@@ -539,7 +536,7 @@ function updateFullView(){
   $('tfBtns').innerHTML=tBtns(t);
 }
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(timers.length)tTickArcs();checkSound()}
+  if(!document.hidden){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(timers.length)tTickArcs(performance.now());checkSound()}
 });
 var kbIdx=-1,kbCards=[],kbPrev=-1;
 function kbGetCards(){
