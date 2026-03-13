@@ -1,5 +1,11 @@
 [
   {
+    "title": "1.1.1.1",
+    "url": "http://1.1.1.1",
+    "icon": "wifi",
+    "category": "Personal"
+  },
+  {
     "title": "Amazon UK",
     "url": "https://www.amazon.co.uk",
     "icon": "cart",
@@ -237,6 +243,12 @@
     "title": "Neal Fun",
     "url": "https://neal.fun",
     "icon": "wand",
+    "category": "Personal"
+  },
+  {
+    "title": "NeverSSL",
+    "url": "http://neverssl.com",
+    "icon": "wifi",
     "category": "Personal"
   },
   {
