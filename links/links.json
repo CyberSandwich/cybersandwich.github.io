@@ -438,6 +438,30 @@
     "category": "Initiatives"
   },
   {
+    "title": "GCP Console",
+    "url": "https://console.cloud.google.com/welcome",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (Credentials)",
+    "url": "https://console.cloud.google.com/apis/credentials",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (IAM)",
+    "url": "https://console.cloud.google.com/iam-admin/iam",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (reCAPTCHA)",
+    "url": "https://console.cloud.google.com/security/recaptcha",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
     "title": "Ghostty",
     "url": "https://ghostty.org/",
     "icon": "terminal",
@@ -486,6 +510,12 @@
     "category": "Initiatives"
   },
   {
+    "title": "Menuva Staging",
+    "url": "https://staging.menuva.co.uk/",
+    "icon": "utensils",
+    "category": "Initiatives"
+  },
+  {
     "title": "menuva University of Warwick Feature",
     "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/",
     "icon": "newspaper",
@@ -501,6 +531,12 @@
     "title": "Neovim",
     "url": "https://neovim.io",
     "icon": "code",
+    "category": "Initiatives"
+  },
+  {
+    "title": "reCAPTCHA Registration",
+    "url": "https://www.google.com/recaptcha/admin/create",
+    "icon": "shield",
     "category": "Initiatives"
   },
   {
