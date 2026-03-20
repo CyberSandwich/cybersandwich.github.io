@@ -24,9 +24,9 @@
     "category": "Web"
   },
   {
-    "title": "JPEG-Opt",
-    "subtitle": "Client-Side JPEG Optimizer",
-    "url": "/jpeg-opt/",
+    "title": "ImageOpt",
+    "subtitle": "JPEG & PNG Image Optimizer",
+    "url": "/imageopt/",
     "category": "Web"
   },
   {
@@ -45,12 +45,6 @@
     "title": "NumGen",
     "subtitle": "Generate Valid UK Phone Numbers",
     "url": "/numgen/",
-    "category": "Web"
-  },
-  {
-    "title": "PNG-Opt",
-    "subtitle": "PNG Image Optimizer",
-    "url": "/png-opt/",
     "category": "Web"
   },
   {

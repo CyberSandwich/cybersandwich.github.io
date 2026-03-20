@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
-<title>JPEG-Opt</title>
+<title>ImageOpt | JPEG</title>
 <style>
 :root{
   --bg:#FAFAFA;--bg2:#F5F5F5;--card:#FFF;
@@ -118,9 +118,10 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:10;paddi
 </div>
 <div id="notif" class="notif"></div>
 <nav>
-<div class="tabs">
+<div class="tabs" aria-label="Optimizer">
 <a href="/">Home</a>
-<a class="active">JPEG-Opt</a>
+<a href="/imageopt/" class="active">JPEG</a>
+<a href="/imageopt/png/">PNG</a>
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
@@ -543,8 +544,8 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='v'){e.preventDefault();pasteImage()}
   else if(e.key==='r'||e.key==='Escape'){e.preventDefault();clearAll()}
   else if(e.key==='t')setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length]);
-  else if(e.key==='1'||e.key==='ArrowLeft')window.location.href='/';
-  else if(e.key==='2'||e.key==='ArrowRight')window.location.href='/projects';
+  else if(e.key==='1')window.location.href='/';
+  else if(e.key==='2'||e.key==='ArrowRight')window.location.href='/imageopt/png/';
 });
 window.addEventListener('unload',function(){if(workerUrl)URL.revokeObjectURL(workerUrl)});
 </script>
