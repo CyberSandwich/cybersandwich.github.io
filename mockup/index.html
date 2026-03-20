@@ -465,27 +465,23 @@ $('sr-bg').querySelector('.slbl').addEventListener('click',function(){setBg(2);s
 $('sr-rx').querySelector('.slbl').addEventListener('click',function(){var a=getAngles();setOrbit(0,a.ry);srowFb($('sr-rx'))});
 $('sr-ry').querySelector('.slbl').addEventListener('click',function(){var a=getAngles();setOrbit(a.rx,0);srowFb($('sr-ry'))});
 
-/* ---- Export (SSAA: render 2x then downsample for smooth edges) ---- */
+/* ---- Export ---- */
 function doExport(cb){
 var w=sceneEl.clientWidth,h=sceneEl.clientHeight;
 var dpr=renderer.getPixelRatio();
-var ow=Math.round(w*dpr*3),oh=Math.round(h*dpr*3);
-renderer.setPixelRatio(1);
-renderer.setSize(ow*2,oh*2,false);
+renderer.setPixelRatio(Math.min(3*dpr,8));
+renderer.setSize(w,h,false);
 var prevBg=scene.background;
 if(BG_CLR[bgM]!=null)scene.background=new THREE.Color(BG_CLR[bgM]);
 else scene.background=null;
 renderer.render(scene,camera);
-var c=document.createElement('canvas');c.width=ow;c.height=oh;
-var ctx=c.getContext('2d');
-ctx.imageSmoothingEnabled=true;
-ctx.imageSmoothingQuality='high';
-ctx.drawImage(renderer.domElement,0,0,ow,oh);
+renderer.domElement.toBlob(function(blob){
 scene.background=prevBg;
 renderer.setPixelRatio(dpr);
 renderer.setSize(w,h);
 render();
-c.toBlob(function(blob){cb(blob)},'image/png')
+cb(blob)
+},'image/png')
 }
 
 cpBtn.addEventListener('click',function(){
