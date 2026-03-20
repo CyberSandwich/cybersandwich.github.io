@@ -278,7 +278,7 @@ function showCards(cfg){
 function catGroups(cats){return function(items){return cats.map(cat=>({label:cat,items:items.filter(x=>x.category===cat).sort((a,b)=>a.title.localeCompare(b.title))}))}}
 
 function showProjects(){showCards({el:'#plist',data:projects,get:getProjects,si:'#psearch',chevron:true,
-  groups:catGroups(projectCategories),href:x=>x.url==='#'?mailtoUrl(x.title):x.url,external:x=>x.url!=='#',
+  groups:catGroups(projectCategories),href:x=>x.url==='#'?mailtoUrl(x.title):x.url,external:x=>x.url!=='#'&&!x.url.startsWith('/'),
   title:x=>x.title,sub:x=>x.subtitle,icon:x=>PROJECT_ICONS[x.title]||DEFAULT_PROJECT_ICON,q:x=>(x.title+' '+x.subtitle+' '+x.category).toLowerCase()})}
 function showLinks(){showCards({el:'#llist',data:links,get:getLinks,si:'#lsearch',chevron:true,
   groups:catGroups(linkCategories),href:x=>x.url,external:()=>true,
