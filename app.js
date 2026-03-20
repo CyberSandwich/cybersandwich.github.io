@@ -244,7 +244,8 @@ function showCards(cfg){
         if(x.url==='#'){
           a.href=mailtoUrl(x.title);
         }else{a.href=x.url;a.target='_blank';a.rel='noopener noreferrer'}
-        a.setAttribute('data-q',(x.title+' '+cfg.sub(x)+' '+x.category).toLowerCase());
+        a.setAttribute('data-q',normC((x.title+' '+cfg.sub(x)+' '+x.category).toLowerCase()));
+        a.setAttribute('data-title',normC(x.title.toLowerCase()));
         if(cfg.icon){a.appendChild(mkIcon(cfg.icon(x)))}
         const inf=document.createElement('div');inf.className='pinf';
         const pt=document.createElement('div');pt.className='pt';pt.textContent=x.title;
@@ -310,7 +311,8 @@ function showCV(){
             card.appendChild(ul);
           }
         }
-        card.setAttribute('data-q',card.textContent.toLowerCase());
+        card.setAttribute('data-q',normC(card.textContent.toLowerCase()));
+        if(e.org)card.setAttribute('data-title',normC(e.org.toLowerCase()));
         sec.appendChild(card);
       });
       el.appendChild(sec);
@@ -350,7 +352,8 @@ function showList(){
       const a=document.createElement('a');
       a.className='ucard';
       a.href='/updates/'+x.file.replace('.md','');
-      a.setAttribute('data-q',(x.title+' '+x.date).toLowerCase());
+      a.setAttribute('data-q',normC((x.title+' '+x.date).toLowerCase()));
+      a.setAttribute('data-title',normC(x.title.toLowerCase()));
       a.appendChild(mkIcon(ICONS[x.icon]||ICONS['post']));
       const inf=document.createElement('div');inf.className='uinf';
       const t=document.createElement('div');t.className='ut';t.textContent=x.title;
@@ -451,28 +454,71 @@ function esc(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Score how well a word matches text (0 = no match)
-// 5 = exact, 4 = prefix, 3 = word-boundary, 2 = substring, 0.5-1.0 = fuzzy (by tightness)
-function scoreWord(w,t,nf){
-  const i=t.indexOf(w);
+// Diacritic normalization + cache
+function norm(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+var _nCache={};
+function normC(s){return _nCache[s]||(_nCache[s]=norm(s))}
+
+// Bounded Damerau-Levenshtein distance (3-row for transpositions)
+function dlDist(a,b,max){
+  var la=a.length,lb=b.length;
+  if(Math.abs(la-lb)>max)return max+1;
+  if(!la)return lb>max?max+1:lb;
+  if(!lb)return la>max?max+1:la;
+  var pp=[],pr=[],cr=[];
+  for(var j=0;j<=lb;j++)pr[j]=j;
+  for(var i=1;i<=la;i++){
+    cr[0]=i;var mn=cr[0];
+    for(var j=1;j<=lb;j++){
+      var cost=a[i-1]===b[j-1]?0:1;
+      cr[j]=Math.min(pr[j]+1,cr[j-1]+1,pr[j-1]+cost);
+      if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1]&&pp.length)
+        cr[j]=Math.min(cr[j],pp[j-2]+cost);
+      if(cr[j]<mn)mn=cr[j];
+    }
+    if(mn>max)return max+1;
+    var t=pp;pp=pr;pr=cr;cr=t.length?t:[];
+  }
+  return pr[lb]>max?max+1:pr[lb];
+}
+
+// 7-tier scoring: exact=10, prefix=8, word-boundary=6, substring=4, edit1=3, edit2=2, fuzzy=0.3-1.5
+function scoreWord(w,t,cvPenalty){
+  var nt=normC(t),nw=norm(w);
+  var i=nt.indexOf(nw);
   if(i!==-1){
-    if(i===0&&t.length===w.length)return 5;
-    if(i===0)return 4;
-    if(t[i-1]===' ')return 3;
-    return 2;
+    if(i===0&&nt.length===nw.length)return 10;
+    if(i===0)return 8+(nw.length>=4?1:0);
+    if(nt[i-1]===' ')return 6+(nw.length>=4?1:0);
+    return 4+(1-i/nt.length);
   }
-  if(nf)return 0;
-  let qi=0,first=-1,last=0;
-  for(let ti=0;ti<t.length&&qi<w.length;ti++){
-    if(t[ti]===w[qi]){if(first<0)first=ti;last=ti;qi++}
+  var d1=dlDist(nw,nt,1);
+  if(d1<=1&&nw.length>=3)return 3+(nw.length>=5?0.5:0);
+  if(nw.length>=5){
+    var wds=nt.split(' ');
+    for(var k=0;k<wds.length;k++){
+      if(dlDist(nw,wds[k],1)<=1)return 3+(nw.length>=5?0.5:0);
+      if(dlDist(nw,wds[k],2)<=2)return 2;
+    }
+    if(dlDist(nw,nt,2)<=2)return 2;
+  }else if(nw.length>=3){
+    var wds=nt.split(' ');
+    for(var k=0;k<wds.length;k++){
+      if(dlDist(nw,wds[k],1)<=1)return 3;
+    }
   }
-  if(qi<w.length)return 0;
-  return 0.5+w.length/(last-first+1)*0.5;
+  var qi=0,first=-1,last=0;
+  for(var ti=0;ti<nt.length&&qi<nw.length;ti++){
+    if(nt[ti]===nw[qi]){if(first<0)first=ti;last=ti;qi++}
+  }
+  if(qi<nw.length)return 0;
+  var f=0.3+nw.length/(last-first+1)*1.2;
+  return cvPenalty?f*0.7:f;
 }
 
 // Generic list filter — scores, sorts, flattens results when searching
 function filterList(input,container){
-  const q=input.value.trim().toLowerCase();
+  const q=norm(input.value.trim().toLowerCase());
   const words=q.split(/\s+/).filter(Boolean);
   const secs=[].slice.call(container.querySelectorAll('.link-sec,.cv-sec'));
   const cards=[].slice.call(container.querySelectorAll('.pcard,.cve,.ucard'));
@@ -494,13 +540,18 @@ function filterList(input,container){
     return;
   }
 
-  // Score each card
+  // Score each card (title weighted 1.5x, CV fuzzy penalized 0.7x)
   const scored=[];
   cards.forEach(c=>{
-    const t=c.getAttribute('data-q')||c.textContent.toLowerCase();
-    const cv=c.classList.contains('cve');
+    const t=c.getAttribute('data-q')||normC(c.textContent.toLowerCase());
+    const tl=c.getAttribute('data-title');
+    const isCV=c.classList.contains('cve');
     let total=0;
-    const ok=words.every(w=>{const s=scoreWord(w,t,cv);total+=s;return s>0});
+    const ok=words.every(w=>{
+      var fs=scoreWord(w,t,isCV);
+      if(tl){var ts=scoreWord(w,tl,isCV)*1.5;if(ts>fs)fs=ts}
+      total+=fs;return fs>0;
+    });
     if(ok)scored.push({el:c,score:total});
     else c.style.display='none';
   });
@@ -508,11 +559,9 @@ function filterList(input,container){
   scored.sort((a,b)=>b.score-a.score||(a.el.getAttribute('data-q')||'').localeCompare(b.el.getAttribute('data-q')||''));
   secs.forEach(s=>{s.style.display='none'});
 
-  scored.forEach((s,idx)=>{
-    if(idx<10){
-      s.el.style.display='';
-      container.appendChild(s.el);
-    }else{s.el.style.display='none'}
+  scored.forEach(s=>{
+    s.el.style.display='';
+    container.appendChild(s.el);
   });
 
   // Empty state
@@ -543,7 +592,7 @@ function wireSearch(iid,cid){
   i.addEventListener('input',()=>{
     clearTimeout(timer);
     if(x)x.style.display=i.value?'flex':'none';
-    timer=setTimeout(run,120);
+    timer=setTimeout(run,80);
   });
   i.addEventListener('keydown',e=>{
     if(e.key==='Escape'){clearTimeout(timer);i.value='';run();i.blur()}
@@ -667,7 +716,7 @@ qrOverlay.addEventListener('click',e=>{if(e.target===qrOverlay)closeQR()});
 
 function cmdBuildItems(){
   const items=[];
-  function add(title,sub,type,act){items.push({q:(title+' '+(sub||'')).toLowerCase(),tl:title.toLowerCase(),title:title,type:type,act:act})}
+  function add(title,sub,type,act){items.push({q:normC((title+' '+(sub||'')).toLowerCase()),tl:normC(title.toLowerCase()),title:title,type:type,act:act})}
   validPages.forEach(p=>{
     add(titles[p],'','Page',()=>{history.pushState(null,'',p==='home'?'/':'/'+p);route()});
   });
@@ -700,15 +749,16 @@ function cmdBuildItems(){
 const cmdTypePri={Page:4,Project:3,Link:3,Post:3,CV:2};
 
 function cmdSearch(q){
-  const words=q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const words=norm(q.trim().toLowerCase()).split(/\s+/).filter(Boolean);
   if(!words.length)return [];
   const items=cmdItems||[];
   const scored=[];
   items.forEach(it=>{
     let total=0;
+    const isCV=it.type==='CV';
     const ok=words.every(w=>{
-      const ts=scoreWord(w,it.tl)*1.5;
-      const fs=scoreWord(w,it.q);
+      const ts=scoreWord(w,it.tl,isCV)*1.5;
+      const fs=scoreWord(w,it.q,isCV);
       const s=ts>fs?ts:fs;
       total+=s;return s>0;
     });
