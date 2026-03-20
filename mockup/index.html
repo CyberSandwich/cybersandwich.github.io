@@ -37,9 +37,9 @@ html[data-theme="sepia"]{
 --shadow2:0 2px 6px rgba(91,70,54,.1),0 8px 20px rgba(91,70,54,.1);
 --tab-bg:rgba(237,229,208,.92);--tab-blur:rgba(250,244,230,.45);--tab-border:rgba(91,70,54,.15);--tab-shadow:0 2px 6px rgba(91,70,54,.1),0 8px 20px rgba(91,70,54,.1);--tab-active:rgba(91,70,54,.8);--tab-active-c:#FAF4E6
 }
-body{margin:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;min-height:100dvh;min-height:-webkit-fill-available;font-family:var(--font)}
+body{margin:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;min-height:100dvh;min-height:-webkit-fill-available;font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .w{max-width:440px;width:100%;padding:20px 20px calc(88px + env(safe-area-inset-bottom,0px))}
-.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .pv-card{padding:0}
 .scene{position:relative;height:clamp(420px,62vh,560px);border-radius:20px;transition:background .2s;overflow:hidden;cursor:grab}
 .scene:active{cursor:grabbing}
@@ -47,28 +47,45 @@ body{margin:0;background:var(--bg);display:flex;flex-direction:column;align-item
 .bg-white .scene{background:#fff}
 .bg-black .scene{background:#000}
 .bg-none .scene{background:transparent}
-.actions button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:var(--card);border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s}
+.actions button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s}
 .actions button:last-child{border-bottom:none}
-.actions button svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}}
 .actions button:active{opacity:.7}
-.ok{background:#DCFCE7!important}.ok span{color:#16A34A!important}
-.dl-fb{background:#FEF9C3!important}.dl-fb span{color:#A16207!important}
-.err-fb{background:#FEE2E2!important}.err-fb span{color:#C41E3A!important}
+.slbl svg,.id,.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.ic{stroke-width:2.5;display:none}
+.ok{background:#DCFCE7!important}
+.ps-fb{background:#DBEAFE!important}
+.dl-fb{background:#EDE9FE!important}
+.ok .id,.ps-fb .id,.dl-fb .id{display:none}
+.ok .ic,.ps-fb .ic,.dl-fb .ic{display:inline}
+.ok .ic,.ok span{color:#34D399!important}
+.ps-fb .ic,.ps-fb span{color:#60A5FA!important}
+.dl-fb .ic,.dl-fb span{color:#A78BFA!important}
+.ok polyline,.ps-fb polyline,.dl-fb polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.rs-fb{background:#FEF9C3!important}
+.rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
+.rs-fb span{color:#CA8A04!important}
+.err-fb{background:#FEE2E2!important}
+.err-fb span{color:#C41E3A!important}
+.ld{background:#DBEAFE!important}
+.ld .id{animation:pulse 1s ease-in-out infinite;color:#60A5FA!important}
+.ld span{color:#60A5FA!important}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
+.srow:active{opacity:.7}
 .slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
-.slbl svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
 .chip:active{transform:scale(.95)}
 .chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
-@media(hover:hover){.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}}
-.stepper{display:flex;align-items:center;gap:2px;background:var(--bg2);border-radius:var(--rr);padding:2px}
-.step-btn{width:32px;height:32px;border-radius:50%;border:none;background:none;font:600 1rem/1 var(--font);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.step-btn:active{background:var(--bdr);transform:scale(.92)}
-@media(hover:hover){.step-btn:hover{background:var(--bdr)}}
-.step-val{min-width:40px;text-align:center;font:600 .8125rem/1 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
+.stepper{display:flex;align-items:center;gap:6px}
+.step-btn{width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
+.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
+.step-btn:active:not(:disabled){transform:scale(.9)}
+.step-btn:disabled{opacity:.3;cursor:default}
+.step-val{min-width:36px;text-align:center;font:600 .8125rem/1 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
 .drop-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(250,250,250,.95);font:600 1.25rem/1 var(--font);color:var(--t3);opacity:0;pointer-events:none;transition:opacity .2s}
 .drop-overlay.active{opacity:1;pointer-events:auto}
 .drop-overlay svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -81,16 +98,16 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));displ
 .tabs a,.tabs button:not(.theme-toggle){background:none;border:none;padding:12px clamp(12px,3.5vw,22px);border-radius:var(--rr);font:500 clamp(.8125rem,2.8vw,.875rem)/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
 .tabs button.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tabs a:active,.tabs button:active{opacity:.7}
-@media(hover:hover){.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}}
 .theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px;border:none;border-radius:50%;cursor:pointer;color:var(--t3);background:none;transition:color .15s}
 .theme-toggle:active{opacity:.7}
-@media(hover:hover){.theme-toggle:hover{color:var(--t1)}}
 .notif{z-index:9;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px));animation:notifIn .25s ease;cursor:pointer}
-.notif-pill{display:flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--r);font:500 .875rem/1 var(--font);white-space:nowrap;box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)}
+.notif-pill{display:flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);white-space:nowrap;box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)}
 .notif-pill.nf-ok{background:#DCFCE7;color:#16A34A}
 .notif-pill.nf-err{background:#FEE2E2;color:#C41E3A}
+.notif-pill:active{transform:scale(.95);opacity:.8}
 @keyframes notifIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes notifOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
+@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.srow:hover{background:var(--bg2)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}.theme-toggle:hover{color:var(--t1)}.notif-pill:hover{opacity:.9}}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 button:focus:not(:focus-visible){outline:none}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -105,43 +122,43 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 <body>
 <div class="w">
 <input id="fin" type="file" accept="image/*" style="display:none">
-<div id="pv" class="card pv-card bg-white">
+<div id="pv" class="card pv-card bg-none">
 <div class="scene" id="scene"></div>
 </div>
 <div id="acts" class="card">
 <div class="actions">
-<button id="upBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg><span data-orig="Upload Screenshot">Upload Screenshot</span></button>
-<button id="cpBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-orig="Copy">Copy</span></button>
-<button id="dlBtn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg><span data-orig="Download">Download</span></button>
-<button id="rvBtn"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span data-orig="Reset View">Reset View</span></button>
-<button id="clBtn"><svg viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span data-orig="Clear Screenshot">Clear Screenshot</span></button>
+<button id="upBtn" data-l="Upload Screenshot"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg><span>Upload Screenshot</span></button>
+<button id="psBtn" data-l="Paste"><svg class="id" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
+<button id="cpBtn" data-l="Copy"><svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
+<button id="dlBtn" data-l="Download"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
+<button id="rsBtn" data-l="Reset All"><svg class="id" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span>Reset All</span></button>
 </div>
 </div>
 <div id="s1" class="card">
 <div class="srow">
 <label class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>Background</span></label>
 <div class="schips" id="bg-chips">
-<button class="chip active" data-bg="0">White</button>
+<button class="chip" data-bg="0">White</button>
 <button class="chip" data-bg="1">Black</button>
-<button class="chip" data-bg="2">None</button>
+<button class="chip active" data-bg="2">None</button>
 </div>
 </div>
 </div>
 <div id="s2" class="card">
 <div class="srow">
-<label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg><span>Rotation X</span></label>
+<label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg><span>Rotation X</span></label>
 <div class="stepper">
-<button class="step-btn" id="rx-dec" aria-label="Decrease X Rotation">&minus;</button>
+<button class="step-btn" id="rx-dec" aria-label="Decrease X Rotation"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 <span class="step-val" id="rx-val">0&deg;</span>
-<button class="step-btn" id="rx-inc" aria-label="Increase X Rotation">+</button>
+<button class="step-btn" id="rx-inc" aria-label="Increase X Rotation"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 </div>
 </div>
 <div class="srow">
-<label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><polyline points="21 3 21 9 15 9"/></svg><span>Rotation Y</span></label>
+<label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg><span>Rotation Y</span></label>
 <div class="stepper">
-<button class="step-btn" id="ry-dec" aria-label="Decrease Y Rotation">&minus;</button>
+<button class="step-btn" id="ry-dec" aria-label="Decrease Y Rotation"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 <span class="step-val" id="ry-val">0&deg;</span>
-<button class="step-btn" id="ry-inc" aria-label="Increase Y Rotation">+</button>
+<button class="step-btn" id="ry-inc" aria-label="Increase Y Rotation"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 </div>
 </div>
 <div class="srow">
@@ -189,11 +206,11 @@ var MAX_A=60,STEP=5,DEG=Math.PI/180;
 var BG_CLS=['bg-white','bg-black','bg-none'];
 var BG_CLR=[0xFFFFFF,0x000000,null];
 
-var img=null,blobUrl=null,bgM=0,expS=2;
+var img=null,blobUrl=null,bgM=2,expS=2;
 var modelReady=false,screenMesh=null;
 
 var fin=$('fin'),pv=$('pv'),sceneEl=$('scene');
-var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),rvBtn=$('rvBtn'),clBtn=$('clBtn'),upBtn=$('upBtn');
+var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),psBtn=$('psBtn'),upBtn=$('upBtn'),rsBtn=$('rsBtn');
 var rxV=$('rx-val'),ryV=$('ry-val'),ov=$('drop-ov');
 var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
 var tm={},toastT,toastFadeT;
@@ -203,7 +220,7 @@ var scene=new THREE.Scene();
 var camera=new THREE.PerspectiveCamera(35,1,0.1,100);
 camera.position.set(0,0,CAM_Z);
 
-var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,premultipliedAlpha:false});
+var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.25;
@@ -212,8 +229,7 @@ renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 sceneEl.appendChild(renderer.domElement);
 
-
-/* Subtle environment for metallic reflections — low intensity for drama */
+/* Subtle environment for metallic reflections */
 var pmrem=new THREE.PMREMGenerator(renderer);
 scene.environment=pmrem.fromScene(new RoomEnvironment()).texture;
 scene.environmentIntensity=0.25;
@@ -231,7 +247,7 @@ controls.minAzimuthAngle=-MAX_A*DEG;
 controls.maxAzimuthAngle=MAX_A*DEG;
 controls.addEventListener('change',updateAngles);
 
-/* Lighting — dramatic 3-point setup */
+/* Lighting */
 scene.add(new THREE.AmbientLight(0xffffff,0.2));
 var keyL=new THREE.DirectionalLight(0xffffff,1.2);keyL.position.set(1,1,2);keyL.castShadow=true;scene.add(keyL);
 var fillL=new THREE.DirectionalLight(0xffffff,0.4);fillL.position.set(-1,0.5,-1);scene.add(fillL);
@@ -269,7 +285,6 @@ ctx.clearRect(0,0,PW*s,PH*s);
 if(img){
 ctx.fillStyle='#000';ctx.fillRect(0,0,PW*s,PH*s);
 drawCover(ctx,img,0,0,PW*s,PH*s);
-/* Dynamic Island */
 ctx.fillStyle='#000';
 rrPath(ctx,IX*s,IY*s,IW*s,IH*s,IRX*s);ctx.fill();
 if(screenMesh)screenMesh.visible=true;
@@ -280,7 +295,6 @@ scrTex.needsUpdate=true;
 render()
 }
 
-/* Rounded rectangle shape for screen overlay geometry */
 function rrShape(w,h,r){
 var s=new THREE.Shape();var hw=w/2,hh=h/2;
 r=Math.min(r,hw,hh);
@@ -294,7 +308,6 @@ return s
 
 /* ---- Load iPhone 16 GLB Model ---- */
 new GLTFLoader().load(MODEL_URL,function(gltf){
-/* Boost metallic reflections — skip screen surface (Object_18) */
 gltf.scene.traverse(function(child){
 if(child.isMesh){
 child.castShadow=true;child.receiveShadow=true;
@@ -303,7 +316,6 @@ var mats=Array.isArray(child.material)?child.material:[child.material];
 mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=0.8;m.roughness=0.2;m.side=THREE.DoubleSide;m.needsUpdate=true}})
 }});
 scene.add(gltf.scene);
-/* Screen overlay — normalize UVs to 0-1 (ShapeGeometry uses raw coords) */
 var geom=new THREE.ShapeGeometry(rrShape(SCR_W,SCR_H,SCR_CR));
 var uvAttr=geom.attributes.uv;
 for(var i=0;i<uvAttr.count;i++){
@@ -360,7 +372,7 @@ var LIGHT_IC='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
 var DARK_IC='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/></svg>';
 var SEPIA_IC='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>';
 var TI={light:LIGHT_IC,dark:DARK_IC,sepia:SEPIA_IC};
-var TH=['light','dark','sepia'],TC={light:'#FFFFFF',dark:'#1C1C1E',sepia:'#FAF4E6'};
+var TH=['light','sepia','dark'],TC={light:'#FFFFFF',dark:'#1C1C1E',sepia:'#FAF4E6'};
 function _ct(){return document.documentElement.getAttribute('data-theme')||'light'}
 function _si(n){var b=$('theme-btn');b.replaceChildren();var t=document.createElement('template');t.innerHTML=TI[n];b.appendChild(t.content)}
 function _st(t){if(t==='light')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);document.querySelector('meta[name="theme-color"]').content=TC[t];_si(TH[(TH.indexOf(t)+1)%TH.length]);try{localStorage.setItem('theme',t)}catch(_){}}
@@ -379,10 +391,13 @@ w.addEventListener('click',dis);document.body.appendChild(w);
 toastT=setTimeout(dis,5000)
 }
 function feedback(btn,cls,text){
-clearTimeout(tm[btn.id]);var sp=btn.querySelector('span');
-btn.classList.remove('ok','dl-fb','err-fb');
+clearTimeout(tm[btn.id]);
+var sp=btn.querySelector('span');
+btn.classList.remove('ok','ps-fb','dl-fb','rs-fb','err-fb','ld');
+var pl=btn.querySelector('.ic polyline');
+if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}
 btn.classList.add(cls);sp.textContent=text;
-tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=sp.dataset.orig},2000)
+tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.dataset.l},800)
 }
 
 /* ---- Image Loading ---- */
@@ -396,22 +411,40 @@ i.onerror=function(){URL.revokeObjectURL(blobUrl);blobUrl=null;notify('Failed to
 i.src=blobUrl
 }
 
-/* Upload button opens file picker */
+/* Upload */
 upBtn.addEventListener('click',function(){fin.click()});
 fin.addEventListener('change',function(){if(fin.files&&fin.files[0])loadImg(fin.files[0]);fin.value=''});
 
-/* ---- Drag & Drop (directly onto canvas/page) ---- */
+/* ---- Drag & Drop ---- */
 var dc=0;
 document.addEventListener('dragenter',function(e){e.preventDefault();dc++;if(dc===1)ov.classList.add('active')});
 document.addEventListener('dragleave',function(e){e.preventDefault();dc--;if(dc<=0){dc=0;ov.classList.remove('active')}});
 document.addEventListener('dragover',function(e){e.preventDefault()});
 document.addEventListener('drop',function(e){e.preventDefault();dc=0;ov.classList.remove('active');if(e.dataTransfer.files&&e.dataTransfer.files.length){var f=e.dataTransfer.files[0];if(f.type.startsWith('image/'))loadImg(f)}});
 
-/* ---- Paste ---- */
+/* ---- Paste (keyboard Cmd+V) ---- */
 document.addEventListener('paste',function(e){
 var items=e.clipboardData&&e.clipboardData.items;if(!items)return;
-for(var i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){e.preventDefault();var f=items[i].getAsFile();if(f)loadImg(f);return}}
+for(var i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){e.preventDefault();var f=items[i].getAsFile();if(f){loadImg(f);feedback(psBtn,'ps-fb','Pasted')}return}}
 });
+
+/* ---- Paste button (Clipboard API) ---- */
+function pasteClipboard(){
+if(!navigator.clipboard||!navigator.clipboard.read){notify('Clipboard Not Available',false);return}
+psBtn.classList.add('ld');psBtn.querySelector('span').textContent='Reading\u2026';
+navigator.clipboard.read().then(function(items){
+for(var i=0;i<items.length;i++){var types=items[i].types;for(var j=0;j<types.length;j++){if(types[j].startsWith('image/')){items[i].getType(types[j]).then(function(blob){
+loadImg(new File([blob],'paste.png',{type:blob.type}));
+feedback(psBtn,'ps-fb','Pasted')
+});return}}}
+psBtn.classList.remove('ld');psBtn.querySelector('span').textContent=psBtn.dataset.l;
+notify('No Image in Clipboard',false)
+}).catch(function(){
+psBtn.classList.remove('ld');psBtn.querySelector('span').textContent=psBtn.dataset.l;
+notify('Clipboard Not Available',false)
+})
+}
+psBtn.addEventListener('click',pasteClipboard);
 
 /* ---- Background ---- */
 function setBg(m){
@@ -441,12 +474,11 @@ $('ry-inc').addEventListener('click',function(){stepAngle('y',STEP)});
 
 /* ---- Export ---- */
 function doExport(cb){
-if(!img){notify('No Screenshot Loaded',false);return}
 var s=expS;
 var w=sceneEl.clientWidth,h=sceneEl.clientHeight;
 var dpr=renderer.getPixelRatio();
-renderer.setPixelRatio(1);
-renderer.setSize(w*dpr*s,h*dpr*s,false);
+renderer.setPixelRatio(s*dpr);
+renderer.setSize(w,h,false);
 var prevBg=scene.background;
 if(BG_CLR[bgM]!=null)scene.background=new THREE.Color(BG_CLR[bgM]);
 else scene.background=null;
@@ -456,43 +488,41 @@ scene.background=prevBg;
 renderer.setPixelRatio(dpr);
 renderer.setSize(w,h);
 render();
-if(blob)cb(blob);else notify('Export Failed',false)
+cb(blob)
 },'image/png')
 }
 
 cpBtn.addEventListener('click',function(){
-doExport(function(b){
+if(!img){notify('No Screenshot Loaded',false);return}
 if(!navigator.clipboard||!navigator.clipboard.write){notify('Clipboard Not Available',false);return}
-navigator.clipboard.write([new ClipboardItem({'image/png':b})]).then(
+navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(function(resolve,reject){
+doExport(function(b){if(b)resolve(b);else reject()})
+})})]).then(
 function(){feedback(cpBtn,'ok','Copied')},
 function(){notify('Copy Failed',false)})
-})
 });
+
 dlBtn.addEventListener('click',function(){
+if(!img){notify('No Screenshot Loaded',false);return}
 doExport(function(b){
+if(!b){notify('Export Failed',false);return}
 var u=URL.createObjectURL(b);
 dlA.download='mockup.png';dlA.href=u;dlA.click();
 setTimeout(function(){URL.revokeObjectURL(u)},1e4);
 feedback(dlBtn,'dl-fb','Downloaded')
 })
 });
-rvBtn.addEventListener('click',resetView);
 
-function clearImg(){
+/* ---- Reset All ---- */
+function resetAll(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-updateScreen()
+updateScreen();
+resetView();
+setBg(2);
+expS=2;$('sc-chips').querySelectorAll('.chip').forEach(function(ch){ch.classList.toggle('active',parseInt(ch.dataset.sc)===2)});
+feedback(rsBtn,'rs-fb','Reset')
 }
-clBtn.addEventListener('click',clearImg);
-
-/* ---- Clipboard paste ---- */
-function pasteClipboard(){
-if(navigator.clipboard&&navigator.clipboard.read){
-navigator.clipboard.read().then(function(items){
-for(var i=0;i<items.length;i++){var types=items[i].types;for(var j=0;j<types.length;j++){if(types[j].startsWith('image/')){items[i].getType(types[j]).then(function(blob){loadImg(new File([blob],'paste.png',{type:blob.type}))});return}}}
-notify('No Image in Clipboard',false)
-}).catch(function(){notify('Clipboard Not Available',false)})
-}else{notify('Clipboard Not Available',false)}
-}
+rsBtn.addEventListener('click',resetAll);
 
 /* ---- Keyboard ---- */
 document.addEventListener('keydown',function(e){
@@ -505,14 +535,13 @@ var tag=document.activeElement&&document.activeElement.tagName;
 if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape')document.activeElement.blur();return}
 if(e.key==='1'){location.href='/';return}
 if(e.key==='t'){_st(TH[(TH.indexOf(_ct())+1)%TH.length]);return}
-if(e.key==='Escape'){var n=document.querySelector('.notif');if(n){n.click();return}if(img){clearImg();return}return}
+if(e.key==='Escape'){var n=document.querySelector('.notif');if(n){n.click();return}return}
 if(e.key==='v'){pasteClipboard();return}
 if(e.key==='u'||e.key===' '){e.preventDefault();fin.click();return}
 if(!img)return;
 if(e.key==='d'){dlBtn.click();return}
 if(e.key==='c'){cpBtn.click();return}
-if(e.key==='r'||e.key==='0'){resetView();return}
-if(e.key==='n'){clearImg();return}
+if(e.key==='r'||e.key==='0'){resetAll();return}
 if(e.key==='w'){setBg(0);return}
 if(e.key==='b'){setBg(1);return}
 if(e.key==='x'){setBg(2);return}
