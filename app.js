@@ -228,6 +228,7 @@ function mkIcon(s){const ic=document.createElement('div');ic.className='picon';v
 
 // Skeleton loading placeholders
 function showSkel(el,n){for(var i=0;i<n;i++){var s=document.createElement('div');s.className='skel';el.appendChild(s)}}
+function mkEmpty(text,cls){var d=document.createElement('div');d.className=cls||'empty';d.textContent=text;d.setAttribute('role','status');return d}
 
 // Render categorized cards (projects & links)
 function showCards(cfg){
@@ -245,8 +246,7 @@ function showCards(cfg){
     el.replaceChildren();
     if(!items.length){
       if(sw)sw.parentNode.style.display='none';
-      const d=document.createElement('div');d.className='empty';d.textContent=cfg.get.err?'Unable to load. Please check your connection.':'Coming Soon!';d.setAttribute('role','status');
-      el.appendChild(d);return;
+      el.appendChild(mkEmpty(cfg.get.err?'Unable to load. Please check your connection.':'Coming Soon!'));return;
     }
     if(sw)sw.parentNode.style.display='block';
     const frag=document.createDocumentFragment();
@@ -296,8 +296,7 @@ function showCV(){
     const sw=$('#csearch');
     if(!data.length){
       if(sw)sw.parentNode.style.display='none';
-      const d=document.createElement('div');d.className='empty';d.textContent=getCV.err?'Unable to load. Please check your connection.':'Coming Soon!';d.setAttribute('role','status');
-      el.appendChild(d);return;
+      el.appendChild(mkEmpty(getCV.err?'Unable to load. Please check your connection.':'Coming Soon!'));return;
     }
     if(sw)sw.parentNode.style.display='block';
     const frag=document.createDocumentFragment();
@@ -384,9 +383,7 @@ function showPost(slug){
     .catch(e=>{
       if(ver!==postVer)return;
       console.error('Post load failed:',slug,e);
-      const msg=document.createElement('div');msg.className='empty';msg.setAttribute('role','status');
-      msg.textContent='Unable to load this post. Please check your connection and try again.';
-      el.appendChild(msg);
+      el.appendChild(mkEmpty('Unable to load this post. Please check your connection and try again.'));
     });
 }
 
@@ -567,7 +564,7 @@ function filterList(input,container){
   // Empty state
   let empty=container.querySelector('.search-empty');
   if(!scored.length){
-    if(!empty){empty=document.createElement('div');empty.className='empty search-empty';empty.textContent='No results';empty.setAttribute('role','status');container.appendChild(empty)}
+    if(!empty){empty=mkEmpty('No results','empty search-empty');container.appendChild(empty)}
     empty.style.display='';
   }else if(empty){empty.style.display='none'}
 }
@@ -652,43 +649,43 @@ cmdInputWrap.appendChild(cmdInput);cmdInputWrap.appendChild(cmdX);
 cmdPalette.appendChild(cmdInputWrap);cmdPalette.appendChild(cmdResults);cmdOverlay.appendChild(cmdPalette);
 document.body.appendChild(cmdOverlay);
 
-let cmdOpen=false;
+function mkModal(overlay){
+  var prev=null,open=false;
+  var m={
+    get isOpen(){return open},
+    open:function(focusEl){
+      if(open)return;prev=document.activeElement;open=true;
+      document.body.style.overflow='hidden';
+      overlay.removeAttribute('aria-hidden');overlay.classList.add('open');
+      if(focusEl)focusEl.focus();
+    },
+    close:function(){
+      if(!open)return;open=false;
+      document.body.style.overflow='';
+      overlay.setAttribute('aria-hidden','true');overlay.classList.remove('open');
+      if(prev)try{prev.focus()}catch(e){}prev=null;
+    }
+  };
+  overlay.addEventListener('click',function(e){if(e.target===overlay)m.close()});
+  return m;
+}
+
+var cmdModal=mkModal(cmdOverlay);
 let cmdIdx=-1;
 let cmdItems=null;
-var _cmdPrev=null;
 
 function openCmd(){
-  if(cmdOpen)return;
-  if(qrOpen)closeQR();
-  _cmdPrev=document.activeElement;
-  cmdOpen=true;
-  cmdInput.value='';
-  cmdX.style.display='none';
-  cmdResults.textContent='';
-  cmdIdx=-1;
-  cmdItems=cmdBuildItems();
-  document.body.style.overflow='hidden';
-  cmdOverlay.removeAttribute('aria-hidden');
-  cmdOverlay.classList.add('open');
-  cmdInput.focus();
-  cmdInput.select();
+  if(cmdModal.isOpen)return;
+  if(qrModal.isOpen)qrModal.close();
+  cmdInput.value='';cmdX.style.display='none';cmdResults.textContent='';
+  cmdIdx=-1;cmdItems=cmdBuildItems();
+  cmdModal.open(cmdInput);cmdInput.select();
 }
 
 function closeCmd(){
-  if(!cmdOpen)return;
-  cmdOpen=false;
-  cmdItems=null;
-  document.body.style.overflow='';
-  cmdOverlay.setAttribute('aria-hidden','true');
-  cmdOverlay.classList.remove('open');
-  cmdInput.blur();
-  if(_cmdPrev)try{_cmdPrev.focus()}catch(e){}
-  _cmdPrev=null;
+  if(!cmdModal.isOpen)return;
+  cmdItems=null;cmdInput.blur();cmdModal.close();
 }
-
-cmdOverlay.addEventListener('click',e=>{
-  if(e.target===cmdOverlay)closeCmd();
-});
 
 const qrOverlay=document.createElement('div');
 qrOverlay.className='qr-overlay';
@@ -700,32 +697,19 @@ const qrCard=document.createElement('div');qrCard.className='qr-card';
 const qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';qrImg.width=23;qrImg.height=23;
 qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
 
-let qrOpen=false;
-var _qrPrev=null;
+var qrModal=mkModal(qrOverlay);
 function openQR(){
-  if(qrOpen)return;
-  if(cmdOpen)closeCmd();
-  _qrPrev=document.activeElement;
+  if(qrModal.isOpen)return;
+  if(cmdModal.isOpen)closeCmd();
   if(!qrImg.src)qrImg.src='/qr-homepage.png';
-  qrOpen=true;
-  document.body.style.overflow='hidden';
-  qrOverlay.classList.add('open');
-  qrOverlay.focus();
+  qrModal.open(qrOverlay);
 }
-function closeQR(){
-  if(!qrOpen)return;
-  qrOpen=false;
-  document.body.style.overflow='';
-  qrOverlay.classList.remove('open');
-  if(_qrPrev)try{_qrPrev.focus()}catch(e){}
-  _qrPrev=null;
-}
+function closeQR(){qrModal.close()}
 const nameCard=$('.name-card');
 if(nameCard){
   nameCard.addEventListener('click',e=>{e.preventDefault();openQR()});
   nameCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openQR()}});
 }
-qrOverlay.addEventListener('click',e=>{if(e.target===qrOverlay)closeQR()});
 
 function cmdBuildItems(){
   const items=[];
@@ -880,13 +864,13 @@ function isPost(){return location.pathname.startsWith('/updates/')&&location.pat
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){
     e.preventDefault();
-    if(cmdOpen)closeCmd();else openCmd();
+    if(cmdModal.isOpen)closeCmd();else openCmd();
     return;
   }
 
-  if(cmdOpen){if(e.key==='Escape')closeCmd();return}
+  if(cmdModal.isOpen){if(e.key==='Escape')closeCmd();return}
 
-  if(qrOpen){if(e.key==='Tab'){e.preventDefault();return}if(e.key==='Escape')closeQR();return}
+  if(qrModal.isOpen){if(e.key==='Tab'){e.preventDefault();return}if(e.key==='Escape')closeQR();return}
 
   const tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'){
