@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>AztecGen</title>
+<title>CodeGen | Aztec</title>
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
 <style>
@@ -197,9 +197,11 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));displ
   <div id="dropOv" class="drop-overlay" role="status" aria-live="assertive">Drop Image to Scan</div>
 </div>
 <nav class="fx-bottom">
-  <div class="tabs">
+  <div class="tabs" aria-label="Generator">
     <a href="/">Home</a>
-    <a href="/projects" class="active">AztecGen</a>
+    <a href="/codegen/">QR</a>
+    <a href="/codegen/barcode/">Barcode</a>
+    <a href="/codegen/aztec/" class="active">Aztec</a>
   </div>
   <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
@@ -853,8 +855,9 @@ document.addEventListener('keydown',function(e){
   if(e.altKey)return;
   var tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape'){document.activeElement.blur()}return}
-  if(e.key==='1'||e.key==='ArrowLeft'){location.href='/';return}
-  if(e.key==='2'||e.key==='ArrowRight'){location.href='/projects';return}
+  if(e.key==='1'){location.href='/';return}
+  if(e.key==='2'||e.key==='ArrowLeft'){location.href='/codegen/barcode/';return}
+  if(e.key==='3'||e.key==='ArrowRight'){location.href='/codegen/';return}
   if(e.key==='/'){e.preventDefault();azIn.focus();return}
   if((e.key==='Enter'||e.key===' ')&&document.activeElement.classList.contains('preview')){e.preventDefault();document.activeElement.click();return}
   if(e.key==='l'){azGroups1[2]._set(0);return}

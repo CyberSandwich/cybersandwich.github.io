@@ -12,12 +12,6 @@
     "category": "Web"
   },
   {
-    "title": "AztecGen",
-    "subtitle": "Aztec Code Generator",
-    "url": "/aztecgen/",
-    "category": "Web"
-  },
-  {
     "title": "Arbit",
     "subtitle": "Random Picker Tool",
     "url": "/arbit/",
@@ -25,7 +19,7 @@
   },
   {
     "title": "CodeGen",
-    "subtitle": "QR Code & Barcode Tool",
+    "subtitle": "QR, Barcode & Aztec Code Tool",
     "url": "/codegen/",
     "category": "Web"
   },
