@@ -131,7 +131,7 @@ body{
 .vcf-link a:hover{background:#3A3A3C;color:#fff}
 
 /* Project Card */
-.pcard,.cve,.ucard{scroll-margin-top:60px}
+.pcard,.cve{scroll-margin-top:60px}
 .pcard{
   display:flex;
   align-items:center;
@@ -146,9 +146,9 @@ body{
   margin-bottom:14px;
   contain:content
 }
-.pcard:hover,.ucard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
-.pcard:active,.ucard:active{transform:translateY(-1px) scale(.985)}
-@media(hover:hover){.pcard:hover,.cve:hover,.ucard:hover{will-change:transform}}
+.pcard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
+.pcard:active{transform:translateY(-1px) scale(.985)}
+@media(hover:hover){.pcard:hover,.cve:hover{will-change:transform}}
 .pcard .pinf{flex:1;min-width:0}
 .pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pcard .pd{font-size:.8125rem;color:var(--t3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -221,25 +221,6 @@ body{
   color:var(--t2)
 }
 
-/* Updates */
-.ucard{
-  display:flex;
-  align-items:center;
-  gap:18px;
-  padding:22px 24px;
-  background:var(--card);
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  margin-bottom:14px;
-  text-decoration:none;
-  color:var(--t1);
-  transition:box-shadow .15s,transform .1s;
-  contain:content
-}
-/* hover/active shared with .pcard above */
-.uinf{flex:1;min-width:0}
-.ucard .ut{font-size:1.0625rem;font-weight:600;color:var(--t1);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ucard .ud{font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.02em}
 .pcontent{
   padding:16px 20px;
   background:var(--card);
@@ -393,7 +374,7 @@ nav{
   .page.active{display:block!important}
   .search-wrap{display:none!important}
   .wrap{padding-bottom:0;max-width:100%}
-  .cve,.pcard,.ucard,.pcontent{break-inside:avoid}
+  .cve,.pcard,.pcontent{break-inside:avoid}
 }
 
 /* Theme toggle icons */
