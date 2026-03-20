@@ -19,7 +19,7 @@
   },
   {
     "title": "CodeGen",
-    "subtitle": "QR, Barcode & Aztec Code Tool",
+    "subtitle": "QR, Barcode, & Aztec Code Tool",
     "url": "/codegen/",
     "category": "Web"
   },
@@ -42,9 +42,9 @@
     "category": "Web"
   },
   {
-    "title": "UK Number Generator",
+    "title": "NumGen",
     "subtitle": "Generate Valid UK Phone Numbers",
-    "url": "/uk-numgen/",
+    "url": "/numgen/",
     "category": "Web"
   },
   {
