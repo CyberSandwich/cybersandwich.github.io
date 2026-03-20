@@ -64,6 +64,8 @@ body{margin:0;background:var(--bg);display:flex;flex-direction:column;align-item
 .rs-fb{background:#FEF9C3!important}
 .rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
 .rs-fb span{color:#CA8A04!important}
+.srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
+.srow.rs-fb .slbl span{color:#CA8A04}
 .err-fb{background:#FEE2E2!important}
 .err-fb span{color:#C41E3A!important}
 .ld{background:#DBEAFE!important}
@@ -121,13 +123,11 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 </head>
 <body>
 <div class="w">
-<input id="fin" type="file" accept="image/*" style="display:none">
 <div id="pv" class="card pv-card bg-none">
 <div class="scene" id="scene"></div>
 </div>
 <div id="acts" class="card">
 <div class="actions">
-<button id="upBtn" data-l="Upload Screenshot"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg><span>Upload Screenshot</span></button>
 <button id="psBtn" data-l="Paste"><svg class="id" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
 <button id="cpBtn" data-l="Copy"><svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
 <button id="dlBtn" data-l="Download"><svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
@@ -135,7 +135,7 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 </div>
 </div>
 <div id="s1" class="card">
-<div class="srow">
+<div class="srow" id="sr-bg">
 <label class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span>Background</span></label>
 <div class="schips" id="bg-chips">
 <button class="chip" data-bg="0">White</button>
@@ -145,7 +145,7 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 </div>
 </div>
 <div id="s2" class="card">
-<div class="srow">
+<div class="srow" id="sr-rx">
 <label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg><span>Rotation X</span></label>
 <div class="stepper">
 <button class="step-btn" id="rx-dec" aria-label="Decrease X Rotation"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -153,20 +153,12 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 <button class="step-btn" id="rx-inc" aria-label="Increase X Rotation"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 </div>
 </div>
-<div class="srow">
+<div class="srow" id="sr-ry">
 <label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg><span>Rotation Y</span></label>
 <div class="stepper">
 <button class="step-btn" id="ry-dec" aria-label="Decrease Y Rotation"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 <span class="step-val" id="ry-val">0&deg;</span>
 <button class="step-btn" id="ry-inc" aria-label="Increase Y Rotation"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-</div>
-</div>
-<div class="srow">
-<label class="slbl"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg><span>Export Scale</span></label>
-<div class="schips" id="sc-chips">
-<button class="chip" data-sc="1">1x</button>
-<button class="chip active" data-sc="2">2x</button>
-<button class="chip" data-sc="3">3x</button>
 </div>
 </div>
 </div>
@@ -197,8 +189,8 @@ var PW=393,PH=852;
 var IW=126,IH=37,IX=(PW-IW)/2,IY=22,IRX=19;
 
 /* Surface config from GLB model */
-var SCR_W=6.526553630828857,SCR_H=14.084951400756836;
-var SCR_Z=0.3926673361784301,SCR_OFF=0.01,SCR_CR=1.02;
+var SCR_W=6.526553630828857+0.06,SCR_H=14.084951400756836+0.06;
+var SCR_Z=0.3926673361784301,SCR_OFF=0.005,SCR_CR=1.02;
 var CAM_Z=25.81158269462921;
 var MODEL_URL='/mockup/iphone_16.glb';
 
@@ -206,11 +198,11 @@ var MAX_A=60,STEP=5,DEG=Math.PI/180;
 var BG_CLS=['bg-white','bg-black','bg-none'];
 var BG_CLR=[0xFFFFFF,0x000000,null];
 
-var img=null,blobUrl=null,bgM=2,expS=2;
+var img=null,blobUrl=null,bgM=2;
 var modelReady=false,screenMesh=null;
 
-var fin=$('fin'),pv=$('pv'),sceneEl=$('scene');
-var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),psBtn=$('psBtn'),upBtn=$('upBtn'),rsBtn=$('rsBtn');
+var pv=$('pv'),sceneEl=$('scene');
+var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),psBtn=$('psBtn'),rsBtn=$('rsBtn');
 var rxV=$('rx-val'),ryV=$('ry-val'),ov=$('drop-ov');
 var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
 var tm={},toastT,toastFadeT;
@@ -255,14 +247,15 @@ var rimL=new THREE.DirectionalLight(0xffffff,0.3);rimL.position.set(0,-1,-1);sce
 
 /* Screen canvas texture */
 var scrCanvas=document.createElement('canvas');
-var scrS=4;
+var scrS=6;
 scrCanvas.width=PW*scrS;scrCanvas.height=PH*scrS;
 var scrCtx=scrCanvas.getContext('2d');
 var scrTex=new THREE.CanvasTexture(scrCanvas);
 scrTex.colorSpace=THREE.SRGBColorSpace;
-scrTex.minFilter=THREE.LinearFilter;
+scrTex.minFilter=THREE.LinearMipmapLinearFilter;
 scrTex.magFilter=THREE.LinearFilter;
-scrTex.generateMipmaps=false;
+scrTex.generateMipmaps=true;
+scrTex.anisotropy=renderer.capabilities.getMaxAnisotropy();
 
 function rrPath(ctx,x,y,w,h,r){
 r=Math.min(r,w/2,h/2);
@@ -411,10 +404,6 @@ i.onerror=function(){URL.revokeObjectURL(blobUrl);blobUrl=null;notify('Failed to
 i.src=blobUrl
 }
 
-/* Upload */
-upBtn.addEventListener('click',function(){fin.click()});
-fin.addEventListener('change',function(){if(fin.files&&fin.files[0])loadImg(fin.files[0]);fin.value=''});
-
 /* ---- Drag & Drop ---- */
 var dc=0;
 document.addEventListener('dragenter',function(e){e.preventDefault();dc++;if(dc===1)ov.classList.add('active')});
@@ -453,13 +442,6 @@ $('bg-chips').querySelectorAll('.chip').forEach(function(c,i){c.classList.toggle
 }
 $('bg-chips').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c)setBg(parseInt(c.dataset.bg))});
 
-/* ---- Export Scale ---- */
-$('sc-chips').addEventListener('click',function(e){
-var c=e.target.closest('.chip');if(!c)return;
-expS=parseInt(c.dataset.sc);
-$('sc-chips').querySelectorAll('.chip').forEach(function(ch){ch.classList.toggle('active',parseInt(ch.dataset.sc)===expS)})
-});
-
 /* ---- Steppers ---- */
 function stepAngle(axis,delta){
 var a=getAngles();
@@ -472,24 +454,38 @@ $('rx-inc').addEventListener('click',function(){stepAngle('x',STEP)});
 $('ry-dec').addEventListener('click',function(){stepAngle('y',-STEP)});
 $('ry-inc').addEventListener('click',function(){stepAngle('y',STEP)});
 
-/* ---- Export ---- */
+/* ---- Srow tap-to-reset ---- */
+function srowFb(el){
+var k='sr-'+el.id;clearTimeout(tm[k]);
+el.classList.remove('rs-fb');void el.offsetWidth;
+el.classList.add('rs-fb');
+tm[k]=setTimeout(function(){el.classList.remove('rs-fb')},800)
+}
+$('sr-bg').querySelector('.slbl').addEventListener('click',function(){setBg(2);srowFb($('sr-bg'))});
+$('sr-rx').querySelector('.slbl').addEventListener('click',function(){var a=getAngles();setOrbit(0,a.ry);srowFb($('sr-rx'))});
+$('sr-ry').querySelector('.slbl').addEventListener('click',function(){var a=getAngles();setOrbit(a.rx,0);srowFb($('sr-ry'))});
+
+/* ---- Export (SSAA: render 2x then downsample for smooth edges) ---- */
 function doExport(cb){
-var s=expS;
 var w=sceneEl.clientWidth,h=sceneEl.clientHeight;
 var dpr=renderer.getPixelRatio();
-renderer.setPixelRatio(s*dpr);
-renderer.setSize(w,h,false);
+var ow=Math.round(w*dpr*3),oh=Math.round(h*dpr*3);
+renderer.setPixelRatio(1);
+renderer.setSize(ow*2,oh*2,false);
 var prevBg=scene.background;
 if(BG_CLR[bgM]!=null)scene.background=new THREE.Color(BG_CLR[bgM]);
 else scene.background=null;
 renderer.render(scene,camera);
-renderer.domElement.toBlob(function(blob){
+var c=document.createElement('canvas');c.width=ow;c.height=oh;
+var ctx=c.getContext('2d');
+ctx.imageSmoothingEnabled=true;
+ctx.imageSmoothingQuality='high';
+ctx.drawImage(renderer.domElement,0,0,ow,oh);
 scene.background=prevBg;
 renderer.setPixelRatio(dpr);
 renderer.setSize(w,h);
 render();
-cb(blob)
-},'image/png')
+c.toBlob(function(blob){cb(blob)},'image/png')
 }
 
 cpBtn.addEventListener('click',function(){
@@ -519,7 +515,6 @@ img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
 updateScreen();
 resetView();
 setBg(2);
-expS=2;$('sc-chips').querySelectorAll('.chip').forEach(function(ch){ch.classList.toggle('active',parseInt(ch.dataset.sc)===2)});
 feedback(rsBtn,'rs-fb','Reset')
 }
 rsBtn.addEventListener('click',resetAll);
@@ -537,7 +532,6 @@ if(e.key==='1'){location.href='/';return}
 if(e.key==='t'){_st(TH[(TH.indexOf(_ct())+1)%TH.length]);return}
 if(e.key==='Escape'){var n=document.querySelector('.notif');if(n){n.click();return}return}
 if(e.key==='v'){pasteClipboard();return}
-if(e.key==='u'||e.key===' '){e.preventDefault();fin.click();return}
 if(!img)return;
 if(e.key==='d'){dlBtn.click();return}
 if(e.key==='c'){cpBtn.click();return}
