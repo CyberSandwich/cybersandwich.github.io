@@ -14,6 +14,10 @@ const validPages=['home','projects','cv','updates','links'];
 const titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
 const emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
 const CHECK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
+const SVG_WRAP_OPEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+const SVG_WRAP_CLOSE='</svg>';
+const RE_UL=/^[-*] /;
+const RE_OL=/^\d+\. /;
 function cleanUrl(u){return u.replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'')}
 function mailtoUrl(t){return 'mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Inquiry: '+t)+'&body='+emailBody}
 
@@ -65,49 +69,46 @@ function route(){
   }
 }
 
-// Copy buttons (with clipboard API fallback and error handling)
-// Note: innerHTML below uses hardcoded SVG string, not user content — safe from XSS
+// Click handler: copy buttons + SPA link interception
+// Note: CHECK_SVG innerHTML below uses hardcoded SVG constant, not user content — safe from XSS
 document.addEventListener('click',e=>{
-  const btn=e.target.closest('.copy-btn');
-  if(!btn)return;
-  const text=btn.getAttribute('data-copy');
-  if(!text)return;
-  e.preventDefault();
-  function done(){
-    clearTimeout(btn._t1);clearTimeout(btn._t2);
-    btn.classList.add('copied');
-    btn.textContent='';
-    const tmp=document.createElement('span');
-    tmp.innerHTML=CHECK_SVG;
-    btn.appendChild(tmp.firstChild);
-    btn._t1=setTimeout(()=>{
-      btn.style.opacity='0';
-      btn._t2=setTimeout(()=>{
-        btn.classList.remove('copied');
-        btn.textContent='Copy';
-        btn.style.opacity='';
-      },200);
-    },1500);
+  var btn=e.target.closest('.copy-btn');
+  if(btn){
+    var text=btn.getAttribute('data-copy');
+    if(!text)return;
+    e.preventDefault();
+    function done(){
+      clearTimeout(btn._t1);clearTimeout(btn._t2);
+      btn.classList.add('copied');
+      btn.textContent='';
+      var tmp=document.createElement('span');
+      tmp.innerHTML=CHECK_SVG;
+      btn.appendChild(tmp.firstChild);
+      btn._t1=setTimeout(()=>{
+        btn.style.opacity='0';
+        btn._t2=setTimeout(()=>{
+          btn.classList.remove('copied');
+          btn.textContent='Copy';
+          btn.style.opacity='';
+        },200);
+      },1500);
+    }
+    function legacy(){
+      var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';
+      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>{try{legacy()}catch(e){}});
+    }else{try{legacy()}catch(e){}}
+    return;
   }
-  function legacy(){
-    const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();
-  }
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(done).catch(()=>{try{legacy()}catch(e){}});
-  }else{try{legacy()}catch(e){}}
-});
-
-// SPA link interception
-document.addEventListener('click',e=>{
   if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
-  if(e.target.closest('.copy-btn'))return;
-  const a=e.target.closest('a[href]');
+  var a=e.target.closest('a[href]');
   if(!a)return;
-  const href=a.getAttribute('href');
+  var href=a.getAttribute('href');
   if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download')||a.target==='_blank')return;
-  const parts=href.split('/').filter(Boolean);
-  const page=parts[0];
+  var parts=href.split('/').filter(Boolean);
+  var page=parts[0];
   if(!page||validPages.indexOf(page)!==-1){
     e.preventDefault();
     if(href===location.pathname&&(href==='/'||page==='home')){openCmd();return}
@@ -145,19 +146,19 @@ const CHEVRON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 
 // Project icons — hardcoded SVGs keyed by title, safe for innerHTML
 const PROJECT_ICONS={
-'menuva':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3"/><path d="M18 15v7"/></svg>',
-'Clock':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
-'AztecGen':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><rect x="6" y="6" width="12" height="12" rx="1"/><rect x="10" y="10" width="4" height="4" rx=".5"/></svg>',
-'Arbit':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>',
-'CodeGen':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M16 7v10"/></svg>',
-'JPEG-Opt':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>',
-'Miele Laundry Guide':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 007-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 007 7z"/></svg>',
-'UK Number Generator':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg>',
-'PNG-Opt':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/></svg>',
-'Wrighter':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/></svg>',
-'Project Convergence':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
-'Project Shifting Tides':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-'Whisp':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><path d="M12 19v3"/></svg>'
+'menuva':'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3"/><path d="M18 15v7"/>',
+'Clock':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+'AztecGen':'<rect x="2" y="2" width="20" height="20" rx="2"/><rect x="6" y="6" width="12" height="12" rx="1"/><rect x="10" y="10" width="4" height="4" rx=".5"/>',
+'Arbit':'<rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+'CodeGen':'<path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M16 7v10"/>',
+'JPEG-Opt':'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
+'Miele Laundry Guide':'<path d="M12 22a7 7 0 007-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 007 7z"/>',
+'UK Number Generator':'<path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/>',
+'PNG-Opt':'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/>',
+'Wrighter':'<path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/>',
+'Project Convergence':'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+'Project Shifting Tides':'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+'Whisp':'<path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><path d="M12 19v3"/>'
 };
 
 // Named icons — reusable SVG inner paths for posts and links, wrapped by mkIcon
@@ -215,11 +216,11 @@ const ICONS={
 };
 
 // Default fallback icons
-const DEFAULT_PROJECT_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg>';
+const DEFAULT_PROJECT_ICON='<path d="M21 8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/>';
 const DEFAULT_LINK_ICON='<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/>';
 
 // Shared icon renderer — wraps inner SVG paths; passes through full SVGs (safe: all SVGs are hardcoded constants, not user content)
-function mkIcon(s){const ic=document.createElement('div');ic.className='picon';var v=s.slice(0,4)==='<svg'?s:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+s+'</svg>';ic.textContent='';ic.insertAdjacentHTML('afterbegin',v);return ic}
+function mkIcon(s){const ic=document.createElement('div');ic.className='picon';var v=s.slice(0,4)==='<svg'?s:SVG_WRAP_OPEN+s+SVG_WRAP_CLOSE;ic.textContent='';ic.insertAdjacentHTML('afterbegin',v);return ic}
 
 // Render categorized cards (projects & links)
 function showCards(cfg){
@@ -234,6 +235,7 @@ function showCards(cfg){
       el.appendChild(d);return;
     }
     if(sw)sw.parentNode.style.display='block';
+    const frag=document.createDocumentFragment();
     cfg.cats.forEach(cat=>{
       const filtered=items.filter(x=>x.category===cat).sort((a,b)=>a.title.localeCompare(b.title));
       if(!filtered.length)return;
@@ -252,11 +254,12 @@ function showCards(cfg){
         const pd=document.createElement('div');pd.className='pd';pd.textContent=cfg.sub(x);
         inf.appendChild(pt);inf.appendChild(pd);
         const arr=document.createElement('div');arr.className='arr';
-        arr.innerHTML=CHEVRON;
+        arr.insertAdjacentHTML('afterbegin',CHEVRON);
         a.appendChild(inf);a.appendChild(arr);sec.appendChild(a);
       });
-      el.appendChild(sec);
+      frag.appendChild(sec);
     });
+    el.appendChild(frag);
     const si=$(cfg.si);if(si&&si.value){filterList(si,el);const x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
   });
 }
@@ -277,6 +280,7 @@ function showCV(){
       el.appendChild(d);return;
     }
     if(sw)sw.parentNode.style.display='block';
+    const frag=document.createDocumentFragment();
     data.forEach(section=>{
       const sec=document.createElement('div');sec.className='cv-sec';
       const h=document.createElement('h3');h.textContent=section.section;sec.appendChild(h);
@@ -315,8 +319,9 @@ function showCV(){
         if(e.org)card.setAttribute('data-title',normC(e.org.toLowerCase()));
         sec.appendChild(card);
       });
-      el.appendChild(sec);
+      frag.appendChild(sec);
     });
+    el.appendChild(frag);
     const si=$('#csearch');if(si&&si.value){filterList(si,el);const x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
   });
 }
@@ -339,6 +344,7 @@ function showList(){
       el.appendChild(d);return;
     }
     if(sw)sw.parentNode.style.display='block';
+    const frag=document.createDocumentFragment();
     let curMonth='',sec;
     p.forEach(x=>{
       const ym=x.date.slice(0,7);
@@ -346,8 +352,8 @@ function showList(){
         curMonth=ym;
         sec=document.createElement('div');sec.className='link-sec';
         const h=document.createElement('h3');
-        h.textContent=new Date(x.date+'T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-        sec.appendChild(h);el.appendChild(sec);
+        h.textContent=fmtDate(x.date,{month:'long',year:'numeric'});
+        sec.appendChild(h);frag.appendChild(sec);
       }
       const a=document.createElement('a');
       a.className='ucard';
@@ -360,6 +366,7 @@ function showList(){
       const d=document.createElement('div');d.className='ud';d.textContent=fmtDate(x.date);
       inf.appendChild(t);inf.appendChild(d);a.appendChild(inf);sec.appendChild(a);
     });
+    el.appendChild(frag);
     const si=$('#usearch');
     if(si&&si.value){filterList(si,el);const x=si.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
   });
@@ -418,13 +425,13 @@ function parseMd(md){
     if(line.startsWith('## ')){cl();h+='<h2>'+il(line.slice(3))+'</h2>';continue}
     if(line.startsWith('# ')){cl();h+='<h1>'+il(line.slice(2))+'</h1>';continue}
     if(line.startsWith('> ')){cl();h+='<blockquote><p>'+il(line.slice(2))+'</p></blockquote>';continue}
-    if(/^[-*] /.test(line)){
+    if(RE_UL.test(line)){
       if(!ul){cl();h+='<ul>';ul=true}
-      h+='<li>'+il(line.replace(/^[-*] /,''))+'</li>';continue;
+      h+='<li>'+il(line.replace(RE_UL,''))+'</li>';continue;
     }
-    if(/^\d+\. /.test(line)){
+    if(RE_OL.test(line)){
       if(!ol){cl();h+='<ol>';ol=true}
-      h+='<li>'+il(line.replace(/^\d+\. /,''))+'</li>';continue;
+      h+='<li>'+il(line.replace(RE_OL,''))+'</li>';continue;
     }
     cl();h+='<p>'+il(line)+'</p>';
   }
@@ -443,7 +450,7 @@ function il(t){
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g,'<em>$1</em>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(_,alt,src)=>{
-      return '<img src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy">';
+      return '<img src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_,text,href)=>{
       return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+'</a>';
@@ -572,11 +579,11 @@ function filterList(input,container){
   }else if(empty){empty.style.display='none'}
 }
 
-function fmtDate(d){
+function fmtDate(d,opts){
   if(!d)return '';
-  const dt=new Date(d+'T12:00:00');
+  var dt=new Date(d+'T12:00:00');
   if(isNaN(dt.getTime()))return '';
-  return dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  return dt.toLocaleDateString('en-GB',opts||{day:'numeric',month:'long',year:'numeric'});
 }
 
 // Search wiring with debounce
@@ -599,10 +606,7 @@ function wireSearch(iid,cid){
   });
   if(x)x.addEventListener('click',()=>{clearTimeout(timer);i.value='';run();i.focus()});
 }
-wireSearch('#psearch','#plist');
-wireSearch('#csearch','#cvlist');
-wireSearch('#usearch','#ulist');
-wireSearch('#lsearch','#llist');
+[['#psearch','#plist'],['#csearch','#cvlist'],['#usearch','#ulist'],['#lsearch','#llist']].forEach(function(p){wireSearch(p[0],p[1])});
 
 // Theme toggle
 const themeBtn=$('#theme-toggle');
@@ -858,6 +862,7 @@ function kbMove(dir){
   kbCards[kbIdx].scrollIntoView({block:'nearest'});
 }
 
+var _kbTick=false;
 document.addEventListener('mousemove',()=>{if(kbIdx>=0)kbClear(true)},{passive:true});
 
 const tabPaths=['/','/projects','/cv','/updates','/links'];
@@ -904,8 +909,8 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  if(key==='j'||key==='ArrowDown'){e.preventDefault();kbMove(1);return}
-  if(key==='k'||key==='ArrowUp'){e.preventDefault();kbMove(-1);return}
+  if(key==='j'||key==='ArrowDown'){e.preventDefault();if(!_kbTick){_kbTick=true;var d=1;requestAnimationFrame(function(){kbMove(d);_kbTick=false})}return}
+  if(key==='k'||key==='ArrowUp'){e.preventDefault();if(!_kbTick){_kbTick=true;var d=-1;requestAnimationFrame(function(){kbMove(d);_kbTick=false})}return}
 
   if(key==='ArrowRight'||key==='ArrowLeft'){
     let ci=tabPaths.indexOf(location.pathname==='/'?'/':location.pathname);
