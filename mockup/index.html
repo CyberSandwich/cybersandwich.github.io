@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FFFFFF">
+<link rel="icon" type="image/png" href="/ds-favicon.png">
 <title>MockupGen</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -77,6 +79,7 @@ body{margin:0;background:var(--bg);display:flex;flex-direction:column;align-item
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
 .srow:active{opacity:.7}
+.srow.sel{background:var(--bg2)}.srow.sel .slbl svg{color:var(--acc)}.srow.sel .slbl span{color:var(--t1);font-weight:600}
 .slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
@@ -110,6 +113,7 @@ nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));displ
 @keyframes notifIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes notifOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.srow:hover{background:var(--bg2)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.tabs a:hover,.tabs button:hover:not(.active){color:var(--t2)}.theme-toggle:hover{color:var(--t1)}.notif-pill:hover{opacity:.9}}
+::selection{background:rgba(72,72,74,.15)}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 button:focus:not(:focus-visible){outline:none}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -163,18 +167,6 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 </div>
 </div>
 <div id="s3" class="card">
-<div class="srow" id="sr-ps">
-<label class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span>Preset</span></label>
-<div class="schips" id="ps-chips">
-<button class="chip active" data-ps="0">Front</button>
-<button class="chip" data-ps="1">Left</button>
-<button class="chip" data-ps="2">Right</button>
-<button class="chip" data-ps="3">Hero</button>
-<button class="chip" data-ps="4">Flat</button>
-</div>
-</div>
-</div>
-<div id="s4" class="card">
 <div class="srow" id="sr-fmt">
 <label class="slbl"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Format</span></label>
 <div class="schips" id="fmt-chips">
@@ -184,23 +176,28 @@ else if(t==='sepia')document.documentElement.setAttribute('data-theme','sepia')}
 </div>
 </div>
 <div class="srow" id="sr-res">
-<label class="slbl"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg><span>Resolution</span></label>
+<label class="slbl"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg><span id="res-val"></span></label>
 <div class="stepper">
 <button class="step-btn" id="res-dec" aria-label="Decrease Resolution"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-<span class="step-val" id="res-val"></span>
 <button class="step-btn" id="res-inc" aria-label="Increase Resolution"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 </div>
 </div>
 </div>
+<div id="s4" class="card">
+<div class="srow sel" id="ps-0"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>Front</span></label></div>
+<div class="srow" id="ps-1"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span>Angle</span></label></div>
+<div class="srow" id="ps-2"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="7" height="20" rx="2"/></svg><span>Side</span></label></div>
+<div class="srow" id="ps-3"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Hero</span></label></div>
+<div class="srow" id="ps-4"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span>Top Down</span></label></div>
 </div>
-<div id="drop-ov" class="drop-overlay">
+</div>
+<div id="drop-ov" class="drop-overlay" role="status" aria-live="assertive">
 <svg width="48" height="48" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
 Drop Image Here
 </div>
 <nav class="fx-bottom">
 <div class="tabs" aria-label="MockupGen">
 <a href="/">Home</a>
-<a href="/projects">Projects</a>
 <a href="/mockup/" class="active">MockupGen</a>
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
@@ -485,8 +482,9 @@ $('ry-inc').addEventListener('click',function(){stepAngle('y',STEP)});
 
 /* ---- Presets ---- */
 var PRESETS=[
-{n:'Front',rx:0,ry:0},{n:'Left',rx:0,ry:-25},{n:'Right',rx:0,ry:25},
-{n:'Hero',rx:-10,ry:20},{n:'Flat',rx:45,ry:0}
+{id:'ps-0',rx:0,ry:0},{id:'ps-1',rx:-15,ry:20},
+{id:'ps-2',rx:0,ry:35},{id:'ps-3',rx:-10,ry:-25},
+{id:'ps-4',rx:50,ry:0}
 ];
 var curPreset=0;
 function setPreset(idx){var p=PRESETS[idx];setOrbit(p.rx,p.ry);syncPreset()}
@@ -494,9 +492,9 @@ function syncPreset(){
 var a=getAngles(),matched=-1;
 PRESETS.forEach(function(p,i){if(Math.abs(Math.round(a.rx)-p.rx)<2&&Math.abs(Math.round(a.ry)-p.ry)<2)matched=i});
 curPreset=matched;
-$('ps-chips').querySelectorAll('.chip').forEach(function(c,i){c.classList.toggle('active',i===curPreset)})
+PRESETS.forEach(function(p,i){$(p.id).classList.toggle('sel',i===matched)})
 }
-$('ps-chips').addEventListener('click',function(e){var c=e.target.closest('.chip');if(c)setPreset(parseInt(c.dataset.ps))});
+PRESETS.forEach(function(p,i){$(p.id).addEventListener('click',function(){setPreset(i)})});
 
 /* ---- Format ---- */
 var FMT_MIME=['image/png','image/jpeg','image/webp'];
@@ -529,7 +527,6 @@ var groups=[
 {_row:$('sr-bg'),_reset:function(){setBg(2)}},
 {_row:$('sr-rx'),_reset:function(){var a=getAngles();setOrbit(0,a.ry)}},
 {_row:$('sr-ry'),_reset:function(){var a=getAngles();setOrbit(a.rx,0)}},
-{_row:$('sr-ps'),_reset:function(){setPreset(0)}},
 {_row:$('sr-fmt'),_reset:function(){setFmt(0)}},
 {_row:$('sr-res'),_reset:function(){resIdx=3;updateResUI()}}
 ];
@@ -615,13 +612,23 @@ if(!img)return;
 if(e.key==='d'){dlBtn.click();return}
 if(e.key==='c'){cpBtn.click();return}
 if(e.key==='r'||e.key==='0'){resetAll();return}
-if(e.key==='w'){setBg(0);return}
+if(e.key==='l'){setBg(0);return}
 if(e.key==='b'){setBg(1);return}
 if(e.key==='x'){setBg(2);return}
+if(e.key==='p'){setFmt(0);return}
+if(e.key==='j'){setFmt(1);return}
+if(e.key==='w'){setFmt(2);return}
 if(e.key==='='){stepAngle('y',STEP);return}
 if(e.key==='-'){stepAngle('y',-STEP);return}
 if(e.key===']'){stepAngle('x',STEP);return}
 if(e.key==='['){stepAngle('x',-STEP);return}
+if(e.key===';'){if(resIdx>0){resIdx--;updateResUI()}return}
+if(e.key==='\''){if(resIdx<RES_W.length-1){resIdx++;updateResUI()}return}
+if(e.key==='f'){setPreset(0);return}
+if(e.key==='a'){setPreset(1);return}
+if(e.key==='s'){setPreset(2);return}
+if(e.key==='h'){setPreset(3);return}
+if(e.key==='g'){setPreset(4);return}
 });
 
 /* ---- Double-click reset ---- */
