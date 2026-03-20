@@ -67,7 +67,6 @@ body{display:flex;align-items:center;justify-content:center}
 <nav>
 <div class="tabs">
 <a href="/">Home</a>
-<a href="/projects">Projects</a>
 <a class="active">NumGen</a>
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
@@ -84,7 +83,7 @@ render();
 el.onclick=e=>{e.preventDefault();doCopy()};
 gb.onclick=function(){clearTimeout(gm);render();gs.textContent='Regenerated';gb.classList.remove('regen');gb.offsetWidth;gb.classList.add('regen');gm=setTimeout(function(){gs.textContent='Regenerate';gb.classList.remove('regen')},800)};
 cb.onclick=doCopy;
-document.addEventListener('keydown',function(e){var t=document.activeElement&&document.activeElement.tagName;if(t==='INPUT'||t==='TEXTAREA')return;if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='1'){location.href='/';return}if(e.key==='2'){location.href='/projects';return}if(e.key===' '||e.key==='Enter'||e.key==='r'){e.preventDefault();gb.click()}if(e.key==='c'){e.preventDefault();doCopy()}if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length])}});
+document.addEventListener('keydown',function(e){var t=document.activeElement&&document.activeElement.tagName;if(t==='INPUT'||t==='TEXTAREA')return;if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='1'){location.href='/';return}if(e.key===' '||e.key==='Enter'||e.key==='r'){e.preventDefault();gb.click()}if(e.key==='c'){e.preventDefault();doCopy()}if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length])}});
 </script>
 </body>
 </html>

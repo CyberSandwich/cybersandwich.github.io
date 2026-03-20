@@ -82,7 +82,6 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <nav>
 <div class="tabs" aria-label="Optimizer">
 <a href="/">Home</a>
-<a href="/projects">Projects</a>
 <a href="/imageopt/">JPEG</a>
 <a href="/imageopt/png/" class="active">PNG</a>
 </div>
@@ -488,8 +487,7 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='r'||e.key==='Escape'){e.preventDefault();clearAll()}
   else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
   else if(e.key==='1')window.location.href='/';
-  else if(e.key==='2')window.location.href='/projects';
-  else if(e.key==='3'||e.key==='ArrowLeft')window.location.href='/imageopt/';
+  else if(e.key==='2'||e.key==='ArrowLeft')window.location.href='/imageopt/';
 });
 window.addEventListener('unload',function(){if(workerUrl)URL.revokeObjectURL(workerUrl)});
 </script>

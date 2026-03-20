@@ -127,7 +127,6 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
 <nav>
   <div class="tabs">
     <a href="/">Home</a>
-    <a href="/projects">Projects</a>
     <button class="active" data-tab="clock">Clock</button>
     <button data-tab="alarm">Alarm</button>
     <button data-tab="sw">Stopwatch</button>
@@ -524,8 +523,7 @@ document.addEventListener('keydown',e=>{
   }
   var tabIds=['clock','alarm','sw','timer'];
   if(e.key==='1'){location.href='/';return}
-  if(e.key==='2'){location.href='/projects';return}
-  if(e.key>='3'&&e.key<='6'){switchTab(tabIds[+e.key-3]);return}
+  if(e.key>='2'&&e.key<='5'){switchTab(tabIds[+e.key-2]);return}
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
     var ci=tabIds.indexOf(at);
     ci+=e.key==='ArrowRight'?1:-1;

@@ -145,7 +145,6 @@ body{display:flex;align-items:center;justify-content:center}
 <nav class="fx-bottom">
   <div class="tabs" aria-label="Generator">
     <a href="/">Home</a>
-    <a href="/projects">Projects</a>
     <a href="/codegen/">QR</a>
     <a href="/codegen/barcode/">Barcode</a>
     <a href="/codegen/aztec/" class="active">Aztec</a>
@@ -785,9 +784,8 @@ document.addEventListener('keydown',function(e){
   var tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape'){document.activeElement.blur()}return}
   if(e.key==='1'){location.href='/';return}
-  if(e.key==='2'){location.href='/projects';return}
-  if(e.key==='3'||e.key==='ArrowRight'){location.href='/codegen/';return}
-  if(e.key==='4'||e.key==='ArrowLeft'){location.href='/codegen/barcode/';return}
+  if(e.key==='2'){location.href='/codegen/';return}
+  if(e.key==='3'||e.key==='ArrowLeft'){location.href='/codegen/barcode/';return}
   if(e.key==='/'){e.preventDefault();azIn.focus();return}
   if((e.key==='Enter'||e.key===' ')&&document.activeElement.classList.contains('preview')){e.preventDefault();document.activeElement.click();return}
   if(e.key==='l'){azGroups1[2]._set(0);return}

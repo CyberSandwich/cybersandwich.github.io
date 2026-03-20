@@ -92,7 +92,6 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <nav>
 <div class="tabs">
 <a href="/">Home</a>
-<a href="/projects">Projects</a>
 <a class="active">Arbit</a>
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
@@ -238,7 +237,6 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='/'){e.preventDefault();$('inp').focus()}
   else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
   else if(e.key==='1')window.location.href='/';
-  else if(e.key==='2')window.location.href='/projects';
 });
 var dragCount=0,overlay=$('drop-overlay');
 document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)overlay.classList.add('active')});
