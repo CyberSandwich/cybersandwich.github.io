@@ -98,7 +98,7 @@ html[data-theme="dark"] .drop-overlay{background:rgba(28,28,30,.95)}
 html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 .fx-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%)}
 nav{z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center}
-.tabs{display:flex;background:var(--tab-bg);border-radius:var(--rr);padding:5px;box-shadow:var(--tab-shadow);border:1px solid var(--tab-border);max-width:calc(100vw - 40px)}
+.tabs{display:flex;background:var(--tab-bg);border-radius:var(--rr);padding:5px;box-shadow:var(--tab-shadow);border:1px solid rgba(255,255,255,.45);max-width:calc(100vw - 40px)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.tabs{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}}
 .tabs a,.tabs button:not(.theme-toggle){background:none;border:none;padding:12px clamp(12px,3.5vw,22px);border-radius:var(--rr);font:500 clamp(.8125rem,2.8vw,.875rem)/1 var(--font);color:var(--t3);cursor:pointer;transition:color .15s,background .15s,box-shadow .15s;white-space:nowrap;text-decoration:none}
 .tabs a.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.15)}
