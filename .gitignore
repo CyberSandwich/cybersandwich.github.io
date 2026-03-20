@@ -8,3 +8,5 @@ codegen/qrcode.png
 CLAUDE.md
 firebase-debug.log
 WORKFLOWS.md
+tasks/
+.claude/
