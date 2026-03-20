@@ -380,7 +380,9 @@ function showList(){
       const inf=document.createElement('div');inf.className='pinf';
       const t=document.createElement('div');t.className='pt';t.textContent=x.title;
       const d=document.createElement('div');d.className='pd';d.textContent=fmtDate(x.date);
-      inf.appendChild(t);inf.appendChild(d);a.appendChild(inf);sec.appendChild(a);
+      inf.appendChild(t);inf.appendChild(d);a.appendChild(inf);
+      const arr=document.createElement('div');arr.className='arr';arr.insertAdjacentHTML('afterbegin',CHEVRON);a.appendChild(arr);
+      sec.appendChild(a);
     });
     el.appendChild(frag);
     const si=$('#usearch');
