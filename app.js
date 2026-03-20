@@ -227,12 +227,17 @@ const DEFAULT_LINK_ICON='<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 0
 // Shared icon renderer — wraps inner SVG paths; passes through full SVGs (safe: all SVGs are hardcoded constants, not user content)
 function mkIcon(s){const ic=document.createElement('div');ic.className='picon';var v=s.slice(0,4)==='<svg'?s:SVG_WRAP_OPEN+s+SVG_WRAP_CLOSE;ic.textContent='';ic.insertAdjacentHTML('afterbegin',v);return ic}
 
+// Skeleton loading placeholders
+function showSkel(el,n){for(var i=0;i<n;i++){var s=document.createElement('div');s.className='skel';el.appendChild(s)}}
+
 // Render categorized cards (projects & links)
 function showCards(cfg){
   const el=$(cfg.el);
   if(cfg.data&&el.children.length)return;
   el.replaceChildren();
+  showSkel(el,3);
   cfg.get().then(items=>{
+    el.replaceChildren();
     const sw=$(cfg.si);
     if(!items.length){
       if(sw)sw.parentNode.style.display='none';
@@ -277,7 +282,9 @@ function showCV(){
   const el=$('#cvlist');
   if(cv&&el.children.length)return;
   el.replaceChildren();
+  showSkel(el,3);
   getCV().then(data=>{
+    el.replaceChildren();
     const sw=$('#csearch');
     if(!data.length){
       if(sw)sw.parentNode.style.display='none';
@@ -307,8 +314,11 @@ function showCV(){
           }
           if(e.pills){
             const pills=document.createElement('div');pills.className='pills';
+            pills.setAttribute('role','list');pills.setAttribute('aria-label','Skills');
             e.pills.forEach(p=>{
-              const pill=document.createElement('span');pill.className='pill';pill.textContent=p;pills.appendChild(pill);
+              const pill=document.createElement('span');pill.className='pill';pill.textContent=p;
+              pill.setAttribute('role','listitem');
+              pills.appendChild(pill);
             });
             card.appendChild(pills);
           }
@@ -341,7 +351,9 @@ function showList(){
   }
   el._saved=null;
   el.replaceChildren();
+  showSkel(el,3);
   getPosts().then(p=>{
+    el.replaceChildren();
     const sw=$('#usearch');
     if(!p.length){
       if(sw)sw.parentNode.style.display='none';
@@ -550,6 +562,9 @@ function filterList(input,container){
     secs.forEach(s=>{s.style.display=''});
     const empty=container.querySelector('.search-empty');
     if(empty)empty.style.display='none';
+    var liveId=container.id+'-live';
+    var live=document.getElementById(liveId);
+    if(live)live.textContent='';
     return;
   }
 
@@ -570,6 +585,13 @@ function filterList(input,container){
   });
 
   scored.sort((a,b)=>b.score-a.score||(a.el.getAttribute('data-q')||'').localeCompare(b.el.getAttribute('data-q')||''));
+
+  // Announce result count for screen readers
+  var liveId=container.id+'-live';
+  var live=document.getElementById(liveId);
+  if(!live){live=document.createElement('div');live.id=liveId;live.className='sr-only';live.setAttribute('aria-live','polite');live.setAttribute('role','status');container.parentNode.insertBefore(live,container)}
+  live.textContent=scored.length?scored.length+' result'+(scored.length===1?'':'s'):'No results';
+
   secs.forEach(s=>{s.style.display='none'});
 
   scored.forEach(s=>{
@@ -647,13 +669,19 @@ document.addEventListener('visibilitychange',()=>{
   const n=document.querySelector('nav');
   if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
 },{passive:true});
+window.addEventListener('storage',function(e){
+  if(e.key==='theme'){
+    var t=e.newValue||'light';
+    if(t!==curTheme())applyTheme(t);
+  }
+},{passive:true});
 
 // Command palette
 const cmdOverlay=document.createElement('div');cmdOverlay.className='cmd-overlay';cmdOverlay.setAttribute('aria-hidden','true');
 const cmdPalette=document.createElement('div');cmdPalette.className='cmd-palette';cmdPalette.setAttribute('role','dialog');cmdPalette.setAttribute('aria-modal','true');cmdPalette.setAttribute('aria-label','Search');
 const cmdInput=document.createElement('input');cmdInput.className='cmd-input';cmdInput.type='text';cmdInput.placeholder='Search';cmdInput.autocomplete='off';cmdInput.spellcheck=false;
 const cmdX=document.createElement('button');cmdX.className='cmd-x';cmdX.setAttribute('aria-label','Clear search');
-const cmdResults=document.createElement('div');cmdResults.className='cmd-results';
+const cmdResults=document.createElement('div');cmdResults.className='cmd-results';cmdResults.setAttribute('aria-live','polite');
 const cmdInputWrap=document.createElement('div');cmdInputWrap.className='cmd-input-wrap';
 cmdInputWrap.appendChild(cmdInput);cmdInputWrap.appendChild(cmdX);
 cmdPalette.appendChild(cmdInputWrap);cmdPalette.appendChild(cmdResults);cmdOverlay.appendChild(cmdPalette);
@@ -662,10 +690,12 @@ document.body.appendChild(cmdOverlay);
 let cmdOpen=false;
 let cmdIdx=-1;
 let cmdItems=null;
+var _cmdPrev=null;
 
 function openCmd(){
   if(cmdOpen)return;
   if(qrOpen)closeQR();
+  _cmdPrev=document.activeElement;
   cmdOpen=true;
   cmdInput.value='';
   cmdX.style.display='none';
@@ -687,6 +717,8 @@ function closeCmd(){
   cmdOverlay.setAttribute('aria-hidden','true');
   cmdOverlay.classList.remove('open');
   cmdInput.blur();
+  if(_cmdPrev)try{_cmdPrev.focus()}catch(e){}
+  _cmdPrev=null;
 }
 
 cmdOverlay.addEventListener('click',e=>{
@@ -695,6 +727,7 @@ cmdOverlay.addEventListener('click',e=>{
 
 const qrOverlay=document.createElement('div');
 qrOverlay.className='qr-overlay';
+qrOverlay.tabIndex=-1;
 qrOverlay.setAttribute('role','dialog');
 qrOverlay.setAttribute('aria-modal','true');
 qrOverlay.setAttribute('aria-label','QR Code');
@@ -703,19 +736,24 @@ const qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';q
 qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
 
 let qrOpen=false;
+var _qrPrev=null;
 function openQR(){
   if(qrOpen)return;
   if(cmdOpen)closeCmd();
+  _qrPrev=document.activeElement;
   if(!qrImg.src)qrImg.src='/qr-homepage.png';
   qrOpen=true;
   document.body.style.overflow='hidden';
   qrOverlay.classList.add('open');
+  qrOverlay.focus();
 }
 function closeQR(){
   if(!qrOpen)return;
   qrOpen=false;
   document.body.style.overflow='';
   qrOverlay.classList.remove('open');
+  if(_qrPrev)try{_qrPrev.focus()}catch(e){}
+  _qrPrev=null;
 }
 const nameCard=$('.name-card');
 if(nameCard){
