@@ -117,18 +117,23 @@ document.addEventListener('click',e=>{
   }
 });
 
-// Data loaders (with retry cap and error logging)
+// Data loaders (SWR: stale-while-revalidate with retry cap and error logging)
 function makeLoader(url,cb){
-  let p=null,fails=0;
-  return function(){
+  var p=null,fails=0,key='swr_'+url;
+  var loader=function(){
     if(p)return p;
     if(fails>=3)return Promise.resolve([]);
+    var cached;
+    try{var raw=localStorage.getItem(key);if(raw)cached=JSON.parse(raw)}catch(e){}
     p=fetch(url,{cache:'no-cache'})
-      .then(r=>{if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.json()})
-      .then(d=>{fails=0;return cb(d)})
-      .catch(e=>{p=null;fails++;console.error('Load failed:',e);return []});
+      .then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.json()})
+      .then(function(d){fails=0;loader.err=false;try{localStorage.setItem(key,JSON.stringify(d))}catch(e){}return cb(d)})
+      .catch(function(e){p=null;fails++;console.error('Load failed:',e);if(cached){loader.err=false;return cb(cached)}loader.err=true;return[]});
+    if(cached){cb(cached);return Promise.resolve(cached)}
     return p;
   };
+  loader.err=false;
+  return loader;
 }
 const getProjects=makeLoader('/projects/projects.json',d=>{projects=d;return d});
 const getLinks=makeLoader('/links/links.json',d=>{links=d;return d});
@@ -231,7 +236,7 @@ function showCards(cfg){
     const sw=$(cfg.si);
     if(!items.length){
       if(sw)sw.parentNode.style.display='none';
-      const d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';d.setAttribute('role','status');
+      const d=document.createElement('div');d.className='empty';d.textContent=cfg.get.err?'Unable to load. Please check your connection.':'Coming Soon!';d.setAttribute('role','status');
       el.appendChild(d);return;
     }
     if(sw)sw.parentNode.style.display='block';
@@ -276,7 +281,7 @@ function showCV(){
     const sw=$('#csearch');
     if(!data.length){
       if(sw)sw.parentNode.style.display='none';
-      const d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';d.setAttribute('role','status');
+      const d=document.createElement('div');d.className='empty';d.textContent=getCV.err?'Unable to load. Please check your connection.':'Coming Soon!';d.setAttribute('role','status');
       el.appendChild(d);return;
     }
     if(sw)sw.parentNode.style.display='block';
@@ -340,7 +345,7 @@ function showList(){
     const sw=$('#usearch');
     if(!p.length){
       if(sw)sw.parentNode.style.display='none';
-      const d=document.createElement('div');d.className='empty';d.textContent='Coming Soon!';d.setAttribute('role','status');
+      const d=document.createElement('div');d.className='empty';d.textContent=getPosts.err?'Unable to load. Please check your connection.':'Coming Soon!';d.setAttribute('role','status');
       el.appendChild(d);return;
     }
     if(sw)sw.parentNode.style.display='block';
@@ -394,7 +399,8 @@ function showPost(slug){
   fetch('/updates/'+encodeURIComponent(slug)+'.md')
     .then(r=>{if(!r.ok)throw new Error('Post '+r.status);return r.text()})
     .then(md=>{
-      const html=parseMd(md);
+      var html;
+      try{html=parseMd(md)}catch(e){console.error('Parse error:',e);html='<p>Unable to render this post.</p>'}
       postCache[slug]=html;
       render(html);
     })
