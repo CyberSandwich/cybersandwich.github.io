@@ -162,9 +162,9 @@ var $=function(s){return document.getElementById(s)};
 
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
-{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:22,irx:19,sw:7.28,sh:15.77,sz:0.44,so:0.005,sr:2.3,cz:28.6,ns:100,ry:0,mm:0.4,mr:0.5},
-{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:22,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:2.1,cz:26.3,ns:100,ry:Math.PI,mm:0.4,mr:0.45},
-{name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:22,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2}
+{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:22,irx:19,sw:7.28,sh:15.77,sz:0.44,so:0.005,sr:2.3,cz:28.6,ns:100,ry:0,mm:0.9,mr:0.7,ei:2.5},
+{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:22,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:2.1,cz:26.3,ns:100,ry:Math.PI,mm:0.9,mr:0.65,ei:2.5},
+{name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:22,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1}
 ];
 var curDev=0;
 var PW,PH,IW,IH,IX,IY,IRX;
@@ -199,7 +199,7 @@ sceneEl.appendChild(renderer.domElement);
 /* Subtle environment for metallic reflections */
 var pmrem=new THREE.PMREMGenerator(renderer);
 scene.environment=pmrem.fromScene(new RoomEnvironment()).texture;
-scene.environmentIntensity=0.25;
+scene.environmentIntensity=0.4;
 pmrem.dispose();
 
 var controls=new OrbitControls(camera,renderer.domElement);
@@ -210,11 +210,11 @@ controls.dampingFactor=0.05;
 controls.rotateSpeed=0.5;
 controls.addEventListener('change',function(){updateAngles()});
 
-/* Lighting */
-scene.add(new THREE.AmbientLight(0xffffff,0.2));
-var keyL=new THREE.DirectionalLight(0xffffff,1.2);keyL.position.set(1,1,2);keyL.castShadow=true;scene.add(keyL);
-var fillL=new THREE.DirectionalLight(0xffffff,0.4);fillL.position.set(-1,0.5,-1);scene.add(fillL);
-var rimL=new THREE.DirectionalLight(0xffffff,0.3);rimL.position.set(0,-1,-1);scene.add(rimL);
+/* Lighting — dramatic key/fill/rim */
+scene.add(new THREE.AmbientLight(0xffffff,0.15));
+var keyL=new THREE.DirectionalLight(0xffffff,1.5);keyL.position.set(2,3,4);keyL.castShadow=true;scene.add(keyL);
+var fillL=new THREE.DirectionalLight(0xffffff,0.3);fillL.position.set(-2,1,-1);scene.add(fillL);
+var rimL=new THREE.DirectionalLight(0xffffff,0.6);rimL.position.set(-1,-2,3);scene.add(rimL);
 
 /* Screen canvas texture */
 var scrCanvas=document.createElement('canvas');
@@ -288,7 +288,7 @@ gltf.scene.traverse(function(child){
 if(child.isMesh){
 child.castShadow=d.ns===1;child.receiveShadow=d.ns===1;
 var mats=Array.isArray(child.material)?child.material:[child.material];
-mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=d.mm;m.roughness=d.mr;m.side=THREE.DoubleSide;m.needsUpdate=true}})
+mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=d.mm;m.roughness=d.mr;m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true}})
 }});
 scene.add(gltf.scene);
 var geom=new THREE.ShapeGeometry(rrShape(d.sw,d.sh,d.sr));
