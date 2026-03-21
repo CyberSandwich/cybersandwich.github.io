@@ -70,6 +70,13 @@ html[data-theme="dark"] .rs-fb{background:#3A3524!important}
 html[data-theme="dark"] .rs-fb .rs-spin,html[data-theme="dark"] .rs-fb span{color:#FACC15!important}
 html[data-theme="sepia"] .rs-fb{background:#EDE5C0!important}
 html[data-theme="sepia"] .rs-fb .rs-spin,html[data-theme="sepia"] .rs-fb span{color:#A67B5B!important}
+.srow.rs-fb{background:#FEF9C3!important}
+.srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
+.srow.rs-fb .slbl span{color:#CA8A04}
+html[data-theme="dark"] .srow.rs-fb{background:#3A3524!important}
+html[data-theme="dark"] .srow.rs-fb .slbl svg,html[data-theme="dark"] .srow.rs-fb .slbl span{color:#FACC15}
+html[data-theme="sepia"] .srow.rs-fb{background:#EDE5C0!important}
+html[data-theme="sepia"] .srow.rs-fb .slbl svg,html[data-theme="sepia"] .srow.rs-fb .slbl span{color:#A67B5B}
 @keyframes copyPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 .sec-label{font:600 .8125rem/1 var(--font);color:var(--t4);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 8px;user-select:none;-webkit-user-select:none}
 .items{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
@@ -710,8 +717,13 @@ $('neutral-row').addEventListener('click',function(){neutral=!neutral;updateNeut
 
 $('cnt-dn').addEventListener('click',function(e){e.stopPropagation();if(swatchCount>1){swatchCount--;updateCountLabel();resliceImage()}});
 $('cnt-up').addEventListener('click',function(e){e.stopPropagation();var max=mode==='image'?lastExtracted.length:12;if(swatchCount<max){swatchCount++;updateCountLabel();resliceImage()}});
+var cntRsTimer;
 $('count-card').addEventListener('click',function(e){if(e.target.closest('.step-btn'))return;
-if(swatchCount===autoCount)return;swatchCount=autoCount;updateCountLabel();resliceImage()});
+if(swatchCount===autoCount)return;swatchCount=autoCount;updateCountLabel();resliceImage();
+var row=$('count-card').querySelector('.srow');
+row.classList.remove('rs-fb');row.offsetWidth;row.classList.add('rs-fb');
+if(cntRsTimer)clearTimeout(cntRsTimer);
+cntRsTimer=setTimeout(function(){row.classList.remove('rs-fb')},600)});
 
 $('fmt-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-f]');if(!row)return;
