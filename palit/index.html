@@ -267,7 +267,7 @@ var r=Math.round(clampV(rgb[0])*255),g=Math.round(clampV(rgb[1])*255),b=Math.rou
 return'#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1).toUpperCase()}
 
 function relLum(rgb){return .2126*srgbToLin(rgb[0])+.7152*srgbToLin(rgb[1])+.0722*srgbToLin(rgb[2])}
-function wcagGrade(lum){var rw=(LUM_W+.05)/(lum+.05),rb=(lum+.05)/(LUM_B+.05);var r=Math.max(rw,rb);return r>=7?'AAA':r>=4.5?'AA':r>=3?'AA18':''}
+function wcagGrade(lum){var r=(LUM_W+.05)/(lum+.05);return r>=7?'AAA':r>=4.5?'AA':r>=3?'AA18':''}
 
 function parseColor(str){
 str=str.trim().toLowerCase();
