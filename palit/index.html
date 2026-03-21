@@ -99,9 +99,9 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <body>
 <div class="w">
 <div class="inp">
-<input type="color" id="cpick" value="#4A90D9" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-<input id="cinp" type="text" placeholder="#4A90D9" value="#4A90D9" aria-label="Color Value" spellcheck="false" autocomplete="off">
-<button id="add-btn" aria-label="Pick Color" style="background:#4A90D9"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<input type="color" id="cpick" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
+<input id="cinp" type="text" placeholder="#888888" value="" aria-label="Color Value" spellcheck="false" autocomplete="off">
+<button id="add-btn" aria-label="Pick Color" style="background:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 <div class="card" id="gen-card">
 <div class="srow sel" data-r="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v10l7 7"/><circle cx="12" cy="12" r="10"/></svg><span>Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
@@ -111,7 +111,9 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <div class="srow" data-r="4"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v20M5 5l14 14M19 5L5 19"/></svg><span>Split-Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="5"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>Monochromatic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="6"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/></svg><span>Accented Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="count-row" style="display:none;cursor:default">
+</div>
+<div class="card" id="count-card" style="display:none">
+<div class="srow" style="cursor:default">
 <span class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Colors</span></span>
 <div class="stepper">
 <button class="step-btn" id="cnt-dn" aria-label="Fewer Colors"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
@@ -367,11 +369,11 @@ var comp=gamutClamp(lch[0],lch[1],compH);
 var compRgb=clampRgb(oklchToRgb(comp));
 btn.querySelector('svg').setAttribute('stroke',rgbToHex(compRgb))}
 
-var base=[.29,.56,.85],ruleIdx=0,neutral=false,globalFmt=0;
+var base=[.5,.5,.5],ruleIdx=0,neutral=false,globalFmt=0;
 var palette=[],mode='harmony',swatchCount=8;
 var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
 var copyTimers={},caTimer,dlTimer,rsTimer;
-var lastValidHex='#4A90D9';
+var lastValidHex='#808080';
 
 // ===================== STORAGE =====================
 
@@ -382,7 +384,7 @@ function saveHist(){try{localStorage.setItem('palit-history',JSON.stringify(hist
 
 function generate(skipHist){
 palette=generateHarmony(base,ruleIdx,neutral);mode='harmony';
-$('count-row').style.display='none';renderSwatches();showOutput();
+renderSwatches();showOutput();
 if(!skipHist)addToHist()}
 
 function processImage(file){
@@ -400,8 +402,7 @@ if(hexArr.length===0)return;
 palette=hexArr.map(function(hex){var rgb=hexToRgb(hex);var hsl=rgbToHsl(rgb);
 return{hex:hex,rgb:'rgb('+Math.round(rgb[0]*255)+', '+Math.round(rgb[1]*255)+', '+Math.round(rgb[2]*255)+')',
 hsl:'hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)',rgbArr:rgb,oklch:rgbToOklch(rgb)}});
-mode='image';$('count-row').style.display='';
-renderSwatches();showOutput();addToHist()};
+mode='image';renderSwatches();showOutput();addToHist()};
 img.src=e.target.result};reader.readAsDataURL(file)}
 
 function addToHist(){
@@ -425,16 +426,19 @@ generate(true);return}}
 palette=e.colors.map(function(hex){var rgb=hexToRgb(hex)||[0,0,0];var hsl=rgbToHsl(rgb);
 return{hex:hex,rgb:'rgb('+Math.round(rgb[0]*255)+', '+Math.round(rgb[1]*255)+', '+Math.round(rgb[2]*255)+')',
 hsl:'hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)',rgbArr:rgb,oklch:rgbToOklch(rgb)}});
-mode='image';$('count-row').style.display='';renderSwatches();showOutput()}
+mode='image';renderSwatches();showOutput()}
 
 // ===================== RENDERING =====================
 
 function showOutput(){
 var show=palette.length>0;
+var isImg=mode==='image';
+$('gen-card').style.display=isImg?'none':'';
 $('fmt-card').style.display=show?'':'none';
-$('neutral-card').style.display=show?'':'none';
+$('neutral-card').style.display=show&&!isImg?'':'none';
 $('color-card').style.display=show?'':'none';
-$('act-card').style.display=show?'':'none'}
+$('act-card').style.display=show?'':'none';
+$('count-card').style.display=isImg?'':'none'}
 
 function fmtVal(p,f){return[p.hex,p.rgb,p.hsl][f]}
 
@@ -548,9 +552,9 @@ resetWarnTimer=setTimeout(function(){resetPending=false;btn.classList.remove('rs
 return}
 resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
 palette=[];mode='harmony';activeIdx=-1;
-$('fmt-card').style.display='none';$('neutral-card').style.display='none';
-$('color-card').style.display='none';$('act-card').style.display='none';
-$('count-row').style.display='none';closeExport();
+$('gen-card').style.display='';$('fmt-card').style.display='none';
+$('neutral-card').style.display='none';$('color-card').style.display='none';
+$('act-card').style.display='none';$('count-card').style.display='none';closeExport();
 btn.classList.remove('rs-warn');
 btnFeedback(btn,'rs-fb','Reset','Done',1500,'rsTimer')}
 
@@ -671,6 +675,14 @@ rows[activeIdx].style.background='var(--bg2)'}
 
 window.addEventListener('storage',function(e){if(e.key==='palit-history'){loadHist();renderHist()}});
 
+// Random starting color: good L/C, random hue
+var rng=new Uint32Array(1);crypto.getRandomValues(rng);
+var randH=(rng[0]/4294967295)*360;
+var randLch=gamutClamp(.65,.15,randH);
+var randRgb=clampRgb(oklchToRgb(randLch));
+base=randRgb;lastValidHex=rgbToHex(randRgb);
+$('cinp').value=lastValidHex;$('cinp').placeholder=lastValidHex;
+$('cpick').value=lastValidHex;
 updateBtnColor(lastValidHex);generate();renderHist()}
 
 setup();
