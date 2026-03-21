@@ -189,8 +189,8 @@ camera.position.set(0,0,DEVICES[0].cz);
 
 var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.25;
+renderer.toneMapping=THREE.NeutralToneMapping;
+renderer.toneMappingExposure=1.0;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
