@@ -154,7 +154,7 @@ var img=null,blobUrl=null;
 var bgMode=0,radiusIdx=4,shadowIdx=4,fmtIdx=0;
 
 var RAD_PCT=[0,2,4,6,8,10,14,18,22,26,30];
-var SHD_PCT=[0,1,2,3,4,5,6,8,10,12];
+var SHD_PCT=[0,1,2,3,5,7,9,12,15,18];
 var BG_NAMES=['Clear','Light','Dark','Warm','Cool','Auto'];
 var BG_CLS=['bg-clear','bg-light','bg-dark','bg-warm','bg-cool','bg-auto'];
 var BG_GRAD=[null,null,null,['#ffecd2','#fcb69f'],['#e0c3fc','#8ec5fc'],null];
@@ -215,13 +215,13 @@ else if(dk){ctx.fillStyle='#1a1a1a';ctx.fillRect(0,0,ow,oh)}
 else if(gr){var grd=ctx.createLinearGradient(0,0,ow,oh);grd.addColorStop(0,gr[0]);grd.addColorStop(1,gr[1]);ctx.fillStyle=grd;ctx.fillRect(0,0,ow,oh)}
 if(shd>0){
 ctx.save();
-ctx.shadowColor=dk?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.1)';
-ctx.shadowBlur=shd*2;ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.5);
+ctx.shadowColor=dk?'rgba(255,255,255,0.3)':'rgba(0,0,0,0.28)';
+ctx.shadowBlur=shd*2;ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.6);
 rrPath(ctx,ix,iy,cw,ch,rad);ctx.fillStyle=dk?'#1a1a1a':'#fff';ctx.fill();
 ctx.restore();
 ctx.save();
-ctx.shadowColor=dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)';
-ctx.shadowBlur=Math.round(shd*0.5);ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.1);
+ctx.shadowColor=dk?'rgba(255,255,255,0.15)':'rgba(0,0,0,0.12)';
+ctx.shadowBlur=Math.round(shd*0.6);ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.15);
 rrPath(ctx,ix,iy,cw,ch,rad);ctx.fillStyle=dk?'#1a1a1a':'#fff';ctx.fill();
 ctx.restore()
 }
