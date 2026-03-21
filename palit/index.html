@@ -65,20 +65,19 @@ html[data-theme="dark"] .ok .ic,html[data-theme="dark"] .ok span{color:#34D399!i
 html[data-theme="sepia"] .ok{background:#E8E0CE!important}
 html[data-theme="sepia"] .ok .ic,html[data-theme="sepia"] .ok span{color:#2D7D46!important}
 .rs-warn{background:#FEE2E2!important}
-.rs-warn .id{color:#C41E3A!important}
+.rs-warn .id{color:#C41E3A!important;animation:spin .4s ease}
 .rs-warn span{color:#C41E3A!important}
 html[data-theme="dark"] .rs-warn{background:#3A2020!important}
 html[data-theme="dark"] .rs-warn .id,html[data-theme="dark"] .rs-warn span{color:#F87171!important}
 html[data-theme="sepia"] .rs-warn{background:#F0DDD0!important}
 html[data-theme="sepia"] .rs-warn .id,html[data-theme="sepia"] .rs-warn span{color:#C41E3A!important}
 .rs-fb{background:#FEF9C3!important}
-.rs-fb .id{display:none!important}
-.rs-fb .rs-spin{display:inline!important;color:#CA8A04!important;animation:spin .4s ease}
+.rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
 .rs-fb span{color:#CA8A04!important}
 html[data-theme="dark"] .rs-fb{background:#3A3524!important}
-html[data-theme="dark"] .rs-fb .rs-spin,html[data-theme="dark"] .rs-fb span{color:#FACC15!important}
+html[data-theme="dark"] .rs-fb .id,html[data-theme="dark"] .rs-fb span{color:#FACC15!important}
 html[data-theme="sepia"] .rs-fb{background:#EDE5C0!important}
-html[data-theme="sepia"] .rs-fb .rs-spin,html[data-theme="sepia"] .rs-fb span{color:#A67B5B!important}
+html[data-theme="sepia"] .rs-fb .id,html[data-theme="sepia"] .rs-fb span{color:#A67B5B!important}
 .srow.rs-fb{background:#FEF9C3!important}
 .srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
 .srow.rs-fb .slbl span{color:#CA8A04}
@@ -178,7 +177,6 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 </button>
 <button id="rs-btn" aria-label="Reset">
 <svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
-<svg class="rs-spin" viewBox="0 0 24 24" style="width:18px;height:18px;display:none" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
 <span>Reset</span>
 </button>
 </div>
@@ -685,7 +683,7 @@ if(btn)btnFeedback(btn,'ok','','Downloaded',1200)}
 
 var fbTimers=new WeakMap();
 function btnFeedback(btn,cls,origText,fbText,dur){
-var prev=fbTimers.get(btn);if(prev){clearTimeout(prev);btn.classList.remove('ok','rs-fb')}
+var prev=fbTimers.get(btn);if(prev){clearTimeout(prev);btn.classList.remove('ok','rs-fb','rs-warn')}
 var sp=btn.querySelector('span'),orig=sp?sp.textContent:'';
 btn.classList.remove(cls);btn.offsetWidth;btn.classList.add(cls);
 if(sp&&fbText)sp.textContent=fbText;
