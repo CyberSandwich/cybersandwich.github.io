@@ -50,9 +50,16 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .srow:last-child{border-bottom:none}
 .srow:active{opacity:.7}
 .srow.sel{background:var(--bg2)}.srow.sel .slbl svg{color:var(--acc)}.srow.sel .slbl span{color:var(--t1);font-weight:600}
-.bg-chk{width:18px;height:18px;flex-shrink:0;color:var(--t4);opacity:.2;transition:opacity .2s,color .2s}.srow.sel .bg-chk{opacity:1;color:#34D399}
-html[data-theme="dark"] .srow.sel .bg-chk{color:#5DE8B5}
-html[data-theme="sepia"] .srow.sel .bg-chk{color:#7CB07C}
+.bg-chk{display:flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 8px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;flex-shrink:0;transition:background .2s,border-color .2s}
+.bg-chk svg{width:14px;height:14px;color:var(--t4);opacity:.25}
+.srow.sel .bg-chk{background:#DCFCE7;border-color:#A7F3D0;animation:bgPop .35s ease}
+.srow.sel .bg-chk svg{color:#34D399;opacity:1}
+.srow.sel .bg-chk polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+@keyframes bgPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+html[data-theme="dark"] .srow.sel .bg-chk{background:#1A3A2A;border-color:#2D5A3E}
+html[data-theme="dark"] .srow.sel .bg-chk svg{color:#34D399}
+html[data-theme="sepia"] .srow.sel .bg-chk{background:#E8E0CE;border-color:#DDD4C0}
+html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
 .slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
@@ -322,6 +329,9 @@ psBtn.addEventListener('click',pasteClipboard);
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
 BG_NAMES.forEach(function(n,i){$('bg-'+i).classList.toggle('sel',i===m)});
+var chk=$('bg-'+m).querySelector('.bg-chk');
+if(chk){chk.style.animation='none';void chk.offsetWidth;chk.style.animation='';
+var pl=chk.querySelector('polyline');if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}}
 render()
 }
 BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
