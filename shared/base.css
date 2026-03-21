@@ -8,7 +8,7 @@
   --shadow2:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);
   --r:14px;--rr:50px;
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
-  --tab-bg:rgba(245,245,245,.92);--tab-blur:rgba(255,255,255,.35);--tab-border:rgba(255,255,255,.45);--tab-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);--tab-active:rgba(50,50,52,.85);--tab-active-c:#fff
+  --tab-bg:rgba(255,255,255,.55);--tab-blur:rgba(255,255,255,.04);--tab-border:rgba(255,255,255,.42);--tab-shadow:0 2px 6px rgba(0,0,0,.04),0 8px 20px rgba(0,0,0,.06);--tab-active:rgba(50,50,52,.72);--tab-active-c:#fff
 }
 html[data-theme="dark"]{
   --bg:#1C1C1E;--bg2:#2C2C2E;--card:#2C2C2E;
@@ -17,7 +17,7 @@ html[data-theme="dark"]{
   --acc:#64B5F6;
   --shadow:0 1px 3px rgba(0,0,0,.2),0 4px 12px rgba(0,0,0,.15);
   --shadow2:0 2px 6px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.3);
-  --tab-bg:rgba(38,38,38,.92);--tab-blur:rgba(30,30,30,.55);--tab-border:rgba(255,255,255,.06);--tab-shadow:0 2px 6px rgba(0,0,0,.2),0 8px 20px rgba(0,0,0,.3);--tab-active:rgba(255,255,255,.12);--tab-active-c:#E4E4E4
+  --tab-bg:rgba(255,255,255,.1);--tab-blur:rgba(255,255,255,.06);--tab-border:rgba(255,255,255,.12);--tab-shadow:0 2px 6px rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.18);--tab-active:rgba(245,245,247,.12);--tab-active-c:#fff
 }
 html[data-theme="sepia"]{
   --bg:#F5EDDA;--bg2:#EDE5D0;--card:#FAF4E6;
@@ -26,7 +26,7 @@ html[data-theme="sepia"]{
   --acc:#A67B5B;
   --shadow:0 1px 3px rgba(91,70,54,.06),0 4px 12px rgba(91,70,54,.06);
   --shadow2:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);
-  --tab-bg:rgba(240,232,216,.92);--tab-blur:rgba(245,237,218,.55);--tab-border:rgba(255,255,255,.35);--tab-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);--tab-active:rgba(91,70,54,.8);--tab-active-c:#F5EDDA
+  --tab-bg:rgba(245,237,218,.55);--tab-blur:rgba(255,248,240,.08);--tab-border:rgba(255,250,242,.42);--tab-shadow:0 2px 6px rgba(91,70,54,.06),0 8px 20px rgba(91,70,54,.08);--tab-active:rgba(91,70,54,.8);--tab-active-c:#F5EDDA
 }
 html{background:var(--bg)}
 body{
@@ -53,7 +53,7 @@ nav{
   max-width:calc(100vw - 40px)
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  .tabs{background:var(--tab-blur);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
+  .tabs{background:var(--tab-blur);backdrop-filter:blur(6px) saturate(180%);-webkit-backdrop-filter:blur(6px) saturate(180%)}
 }
 .tabs a,.tabs button:not(.theme-toggle){
   background:none;border:none;
@@ -66,7 +66,7 @@ nav{
 .tabs a.active,.tabs button.active{
   background:var(--tab-active);
   color:var(--tab-active-c);
-  box-shadow:0 2px 8px rgba(0,0,0,.15)
+  box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)
 }
 .tabs a:active,.tabs button:active{opacity:.7}
 .theme-toggle{display:flex;align-items:center;justify-content:center;padding:12px;border:none;border-radius:50%;cursor:pointer;color:var(--t3);background:none;transition:color .15s}
@@ -80,5 +80,10 @@ nav{
 @keyframes spin{to{transform:rotate(360deg)}}
 :focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(prefers-reduced-transparency:reduce){
+  .tabs{background:rgba(255,255,255,.82)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  html[data-theme="sepia"] .tabs{background:rgba(245,237,218,.82)!important}
+  html[data-theme="dark"] .tabs{background:rgba(44,44,46,.88)!important}
+}
 @media(max-width:390px){.tabs{max-width:calc(100vw - 20px)}}
 .fx-bottom{bottom:0;left:50%;transform:translateX(-50%);position:fixed;z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center}
