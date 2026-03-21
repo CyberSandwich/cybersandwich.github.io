@@ -12,6 +12,12 @@
     "category": "Web"
   },
   {
+    "title": "Clip",
+    "subtitle": "Clipboard Text Manager",
+    "url": "/clip/",
+    "category": "Web"
+  },
+  {
     "title": "Clock",
     "subtitle": "A Minimal 8KB Clock",
     "url": "/time/",

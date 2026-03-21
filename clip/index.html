@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/ds-favicon.png">
+<title>Clip</title>
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=2">
+<style>
+body{display:flex;align-items:flex-start;justify-content:center}
+.w{max-width:440px;padding:20px 20px 100px;width:100%}
+.inp{display:flex;gap:8px;margin-bottom:14px}
+.inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
+.inp input:focus{border-color:var(--t4)}
+.inp button{width:44px;height:44px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
+.paste-hint{display:none;font:400 .75rem/1 var(--font);color:var(--t4);text-align:center;margin-top:-6px;margin-bottom:14px}
+@media(hover:none){.paste-hint{display:block}}
+.links{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.links>button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s,color .15s}
+.links>button:last-child{border-bottom:none}
+.links>button svg{width:18px;height:18px;color:var(--t4);flex-shrink:0}
+.links>button[disabled]{opacity:.35;cursor:not-allowed}
+.ok{background:#DCFCE7!important;color:#34D399!important}
+.ok svg,.ok span{color:#34D399!important}
+.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.rs-fb{background:#FEF9C3!important;color:#CA8A04!important}
+.rs-fb svg{color:#CA8A04!important;animation:spin .4s ease}
+.rs-fb span{color:#CA8A04!important}
+.search-wrap{display:none;margin-bottom:14px}
+.search-wrap input{width:100%;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
+.search-wrap input:focus{border-color:var(--t4)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;color:var(--t4);gap:12px;font:500 .9375rem/1 var(--font)}
+.empty svg{opacity:.4}
+.items{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.item{display:flex;align-items:center;padding:14px 16px 14px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.3 var(--font);color:var(--t2);cursor:pointer;transition:background .15s;word-break:break-word}
+.item:last-child{border-bottom:none}
+.item span{flex:1;pointer-events:none}
+.item .del{width:28px;height:28px;border-radius:50%;border:1.5px solid transparent;background:none;cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s,border-color .15s,opacity .2s}
+.item .del svg{width:14px;height:14px;pointer-events:none}
+.item .del.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
+.item .del.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:checkDraw .35s ease .08s forwards}
+html[data-theme="dark"] .item .del.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
+html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
+.no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
+.drop-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(250,250,250,.95);font:600 1.25rem/1 var(--font);color:var(--t3);opacity:0;pointer-events:none;transition:opacity .2s}
+.drop-overlay.active{opacity:1;pointer-events:auto}
+html[data-theme="dark"] .drop-overlay{background:rgba(28,28,30,.95)}
+html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
+.fi{animation:fi .25s ease}
+@keyframes copyPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes checkDraw{to{stroke-dashoffset:0}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media(hover:hover){
+  .links>button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
+  .inp button:hover{color:var(--t1)}
+  .item:hover{background:var(--bg2)}
+  .item .del:hover{color:var(--t2);background:var(--bg2)}
+}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="inp">
+    <input id="inp" type="text" autocomplete="off" placeholder="Clip 1" spellcheck="false" aria-label="Text Input">
+    <button id="add-btn" aria-label="Add Item"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+  <div class="paste-hint">Long-Press Input Box to Paste</div>
+  <div class="links">
+    <button id="ca-btn" disabled aria-label="Copy All"><svg id="ca-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ca-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="ca-l">Copy All</span></button>
+    <button id="rs-btn" aria-label="Reset"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
+  </div>
+  <div class="search-wrap" id="search-wrap">
+    <input id="search" type="text" placeholder="Search" autocomplete="off" aria-label="Search Items">
+  </div>
+  <div id="empty" class="empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+    No Items Yet
+  </div>
+  <div class="items" id="items" style="display:none" role="list"></div>
+</div>
+<div class="drop-overlay" id="drop-overlay">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
+  Drop Text File Here
+</div>
+<div id="status" class="sr-only" aria-live="polite"></div>
+<nav>
+<div class="tabs">
+<a href="/">Home</a>
+<a class="active">Clip</a>
+</div>
+<div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=1"></script>
+<script>
+function $(id){return document.getElementById(id)}
+var items=[],copyTimers={},caTimer=null,rsTimer=null,searchTimer=null;
+
+/* ── Storage ──────────────────────────────────────────────────────── */
+function load(){try{var r=localStorage.getItem('clip-items');if(r){var p=JSON.parse(r);if(Array.isArray(p))items=p}}catch(_){}}
+function save(){try{localStorage.setItem('clip-items',JSON.stringify(items))}catch(_){}}
+
+/* ── Text Cleaning ────────────────────────────────────────────────── */
+function clean(s){return s.replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ').replace(/\t/g,' ').replace(/ {2,}/g,' ').trim()}
+
+/* ── Unique ID ────────────────────────────────────────────────────── */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+/* ── Announce (a11y) ──────────────────────────────────────────────── */
+function announce(msg){var el=$('status');el.textContent='';requestAnimationFrame(function(){el.textContent=msg})}
+
+/* ── Render ───────────────────────────────────────────────────────── */
+function render(newId){
+  var c=$('items'),q=$('search').value.toLowerCase(),hasItems=items.length>0;
+  c.textContent='';
+  $('empty').style.display=hasItems?'none':'';
+  $('search-wrap').style.display=hasItems?'block':'none';
+  $('ca-btn').disabled=!hasItems;
+  inp.placeholder='Clip '+(items.length+1);
+  if(!hasItems){c.style.display='none';return}
+  var shown=0;
+  for(var i=0;i<items.length;i++){
+    var it=items[i];
+    if(q&&it.text.toLowerCase().indexOf(q)===-1)continue;
+    shown++;
+    var row=document.createElement('div');row.className='item';row.setAttribute('role','listitem');row.setAttribute('data-id',it.id);
+    var s=document.createElement('span');s.textContent=it.text;
+    var btn=document.createElement('button');btn.className='del';btn.setAttribute('aria-label','Remove');
+    var xsvg=mkX();btn.appendChild(xsvg);
+    row.appendChild(s);row.appendChild(btn);c.appendChild(row);
+    if(newId&&it.id===newId)row.classList.add('fi');
+  }
+  if(shown===0&&q){
+    var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';c.appendChild(nm);
+  }
+  c.style.display='';
+}
+
+/* ── SVG Helpers ──────────────────────────────────────────────────── */
+function mkX(){
+  var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('width','14');s.setAttribute('height','14');s.setAttribute('viewBox','0 0 24 24');
+  s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');
+  s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');
+  var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d','M18 6L6 18M6 6l12 12');s.appendChild(p);return s;
+}
+function mkCheck(){
+  var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('width','14');s.setAttribute('height','14');s.setAttribute('viewBox','0 0 24 24');
+  s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2.5');
+  s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');
+  var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  p.setAttribute('points','4 12 9 17 20 6');s.appendChild(p);return s;
+}
+
+/* ── Add Item ─────────────────────────────────────────────────────── */
+function addItem(text){
+  var t=clean(text);if(!t)return;
+  var id=uid();
+  items.unshift({id:id,text:t,ts:Date.now()});
+  save();render(id);announce('Added');
+}
+function addBulk(text){
+  var parts=text.split(/\n/);var added=0;
+  for(var i=0;i<parts.length;i++){var t=clean(parts[i]);if(t){items.unshift({id:uid(),text:t,ts:Date.now()});added++}}
+  if(added){save();render();announce(added+' Item'+(added!==1?'s':'')+' Added')}
+}
+
+/* ── Remove Item ──────────────────────────────────────────────────── */
+function removeItem(id){
+  for(var i=0;i<items.length;i++){if(items[i].id===id){items.splice(i,1);break}}
+  if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);delete copyTimers[id]}
+  save();render();announce('Removed');
+}
+
+/* ── Copy Single Item ─────────────────────────────────────────────── */
+function copyItem(id,btn){
+  var text='';
+  for(var i=0;i<items.length;i++){if(items[i].id===id){text=items[i].text;break}}
+  if(!text)return;
+  doCopy(text,function(){
+    if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);btn.classList.remove('copied');btn.textContent='';btn.appendChild(mkX())}
+    btn.textContent='';btn.appendChild(mkCheck());
+    btn.classList.remove('copied');btn.offsetWidth;btn.classList.add('copied');
+    copyTimers[id]={};
+    copyTimers[id].t1=setTimeout(function(){btn.style.opacity='0';
+      copyTimers[id].t2=setTimeout(function(){btn.classList.remove('copied');btn.textContent='';btn.appendChild(mkX());btn.style.opacity='';delete copyTimers[id]},200);
+    },1500);
+    announce('Copied');
+  });
+}
+
+/* ── Clipboard Write (with fallback) ─────────────────────────────── */
+function doCopy(text,cb){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(cb,function(){fallbackCopy(text);cb()});
+  }else{fallbackCopy(text);cb()}
+}
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy')}catch(_){}
+  document.body.removeChild(ta);
+}
+
+/* ── Copy All ─────────────────────────────────────────────────────── */
+function doCopyAll(){
+  if(items.length===0)return;
+  var all=[];for(var i=0;i<items.length;i++)all.push(items[i].text);
+  var btn=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
+  doCopy(all.join('\n'),function(){
+    if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All'}
+    ci.style.display='none';ck.style.display='';cl.textContent='Copied';
+    btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+    caTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All';caTimer=null},800);
+    announce('All Items Copied');
+  });
+}
+
+/* ── Reset ────────────────────────────────────────────────────────── */
+function doReset(){
+  items=[];save();
+  Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
+  copyTimers={};
+  $('search').value='';render();
+  var rb=$('rs-btn'),rl=$('rs-l');
+  if(rsTimer){clearTimeout(rsTimer);rb.classList.remove('rs-fb');rl.textContent='Reset'}
+  rl.textContent='Done';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-fb');
+  rsTimer=setTimeout(function(){rb.classList.remove('rs-fb');rl.textContent='Reset';rsTimer=null},1500);
+  announce('All Items Cleared');
+}
+
+/* ── Input Handlers ───────────────────────────────────────────────── */
+var inp=$('inp');
+function doAdd(){var v=inp.value;addItem(v);inp.value='';inp.focus()}
+$('add-btn').addEventListener('click',doAdd);
+inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doAdd()}});
+inp.addEventListener('paste',function(e){
+  var text=(e.clipboardData||window.clipboardData).getData('text');
+  if(text){e.preventDefault();addItem(text);inp.value=''}
+});
+
+/* ── Item Click Delegation ────────────────────────────────────────── */
+$('items').addEventListener('click',function(e){
+  var del=e.target.closest('.del');
+  var row=e.target.closest('.item');
+  if(!row)return;
+  var id=row.getAttribute('data-id');
+  if(del){removeItem(id)}
+  else{copyItem(id,row.querySelector('.del'))}
+});
+
+/* ── Search ───────────────────────────────────────────────────────── */
+$('search').addEventListener('input',function(){
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(function(){render()},150);
+});
+
+/* ── Action Buttons ───────────────────────────────────────────────── */
+$('ca-btn').addEventListener('click',doCopyAll);
+$('rs-btn').addEventListener('click',doReset);
+
+/* ── Keyboard Shortcuts ───────────────────────────────────────────── */
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){document.activeElement.blur();return}
+  var tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;
+  if(e.key==='/'){e.preventDefault();inp.focus()}
+  else if(e.key==='a'){e.preventDefault();doCopyAll()}
+  else if(e.key==='r')doReset();
+  else if(e.key==='x'){if(items.length>0)removeItem(items[0].id)}
+  else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
+  else if(e.key==='1')window.location.href='/';
+});
+
+/* ── Drag-Drop ────────────────────────────────────────────────────── */
+var dragCount=0,overlay=$('drop-overlay');
+document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)overlay.classList.add('active')});
+document.addEventListener('dragleave',function(e){e.preventDefault();dragCount--;if(dragCount<=0){dragCount=0;overlay.classList.remove('active')}});
+document.addEventListener('dragover',function(e){e.preventDefault()});
+document.addEventListener('drop',function(e){
+  e.preventDefault();dragCount=0;overlay.classList.remove('active');
+  var files=e.dataTransfer.files;
+  if(files&&files.length>0){
+    for(var i=0;i<files.length;i++){
+      (function(file){
+        if(file.type&&!file.type.match(/^text\//))return;
+        var name=file.name||'';
+        if(!file.type&&!name.match(/\.(txt|csv)$/i))return;
+        var reader=new FileReader();
+        reader.onload=function(ev){addBulk(ev.target.result)};
+        reader.readAsText(file);
+      })(files[i]);
+    }
+  }else{var text=e.dataTransfer.getData('text');if(text)addBulk(text)}
+});
+
+/* ── Cross-Tab Sync ───────────────────────────────────────────────── */
+window.addEventListener('storage',function(e){
+  if(e.key==='clip-items'){load();render()}
+});
+
+/* ── Init ─────────────────────────────────────────────────────────── */
+load();render();
+</script>
+</body>
+</html>
