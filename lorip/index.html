@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Lorip</title>
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/ds-favicon.png">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=2">
+<style>
+:root{--num-bg:#48484A}
+html[data-theme="sepia"]{--num-bg:#6B5744}
+body{display:flex;align-items:flex-start;justify-content:center}
+.w{max-width:440px;width:100%;padding:20px 20px 100px}
+.out{
+  background:var(--num-bg);border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:24px;margin-bottom:14px;
+  max-height:320px;overflow-y:auto;
+  transition:background .3s;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent;
+  cursor:pointer
+}
+.out::-webkit-scrollbar{width:4px}
+.out::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.out:active{opacity:.85}
+#r{
+  font:400 .9375rem/1.65 var(--font);
+  color:rgba(255,255,255,.88);
+  white-space:pre-wrap;word-break:break-word
+}
+#r::selection{background:rgba(255,255,255,.2)}
+.out.cp-fb{animation:cpFlash .35s ease}
+.settings{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s}
+.srow:last-child{border-bottom:none}
+.slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
+.slbl svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.schips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{
+  padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
+  font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;white-space:nowrap
+}
+.chip:active{transform:scale(.95)}
+.chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.stepper{display:flex;align-items:center;gap:6px}
+.step-val{font:600 .9375rem/1 var(--font);color:var(--t1);min-width:28px;text-align:center;font-variant-numeric:tabular-nums}
+.step-btn{
+  width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
+  color:var(--t3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s,color .15s,opacity .15s;padding:0
+}
+.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
+.step-btn:active:not(:disabled){transform:scale(.9)}
+.step-btn:disabled{opacity:.3;cursor:default}
+.toggle-pill{padding:8px 16px;border-radius:50px;border:1.5px solid var(--bdr);font:500 .75rem/1 var(--font);color:var(--t3);background:none;cursor:pointer;flex-shrink:0;min-width:58px;text-align:center;transition:.2s ease}
+.toggle-pill:active{opacity:.7}
+.toggle-pill.toggled{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:pop .35s ease}
+.toggle-pill.toggled svg{width:12px;height:12px;display:block;margin:0 auto}
+.toggle-pill.toggled polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.links{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.links button{
+  display:flex;align-items:center;gap:12px;
+  width:100%;padding:14px 20px;
+  font:500 .9375rem/1 var(--font);
+  color:var(--t2);background:none;border:none;
+  border-bottom:1px solid var(--bdr2);
+  cursor:pointer;text-align:left;
+  transition:background .25s,color .15s
+}
+.links button:last-child{border-bottom:none}
+.links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.ok{background:#DCFCE7!important}
+.ok svg,.ok span{color:#34D399!important}
+.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.regen{background:#FEF9C3!important}
+.regen svg{color:#CA8A04!important;animation:spin .4s ease}
+.regen span{color:#CA8A04}
+.fi{animation:fi .25s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes cpFlash{0%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px rgba(52,211,153,.4),var(--shadow)}100%{box-shadow:var(--shadow)}}
+@media(hover:hover){
+  .links button:hover{background:var(--bg2);color:var(--t1)}
+  .chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}
+  .step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}
+  .toggle-pill:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
+  .out:hover{opacity:.92}
+}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="out" id="out" role="button" tabindex="0" aria-label="Click to Copy Generated Text">
+    <div id="r" aria-live="polite"></div>
+  </div>
+  <div class="settings">
+    <div class="srow">
+      <div class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg><span>Mode</span></div>
+      <div class="schips" id="chips"></div>
+    </div>
+    <div class="srow">
+      <div class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span id="cl"></span></div>
+      <div class="stepper">
+        <button class="step-btn" id="dec" aria-label="Decrease Count"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+        <span class="step-val" id="cv"></span>
+        <button class="step-btn" id="inc" aria-label="Increase Count"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg><span>Start With Lorem Ipsum</span></div>
+      <button class="toggle-pill" id="lorem-btn" aria-label="Toggle Start With Lorem Ipsum">On</button>
+    </div>
+  </div>
+  <div class="links">
+    <button id="g" type="button" aria-label="Regenerate text"><svg id="gi" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="gl">Regenerate</span></button>
+    <button id="c" type="button" aria-label="Copy text to clipboard"><svg id="ci" aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" aria-hidden="true" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6" stroke-width="2.5"/></svg><span id="csl">Copy</span></button>
+  </div>
+</div>
+<nav>
+<div class="tabs">
+<a href="/">Home</a>
+<a class="active">Lorip</a>
+</div>
+<div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=1"></script>
+<script>
+var $=function(id){return document.getElementById(id)},
+MODES=['Paragraphs','Sentences','Words','Lists'],
+DEFS=[3,5,50,5],MINS=[1,1,1,1],MAXS=[20,50,500,30],STEPS=[1,1,10,1],
+OPENER='Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+W='lorem,ipsum,dolor,sit,amet,consectetur,adipiscing,elit,sed,do,eiusmod,tempor,incididunt,ut,labore,et,dolore,magna,aliqua,enim,ad,minim,veniam,quis,nostrud,exercitation,ullamco,laboris,nisi,aliquip,ex,ea,commodo,consequat,duis,aute,irure,in,reprehenderit,voluptate,velit,esse,cillum,fugiat,nulla,pariatur,excepteur,sint,occaecat,cupidatat,non,proident,sunt,culpa,qui,officia,deserunt,mollit,anim,id,est,laborum,ac,accumsan,aliquet,ante,arcu,at,auctor,augue,bibendum,blandit,condimentum,congue,cras,cursus,diam,dictum,dignissim,donec,dui,efficitur,egestas,eget,eleifend,elementum,eros,etiam,eu,facilisi,faucibus,felis,fermentum,feugiat,finibus,gravida,habitant,habitasse,hendrerit,iaculis,imperdiet,integer,interdum,justo,lacinia,lacus,laoreet,lectus,leo,libero,ligula,lobortis,luctus,maecenas,massa,mattis,mauris,maximus,metus,mi,morbi,nam,nec,neque,nibh,nullam,nunc,odio,orci,ornare,pellentesque,pharetra,placerat,platea,porta,porttitor,posuere,praesent,pretium,proin,pulvinar,purus,quam,quisque,rhoncus,risus,rutrum,sagittis,sapien,scelerisque,semper,senectus,sodales,sollicitudin,suscipit,suspendisse,tellus,tincidunt,tortor,tristique,turpis,ultrices,ultricies,urna,varius,vehicula,vel,vestibulum,vitae,vivamus,viverra,volutpat,vulputate'.split(','),
+mode=0,count=3,lorem=true,output='',gm,cm,cpTm,loremTm,loremTm2;
+
+function rand(n){var r=new Uint32Array(1);crypto.getRandomValues(r);return r[0]%n}
+function randWord(){return W[rand(W.length)]}
+function genSentence(minW,maxW){
+  var len=minW+rand(maxW-minW+1),words=[],i,out='';
+  for(i=0;i<len;i++)words.push(randWord());
+  words[0]=words[0][0].toUpperCase()+words[0].slice(1);
+  for(i=0;i<words.length;i++){
+    out+=words[i];
+    if(i<words.length-1){
+      if(i>1&&i<words.length-2&&len>6&&(i%4===2||i%5===3))out+=', ';
+      else out+=' ';
+    }
+  }
+  return out+'.'
+}
+function genParagraph(){
+  var n=3+rand(4),sents=[],i;
+  for(i=0;i<n;i++)sents.push(genSentence(8,16));
+  return sents.join(' ')
+}
+function generate(){
+  var parts=[],i,wc,s,words,remaining;
+  if(mode===0){
+    for(i=0;i<count;i++){
+      if(i===0&&lorem)parts.push(OPENER+' '+genParagraph());
+      else parts.push(genParagraph());
+    }
+    output=parts.join('\n\n');
+  }else if(mode===1){
+    for(i=0;i<count;i++){
+      if(i===0&&lorem)parts.push(OPENER);
+      else parts.push(genSentence(8,16));
+    }
+    output=parts.join(' ');
+  }else if(mode===2){
+    if(lorem){
+      words=OPENER.replace(/[.,]/g,'').split(' ');
+      if(count<=words.length){output=words.slice(0,count).join(' ');output=output[0].toUpperCase()+output.slice(1)+'.';return}
+      parts=parts.concat(words);
+      remaining=count-words.length;
+    }else{remaining=count;parts=[]}
+    while(remaining>0){
+      if(remaining<=3){for(i=0;i<remaining;i++)parts.push(randWord());remaining=0}
+      else{
+        s=genSentence(Math.min(8,remaining),Math.min(16,remaining));
+        words=s.replace(/[.,]/g,'').split(' ');
+        if(words.length>remaining)words=words.slice(0,remaining);
+        parts=parts.concat(words);remaining-=words.length;
+      }
+    }
+    var raw=parts.join(' ');
+    raw=raw[0].toUpperCase()+raw.slice(1);
+    if(!raw.endsWith('.'))raw+='.';
+    output=raw;
+  }else{
+    for(i=0;i<count;i++){
+      if(i===0&&lorem){
+        var opWords=OPENER.replace(/\.$/,'').split(' ');
+        var shortOpener=opWords.slice(0,5+rand(4)).join(' ');
+        parts.push('\u2022 '+shortOpener[0].toUpperCase()+shortOpener.slice(1));
+      }else{
+        parts.push('\u2022 '+genSentence(4,10).replace(/\.$/,''));
+      }
+    }
+    output=parts.join('\n');
+  }
+}
+function render(){
+  generate();
+  var el=$('r');
+  el.classList.remove('fi');el.offsetWidth;
+  el.textContent=output;
+  el.classList.add('fi');
+  $('out').scrollTop=0;
+}
+function updateUI(){
+  var chips=$('chips').querySelectorAll('.chip');
+  for(var i=0;i<chips.length;i++)chips[i].classList.toggle('active',i===mode);
+  $('cv').textContent=count;
+  $('cl').textContent=count+' '+(count===1?MODES[mode].replace(/s$/,''):MODES[mode]);
+  $('dec').disabled=count<=MINS[mode];
+  $('inc').disabled=count>=MAXS[mode];
+}
+function setMode(m){
+  mode=m;count=DEFS[m];updateUI();render();
+}
+function setCount(n){
+  count=Math.max(MINS[mode],Math.min(MAXS[mode],n));updateUI();render();
+}
+function mkCheck(){
+  var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');
+  s.setAttribute('stroke-width','2.5');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');
+  var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points','4 12 9 17 20 6');
+  s.appendChild(p);return s
+}
+function toggleLorem(){
+  lorem=!lorem;
+  var tb=$('lorem-btn');
+  if(loremTm){clearTimeout(loremTm);clearTimeout(loremTm2);tb.classList.remove('toggled');tb.textContent=lorem?'On':'Off';tb.style.opacity=''}
+  tb.classList.remove('toggled');tb.offsetWidth;
+  tb.textContent='';tb.appendChild(mkCheck());
+  tb.classList.add('toggled');
+  loremTm=setTimeout(function(){
+    tb.style.opacity='0';
+    loremTm2=setTimeout(function(){
+      tb.classList.remove('toggled');
+      tb.textContent=lorem?'On':'Off';
+      tb.style.opacity='';
+    },200);
+  },1500);
+  render();
+}
+function doCopy(){
+  if(!output)return;
+  clearTimeout(cm);
+  navigator.clipboard.writeText(output).then(function(){
+    $('ci').style.display='none';$('ck').style.display='';
+    $('csl').textContent='Copied';
+    var btn=$('c');btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+    cm=setTimeout(function(){
+      btn.classList.remove('ok');$('ci').style.display='';$('ck').style.display='none';$('csl').textContent='Copy';
+    },800);
+  },function(){$('csl').textContent='Failed';cm=setTimeout(function(){$('csl').textContent='Copy'},800)});
+}
+function doRegen(){
+  clearTimeout(gm);render();
+  $('gl').textContent='Regenerated';
+  var btn=$('g');btn.classList.remove('regen');btn.offsetWidth;btn.classList.add('regen');
+  gm=setTimeout(function(){$('gl').textContent='Regenerate';btn.classList.remove('regen')},800);
+}
+/* Build mode chips */
+(function(){
+  var container=$('chips');
+  for(var i=0;i<MODES.length;i++){
+    var b=document.createElement('button');
+    b.className='chip'+(i===0?' active':'');
+    b.type='button';b.textContent=MODES[i];
+    b.addEventListener('click',(function(idx){return function(){setMode(idx)}})(i));
+    container.appendChild(b);
+  }
+})();
+/* Events */
+$('dec').onclick=function(){setCount(count-STEPS[mode])};
+$('inc').onclick=function(){setCount(count+STEPS[mode])};
+$('lorem-btn').onclick=toggleLorem;
+$('g').onclick=doRegen;
+$('c').onclick=doCopy;
+$('out').onclick=function(){
+  if(!output)return;
+  clearTimeout(cpTm);
+  navigator.clipboard.writeText(output).then(function(){
+    var el=$('out');el.classList.remove('cp-fb');el.offsetWidth;el.classList.add('cp-fb');
+    cpTm=setTimeout(function(){el.classList.remove('cp-fb')},400);
+  },function(){});
+};
+document.addEventListener('keydown',function(e){
+  var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();doRegen()}
+  else if(e.key==='c'){e.preventDefault();doCopy()}
+  else if(e.key==='m'){setMode((mode+1)%MODES.length)}
+  else if(e.key==='l')toggleLorem();
+  else if(e.key==='ArrowUp'||e.key==='='||e.key==='+'){e.preventDefault();setCount(count+STEPS[mode])}
+  else if(e.key==='ArrowDown'||e.key==='-'){e.preventDefault();setCount(count-STEPS[mode])}
+  else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
+  else if(e.key==='1')window.location.href='/';
+});
+/* Init */
+updateUI();render();
+</script>
+</body>
+</html>
