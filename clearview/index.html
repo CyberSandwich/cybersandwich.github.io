@@ -108,13 +108,6 @@ button:focus:not(:focus-visible){outline:none}
 <button class="step-btn" id="rad-inc" aria-label="Increase Corner Radius"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 </div>
 </div>
-<div class="srow" id="sr-pad">
-<label class="slbl"><svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg><span id="pad-val"></span></label>
-<div class="stepper">
-<button class="step-btn" id="pad-dec" aria-label="Decrease Padding"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-<button class="step-btn" id="pad-inc" aria-label="Increase Padding"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-</div>
-</div>
 <div class="srow" id="sr-shd">
 <label class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 9H9v12"/></svg><span id="shd-val"></span></label>
 <div class="stepper">
@@ -146,10 +139,9 @@ Drop Image Here
 var $=function(s){return document.getElementById(s)};
 
 var img=null,blobUrl=null;
-var bgMode=0,radiusIdx=4,padIdx=1,shadowIdx=2,fmtIdx=0;
+var bgMode=0,radiusIdx=4,shadowIdx=2,fmtIdx=0;
 
 var RAD_PCT=[0,2,4,6,8,10,14,18,22,26,30];
-var PAD_PCT=[0,2,4,6,8,10,12,15,20,25,30];
 var SHD_PCT=[0,1,2,3,4,5,6,8,10,12];
 var BG_NAMES=['Clear','Light','Dark','Warm','Cool'];
 var BG_CLS=['bg-clear','bg-light','bg-dark','bg-warm','bg-cool'];
@@ -186,23 +178,21 @@ emptyEl.style.display='none';canvas.style.display='block';
 var cw=img.naturalWidth,ch=img.naturalHeight;
 var minD=Math.min(cw,ch);
 var rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
-var pad=Math.round(minD*PAD_PCT[padIdx]/100);
 var shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
 var se=shd>0?Math.ceil(shd*3.5):0;
-var ow=cw+pad*2+se*2,oh=ch+pad*2+se*2;
+var ow=cw+se*2,oh=ch+se*2;
 if(ow>MAX_DIM||oh>MAX_DIM){
 var s=Math.min(MAX_DIM/ow,MAX_DIM/oh);
 cw=Math.round(img.naturalWidth*s);ch=Math.round(img.naturalHeight*s);
 minD=Math.min(cw,ch);
 rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
-pad=Math.round(minD*PAD_PCT[padIdx]/100);
 shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
 se=shd>0?Math.ceil(shd*3.5):0;
-ow=cw+pad*2+se*2;oh=ch+pad*2+se*2
+ow=cw+se*2;oh=ch+se*2
 }
 canvas.width=ow;canvas.height=oh;
 ctx.clearRect(0,0,ow,oh);
-var ix=se+pad,iy=se+pad;
+var ix=se,iy=se;
 var dk=bgMode===2;
 var gr=BG_GRAD[bgMode];
 if(bgMode===1){ctx.fillStyle='#fff';ctx.fillRect(0,0,ow,oh)}
@@ -301,24 +291,16 @@ $('rad-val').textContent=v===0?'None':v+'% Radius';
 $('rad-dec').disabled=radiusIdx===0;
 $('rad-inc').disabled=radiusIdx===RAD_PCT.length-1
 }
-function updatePadUI(){
-var v=PAD_PCT[padIdx];
-$('pad-val').textContent=v===0?'None':v+'% Padding';
-$('pad-dec').disabled=padIdx===0;
-$('pad-inc').disabled=padIdx===PAD_PCT.length-1
-}
 function updateShdUI(){
 var v=SHD_PCT[shadowIdx];
 $('shd-val').textContent=v===0?'Off':v+'% Shadow';
 $('shd-dec').disabled=shadowIdx===0;
 $('shd-inc').disabled=shadowIdx===SHD_PCT.length-1
 }
-updateRadUI();updatePadUI();updateShdUI();
+updateRadUI();updateShdUI();
 
 $('rad-dec').addEventListener('click',function(){if(radiusIdx>0){radiusIdx--;updateRadUI();render()}});
 $('rad-inc').addEventListener('click',function(){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render()}});
-$('pad-dec').addEventListener('click',function(){if(padIdx>0){padIdx--;updatePadUI();render()}});
-$('pad-inc').addEventListener('click',function(){if(padIdx<PAD_PCT.length-1){padIdx++;updatePadUI();render()}});
 $('shd-dec').addEventListener('click',function(){if(shadowIdx>0){shadowIdx--;updateShdUI();render()}});
 $('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}});
 
@@ -343,7 +325,6 @@ setFmt(0);
 var RESET_IC='<svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
 var groups=[
 {_row:$('sr-rad'),_reset:function(){radiusIdx=4;updateRadUI();render()}},
-{_row:$('sr-pad'),_reset:function(){padIdx=1;updatePadUI();render()}},
 {_row:$('sr-shd'),_reset:function(){shadowIdx=2;updateShdUI();render()}},
 {_row:$('sr-fmt'),_reset:function(){setFmt(0)}}
 ];
@@ -413,8 +394,8 @@ feedback(dlBtn,'dl-fb','Downloaded')
 
 function resetAll(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-render();setBg(0);radiusIdx=4;padIdx=1;shadowIdx=2;
-updateRadUI();updatePadUI();updateShdUI();setFmt(0);
+render();setBg(0);radiusIdx=4;shadowIdx=2;
+updateRadUI();updateShdUI();setFmt(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});
 feedback(rsBtn,'rs-fb','Reset')
@@ -448,8 +429,6 @@ if(e.key==='j'){setFmt(1);return}
 if(e.key==='w'){setFmt(2);return}
 if(e.key==='='){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render()}return}
 if(e.key==='-'){if(radiusIdx>0){radiusIdx--;updateRadUI();render()}return}
-if(e.key===']'){if(padIdx<PAD_PCT.length-1){padIdx++;updatePadUI();render()}return}
-if(e.key==='['){if(padIdx>0){padIdx--;updatePadUI();render()}return}
 if(e.key==='\''){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}return}
 if(e.key===';'){if(shadowIdx>0){shadowIdx--;updateShdUI();render()}return}
 });
