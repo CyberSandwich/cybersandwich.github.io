@@ -49,6 +49,7 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
 .srow:active{opacity:.7}
+.srow.sel{background:var(--bg2)}.srow.sel .slbl svg{color:var(--acc)}.srow.sel .slbl span{color:var(--t1);font-weight:600}
 .slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
@@ -93,10 +94,11 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </div>
 <div id="s1" class="card">
-<div class="srow" id="sr-bg">
-<label class="slbl"><span id="bg-ic"></span><span id="bg-nm" style="transition:opacity .15s"></span></label>
-<div class="schips" id="bg-chips"></div>
-</div>
+<div class="srow sel" id="bg-0"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label></div>
+<div class="srow" id="bg-1"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Light</span></label></div>
+<div class="srow" id="bg-2"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark</span></label></div>
+<div class="srow" id="bg-3"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label></div>
+<div class="srow" id="bg-4"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label></div>
 </div>
 <div id="s2" class="card">
 <div class="srow" id="sr-rad">
@@ -126,10 +128,6 @@ button:focus:not(:focus-visible){outline:none}
 <label class="slbl"><span id="fmt-ic"></span><span id="fmt-nm" style="transition:opacity .15s"></span></label>
 <div class="schips" id="fmt-chips"></div>
 </div>
-<div class="srow" id="sr-sc">
-<label class="slbl"><span id="sc-ic"></span><span id="sc-nm" style="transition:opacity .15s"></span></label>
-<div class="schips" id="sc-chips"></div>
-</div>
 </div>
 </div>
 <div id="drop-ov" class="drop-overlay" role="status" aria-live="assertive">
@@ -148,27 +146,14 @@ Drop Image Here
 var $=function(s){return document.getElementById(s)};
 
 var img=null,blobUrl=null;
-var bgMode=0,radiusIdx=4,padIdx=5,shadowIdx=2,fmtIdx=0;
+var bgMode=0,radiusIdx=4,padIdx=1,shadowIdx=2,fmtIdx=0;
 
-var RAD_PCT=[0,1,2,3,4,5,6,8,10,12,15];
+var RAD_PCT=[0,2,4,6,8,10,14,18,22,26,30];
 var PAD_PCT=[0,2,4,6,8,10,12,15,20,25,30];
 var SHD_PCT=[0,1,2,3,4,5,6,8,10,12];
 var BG_NAMES=['Clear','Light','Dark','Warm','Cool'];
 var BG_CLS=['bg-clear','bg-light','bg-dark','bg-warm','bg-cool'];
 var BG_GRAD=[null,null,null,['#ffecd2','#fcb69f'],['#e0c3fc','#8ec5fc']];
-var BG_ICS=[
-'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>',
-'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
-'<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
-'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>',
-'<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>'
-];
-var SC_NAMES=['1x','2x'];
-var SC_ICS=[
-'<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>',
-'<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>'
-];
-var scaleIdx=0;
 var FMT_NAMES=['PNG','JPEG','WebP'];
 var FMT_MIME=['image/png','image/jpeg','image/webp'];
 var FMT_QUAL=[undefined,0.92,0.92];
@@ -203,7 +188,7 @@ var minD=Math.min(cw,ch);
 var rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
 var pad=Math.round(minD*PAD_PCT[padIdx]/100);
 var shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
-var se=shd>0?Math.ceil(shd*1.5)+Math.ceil(shd/4):0;
+var se=shd>0?Math.ceil(shd*3.5):0;
 var ow=cw+pad*2+se*2,oh=ch+pad*2+se*2;
 if(ow>MAX_DIM||oh>MAX_DIM){
 var s=Math.min(MAX_DIM/ow,MAX_DIM/oh);
@@ -212,12 +197,10 @@ minD=Math.min(cw,ch);
 rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
 pad=Math.round(minD*PAD_PCT[padIdx]/100);
 shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
-se=shd>0?Math.ceil(shd*1.5)+Math.ceil(shd/4):0;
+se=shd>0?Math.ceil(shd*3.5):0;
 ow=cw+pad*2+se*2;oh=ch+pad*2+se*2
 }
-var sc=SC_NAMES[scaleIdx]==='2x'?2:1;
-canvas.width=ow*sc;canvas.height=oh*sc;
-if(sc>1)ctx.scale(sc,sc);
+canvas.width=ow;canvas.height=oh;
 ctx.clearRect(0,0,ow,oh);
 var ix=se+pad,iy=se+pad;
 var dk=bgMode===2;
@@ -226,12 +209,15 @@ if(bgMode===1){ctx.fillStyle='#fff';ctx.fillRect(0,0,ow,oh)}
 else if(dk){ctx.fillStyle='#1a1a1a';ctx.fillRect(0,0,ow,oh)}
 else if(gr){var grd=ctx.createLinearGradient(0,0,ow,oh);grd.addColorStop(0,gr[0]);grd.addColorStop(1,gr[1]);ctx.fillStyle=grd;ctx.fillRect(0,0,ow,oh)}
 if(shd>0){
-var sa=Math.min(0.4,SHD_PCT[shadowIdx]/6);
 ctx.save();
-ctx.shadowColor=dk?'rgba(255,255,255,'+sa+')':'rgba(0,0,0,'+sa+')';
-ctx.shadowBlur=shd;ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd/4);
-rrPath(ctx,ix,iy,cw,ch,rad);
-ctx.fillStyle=dk?'#1a1a1a':'#fff';ctx.fill();
+ctx.shadowColor=dk?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.1)';
+ctx.shadowBlur=shd*2;ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.5);
+rrPath(ctx,ix,iy,cw,ch,rad);ctx.fillStyle=dk?'#1a1a1a':'#fff';ctx.fill();
+ctx.restore();
+ctx.save();
+ctx.shadowColor=dk?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.04)';
+ctx.shadowBlur=Math.round(shd*0.5);ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.1);
+rrPath(ctx,ix,iy,cw,ch,rad);ctx.fillStyle=dk?'#1a1a1a':'#fff';ctx.fill();
 ctx.restore()
 }
 ctx.save();
@@ -241,8 +227,7 @@ ctx.drawImage(img,ix,iy,cw,ch);
 ctx.strokeStyle=dk?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.08)';
 ctx.lineWidth=1;
 ctx.stroke();
-ctx.restore();
-if(sc>1)ctx.setTransform(1,0,0,1,0,0)
+ctx.restore()
 }
 
 function notify(msg,ok){
@@ -303,23 +288,12 @@ notify('Clipboard Not Available',false)
 }
 psBtn.addEventListener('click',pasteClipboard);
 
-function buildBgChips(){
-var el=$('bg-chips');el.textContent='';
-BG_NAMES.forEach(function(n,i){
-if(i===bgMode)return;
-var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=n;
-b.addEventListener('click',function(){setBg(i)});
-el.appendChild(b)
-})
-}
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
-var ic=$('bg-ic');ic.replaceChildren();var t=document.createElement('template');t.innerHTML=BG_ICS[m];ic.appendChild(t.content);
-var nm=$('bg-nm');nm.style.opacity='.3';
-setTimeout(function(){nm.textContent=BG_NAMES[m];nm.style.opacity='1'},100);
-buildBgChips();render()
+BG_NAMES.forEach(function(n,i){$('bg-'+i).classList.toggle('sel',i===m)});
+render()
 }
-setBg(0);
+BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
 
 function updateRadUI(){
 var v=RAD_PCT[radiusIdx];
@@ -366,32 +340,12 @@ buildFmtChips()
 }
 setFmt(0);
 
-function buildScChips(){
-var el=$('sc-chips');el.textContent='';
-SC_NAMES.forEach(function(n,i){
-if(i===scaleIdx)return;
-var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=n;
-b.addEventListener('click',function(){setScale(i)});
-el.appendChild(b)
-})
-}
-function setScale(i){
-scaleIdx=i;
-var ic=$('sc-ic');ic.replaceChildren();var t=document.createElement('template');t.innerHTML=SC_ICS[i];ic.appendChild(t.content);
-var nm=$('sc-nm');nm.style.opacity='.3';
-setTimeout(function(){nm.textContent=SC_NAMES[i]+' Scale';nm.style.opacity='1'},100);
-buildScChips();render()
-}
-setScale(0);
-
 var RESET_IC='<svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
 var groups=[
-{_row:$('sr-bg'),_reset:function(){setBg(0)}},
 {_row:$('sr-rad'),_reset:function(){radiusIdx=4;updateRadUI();render()}},
-{_row:$('sr-pad'),_reset:function(){padIdx=5;updatePadUI();render()}},
+{_row:$('sr-pad'),_reset:function(){padIdx=1;updatePadUI();render()}},
 {_row:$('sr-shd'),_reset:function(){shadowIdx=2;updateShdUI();render()}},
-{_row:$('sr-fmt'),_reset:function(){setFmt(0)}},
-{_row:$('sr-sc'),_reset:function(){setScale(0)}}
+{_row:$('sr-fmt'),_reset:function(){setFmt(0)}}
 ];
 function animateReset(g){
 var row=g._row,lbl=row.querySelector('.slbl'),ic=lbl.querySelector('svg');
@@ -421,14 +375,19 @@ canvas.toBlob(cb,FMT_MIME[fmtIdx],FMT_QUAL[fmtIdx])
 }
 }
 
-pv.addEventListener('click',function(e){
-if(!img||e.target.closest('button'))return;
+function copyToClipboard(){
+if(!img)return;
 if(!navigator.clipboard||!navigator.clipboard.write){notify('Clipboard Not Available',false);return}
 navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(function(resolve,reject){
 canvas.toBlob(function(b){if(b)resolve(b);else reject()},'image/png')
 })})]).then(
 function(){notify('Copied to Clipboard',true)},
 function(){notify('Copy Failed',false)})
+}
+
+pv.addEventListener('click',function(e){
+if(!img||e.target.closest('button'))return;
+copyToClipboard()
 });
 
 cpBtn.addEventListener('click',function(){
@@ -454,8 +413,8 @@ feedback(dlBtn,'dl-fb','Downloaded')
 
 function resetAll(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-render();setBg(0);radiusIdx=4;padIdx=5;shadowIdx=2;
-updateRadUI();updatePadUI();updateShdUI();setFmt(0);setScale(0);
+render();setBg(0);radiusIdx=4;padIdx=1;shadowIdx=2;
+updateRadUI();updatePadUI();updateShdUI();setFmt(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});
 feedback(rsBtn,'rs-fb','Reset')
@@ -474,6 +433,7 @@ if(e.key==='1'){location.href='/';return}
 if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);return}
 if(e.key==='Escape'){var n=document.querySelector('.notif');if(n){n.click();return}return}
 if(e.key==='v'){pasteClipboard();return}
+if(e.key===' '||e.key==='Enter'){if(img){e.preventDefault();copyToClipboard()}return}
 if(!img)return;
 if(e.key==='d'){dlBtn.click();return}
 if(e.key==='c'){cpBtn.click();return}
@@ -481,6 +441,8 @@ if(e.key==='r'||e.key==='0'){resetAll();return}
 if(e.key==='x'){setBg(0);return}
 if(e.key==='l'){setBg(1);return}
 if(e.key==='b'){setBg(2);return}
+if(e.key==='3'){setBg(3);return}
+if(e.key==='4'){setBg(4);return}
 if(e.key==='p'){setFmt(0);return}
 if(e.key==='j'){setFmt(1);return}
 if(e.key==='w'){setFmt(2);return}
