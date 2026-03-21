@@ -5,18 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FAFAFA">
+<meta name="description" content="Color palette generator — create harmonies, extract from images">
 <link rel="icon" type="image/png" href="/ds-favicon.png">
 <title>Palit</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
 <link rel="stylesheet" href="/shared/base.css?v=2">
 <style>
-body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fill-available}
-.w{max-width:440px;width:100%;padding:20px 20px calc(88px + env(safe-area-inset-bottom,0px))}
+body{display:flex;flex-direction:column;align-items:center}
+.w{max-width:440px;width:100%;padding:20px 20px calc(86px + env(safe-area-inset-bottom,0px))}
 .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .inp{display:flex;gap:8px;margin-bottom:14px}
-.inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
+.inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);transition:border-color .15s}
 .inp input:focus{border-color:var(--t4)}
-.inp input.shake{animation:shake .3s ease}
+.inp input.shake{animation:shake .3s ease;border-color:#EF4444}
 .inp button{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;box-shadow:var(--shadow)}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s;cursor:pointer}
@@ -33,14 +34,14 @@ html[data-theme="dark"] .srow.sel .bg-chk{background:#1A3A2A;border-color:#2D5A3
 html[data-theme="dark"] .srow.sel .bg-chk svg{color:#34D399}
 html[data-theme="sepia"] .srow.sel .bg-chk{background:#E8E0CE;border-color:#DDD4C0}
 html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
-.stepper{display:flex;align-items:center;gap:6px}
-.step-btn{width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
-.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
+.stepper{display:flex;align-items:center;gap:4px}
+.step-btn{width:36px;height:36px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
+.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:16px;height:16px}
 .step-btn:active:not(:disabled){transform:scale(.9)}
 .step-btn:disabled{opacity:.3;cursor:default}
 .cdot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:1px solid var(--bdr2)}
 .clbl{flex:1;min-width:0;font:500 .9375rem/1 var(--font);color:var(--t2);word-break:break-all}
-.clbl .cg{font:500 .8125rem/1 var(--font);color:var(--t4);margin-left:6px}
+.clbl .cg{font:500 .8125rem/1 var(--font);color:var(--t3);margin-left:6px}
 .actions button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s}
 .actions button:last-child{border-bottom:none}
 .actions button:active{opacity:.7}
@@ -82,15 +83,17 @@ html[data-theme="sepia"] .srow.rs-fb .slbl svg,html[data-theme="sepia"] .srow.rs
 .items{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
 .hist-row{display:flex;align-items:center;padding:10px 14px 10px 16px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .15s}
 .hist-row:last-child{border-bottom:none}
+.hist-row:active{opacity:.7}
 .mini-swatches{display:flex;gap:3px;flex:1;overflow:hidden}
 .mini-sw{width:24px;height:24px;border-radius:6px;flex-shrink:0}
-.del{width:28px;height:28px;border-radius:50%;border:none;background:none;cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s;margin-left:8px}
+.del{width:36px;height:36px;border-radius:50%;border:none;background:none;cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s;margin-left:8px}
 .del svg{width:14px;height:14px}
+.del:active{opacity:.7}
 .drop-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(250,250,250,.95);font:600 1.25rem/1 var(--font);color:var(--t3);opacity:0;pointer-events:none;transition:opacity .2s}
 .drop-overlay.active{opacity:1;pointer-events:auto}
 html[data-theme="dark"] .drop-overlay{background:rgba(28,28,30,.95)}
 html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
-.paste-hint{display:none;text-align:center;font:400 .75rem/1 var(--font);color:var(--t4);padding:0 20px 4px}
+.paste-hint{display:none;text-align:center;font:400 .75rem/1 var(--font);color:var(--t4);padding:0 20px 4px;cursor:pointer}
 @media(hover:none){.paste-hint{display:block}}
 @media(hover:hover){
 .srow:hover{background:var(--bg2)}
@@ -104,83 +107,84 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <body>
 <div class="w">
 <div class="inp">
-<input type="color" id="cpick" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-<input id="cinp" type="text" placeholder="#HEX, rgb(), or hsl()" value="" aria-label="Color Value" spellcheck="false" autocomplete="off">
-<button id="add-btn" aria-label="Pick Color" style="background:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--card)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<input type="color" id="cpick" value="#888888" style="position:fixed;top:-100px;left:-100px;opacity:0;width:1px;height:1px">
+<input id="cinp" type="text" placeholder="#HEX, rgb(), or hsl()" value="" aria-label="Color Value" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
+<button id="add-btn" aria-label="Pick Color" style="background:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" stroke="var(--card)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
-<div class="card" id="gen-card">
-<div class="srow" data-r="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v10l7 7"/><circle cx="12" cy="12" r="10"/></svg><span>Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="1"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 010 20"/><circle cx="12" cy="12" r="10"/></svg><span>Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="2"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2l8.66 15H3.34z"/></svg><span>Triadic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="3"><span class="slbl"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Tetradic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="4"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v20M5 5l14 14M19 5L5 19"/></svg><span>Split-Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="5"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>Monochromatic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="6"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/></svg><span>Accented Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="card" id="gen-card" role="radiogroup" aria-label="Harmony Rule">
+<div class="srow" data-r="0" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v10l7 7"/><circle cx="12" cy="12" r="10"/></svg><span>Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="1" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 010 20"/><circle cx="12" cy="12" r="10"/></svg><span>Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="2" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8.66 15H3.34z"/></svg><span>Triadic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="3" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Tetradic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="4" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M5 5l14 14M19 5L5 19"/></svg><span>Split-Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="5" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>Monochromatic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="6" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/></svg><span>Accented Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 </div>
 <div class="card" id="count-card" style="display:none">
 <div class="srow" style="cursor:default">
-<span class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span id="cnt-lbl">8 Colors</span></span>
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span id="cnt-lbl">8 Colors</span></span>
 <div class="stepper">
-<button class="step-btn" id="cnt-dn" aria-label="Fewer Colors"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
-<button class="step-btn" id="cnt-up" aria-label="More Colors"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="step-btn" id="cnt-dn" aria-label="Fewer Colors"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+<button class="step-btn" id="cnt-up" aria-label="More Colors"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 </div>
 </div>
 <div class="card" id="color-card" style="display:none">
-<div id="color-rows" aria-live="polite"></div>
+<div id="color-rows" aria-live="polite" aria-label="Generated Colors"></div>
 </div>
-<div class="card" id="fmt-card" style="display:none">
-<div class="srow sel" data-f="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>HEX</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-f="1"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>RGB</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-f="2"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20"/></svg><span>HSL</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="card" id="fmt-card" style="display:none" role="radiogroup" aria-label="Color Format">
+<div class="srow sel" data-f="0" tabindex="0" role="radio" aria-checked="true"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>HEX</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-f="1" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>RGB</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-f="2" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20"/></svg><span>HSL</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 </div>
 <div class="card" id="neutral-card" style="display:none">
-<div class="srow" id="neutral-row"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="neutral-row" tabindex="0" role="switch" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 </div>
 <div class="card actions" id="act-card" style="display:none">
 <button id="ca-btn" aria-label="Copy All Colors">
-<svg class="id" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-<svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Copy All</span>
 </button>
 <button id="dl-btn" aria-label="Download Palette">
-<svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
-<svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Download</span>
 </button>
 <button class="ex-opt" data-fmt="text" style="display:none">
-<svg class="id" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
-<svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Plain Text</span>
 </button>
 <button class="ex-opt" data-fmt="css" style="display:none">
-<svg class="id" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-<svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>CSS Variables</span>
 </button>
 <button class="ex-opt" data-fmt="tw" style="display:none">
-<svg class="id" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-<svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Tailwind</span>
 </button>
 <button id="rs-btn" aria-label="Reset">
-<svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
-<svg class="rs-spin" viewBox="0 0 24 24" style="width:18px;height:18px;display:none"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
+<svg class="rs-spin" viewBox="0 0 24 24" style="width:18px;height:18px;display:none" aria-hidden="true"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
 <span>Reset</span>
 </button>
 </div>
-<div class="paste-hint">Long-Press to Paste Images</div>
+<label class="paste-hint" for="file-inp">Tap to Upload or Paste Image</label>
+<input type="file" id="file-inp" accept="image/*" style="display:none">
 <div id="hist-wrap" style="display:none">
 <div class="sec-label">History</div>
 <div class="items" id="hist-items"></div>
 </div>
 </div>
 <div class="drop-overlay" id="drop-ov">
-<svg viewBox="0 0 24 24" width="48" height="48"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
+<svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
 Drop Image Here
 </div>
 <nav>
-<div class="tabs" aria-label="Navigation"><a href="/">Home</a><a class="active">Palit</a></div>
+<div class="tabs" aria-label="Palette"><a href="/">Home</a><a class="active">Palit</a></div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <canvas id="cvs" style="display:none"></canvas>
@@ -259,12 +263,12 @@ function wcagGrade(lum){var rw=(LUM_W+.05)/(lum+.05),rb=(lum+.05)/(LUM_B+.05);va
 
 function parseColor(str){
 str=str.trim().toLowerCase();
-var m=str.match(/^#?([0-9a-f]{3,6})$/);
-if(m){var h=m[1];if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];if(h.length===6)return hexToRgb('#'+h)}
+var m=str.match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/);
+if(m){var h=m[1];if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return hexToRgb('#'+h)}
 m=str.match(/^rgb\(\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})\s*\)$/);
-if(m)return[+m[1]/255,+m[2]/255,+m[3]/255];
+if(m)return[Math.min(255,+m[1])/255,Math.min(255,+m[2])/255,Math.min(255,+m[3])/255];
 m=str.match(/^hsl\(\s*(\d{1,3})\s*[,\s]\s*(\d{1,3})%?\s*[,\s]\s*(\d{1,3})%?\s*\)$/);
-if(m){var hh=+m[1]/360,ss=+m[2]/100,ll=+m[3]/100;if(ss===0)return[ll,ll,ll];
+if(m){var hh=(+m[1]%360)/360,ss=Math.min(100,+m[2])/100,ll=Math.min(100,+m[3])/100;if(ss===0)return[ll,ll,ll];
 function h2r(p,q,t){if(t<0)t++;if(t>1)t--;if(t<1/6)return p+(q-p)*6*t;if(t<.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p}
 var q=ll<.5?ll*(1+ss):ll+ss-ll*ss,p=2*ll-q;return[h2r(p,q,hh+1/3),h2r(p,q,hh),h2r(p,q,hh-1/3)]}
 return null}
@@ -324,7 +328,7 @@ return centroids}
 
 // Multi-pass extraction: oversample k-means, merge, score, rank, auto-count
 function extractColors(imgData,maxColors){
-var d=imgData.data,N=d.length/4,pixels=[];
+var d=imgData.data,pixels=[];
 // Phase 1: Collect pixels as Oklab, skip transparent
 for(var i=0;i<d.length;i+=4){if(d[i+3]<128)continue;
 pixels.push(rgbToOklab([d[i]/255,d[i+1]/255,d[i+2]/255]))}
@@ -458,7 +462,7 @@ var btn=$('rs-btn');btn.classList.remove('rs-warn');btn.querySelector('span').te
 var base=null,baseUserSet=false,ruleIdx=-1,neutral=false,globalFmt=0;
 var palette=[],mode='harmony',swatchCount=8,lastExtracted=[],autoCount=8;
 var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
-var copyTimers={},histTimer;
+var copyTimers={},histTimer,cntRsTimer;
 var lastValidHex='';
 
 // ===================== STORAGE =====================
@@ -485,7 +489,10 @@ if(!file||!file.type.startsWith('image/'))return;
 clearResetState();
 var reader=new FileReader();
 reader.onload=function(e){
-var img=new Image();img.onload=function(){
+var img=new Image();
+img.onerror=function(){var inp=$('cinp');inp.classList.remove('shake');inp.offsetWidth;inp.classList.add('shake');
+setTimeout(function(){inp.classList.remove('shake')},300)};
+img.onload=function(){
 var cvs=$('cvs'),ctx=cvs.getContext('2d');
 var sz=200,w=img.width,h=img.height;
 if(w>h){cvs.width=sz;cvs.height=Math.round(h/w*sz)}else{cvs.height=sz;cvs.width=Math.round(w/h*sz)}
@@ -525,18 +532,18 @@ mode='restored';baseUserSet=false;base=null;lastValidHex='';lastExtracted=[];
 $('cinp').value='';$('add-btn').style.background='var(--t3)';
 $('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
 ruleIdx=-1;updateRows();neutral=false;updateNeutralUI();
-updateSwatchDOM();lastShownMode=undefined;lastShownHas=undefined;showOutput()}
+updateSwatchDOM();lastShownMode=undefined;lastShownHas=undefined;lastHistLen=undefined;showOutput()}
 
 // ===================== RENDERING =====================
 
-var lastShownMode,lastShownHas;
+var lastShownMode,lastShownHas,lastHistLen;
 function showOutput(){
-var show=palette.length>0,isImg=mode==='image',isHarmony=mode==='harmony';
-if(mode===lastShownMode&&show===lastShownHas)return;
-lastShownMode=mode;lastShownHas=show;
+var show=palette.length>0,isImg=mode==='image',isHarmony=mode==='harmony',hl=hist.length;
+if(mode===lastShownMode&&show===lastShownHas&&hl===lastHistLen)return;
+lastShownMode=mode;lastShownHas=show;lastHistLen=hl;
 $('gen-card').style.display=isImg?'none':'';
 $('fmt-card').style.display=show?'':'none';
-$('neutral-card').style.display=show&&isHarmony?'':'none';
+$('neutral-card').style.display=show&&isHarmony&&ruleIdx>=0?'':'none';
 $('color-card').style.display=show?'':'none';
 $('act-card').style.display=show||hist.length>0?'':'none';
 $('ca-btn').style.display=show?'':'none';
@@ -547,14 +554,18 @@ function fmtVal(p,f){return[p.hex,p.rgb,p.hsl][f]}
 
 function updateSwatchDOM(){
 var el=$('color-rows'),n=palette.length,existing=el.children.length;
+if(activeIdx>=0&&activeIdx<existing)el.children[activeIdx].style.background='';
 if(existing===n){
 for(var i=0;i<n;i++){var row=el.children[i],p=palette[i];
 row.querySelector('.cdot').style.background=p.hex;
 row.querySelector('.cv').textContent=fmtVal(p,globalFmt);
+row.classList.remove('sel');
 var cg=row.querySelector('.cg'),grade=wcagGrade(relLum(p.rgbArr));
 if(cg){cg.textContent=grade?'('+grade+')':'';cg.style.display=grade?'':'none'}
 else if(grade){cg=document.createElement('span');cg.className='cg';cg.textContent='('+grade+')';row.querySelector('.clbl').appendChild(cg)}}
 }else{
+for(var k in copyTimers){if(copyTimers.hasOwnProperty(k))clearTimeout(copyTimers[k])}
+copyTimers={};
 el.textContent='';
 for(var i=0;i<n;i++){
 var p=palette[i],row=document.createElement('div');row.className='srow';row.setAttribute('data-ci',i);
@@ -568,7 +579,7 @@ if(grade){var cg=document.createElement('span');cg.className='cg';cg.textContent
 lbl.appendChild(dot);lbl.appendChild(info);row.appendChild(lbl);
 var chk=document.createElement('span');chk.className='bg-chk';
 var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-svg.setAttribute('viewBox','0 0 24 24');
+svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');
 var pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
 pl.setAttribute('points','4 12 9 17 20 6');svg.appendChild(pl);chk.appendChild(svg);row.appendChild(chk);
 el.appendChild(row)}}
@@ -576,7 +587,9 @@ activeIdx=-1;closeExport()}
 
 function updateFmtRows(){
 var rows=$('fmt-card').querySelectorAll('.srow[data-f]');
-for(var i=0;i<rows.length;i++)rows[i].className='srow'+(parseInt(rows[i].getAttribute('data-f'))===globalFmt?' sel':'')}
+for(var i=0;i<rows.length;i++){var f=parseInt(rows[i].getAttribute('data-f'));
+rows[i].className='srow'+(f===globalFmt?' sel':'');
+rows[i].setAttribute('aria-checked',f===globalFmt?'true':'false')}}
 
 function refreshColorValues(){
 var rows=$('color-rows').children;
@@ -586,26 +599,32 @@ rows[i].querySelector('.cv').textContent=fmtVal(palette[i],globalFmt)}
 function renderHist(){
 var el=$('hist-items'),wrap=$('hist-wrap');
 el.textContent='';
-if(hist.length===0){wrap.style.display='none';return}
+if(hist.length===0){wrap.style.display='none';showOutput();return}
 wrap.style.display='';
 for(var i=0;i<hist.length;i++){
 var row=document.createElement('div');row.className='hist-row';row.setAttribute('data-idx',i);
+row.setAttribute('tabindex','0');
+row.setAttribute('aria-label','Restore palette: '+hist[i].colors.slice(0,3).join(', ')+(hist[i].colors.length>3?' and more':''));
 var ms=document.createElement('div');ms.className='mini-swatches';
 for(var j=0;j<hist[i].colors.length;j++){
 var s=document.createElement('div');s.className='mini-sw';s.style.background=hist[i].colors[j];ms.appendChild(s)}
 row.appendChild(ms);
-var del=document.createElement('button');del.className='del';del.setAttribute('aria-label','Delete');del.setAttribute('data-idx',i);
+var del=document.createElement('button');del.className='del';del.setAttribute('aria-label','Delete palette '+(i+1));del.setAttribute('data-idx',i);
 var xsvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-xsvg.setAttribute('viewBox','0 0 24 24');xsvg.setAttribute('width','14');xsvg.setAttribute('height','14');
+xsvg.setAttribute('viewBox','0 0 24 24');xsvg.setAttribute('width','14');xsvg.setAttribute('height','14');xsvg.setAttribute('aria-hidden','true');
 var xp=document.createElementNS('http://www.w3.org/2000/svg','path');xp.setAttribute('d','M18 6L6 18M6 6l12 12');
-xsvg.appendChild(xp);del.appendChild(xsvg);row.appendChild(del);el.appendChild(row)}}
+xsvg.appendChild(xp);del.appendChild(xsvg);row.appendChild(del);el.appendChild(row)}
+showOutput()}
 
 function updateRows(){
 var rows=$('gen-card').querySelectorAll('.srow[data-r]');
-for(var i=0;i<rows.length;i++)rows[i].className='srow'+(parseInt(rows[i].getAttribute('data-r'))===ruleIdx?' sel':'');
+for(var i=0;i<rows.length;i++){var ri=parseInt(rows[i].getAttribute('data-r'));
+rows[i].className='srow'+(ri===ruleIdx?' sel':'');
+rows[i].setAttribute('aria-checked',ri===ruleIdx?'true':'false')}
 updateNeutralUI()}
 
-function updateNeutralUI(){$('neutral-row').className='srow'+(neutral?' sel':'')}
+function updateNeutralUI(){var nr=$('neutral-row');nr.className='srow'+(neutral?' sel':'');
+nr.setAttribute('aria-checked',neutral?'true':'false')}
 
 // ===================== COPY =====================
 
@@ -616,7 +635,7 @@ document.body.appendChild(ta);ta.select();document.execCommand('copy');document.
 
 function copyColor(idx){
 if(idx<0||idx>=palette.length)return;
-var row=$('color-rows').children[idx];
+var row=$('color-rows').children[idx];if(!row)return;
 copyText(fmtVal(palette[idx],globalFmt));
 row.classList.remove('sel');row.offsetWidth;row.classList.add('sel');
 if(copyTimers[idx])clearTimeout(copyTimers[idx]);
@@ -627,15 +646,22 @@ if(palette.length===0)return;
 var out=palette.map(function(p){return fmtVal(p,globalFmt)}).join(', ');
 copyText(out);btnFeedback($('ca-btn'),'ok','Copy All','Copied',1500)}
 
+function dlFile(name,content,type){
+var b=new Blob([content],{type:type||'text/plain'});
+var u=URL.createObjectURL(b);
+var a=document.createElement('a');a.href=u;a.download=name;
+document.body.appendChild(a);a.click();document.body.removeChild(a);
+setTimeout(function(){URL.revokeObjectURL(u)},100)}
+
 function doExportFmt(fmt){
 if(palette.length===0)return;
-var out='';
-if(fmt==='text')out=palette.map(function(p){return p.hex}).join(', ');
-else if(fmt==='css')out=palette.map(function(p,i){return'--color-'+(i+1)+': '+p.hex+';'}).join('\n');
-else if(fmt==='tw')out=palette.map(function(p,i){return"'palette-"+(i+1)+"': '"+p.hex+"',"}).join('\n');
-copyText(out);
+var out='',name='palette',type='text/plain';
+if(fmt==='text'){out=palette.map(function(p){return fmtVal(p,globalFmt)}).join('\n');name='palette.txt'}
+else if(fmt==='css'){out=':root {\n'+palette.map(function(p,i){return'  --color-'+(i+1)+': '+p.hex+';'}).join('\n')+'\n}';name='palette.css';type='text/css'}
+else if(fmt==='tw'){out=palette.map(function(p,i){return"  'palette-"+(i+1)+"': '"+p.hex+"',"}).join('\n');name='palette-tailwind.txt'}
+dlFile(name,out,type);
 var btn=document.querySelector('.ex-opt[data-fmt="'+fmt+'"]');
-if(btn)btnFeedback(btn,'ok','','Copied',1200)}
+if(btn)btnFeedback(btn,'ok','','Downloaded',1200)}
 
 var fbTimers=new WeakMap();
 function btnFeedback(btn,cls,origText,fbText,dur){
@@ -662,7 +688,7 @@ $('cinp').value='';$('cpick').value='#888888';
 $('add-btn').style.background='var(--t3)';
 $('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
 updateRows();updateNeutralUI();
-lastShownMode=undefined;lastShownHas=undefined;
+lastShownMode=undefined;lastShownHas=undefined;lastHistLen=undefined;
 showOutput();closeExport();
 btn.classList.remove('rs-warn');
 btnFeedback(btn,'rs-fb','Reset','Done',1500)}
@@ -720,16 +746,19 @@ baseUserSet=true;setBaseColor(rgb);
 if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
 if(ruleIdx>=0)generate()}
 
+function rowKey(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();var row=e.target.closest('.srow');if(row)row.click()}}
+
 $('gen-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-r]');if(!row)return;
 var ri=parseInt(row.getAttribute('data-r'));if(isNaN(ri))return;
 if(ri!==ruleIdx||!baseUserSet){ruleIdx=ri;updateRows();generate()}});
+$('gen-card').addEventListener('keydown',rowKey);
 
-$('neutral-row').addEventListener('click',function(){neutral=!neutral;updateNeutralUI();generate()});
+$('neutral-row').addEventListener('click',function(){if(ruleIdx<0)return;neutral=!neutral;updateNeutralUI();generate()});
+$('neutral-row').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();this.click()}});
 
 $('cnt-dn').addEventListener('click',function(e){e.stopPropagation();if(swatchCount>1){swatchCount--;updateCountLabel();resliceImage()}});
 $('cnt-up').addEventListener('click',function(e){e.stopPropagation();var max=mode==='image'?lastExtracted.length:12;if(swatchCount<max){swatchCount++;updateCountLabel();resliceImage()}});
-var cntRsTimer;
 $('count-card').addEventListener('click',function(e){if(e.target.closest('.step-btn'))return;
 if(swatchCount===autoCount)return;swatchCount=autoCount;updateCountLabel();resliceImage();
 var row=$('count-card').querySelector('.srow');
@@ -741,6 +770,7 @@ $('fmt-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-f]');if(!row)return;
 var f=parseInt(row.getAttribute('data-f'));if(f===globalFmt)return;
 globalFmt=f;updateFmtRows();refreshColorValues()});
+$('fmt-card').addEventListener('keydown',rowKey);
 
 $('color-rows').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-ci]');if(!row)return;
@@ -761,6 +791,10 @@ var del=e.target.closest('.del');
 if(del){var idx=parseInt(del.getAttribute('data-idx'));hist.splice(idx,1);saveHist();renderHist();return}
 var row=e.target.closest('.hist-row');
 if(row){restoreEntry(parseInt(row.getAttribute('data-idx')))}});
+$('hist-items').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){
+var row=e.target.closest('.hist-row');if(row){e.preventDefault();e.stopPropagation();restoreEntry(parseInt(row.getAttribute('data-idx')))}}});
+
+$('file-inp').addEventListener('change',function(){if(this.files&&this.files.length>0){processImage(this.files[0]);this.value=''}});
 
 var ov=$('drop-ov');
 document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)ov.classList.add('active')});
