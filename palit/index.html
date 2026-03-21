@@ -48,6 +48,8 @@ html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
 .actions .id,.actions .ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .actions .ic{stroke-width:2.5;display:none}
 .ex-opt{padding-left:44px!important}
+.dl-chev{width:14px;height:14px;flex-shrink:0;color:var(--t4);margin-left:auto;transition:transform .2s ease}
+.dl-open .dl-chev{transform:rotate(90deg)}
 .ok{background:#DCFCE7!important}
 .ok .id{display:none!important}.ok .ic{display:inline!important}
 .ok .ic,.ok span{color:#34D399!important}
@@ -146,10 +148,11 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Copy All</span>
 </button>
-<button id="dl-btn" aria-label="Download Palette">
+<button id="dl-btn" aria-label="Download Palette" aria-expanded="false">
 <svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
 <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Download</span>
+<svg class="dl-chev" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>
 </button>
 <button class="ex-opt" data-fmt="text" style="display:none">
 <svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
@@ -708,14 +711,16 @@ updateSwatchDOM()}
 // ===================== EXPORT =====================
 
 function toggleExport(){
-var opts=document.querySelectorAll('.ex-opt');
+var opts=document.querySelectorAll('.ex-opt'),btn=$('dl-btn');
 exportOpen=!exportOpen;
-for(var i=0;i<opts.length;i++)opts[i].style.display=exportOpen?'':'none'}
+for(var i=0;i<opts.length;i++)opts[i].style.display=exportOpen?'':'none';
+btn.classList.toggle('dl-open',exportOpen);btn.setAttribute('aria-expanded',exportOpen?'true':'false')}
 
 function closeExport(){
 if(!exportOpen)return;exportOpen=false;
-var opts=document.querySelectorAll('.ex-opt');
-for(var i=0;i<opts.length;i++)opts[i].style.display='none'}
+var opts=document.querySelectorAll('.ex-opt'),btn=$('dl-btn');
+for(var i=0;i<opts.length;i++)opts[i].style.display='none';
+btn.classList.remove('dl-open');btn.setAttribute('aria-expanded','false')}
 
 // ===================== EVENTS =====================
 
