@@ -110,12 +110,12 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </div>
 <div class="card">
-<div class="srow" id="bg-0"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label></div>
+<div class="srow sel" id="bg-0"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label></div>
 <div class="srow" id="bg-1"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Light</span></label></div>
 <div class="srow" id="bg-2"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark</span></label></div>
 </div>
 <div class="card">
-<div class="srow sel" id="bg-5"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label></div>
+<div class="srow" id="bg-5"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label></div>
 <div class="srow" id="bg-3"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label></div>
 <div class="srow" id="bg-4"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label></div>
 </div>
@@ -142,7 +142,7 @@ Drop Image Here
 var $=function(s){return document.getElementById(s)};
 
 var img=null,blobUrl=null;
-var bgMode=5,radiusIdx=4,shadowIdx=4,fmtIdx=0;
+var bgMode=0,radiusIdx=4,shadowIdx=4,fmtIdx=0;
 
 var RAD_PCT=[0,2,4,6,8,10,14,18,22,26,30];
 var SHD_PCT=[0,1,2,3,4,5,6,8,10,12];
@@ -185,7 +185,7 @@ var cw=img.naturalWidth,ch=img.naturalHeight;
 var minD=Math.min(cw,ch);
 var rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
 var shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
-var se=shd>0?Math.ceil(shd*2.5):0;
+var se=shd>0?Math.ceil(shd*1.8):0;
 var ow=cw+se*2,oh=ch+se*2;
 if(ow>MAX_DIM||oh>MAX_DIM){
 var s=Math.min(MAX_DIM/ow,MAX_DIM/oh);
@@ -193,7 +193,7 @@ cw=Math.round(img.naturalWidth*s);ch=Math.round(img.naturalHeight*s);
 minD=Math.min(cw,ch);
 rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
 shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
-se=shd>0?Math.ceil(shd*2.5):0;
+se=shd>0?Math.ceil(shd*1.8):0;
 ow=cw+se*2;oh=ch+se*2
 }
 canvas.width=ow;canvas.height=oh;
@@ -432,7 +432,7 @@ feedback(dlBtn,'dl-fb','Downloaded')
 
 function resetAll(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-render();setBg(5);radiusIdx=4;shadowIdx=2;
+render();setBg(0);radiusIdx=4;shadowIdx=2;
 updateRadUI();updateShdUI();setFmt(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});
