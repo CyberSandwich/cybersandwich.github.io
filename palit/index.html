@@ -105,7 +105,6 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <div class="srow" data-r="4"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v20M5 5l14 14M19 5L5 19"/></svg><span>Split-Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="5"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>Monochromatic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="6"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/></svg><span>Accented Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="n" style="cursor:pointer"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><button id="neutral-btn" class="toggle-pill" aria-label="Toggle Neutral Anchor">Off</button></div>
 <div class="srow" id="count-row" style="display:none;cursor:default">
 <span class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Colors</span></span>
 <div class="stepper">
@@ -119,6 +118,9 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <div class="srow sel" data-f="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>HEX</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-f="1"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>RGB</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-f="2"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20"/></svg><span>HSL</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+</div>
+<div class="card" id="neutral-card" style="display:none">
+<div class="srow" id="neutral-row"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 </div>
 <div class="card" id="color-card" style="display:none">
 <div id="color-rows" aria-live="polite"></div>
@@ -413,6 +415,7 @@ mode='image';$('count-row').style.display='';renderSwatches();showOutput()}
 function showOutput(){
 var show=palette.length>0;
 $('fmt-card').style.display=show?'':'none';
+$('neutral-card').style.display=show?'':'none';
 $('color-card').style.display=show?'':'none';
 $('act-card').style.display=show?'':'none'}
 
@@ -430,7 +433,7 @@ var cv=document.createElement('div');cv.className='cv';cv.textContent=fmtVal(p,g
 info.appendChild(cv);
 var cw=contrastRatio(p.rgbArr,[1,1,1]),cb=contrastRatio(p.rgbArr,[0,0,0]);
 var grade=wcagGrade(Math.max(cw,cb));
-if(grade){var cg=document.createElement('div');cg.className='cg';cg.textContent=grade;info.appendChild(cg)}
+if(grade){var cg=document.createElement('div');cg.className='cg';cg.textContent='('+grade+')';info.appendChild(cg)}
 lbl.appendChild(dot);lbl.appendChild(info);row.appendChild(lbl);
 var chk=document.createElement('span');chk.className='bg-chk';
 var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -476,10 +479,8 @@ rows[i].className='srow'+(parseInt(r)===ruleIdx?' sel':'')}
 updateNeutralUI()}
 
 function updateNeutralUI(){
-var btn=$('neutral-btn');
-btn.textContent='';btn.classList.remove('toggled');
-if(neutral){btn.classList.add('toggled');btn.textContent='On'}
-else{btn.textContent='Off'}}
+var row=$('neutral-row');
+row.className='srow'+(neutral?' sel':'')}
 
 // ===================== COPY =====================
 
@@ -520,7 +521,8 @@ window[timerKey]=setTimeout(function(){btn.classList.remove(cls);if(sp)sp.textCo
 
 function doReset(){
 palette=[];mode='harmony';activeIdx=-1;
-$('swatch-card').style.display='none';$('act-card').style.display='none';
+$('fmt-card').style.display='none';$('neutral-card').style.display='none';
+$('color-card').style.display='none';$('act-card').style.display='none';
 $('count-row').style.display='none';closeExport();
 btnFeedback($('rs-btn'),'rs-fb','Reset','Done',1500,'rsTimer')}
 
@@ -565,8 +567,12 @@ $('gen-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-r]');if(!row)return;
 if(e.target.closest('.stepper'))return;
 var r=row.getAttribute('data-r');
-if(r==='n'){neutral=!neutral;updateNeutralUI();generate()}
-else{var ri=parseInt(r);if(!isNaN(ri)&&ri!==ruleIdx){ruleIdx=ri;updateRows();generate()}}});
+if(r==='n')return;
+var ri=parseInt(r);if(!isNaN(ri)&&ri!==ruleIdx){ruleIdx=ri;updateRows();generate()}});
+
+// Neutral toggle
+$('neutral-row').addEventListener('click',function(){
+neutral=!neutral;updateNeutralUI();generate()});
 
 $('cnt-dn').addEventListener('click',function(){if(swatchCount>3){swatchCount--;$('cnt-val').textContent=swatchCount}updateStepBtns()});
 $('cnt-up').addEventListener('click',function(){if(swatchCount<12){swatchCount++;$('cnt-val').textContent=swatchCount}updateStepBtns()});
