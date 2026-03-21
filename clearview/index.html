@@ -142,7 +142,7 @@ Drop Image Here
 var $=function(s){return document.getElementById(s)};
 
 var img=null,blobUrl=null;
-var bgMode=5,radiusIdx=4,shadowIdx=2,fmtIdx=0;
+var bgMode=5,radiusIdx=4,shadowIdx=4,fmtIdx=0;
 
 var RAD_PCT=[0,2,4,6,8,10,14,18,22,26,30];
 var SHD_PCT=[0,1,2,3,4,5,6,8,10,12];
@@ -363,7 +363,7 @@ setFmt(0);
 var RESET_IC='<svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
 var groups=[
 {_row:$('sr-rad'),_reset:function(){radiusIdx=4;updateRadUI();render()}},
-{_row:$('sr-shd'),_reset:function(){shadowIdx=2;updateShdUI();render()}},
+{_row:$('sr-shd'),_reset:function(){shadowIdx=4;updateShdUI();render()}},
 {_row:$('sr-fmt'),_reset:function(){setFmt(0)}}
 ];
 function animateReset(g){
