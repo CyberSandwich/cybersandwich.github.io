@@ -534,7 +534,7 @@ function showOutput(){
 var show=palette.length>0,isImg=mode==='image',isHarmony=mode==='harmony';
 if(mode===lastShownMode&&show===lastShownHas)return;
 lastShownMode=mode;lastShownHas=show;
-$('gen-card').style.display=isHarmony||(!show&&mode!=='image')?'':'none';
+$('gen-card').style.display=isImg?'none':'';
 $('fmt-card').style.display=show?'':'none';
 $('neutral-card').style.display=show&&isHarmony?'':'none';
 $('color-card').style.display=show?'':'none';
@@ -700,7 +700,9 @@ $('add-btn').addEventListener('click',function(){$('cpick').click()});
 
 $('cpick').addEventListener('input',function(){
 var rgb=hexToRgb(this.value);if(!rgb)return;
-baseUserSet=true;setBaseColor(rgb);if(ruleIdx>=0)generate()});
+baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate()});
 
 $('cinp').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();applyColorInput()}});
 $('cinp').addEventListener('blur',applyColorInput);
@@ -714,7 +716,9 @@ $('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');return}
 var rgb=parseColor(v);
 if(!rgb){inp.classList.remove('shake');inp.offsetWidth;inp.classList.add('shake');
 setTimeout(function(){inp.classList.remove('shake');inp.value=lastValidHex||''},300);return}
-baseUserSet=true;setBaseColor(rgb);if(ruleIdx>=0)generate()}
+baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate()}
 
 $('gen-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-r]');if(!row)return;
@@ -770,7 +774,9 @@ if(document.activeElement===$('cinp'))return;
 var cd=e.clipboardData;if(!cd)return;
 var items=cd.items;if(items){for(var i=0;i<items.length;i++){if(items[i].type.indexOf('image')!==-1){processImage(items[i].getAsFile());return}}}
 var text=cd.getData('text');if(text){var rgb=parseColor(text.trim());if(rgb){
-e.preventDefault();baseUserSet=true;setBaseColor(rgb);if(ruleIdx>=0)generate()}}});
+e.preventDefault();baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate()}}});
 
 document.addEventListener('keydown',function(e){
 if(e.metaKey||e.ctrlKey||e.altKey)return;
