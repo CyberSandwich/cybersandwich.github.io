@@ -388,6 +388,7 @@ html[data-theme="dark"] .icon-moon{display:inline}
 /* Sepia Mode */
 html[data-theme="sepia"]{
   --bg:#F5EDDA;--bg2:#EDE5D0;
+  background-color:#F5EDDA;
   --card:#FAF4E6;
   --t1:#5B4636;--t2:#8B7355;--t3:#AB9B85;--t4:#C8B99E;
   --bdr:#DDD4C0;--bdr2:#E8E0CE;
