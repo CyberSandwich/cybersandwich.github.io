@@ -198,6 +198,7 @@ function render(newId){
   var words=q.split(/\s+/).filter(Boolean);
   var frag=document.createDocumentFragment();
   $('ca-btn').disabled=!hasItems;$('ca-btn').style.display=hasItems?'':'none';
+  $('ca-l').textContent=items.length>1?'Copy All':'Copy';
   $('rs-btn').style.display=hasItems?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
   inp.placeholder='Clip '+(items.length+1);
@@ -342,10 +343,10 @@ function doCopyAll(){
   var all=[];for(var i=0;i<items.length;i++)all.push(items[i].text);
   var btn=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
   doCopy(all.join('\n'),function(){
-    if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All'}
+    if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=items.length>1?'Copy All':'Copy'}
     ci.style.display='none';ck.style.display='';cl.textContent='Copied';
     btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
-    caTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All';caTimer=null},800);
+    caTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=items.length>1?'Copy All':'Copy';caTimer=null},800);
     announce('All Items Copied');
   });
 }
@@ -507,7 +508,7 @@ document.addEventListener('visibilitychange',function(){
     var rb=$('rs-btn'),rl=$('rs-l');
     rb.classList.remove('rs-fb');rb.classList.remove('rs-warn');rl.textContent='Reset';resetPending=false;
     var cb=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
-    cb.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All';
+    cb.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=items.length>1?'Copy All':'Copy';
     var pb=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
     pb.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';
   }
