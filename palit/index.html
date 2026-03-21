@@ -553,6 +553,7 @@ $('cinp').value=lastValidHex;$('cswatch').style.background=lastValidHex;generate
 
 $('cinp').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();applyColorInput()}});
 $('cinp').addEventListener('blur',applyColorInput);
+$('cinp').addEventListener('paste',function(){setTimeout(applyColorInput,0)});
 
 function applyColorInput(){
 var inp=$('cinp'),v=inp.value.trim();if(!v)return;
