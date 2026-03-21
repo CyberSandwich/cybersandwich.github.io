@@ -363,21 +363,21 @@ while(raw.length>2){
 var bestD=Infinity,bi=-1,bj=-1;
 for(var i=0;i<raw.length;i++)for(var j=i+1;j<raw.length;j++){
 var dd=oklabDist(raw[i].lab,raw[j].lab);if(dd<bestD){bestD=dd;bi=i;bj=j}}
-if(bestD>.05)break; // .05 Oklab ≈ clearly distinct to human eye
+if(bestD>.06)break; // .06 Oklab ≈ clearly distinct to human eye
 var a=raw[bi],b=raw[bj],total=a.count+b.count;
 var merged={lab:[(a.lab[0]*a.count+b.lab[0]*b.count)/total,(a.lab[1]*a.count+b.lab[1]*b.count)/total,(a.lab[2]*a.count+b.lab[2]*b.count)/total],
 count:total,tightness:(a.tightness*a.count+b.tightness*b.count)/total};
 merged.lch=oklabToOklch(merged.lab);merged.variance=(a.variance*a.count+b.variance*b.count)/total;
 raw.splice(bj,1);raw.splice(bi,1);raw.push(merged)}
 
-// Phase 4b: Kill anti-aliasing noise — loose clusters with low population
-// are blend artifacts from edges between solid color regions
+// Phase 4b: Kill anti-aliasing noise — only remove clusters that are
+// tiny AND loose AND dull. All three must be true to filter.
 var totalPx=pixels.length,allRaw=raw.slice();
 var avgTight=0;for(var i=0;i<raw.length;i++)avgTight+=raw[i].tightness;avgTight/=raw.length;
 raw=raw.filter(function(cl){
-if(cl.count/totalPx>.03)return true; // >3% of image
-if(cl.tightness>avgTight*.7)return true; // reasonably coherent
-if(cl.lch[1]>.15)return true; // vivid enough to be intentional
+if(cl.count/totalPx>.01)return true; // >1% of image
+if(cl.tightness>avgTight*.5)return true; // reasonably coherent
+if(cl.lch[1]>.08)return true; // any noticeable color
 return false});
 if(raw.length===0)raw=allRaw;
 
