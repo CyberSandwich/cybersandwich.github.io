@@ -521,18 +521,22 @@ if(typeof e.rule==='number'){ruleIdx=e.rule;updateRows()}
 if(typeof e.neutral==='boolean'){neutral=e.neutral;updateRows()}
 generate(true);return}}
 palette=e.colors.map(function(hex){return mkEntry(hexToRgb(hex)||[0,0,0])});
-mode='image';updateSwatchDOM();showOutput()}
+mode='restored';baseUserSet=false;base=null;lastValidHex='';lastExtracted=[];
+$('cinp').value='';$('add-btn').style.background='var(--t3)';
+$('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
+ruleIdx=-1;updateRows();neutral=false;updateNeutralUI();
+updateSwatchDOM();lastShownMode=undefined;lastShownHas=undefined;showOutput()}
 
 // ===================== RENDERING =====================
 
 var lastShownMode,lastShownHas;
 function showOutput(){
-var show=palette.length>0,isImg=mode==='image';
-if(isImg===lastShownMode&&show===lastShownHas)return;
-lastShownMode=isImg;lastShownHas=show;
-$('gen-card').style.display=isImg?'none':'';
+var show=palette.length>0,isImg=mode==='image',isHarmony=mode==='harmony';
+if(mode===lastShownMode&&show===lastShownHas)return;
+lastShownMode=mode;lastShownHas=show;
+$('gen-card').style.display=isHarmony||(!show&&mode!=='image')?'':'none';
 $('fmt-card').style.display=show?'':'none';
-$('neutral-card').style.display=show&&!isImg?'':'none';
+$('neutral-card').style.display=show&&isHarmony?'':'none';
 $('color-card').style.display=show?'':'none';
 $('act-card').style.display=show||hist.length>0?'':'none';
 $('ca-btn').style.display=show?'':'none';
