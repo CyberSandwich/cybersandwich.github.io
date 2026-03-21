@@ -271,7 +271,7 @@ var rw=(LUM_W+.05)/(lum+.05),rb=(lum+.05)/.05;
 var r=rw>rb?rw:rb,ratio=Math.round(r*10)/10;
 var grade=r>=7?'AAA':r>=4.5?'AA':r>=3?'AA18':'';
 if(!grade)return'';
-return ratio+':1 '+grade+(rw>=3&&rb>=3?' \u2022':rw>=3?' W':' B')}
+return ratio+':1 '+grade+(rw>=3&&rb>=3?' B/W':rw>=3?' W':' B')}
 
 function parseColor(str){
 str=str.trim().toLowerCase();
