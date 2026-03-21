@@ -177,8 +177,10 @@ c.arcTo(x,y,x+r,y,r);c.closePath()
 }
 
 function render(){
-if(!img){canvas.style.display='none';emptyEl.style.display='';return}
+var pw=document.querySelector('.pv-wrap');
+if(!img){canvas.style.display='none';emptyEl.style.display='';pw.style.background='';return}
 emptyEl.style.display='none';canvas.style.display='block';
+pw.style.background='none';
 var cw=img.naturalWidth,ch=img.naturalHeight;
 var minD=Math.min(cw,ch);
 var rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
@@ -317,8 +319,6 @@ psBtn.addEventListener('click',pasteClipboard);
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
 BG_NAMES.forEach(function(n,i){$('bg-'+i).classList.toggle('sel',i===m)});
-var pw=document.querySelector('.pv-wrap');
-pw.style.background=m===5&&autoGrad?'linear-gradient(135deg,'+autoGrad[0]+','+autoGrad[1]+')':'';
 render()
 }
 BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
