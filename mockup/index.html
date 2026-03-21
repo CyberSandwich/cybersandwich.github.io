@@ -565,8 +565,6 @@ feedback(dlBtn,'dl-fb','Downloaded')
 
 /* ---- Reset All ---- */
 function resetAll(){
-img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-updateScreen();
 resetView();setBg(2);setFmt(0);resIdx=3;updateResUI();
 if(curDev!==0)setDevice(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
