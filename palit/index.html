@@ -325,6 +325,7 @@ var mid=(lMin+lMax)/2,dist=Math.abs(nL-mid)/((lMax-lMin)/2||1);
 var nC=C*(1-dist*.5);colors.push(gamutClamp(nL,nC,H))}
 }else{
 for(var i=0;i<rule.offsets.length;i++){
+if(rule.offsets[i]===0){colors.push([L,C,H]);continue}
 var nH=(H+rule.offsets[i]+360)%360,nL=L,nC=C;
 if(nH>=0&&nH<90)nC*=.9;
 if(nH>=200&&nH<=300)nL=Math.min(.9,nL+nL*.03);
