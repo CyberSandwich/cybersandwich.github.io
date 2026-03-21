@@ -42,7 +42,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
 
 <div class="metrics">
   <div class="tabs metric-pill"><output id="words" class="metric-label" aria-live="polite">0 Words</output></div>
-  <div class="tabs metric-pill"><output id="letters" class="metric-label" aria-live="polite">0 Letters</output></div>
+  <div class="tabs metric-pill"><output id="letters" class="metric-label" aria-live="polite">0 Characters</output></div>
   <div class="tabs metric-pill"><output id="time" class="metric-label" aria-live="polite">0m 0s</output></div>
 </div>
 
@@ -374,7 +374,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
     }
     if(letters!==shownLetters){
       shownLetters=letters;
-      lettersOut.textContent=letters+(letters===1?' Letter':' Letters');
+      lettersOut.textContent=letters+(letters===1?' Character':' Characters');
     }
     if(sec!==shownSec){
       shownSec=sec;
