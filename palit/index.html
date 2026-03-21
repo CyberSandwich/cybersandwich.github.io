@@ -560,7 +560,7 @@ hist.unshift(entry);if(hist.length>10)hist.pop();saveHist();renderHist()}
 function restoreEntry(idx){
 var e=hist[idx];if(!e)return;
 if(e.source==='harmony'&&e.base){
-var rgb=hexToRgb(e.base);if(rgb){setBaseColor(rgb);
+var rgb=hexToRgb(e.base);if(rgb){baseUserSet=true;setBaseColor(rgb);
 if(typeof e.rule==='number'){ruleIdx=e.rule;updateRows()}
 if(typeof e.neutral==='boolean'){neutral=e.neutral;updateRows()}
 generate(true);return}}
