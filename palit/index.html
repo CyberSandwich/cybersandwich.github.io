@@ -313,17 +313,11 @@ for(var i=0;i<pixels.length;i++){sum+=dists[i];if(sum>=target){centroids.push(pi
 return centroids}
 
 function extractColors(imgData,count){
-var d=imgData.data,w=imgData.width,h=imgData.height,pixels=[],isBorder=[];
+var d=imgData.data,pixels=[];
 for(var i=0;i<d.length;i+=4){if(d[i+3]<128)continue;
-var px=i/4,x=px%w,y=(px/w)|0;
-pixels.push(rgbToOklab([d[i]/255,d[i+1]/255,d[i+2]/255]));
-isBorder.push(x===0||x===w-1||y===0||y===h-1)}
+pixels.push(rgbToOklab([d[i]/255,d[i+1]/255,d[i+2]/255]))}
 if(pixels.length===0)return{colors:[],best:0};
 if(pixels.length<=count){var seen={},uniq=[];pixels.forEach(function(lab){var hex=rgbToHex(clampRgb(oklabToRgb(lab)));if(!seen[hex]){seen[hex]=1;uniq.push(hex)}});return{colors:uniq,best:uniq.length}}
-
-var bgColor=null,bSum=[0,0,0],bCnt=0;
-for(var i=0;i<pixels.length;i++){if(isBorder[i]){bSum[0]+=pixels[i][0];bSum[1]+=pixels[i][1];bSum[2]+=pixels[i][2];bCnt++}}
-if(bCnt>0)bgColor=[bSum[0]/bCnt,bSum[1]/bCnt,bSum[2]/bCnt];
 
 var K=Math.min(Math.max(count*3,24),pixels.length);
 var centroids=kmeansInit(pixels,K);
@@ -340,8 +334,6 @@ if(moved/K<.005)break}
 var clusters=[],maxChroma=0;
 for(var c=0;c<K;c++){if(cnts[c]===0)continue;
 var lab=centroids[c],lc=oklabToOklch(lab);
-// Only filter background color; keep whites, blacks, grays as valid palette colors
-if(bgColor&&oklabDist(lab,bgColor)<.06)continue;
 if(lc[1]>maxChroma)maxChroma=lc[1];
 clusters.push({lab:lab,lch:lc,count:cnts[c]})}
 // Score: population weighted by chroma (vivid colors rank higher, but grays still included)
@@ -359,8 +351,8 @@ if(deduped.length>1){var maxGap=0,gapIdx=0;
 for(var i=0;i<deduped.length-1;i++){var gap=deduped[i].score-deduped[i+1].score;
 // Normalize gap relative to current score to find proportional drops
 var relGap=gap/(deduped[i].score||1);
-if(relGap>maxGap&&relGap>.4){maxGap=relGap;gapIdx=i+1}}
-if(maxGap>.4)best=gapIdx}
+if(relGap>maxGap&&relGap>.5){maxGap=relGap;gapIdx=i+1}}
+if(maxGap>.5)best=gapIdx}
 best=Math.max(1,Math.min(best,count));
 var hex=deduped.slice(0,count).map(function(cl){return rgbToHex(clampRgb(oklabToRgb(cl.lab)))});
 return{colors:hex,best:best}}
