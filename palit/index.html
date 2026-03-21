@@ -350,21 +350,32 @@ for(var r=0;r<raw.length;r++){var cl=raw[r],variance=0;
 for(var i=0;i<pixels.length;i++){if(assign[i]===cl.idx)variance+=oklabDistSq(pixels[i],cl.lab)}
 cl.variance=cl.count>1?variance/cl.count:0;cl.tightness=1/(1+cl.variance*100)}
 
-// Phase 4: Hierarchical merge — agglomeratively merge nearest clusters
-// until we reach maxColors*2 candidates, preserving population
-while(raw.length>maxColors*2){
+// Phase 4: Hierarchical agglomerative merge
+// Merge nearest clusters until all pairs are perceptually distinct
+while(raw.length>2){
 var bestD=Infinity,bi=-1,bj=-1;
 for(var i=0;i<raw.length;i++)for(var j=i+1;j<raw.length;j++){
 var dd=oklabDist(raw[i].lab,raw[j].lab);if(dd<bestD){bestD=dd;bi=i;bj=j}}
-if(bestD>.03)break; // Stop merging if nearest pair is perceptually distinct
+if(bestD>.05)break; // .05 Oklab ≈ clearly distinct to human eye
 var a=raw[bi],b=raw[bj],total=a.count+b.count;
 var merged={lab:[(a.lab[0]*a.count+b.lab[0]*b.count)/total,(a.lab[1]*a.count+b.lab[1]*b.count)/total,(a.lab[2]*a.count+b.lab[2]*b.count)/total],
 count:total,tightness:(a.tightness*a.count+b.tightness*b.count)/total};
 merged.lch=oklabToOklch(merged.lab);merged.variance=(a.variance*a.count+b.variance*b.count)/total;
 raw.splice(bj,1);raw.splice(bi,1);raw.push(merged)}
 
+// Phase 4b: Kill anti-aliasing noise — loose clusters with low population
+// are blend artifacts from edges between solid color regions
+var totalPx=pixels.length,allRaw=raw.slice();
+var avgTight=0;for(var i=0;i<raw.length;i++)avgTight+=raw[i].tightness;avgTight/=raw.length;
+raw=raw.filter(function(cl){
+if(cl.count/totalPx>.03)return true; // >3% of image
+if(cl.tightness>avgTight*.7)return true; // reasonably coherent
+if(cl.lch[1]>.15)return true; // vivid enough to be intentional
+return false});
+if(raw.length===0)raw=allRaw;
+
 // Phase 5: Score with multi-factor ranking
-var totalPx=pixels.length,maxC=0;
+var maxC=0;
 for(var i=0;i<raw.length;i++)if(raw[i].lch[1]>maxC)maxC=raw[i].lch[1];
 for(var i=0;i<raw.length;i++){var cl=raw[i];
 var popFactor=cl.count/totalPx; // 0-1: fraction of image
@@ -379,7 +390,7 @@ raw.sort(function(a,b){return b.score-a.score});
 var deduped=[];
 for(var i=0;i<raw.length&&deduped.length<maxColors;i++){
 var cl=raw[i],isDup=false;
-var thresh=cl.lch[1]<.05?.06:.035; // Looser for grays, tighter for chromatic
+var thresh=cl.lch[1]<.05?.07:.05; // Looser for grays, moderate for chromatic
 for(var j=0;j<deduped.length;j++){
 if(oklabDist(cl.lab,deduped[j].lab)<thresh){isDup=true;break}}
 if(!isDup)deduped.push(cl)}
@@ -410,11 +421,10 @@ for(var i=deduped.length-1;i>=1;i--){
 var gap=gaps[i-1];
 var coverage=deduped[i-1].cumCoverage;
 var novelty=deduped[i].minDistToOthers;
-// Cut here if: large score drop AND good coverage already AND low novelty
-if(gap.drop>.6&&coverage>.7){best=i;continue}
-if(gap.drop>.45&&coverage>.85){best=i;continue}
-if(gap.drop>.3&&novelty<.04){best=i;continue}
-break}}
+// Cut here if: large score drop AND good coverage already AND/OR low novelty
+if(gap.drop>.5&&coverage>.6){best=i;continue}
+if(gap.drop>.35&&coverage>.8){best=i;continue}
+if(novelty<.05&&coverage>.5){best=i;continue}}}
 best=Math.max(1,Math.min(best,maxColors));
 
 // Phase 8: Convert to hex, preserving score order
