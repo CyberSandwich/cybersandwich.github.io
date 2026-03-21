@@ -99,8 +99,8 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <div class="w">
 <div class="inp">
 <input type="color" id="cpick" value="#888888" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-<input id="cinp" type="text" placeholder="#888888" value="" aria-label="Color Value" spellcheck="false" autocomplete="off">
-<button id="add-btn" aria-label="Pick Color" style="background:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<input id="cinp" type="text" placeholder="#HEX, rgb(), or hsl()" value="" aria-label="Color Value" spellcheck="false" autocomplete="off">
+<button id="add-btn" aria-label="Pick Color" style="background:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--card)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 <div class="card" id="gen-card">
 <div class="srow sel" data-r="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v10l7 7"/><circle cx="12" cy="12" r="10"/></svg><span>Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
@@ -376,11 +376,11 @@ function clearResetState(){
 if(resetPending){resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
 var btn=$('rs-btn');btn.classList.remove('rs-warn');btn.querySelector('span').textContent='Reset'}}
 
-var base=[.5,.5,.5],ruleIdx=0,neutral=false,globalFmt=0;
+var base=null,ruleIdx=0,neutral=false,globalFmt=0;
 var palette=[],mode='harmony',swatchCount=8;
 var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
 var copyTimers={},histTimer;
-var lastValidHex='#808080';
+var lastValidHex='';
 
 // ===================== STORAGE =====================
 
@@ -389,7 +389,13 @@ function saveHist(){try{localStorage.setItem('palit-history',JSON.stringify(hist
 
 // ===================== GENERATE & EXTRACT =====================
 
+function randomBase(){
+var rng=new Uint32Array(1);crypto.getRandomValues(rng);
+var h=(rng[0]/4294967295)*360;
+return clampRgb(oklchToRgb(gamutClamp(.65,.15,h)))}
+
 function generate(skipHist){
+if(!base)setBaseColor(randomBase());
 palette=generateHarmony(base,ruleIdx,neutral);mode='harmony';
 clearResetState();updateSwatchDOM();showOutput();
 if(!skipHist)scheduleHist()}
@@ -562,7 +568,10 @@ if(resetWarnTimer)clearTimeout(resetWarnTimer);
 resetWarnTimer=setTimeout(function(){resetPending=false;btn.classList.remove('rs-warn');sp.textContent='Reset'},2000);
 return}
 resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
-palette=[];mode='harmony';activeIdx=-1;
+palette=[];base=null;lastValidHex='';mode='harmony';activeIdx=-1;
+$('cinp').value='';$('cpick').value='#888888';
+$('add-btn').style.background='var(--t3)';
+$('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
 lastShownMode=undefined;lastShownHas=undefined;
 showOutput();closeExport();
 btn.classList.remove('rs-warn');
@@ -599,7 +608,7 @@ function applyColorInput(){
 var inp=$('cinp'),v=inp.value.trim();if(!v)return;
 var rgb=parseColor(v);
 if(!rgb){inp.classList.remove('shake');inp.offsetWidth;inp.classList.add('shake');
-setTimeout(function(){inp.classList.remove('shake');inp.value=lastValidHex},300);return}
+setTimeout(function(){inp.classList.remove('shake');inp.value=lastValidHex||''},300);return}
 setBaseColor(rgb);generate()}
 
 $('gen-card').addEventListener('click',function(e){
@@ -672,11 +681,7 @@ rows[activeIdx].style.background='var(--bg2)'}
 
 window.addEventListener('storage',function(e){if(e.key==='palit-history'){loadHist();renderHist()}});
 
-var rng=new Uint32Array(1);crypto.getRandomValues(rng);
-var randH=(rng[0]/4294967295)*360;
-var randRgb=clampRgb(oklchToRgb(gamutClamp(.65,.15,randH)));
-setBaseColor(randRgb);$('cinp').placeholder=lastValidHex;
-generate();renderHist()}
+renderHist()}
 
 setup();
 </script>
