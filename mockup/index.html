@@ -283,6 +283,8 @@ if(myId!==loadId)return;
 if(phoneModel){scene.remove(phoneModel);phoneModel.traverse(function(c){if(c.isMesh){c.geometry.dispose();(Array.isArray(c.material)?c.material:[c.material]).forEach(function(m){if(m)m.dispose()})}});phoneModel=null}
 if(screenMesh){scene.remove(screenMesh);screenMesh.geometry.dispose();screenMesh=null}
 scrCanvas.width=PW*scrS;scrCanvas.height=PH*scrS;
+scrTex.dispose();scrTex=new THREE.CanvasTexture(scrCanvas);
+scrTex.colorSpace=THREE.SRGBColorSpace;scrTex.minFilter=THREE.LinearMipmapLinearFilter;scrTex.magFilter=THREE.LinearFilter;scrTex.generateMipmaps=true;scrTex.anisotropy=renderer.capabilities.getMaxAnisotropy();
 camera.position.set(0,0,d.cz);controls.update();
 phoneModel=gltf.scene;
 if(d.ns&&d.ns!==1)phoneModel.scale.multiplyScalar(d.ns);
