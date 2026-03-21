@@ -304,7 +304,7 @@ var uvAttr=geom.attributes.uv;
 for(var i=0;i<uvAttr.count;i++){
 uvAttr.setXY(i,(uvAttr.getX(i)+d.sw/2)/d.sw,(uvAttr.getY(i)+d.sh/2)/d.sh)}
 uvAttr.needsUpdate=true;
-var mat=new THREE.MeshBasicMaterial({map:scrTex,transparent:true,toneMapped:false});
+var mat=new THREE.MeshPhysicalMaterial({map:scrTex,transparent:true,toneMapped:false,metalness:0,roughness:0.15,clearcoat:0.6,clearcoatRoughness:0.1,envMapIntensity:0.3,ior:1.5});
 screenMesh=new THREE.Mesh(geom,mat);
 screenMesh.position.set(0,0,d.sz+d.so);
 screenMesh.visible=!!img;
