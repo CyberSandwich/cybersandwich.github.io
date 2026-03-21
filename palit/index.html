@@ -489,7 +489,7 @@ function clearResetState(){
 if(resetPending){resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
 var btn=$('rs-btn');btn.classList.remove('rs-warn');btn.querySelector('span').textContent='Reset'}}
 
-var base=null,baseUserSet=false,ruleIdx=-1,neutral=false,globalFmt=0;
+var base=null,baseUserSet=false,ruleIdx=-1,neutral=false,globalFmt=+(localStorage.getItem('palit-fmt'))||0;
 var palette=[],mode='harmony',swatchCount=8,lastExtracted=[],autoCount=8;
 var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
 var copyTimers={},histTimer,cntRsTimer;
@@ -627,7 +627,8 @@ function updateFmtRows(){
 var rows=$('fmt-card').querySelectorAll('.srow[data-f]');
 for(var i=0;i<rows.length;i++){var f=parseInt(rows[i].getAttribute('data-f'));
 rows[i].className='srow'+(f===globalFmt?' sel':'');
-rows[i].setAttribute('aria-checked',f===globalFmt?'true':'false')}}
+rows[i].setAttribute('aria-checked',f===globalFmt?'true':'false')}
+try{localStorage.setItem('palit-fmt',globalFmt)}catch(_){}}
 
 function refreshColorValues(){
 var rows=$('color-rows').children;
@@ -901,6 +902,7 @@ rows[activeIdx].style.background='var(--bg2)'}
 
 window.addEventListener('storage',function(e){if(e.key==='palit-history'){loadHist();renderHist()}});
 
+if(globalFmt)updateFmtRows();
 renderHist()}
 
 setup();
