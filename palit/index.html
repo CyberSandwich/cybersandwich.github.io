@@ -189,7 +189,7 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 </div>
 <div class="drop-overlay" id="drop-ov">
 <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
-Drop Image Here
+Drop Here
 </div>
 <nav>
 <div class="tabs" aria-label="Palette"><a href="/">Home</a><a class="active">Palit</a></div>
@@ -280,6 +280,22 @@ if(m){var hh=(+m[1]%360)/360,ss=Math.min(100,+m[2])/100,ll=Math.min(100,+m[3])/1
 function h2r(p,q,t){if(t<0)t++;if(t>1)t--;if(t<1/6)return p+(q-p)*6*t;if(t<.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p}
 var q=ll<.5?ll*(1+ss):ll+ss-ll*ss,p=2*ll-q;return[h2r(p,q,hh+1/3),h2r(p,q,hh),h2r(p,q,hh-1/3)]}
 return null}
+
+function parseMultiColor(text){
+var colors=[],seen={};
+// Extract CSS variable values: --color-1: #hex;
+text=text.replace(/--[\w-]+:\s*/g,'');
+// Extract Tailwind values: 'palette-1': '#hex',
+text=text.replace(/'[\w-]+':\s*/g,'');
+// Strip :root { } wrapper, quotes, commas, semicolons
+text=text.replace(/:root\s*\{/g,'').replace(/\}/g,'').replace(/['"]/g,'');
+// Split on newlines, commas, semicolons
+var parts=text.split(/[\n,;]+/);
+for(var i=0;i<parts.length;i++){
+var s=parts[i].trim();if(!s)continue;
+var rgb=parseColor(s);
+if(rgb){var hex=rgbToHex(rgb);if(!seen[hex]){seen[hex]=1;colors.push(rgb)}}}
+return colors.length>=2?colors:null}
 
 function mkEntry(rgb){
 var hex=rgbToHex(rgb),hsl=rgbToHsl(rgb);
@@ -514,6 +530,17 @@ lastExtracted=ext.colors;
 mode='image';updateSwatchDOM();showOutput();commitHist()};
 img.src=e.target.result};reader.readAsDataURL(file)}
 
+function processPastedColors(colors){
+clearResetState();
+palette=colors.map(function(rgb){return mkEntry(rgb)});
+lastExtracted=[];mode='pasted';
+baseUserSet=false;base=null;lastValidHex='';
+$('cinp').value='';$('add-btn').style.background='var(--t3)';
+$('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
+ruleIdx=-1;updateRows();neutral=false;updateNeutralUI();
+updateSwatchDOM();lastShownMode=undefined;lastShownHas=undefined;lastHistLen=undefined;
+showOutput();commitHist()}
+
 function scheduleHist(){
 if(histTimer)clearTimeout(histTimer);
 histTimer=setTimeout(commitHist,400)}
@@ -546,17 +573,17 @@ updateSwatchDOM();lastShownMode=undefined;lastShownHas=undefined;lastHistLen=und
 
 var lastShownMode,lastShownHas,lastHistLen;
 function showOutput(){
-var show=palette.length>0,isImg=mode==='image',isHarmony=mode==='harmony',hl=hist.length;
+var show=palette.length>0,isHarmony=mode==='harmony',hideRules=mode==='image'||mode==='pasted'||mode==='restored',hl=hist.length;
 if(mode===lastShownMode&&show===lastShownHas&&hl===lastHistLen)return;
 lastShownMode=mode;lastShownHas=show;lastHistLen=hl;
-$('gen-card').style.display=isImg?'none':'';
+$('gen-card').style.display=hideRules?'none':'';
 $('fmt-card').style.display=show?'':'none';
 $('neutral-card').style.display=show&&isHarmony&&ruleIdx>=0?'':'none';
 $('color-card').style.display=show?'':'none';
 $('act-card').style.display=show||hist.length>0?'':'none';
 $('ca-btn').style.display=show?'':'none';
 $('dl-btn').style.display=show?'':'none';
-$('count-card').style.display=isImg?'':'none'}
+$('count-card').style.display=mode==='image'?'':'none'}
 
 function fmtVal(p,f){return[p.hex,p.rgb,p.hsl][f]}
 
@@ -821,13 +848,21 @@ document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++
 document.addEventListener('dragleave',function(e){e.preventDefault();dragCount--;if(dragCount<=0){dragCount=0;ov.classList.remove('active')}});
 document.addEventListener('dragover',function(e){e.preventDefault()});
 document.addEventListener('drop',function(e){e.preventDefault();dragCount=0;ov.classList.remove('active');
-var files=e.dataTransfer.files;if(files.length>0)processImage(files[0])});
+var files=e.dataTransfer.files;if(files.length>0){processImage(files[0]);return}
+var text=e.dataTransfer.getData('text');if(text){
+var multi=parseMultiColor(text);if(multi){processPastedColors(multi);return}
+var rgb=parseColor(text.trim());if(rgb){baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate()}}});
 
 document.addEventListener('paste',function(e){
 if(document.activeElement===$('cinp'))return;
 var cd=e.clipboardData;if(!cd)return;
 var items=cd.items;if(items){for(var i=0;i<items.length;i++){if(items[i].type.indexOf('image')!==-1){processImage(items[i].getAsFile());return}}}
-var text=cd.getData('text');if(text){var rgb=parseColor(text.trim());if(rgb){
+var text=cd.getData('text');if(text){
+var multi=parseMultiColor(text);
+if(multi){e.preventDefault();processPastedColors(multi);return}
+var rgb=parseColor(text.trim());if(rgb){
 e.preventDefault();baseUserSet=true;setBaseColor(rgb);
 if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
 if(ruleIdx>=0)generate()}}});
