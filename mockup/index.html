@@ -160,11 +160,11 @@ import{RoomEnvironment}from'three/addons/environments/RoomEnvironment.js';
 
 var $=function(s){return document.getElementById(s)};
 
-/* Device configs: screen dims, dynamic island, 3D surface, camera, normalization */
+/* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
-{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:22,irx:19,sw:7.34,sh:15.83,sz:0.44,so:0.005,sr:1.14,cz:28.6,ns:100},
-{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:22,irx:19,sw:6.73,sh:14.49,sz:0.44,so:0.005,sr:1.04,cz:26.3,ns:100},
-{name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:22,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1}
+{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:22,irx:19,sw:7.34,sh:15.83,sz:0.44,so:0.005,sr:1.14,cz:28.6,ns:100,ry:0,mm:0.4,mr:0.5},
+{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:22,irx:19,sw:6.73,sh:14.49,sz:0.44,so:0.005,sr:1.04,cz:26.3,ns:100,ry:Math.PI,mm:0.4,mr:0.45},
+{name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:22,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2}
 ];
 var curDev=0;
 var PW,PH,IW,IH,IX,IY,IRX;
@@ -283,11 +283,12 @@ camera.position.set(0,0,d.cz);controls.update();
 gltfLoader.load(d.url,function(gltf){
 phoneModel=gltf.scene;
 if(d.ns&&d.ns!==1)phoneModel.scale.multiplyScalar(d.ns);
+if(d.ry)phoneModel.rotation.y=d.ry;
 gltf.scene.traverse(function(child){
 if(child.isMesh){
-child.castShadow=true;child.receiveShadow=true;
+child.castShadow=d.ns===1;child.receiveShadow=d.ns===1;
 var mats=Array.isArray(child.material)?child.material:[child.material];
-mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=0.8;m.roughness=0.2;m.side=THREE.DoubleSide;m.needsUpdate=true}})
+mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=d.mm;m.roughness=d.mr;m.side=THREE.DoubleSide;m.needsUpdate=true}})
 }});
 scene.add(gltf.scene);
 var geom=new THREE.ShapeGeometry(rrShape(d.sw,d.sh,d.sr));
