@@ -326,34 +326,39 @@ nav{
 }
 .tabs{
   display:flex;
-  background:rgba(245,245,245,.35);
+  position:relative;
+  background:rgb(255 255 255 / .55);
   border-radius:var(--rr);
   padding:5px;
-  box-shadow:0 8px 32px rgba(0,0,0,.1),0 2px 6px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,1),inset 0 -1px 0 rgba(255,255,255,.5);
-  border:.5px solid rgba(255,255,255,.6);
+  box-shadow:0 8px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04),inset 0 1px 0 rgb(255 255 255 / .7);
+  border:1px solid rgb(255 255 255 / .45);
   max-width:calc(100vw - 40px)
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  .tabs{background:none;backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4)}
+  .tabs{background:rgb(255 255 255 / .15);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
 }
+.tabs::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse 50% 50% at 30% 25%,rgb(255 255 255 / .28) 0%,transparent 70%);pointer-events:none;animation:sheen 7s ease-in-out infinite alternate}
+@keyframes sheen{from{transform:translate(0,0)}to{transform:translate(3px,1.5px)}}
 .tabs a{
+  position:relative;
+  z-index:1;
   background:none;
   padding:12px clamp(12px,3.5vw,22px);
   border-radius:var(--rr);
   font:500 clamp(.8125rem,2.8vw,.875rem)/1 var(--font);
-  color:var(--t3);
+  color:var(--t2);
   cursor:pointer;
   transition:color .15s,background .15s,box-shadow .15s;
   white-space:nowrap;
   text-decoration:none
 }
 .tabs a.active{
-  background:rgba(50,50,52,.7);
+  background:rgba(50,50,52,.72);
   color:#fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.15)
+  box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgb(255 255 255 / .12)
 }
 .tabs a:active{opacity:.7}
-@media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
+@media(hover:hover){.tabs a:hover:not(.active){color:var(--t1)}}
 
 /* Responsive */
 @media(max-width:390px){
@@ -404,10 +409,11 @@ html[data-theme="sepia"] ::selection{background:rgba(166,123,91,.2)}
 html[data-theme="sepia"] .vcf-link a{background:#6B5744;color:#F5EDDA}
 html[data-theme="sepia"] .vcf-link a:hover{background:#5B4636}
 html[data-theme="sepia"] .copy-btn.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
-html[data-theme="sepia"] .tabs{background:rgba(240,232,216,.35);border-color:rgba(255,250,242,.6);box-shadow:0 8px 32px rgba(91,70,54,.1),0 2px 6px rgba(91,70,54,.04),inset 0 1px 0 rgba(255,250,242,1),inset 0 -1px 0 rgba(255,250,242,.5)}
+html[data-theme="sepia"] .tabs{background:rgb(245 237 218 / .55);border-color:rgb(255 250 242 / .5);box-shadow:0 8px 32px rgba(91,70,54,.08),0 2px 8px rgba(91,70,54,.04),inset 0 1px 0 rgb(255 250 242 / .7)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  html[data-theme="sepia"] .tabs{background:none}
+  html[data-theme="sepia"] .tabs{background:rgb(255 248 240 / .14)}
 }
+html[data-theme="sepia"] .tabs::after{background:radial-gradient(ellipse 50% 50% at 30% 25%,rgb(255 250 242 / .25) 0%,transparent 70%)}
 html[data-theme="sepia"] .tabs a.active{background:rgba(91,70,54,.8);color:#F5EDDA}
 html[data-theme="sepia"] .cmd-row-type{background:var(--bg)}
 
@@ -430,10 +436,11 @@ html[data-theme="dark"] ::selection{background:rgba(100,181,246,.2)}
 html[data-theme="dark"] .vcf-link a{background:#48484A}
 html[data-theme="dark"] .vcf-link a:hover{background:#58585A}
 html[data-theme="dark"] .copy-btn.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
-html[data-theme="dark"] .tabs{background:rgba(44,44,46,.35);border-color:rgba(255,255,255,.15);box-shadow:0 8px 32px rgba(0,0,0,.25),0 2px 6px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -1px 0 rgba(255,255,255,.08)}
+html[data-theme="dark"] .tabs{background:rgb(255 255 255 / .1);border-color:rgb(255 255 255 / .12);box-shadow:0 8px 32px rgba(0,0,0,.22),0 2px 8px rgba(0,0,0,.1),inset 0 1px 0 rgb(255 255 255 / .18)}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  html[data-theme="dark"] .tabs{background:none}
+  html[data-theme="dark"] .tabs{background:rgb(255 255 255 / .06)}
 }
+html[data-theme="dark"] .tabs::after{background:radial-gradient(ellipse 50% 50% at 30% 25%,rgb(255 255 255 / .08) 0%,transparent 70%)}
 html[data-theme="dark"] .tabs a.active{background:rgba(245,245,247,.12)}
 html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 
@@ -547,4 +554,11 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
   html{scroll-behavior:auto!important}
+}
+/* Reduced Transparency */
+@media(prefers-reduced-transparency:reduce){
+  .tabs{background:rgb(255 255 255 / .82)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .tabs::after{display:none}
+  html[data-theme="sepia"] .tabs{background:rgb(245 237 218 / .82)!important}
+  html[data-theme="dark"] .tabs{background:rgb(44 44 46 / .88)!important}
 }
