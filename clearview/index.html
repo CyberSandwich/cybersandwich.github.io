@@ -93,13 +93,6 @@ button:focus:not(:focus-visible){outline:none}
 <button id="rsBtn" data-l="Reset All"><svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset All</span></button>
 </div>
 </div>
-<div id="s1" class="card">
-<div class="srow sel" id="bg-0"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label></div>
-<div class="srow" id="bg-1"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Light</span></label></div>
-<div class="srow" id="bg-2"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark</span></label></div>
-<div class="srow" id="bg-3"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label></div>
-<div class="srow" id="bg-4"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label></div>
-</div>
 <div id="s2" class="card">
 <div class="srow" id="sr-rad">
 <label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M14 3h7v7"/></svg><span id="rad-val"></span></label>
@@ -115,6 +108,16 @@ button:focus:not(:focus-visible){outline:none}
 <button class="step-btn" id="shd-inc" aria-label="Increase Shadow"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 </div>
 </div>
+</div>
+<div class="card">
+<div class="srow" id="bg-0"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label></div>
+<div class="srow" id="bg-1"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Light</span></label></div>
+<div class="srow" id="bg-2"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark</span></label></div>
+</div>
+<div class="card">
+<div class="srow sel" id="bg-5"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label></div>
+<div class="srow" id="bg-3"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label></div>
+<div class="srow" id="bg-4"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label></div>
 </div>
 <div id="s3" class="card">
 <div class="srow" id="sr-fmt">
@@ -139,13 +142,14 @@ Drop Image Here
 var $=function(s){return document.getElementById(s)};
 
 var img=null,blobUrl=null;
-var bgMode=0,radiusIdx=4,shadowIdx=2,fmtIdx=0;
+var bgMode=5,radiusIdx=4,shadowIdx=2,fmtIdx=0;
 
 var RAD_PCT=[0,2,4,6,8,10,14,18,22,26,30];
 var SHD_PCT=[0,1,2,3,4,5,6,8,10,12];
-var BG_NAMES=['Clear','Light','Dark','Warm','Cool'];
-var BG_CLS=['bg-clear','bg-light','bg-dark','bg-warm','bg-cool'];
-var BG_GRAD=[null,null,null,['#ffecd2','#fcb69f'],['#e0c3fc','#8ec5fc']];
+var BG_NAMES=['Clear','Light','Dark','Warm','Cool','Auto'];
+var BG_CLS=['bg-clear','bg-light','bg-dark','bg-warm','bg-cool','bg-auto'];
+var BG_GRAD=[null,null,null,['#ffecd2','#fcb69f'],['#e0c3fc','#8ec5fc'],null];
+var autoGrad=null;
 var FMT_NAMES=['PNG','JPEG','WebP'];
 var FMT_MIME=['image/png','image/jpeg','image/webp'];
 var FMT_QUAL=[undefined,0.92,0.92];
@@ -194,7 +198,7 @@ canvas.width=ow;canvas.height=oh;
 ctx.clearRect(0,0,ow,oh);
 var ix=se,iy=se;
 var dk=bgMode===2;
-var gr=BG_GRAD[bgMode];
+var gr=bgMode===5?autoGrad:BG_GRAD[bgMode];
 if(bgMode===1){ctx.fillStyle='#fff';ctx.fillRect(0,0,ow,oh)}
 else if(dk){ctx.fillStyle='#1a1a1a';ctx.fillRect(0,0,ow,oh)}
 else if(gr){var grd=ctx.createLinearGradient(0,0,ow,oh);grd.addColorStop(0,gr[0]);grd.addColorStop(1,gr[1]);ctx.fillStyle=grd;ctx.fillRect(0,0,ow,oh)}
@@ -240,12 +244,31 @@ btn.classList.add(cls);sp.textContent=text;
 tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.dataset.l},800)
 }
 
+function computeAutoGrad(){
+if(!img){autoGrad=null;return}
+var sc=document.createElement('canvas'),sw=8,sh=8;
+sc.width=sw;sc.height=sh;
+var sctx=sc.getContext('2d');
+sctx.drawImage(img,0,0,sw,sh);
+var d=sctx.getImageData(0,0,sw,sh).data;
+var tr=0,tg=0,tb=0,br=0,bg=0,bb=0;
+for(var i=0;i<sw;i++){var o=i*4;tr+=d[o];tg+=d[o+1];tb+=d[o+2]}
+var lr=(sh-1)*sw*4;
+for(var i=0;i<sw;i++){var o=lr+i*4;br+=d[o];bg+=d[o+1];bb+=d[o+2]}
+tr/=sw;tg/=sw;tb/=sw;br/=sw;bg/=sw;bb/=sw;
+var m=0.55;
+autoGrad=[
+'rgb('+Math.round(tr+(255-tr)*m)+','+Math.round(tg+(255-tg)*m)+','+Math.round(tb+(255-tb)*m)+')',
+'rgb('+Math.round(br+(255-br)*m)+','+Math.round(bg+(255-bg)*m)+','+Math.round(bb+(255-bb)*m)+')'
+]
+}
+
 function loadImg(file){
 if(!file||!file.type.startsWith('image/')){notify('Invalid Image',false);return}
 if(blobUrl)URL.revokeObjectURL(blobUrl);
 blobUrl=URL.createObjectURL(file);
 var i=new Image();
-i.onload=function(){img=i;render()};
+i.onload=function(){img=i;computeAutoGrad();if(bgMode===5)setBg(5);else render()};
 i.onerror=function(){URL.revokeObjectURL(blobUrl);blobUrl=null;notify('Failed to Load Image',false)};
 i.src=blobUrl
 }
@@ -281,6 +304,8 @@ psBtn.addEventListener('click',pasteClipboard);
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
 BG_NAMES.forEach(function(n,i){$('bg-'+i).classList.toggle('sel',i===m)});
+var pw=document.querySelector('.pv-wrap');
+pw.style.background=m===5&&autoGrad?'linear-gradient(135deg,'+autoGrad[0]+','+autoGrad[1]+')':'';
 render()
 }
 BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
@@ -394,7 +419,7 @@ feedback(dlBtn,'dl-fb','Downloaded')
 
 function resetAll(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-render();setBg(0);radiusIdx=4;shadowIdx=2;
+render();setBg(5);radiusIdx=4;shadowIdx=2;
 updateRadUI();updateShdUI();setFmt(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});
@@ -424,6 +449,7 @@ if(e.key==='l'){setBg(1);return}
 if(e.key==='b'){setBg(2);return}
 if(e.key==='3'){setBg(3);return}
 if(e.key==='4'){setBg(4);return}
+if(e.key==='a'){setBg(5);return}
 if(e.key==='p'){setFmt(0);return}
 if(e.key==='j'){setFmt(1);return}
 if(e.key==='w'){setFmt(2);return}
