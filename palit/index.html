@@ -318,8 +318,8 @@ for(var i=0;i<d.length;i+=4){if(d[i+3]<128)continue;
 var px=i/4,x=px%w,y=(px/w)|0;
 pixels.push(rgbToOklab([d[i]/255,d[i+1]/255,d[i+2]/255]));
 isBorder.push(x===0||x===w-1||y===0||y===h-1)}
-if(pixels.length===0)return[];
-if(pixels.length<=count){var seen={};return pixels.filter(function(lab){var hex=rgbToHex(clampRgb(oklabToRgb(lab)));if(seen[hex])return false;seen[hex]=1;return true}).map(function(lab){return rgbToHex(clampRgb(oklabToRgb(lab)))})}
+if(pixels.length===0)return{colors:[],best:0};
+if(pixels.length<=count){var seen={},uniq=[];pixels.forEach(function(lab){var hex=rgbToHex(clampRgb(oklabToRgb(lab)));if(!seen[hex]){seen[hex]=1;uniq.push(hex)}});return{colors:uniq,best:uniq.length}}
 
 var bgColor=null,bSum=[0,0,0],bCnt=0;
 for(var i=0;i<pixels.length;i++){if(isBorder[i]){bSum[0]+=pixels[i][0];bSum[1]+=pixels[i][1];bSum[2]+=pixels[i][2];bCnt++}}
@@ -349,11 +349,17 @@ if(clusters.length===0){clusters=allClusters;maxChroma=0;
 for(var i=0;i<clusters.length;i++)if(clusters[i].lch[1]>maxChroma)maxChroma=clusters[i].lch[1]}
 for(var i=0;i<clusters.length;i++)clusters[i].score=clusters[i].count*(1+(maxChroma>0?clusters[i].lch[1]/maxChroma*1.5:0));
 clusters.sort(function(a,b){return b.score-a.score});
-var result=[];
-for(var i=0;i<clusters.length&&result.length<count;i++){
-var dup=false;for(var j=0;j<result.length;j++){if(oklabDist(clusters[i].lab,result[j].lab)<.06){dup=true;break}}
-if(!dup)result.push(clusters[i])}
-return result.map(function(cl){return rgbToHex(clampRgb(oklabToRgb(cl.lab)))})}
+var deduped=[];
+for(var i=0;i<clusters.length&&deduped.length<12;i++){
+var dup=false;for(var j=0;j<deduped.length;j++){if(oklabDist(clusters[i].lab,deduped[j].lab)<.06){dup=true;break}}
+if(!dup)deduped.push(clusters[i])}
+if(deduped.length===0)return{colors:[],best:0};
+// Find optimal count: include colors scoring >= 8% of top score
+var topScore=deduped[0].score,best=1;
+for(var i=1;i<deduped.length;i++){if(deduped[i].score>=topScore*.08)best=i+1;else break}
+best=Math.max(2,Math.min(best,count));
+var hex=deduped.slice(0,count).map(function(cl){return rgbToHex(clampRgb(oklabToRgb(cl.lab)))});
+return{colors:hex,best:best}}
 
 // ===================== STATE =====================
 
@@ -375,7 +381,7 @@ if(resetPending){resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTime
 var btn=$('rs-btn');btn.classList.remove('rs-warn');btn.querySelector('span').textContent='Reset'}}
 
 var base=null,ruleIdx=-1,neutral=false,globalFmt=0;
-var palette=[],mode='harmony',swatchCount=8;
+var palette=[],mode='harmony',swatchCount=8,lastExtracted=[];
 var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
 var copyTimers={},histTimer;
 var lastValidHex='';
@@ -410,9 +416,11 @@ var sz=150,w=img.width,h=img.height;
 if(w>h){cvs.width=sz;cvs.height=Math.round(h/w*sz)}else{cvs.height=sz;cvs.width=Math.round(w/h*sz)}
 ctx.drawImage(img,0,0,cvs.width,cvs.height);
 var data=ctx.getImageData(0,0,cvs.width,cvs.height);
-var hexArr=extractColors(data,swatchCount);
-if(hexArr.length===0)return;
-palette=hexArr.map(function(hex){return mkEntry(hexToRgb(hex)||[0,0,0])});
+var ext=extractColors(data,12);
+if(ext.colors.length===0)return;
+swatchCount=ext.best;updateCountLabel();
+palette=ext.colors.slice(0,swatchCount).map(function(hex){return mkEntry(hexToRgb(hex)||[0,0,0])});
+lastExtracted=ext.colors;
 mode='image';updateSwatchDOM();showOutput();commitHist()};
 img.src=e.target.result};reader.readAsDataURL(file)}
 
@@ -567,7 +575,7 @@ if(resetWarnTimer)clearTimeout(resetWarnTimer);
 resetWarnTimer=setTimeout(function(){resetPending=false;btn.classList.remove('rs-warn');sp.textContent='Reset'},2000);
 return}
 resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
-palette=[];base=null;lastValidHex='';ruleIdx=-1;neutral=false;mode='harmony';activeIdx=-1;
+palette=[];base=null;lastValidHex='';ruleIdx=-1;neutral=false;mode='harmony';activeIdx=-1;lastExtracted=[];
 $('cinp').value='';$('cpick').value='#888888';
 $('add-btn').style.background='var(--t3)';
 $('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
@@ -618,9 +626,16 @@ if(ri!==ruleIdx||!base){ruleIdx=ri;updateRows();generate()}});
 
 $('neutral-row').addEventListener('click',function(){neutral=!neutral;updateNeutralUI();generate()});
 
-function updateCountLabel(){$('cnt-lbl').textContent=swatchCount+(swatchCount===1?' Color':' Colors');$('cnt-dn').disabled=swatchCount<=3;$('cnt-up').disabled=swatchCount>=12}
-$('cnt-dn').addEventListener('click',function(){if(swatchCount>3){swatchCount--;updateCountLabel()}});
-$('cnt-up').addEventListener('click',function(){if(swatchCount<12){swatchCount++;updateCountLabel()}});
+function updateCountLabel(){
+var max=mode==='image'?lastExtracted.length:12;
+$('cnt-lbl').textContent=swatchCount+(swatchCount===1?' Color':' Colors');
+$('cnt-dn').disabled=swatchCount<=2;$('cnt-up').disabled=swatchCount>=max}
+function resliceImage(){
+if(mode!=='image'||lastExtracted.length===0)return;
+palette=lastExtracted.slice(0,swatchCount).map(function(hex){return mkEntry(hexToRgb(hex)||[0,0,0])});
+updateSwatchDOM()}
+$('cnt-dn').addEventListener('click',function(){if(swatchCount>2){swatchCount--;updateCountLabel();resliceImage()}});
+$('cnt-up').addEventListener('click',function(){var max=mode==='image'?lastExtracted.length:12;if(swatchCount<max){swatchCount++;updateCountLabel();resliceImage()}});
 
 $('fmt-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-f]');if(!row)return;
