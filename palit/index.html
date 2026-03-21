@@ -475,7 +475,7 @@ return clampRgb(oklchToRgb(gamutClamp(.65,.15,h)))}
 
 function generate(skipHist){
 if(ruleIdx<0)return;
-if(!baseUserSet)setBaseColor(randomBase());
+if(!baseUserSet){base=randomBase();updateBtnColor(rgbToHex(base))}
 palette=generateHarmony(base,ruleIdx,neutral);mode='harmony';
 clearResetState();updateSwatchDOM();showOutput();
 if(!skipHist)scheduleHist()}
@@ -534,7 +534,9 @@ $('gen-card').style.display=isImg?'none':'';
 $('fmt-card').style.display=show?'':'none';
 $('neutral-card').style.display=show&&!isImg?'':'none';
 $('color-card').style.display=show?'':'none';
-$('act-card').style.display=show?'':'none';
+$('act-card').style.display=show||hist.length>0?'':'none';
+$('ca-btn').style.display=show?'':'none';
+$('dl-btn').style.display=show?'':'none';
 $('count-card').style.display=isImg?'':'none'}
 
 function fmtVal(p,f){return[p.hex,p.rgb,p.hsl][f]}
