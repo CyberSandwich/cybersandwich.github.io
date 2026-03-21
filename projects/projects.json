@@ -66,6 +66,12 @@
     "category": "Web"
   },
   {
+    "title": "Palit",
+    "subtitle": "Color Palette Generator",
+    "url": "/palit/",
+    "category": "Web"
+  },
+  {
     "title": "Wrighter",
     "subtitle": "Minimal Plain Text Editor",
     "url": "/wrighter/",
