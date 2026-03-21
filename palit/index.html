@@ -443,10 +443,8 @@ return{colors:hex,best:best}}
 function updateBtnColor(hex){
 var btn=$('add-btn');btn.style.background=hex;
 var rgb=hexToRgb(hex)||[0,0,0];
-var lch=rgbToOklch(rgb);var compH=(lch[2]+180)%360;
-var comp=gamutClamp(lch[0],lch[1],compH);
-var compRgb=clampRgb(oklchToRgb(comp));
-btn.querySelector('svg').setAttribute('stroke',rgbToHex(compRgb))}
+var lum=relLum(rgb);
+btn.querySelector('svg').setAttribute('stroke',lum>.4?'#000':'#fff')}
 
 function setBaseColor(rgb){
 base=rgb;lastValidHex=rgbToHex(rgb);
@@ -703,7 +701,8 @@ $('cinp').addEventListener('blur',applyColorInput);
 $('cinp').addEventListener('paste',function(){setTimeout(applyColorInput,0)});
 
 function applyColorInput(){
-var inp=$('cinp'),v=inp.value.trim();if(!v)return;
+var inp=$('cinp'),v=inp.value.trim();
+if(!v){if(ruleIdx>=0){base=null;setBaseColor(randomBase());generate()}return}
 var rgb=parseColor(v);
 if(!rgb){inp.classList.remove('shake');inp.offsetWidth;inp.classList.add('shake');
 setTimeout(function(){inp.classList.remove('shake');inp.value=lastValidHex||''},300);return}
