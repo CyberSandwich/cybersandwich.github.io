@@ -179,7 +179,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
       <div class="t-chips">
         <button onclick="tGo(60)">1 min</button>
 <button onclick="tGo(300)">5 min</button>
-        <button onclick="tGo(600)">10 min</button>
+        <button onclick="tGo(1500)">25 min</button>
       </div>
       <div class="t-input">
         <div class="t-digit">
@@ -556,7 +556,7 @@ document.addEventListener('keydown',e=>{
       if(e.key==='s'){$('cS').focus();return}
       if(e.key==='q'){tGo(60);return}
       if(e.key==='w'){tGo(300);return}
-      if(e.key==='e'){tGo(600);return}
+      if(e.key==='e'){tGo(1500);return}
       if(e.key===' '||e.key==='Enter'){e.preventDefault();tStartCustom();return}
       if(e.key==='Escape'){e.preventDefault();tClear();return}
     }
