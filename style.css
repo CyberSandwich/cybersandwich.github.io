@@ -335,7 +335,7 @@ nav{
   max-width:calc(100vw - 40px)
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  .tabs{background:rgb(255 255 255 / .15);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
+  .tabs{background:rgb(255 255 255 / .08);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
 }
 .tabs::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse 50% 50% at 30% 25%,rgb(255 255 255 / .28) 0%,transparent 70%);pointer-events:none;animation:sheen 7s ease-in-out infinite alternate}
 @keyframes sheen{from{transform:translate(0,0)}to{transform:translate(3px,1.5px)}}
@@ -346,7 +346,7 @@ nav{
   padding:12px clamp(12px,3.5vw,22px);
   border-radius:var(--rr);
   font:500 clamp(.8125rem,2.8vw,.875rem)/1 var(--font);
-  color:var(--t2);
+  color:var(--t3);
   cursor:pointer;
   transition:color .15s,background .15s,box-shadow .15s;
   white-space:nowrap;
@@ -358,7 +358,7 @@ nav{
   box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgb(255 255 255 / .12)
 }
 .tabs a:active{opacity:.7}
-@media(hover:hover){.tabs a:hover:not(.active){color:var(--t1)}}
+@media(hover:hover){.tabs a:hover:not(.active){color:var(--t2)}}
 
 /* Responsive */
 @media(max-width:390px){
