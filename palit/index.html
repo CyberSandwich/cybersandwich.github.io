@@ -19,23 +19,20 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .cinp:focus{border-color:var(--t4)}
 .cinp.shake{animation:shake .3s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
-.srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s;cursor:pointer}
 .srow:last-child{border-bottom:none}
+.srow:active{opacity:.7}
 .slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
 .slbl svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
-.schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
-.chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
-.chip:active{transform:scale(.95)}
-.chip.active{border-color:var(--acc);color:var(--t1);background:var(--bg2)}
-.toggle-pill{padding:8px 16px;border-radius:var(--rr);border:1.5px solid var(--bdr);font:500 .75rem/1 var(--font);color:var(--t3);background:none;cursor:pointer;flex-shrink:0;min-width:58px;text-align:center;transition:.2s ease}
-.toggle-pill:active{opacity:.7}
-.toggle-pill.toggled{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
-.toggle-pill.toggled svg{width:12px;height:12px;display:block;margin:0 auto}
-.toggle-pill.toggled polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-html[data-theme="dark"] .toggle-pill.toggled{background:#1A3A2A;border-color:#2D5A3E}
-html[data-theme="dark"] .toggle-pill.toggled svg{color:#34D399}
-html[data-theme="sepia"] .toggle-pill.toggled{background:#E8E0CE;border-color:#DDD4C0}
-html[data-theme="sepia"] .toggle-pill.toggled svg{color:#2D7D46}
+.bg-chk{padding:5px 10px;border:1.5px solid var(--bdr);border-radius:var(--rr);background:none;flex-shrink:0;transition:.2s ease}
+.bg-chk svg{width:14px;height:14px;display:block;margin:0 auto;color:var(--t4);opacity:.2}
+.srow.sel .bg-chk{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:copyPop .35s ease}
+.srow.sel .bg-chk svg{color:#34D399;opacity:1}
+.srow.sel .bg-chk polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+html[data-theme="dark"] .srow.sel .bg-chk{background:#1A3A2A;border-color:#2D5A3E}
+html[data-theme="dark"] .srow.sel .bg-chk svg{color:#34D399}
+html[data-theme="sepia"] .srow.sel .bg-chk{background:#E8E0CE;border-color:#DDD4C0}
+html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
 .stepper{display:flex;align-items:center;gap:6px}
 .step-btn{width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
 .step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
@@ -74,12 +71,13 @@ html[data-theme="dark"] .ok .ic,html[data-theme="dark"] .ok span{color:#34D399!i
 html[data-theme="sepia"] .ok{background:#E8E0CE!important}
 html[data-theme="sepia"] .ok .ic,html[data-theme="sepia"] .ok span{color:#2D7D46!important}
 .rs-fb{background:#FEF9C3!important}
-.rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
+.rs-fb .id{display:none!important}
+.rs-fb .rs-spin{display:inline!important;color:#CA8A04!important;animation:spin .4s ease}
 .rs-fb span{color:#CA8A04!important}
 html[data-theme="dark"] .rs-fb{background:#3A3524!important}
-html[data-theme="dark"] .rs-fb .id,html[data-theme="dark"] .rs-fb span{color:#FACC15!important}
+html[data-theme="dark"] .rs-fb .rs-spin,html[data-theme="dark"] .rs-fb span{color:#FACC15!important}
 html[data-theme="sepia"] .rs-fb{background:#EDE5C0!important}
-html[data-theme="sepia"] .rs-fb .id,html[data-theme="sepia"] .rs-fb span{color:#A67B5B!important}
+html[data-theme="sepia"] .rs-fb .rs-spin,html[data-theme="sepia"] .rs-fb span{color:#A67B5B!important}
 @keyframes copyPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 .sec-label{font:600 .8125rem/1 var(--font);color:var(--t4);text-transform:uppercase;letter-spacing:.5px;padding:16px 20px 8px;user-select:none;-webkit-user-select:none}
 .items{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
@@ -96,8 +94,7 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 .paste-hint{display:none;text-align:center;font:400 .75rem/1 var(--font);color:var(--t4);padding:0 20px 4px}
 @media(hover:none){.paste-hint{display:block}}
 @media(hover:hover){
-.chip:hover{border-color:var(--t4);color:var(--t2)}
-.toggle-pill:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
+.srow:hover{background:var(--bg2)}
 .step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}
 .actions button:hover{background:var(--bg2)}
 .del:hover{color:var(--t2);background:var(--bg2)}
@@ -115,15 +112,15 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <div id="cswatch" class="cswatch" role="button" tabindex="0" aria-label="Pick Color" style="background:#4A90D9"></div>
 <input id="cinp" type="text" class="cinp" placeholder="#4A90D9" value="#4A90D9" aria-label="Color Value" spellcheck="false" autocomplete="off">
 </div>
-<div class="srow">
-<span class="slbl"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><circle cx="14" cy="10" r="6"/><circle cx="12" cy="14" r="6"/></svg><span>Harmony</span></span>
-<div class="schips" id="hchips"></div>
-</div>
-<div class="srow" id="neutral-row">
-<span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span>
-<button id="neutral-btn" class="toggle-pill" aria-label="Toggle Neutral Anchor">Off</button>
-</div>
-<div class="srow" id="count-row" style="display:none">
+<div class="srow sel" data-r="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v10l7 7"/><circle cx="12" cy="12" r="10"/></svg><span>Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="1"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 010 20"/><circle cx="12" cy="12" r="10"/></svg><span>Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="2"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2l8.66 15H3.34z"/></svg><span>Triadic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="3"><span class="slbl"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Tetradic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="4"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v20M5 5l14 14M19 5L5 19"/></svg><span>Split-Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="5"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>Monochromatic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="6"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/></svg><span>Accented Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="n"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="count-row" style="display:none;cursor:default">
 <span class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Colors</span></span>
 <div class="stepper">
 <button class="step-btn" id="cnt-dn" aria-label="Fewer Colors"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
@@ -141,10 +138,10 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
 <span>Copy All</span>
 </button>
-<button id="ex-btn" aria-label="Export Palette">
+<button id="dl-btn" aria-label="Download Palette">
 <svg class="id" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
 <svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg>
-<span>Export</span>
+<span>Download</span>
 </button>
 <button class="ex-opt" data-fmt="text" style="display:none">
 <svg class="id" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
@@ -162,7 +159,8 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <span>Tailwind</span>
 </button>
 <button id="rs-btn" aria-label="Reset">
-<svg class="id" viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9 5 5 0 00-4 2"/><polyline points="3 3 3 7 7 7"/></svg>
+<svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
+<svg class="rs-spin" viewBox="0 0 24 24" style="width:18px;height:18px;display:none"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg>
 <span>Reset</span>
 </button>
 </div>
@@ -271,13 +269,13 @@ return null}
 // ===================== HARMONY GENERATION =====================
 
 var RULES=[
-{name:'Comp',offsets:[0,180]},
-{name:'Analog',offsets:[-30,0,30]},
-{name:'Triad',offsets:[0,120,240]},
-{name:'Tetrad',offsets:[0,90,180,270]},
-{name:'Split',offsets:[0,150,210]},
-{name:'Mono',mono:true},
-{name:'Accent',offsets:[-30,0,30,180]}];
+{name:'Complementary',offsets:[0,180]},
+{name:'Analogous',offsets:[-30,0,30]},
+{name:'Triadic',offsets:[0,120,240]},
+{name:'Tetradic',offsets:[0,90,180,270]},
+{name:'Split-Complementary',offsets:[0,150,210]},
+{name:'Monochromatic',mono:true},
+{name:'Accented Analogous',offsets:[-30,0,30,180]}];
 
 function generateHarmony(baseRgb,ri,incNeutral){
 var rule=RULES[ri],lch=rgbToOklch(baseRgb);
@@ -359,10 +357,10 @@ return result.map(function(cl){return rgbToHex(clampRgb(oklabToRgb(cl.lab)))})}
 
 // ===================== STATE =====================
 
-var base=[.29,.56,.85],ruleIdx=2,neutral=false,globalFmt=0;
+var base=[.29,.56,.85],ruleIdx=0,neutral=false,globalFmt=0;
 var palette=[],mode='harmony',swatchCount=8;
 var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
-var copyTimers={},caTimer,exTimer,rsTimer,ntTimer,ntTimer2;
+var copyTimers={},caTimer,dlTimer,rsTimer;
 var lastValidHex='#4A90D9';
 
 function mkCheck(){
@@ -381,9 +379,10 @@ function saveHist(){try{localStorage.setItem('palit-history',JSON.stringify(hist
 
 // ===================== GENERATE & EXTRACT =====================
 
-function generate(){
+function generate(skipHist){
 palette=generateHarmony(base,ruleIdx,neutral);mode='harmony';
-$('count-row').style.display='none';renderSwatches();showOutput();addToHist()}
+$('count-row').style.display='none';renderSwatches();showOutput();
+if(!skipHist)addToHist()}
 
 function processImage(file){
 if(!file||!file.type.startsWith('image/'))return;
@@ -406,7 +405,12 @@ img.src=e.target.result};reader.readAsDataURL(file)}
 
 function addToHist(){
 if(palette.length===0)return;
-var entry={colors:palette.map(function(p){return p.hex}),source:mode,ts:Date.now()};
+var colors=palette.map(function(p){return p.hex});
+// Deduplicate: skip if identical to most recent entry
+if(hist.length>0){
+var last=hist[0].colors;
+if(last.length===colors.length&&last.every(function(c,i){return c===colors[i]}))return}
+var entry={colors:colors,source:mode,ts:Date.now()};
 if(mode==='harmony'){entry.rule=ruleIdx;entry.base=lastValidHex;entry.neutral=neutral}
 hist.unshift(entry);if(hist.length>20)hist.pop();saveHist();renderHist()}
 
@@ -414,9 +418,9 @@ function restoreEntry(idx){
 var e=hist[idx];if(!e)return;
 if(e.source==='harmony'&&e.base){
 var rgb=hexToRgb(e.base);if(rgb){base=rgb;lastValidHex=e.base;$('cinp').value=e.base;$('cswatch').style.background=e.base;$('cpick').value=e.base;
-if(typeof e.rule==='number'){ruleIdx=e.rule;updateChips()}
-if(typeof e.neutral==='boolean'){neutral=e.neutral;updateNeutralUI()}
-generate();return}}
+if(typeof e.rule==='number'){ruleIdx=e.rule;updateRows()}
+if(typeof e.neutral==='boolean'){neutral=e.neutral;updateRows()}
+generate(true);return}}
 palette=e.colors.map(function(hex){var rgb=hexToRgb(hex)||[0,0,0];var hsl=rgbToHsl(rgb);
 return{hex:hex,rgb:'rgb('+Math.round(rgb[0]*255)+', '+Math.round(rgb[1]*255)+', '+Math.round(rgb[2]*255)+')',
 hsl:'hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)',rgbArr:rgb,oklch:rgbToOklch(rgb)}});
@@ -463,25 +467,12 @@ xsvg.setAttribute('viewBox','0 0 24 24');xsvg.setAttribute('width','14');xsvg.se
 var xp=document.createElementNS('http://www.w3.org/2000/svg','path');xp.setAttribute('d','M18 6L6 18M6 6l12 12');
 xsvg.appendChild(xp);del.appendChild(xsvg);row.appendChild(del);el.appendChild(row)}}
 
-function buildChips(){
-var el=$('hchips');
-for(var i=0;i<RULES.length;i++){
-var btn=document.createElement('button');btn.className='chip'+(i===ruleIdx?' active':'');
-btn.textContent=RULES[i].name;btn.setAttribute('data-r',i);el.appendChild(btn)}}
-
-function updateChips(){
-var chips=$('hchips').children;
-for(var i=0;i<chips.length;i++)chips[i].className='chip'+(i===ruleIdx?' active':'')}
-
-function updateNeutralUI(){
-var btn=$('neutral-btn');
-btn.textContent='';btn.classList.remove('toggled');
-if(neutral){
-btn.classList.add('toggled');
-var ck=mkCheck();ck.style.width='12px';ck.style.height='12px';
-ck.querySelector('svg').style.width='12px';ck.querySelector('svg').style.height='12px';
-btn.appendChild(ck)
-}else{btn.textContent='Off'}}
+function updateRows(){
+var rows=$('gen-card').querySelectorAll('.srow[data-r]');
+for(var i=0;i<rows.length;i++){
+var r=rows[i].getAttribute('data-r');
+if(r==='n')rows[i].className='srow'+(neutral?' sel':'');
+else rows[i].className='srow'+(parseInt(r)===ruleIdx?' sel':'')}}
 
 // ===================== COPY =====================
 
@@ -515,7 +506,7 @@ else if(fmt==='css')out=palette.map(function(p,i){return'--color-'+(i+1)+': '+p.
 else if(fmt==='tw')out=palette.map(function(p,i){return"'palette-"+(i+1)+"': '"+p.hex+"',"}).join('\n');
 copyText(out);
 var btns=document.querySelectorAll('.ex-opt[data-fmt="'+fmt+'"]');
-if(btns[0])btnFeedback(btns[0],'ok','','Copied',1200,'exTimer')}
+if(btns[0])btnFeedback(btns[0],'ok','','Copied',1200,'dlTimer')}
 
 function btnFeedback(btn,cls,origText,fbText,dur,timerKey){
 if(window[timerKey]){clearTimeout(window[timerKey]);btn.classList.remove('ok','rs-fb')}
@@ -545,7 +536,7 @@ for(var i=0;i<opts.length;i++)opts[i].style.display='none'}
 // ===================== EVENTS =====================
 
 function setup(){
-loadHist();buildChips();
+loadHist();
 
 $('cswatch').addEventListener('click',function(){$('cpick').click()});
 $('cswatch').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('cpick').click()}});
@@ -566,13 +557,13 @@ setTimeout(function(){inp.classList.remove('shake');inp.value=lastValidHex},300)
 base=rgb;lastValidHex=rgbToHex(rgb);inp.value=lastValidHex;
 $('cswatch').style.background=lastValidHex;$('cpick').value=lastValidHex;generate()}
 
-$('hchips').addEventListener('click',function(e){
-var btn=e.target.closest('.chip');if(!btn)return;
-var r=parseInt(btn.getAttribute('data-r'));if(isNaN(r)||r===ruleIdx)return;
-ruleIdx=r;updateChips();generate()});
-
-$('neutral-btn').addEventListener('click',function(){
-neutral=!neutral;updateNeutralUI();generate()});
+// Harmony row clicks
+$('gen-card').addEventListener('click',function(e){
+var row=e.target.closest('.srow[data-r]');if(!row)return;
+if(e.target.closest('.stepper'))return;
+var r=row.getAttribute('data-r');
+if(r==='n'){neutral=!neutral;updateRows();generate()}
+else{var ri=parseInt(r);if(!isNaN(ri)&&ri!==ruleIdx){ruleIdx=ri;updateRows();generate()}}});
 
 $('cnt-dn').addEventListener('click',function(){if(swatchCount>3){swatchCount--;$('cnt-val').textContent=swatchCount}updateStepBtns()});
 $('cnt-up').addEventListener('click',function(){if(swatchCount<12){swatchCount++;$('cnt-val').textContent=swatchCount}updateStepBtns()});
@@ -583,12 +574,12 @@ var sw=e.target.closest('.swatch');if(!sw)return;
 copySwatch(parseInt(sw.getAttribute('data-idx')))});
 
 $('ca-btn').addEventListener('click',doCopyAll);
-$('ex-btn').addEventListener('click',toggleExport);
+$('dl-btn').addEventListener('click',toggleExport);
 
 document.addEventListener('click',function(e){
 var opt=e.target.closest('.ex-opt');
 if(opt){doExportFmt(opt.getAttribute('data-fmt'));return}
-if(exportOpen&&!e.target.closest('#ex-btn')&&!e.target.closest('.ex-opt'))closeExport()});
+if(exportOpen&&!e.target.closest('#dl-btn')&&!e.target.closest('.ex-opt'))closeExport()});
 
 $('rs-btn').addEventListener('click',doReset);
 
