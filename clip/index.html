@@ -48,7 +48,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 html[data-theme="dark"] .item .del.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
 html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
 .item.hi{background:var(--bg2)}
-.item.removing{max-height:0;opacity:0;padding-top:0;padding-bottom:0;border-bottom-width:0;overflow:hidden}
+.item.removing{opacity:0;transition:opacity .1s ease}
 .item.kb-focus{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .drop-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(250,250,250,.95);font:600 1.25rem/1 var(--font);color:var(--t3);opacity:0;pointer-events:none;transition:opacity .2s}
@@ -284,18 +284,11 @@ function addBulk(text){
 /* ── Remove Item (with smooth animation) ──────────────────────────── */
 function removeItem(id){
   var row=$('items').querySelector('[data-id="'+id+'"]');
-  if(row){
-    row.classList.add('removing');
-    setTimeout(function(){
-      for(var i=0;i<items.length;i++){if(items[i].id===id){items.splice(i,1);break}}
-      if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);delete copyTimers[id]}
-      save();render();announce('Removed');inp.focus();
-    },200);
-  }else{
-    for(var i=0;i<items.length;i++){if(items[i].id===id){items.splice(i,1);break}}
-    if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);delete copyTimers[id]}
-    save();render();announce('Removed');
-  }
+  if(row)row.classList.add('removing');
+  for(var i=0;i<items.length;i++){if(items[i].id===id){items.splice(i,1);break}}
+  if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);delete copyTimers[id]}
+  save();
+  setTimeout(function(){render();announce('Removed')},100);
 }
 
 /* ── Copy Single Item ─────────────────────────────────────────────── */
