@@ -475,7 +475,7 @@ return clampRgb(oklchToRgb(gamutClamp(.65,.15,h)))}
 
 function generate(skipHist){
 if(ruleIdx<0)return;
-if(!baseUserSet){base=randomBase();updateBtnColor(rgbToHex(base))}
+if(!baseUserSet)base=randomBase();
 palette=generateHarmony(base,ruleIdx,neutral);mode='harmony';
 clearResetState();updateSwatchDOM();showOutput();
 if(!skipHist)scheduleHist()}
