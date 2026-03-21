@@ -185,7 +185,7 @@ var tm={},toastT,toastFadeT;
 /* ---- Three.js Scene ---- */
 var scene=new THREE.Scene();
 var camera=new THREE.PerspectiveCamera(35,1,0.1,100);
-camera.position.set(0,0,CAM_Z);
+camera.position.set(0,0,DEVICES[0].cz);
 
 var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
@@ -219,7 +219,7 @@ var rimL=new THREE.DirectionalLight(0xffffff,0.3);rimL.position.set(0,-1,-1);sce
 /* Screen canvas texture */
 var scrCanvas=document.createElement('canvas');
 var scrS=6;
-scrCanvas.width=PW*scrS;scrCanvas.height=PH*scrS;
+scrCanvas.width=DEVICES[0].pw*scrS;scrCanvas.height=DEVICES[0].ph*scrS;
 var scrCtx=scrCanvas.getContext('2d');
 var scrTex=new THREE.CanvasTexture(scrCanvas);
 scrTex.colorSpace=THREE.SRGBColorSpace;
