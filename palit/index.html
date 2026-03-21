@@ -320,9 +320,12 @@ var rule=RULES[ri],lch=rgbToOklch(baseRgb);
 var L=lch[0],C=lch[1],H=lch[2],colors=[];
 if(rule.mono){
 var steps=5,lMin=Math.max(.25,L-.25),lMax=Math.min(.9,L+.25);
+var bestIdx=0,bestDist=Infinity;
 for(var i=0;i<steps;i++){var t=i/(steps-1);var nL=lMin+(lMax-lMin)*t;
 var mid=(lMin+lMax)/2,dist=Math.abs(nL-mid)/((lMax-lMin)/2||1);
-var nC=C*(1-dist*.5);colors.push(gamutClamp(nL,nC,H))}
+var nC=C*(1-dist*.5);colors.push(gamutClamp(nL,nC,H));
+var dL=Math.abs(nL-L);if(dL<bestDist){bestDist=dL;bestIdx=i}}
+colors[bestIdx]=[L,C,H];
 }else{
 for(var i=0;i<rule.offsets.length;i++){
 if(rule.offsets[i]===0){colors.push([L,C,H]);continue}
