@@ -162,8 +162,8 @@ var $=function(s){return document.getElementById(s)};
 
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
-{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:22,irx:19,sw:7.28,sh:15.77,sz:0.44,so:0.005,sr:1.06,cz:28.6,ns:100,ry:0,mm:0.9,mr:0.7,ei:2.5},
-{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:22,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:1.06,cz:26.3,ns:100,ry:Math.PI,mm:0.9,mr:0.65,ei:2.5},
+{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:22,irx:19,sw:7.28,sh:15.77,sz:0.44,so:0.005,sr:1.06,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.32,ei:1.0,phys:1,an:0.7,cc:0.4,ccr:0.15},
+{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:22,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:1.06,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.32,ei:1.0,phys:1,an:0.7,cc:0.4,ccr:0.15},
 {name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:22,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1}
 ];
 var curDev=0;
@@ -198,7 +198,12 @@ sceneEl.appendChild(renderer.domElement);
 
 /* Subtle environment for metallic reflections */
 var pmrem=new THREE.PMREMGenerator(renderer);
-scene.environment=pmrem.fromScene(new RoomEnvironment()).texture;
+var roomEnvTex=pmrem.fromScene(new RoomEnvironment()).texture;
+var _es=new THREE.Scene();_es.background=new THREE.Color(0x111111);
+[[8,3,8,8,8,3,5,3],[6,3,3,3,3.5,-4,3,2],[1,10,12,12,12,-2,0,-5]].forEach(function(a){var m=new THREE.Mesh(new THREE.PlaneGeometry(a[0],a[1]),new THREE.MeshBasicMaterial({color:new THREE.Color(a[2],a[3],a[4]),side:THREE.DoubleSide}));m.position.set(a[5],a[6],a[7]);m.lookAt(0,0,0);_es.add(m)});
+var studioEnvTex=pmrem.fromScene(_es).texture;
+_es.traverse(function(c){if(c.isMesh){c.geometry.dispose();c.material.dispose()}});
+scene.environment=roomEnvTex;
 scene.environmentIntensity=0.4;
 pmrem.dispose();
 
@@ -211,7 +216,7 @@ controls.rotateSpeed=0.5;
 controls.addEventListener('change',function(){updateAngles()});
 
 /* Lighting — dramatic key/fill/rim */
-scene.add(new THREE.AmbientLight(0xffffff,0.15));
+var ambL=new THREE.AmbientLight(0xffffff,0.15);scene.add(ambL);
 var keyL=new THREE.DirectionalLight(0xffffff,1.5);keyL.position.set(2,3,4);keyL.castShadow=true;scene.add(keyL);
 var fillL=new THREE.DirectionalLight(0xffffff,0.3);fillL.position.set(-2,1,-1);scene.add(fillL);
 var rimL=new THREE.DirectionalLight(0xffffff,0.6);rimL.position.set(-1,-2,3);scene.add(rimL);
@@ -279,6 +284,12 @@ if(phoneModel){scene.remove(phoneModel);phoneModel.traverse(function(c){if(c.isM
 if(screenMesh){scene.remove(screenMesh);screenMesh.geometry.dispose();screenMesh=null}
 modelReady=false;
 camera.position.set(0,0,d.cz);controls.update();
+renderer.toneMapping=d.phys?THREE.NeutralToneMapping:THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=d.phys?1.0:1.25;
+scene.environment=d.phys?studioEnvTex:roomEnvTex;
+scene.environmentIntensity=d.phys?1.0:0.4;
+ambL.intensity=d.phys?0:0.15;
+keyL.intensity=d.phys?0.4:1.5;fillL.intensity=d.phys?0:0.3;rimL.intensity=d.phys?0:0.6;
 gltfLoader.load(d.url,function(gltf){
 phoneModel=gltf.scene;
 if(d.ns&&d.ns!==1)phoneModel.scale.multiplyScalar(d.ns);
@@ -287,7 +298,12 @@ gltf.scene.traverse(function(child){
 if(child.isMesh){
 child.castShadow=d.ns===1;child.receiveShadow=d.ns===1;
 var mats=Array.isArray(child.material)?child.material:[child.material];
-mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=d.mm;m.roughness=d.mr;m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true}})
+mats.forEach(function(m,mi){if(!m||!m.isMeshStandardMaterial)return;
+if(d.phys&&m.metalness>0.5){var p=new THREE.MeshPhysicalMaterial({map:m.map,normalMap:m.normalMap,roughnessMap:m.roughnessMap,metalnessMap:m.metalnessMap,color:m.color,metalness:d.mm,roughness:d.mr,anisotropy:d.an,anisotropyRotation:0,clearcoat:d.cc,clearcoatRoughness:d.ccr,envMapIntensity:d.ei,side:THREE.DoubleSide});
+if(child.geometry.index&&!child.geometry.attributes.tangent)try{child.geometry.computeTangents()}catch(_){}
+if(Array.isArray(child.material))child.material[mi]=p;else child.material=p;m.dispose()
+}else if(d.phys){m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true
+}else{m.metalness=d.mm;m.roughness=d.mr;m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true}})
 }});
 scene.add(gltf.scene);
 var geom=new THREE.ShapeGeometry(rrShape(d.sw,d.sh,d.sr));
