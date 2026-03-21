@@ -183,7 +183,7 @@ var cw=img.naturalWidth,ch=img.naturalHeight;
 var minD=Math.min(cw,ch);
 var rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
 var shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
-var se=shd>0?Math.ceil(shd*3.5):0;
+var se=shd>0?Math.ceil(shd*2.5):0;
 var ow=cw+se*2,oh=ch+se*2;
 if(ow>MAX_DIM||oh>MAX_DIM){
 var s=Math.min(MAX_DIM/ow,MAX_DIM/oh);
@@ -191,7 +191,7 @@ cw=Math.round(img.naturalWidth*s);ch=Math.round(img.naturalHeight*s);
 minD=Math.min(cw,ch);
 rad=Math.round(minD*RAD_PCT[radiusIdx]/100);
 shd=Math.round(minD*SHD_PCT[shadowIdx]/100);
-se=shd>0?Math.ceil(shd*3.5):0;
+se=shd>0?Math.ceil(shd*2.5):0;
 ow=cw+se*2;oh=ch+se*2
 }
 canvas.width=ow;canvas.height=oh;
