@@ -6,6 +6,12 @@
     "category": "Mobile"
   },
   {
+    "title": "ClearView",
+    "subtitle": "Screenshot Prettifier",
+    "url": "/clearview/",
+    "category": "Web"
+  },
+  {
     "title": "Clock",
     "subtitle": "A Minimal 8KB Clock",
     "url": "/time/",

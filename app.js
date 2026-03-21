@@ -152,6 +152,7 @@ const CHEVRON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 // Project icons — hardcoded SVGs keyed by title, safe for innerHTML
 const PROJECT_ICONS={
 'menuva':'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3"/><path d="M18 15v7"/>',
+'ClearView':'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="m19.5 2 .5 1.5L21.5 4 20 4.5 19.5 6 19 4.5 17.5 4l1.5-.5z"/><path d="m9 11 1.5 3 3 1.5-3 1.5L9 20l-1.5-3-3-1.5 3-1.5z"/>',
 'Clock':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
 'Arbit':'<rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
 'CodeGen':'<path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M16 7v10"/>',
