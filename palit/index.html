@@ -39,23 +39,10 @@ html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
 .step-btn:active:not(:disabled){transform:scale(.9)}
 .step-btn:disabled{opacity:.3;cursor:default}
 .step-val{font:600 .875rem/1 var(--font);color:var(--t1);min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
-.swatches{display:flex;gap:8px;padding:16px;flex-wrap:wrap}
-.swatch{flex:1;min-width:56px;min-height:80px;border-radius:var(--r);cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:6px 4px;transition:transform .15s,box-shadow .15s;outline:none;border:none;font-family:var(--font);-webkit-tap-highlight-color:transparent}
-.swatch:focus-visible{outline:2px solid #3B82F6;outline-offset:3px}
-.swatch.active{transform:scale(1.06);box-shadow:0 4px 16px rgba(0,0,0,.2)}
-.swatch .fmt{font:600 .5625rem/1 var(--font);text-transform:uppercase;opacity:.7;letter-spacing:.5px}
-.swatch .val{font:500 .625rem/1.2 var(--font);margin-top:2px;word-break:break-all;text-align:center}
-.swatch .wcag{position:absolute;top:4px;right:4px;font:700 .5rem/1 var(--font);padding:2px 4px;border-radius:4px;opacity:.75}
-.swatch .chk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:var(--r);opacity:0;pointer-events:none;transition:opacity .15s}
-.swatch .chk.show{opacity:1}
-.swatch .chk-c{width:28px;height:28px;border-radius:50%;background:#DCFCE7;display:flex;align-items:center;justify-content:center}
-.swatch .chk-c svg{width:14px;height:14px;color:#34D399;stroke-width:2.5}
-.swatch .chk-c.pop{animation:copyPop .35s ease}
-.swatch .chk-c polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-html[data-theme="dark"] .swatch .chk-c{background:#1A3A2A}
-html[data-theme="dark"] .swatch .chk-c svg{color:#34D399}
-html[data-theme="sepia"] .swatch .chk-c{background:#E8E0CE}
-html[data-theme="sepia"] .swatch .chk-c svg{color:#2D7D46}
+.cdot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:1px solid var(--bdr2)}
+.clbl{flex:1;min-width:0}
+.clbl .cv{font:500 .9375rem/1 var(--font);color:var(--t2);word-break:break-all}
+.clbl .cg{font:600 .6875rem/1 var(--font);color:var(--t4);margin-top:2px}
 .actions button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s}
 .actions button:last-child{border-bottom:none}
 .actions button:active{opacity:.7}
@@ -100,7 +87,6 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 .del:hover{color:var(--t2);background:var(--bg2)}
 .hist-row:hover{background:var(--bg2)}
 .cswatch:hover{border-color:var(--t4)}
-.swatch:hover{transform:scale(1.03)}
 }
 </style>
 </head>
@@ -119,7 +105,7 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <div class="srow" data-r="4"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2v20M5 5l14 14M19 5L5 19"/></svg><span>Split-Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="5"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span>Monochromatic</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="6"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/></svg><span>Accented Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-r="n"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-r="n" style="cursor:pointer"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><button id="neutral-btn" class="toggle-pill" aria-label="Toggle Neutral Anchor">Off</button></div>
 <div class="srow" id="count-row" style="display:none;cursor:default">
 <span class="slbl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Colors</span></span>
 <div class="stepper">
@@ -129,8 +115,13 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 </div>
 </div>
 </div>
-<div class="card" id="swatch-card" style="display:none">
-<div class="swatches" id="swatches" aria-live="polite"></div>
+<div class="card" id="fmt-card" style="display:none">
+<div class="srow sel" data-f="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>HEX</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-f="1"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>RGB</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" data-f="2"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20"/></svg><span>HSL</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+</div>
+<div class="card" id="color-card" style="display:none">
+<div id="color-rows" aria-live="polite"></div>
 </div>
 <div class="card actions" id="act-card" style="display:none">
 <button id="ca-btn" aria-label="Copy All Colors">
@@ -363,15 +354,6 @@ var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
 var copyTimers={},caTimer,dlTimer,rsTimer;
 var lastValidHex='#4A90D9';
 
-function mkCheck(){
-var d=document.createElement('div');d.className='chk-c';
-var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');
-svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2.5');
-svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');
-var pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-pl.setAttribute('points','4 12 9 17 20 6');svg.appendChild(pl);d.appendChild(svg);return d}
-
 // ===================== STORAGE =====================
 
 function loadHist(){try{var r=localStorage.getItem('palit-history');if(r){var p=JSON.parse(r);if(Array.isArray(p))hist=p}}catch(_){}}
@@ -412,7 +394,7 @@ var last=hist[0].colors;
 if(last.length===colors.length&&last.every(function(c,i){return c===colors[i]}))return}
 var entry={colors:colors,source:mode,ts:Date.now()};
 if(mode==='harmony'){entry.rule=ruleIdx;entry.base=lastValidHex;entry.neutral=neutral}
-hist.unshift(entry);if(hist.length>20)hist.pop();saveHist();renderHist()}
+hist.unshift(entry);if(hist.length>10)hist.pop();saveHist();renderHist()}
 
 function restoreEntry(idx){
 var e=hist[idx];if(!e)return;
@@ -430,25 +412,43 @@ mode='image';$('count-row').style.display='';renderSwatches();showOutput()}
 
 function showOutput(){
 var show=palette.length>0;
-$('swatch-card').style.display=show?'':'none';
+$('fmt-card').style.display=show?'':'none';
+$('color-card').style.display=show?'':'none';
 $('act-card').style.display=show?'':'none'}
 
+function fmtVal(p,f){return[p.hex,p.rgb,p.hsl][f]}
+
 function renderSwatches(){
-var el=$('swatches');el.textContent='';activeIdx=-1;
+var el=$('color-rows');el.textContent='';activeIdx=-1;
 for(var i=0;i<palette.length;i++){
-var p=palette[i],sw=document.createElement('div');
-sw.className='swatch';sw.tabIndex=0;sw.setAttribute('data-idx',i);sw.setAttribute('data-fmt','0');
-sw.style.background=p.hex;
-var tc=bestTextColor(p.rgbArr),tcolor=tc[0]===0?'#000':'#fff';sw.style.color=tcolor;
-var fmt=document.createElement('div');fmt.className='fmt';fmt.textContent='HEX';sw.appendChild(fmt);
-var val=document.createElement('div');val.className='val';val.textContent=p.hex;sw.appendChild(val);
+var p=palette[i];
+var row=document.createElement('div');row.className='srow';row.setAttribute('data-ci',i);
+var lbl=document.createElement('span');lbl.className='slbl';
+var dot=document.createElement('div');dot.className='cdot';dot.style.background=p.hex;
+var info=document.createElement('div');info.className='clbl';
+var cv=document.createElement('div');cv.className='cv';cv.textContent=fmtVal(p,globalFmt);
+info.appendChild(cv);
 var cw=contrastRatio(p.rgbArr,[1,1,1]),cb=contrastRatio(p.rgbArr,[0,0,0]);
 var grade=wcagGrade(Math.max(cw,cb));
-if(grade){var badge=document.createElement('div');badge.className='wcag';badge.textContent=grade;
-badge.style.background=tc[0]===0?'rgba(0,0,0,.12)':'rgba(255,255,255,.18)';sw.appendChild(badge)}
-var chk=document.createElement('div');chk.className='chk';sw.appendChild(chk);
-el.appendChild(sw)}
+if(grade){var cg=document.createElement('div');cg.className='cg';cg.textContent=grade;info.appendChild(cg)}
+lbl.appendChild(dot);lbl.appendChild(info);row.appendChild(lbl);
+var chk=document.createElement('span');chk.className='bg-chk';
+var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+svg.setAttribute('viewBox','0 0 24 24');
+var pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+pl.setAttribute('points','4 12 9 17 20 6');svg.appendChild(pl);chk.appendChild(svg);row.appendChild(chk);
+el.appendChild(row)}
 closeExport()}
+
+function updateFmtRows(){
+var rows=$('fmt-card').querySelectorAll('.srow[data-f]');
+for(var i=0;i<rows.length;i++){
+rows[i].className='srow'+(parseInt(rows[i].getAttribute('data-f'))===globalFmt?' sel':'')}}
+
+function refreshColorValues(){
+var rows=$('color-rows').children;
+for(var i=0;i<rows.length&&i<palette.length;i++){
+rows[i].querySelector('.cv').textContent=fmtVal(palette[i],globalFmt)}}
 
 function renderHist(){
 var el=$('hist-items'),wrap=$('hist-wrap');
@@ -471,8 +471,15 @@ function updateRows(){
 var rows=$('gen-card').querySelectorAll('.srow[data-r]');
 for(var i=0;i<rows.length;i++){
 var r=rows[i].getAttribute('data-r');
-if(r==='n')rows[i].className='srow'+(neutral?' sel':'');
-else rows[i].className='srow'+(parseInt(r)===ruleIdx?' sel':'')}}
+if(r==='n')continue;
+rows[i].className='srow'+(parseInt(r)===ruleIdx?' sel':'')}
+updateNeutralUI()}
+
+function updateNeutralUI(){
+var btn=$('neutral-btn');
+btn.textContent='';btn.classList.remove('toggled');
+if(neutral){btn.classList.add('toggled');btn.textContent='On'}
+else{btn.textContent='Off'}}
 
 // ===================== COPY =====================
 
@@ -481,17 +488,13 @@ navigator.clipboard.writeText(text).then(function(){},function(){
 var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';
 document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)})}
 
-function copySwatch(idx){
+function copyColor(idx){
 if(idx<0||idx>=palette.length)return;
-var sw=$('swatches').children[idx],p=palette[idx];
-var f=parseInt(sw.getAttribute('data-fmt')),labels=['HEX','RGB','HSL'],values=[p.hex,p.rgb,p.hsl];
-copyText(values[f]);
-var nf=(f+1)%3;sw.setAttribute('data-fmt',String(nf));globalFmt=nf;
-sw.querySelector('.fmt').textContent=labels[nf];sw.querySelector('.val').textContent=values[nf];
-var chk=sw.querySelector('.chk');chk.textContent='';
-var c=mkCheck();chk.appendChild(c);chk.classList.remove('show');c.offsetWidth;c.classList.add('pop');chk.classList.add('show');
+var row=$('color-rows').children[idx],p=palette[idx];
+copyText(fmtVal(p,globalFmt));
+row.classList.remove('sel');row.offsetWidth;row.classList.add('sel');
 if(copyTimers[idx])clearTimeout(copyTimers[idx]);
-copyTimers[idx]=setTimeout(function(){chk.classList.remove('show');setTimeout(function(){chk.textContent=''},150)},1200)}
+copyTimers[idx]=setTimeout(function(){row.classList.remove('sel')},1200)}
 
 function doCopyAll(){
 if(palette.length===0)return;
@@ -562,16 +565,23 @@ $('gen-card').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-r]');if(!row)return;
 if(e.target.closest('.stepper'))return;
 var r=row.getAttribute('data-r');
-if(r==='n'){neutral=!neutral;updateRows();generate()}
+if(r==='n'){neutral=!neutral;updateNeutralUI();generate()}
 else{var ri=parseInt(r);if(!isNaN(ri)&&ri!==ruleIdx){ruleIdx=ri;updateRows();generate()}}});
 
 $('cnt-dn').addEventListener('click',function(){if(swatchCount>3){swatchCount--;$('cnt-val').textContent=swatchCount}updateStepBtns()});
 $('cnt-up').addEventListener('click',function(){if(swatchCount<12){swatchCount++;$('cnt-val').textContent=swatchCount}updateStepBtns()});
 function updateStepBtns(){$('cnt-dn').disabled=swatchCount<=3;$('cnt-up').disabled=swatchCount>=12}
 
-$('swatches').addEventListener('click',function(e){
-var sw=e.target.closest('.swatch');if(!sw)return;
-copySwatch(parseInt(sw.getAttribute('data-idx')))});
+// Format selector
+$('fmt-card').addEventListener('click',function(e){
+var row=e.target.closest('.srow[data-f]');if(!row)return;
+var f=parseInt(row.getAttribute('data-f'));if(f===globalFmt)return;
+globalFmt=f;updateFmtRows();refreshColorValues()});
+
+// Color row clicks -> copy
+$('color-rows').addEventListener('click',function(e){
+var row=e.target.closest('.srow[data-ci]');if(!row)return;
+copyColor(parseInt(row.getAttribute('data-ci')))});
 
 $('ca-btn').addEventListener('click',doCopyAll);
 $('dl-btn').addEventListener('click',toggleExport);
@@ -609,17 +619,17 @@ if(tag==='INPUT'||tag==='TEXTAREA'){if(e.key==='Escape')document.activeElement.b
 if(e.key==='1'){location.href='/';return}
 if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);return}
 if(e.key==='/'){e.preventDefault();$('cinp').focus();return}
-if(e.key==='ArrowLeft'){navSwatch(-1);return}
-if(e.key==='ArrowRight'){navSwatch(1);return}
-if(e.key==='Enter'&&activeIdx>=0){copySwatch(activeIdx);return}
+if(e.key==='ArrowUp'){navSwatch(-1);return}
+if(e.key==='ArrowDown'){navSwatch(1);return}
+if(e.key==='Enter'&&activeIdx>=0){copyColor(activeIdx);return}
 if(e.key==='c'&&palette.length>0){doCopyAll();return}
 if(e.key==='Escape'){closeExport();return}});
 
 function navSwatch(dir){
-var swatches=$('swatches').children;if(swatches.length===0)return;
-if(activeIdx>=0&&activeIdx<swatches.length)swatches[activeIdx].classList.remove('active');
-activeIdx+=dir;if(activeIdx<0)activeIdx=swatches.length-1;if(activeIdx>=swatches.length)activeIdx=0;
-swatches[activeIdx].classList.add('active');swatches[activeIdx].focus()}
+var rows=$('color-rows').children;if(rows.length===0)return;
+if(activeIdx>=0&&activeIdx<rows.length)rows[activeIdx].style.background='';
+activeIdx+=dir;if(activeIdx<0)activeIdx=rows.length-1;if(activeIdx>=rows.length)activeIdx=0;
+rows[activeIdx].style.background='var(--bg2)'}
 
 window.addEventListener('storage',function(e){if(e.key==='palit-history'){loadHist();renderHist()}});
 
