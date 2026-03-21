@@ -585,6 +585,18 @@ showOutput();closeExport();
 btn.classList.remove('rs-warn');
 btnFeedback(btn,'rs-fb','Reset','Done',1500)}
 
+// ===================== COUNT =====================
+
+function updateCountLabel(){
+var max=mode==='image'?lastExtracted.length:12;
+$('cnt-lbl').textContent=swatchCount+(swatchCount===1?' Color':' Colors');
+$('cnt-dn').disabled=swatchCount<=2;$('cnt-up').disabled=swatchCount>=max}
+
+function resliceImage(){
+if(mode!=='image'||lastExtracted.length===0)return;
+palette=lastExtracted.slice(0,swatchCount).map(function(hex){return mkEntry(hexToRgb(hex)||[0,0,0])});
+updateSwatchDOM()}
+
 // ===================== EXPORT =====================
 
 function toggleExport(){
@@ -626,14 +638,6 @@ if(ri!==ruleIdx||!base){ruleIdx=ri;updateRows();generate()}});
 
 $('neutral-row').addEventListener('click',function(){neutral=!neutral;updateNeutralUI();generate()});
 
-function updateCountLabel(){
-var max=mode==='image'?lastExtracted.length:12;
-$('cnt-lbl').textContent=swatchCount+(swatchCount===1?' Color':' Colors');
-$('cnt-dn').disabled=swatchCount<=2;$('cnt-up').disabled=swatchCount>=max}
-function resliceImage(){
-if(mode!=='image'||lastExtracted.length===0)return;
-palette=lastExtracted.slice(0,swatchCount).map(function(hex){return mkEntry(hexToRgb(hex)||[0,0,0])});
-updateSwatchDOM()}
 $('cnt-dn').addEventListener('click',function(){if(swatchCount>2){swatchCount--;updateCountLabel();resliceImage()}});
 $('cnt-up').addEventListener('click',function(){var max=mode==='image'?lastExtracted.length:12;if(swatchCount<max){swatchCount++;updateCountLabel();resliceImage()}});
 
