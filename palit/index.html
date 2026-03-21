@@ -110,6 +110,7 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 .hist-row:hover{background:var(--bg2)}
 .cp-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 }
+.cp-btn:active{transform:scale(.95)}
 </style>
 </head>
 <body>
@@ -200,7 +201,7 @@ Drop Here
 <script>
 'use strict';
 var $=function(id){return document.getElementById(id)},PI=Math.PI;
-var WHITE=[1,1,1],BLACK=[0,0,0],LUM_W=1,LUM_B=0;
+var LUM_W=1;
 
 // ===================== COLOR MATH =====================
 
@@ -482,7 +483,8 @@ btn.querySelector('svg').setAttribute('stroke',lum>.4?'#000':'#fff')}
 
 function setBaseColor(rgb){
 base=rgb;lastValidHex=rgbToHex(rgb);
-$('cinp').value=lastValidHex;$('cpick').value=lastValidHex;
+var e=mkEntry(rgb);$('cinp').value=fmtVal(e,globalFmt);
+$('cpick').value=lastValidHex;
 updateBtnColor(lastValidHex)}
 
 function clearResetState(){
