@@ -296,9 +296,13 @@ while((m=re.exec(text))!==null){var rgb=parseColor(m[0]);if(rgb)add(rgb)}
 // Extract #RRGGBB and #RGB hex colors (handles concatenated like #AAA#BBB#CCC)
 var rh=/#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}(?![0-9a-fA-F])/g;
 while((m=rh.exec(text))!==null){var rgb=parseColor(m[0]);if(rgb)add(rgb)}
-// Bare 6-digit hex without # (e.g. from Coolors URLs: 9B78DE-00A68F-CB772D)
+// Bare 6-digit hex without # (e.g. Coolors: 9B78DE-00A68F-CB772D)
 var rb=/(?:^|[^0-9a-fA-F#])([0-9a-fA-F]{6})(?=[^0-9a-fA-F]|$)/g;
 while((m=rb.exec(text))!==null){var rgb=parseColor('#'+m[1]);if(rgb)add(rgb)}
+// Concatenated bare hex with no separator (e.g. 9B78DE00A68FCB772D)
+if(colors.length<2){var stripped=text.replace(/[^0-9a-fA-F]/g,'');
+if(stripped.length>=12&&stripped.length%6===0)
+for(var i=0;i<stripped.length;i+=6){var rgb=parseColor('#'+stripped.substr(i,6));if(rgb)add(rgb)}}
 return colors.length>=2?colors:null}
 
 function mkEntry(rgb){
