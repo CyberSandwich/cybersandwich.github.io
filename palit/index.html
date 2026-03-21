@@ -653,6 +653,7 @@ resetWarnTimer=setTimeout(function(){resetPending=false;btn.classList.remove('rs
 return}
 resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
 palette=[];base=null;lastValidHex='';ruleIdx=-1;neutral=false;mode='harmony';activeIdx=-1;lastExtracted=[];
+hist=[];saveHist();renderHist();
 $('cinp').value='';$('cpick').value='#888888';
 $('add-btn').style.background='var(--t3)';
 $('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
