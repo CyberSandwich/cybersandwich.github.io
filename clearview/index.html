@@ -246,20 +246,33 @@ tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.da
 
 function computeAutoGrad(){
 if(!img){autoGrad=null;return}
-var sc=document.createElement('canvas'),sw=8,sh=8;
+var sc=document.createElement('canvas'),sw=16,sh=16;
 sc.width=sw;sc.height=sh;
 var sctx=sc.getContext('2d');
 sctx.drawImage(img,0,0,sw,sh);
 var d=sctx.getImageData(0,0,sw,sh).data;
-var tr=0,tg=0,tb=0,br=0,bg=0,bb=0;
-for(var i=0;i<sw;i++){var o=i*4;tr+=d[o];tg+=d[o+1];tb+=d[o+2]}
-var lr=(sh-1)*sw*4;
-for(var i=0;i<sw;i++){var o=lr+i*4;br+=d[o];bg+=d[o+1];bb+=d[o+2]}
-tr/=sw;tg/=sw;tb/=sw;br/=sw;bg/=sw;bb/=sw;
-var m=0.55;
+var bestSat=0,hr=128,hg=128,hb=128;
+for(var i=0;i<d.length;i+=4){
+var r=d[i],g=d[i+1],b=d[i+2];
+var mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+var sat=mx>0?(mx-mn)/mx:0;
+if(sat>bestSat){bestSat=sat;hr=r;hg=g;hb=b}
+}
+var r1=hr/255,g1=hg/255,b1=hb/255;
+var mx2=Math.max(r1,g1,b1),mn2=Math.min(r1,g1,b1);
+var h=0,s=0;
+if(mx2!==mn2){
+var dd=mx2-mn2;
+s=(mx2+mn2)>1?dd/(2-mx2-mn2):dd/(mx2+mn2);
+if(mx2===r1)h=((g1-b1)/dd+(g1<b1?6:0))/6;
+else if(mx2===g1)h=((b1-r1)/dd+2)/6;
+else h=((r1-g1)/dd+4)/6
+}
+if(s<0.08){h=220/360;s=0.3}
+else{s=Math.max(s,0.35)}
 autoGrad=[
-'rgb('+Math.round(tr+(255-tr)*m)+','+Math.round(tg+(255-tg)*m)+','+Math.round(tb+(255-tb)*m)+')',
-'rgb('+Math.round(br+(255-br)*m)+','+Math.round(bg+(255-bg)*m)+','+Math.round(bb+(255-bb)*m)+')'
+'hsl('+Math.round(h*360)+','+Math.round(s*100)+'%,90%)',
+'hsl('+Math.round((h*360+25)%360)+','+Math.round(s*100)+'%,83%)'
 ]
 }
 
