@@ -166,7 +166,7 @@ var DEVICES=[
 {name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:1.22,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.65,ei:2.5},
 {name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:10,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1}
 ];
-var curDev=0;
+var curDev=0,loadId=0;
 var PW,PH,IW,IH,IX,IY,IRX;
 
 var STEP=5,DEG=Math.PI/180;
@@ -276,12 +276,14 @@ var gltfLoader=new GLTFLoader();
 function loadModel(idx){
 curDev=idx;var d=DEVICES[idx];
 PW=d.pw;PH=d.ph;IW=d.iw;IH=d.ih;IX=(PW-IW)/2;IY=d.iy;IRX=d.irx;
-scrCanvas.width=PW*scrS;scrCanvas.height=PH*scrS;
+modelReady=false;var myId=++loadId;
+try{localStorage.setItem('mockup-dev',idx)}catch(_){}
+gltfLoader.load(d.url,function(gltf){
+if(myId!==loadId)return;
 if(phoneModel){scene.remove(phoneModel);phoneModel.traverse(function(c){if(c.isMesh){c.geometry.dispose();(Array.isArray(c.material)?c.material:[c.material]).forEach(function(m){if(m)m.dispose()})}});phoneModel=null}
 if(screenMesh){scene.remove(screenMesh);screenMesh.geometry.dispose();screenMesh=null}
-modelReady=false;
+scrCanvas.width=PW*scrS;scrCanvas.height=PH*scrS;
 camera.position.set(0,0,d.cz);controls.update();
-gltfLoader.load(d.url,function(gltf){
 phoneModel=gltf.scene;
 if(d.ns&&d.ns!==1)phoneModel.scale.multiplyScalar(d.ns);
 if(d.ry)phoneModel.rotation.y=d.ry;
@@ -306,7 +308,9 @@ modelReady=true;
 updateScreen();render()
 },undefined,function(){notify('Failed to Load Model',false)})
 }
-loadModel(0);
+var initDev=0;try{var sd=localStorage.getItem('mockup-dev');if(sd!=null&&DEVICES[+sd])initDev=+sd}catch(_){}
+loadModel(initDev);
+if(initDev)DEVICES.forEach(function(d,i){$('dv-'+i).classList.toggle('sel',i===initDev)});
 
 /* Resize */
 function resize(){
