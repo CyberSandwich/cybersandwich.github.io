@@ -626,7 +626,8 @@ rows[i].setAttribute('aria-checked',f===globalFmt?'true':'false')}}
 function refreshColorValues(){
 var rows=$('color-rows').children;
 for(var i=0;i<rows.length&&i<palette.length;i++)
-rows[i].querySelector('.cv').textContent=fmtVal(palette[i],globalFmt)}
+rows[i].querySelector('.cv').textContent=fmtVal(palette[i],globalFmt);
+if(baseUserSet&&base){var e=mkEntry(base);$('cinp').value=fmtVal(e,globalFmt)}}
 
 function renderHist(){
 var el=$('hist-items'),wrap=$('hist-wrap');
