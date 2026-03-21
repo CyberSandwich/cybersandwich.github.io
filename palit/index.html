@@ -325,7 +325,7 @@ var bgColor=null,bSum=[0,0,0],bCnt=0;
 for(var i=0;i<pixels.length;i++){if(isBorder[i]){bSum[0]+=pixels[i][0];bSum[1]+=pixels[i][1];bSum[2]+=pixels[i][2];bCnt++}}
 if(bCnt>0)bgColor=[bSum[0]/bCnt,bSum[1]/bCnt,bSum[2]/bCnt];
 
-var K=Math.min(count*3,Math.max(count+4,16),pixels.length);
+var K=Math.min(Math.max(count*3,24),pixels.length);
 var centroids=kmeansInit(pixels,K);
 var assign=new Int32Array(pixels.length);
 var sums=new Float64Array(K*3),cnts=new Int32Array(K);
@@ -337,26 +337,30 @@ for(var i=0;i<pixels.length;i++){var c=assign[i];sums[c*3]+=pixels[i][0];sums[c*
 var moved=0;for(var c=0;c<K;c++){if(cnts[c]===0)continue;
 var nc=[sums[c*3]/cnts[c],sums[c*3+1]/cnts[c],sums[c*3+2]/cnts[c]];moved+=oklabDist(centroids[c],nc);centroids[c]=nc}
 if(moved/K<.005)break}
-var clusters=[],allClusters=[],maxChroma=0;
+var clusters=[],maxChroma=0;
 for(var c=0;c<K;c++){if(cnts[c]===0)continue;
 var lab=centroids[c],lc=oklabToOklch(lab);
-allClusters.push({lab:lab,lch:lc,count:cnts[c]});
-if(lc[0]>.93||lc[0]<.07)continue;if(lc[1]<.03)continue;
-if(bgColor&&oklabDist(lab,bgColor)<.08)continue;
+// Only filter background color; keep whites, blacks, grays as valid palette colors
+if(bgColor&&oklabDist(lab,bgColor)<.06)continue;
 if(lc[1]>maxChroma)maxChroma=lc[1];
 clusters.push({lab:lab,lch:lc,count:cnts[c]})}
-if(clusters.length===0){clusters=allClusters;maxChroma=0;
-for(var i=0;i<clusters.length;i++)if(clusters[i].lch[1]>maxChroma)maxChroma=clusters[i].lch[1]}
-for(var i=0;i<clusters.length;i++)clusters[i].score=clusters[i].count*(1+(maxChroma>0?clusters[i].lch[1]/maxChroma*1.5:0));
+// Score: population weighted by chroma (vivid colors rank higher, but grays still included)
+for(var i=0;i<clusters.length;i++)clusters[i].score=clusters[i].count*(1+(maxChroma>0?clusters[i].lch[1]/maxChroma*.5:0));
 clusters.sort(function(a,b){return b.score-a.score});
+// Deduplicate with tighter threshold to preserve similar-but-distinct colors
 var deduped=[];
 for(var i=0;i<clusters.length&&deduped.length<12;i++){
-var dup=false;for(var j=0;j<deduped.length;j++){if(oklabDist(clusters[i].lab,deduped[j].lab)<.06){dup=true;break}}
+var dup=false;for(var j=0;j<deduped.length;j++){if(oklabDist(clusters[i].lab,deduped[j].lab)<.04){dup=true;break}}
 if(!dup)deduped.push(clusters[i])}
 if(deduped.length===0)return{colors:[],best:0};
-// Find optimal count: include colors scoring >= 8% of top score
-var topScore=deduped[0].score,best=1;
-for(var i=1;i<deduped.length;i++){if(deduped[i].score>=topScore*.08)best=i+1;else break}
+// Optimal count: find largest score drop (gap detection)
+var topScore=deduped[0].score,best=deduped.length;
+if(deduped.length>1){var maxGap=0,gapIdx=0;
+for(var i=0;i<deduped.length-1;i++){var gap=deduped[i].score-deduped[i+1].score;
+// Normalize gap relative to current score to find proportional drops
+var relGap=gap/(deduped[i].score||1);
+if(relGap>maxGap&&relGap>.4){maxGap=relGap;gapIdx=i+1}}
+if(maxGap>.4)best=gapIdx}
 best=Math.max(1,Math.min(best,count));
 var hex=deduped.slice(0,count).map(function(cl){return rgbToHex(clampRgb(oklabToRgb(cl.lab)))});
 return{colors:hex,best:best}}
@@ -412,7 +416,7 @@ var reader=new FileReader();
 reader.onload=function(e){
 var img=new Image();img.onload=function(){
 var cvs=$('cvs'),ctx=cvs.getContext('2d');
-var sz=150,w=img.width,h=img.height;
+var sz=200,w=img.width,h=img.height;
 if(w>h){cvs.width=sz;cvs.height=Math.round(h/w*sz)}else{cvs.height=sz;cvs.width=Math.round(w/h*sz)}
 ctx.drawImage(img,0,0,cvs.width,cvs.height);
 var data=ctx.getImageData(0,0,cvs.width,cvs.height);
