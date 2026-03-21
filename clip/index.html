@@ -461,6 +461,13 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear()},{passive:true});
 
+/* ── Text File Detection (from wrighter) ──────────────────────────── */
+function isTextFile(file){
+  var type=(file&&file.type?file.type:'').toLowerCase();
+  var name=(file&&file.name?file.name:'').toLowerCase();
+  return type.startsWith('text/')||type==='application/json'||type==='application/xml'||type==='application/javascript'||/\.(txt|text|md|markdown|mdown|mkd|log|csv|tsv|json|jsonl|xml|html|htm|css|js|mjs|cjs|ts|tsx|jsx|vcf|ics|yaml|yml|toml|ini|cfg|conf|env|sh|bash|zsh|fish|bat|cmd|ps1|py|rb|rs|go|java|kt|kts|c|h|cpp|hpp|cs|swift|m|mm|r|pl|pm|lua|php|sql|graphql|gql|svg|tex|bib|rtf|org|rst|adoc|diff|patch|gitignore|gitattributes|editorconfig|prettierrc|eslintrc|babelrc|dockerfile|makefile|cmake|gradle|properties|plist|lock)$/.test(name);
+}
+
 /* ── Drag-Drop ────────────────────────────────────────────────────── */
 var dragCount=0,overlay=$('drop-overlay');
 document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)overlay.classList.add('active')});
@@ -472,9 +479,7 @@ document.addEventListener('drop',function(e){
   if(files&&files.length>0){
     for(var i=0;i<files.length;i++){
       (function(file){
-        if(file.type&&!file.type.match(/^text\//))return;
-        var name=file.name||'';
-        if(!file.type&&!name.match(/\.(txt|csv)$/i))return;
+        if(!isTextFile(file))return;
         var reader=new FileReader();
         reader.onload=function(ev){addBulk(ev.target.result)};
         reader.readAsText(file);
