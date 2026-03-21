@@ -119,6 +119,9 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 </div>
 </div>
 </div>
+<div class="card" id="color-card" style="display:none">
+<div id="color-rows" aria-live="polite"></div>
+</div>
 <div class="card" id="fmt-card" style="display:none">
 <div class="srow sel" data-f="0"><span class="slbl"><svg viewBox="0 0 24 24"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>HEX</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-f="1"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>RGB</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
@@ -126,9 +129,6 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 </div>
 <div class="card" id="neutral-card" style="display:none">
 <div class="srow" id="neutral-row"><span class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-</div>
-<div class="card" id="color-card" style="display:none">
-<div id="color-rows" aria-live="polite"></div>
 </div>
 <div class="card actions" id="act-card" style="display:none">
 <button id="ca-btn" aria-label="Copy All Colors">
@@ -357,7 +357,7 @@ if(deduped.length===0)return{colors:[],best:0};
 // Find optimal count: include colors scoring >= 8% of top score
 var topScore=deduped[0].score,best=1;
 for(var i=1;i<deduped.length;i++){if(deduped[i].score>=topScore*.08)best=i+1;else break}
-best=Math.max(2,Math.min(best,count));
+best=Math.max(1,Math.min(best,count));
 var hex=deduped.slice(0,count).map(function(cl){return rgbToHex(clampRgb(oklabToRgb(cl.lab)))});
 return{colors:hex,best:best}}
 
@@ -590,7 +590,7 @@ btnFeedback(btn,'rs-fb','Reset','Done',1500)}
 function updateCountLabel(){
 var max=mode==='image'?lastExtracted.length:12;
 $('cnt-lbl').textContent=swatchCount+(swatchCount===1?' Color':' Colors');
-$('cnt-dn').disabled=swatchCount<=2;$('cnt-up').disabled=swatchCount>=max}
+$('cnt-dn').disabled=swatchCount<=1;$('cnt-up').disabled=swatchCount>=max}
 
 function resliceImage(){
 if(mode!=='image'||lastExtracted.length===0)return;
@@ -638,7 +638,7 @@ if(ri!==ruleIdx||!base){ruleIdx=ri;updateRows();generate()}});
 
 $('neutral-row').addEventListener('click',function(){neutral=!neutral;updateNeutralUI();generate()});
 
-$('cnt-dn').addEventListener('click',function(){if(swatchCount>2){swatchCount--;updateCountLabel();resliceImage()}});
+$('cnt-dn').addEventListener('click',function(){if(swatchCount>1){swatchCount--;updateCountLabel();resliceImage()}});
 $('cnt-up').addEventListener('click',function(){var max=mode==='image'?lastExtracted.length:12;if(swatchCount<max){swatchCount++;updateCountLabel();resliceImage()}});
 
 $('fmt-card').addEventListener('click',function(e){
