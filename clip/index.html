@@ -77,8 +77,8 @@ button:focus:not(:focus-visible){outline:none}
 </head>
 <body>
 <div class="w">
-  <div class="links">
-    <button type="button" id="ca-btn" disabled aria-label="Copy All"><svg aria-hidden="true" id="ca-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg aria-hidden="true" id="ca-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="ca-l">Copy All</span></button>
+  <div class="links" id="actions" style="display:none">
+    <button type="button" id="ca-btn" aria-label="Copy All"><svg aria-hidden="true" id="ca-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg aria-hidden="true" id="ca-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="ca-l">Copy All</span></button>
     <button type="button" id="rs-btn" aria-label="Reset"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
   </div>
   <div class="inp">
@@ -198,8 +198,8 @@ function render(newId){
   var c=$('items'),q=norm($('search').value.trim().toLowerCase()),hasItems=items.length>0;
   var words=q.split(/\s+/).filter(Boolean);
   var frag=document.createDocumentFragment();
+  $('actions').style.display=hasItems?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
-  $('ca-btn').disabled=!hasItems;
   inp.placeholder='Clip '+(items.length+1);
   updateTitle();
   if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
