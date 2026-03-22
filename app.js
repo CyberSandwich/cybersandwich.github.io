@@ -630,6 +630,11 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden)return;
   const stored=localStorage.getItem('theme')||'light';
   if(stored!==curTheme())applyTheme(stored);
+  // Reset any stuck copy buttons (timers throttled while tab was hidden)
+  document.querySelectorAll('.copy-btn.copied').forEach(b=>{
+    clearTimeout(b._t1);clearTimeout(b._t2);
+    b.classList.remove('copied');b.textContent='Copy';b.style.opacity='';
+  });
   // iOS Safari: force nav repaint after tab switch to restore touch hit-testing
   const n=document.querySelector('nav');
   if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
