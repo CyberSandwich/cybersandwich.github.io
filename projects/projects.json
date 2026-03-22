@@ -3,91 +3,91 @@
     "title": "menuva",
     "subtitle": "The Digital Menu Platform",
     "url": "https://menuva.co.uk",
-    "category": "Mobile"
+    "category": "Flagship Projects"
   },
   {
     "title": "ClearView",
     "subtitle": "Screenshot Prettifier",
     "url": "/clearview/",
-    "category": "Web"
-  },
-  {
-    "title": "Clip",
-    "subtitle": "Clipboard Text Manager",
-    "url": "/clip/",
-    "category": "Web"
-  },
-  {
-    "title": "Clock",
-    "subtitle": "A Minimal 8KB Clock",
-    "url": "/time/",
-    "category": "Web"
-  },
-  {
-    "title": "Arbit",
-    "subtitle": "Random Picker Tool",
-    "url": "/arbit/",
-    "category": "Web"
+    "category": "Image Tools"
   },
   {
     "title": "CodeGen",
     "subtitle": "QR, Barcode, & Aztec Code Tool",
     "url": "/codegen/",
-    "category": "Web"
+    "category": "Image Tools"
   },
   {
     "title": "ImageOpt",
     "subtitle": "JPEG & PNG Image Optimizer",
     "url": "/imageopt/",
-    "category": "Web"
-  },
-  {
-    "title": "Lorip",
-    "subtitle": "Lorem Ipsum Generator",
-    "url": "/lorip/",
-    "category": "Web"
-  },
-  {
-    "title": "Miele Laundry Guide",
-    "subtitle": "Vita Student Cannon Park Laundry Guide",
-    "url": "/laundry/",
-    "category": "Web"
+    "category": "Image Tools"
   },
   {
     "title": "MockupGen",
     "subtitle": "iPhone Mockup Generator",
     "url": "/mockup/",
-    "category": "Web"
-  },
-  {
-    "title": "NumGen",
-    "subtitle": "Generate Valid UK Phone Numbers",
-    "url": "/numgen/",
-    "category": "Web"
+    "category": "Image Tools"
   },
   {
     "title": "Palit",
     "subtitle": "Color Palette Generator",
     "url": "/palit/",
-    "category": "Web"
+    "category": "Image Tools"
+  },
+  {
+    "title": "Clip",
+    "subtitle": "Clipboard Text Manager",
+    "url": "/clip/",
+    "category": "Text Tools"
+  },
+  {
+    "title": "Lorip",
+    "subtitle": "Lorem Ipsum Generator",
+    "url": "/lorip/",
+    "category": "Text Tools"
   },
   {
     "title": "Wrighter",
     "subtitle": "Minimal Plain Text Editor",
     "url": "/wrighter/",
-    "category": "Web"
+    "category": "Text Tools"
+  },
+  {
+    "title": "Arbit",
+    "subtitle": "Random Picker Tool",
+    "url": "/arbit/",
+    "category": "Generators"
+  },
+  {
+    "title": "NumGen",
+    "subtitle": "Generate Valid UK Phone Numbers",
+    "url": "/numgen/",
+    "category": "Generators"
+  },
+  {
+    "title": "Clock",
+    "subtitle": "A Minimal 8KB Clock",
+    "url": "/time/",
+    "category": "Utilities"
+  },
+  {
+    "title": "Miele Laundry Guide",
+    "subtitle": "Vita Student Cannon Park Laundry Guide",
+    "url": "/laundry/",
+    "category": "Miscellaneous"
   },
   {
     "title": "Project Convergence",
     "subtitle": "Stealth Mode",
     "url": "#",
-    "category": "Extensions"
+    "category": "Miscellaneous"
   },
   {
     "title": "Project Shifting Tides",
     "subtitle": "Stealth Mode",
     "url": "#",
-    "category": "Extensions"
+    "category": "Miscellaneous"
   },
   {
     "title": "Whisp",

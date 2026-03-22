@@ -143,7 +143,7 @@ const getPosts=makeLoader('/updates/posts.json',d=>{
   posts=d;return d;
 });
 
-const projectCategories=['Mobile','Web','Extensions','In Development'];
+const projectCategories=['Flagship Projects','Image Tools','Text Tools','Generators','Utilities','Miscellaneous','In Development'];
 const linkCategories=['Modules','Initiatives','Academic','Career','Community','Personal','Miscellaneous'];
 
 // Chevron SVG for card arrows
