@@ -308,13 +308,17 @@ child.castShadow=d.ns===1;child.receiveShadow=d.ns===1;
 var mats=Array.isArray(child.material)?child.material:[child.material];
 mats.forEach(function(m,mi){if(m&&m.isMeshStandardMaterial){
 if(d.phys){
-var p=new THREE.MeshPhysicalMaterial();p.copy(m);
-p.metalness=d.mm;p.roughness=d.mr;p.envMapIntensity=d.ei;
-p.anisotropy=d.an;p.anisotropyRotation=d.ar;
-p.clearcoat=d.cc;p.clearcoatRoughness=d.ccr;
-p.side=THREE.DoubleSide;p.needsUpdate=true;
-if(Array.isArray(child.material))child.material[mi]=p;else child.material=p;
-m.dispose()
+var p=new THREE.MeshPhysicalMaterial({
+color:m.color,map:m.map,normalMap:m.normalMap,normalScale:m.normalScale,
+aoMap:m.aoMap,aoMapIntensity:m.aoMapIntensity,
+emissive:m.emissive,emissiveMap:m.emissiveMap,emissiveIntensity:m.emissiveIntensity,
+metalness:d.mm,roughness:d.mr,envMapIntensity:d.ei,
+metalnessMap:m.metalnessMap,roughnessMap:m.roughnessMap,
+anisotropy:d.an,anisotropyRotation:d.ar,
+clearcoat:d.cc,clearcoatRoughness:d.ccr,
+side:THREE.DoubleSide,transparent:m.transparent,opacity:m.opacity
+});
+if(Array.isArray(child.material))child.material[mi]=p;else child.material=p
 }else{m.metalness=d.mm;m.roughness=d.mr;m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true}
 }})
 }});
