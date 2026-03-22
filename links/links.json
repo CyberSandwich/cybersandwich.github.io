@@ -480,7 +480,7 @@
     "category": "Initiatives"
   },
   {
-    "title": "Google Cloud Storage Buckets",
+    "title": "GCP Console (Storage Buckets)",
     "url": "https://console.cloud.google.com/storage/",
     "icon": "cloud",
     "category": "Initiatives"
