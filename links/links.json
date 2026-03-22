@@ -438,6 +438,12 @@
     "category": "Initiatives"
   },
   {
+    "title": "Friendly Captcha",
+    "url": "https://friendlycaptcha.com/",
+    "icon": "shield",
+    "category": "Initiatives"
+  },
+  {
     "title": "GCP Console",
     "url": "https://console.cloud.google.com/welcome",
     "icon": "cloud",
