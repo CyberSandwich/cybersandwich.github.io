@@ -1,0 +1,3 @@
+Contact: mailto:ventures@saputra.co.uk
+Preferred-Languages: en
+Canonical: https://saputra.co.uk/.well-known/security.txt

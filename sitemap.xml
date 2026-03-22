@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://saputra.co.uk/</loc></url>
-  <url><loc>https://saputra.co.uk/projects</loc></url>
-  <url><loc>https://saputra.co.uk/cv</loc></url>
-  <url><loc>https://saputra.co.uk/updates</loc></url>
-  <url><loc>https://saputra.co.uk/links</loc></url>
+  <url><loc>https://saputra.co.uk/</loc><lastmod>2026-03-22</lastmod><priority>1.0</priority></url>
+  <url><loc>https://saputra.co.uk/projects</loc><lastmod>2026-03-22</lastmod><priority>0.8</priority></url>
+  <url><loc>https://saputra.co.uk/cv</loc><lastmod>2026-03-22</lastmod><priority>0.8</priority></url>
+  <url><loc>https://saputra.co.uk/updates</loc><lastmod>2026-03-22</lastmod><priority>0.7</priority></url>
+  <url><loc>https://saputra.co.uk/links</loc><lastmod>2026-03-22</lastmod><priority>0.6</priority></url>
+  <url><loc>https://saputra.co.uk/updates/2026-03-01-adding-keyboard-shortcuts</loc><lastmod>2026-03-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://saputra.co.uk/updates/2026-02-25-heic-optimization-automator</loc><lastmod>2026-02-25</lastmod><priority>0.5</priority></url>
+  <url><loc>https://saputra.co.uk/updates/2026-02-25-jpeg-optimization-automator</loc><lastmod>2026-02-25</lastmod><priority>0.5</priority></url>
+  <url><loc>https://saputra.co.uk/updates/2026-02-25-office-to-pdf-automator</loc><lastmod>2026-02-25</lastmod><priority>0.5</priority></url>
+  <url><loc>https://saputra.co.uk/updates/2026-02-25-png-optimization-automator</loc><lastmod>2026-02-25</lastmod><priority>0.5</priority></url>
+  <url><loc>https://saputra.co.uk/clearview/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/codegen/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/imageopt/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/mockup/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/palit/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/clip/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/lorip/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/wrighter/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/arbit/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/numgen/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/time/</loc><lastmod>2026-03-22</lastmod><priority>0.4</priority></url>
+  <url><loc>https://saputra.co.uk/laundry/</loc><lastmod>2026-03-22</lastmod><priority>0.3</priority></url>
 </urlset>
