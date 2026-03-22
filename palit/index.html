@@ -119,6 +119,13 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <input id="cinp" type="text" placeholder="#HEX, rgb(), or hsl()" value="" aria-label="Color Value" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">
 <button id="add-btn" aria-label="Pick Color" style="background:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" stroke="var(--card)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
+<div class="card actions" id="paste-card">
+<button id="paste-btn" aria-label="Paste Color or Image">
+<svg class="id" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg>
+<span>Paste</span>
+</button>
+</div>
 <div class="card" id="gen-card" role="radiogroup" aria-label="Harmony Rule">
 <div class="srow" data-r="0" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v10l7 7"/><circle cx="12" cy="12" r="10"/></svg><span>Complementary</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" data-r="1" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 010 20"/><circle cx="12" cy="12" r="10"/></svg><span>Analogous</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
@@ -857,6 +864,36 @@ $('hist-items').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key
 var row=e.target.closest('.hist-row');if(row){e.preventDefault();e.stopPropagation();restoreEntry(parseInt(row.getAttribute('data-idx')))}}});
 
 $('file-inp').addEventListener('change',function(){if(this.files&&this.files.length>0){processImage(this.files[0]);this.value=''}});
+
+$('paste-btn').addEventListener('click',function(){
+var btn=$('paste-btn');
+navigator.clipboard.read().then(function(items){
+for(var i=0;i<items.length;i++){var types=items[i].types;
+for(var j=0;j<types.length;j++){if(types[j].startsWith('image/')){
+items[i].getType(types[j]).then(function(blob){processImage(new File([blob],'pasted.png',{type:blob.type}))});
+btnFeedback(btn,'ok','Paste','Pasted',1200);return}}}
+// No image — try text
+return navigator.clipboard.readText().then(function(text){
+if(!text){btnFeedback(btn,'rs-warn','Paste','Empty',1200);return}
+var multi=parseMultiColor(text);
+if(multi){processPastedColors(multi);btnFeedback(btn,'ok','Paste','Pasted',1200);return}
+var rgb=parseColor(text.trim());
+if(rgb){baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate();btnFeedback(btn,'ok','Paste','Pasted',1200);return}
+btnFeedback(btn,'rs-warn','Paste','Invalid',1200)})
+}).catch(function(){
+// Clipboard API denied — fall back to readText
+navigator.clipboard.readText().then(function(text){
+if(!text){btnFeedback(btn,'rs-warn','Paste','Empty',1200);return}
+var multi=parseMultiColor(text);
+if(multi){processPastedColors(multi);btnFeedback(btn,'ok','Paste','Pasted',1200);return}
+var rgb=parseColor(text.trim());
+if(rgb){baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate();btnFeedback(btn,'ok','Paste','Pasted',1200);return}
+btnFeedback(btn,'rs-warn','Paste','Invalid',1200)
+}).catch(function(){btnFeedback(btn,'rs-warn','Paste','Denied',1200)})})});
 
 var ov=$('drop-ov');
 document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)ov.classList.add('active')});
