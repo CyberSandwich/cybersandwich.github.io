@@ -504,6 +504,11 @@ document.addEventListener('visibilitychange',function(){
     cb.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=items.length>1?'Copy All':'Copy';
     var pb=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
     pb.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';
+    Object.keys(copyTimers).forEach(function(k){
+      var row=$('items').querySelector('[data-id="'+k+'"]');
+      if(row){var d=row.querySelector('.del');if(d){d.classList.remove('copied');d.replaceChildren(mkX());d.style.opacity='';d.setAttribute('aria-label','Remove')}}
+    });
+    copyTimers={};
   }
 });
 
