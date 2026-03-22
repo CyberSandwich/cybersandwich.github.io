@@ -156,15 +156,15 @@ Drop Image Here
 import*as THREE from'three';
 import{OrbitControls}from'three/addons/controls/OrbitControls.js';
 import{GLTFLoader}from'three/addons/loaders/GLTFLoader.js';
-import{RoomEnvironment}from'three/addons/environments/RoomEnvironment.js';
+import{RGBELoader}from'three/addons/loaders/RGBELoader.js';
 
 var $=function(s){return document.getElementById(s)};
 
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
-{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.28,sh:15.77,sz:0.44,so:0.005,sr:1.21,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.7,ei:2.5},
-{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:1.21,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.65,ei:2.5},
-{name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:10,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1}
+{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.28,sh:15.77,sz:0.44,so:0.005,sr:1.21,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.30,ei:1.2,an:0.8,ar:0,cc:0.3,ccr:0.15,phys:true},
+{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.67,sh:14.43,sz:0.44,so:0.005,sr:1.21,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.28,ei:1.2,an:0.8,ar:0,cc:0.3,ccr:0.15,phys:true},
+{name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:10,irx:19,sw:6.59,sh:14.14,sz:0.3927,so:0.005,sr:1.02,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1,phys:false}
 ];
 var curDev=0,loadId=0;
 var PW,PH,IW,IH,IX,IY,IRX;
@@ -190,17 +190,22 @@ camera.position.set(0,0,DEVICES[0].cz);
 var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.toneMapping=THREE.NeutralToneMapping;
-renderer.toneMappingExposure=1.0;
+renderer.toneMappingExposure=1.1;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 sceneEl.appendChild(renderer.domElement);
 
-/* Subtle environment for metallic reflections */
+/* Studio HDRI for cinematic metallic reflections */
+var envReady=false;
+new RGBELoader().load('/mockup/studio.hdr',function(tex){
+tex.mapping=THREE.EquirectangularReflectionMapping;
 var pmrem=new THREE.PMREMGenerator(renderer);
-scene.environment=pmrem.fromScene(new RoomEnvironment()).texture;
-scene.environmentIntensity=0.5;
-pmrem.dispose();
+scene.environment=pmrem.fromEquirectangular(tex).texture;
+scene.environmentIntensity=1.0;
+scene.environmentRotation=new THREE.Euler(0,Math.PI*0.25,0);
+tex.dispose();pmrem.dispose();envReady=true;render()
+});
 
 var controls=new OrbitControls(camera,renderer.domElement);
 controls.enableZoom=false;
@@ -210,13 +215,16 @@ controls.dampingFactor=0.05;
 controls.rotateSpeed=0.5;
 controls.addEventListener('change',function(){updateAngles()});
 
-/* Lighting — studio key/fill/rim/bounce */
-var ambL=new THREE.AmbientLight(0xffffff,0.05);scene.add(ambL);
-var keyL=new THREE.DirectionalLight(0xffffff,1.5);keyL.position.set(3,4,5);keyL.castShadow=true;scene.add(keyL);
-var fillL=new THREE.DirectionalLight(0xffffff,0.2);fillL.position.set(-3,1,3);scene.add(fillL);
-var rimL=new THREE.DirectionalLight(0xffffff,0.7);rimL.position.set(-4,2,-2);scene.add(rimL);
-var rimR=new THREE.DirectionalLight(0xffffff,0.7);rimR.position.set(4,2,-2);scene.add(rimR);
-var btmL=new THREE.DirectionalLight(0xffffff,0.2);btmL.position.set(0,-3,3);scene.add(btmL);
+/* Lighting — warm key / cool fill / warm rim / camera fill */
+var hemiL=new THREE.HemisphereLight(0xEBEEFF,0x3d3020,0.15);scene.add(hemiL);
+var keyL=new THREE.DirectionalLight(0xFFDBBA,2.5);keyL.position.set(5,8,5);keyL.castShadow=true;scene.add(keyL);
+var fillL=new THREE.DirectionalLight(0xEBEEFF,0.8);fillL.position.set(-4,3,-2);scene.add(fillL);
+var rimL=new THREE.DirectionalLight(0xFFECD6,1.5);rimL.position.set(-2,4,-6);scene.add(rimL);
+var rimR=new THREE.DirectionalLight(0xFFECD6,1.5);rimR.position.set(4,2,-5);scene.add(rimR);
+var btmL=new THREE.DirectionalLight(0xE3E9FF,0.3);btmL.position.set(0,-3,3);scene.add(btmL);
+/* Camera-attached fill — eliminates dead zones at every orbit angle */
+var camFill=new THREE.PointLight(0xffffff,0.4,0,2);camFill.position.set(0.5,1,0);
+camera.add(camFill);scene.add(camera);
 
 /* Screen canvas texture */
 var scrCanvas=document.createElement('canvas');
@@ -277,9 +285,11 @@ function loadModel(idx){
 curDev=idx;var d=DEVICES[idx];
 PW=d.pw;PH=d.ph;IW=d.iw;IH=d.ih;IX=(PW-IW)/2;IY=d.iy;IRX=d.irx;
 modelReady=false;var myId=++loadId;var is17=idx<2;
-ambL.intensity=is17?0:0.05;keyL.intensity=is17?2.2:1.5;fillL.intensity=is17?0.05:0.2;
-rimL.intensity=is17?1.4:0.7;rimR.intensity=is17?1.4:0.7;btmL.intensity=is17?0.05:0.2;
-scene.environmentIntensity=is17?0.8:0.5;
+hemiL.intensity=is17?0.15:0.2;keyL.intensity=is17?2.5:1.5;keyL.color.set(is17?0xFFDBBA:0xffffff);
+fillL.intensity=is17?0.8:0.4;fillL.color.set(is17?0xEBEEFF:0xffffff);
+rimL.intensity=is17?1.5:0.7;rimR.intensity=is17?1.5:0.7;btmL.intensity=is17?0.3:0.2;
+camFill.intensity=is17?0.4:0.15;
+scene.environmentIntensity=is17?1.0:0.5;
 try{localStorage.setItem('mockup-dev',idx)}catch(_){}
 gltfLoader.load(d.url,function(gltf){
 if(myId!==loadId)return;
@@ -296,7 +306,17 @@ gltf.scene.traverse(function(child){
 if(child.isMesh){
 child.castShadow=d.ns===1;child.receiveShadow=d.ns===1;
 var mats=Array.isArray(child.material)?child.material:[child.material];
-mats.forEach(function(m){if(m&&m.isMeshStandardMaterial){m.metalness=d.mm;m.roughness=d.mr;m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true}})
+mats.forEach(function(m,mi){if(m&&m.isMeshStandardMaterial){
+if(d.phys){
+var p=new THREE.MeshPhysicalMaterial();p.copy(m);
+p.metalness=d.mm;p.roughness=d.mr;p.envMapIntensity=d.ei;
+p.anisotropy=d.an;p.anisotropyRotation=d.ar;
+p.clearcoat=d.cc;p.clearcoatRoughness=d.ccr;
+p.side=THREE.DoubleSide;p.needsUpdate=true;
+if(Array.isArray(child.material))child.material[mi]=p;else child.material=p;
+m.dispose()
+}else{m.metalness=d.mm;m.roughness=d.mr;m.envMapIntensity=d.ei;m.side=THREE.DoubleSide;m.needsUpdate=true}
+}})
 }});
 scene.add(gltf.scene);
 var geom=new THREE.ShapeGeometry(rrShape(d.sw,d.sh,d.sr));
@@ -335,7 +355,17 @@ var sph=new THREE.Spherical().setFromVector3(camera.position);
 var ry=Math.round(sph.theta/DEG);
 var rx=Math.round((sph.phi-Math.PI/2)/DEG);
 rxV.textContent='Rotation X: '+rx+'\u00B0';
-ryV.textContent='Rotation Y: '+ry+'\u00B0'
+ryV.textContent='Rotation Y: '+ry+'\u00B0';
+/* Dynamic lighting — boost camera fill when facing away from key light */
+if(curDev<2){
+var keyAz=Math.atan2(keyL.position.x,keyL.position.z);
+var diff=Math.abs(sph.theta-keyAz);
+if(diff>Math.PI)diff=2*Math.PI-diff;
+var align=(1+Math.cos(diff))/2;
+camFill.intensity=THREE.MathUtils.lerp(0.6,0.15,align);
+var polarDev=Math.abs(sph.phi-Math.PI/2);
+scene.environmentIntensity=1.0+polarDev*0.4;
+}
 }
 
 function setOrbit(rx,ry){
