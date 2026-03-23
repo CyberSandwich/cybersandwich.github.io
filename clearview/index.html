@@ -8,11 +8,10 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>ClearView</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=2">
+<link rel="stylesheet" href="/shared/base.css?v=5">
 <style>
 body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fill-available}
 .w{max-width:440px;width:100%;padding:20px 20px calc(88px + env(safe-area-inset-bottom,0px))}
-.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .pv-card{padding:20px}
 .pv-wrap{display:flex;align-items:center;justify-content:center;min-height:200px;border-radius:12px;overflow:hidden;transition:background .2s}
 .pv-wrap canvas{display:block;max-width:100%;height:auto;border-radius:12px}
@@ -26,26 +25,6 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .actions button:active{opacity:.7}
 .slbl svg,.id,.ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .ic{stroke-width:2.5;display:none}
-.ok{background:#DCFCE7!important}
-.ps-fb{background:#DBEAFE!important}
-.dl-fb{background:#EDE9FE!important}
-.ok .id,.ps-fb .id,.dl-fb .id{display:none}
-.ok .ic,.ps-fb .ic,.dl-fb .ic{display:inline}
-.ok .ic,.ok span{color:#34D399!important}
-.ps-fb .ic,.ps-fb span{color:#60A5FA!important}
-.dl-fb .ic,.dl-fb span{color:#A78BFA!important}
-.ok polyline,.ps-fb polyline,.dl-fb polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-.rs-fb{background:#FEF9C3!important}
-.rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
-.rs-fb span{color:#CA8A04!important}
-.srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
-.srow.rs-fb .slbl span{color:#CA8A04}
-.err-fb{background:#FEE2E2!important}
-.err-fb span{color:#C41E3A!important}
-.ld{background:#DBEAFE!important}
-.ld .id{animation:pulse 1s ease-in-out infinite;color:#60A5FA!important}
-.ld span{color:#60A5FA!important}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
 .srow:active{opacity:.7}
@@ -146,7 +125,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=1"></script>
+<script src="/shared/base.js?v=3"></script>
 <script>
 var $=function(s){return document.getElementById(s)};
 

@@ -9,11 +9,10 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Palit</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=2">
+<link rel="stylesheet" href="/shared/base.css?v=5">
 <style>
 body{display:flex;flex-direction:column;align-items:center}
 .w{max-width:440px;width:100%;padding:20px 20px calc(86px + env(safe-area-inset-bottom,0px))}
-.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .inp{display:flex;gap:8px;margin-bottom:14px}
 .inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);transition:border-color .15s}
 .inp input:focus{border-color:var(--t4)}
@@ -56,37 +55,7 @@ html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-
 .ex-opt{padding-left:44px!important}
 .dl-chev{width:14px;height:14px;flex-shrink:0;color:var(--t4);margin-left:auto;transition:transform .2s ease}
 .dl-open .dl-chev{transform:rotate(90deg)}
-.ok{background:#DCFCE7!important}
-.ok .id{display:none!important}.ok .ic{display:inline!important}
-.ok .ic,.ok span{color:#34D399!important}
-.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-html[data-theme="dark"] .ok{background:#1A3A2A!important}
-html[data-theme="dark"] .ok .ic,html[data-theme="dark"] .ok span{color:#34D399!important}
-html[data-theme="sepia"] .ok{background:#E8E0CE!important}
-html[data-theme="sepia"] .ok .ic,html[data-theme="sepia"] .ok span{color:#2D7D46!important}
-.rs-warn{background:#FEE2E2!important}
-.rs-warn .id{color:#C41E3A!important;animation:spin .4s ease}
-.rs-warn span{color:#C41E3A!important}
-html[data-theme="dark"] .rs-warn{background:#3A2020!important}
-html[data-theme="dark"] .rs-warn .id,html[data-theme="dark"] .rs-warn span{color:#F87171!important}
-html[data-theme="sepia"] .rs-warn{background:#F0DDD0!important}
-html[data-theme="sepia"] .rs-warn .id,html[data-theme="sepia"] .rs-warn span{color:#C41E3A!important}
-.rs-fb{background:#FEF9C3!important}
-.rs-fb .id{color:#CA8A04!important;animation:spin .4s ease}
-.rs-fb span{color:#CA8A04!important}
-html[data-theme="dark"] .rs-fb{background:#3A3524!important}
-html[data-theme="dark"] .rs-fb .id,html[data-theme="dark"] .rs-fb span{color:#FACC15!important}
-html[data-theme="sepia"] .rs-fb{background:#EDE5C0!important}
-html[data-theme="sepia"] .rs-fb .id,html[data-theme="sepia"] .rs-fb span{color:#A67B5B!important}
-.srow.rs-fb{background:#FEF9C3!important}
-.srow.rs-fb .slbl svg{animation:spin .4s ease;color:#CA8A04}
-.srow.rs-fb .slbl span{color:#CA8A04}
-html[data-theme="dark"] .srow.rs-fb{background:#3A3524!important}
-html[data-theme="dark"] .srow.rs-fb .slbl svg,html[data-theme="dark"] .srow.rs-fb .slbl span{color:#FACC15}
-html[data-theme="sepia"] .srow.rs-fb{background:#EDE5C0!important}
-html[data-theme="sepia"] .srow.rs-fb .slbl svg,html[data-theme="sepia"] .srow.rs-fb .slbl span{color:#A67B5B}
 @keyframes copyPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
-.items{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
 .hist-row{display:flex;align-items:center;padding:10px 14px 10px 16px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .15s}
 .hist-row:last-child{border-bottom:none}
 .hist-row:active{opacity:.7}
@@ -190,7 +159,7 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 <label class="paste-hint" for="file-inp">Tap to Upload or Paste Image</label>
 <input type="file" id="file-inp" accept="image/*" style="display:none">
 <div id="hist-wrap" style="display:none">
-<div class="items" id="hist-items"></div>
+<div class="card items" id="hist-items"></div>
 </div>
 </div>
 <div class="drop-overlay" id="drop-ov">
@@ -202,7 +171,7 @@ Drop Here
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <canvas id="cvs" style="display:none"></canvas>
-<script src="/shared/base.js?v=1"></script>
+<script src="/shared/base.js?v=3"></script>
 <script>
 'use strict';
 var $=function(id){return document.getElementById(id)},PI=Math.PI;
@@ -682,17 +651,9 @@ nr.setAttribute('aria-checked',neutral?'true':'false')}
 
 // ===================== COPY =====================
 
-function copyText(text){
-navigator.clipboard.writeText(text).then(function(){},function(){
-var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';
-document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)})}
+function copyText(text){_base.copyText(text)}
 
-function mkCheckSvg(){
-var s=document.createElementNS('http://www.w3.org/2000/svg','svg');
-s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');
-s.setAttribute('stroke-width','2.5');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.setAttribute('aria-hidden','true');
-var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points','4 12 9 17 20 6');
-s.appendChild(p);return s}
+var mkCheckSvg=_base.mkCheck;
 
 function copyColor(idx){
 if(idx<0||idx>=palette.length)return;

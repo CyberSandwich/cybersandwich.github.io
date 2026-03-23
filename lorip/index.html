@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=2">
+<link rel="stylesheet" href="/shared/base.css?v=5">
 <style>
 :root{--num-bg:#48484A}
 html[data-theme="sepia"]{--num-bg:#6B5744}
@@ -55,7 +55,6 @@ body{display:flex;align-items:flex-start;justify-content:center}
 }
 .inp button:active:not(:disabled){transform:scale(.9)}
 .inp button:disabled{opacity:.3;cursor:not-allowed}
-.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
 .srow:active{opacity:.7}
@@ -70,32 +69,14 @@ html[data-theme="dark"] .srow.sel .bg-chk{background:#1A3A2A;border-color:#2D5A3
 html[data-theme="dark"] .srow.sel .bg-chk svg{color:#34D399}
 html[data-theme="sepia"] .srow.sel .bg-chk{background:#E8E0CE;border-color:#DDD4C0}
 html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
-.links{background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
-.links button{
-  display:flex;align-items:center;gap:12px;
-  width:100%;padding:14px 20px;
-  font:500 .9375rem/1 var(--font);
-  color:var(--t2);background:none;border:none;
-  border-bottom:1px solid var(--bdr2);
-  cursor:pointer;text-align:left;
-  transition:background .25s,color .15s
-}
-.links button:last-child{border-bottom:none}
-.links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
-.ok{background:#DCFCE7!important}
-.ok svg,.ok span{color:#34D399!important}
-.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+.links{margin-bottom:0}
 .regen{background:#FEF9C3!important}
 .regen svg{color:#CA8A04!important;animation:spin .4s ease}
 .regen span{color:#CA8A04}
-.rs-fb{background:#FEF9C3!important}
-.rs-fb svg{color:#CA8A04!important;animation:spin .4s ease}
-.rs-fb span{color:#CA8A04}
 .fi{animation:fi .25s ease}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 @keyframes cpFlash{0%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px rgba(52,211,153,.4),var(--shadow)}100%{box-shadow:var(--shadow)}}
 @media(hover:hover){
-  .links button:hover{background:var(--bg2);color:var(--t1)}
   .srow:hover{background:var(--bg2)}
   .inp button:hover:not(:disabled){color:var(--t1)}
   .out:hover{opacity:.92}
@@ -113,7 +94,7 @@ html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
     <button id="inc" type="button" aria-label="Increase Count"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div class="card" id="modes"></div>
-  <div class="links">
+  <div class="card links">
     <button id="g" type="button" aria-label="Regenerate text"><svg id="gi" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="gl">Regenerate</span></button>
     <button id="c" type="button" aria-label="Copy text to clipboard"><svg id="ci" aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" aria-hidden="true" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6" stroke-width="2.5"/></svg><span id="csl">Copy</span></button>
     <button id="rs" type="button" aria-label="Reset to defaults"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rsl">Reset</span></button>
@@ -126,7 +107,7 @@ html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=1"></script>
+<script src="/shared/base.js?v=3"></script>
 <script>
 var $=function(id){return document.getElementById(id)},
 NS='http://www.w3.org/2000/svg',
@@ -268,14 +249,14 @@ function validateInput(){
 function doCopy(){
   if(!output)return;
   clearTimeout(cm);
-  navigator.clipboard.writeText(output).then(function(){
+  _base.copyText(output,function(){
     $('ci').style.display='none';$('ck').style.display='';
     $('csl').textContent='Copied';
     var btn=$('c');btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
     cm=setTimeout(function(){
       btn.classList.remove('ok');$('ci').style.display='';$('ck').style.display='none';$('csl').textContent='Copy';
     },800);
-  },function(){$('csl').textContent='Failed';cm=setTimeout(function(){$('csl').textContent='Copy'},800)});
+  });
 }
 function doRegen(){
   clearTimeout(gm);render();
@@ -327,10 +308,10 @@ $('rs').onclick=doReset;
 $('out').onclick=function(){
   if(!output)return;
   clearTimeout(cpTm);
-  navigator.clipboard.writeText(output).then(function(){
+  _base.copyText(output,function(){
     var el=$('out');el.classList.remove('cp-fb');el.offsetWidth;el.classList.add('cp-fb');
     cpTm=setTimeout(function(){el.classList.remove('cp-fb')},400);
-  },function(){});
+  });
 };
 document.addEventListener('keydown',function(e){
   var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;

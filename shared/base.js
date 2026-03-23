@@ -46,6 +46,20 @@
     if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
   });
 
+  /* Clipboard write with execCommand fallback */
+  function copyText(text,cb){
+    function fb(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none';ta.setAttribute('readonly','');document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(_){}document.body.removeChild(ta);if(cb)cb()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(cb,fb)}else{fb()}
+  }
+
+  /* SVG icon helpers */
+  function mkCheck(){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('width','14');s.setAttribute('height','14');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2.5');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.setAttribute('aria-hidden','true');var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points','4 12 9 17 20 6');s.appendChild(p);return s}
+
+  function mkX(){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('width','14');s.setAttribute('height','14');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.setAttribute('aria-hidden','true');var p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d','M18 6L6 18M6 6l12 12');s.appendChild(p);return s}
+
+  /* Button feedback: add class, hold, fade out, revert */
+  function btnFeedback(btn,cls,dur,onDone){clearTimeout(btn._ft1);clearTimeout(btn._ft2);btn.classList.remove(cls);btn.offsetWidth;btn.classList.add(cls);btn._ft1=setTimeout(function(){btn.style.opacity='0';btn._ft2=setTimeout(function(){btn.classList.remove(cls);btn.style.opacity='';if(onDone)onDone()},200)},dur||1500)}
+
   /* Expose for project-specific keyboard handlers */
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback};
 })();
