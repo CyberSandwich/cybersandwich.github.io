@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=5">
+<link rel="stylesheet" href="/shared/base.css?v=6">
 <style>
 :root{--num-bg:#48484A}
 html[data-theme="sepia"]{--num-bg:#6B5744}
@@ -107,7 +107,7 @@ html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=3"></script>
+<script src="/shared/base.js?v=4"></script>
 <script>
 var $=function(id){return document.getElementById(id)},
 NS='http://www.w3.org/2000/svg',
@@ -115,7 +115,7 @@ MODES=['Paragraphs','Sentences','Words','Lists'],
 DEFS=[3,5,50,5],MINS=[1,1,1,1],MAXS=[20,50,500,30],STEPS=[1,1,10,1],
 OPENER='Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 W='lorem,ipsum,dolor,sit,amet,consectetur,adipiscing,elit,sed,do,eiusmod,tempor,incididunt,ut,labore,et,dolore,magna,aliqua,enim,ad,minim,veniam,quis,nostrud,exercitation,ullamco,laboris,nisi,aliquip,ex,ea,commodo,consequat,duis,aute,irure,in,reprehenderit,voluptate,velit,esse,cillum,fugiat,nulla,pariatur,excepteur,sint,occaecat,cupidatat,non,proident,sunt,culpa,qui,officia,deserunt,mollit,anim,id,est,laborum,ac,accumsan,aliquet,ante,arcu,at,auctor,augue,bibendum,blandit,condimentum,congue,cras,cursus,diam,dictum,dignissim,donec,dui,efficitur,egestas,eget,eleifend,elementum,eros,etiam,eu,facilisi,faucibus,felis,fermentum,feugiat,finibus,gravida,habitant,habitasse,hendrerit,iaculis,imperdiet,integer,interdum,justo,lacinia,lacus,laoreet,lectus,leo,libero,ligula,lobortis,luctus,maecenas,massa,mattis,mauris,maximus,metus,mi,morbi,nam,nec,neque,nibh,nullam,nunc,odio,orci,ornare,pellentesque,pharetra,placerat,platea,porta,porttitor,posuere,praesent,pretium,proin,pulvinar,purus,quam,quisque,rhoncus,risus,rutrum,sagittis,sapien,scelerisque,semper,senectus,sodales,sollicitudin,suscipit,suspendisse,tellus,tincidunt,tortor,tristique,turpis,ultrices,ultricies,urna,varius,vehicula,vel,vestibulum,vitae,vivamus,viverra,volutpat,vulputate'.split(','),
-mode=0,count=3,output='',gm,cm,cpTm,rm,prevCount=3;
+mode=0,count=3,output='',gm,cpTm,rm,prevCount=3;
 
 /* SVG path data for mode icons */
 var MODE_PATHS=[
@@ -135,14 +135,6 @@ function mkSvg(paths){
   }
   return s
 }
-function mkChk(){
-  var s=document.createElementNS(NS,'svg');
-  s.setAttribute('viewBox','0 0 24 24');
-  var p=document.createElementNS(NS,'polyline');
-  p.setAttribute('points','4 12 9 17 20 6');
-  s.appendChild(p);return s
-}
-
 function rand(n){var r=new Uint32Array(1);crypto.getRandomValues(r);return r[0]%n}
 function randWord(){return W[rand(W.length)]}
 function genSentence(minW,maxW){
@@ -248,15 +240,10 @@ function validateInput(){
 }
 function doCopy(){
   if(!output)return;
-  clearTimeout(cm);
   _base.copyText(output,function(){
-    $('ci').style.display='none';$('ck').style.display='';
-    $('csl').textContent='Copied';
-    var btn=$('c');btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
-    cm=setTimeout(function(){
-      btn.classList.remove('ok');$('ci').style.display='';$('ck').style.display='none';$('csl').textContent='Copy';
-    },800);
-  });
+    $('ci').style.display='none';$('ck').style.display='';$('csl').textContent='Copied';
+    _base.btnFeedback($('c'),'ok',800,function(){$('ci').style.display='';$('ck').style.display='none';$('csl').textContent='Copy'})
+  },function(){$('csl').textContent='Failed';setTimeout(function(){$('csl').textContent='Copy'},800)});
 }
 function doRegen(){
   clearTimeout(gm);render();
@@ -286,7 +273,7 @@ function doReset(){
     row.appendChild(lbl);
     var chk=document.createElement('span');
     chk.className='bg-chk';
-    chk.appendChild(mkChk());
+    chk.appendChild(_base.mkCheck());
     row.appendChild(chk);
     row.addEventListener('click',(function(idx){return function(){setMode(idx)}})(i));
     container.appendChild(row);

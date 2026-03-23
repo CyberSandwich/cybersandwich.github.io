@@ -47,8 +47,8 @@
   });
 
   /* Clipboard write with execCommand fallback */
-  function copyText(text,cb){
-    function fb(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none';ta.setAttribute('readonly','');document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(_){}document.body.removeChild(ta);if(cb)cb()}
+  function copyText(text,cb,onErr){
+    function fb(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none';ta.setAttribute('readonly','');document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(_){}document.body.removeChild(ta);if(ok){if(cb)cb()}else{if(onErr)onErr()}}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(cb,fb)}else{fb()}
   }
 

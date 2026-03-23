@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=5">
+<link rel="stylesheet" href="/shared/base.css?v=6">
 <title>ImageOpt | JPEG</title>
 <style>
 body{display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -33,7 +33,6 @@ body.has-files{align-items:flex-start;cursor:default}
 .fc-sizes{font:400 .8125rem/1 var(--font);color:var(--t3);margin-top:6px}
 .fc-acts{display:flex;gap:8px;margin-top:10px}
 .fc-acts button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t2);cursor:pointer;text-align:center;transition:background .2s,color .15s}
-.links>button[disabled]{opacity:.35;cursor:not-allowed}
 .links>button.danger{color:#EF4444}
 .links>button.danger svg{color:#EF4444}
 .drop-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(250,250,250,.95);font:600 1.25rem/1 var(--font);color:var(--t3);opacity:0;pointer-events:none;transition:opacity .2s}
@@ -81,7 +80,7 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=3"></script>
+<script src="/shared/base.js?v=4"></script>
 <script>
 
 function $(id){return document.getElementById(id)}

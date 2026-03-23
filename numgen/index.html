@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=5">
+<link rel="stylesheet" href="/shared/base.css?v=6">
 <style>
 :root{--num-bg:#48484A}
 html[data-theme="sepia"]{--num-bg:#6B5744}
@@ -53,14 +53,14 @@ body{display:flex;align-items:center;justify-content:center}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=3"></script>
+<script src="/shared/base.js?v=4"></script>
 <script>
 var $=s=>document.getElementById(s),
 /* reserved/invalid UK 07 area codes */ X=new Set([700,781,797,829,839,911,924,937]),
-el=$('n'),gb=$('g'),gs=$('gl'),cb=$('c'),si=$('ci'),sk=$('ck'),sl=$('cl'),gm,cm,cur;
+el=$('n'),gb=$('g'),gs=$('gl'),cb=$('c'),si=$('ci'),sk=$('ck'),sl=$('cl'),gm,cur;
 function gen(){var r=new Uint8Array(9),a,b,c,s,i;do{crypto.getRandomValues(r);a=7+r[0]%3;b=r[1]%10;c=r[2]%10}while(X.has(a*100+b*10+c));s='07'+a+b+c;for(i=3;i<9;i++)s+=r[i]%10;return s}
 function render(){cur=gen();el.textContent=cur.slice(0,5)+' '+cur.slice(5);el.href='tel:+44'+cur.slice(1);el.classList.remove('fi');el.offsetWidth;el.classList.add('fi')}
-function doCopy(){clearTimeout(cm);_base.copyText(cur,function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';cb.classList.remove('ok');cb.offsetWidth;cb.classList.add('ok');cm=setTimeout(function(){si.style.display='';sk.style.display='none';sl.textContent='Copy';cb.classList.remove('ok')},800)})}
+function doCopy(){_base.copyText(cur,function(){si.style.display='none';sk.style.display='';sl.textContent='Copied';_base.btnFeedback(cb,'ok',800,function(){si.style.display='';sk.style.display='none';sl.textContent='Copy'})},function(){sl.textContent='Failed';setTimeout(function(){sl.textContent='Copy'},800)})}
 render();
 el.onclick=e=>{e.preventDefault();doCopy()};
 gb.onclick=function(){clearTimeout(gm);render();gs.textContent='Regenerated';gb.classList.remove('regen');gb.offsetWidth;gb.classList.add('regen');gm=setTimeout(function(){gs.textContent='Regenerate';gb.classList.remove('regen')},800)};
