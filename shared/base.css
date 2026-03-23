@@ -75,16 +75,41 @@ nav{
   .tabs a:hover:not(.active),.tabs button:hover:not(.active):not(.theme-toggle){color:var(--t2)}
   .theme-toggle:hover{color:var(--t1)}
   .links>button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
+  .inp button:hover:not(:disabled){color:var(--t1)}
 }
 .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .links>button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s,color .15s}
 .links>button:last-child{border-bottom:none}
 .links>button[disabled]{opacity:.35;cursor:not-allowed}
 .links>button svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}
+.srow:last-child{border-bottom:none}
+.srow:active{opacity:.7}
+@media(hover:hover){.srow:hover{background:var(--bg2)}}
+.slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
+.slbl svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.bg-chk{padding:5px 10px;border:1.5px solid var(--bdr);border-radius:var(--rr);background:none;flex-shrink:0;transition:.2s ease}
+.bg-chk svg{width:14px;height:14px;display:block;margin:0 auto;color:var(--t4);opacity:.2}
+.srow.sel .bg-chk{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:pop .35s ease}
+.srow.sel .bg-chk svg{color:#34D399;opacity:1}
+.srow.sel .bg-chk polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+html[data-theme="dark"] .srow.sel .bg-chk{background:#1A3A2A;border-color:#2D5A3E}
+html[data-theme="dark"] .srow.sel .bg-chk svg{color:#34D399}
+html[data-theme="sepia"] .srow.sel .bg-chk{background:#E8E0CE;border-color:#DDD4C0}
+html[data-theme="sepia"] .srow.sel .bg-chk svg{color:#2D7D46}
+.drop-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(250,250,250,.95);font:600 1.25rem/1 var(--font);color:var(--t3);opacity:0;pointer-events:none;transition:opacity .2s}
+.drop-overlay.active{opacity:1;pointer-events:auto}
+html[data-theme="dark"] .drop-overlay{background:rgba(28,28,30,.95)}
+html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
+.inp{display:flex;gap:8px;margin-bottom:14px}
+.inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
+.inp input:focus{border-color:var(--t4)}
+.inp button{width:44px;height:44px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 .ok{background:#DCFCE7!important}
 .ok svg,.ok span{color:#34D399!important}
 .ok .id{display:none!important}.ok .ic{display:inline!important}
