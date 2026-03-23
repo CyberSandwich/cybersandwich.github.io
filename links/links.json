@@ -372,6 +372,12 @@
     "category": "Personal"
   },
   {
+    "title": "WhatsApp Web",
+    "url": "https://web.whatsapp.com/",
+    "icon": "message",
+    "category": "Personal"
+  },
+  {
     "title": "What is my IP Address",
     "url": "https://whatismyipaddress.com",
     "icon": "globe",
