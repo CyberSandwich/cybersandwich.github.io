@@ -60,6 +60,56 @@
   /* Button feedback: add class, hold, fade out, revert */
   function btnFeedback(btn,cls,dur,onDone){clearTimeout(btn._ft1);clearTimeout(btn._ft2);btn.classList.remove(cls);btn.offsetWidth;btn.classList.add(cls);btn._ft1=setTimeout(function(){btn.style.opacity='0';btn._ft2=setTimeout(function(){btn.classList.remove(cls);btn.style.opacity='';if(onDone)onDone()},200)},dur||1500)}
 
+  /* Drag-and-drop overlay boilerplate
+     opts.overlay: DOM element with .drop-overlay class (toggled via .active)
+     opts.onDrop:  function(files, text) — called with FileList and text/plain data */
+  function setupDragDrop(opts){
+    var ov=opts.overlay,dc=0;
+    document.addEventListener('dragenter',function(e){e.preventDefault();dc++;if(dc===1)ov.classList.add('active')});
+    document.addEventListener('dragleave',function(e){e.preventDefault();dc--;if(dc<=0){dc=0;ov.classList.remove('active')}});
+    document.addEventListener('dragover',function(e){e.preventDefault()});
+    document.addEventListener('drop',function(e){
+      e.preventDefault();dc=0;ov.classList.remove('active');
+      var files=e.dataTransfer.files,text=e.dataTransfer.getData('text');
+      opts.onDrop(files,text);
+    });
+    return function(){if(dc>0){dc=0;ov.classList.remove('active')}};
+  }
+
+  /* Two-press reset confirmation: first click shows warning, second confirms
+     btn: the button element
+     opts.label:    DOM element for text (default: btn.querySelector('span'))
+     opts.text:     default label text (default: 'Reset')
+     opts.onConfirm: function() called on second click
+     opts.guard:    function()→boolean — if returns false, first click ignored
+     opts.timeout:  ms before warn expires (default: 2000)
+     opts.feedback: ms for Done feedback (default: 1500)
+     Returns {press:function(), clear:function()} — press() is the click handler, clear() resets UI */
+  function twoPress(btn,opts){
+    var lbl=opts.label||btn.querySelector('span'),txt=opts.text||'Reset',tWarn=opts.timeout||2000,tFb=opts.feedback||1500;
+    var pending=false,warnT=0,fbT=0;
+    function clear(){
+      pending=false;clearTimeout(warnT);clearTimeout(fbT);
+      btn.classList.remove('rs-warn');btn.classList.remove('rs-fb');
+      lbl.textContent=txt;
+    }
+    function press(){
+      if(opts.guard&&!opts.guard())return;
+      if(!pending){
+        pending=true;clearTimeout(fbT);
+        lbl.textContent='Confirm?';btn.classList.remove('rs-fb');btn.offsetWidth;btn.classList.add('rs-warn');
+        warnT=setTimeout(function(){pending=false;btn.classList.remove('rs-warn');lbl.textContent=txt},tWarn);
+        return;
+      }
+      pending=false;clearTimeout(warnT);
+      btn.classList.remove('rs-warn');
+      if(opts.onConfirm)opts.onConfirm();
+      lbl.textContent='Done';btn.classList.remove('rs-fb');btn.offsetWidth;btn.classList.add('rs-fb');
+      fbT=setTimeout(function(){btn.classList.remove('rs-fb');lbl.textContent=txt},tFb);
+    }
+    return{press:press,clear:clear};
+  }
+
   /* Expose for project-specific keyboard handlers */
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,setupDragDrop:setupDragDrop,twoPress:twoPress};
 })();

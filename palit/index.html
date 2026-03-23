@@ -148,7 +148,7 @@ Drop Here
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <canvas id="cvs" style="display:none"></canvas>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script>
 'use strict';
 var $=function(id){return document.getElementById(id)},PI=Math.PI;
@@ -445,13 +445,11 @@ var e=mkEntry(rgb);$('cinp').value=fmtVal(e,globalFmt);
 $('cpick').value=lastValidHex;
 updateBtnColor(lastValidHex)}
 
-function clearResetState(){
-if(resetPending){resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
-var btn=$('rs-btn');btn.classList.remove('rs-warn');btn.querySelector('span').textContent='Reset'}}
+function clearResetState(){resetCtrl.clear()}
 
 var base=null,baseUserSet=false,ruleIdx=-1,neutral=false,globalFmt=+(localStorage.getItem('palit-fmt'))||0;
 var palette=[],mode='harmony',swatchCount=8,lastExtracted=[],autoCount=8;
-var hist=[],activeIdx=-1,dragCount=0,exportOpen=false;
+var hist=[],activeIdx=-1,exportOpen=false;
 var copyTimers={},histTimer,cntRsTimer;
 var lastValidHex='';
 
@@ -676,17 +674,8 @@ btn.classList.remove(cls);btn.offsetWidth;btn.classList.add(cls);
 if(sp&&fbText)sp.textContent=fbText;
 fbTimers.set(btn,setTimeout(function(){btn.classList.remove(cls);if(sp)sp.textContent=origText||orig;fbTimers.delete(btn)},dur))}
 
-var resetPending=false,resetWarnTimer;
-function doReset(){
-var btn=$('rs-btn'),sp=btn.querySelector('span');
-if(!resetPending){
-resetPending=true;
-btn.classList.remove('rs-fb');btn.offsetWidth;btn.classList.add('rs-warn');
-sp.textContent='Confirm?';
-if(resetWarnTimer)clearTimeout(resetWarnTimer);
-resetWarnTimer=setTimeout(function(){resetPending=false;btn.classList.remove('rs-warn');sp.textContent='Reset'},2000);
-return}
-resetPending=false;if(resetWarnTimer)clearTimeout(resetWarnTimer);
+var resetCtrl=_base.twoPress($('rs-btn'),{
+onConfirm:function(){
 palette=[];base=null;baseUserSet=false;lastValidHex='';ruleIdx=-1;neutral=false;mode='harmony';activeIdx=-1;lastExtracted=[];
 hist=[];saveHist();renderHist();
 $('cinp').value='';$('cpick').value='#888888';
@@ -694,9 +683,9 @@ $('add-btn').style.background='var(--t3)';
 $('add-btn').querySelector('svg').setAttribute('stroke','var(--card)');
 updateRows();updateNeutralUI();
 lastShownMode=undefined;lastShownHas=undefined;lastHistLen=undefined;
-showOutput();closeExport();
-btn.classList.remove('rs-warn');
-btnFeedback(btn,'rs-fb','Reset','Done',1500)}
+showOutput();closeExport()}
+});
+function doReset(){resetCtrl.press()}
 
 // ===================== COUNT =====================
 
@@ -833,17 +822,13 @@ if(ruleIdx>=0)generate();btnFeedback(btn,'ok','Paste','Pasted',1200);return}
 btnFeedback(btn,'rs-warn','Paste','Invalid',1200)
 }).catch(function(){btnFeedback(btn,'rs-warn','Paste','Denied',1200)})})});
 
-var ov=$('drop-ov');
-document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)ov.classList.add('active')});
-document.addEventListener('dragleave',function(e){e.preventDefault();dragCount--;if(dragCount<=0){dragCount=0;ov.classList.remove('active')}});
-document.addEventListener('dragover',function(e){e.preventDefault()});
-document.addEventListener('drop',function(e){e.preventDefault();dragCount=0;ov.classList.remove('active');
-var files=e.dataTransfer.files;if(files.length>0){processImage(files[0]);return}
-var text=e.dataTransfer.getData('text');if(text){
+_base.setupDragDrop({overlay:$('drop-ov'),onDrop:function(files,text){
+if(files&&files.length>0){processImage(files[0]);return}
+if(text){
 var multi=parseMultiColor(text);if(multi){processPastedColors(multi);return}
 var rgb=parseColor(text.trim());if(rgb){baseUserSet=true;setBaseColor(rgb);
 if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
-if(ruleIdx>=0)generate()}}});
+if(ruleIdx>=0)generate()}}}});
 
 document.addEventListener('paste',function(e){
 if(document.activeElement===$('cinp'))return;

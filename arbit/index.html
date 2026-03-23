@@ -75,11 +75,11 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script>
 function $(id){return document.getElementById(id)}
 var items=[],mode=false,picked=null;
-var pickTimer=null,resetTimer=null,copyTimer=null,hiTimer=null;
+var pickTimer=null,copyTimer=null,hiTimer=null;
 function load(){try{var r=localStorage.getItem('arbit-items');if(r){var p=JSON.parse(r);if(Array.isArray(p))items=p}var m=localStorage.getItem('arbit-mode');if(m==='true')mode=true}catch(_){}}
 function save(){try{localStorage.setItem('arbit-items',JSON.stringify(items));localStorage.setItem('arbit-mode',mode?'true':'false')}catch(_){}}
 function render(){
@@ -149,13 +149,14 @@ function doPick(){
     },350);
   }
 }
-function doReset(){
-  items=[];mode=false;picked=null;$('r').textContent='-';sizeResult('-');save();render();updateModeUI();
-  var rb=$('reset-btn'),rl=$('rl');
-  if(resetTimer){clearTimeout(resetTimer);rb.classList.remove('rs-fb');rl.textContent='Reset'}
-  rl.textContent='Done';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-fb');
-  resetTimer=setTimeout(function(){rb.classList.remove('rs-fb');rl.textContent='Reset'},1500);
-}
+var resetCtrl=_base.twoPress($('reset-btn'),{
+  label:$('rl'),
+  guard:function(){return items.length>0},
+  onConfirm:function(){
+    items=[];mode=false;picked=null;$('r').textContent='-';sizeResult('-');save();render();updateModeUI();
+  }
+});
+function doReset(){resetCtrl.press()}
 function toggleMode(){
   mode=!mode;save();updateModeUI();
   var tb=$('mode-btn');
@@ -185,7 +186,7 @@ $('inp').addEventListener('paste',function(){
 });
 $('pick-btn').addEventListener('click',doPick);
 $('mode-btn').addEventListener('click',toggleMode);
-$('reset-btn').addEventListener('click',doReset);
+$('reset-btn').addEventListener('click',function(){resetCtrl.press()});
 $('copy-btn').addEventListener('click',doCopy);
 document.addEventListener('keydown',function(e){
   var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
@@ -199,13 +200,7 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
   else if(e.key==='1')window.location.href='/';
 });
-var dragCount=0,overlay=$('drop-overlay');
-document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)overlay.classList.add('active')});
-document.addEventListener('dragleave',function(e){e.preventDefault();dragCount--;if(dragCount<=0){dragCount=0;overlay.classList.remove('active')}});
-document.addEventListener('dragover',function(e){e.preventDefault()});
-document.addEventListener('drop',function(e){
-  e.preventDefault();dragCount=0;overlay.classList.remove('active');
-  var files=e.dataTransfer.files;
+_base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(files,text){
   if(files&&files.length>0){
     for(var i=0;i<files.length;i++){
       (function(file){
@@ -217,8 +212,8 @@ document.addEventListener('drop',function(e){
         reader.readAsText(file);
       })(files[i]);
     }
-  }else{var text=e.dataTransfer.getData('text');if(text)addBulk(text)}
-});
+  }else if(text)addBulk(text);
+}});
 load();render();updateModeUI();
 </script>
 </body>

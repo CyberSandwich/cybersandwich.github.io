@@ -188,7 +188,7 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
     };
 }));
 </script>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script>
 var $=function(s){return document.getElementById(s)};
 var tm={},toastT,toastFadeT;
@@ -707,37 +707,25 @@ document.addEventListener('paste',function(e){
 });
 
 /* Reset */
-function resetAll(btn,groups,input){
+function doResetAll(groups,input){
   input.value='';if(input.tagName==='TEXTAREA')autoGrow(input);
   groups.forEach(function(g){if(g._reset)resetGroup(g)});
-  feedback(btn,'rs-fb','Done');
 }
 var azAllGroups=azGroups1.concat(azGroups2);
-$('azRs').onclick=function(){resetAll(this,azAllGroups,azIn)};
+var azResetCtrl=_base.twoPress($('azRs'),{
+  onConfirm:function(){doResetAll(azAllGroups,azIn)}
+});
+$('azRs').onclick=function(){azResetCtrl.press()};
 
 /* Drag and Drop */
-var dropOv=$('dropOv'),dragC=0;
-
-document.addEventListener('dragenter',function(e){
-  e.preventDefault();if(++dragC===1)dropOv.classList.add('active');
-});
-document.addEventListener('dragleave',function(e){
-  e.preventDefault();if(--dragC===0)dropOv.classList.remove('active');
-});
-document.addEventListener('dragover',function(e){e.preventDefault()});
-document.addEventListener('drop',function(e){
-  e.preventDefault();dragC=0;dropOv.classList.remove('active');
-  var files=e.dataTransfer.files;
+_base.setupDragDrop({overlay:$('dropOv'),onDrop:function(files,text){
   var imgFile=null;
   for(var i=0;i<files.length;i++){if(files[i].type.indexOf('image/')===0){imgFile=files[i];break}}
   if(imgFile){
     scanBlob(imgFile,$('azPs'),$('azCp'));
-  }else{
-    var t=e.dataTransfer.getData('text');
-    if(t){azIn.value=t;autoGrow(azIn);genAZ()}
-    else if(files.length)notify('Unsupported File Type',false);
-  }
-});
+  }else if(text){azIn.value=text;autoGrow(azIn);genAZ()}
+  else if(files.length)notify('Unsupported File Type',false);
+}});
 
 /* Keyboard shortcuts */
 document.addEventListener('keydown',function(e){

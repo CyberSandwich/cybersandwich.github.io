@@ -107,7 +107,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script>
 var $=function(s){return document.getElementById(s)};
 
@@ -258,11 +258,9 @@ i.onerror=function(){URL.revokeObjectURL(blobUrl);blobUrl=null;notify('Failed to
 i.src=blobUrl
 }
 
-var dc=0;
-document.addEventListener('dragenter',function(e){e.preventDefault();dc++;if(dc===1)ov.classList.add('active')});
-document.addEventListener('dragleave',function(e){e.preventDefault();dc--;if(dc<=0){dc=0;ov.classList.remove('active')}});
-document.addEventListener('dragover',function(e){e.preventDefault()});
-document.addEventListener('drop',function(e){e.preventDefault();dc=0;ov.classList.remove('active');if(e.dataTransfer.files&&e.dataTransfer.files.length){var f=e.dataTransfer.files[0];if(f.type.startsWith('image/'))loadImg(f)}});
+_base.setupDragDrop({overlay:ov,onDrop:function(files){
+  if(files&&files.length){var f=files[0];if(f.type.startsWith('image/'))loadImg(f)}
+}});
 
 document.addEventListener('paste',function(e){
 var items=e.clipboardData&&e.clipboardData.items;if(!items)return;
@@ -403,14 +401,18 @@ feedback(dlBtn,'dl-fb','Downloaded')
 })
 });
 
-function resetAll(){
+var resetCtrl=_base.twoPress(rsBtn,{
+text:'Reset All',
+guard:function(){return !!img},
+onConfirm:function(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
 render();setBg(0);radiusIdx=4;shadowIdx=2;
 updateRadUI();updateShdUI();setFmt(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});
-feedback(rsBtn,'rs-fb','Reset')
 }
+});
+function resetAll(){resetCtrl.press()}
 rsBtn.addEventListener('click',resetAll);
 
 document.addEventListener('keydown',function(e){

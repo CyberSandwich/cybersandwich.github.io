@@ -112,7 +112,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script type="module">
 import*as THREE from'three';
 import{OrbitControls}from'three/addons/controls/OrbitControls.js';
@@ -367,11 +367,9 @@ i.src=blobUrl
 }
 
 /* ---- Drag & Drop ---- */
-var dc=0;
-document.addEventListener('dragenter',function(e){e.preventDefault();dc++;if(dc===1)ov.classList.add('active')});
-document.addEventListener('dragleave',function(e){e.preventDefault();dc--;if(dc<=0){dc=0;ov.classList.remove('active')}});
-document.addEventListener('dragover',function(e){e.preventDefault()});
-document.addEventListener('drop',function(e){e.preventDefault();dc=0;ov.classList.remove('active');if(e.dataTransfer.files&&e.dataTransfer.files.length){var f=e.dataTransfer.files[0];if(f.type.startsWith('image/'))loadImg(f)}});
+_base.setupDragDrop({overlay:ov,onDrop:function(files){
+  if(files&&files.length){var f=files[0];if(f.type.startsWith('image/'))loadImg(f)}
+}});
 
 /* ---- Paste (keyboard Cmd+V) ---- */
 document.addEventListener('paste',function(e){
@@ -555,13 +553,17 @@ feedback(dlBtn,'dl-fb','Downloaded')
 });
 
 /* ---- Reset All ---- */
-function resetAll(){
+var resetCtrl=_base.twoPress(rsBtn,{
+text:'Reset All',
+guard:function(){return !!img},
+onConfirm:function(){
 resetView();setBg(2);setFmt(0);resIdx=3;updateResUI();
 if(curDev!==0)setDevice(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});
-feedback(rsBtn,'rs-fb','Reset')
 }
+});
+function resetAll(){resetCtrl.press()}
 rsBtn.addEventListener('click',resetAll);
 
 /* ---- Keyboard ---- */

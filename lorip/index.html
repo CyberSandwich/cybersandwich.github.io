@@ -73,7 +73,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script>
 var $=function(id){return document.getElementById(id)},
 NS='http://www.w3.org/2000/svg',
@@ -81,7 +81,7 @@ MODES=['Paragraphs','Sentences','Words','Lists'],
 DEFS=[3,5,50,5],MINS=[1,1,1,1],MAXS=[20,50,500,30],STEPS=[1,1,10,1],
 OPENER='Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 W='lorem,ipsum,dolor,sit,amet,consectetur,adipiscing,elit,sed,do,eiusmod,tempor,incididunt,ut,labore,et,dolore,magna,aliqua,enim,ad,minim,veniam,quis,nostrud,exercitation,ullamco,laboris,nisi,aliquip,ex,ea,commodo,consequat,duis,aute,irure,in,reprehenderit,voluptate,velit,esse,cillum,fugiat,nulla,pariatur,excepteur,sint,occaecat,cupidatat,non,proident,sunt,culpa,qui,officia,deserunt,mollit,anim,id,est,laborum,ac,accumsan,aliquet,ante,arcu,at,auctor,augue,bibendum,blandit,condimentum,congue,cras,cursus,diam,dictum,dignissim,donec,dui,efficitur,egestas,eget,eleifend,elementum,eros,etiam,eu,facilisi,faucibus,felis,fermentum,feugiat,finibus,gravida,habitant,habitasse,hendrerit,iaculis,imperdiet,integer,interdum,justo,lacinia,lacus,laoreet,lectus,leo,libero,ligula,lobortis,luctus,maecenas,massa,mattis,mauris,maximus,metus,mi,morbi,nam,nec,neque,nibh,nullam,nunc,odio,orci,ornare,pellentesque,pharetra,placerat,platea,porta,porttitor,posuere,praesent,pretium,proin,pulvinar,purus,quam,quisque,rhoncus,risus,rutrum,sagittis,sapien,scelerisque,semper,senectus,sodales,sollicitudin,suscipit,suspendisse,tellus,tincidunt,tortor,tristique,turpis,ultrices,ultricies,urna,varius,vehicula,vel,vestibulum,vitae,vivamus,viverra,volutpat,vulputate'.split(','),
-mode=0,count=3,output='',gm,cpTm,rm,prevCount=3;
+mode=0,count=3,output='',gm,cpTm,prevCount=3;
 
 /* SVG path data for mode icons */
 var MODE_PATHS=[
@@ -217,13 +217,13 @@ function doRegen(){
   var btn=$('g');btn.classList.remove('regen');btn.offsetWidth;btn.classList.add('regen');
   gm=setTimeout(function(){$('gl').textContent='Regenerate';btn.classList.remove('regen')},800);
 }
-function doReset(){
-  mode=0;count=DEFS[0];prevCount=count;updateUI();render();
-  clearTimeout(rm);
-  $('rsl').textContent='Done';
-  var btn=$('rs');btn.classList.remove('rs-fb');btn.offsetWidth;btn.classList.add('rs-fb');
-  rm=setTimeout(function(){btn.classList.remove('rs-fb');$('rsl').textContent='Reset'},1500);
-}
+var resetCtrl=_base.twoPress($('rs'),{
+  label:$('rsl'),
+  onConfirm:function(){
+    mode=0;count=DEFS[0];prevCount=count;updateUI();render();
+  }
+});
+function doReset(){resetCtrl.press()}
 /* Build mode rows (ClearView checkmark pattern) */
 (function(){
   var container=$('modes');
@@ -257,7 +257,7 @@ $('cnt').addEventListener('keydown',function(e){
 });
 $('g').onclick=doRegen;
 $('c').onclick=doCopy;
-$('rs').onclick=doReset;
+$('rs').onclick=function(){resetCtrl.press()};
 $('out').onclick=function(){
   if(!output)return;
   clearTimeout(cpTm);

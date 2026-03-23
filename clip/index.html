@@ -77,10 +77,10 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=4"></script>
+<script src="/shared/base.js?v=6"></script>
 <script>
 function $(id){return document.getElementById(id)}
-var items=[],copyTimers={},caTimer=null,rsTimer=null,searchTimer=null,resetPending=false,resetPendingTimer=null;
+var items=[],copyTimers={},caTimer=null,searchTimer=null;
 var kbIdx=-1;
 
 /* ── Storage ──────────────────────────────────────────────────────── */
@@ -288,26 +288,19 @@ function doCopyAll(){
 }
 
 /* ── Reset (two-press confirmation) ───────────────────────────────── */
-function doReset(){
-  if(items.length===0)return;
-  var rb=$('rs-btn'),rl=$('rs-l');
-  if(!resetPending){
-    resetPending=true;
-    rl.textContent='Confirm?';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-warn');
-    resetPendingTimer=setTimeout(function(){resetPending=false;rb.classList.remove('rs-warn');rl.textContent='Reset'},2000);
-    return;
+var resetCtrl=_base.twoPress($('rs-btn'),{
+  label:$('rs-l'),
+  guard:function(){return items.length>0},
+  onConfirm:function(){
+    items=[];save();
+    clearTimeout(searchTimer);
+    Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
+    copyTimers={};kbIdx=-1;
+    $('search').value='';render();
+    announce('All Items Cleared');
   }
-  resetPending=false;clearTimeout(resetPendingTimer);
-  items=[];save();
-  clearTimeout(searchTimer);
-  Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
-  copyTimers={};kbIdx=-1;
-  $('search').value='';render();
-  rb.classList.remove('rs-warn');
-  rl.textContent='Done';rb.classList.remove('rs-fb');rb.offsetWidth;rb.classList.add('rs-fb');
-  rsTimer=setTimeout(function(){rb.classList.remove('rs-fb');rl.textContent='Reset';rsTimer=null},1500);
-  announce('All Items Cleared');
-}
+});
+function doReset(){resetCtrl.press()}
 
 /* ── Keyboard Navigation ──────────────────────────────────────────── */
 function kbCards(){return $('items').querySelectorAll('.item')}
@@ -404,13 +397,7 @@ function isTextFile(file){
 }
 
 /* ── Drag-Drop ────────────────────────────────────────────────────── */
-var dragCount=0,overlay=$('drop-overlay');
-document.addEventListener('dragenter',function(e){e.preventDefault();dragCount++;if(dragCount===1)overlay.classList.add('active')});
-document.addEventListener('dragleave',function(e){e.preventDefault();dragCount--;if(dragCount<=0){dragCount=0;overlay.classList.remove('active')}});
-document.addEventListener('dragover',function(e){e.preventDefault()});
-document.addEventListener('drop',function(e){
-  e.preventDefault();dragCount=0;overlay.classList.remove('active');
-  var files=e.dataTransfer.files;
+var resetDrag=_base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(files,text){
   if(files&&files.length>0){
     for(var i=0;i<files.length;i++){
       (function(file){
@@ -420,8 +407,8 @@ document.addEventListener('drop',function(e){
         reader.readAsText(file);
       })(files[i]);
     }
-  }else{var text=e.dataTransfer.getData('text');if(text)addBulk(text)}
-});
+  }else if(text)addBulk(text);
+}});
 
 /* ── Cross-Tab Sync ───────────────────────────────────────────────── */
 window.addEventListener('storage',function(e){
@@ -436,13 +423,12 @@ window.addEventListener('storage',function(e){
 /* ── Visibility / Timer Cleanup ───────────────────────────────────── */
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){
-    clearTimeout(searchTimer);clearTimeout(caTimer);clearTimeout(rsTimer);clearTimeout(resetPendingTimer);clearTimeout(paTimer);
+    clearTimeout(searchTimer);clearTimeout(caTimer);clearTimeout(paTimer);
     Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
   }
   if(!document.hidden){
-    if(dragCount>0){dragCount=0;overlay.classList.remove('active')}
-    var rb=$('rs-btn'),rl=$('rs-l');
-    rb.classList.remove('rs-fb');rb.classList.remove('rs-warn');rl.textContent='Reset';resetPending=false;
+    resetDrag();
+    resetCtrl.clear();
     var cb=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
     cb.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=items.length>1?'Copy All':'Copy';
     var pb=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
