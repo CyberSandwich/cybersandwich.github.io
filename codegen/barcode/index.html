@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=14">
+<link rel="stylesheet" href="/shared/base.css?v=15">
 <style>
 html{height:100%}
 body{display:flex;align-items:center;justify-content:center}
@@ -66,22 +66,8 @@ body{display:flex;align-items:center;justify-content:center}
 .schips{display:flex;gap:4px}
 .id,.ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .ic{stroke-width:2.5;display:none}
-.notif-pill:active{transform:scale(.95);opacity:.8}
-@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.notif-pill:hover{opacity:.9}}
+@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}}
 .preview:active{transform:scale(.97)}
-.notif{
-  z-index:9;
-  padding:0 20px calc(86px + env(safe-area-inset-bottom,0px));
-  animation:notifIn .25s ease;cursor:pointer
-}
-.notif-pill{
-  display:flex;align-items:center;justify-content:center;
-  padding:12px 22px;border-radius:var(--rr);
-  font:500 .875rem/1 var(--font);white-space:nowrap;
-  box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)
-}
-.notif-pill.nf-ok{background:#DCFCE7;color:#16A34A}
-.notif-pill.nf-err{background:#FEE2E2;color:#C41E3A}
 @keyframes pvPop{from{transform:scale(.97)}to{transform:scale(1)}}
 ::selection{background:rgba(72,72,74,.15)}
 .cam-wrap{padding:0}.cam-wrap video{width:100%;display:block;border-radius:20px;background:#000}

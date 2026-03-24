@@ -83,6 +83,7 @@ nav{
   .links>button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
   .inp button:hover:not(:disabled){color:var(--t1)}
   .step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}
+  .notif-pill:hover{opacity:.9}
 }
 .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .links>button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s,color .15s}
@@ -191,3 +192,8 @@ html[data-theme="sepia"] .ld svg,html[data-theme="sepia"] .ld .id{color:#4A7AA5!
 }
 @media(max-width:390px){.tabs{max-width:calc(100vw - 20px)}}
 .fx-bottom{bottom:0;left:50%;transform:translateX(-50%);position:fixed;z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center}
+.notif{z-index:9;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px));animation:notifIn .25s ease;cursor:pointer}
+.notif-pill{display:flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);white-space:nowrap;box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)}
+.notif-pill.nf-ok{background:#DCFCE7;color:#16A34A}
+.notif-pill.nf-err{background:#FEE2E2;color:#C41E3A}
+.notif-pill:active{transform:scale(.95);opacity:.8}
