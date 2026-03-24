@@ -18,6 +18,12 @@
     "category": "Personal"
   },
   {
+    "title": "Amazon UK (Gift Card)",
+    "url": "https://www.amazon.co.uk/gc/redeem",
+    "icon": "cart",
+    "category": "Personal"
+  },
+  {
     "title": "Apple Captive Portal",
     "url": "http://captive.apple.com",
     "icon": "wifi",
