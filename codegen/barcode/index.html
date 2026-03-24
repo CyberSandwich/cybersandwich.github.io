@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" type="image/png" href="/favicon.png">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=13">
+<link rel="stylesheet" href="/shared/base.css?v=14">
 <style>
 html{height:100%}
 body{display:flex;align-items:center;justify-content:center}
@@ -64,26 +64,10 @@ body{display:flex;align-items:center;justify-content:center}
 }
 .actions button:last-child{border-bottom:none}
 .schips{display:flex;gap:4px}
-.chip{
-  padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
-  font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap
-}
-.chip:active{transform:scale(.95)}
-.chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
-.stepper{display:flex;align-items:center;gap:6px}
-.step-btn{
-  width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;
-  color:var(--t3);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:border-color .15s,color .15s,opacity .15s;padding:0
-}
-.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
-.step-btn:active:not(:disabled){transform:scale(.9)}
-.step-btn:disabled{opacity:.3;cursor:default}
 .id,.ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .ic{stroke-width:2.5;display:none}
 .notif-pill:active{transform:scale(.95);opacity:.8}
-@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.notif-pill:hover{opacity:.9}}
+@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}.notif-pill:hover{opacity:.9}}
 .preview:active{transform:scale(.97)}
 .notif{
   z-index:9;

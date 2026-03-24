@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Palit</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=13">
+<link rel="stylesheet" href="/shared/base.css?v=14">
 <style>
 body{display:flex;flex-direction:column;align-items:center}
 .w{max-width:440px;width:100%;padding:20px 20px calc(86px + env(safe-area-inset-bottom,0px))}
@@ -22,11 +22,9 @@ body{display:flex;flex-direction:column;align-items:center}
 .cp-btn.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
 html[data-theme="dark"] .cp-btn.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
 html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
-.stepper{display:flex;align-items:center;gap:4px}
-.step-btn{width:36px;height:36px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
-.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:16px;height:16px}
-.step-btn:active:not(:disabled){transform:scale(.9)}
-.step-btn:disabled{opacity:.3;cursor:default}
+.stepper{gap:4px}
+.step-btn{width:36px;height:36px}
+.step-btn svg{width:16px;height:16px}
 .cdot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:1px solid var(--bdr2)}
 .clbl{flex:1;min-width:0;font:500 .9375rem/1 var(--font);color:var(--t2);word-break:break-all}
 .clbl .cg{font:500 .8125rem/1 var(--font);color:var(--t3);margin-left:6px}
@@ -49,7 +47,6 @@ html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-
 .paste-hint{display:none;text-align:center;font:400 .75rem/1 var(--font);color:var(--t4);padding:0 20px 4px;cursor:pointer}
 @media(hover:none){.paste-hint{display:block}}
 @media(hover:hover){
-.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}
 .actions button:hover{background:var(--bg2)}
 .del:hover{color:var(--t2);background:var(--bg2)}
 .hist-row:hover{background:var(--bg2)}

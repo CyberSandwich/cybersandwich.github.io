@@ -1,5 +1,7 @@
 :root{
   --acc:#3B82F6;
+  --ok-bg:#DCFCE7;--ok-c:#34D399;--ok-bdr:#A7F3D0;
+  --vcf-bg:#48484A;--vcf-hover:#3A3A3C;--vcf-c:#fff;
   --search-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
 }
 html{scroll-behavior:smooth;overflow-y:scroll}
@@ -106,12 +108,12 @@ body{line-height:1.5}
   transition:.2s ease
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
-.copy-btn.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:pop .35s ease}
+.copy-btn.copied{background:var(--ok-bg);color:var(--ok-c);border-color:var(--ok-bdr);animation:pop .35s ease}
 .copy-btn.copied svg{width:14px;height:14px;display:block;margin:0 auto}
 .copy-btn.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
 .vcf-link{margin-bottom:14px}
-.vcf-link a{font-weight:600;color:#fff;background:#48484A;justify-content:center}
-.vcf-link a:hover{background:#3A3A3C;color:#fff}
+.vcf-link a{font-weight:600;color:var(--vcf-c);background:var(--vcf-bg);justify-content:center}
+.vcf-link a:hover{background:var(--vcf-hover);color:var(--vcf-c)}
 
 /* Project Card */
 .pcard,.cve{scroll-margin-top:60px}
@@ -296,26 +298,24 @@ html[data-theme="dark"] .icon-moon{display:inline}
 
 /* Sepia Mode */
 html[data-theme="sepia"]{
+  --ok-bg:#E8E0CE;--ok-c:#2D7D46;--ok-bdr:#DDD4C0;
+  --vcf-bg:#6B5744;--vcf-hover:#5B4636;--vcf-c:#F5EDDA;
   --search-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
 }
 html[data-theme="sepia"] ::-webkit-scrollbar-thumb{background:rgba(91,70,54,.15)}
 html[data-theme="sepia"] ::-webkit-scrollbar-thumb:hover{background:rgba(91,70,54,.25)}
 html[data-theme="sepia"] ::selection{background:rgba(166,123,91,.2)}
-html[data-theme="sepia"] .vcf-link a{background:#6B5744;color:#F5EDDA}
-html[data-theme="sepia"] .vcf-link a:hover{background:#5B4636}
-html[data-theme="sepia"] .copy-btn.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
 html[data-theme="sepia"] .cmd-row-type{background:var(--bg)}
 
 /* Dark Mode */
 html[data-theme="dark"]{
+  --ok-bg:#1A3A2A;--ok-c:#34D399;--ok-bdr:#2D5A3E;
+  --vcf-bg:#48484A;--vcf-hover:#58585A;
   --search-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
 }
 html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)}
 html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
 html[data-theme="dark"] ::selection{background:rgba(100,181,246,.2)}
-html[data-theme="dark"] .vcf-link a{background:#48484A}
-html[data-theme="dark"] .vcf-link a:hover{background:#58585A}
-html[data-theme="dark"] .copy-btn.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
 html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 
 /* Overlays (shared) */

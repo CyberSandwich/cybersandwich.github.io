@@ -82,6 +82,7 @@ nav{
   .theme-toggle:hover{color:var(--t1)}
   .links>button:hover:not([disabled]){background:var(--bg2);color:var(--t1)}
   .inp button:hover:not(:disabled){color:var(--t1)}
+  .step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}
 }
 .card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .links>button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s,color .15s}
@@ -111,6 +112,14 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 .inp input{flex:1;padding:12px 20px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card);box-shadow:var(--shadow);outline:none;transition:border-color .15s}
 .inp input:focus{border-color:var(--t4)}
 .inp button{width:44px;height:44px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s}
+.chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
+.chip:active{transform:scale(.95)}
+.chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.stepper{display:flex;align-items:center;gap:6px}
+.step-btn{width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
+.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
+.step-btn:active:not(:disabled){transform:scale(.9)}
+.step-btn:disabled{opacity:.3;cursor:default}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes spin{to{transform:rotate(360deg)}}

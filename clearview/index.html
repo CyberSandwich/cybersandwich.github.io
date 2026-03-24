@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>ClearView</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=13">
+<link rel="stylesheet" href="/shared/base.css?v=14">
 <style>
 body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fill-available}
 .w{max-width:440px;width:100%;padding:20px 20px calc(88px + env(safe-area-inset-bottom,0px))}
@@ -26,19 +26,12 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .id,.ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
 .ic{stroke-width:2.5;display:none}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
-.chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
-.chip:active{transform:scale(.95)}
-.stepper{display:flex;align-items:center;gap:6px}
-.step-btn{width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
-.step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}
-.step-btn:active:not(:disabled){transform:scale(.9)}
-.step-btn:disabled{opacity:.3;cursor:default}
 .notif{z-index:9;padding:0 20px calc(86px + env(safe-area-inset-bottom,0px));animation:notifIn .25s ease;cursor:pointer}
 .notif-pill{display:flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);white-space:nowrap;box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)}
 .notif-pill.nf-ok{background:#DCFCE7;color:#16A34A}
 .notif-pill.nf-err{background:#FEE2E2;color:#C41E3A}
 .notif-pill:active{transform:scale(.95);opacity:.8}
-@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.step-btn:hover:not(:disabled){border-color:var(--t4);color:var(--t2)}.notif-pill:hover{opacity:.9}}
+@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.notif-pill:hover{opacity:.9}}
 ::selection{background:rgba(72,72,74,.15)}
 button:focus:not(:focus-visible){outline:none}
 </style>
