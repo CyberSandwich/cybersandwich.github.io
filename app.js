@@ -243,6 +243,7 @@ function showSkel(el,n){for(var i=0;i<n;i++){var s=document.createElement('div')
 function mkEmpty(text,cls){var d=document.createElement('div');d.className=cls||'empty';d.textContent=text;d.setAttribute('role','status');return d}
 function mkSection(label,cls){var s=document.createElement('div');s.className=cls;var h=document.createElement('h3');h.textContent=label;s.appendChild(h);return s}
 function setSearchVis(sw,v){if(sw)sw.parentNode.style.display=v?'block':'none'}
+function setSearchX(p,v){var x=p.querySelector('.search-x');if(x)x.style.display=v?'flex':'none'}
 
 // Render categorized cards (projects & links)
 function renderCards(cfg,el,sw,items){
@@ -274,7 +275,7 @@ function renderCards(cfg,el,sw,items){
     frag.appendChild(sec);
   });
   el.appendChild(frag);
-  if(sw&&sw.value){filterList(sw,el);const x=sw.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
+  if(sw&&sw.value){filterList(sw,el);setSearchX(sw.parentNode,true)}
 }
 function showCards(cfg){
   const el=$(cfg.el);
@@ -359,7 +360,7 @@ function renderCV(el,data){
     frag.appendChild(sec);
   });
   el.appendChild(frag);
-  if(sw&&sw.value){filterList(sw,el);const x=sw.parentNode.querySelector('.search-x');if(x)x.style.display='flex'}
+  if(sw&&sw.value){filterList(sw,el);setSearchX(sw.parentNode,true)}
 }
 function showCV(){
   const el=$('#cvlist');
@@ -608,20 +609,20 @@ function fmtDate(d,opts){
 function wireSearch(iid,cid){
   const i=$(iid),c=$(cid);
   if(!i||!c)return;
-  const x=i.parentNode.querySelector('.search-x');
   let timer;
   function run(){
     filterList(i,c);
-    if(x)x.style.display=i.value?'flex':'none';
+    setSearchX(i.parentNode,i.value);
   }
   i.addEventListener('input',()=>{
     clearTimeout(timer);
-    if(x)x.style.display=i.value?'flex':'none';
+    setSearchX(i.parentNode,i.value);
     timer=setTimeout(run,80);
   });
   i.addEventListener('keydown',e=>{
     if(e.key==='Escape'){clearTimeout(timer);i.value='';run();i.blur()}
   });
+  const x=i.parentNode.querySelector('.search-x');
   if(x)x.addEventListener('click',()=>{clearTimeout(timer);i.value='';run();i.focus()});
 }
 [['#psearch','#plist'],['#csearch','#cvlist'],['#usearch','#ulist'],['#lsearch','#llist']].forEach(function(p){wireSearch(p[0],p[1])});

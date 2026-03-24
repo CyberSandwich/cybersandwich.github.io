@@ -204,6 +204,8 @@ function render(newId){
   if(list.length===0&&words.length){
     var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';frag.appendChild(nm);
     announce('Nothing Found');
+  }else if(words.length){
+    announce(list.length+' result'+(list.length===1?'':'s'));
   }
   c.textContent='';c.appendChild(frag);c.style.display='';
   if(kbIdx>=list.length)kbIdx=list.length-1;
@@ -340,7 +342,7 @@ $('items').addEventListener('click',function(e){
 /* ── Search ───────────────────────────────────────────────────────── */
 $('search').addEventListener('input',function(){
   clearTimeout(searchTimer);kbIdx=-1;
-  searchTimer=setTimeout(function(){render()},150);
+  searchTimer=setTimeout(function(){render()},80);
 });
 
 /* ── Action Buttons ───────────────────────────────────────────────── */
