@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Clip</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=12">
+<link rel="stylesheet" href="/shared/base.css?v=13">
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
@@ -26,7 +26,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .item .del{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:20px;align-self:flex-start;transition:color .15s,background .15s,border-color .15s}
 .item .del svg{width:14px;height:14px;pointer-events:none}
 .item .del.copied{background:#DCFCE7;color:#34D399;border-color:#A7F3D0;animation:pop .35s ease}
-.item .del.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:checkDraw .35s ease .08s forwards}
+.item .del.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
 html[data-theme="dark"] .item .del.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
 html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
 .item.hi{background:var(--bg2)}
@@ -34,7 +34,6 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
 .item.kb-focus{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .fi{animation:fi .25s ease}
-@keyframes checkDraw{to{stroke-dashoffset:0}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 ::selection{background:rgba(72,72,74,.15)}
 button:focus:not(:focus-visible){outline:none}

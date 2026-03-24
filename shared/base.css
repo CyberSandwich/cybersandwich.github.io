@@ -116,6 +116,8 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes notifIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes notifOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
 .ok{background:#DCFCE7!important}
 .ok svg,.ok span{color:#34D399!important}
 .ok .id{display:none!important}.ok .ic{display:inline!important}

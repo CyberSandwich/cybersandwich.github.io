@@ -396,6 +396,9 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 /* Screen Reader Only */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
+/* SWR fade on fresh data */
+#plist,#llist,#cvlist,#ulist{transition:opacity .15s ease}
+
 /* Skeleton Loading */
 .skel{padding:24px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;height:76px;animation:skel-pulse 1.5s ease-in-out infinite}
 @keyframes skel-pulse{0%,100%{opacity:.6}50%{opacity:.3}}
@@ -403,4 +406,5 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 /* Reduced Motion */
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto!important}
+  #plist,#llist,#cvlist,#ulist{transition:none}
 }
