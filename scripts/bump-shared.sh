@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # bump-shared.sh — Cache buster manager for saputra.co.uk
-# Bumps ?v= params for shared/base.css, shared/base.js, style.css, and app.js.
+# Bumps ?v= params for shared/base.css, shared/base.js, shared/search.js, style.css, and app.js.
 #
 # Usage:
 #   ./scripts/bump-shared.sh              Auto-detect git changes and bump
@@ -131,6 +131,9 @@ set_ver() {
   ok "${B}${file}${Z}: set to v=${ver} (${updated} files)"
 }
 
+# All HTML files (sub-projects + main) for search.js bumping
+ALL_HTMLS=("${SUB_HTMLS[@]}" "$MAIN_HTML")
+
 # ── Commands ────────────────────────────────────────────────────────
 cmd_status() {
   printf "\n${B}Cache Buster Status${Z}\n"
@@ -145,6 +148,16 @@ cmd_status() {
     local versions=(${(f)"$(find_versions "$f" "${SUB_HTMLS[@]}")"})
     (( ${#versions} > 1 )) && drift=" ${R}DRIFT${Z}"
     printf "%-14s %-10s %-8s %-8s %b\n" "$f" "v=${v:-?}" "$fc" "$rc" "sub-projects${drift}"
+  done
+
+  for f in search.js; do
+    local v=$(current_version "$f" "${ALL_HTMLS[@]}")
+    local fc=$(count_files "$f" "$v" "${ALL_HTMLS[@]}")
+    local rc=$(count_refs "$f" "$v" "${ALL_HTMLS[@]}")
+    local drift=""
+    local versions=(${(f)"$(find_versions "$f" "${ALL_HTMLS[@]}")"})
+    (( ${#versions} > 1 )) && drift=" ${R}DRIFT${Z}"
+    printf "%-14s %-10s %-8s %-8s %b\n" "$f" "v=${v:-?}" "$fc" "$rc" "all HTML${drift}"
   done
 
   for f in style.css app.js; do
@@ -182,6 +195,18 @@ cmd_verify() {
       (( errors++ ))
     fi
   done
+  for f in search.js; do
+    local versions=(${(f)"$(find_versions "$f" "${ALL_HTMLS[@]}")"})
+    if (( ${#versions} > 1 )); then
+      err "Version drift in ${B}${f}${Z}: ${versions[*]}"
+      for v in "${versions[@]}"; do
+        for t in "${ALL_HTMLS[@]}"; do
+          grep -q "${f}?v=${v}" "$t" 2>/dev/null && dim "  v=${v}: ${t#./}"
+        done
+      done
+      (( errors++ ))
+    fi
+  done
   if (( errors == 0 )); then
     ok "All versions in sync."
   else
@@ -203,6 +228,11 @@ cmd_auto() {
   if echo "$changed" | grep -q "shared/base.js"; then
     info "Detected shared/base.js change"
     bump "base.js" "${SUB_HTMLS[@]}"
+    bumped=true
+  fi
+  if echo "$changed" | grep -q "shared/search.js"; then
+    info "Detected shared/search.js change"
+    bump "search.js" "${ALL_HTMLS[@]}"
     bumped=true
   fi
   if echo "$changed" | grep -q "^style.css$"; then
@@ -239,11 +269,14 @@ case "$CMD" in
   verify|check) cmd_verify ;;
   css)         bump "base.css" "${SUB_HTMLS[@]}" ;;
   js)          bump "base.js" "${SUB_HTMLS[@]}" ;;
-  both|shared) bump "base.css" "${SUB_HTMLS[@]}"; bump "base.js" "${SUB_HTMLS[@]}" ;;
+  search-js)   bump "search.js" "${ALL_HTMLS[@]}" ;;
+  both|shared) bump "base.css" "${SUB_HTMLS[@]}"; bump "base.js" "${SUB_HTMLS[@]}"
+               bump "search.js" "${ALL_HTMLS[@]}" ;;
   main-css)    bump "style.css" "$MAIN_HTML" ;;
   main-js)     bump "app.js" "$MAIN_HTML" ;;
   main)        bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
   all)         bump "base.css" "${SUB_HTMLS[@]}"; bump "base.js" "${SUB_HTMLS[@]}"
+               bump "search.js" "${ALL_HTMLS[@]}"
                bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
   set)
     V="${ARGS[2]:-}"
@@ -252,6 +285,7 @@ case "$CMD" in
     fi
     set_ver "base.css" "$V" "${SUB_HTMLS[@]}"
     set_ver "base.js" "$V" "${SUB_HTMLS[@]}"
+    set_ver "search.js" "$V" "${ALL_HTMLS[@]}"
     ;;
   auto)        cmd_auto ;;
   help|-h|--help)
@@ -262,7 +296,8 @@ case "$CMD" in
     printf "  ${C}verify${Z}      Check versions are in sync\n"
     printf "  ${C}css${Z}         Bump shared/base.css\n"
     printf "  ${C}js${Z}          Bump shared/base.js\n"
-    printf "  ${C}both${Z}        Bump both shared files\n"
+    printf "  ${C}search-js${Z}   Bump shared/search.js\n"
+    printf "  ${C}both${Z}        Bump all shared files\n"
     printf "  ${C}main-css${Z}    Bump style.css in index.html\n"
     printf "  ${C}main-js${Z}     Bump app.js in index.html\n"
     printf "  ${C}main${Z}        Bump both main SPA files\n"
