@@ -98,7 +98,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script>
 var $=function(s){return document.getElementById(s)};
 
@@ -406,37 +406,7 @@ groups.forEach(function(g){animateReset(g)});
 function resetAll(){resetCtrl.press()}
 rsBtn.addEventListener('click',resetAll);
 
-document.addEventListener('keydown',function(e){
-if(e.metaKey||e.ctrlKey){
-if(e.key==='s'){e.preventDefault();if(img)dlBtn.click();return}
-if(e.key==='c'&&!getSelection().toString()){e.preventDefault();if(img)cpBtn.click();return}
-return}
-if(e.altKey)return;
-var tag=document.activeElement&&document.activeElement.tagName;
-if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape')document.activeElement.blur();return}
-if(e.key==='1'){location.href='/';return}
-if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);return}
-if(e.key==='Escape'){var n=document.querySelector('.notif');if(n){n.click();return}return}
-if(e.key==='v'){pasteClipboard();return}
-if(e.key===' '||e.key==='Enter'){if(img){e.preventDefault();copyToClipboard()}return}
-if(!img)return;
-if(e.key==='d'){dlBtn.click();return}
-if(e.key==='c'){cpBtn.click();return}
-if(e.key==='r'||e.key==='0'){resetAll();return}
-if(e.key==='x'){setBg(0);return}
-if(e.key==='l'){setBg(1);return}
-if(e.key==='b'){setBg(2);return}
-if(e.key==='3'){setBg(3);return}
-if(e.key==='4'){setBg(4);return}
-if(e.key==='a'){setBg(5);return}
-if(e.key==='p'){setFmt(0);return}
-if(e.key==='j'){setFmt(1);return}
-if(e.key==='w'){setFmt(2);return}
-if(e.key==='='){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render()}return}
-if(e.key==='-'){if(radiusIdx>0){radiusIdx--;updateRadUI();render()}return}
-if(e.key==='\''){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}return}
-if(e.key===';'){if(shadowIdx>0){shadowIdx--;updateShdUI();render()}return}
-});
+_base.onKey({ctrl:{s:function(e){e.preventDefault();if(img)dlBtn.click()},c:function(e){if(!getSelection().toString()){e.preventDefault();if(img)cpBtn.click()}}},Escape:function(){var n=document.querySelector('.notif');if(n)n.click()},v:function(){pasteClipboard()},' ':function(e){if(img){e.preventDefault();copyToClipboard()}},Enter:function(e){if(img){e.preventDefault();copyToClipboard()}},d:function(){if(img)dlBtn.click()},c:function(){if(img)cpBtn.click()},r:function(){if(img)resetAll()},'0':function(){if(img)resetAll()},x:function(){if(img)setBg(0)},l:function(){if(img)setBg(1)},b:function(){if(img)setBg(2)},'3':function(){if(img)setBg(3)},'4':function(){if(img)setBg(4)},a:function(){if(img)setBg(5)},p:function(){if(img)setFmt(0)},j:function(){if(img)setFmt(1)},w:function(){if(img)setFmt(2)},'=':function(){if(img&&radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render()}},'-':function(){if(img&&radiusIdx>0){radiusIdx--;updateRadUI();render()}},"'":function(){if(img&&shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}},';':function(){if(img&&shadowIdx>0){shadowIdx--;updateShdUI();render()}}});
 </script>
 </body>
 </html>

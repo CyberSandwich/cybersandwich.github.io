@@ -76,7 +76,7 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script>
 function $(id){return document.getElementById(id)}
 var items=[],copyTimers={},caTimer=null,searchTimer=null;
@@ -84,10 +84,8 @@ var kbIdx=-1;
 
 /* ── Storage ──────────────────────────────────────────────────────── */
 function load(){
-  try{
-    var r=localStorage.getItem('clip-items');
-    if(r){var p=JSON.parse(r);if(Array.isArray(p))items=p.filter(function(e){return e&&e.id&&e.text})}
-  }catch(_){}
+  var p=_base.load('clip-items',[]);
+  if(Array.isArray(p))items=p.filter(function(e){return e&&e.id&&e.text});
 }
 function save(){
   try{localStorage.setItem('clip-items',JSON.stringify(items))}

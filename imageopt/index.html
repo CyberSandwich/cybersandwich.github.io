@@ -76,7 +76,7 @@ body.has-files{align-items:flex-start;cursor:default}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script>
 
 function $(id){return document.getElementById(id)}
@@ -461,25 +461,7 @@ document.addEventListener('paste',function(e){
   if(files.length){e.preventDefault();enqueue(files)}
 });
 
-document.addEventListener('keydown',function(e){
-  var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
-  var mod=e.metaKey||e.ctrlKey;
-  if(mod&&!e.altKey&&!e.shiftKey){
-    if(e.key==='s'){e.preventDefault();downloadAll();return}
-    if(e.key==='c'){e.preventDefault();copyTopImage();return}
-    if(e.key==='v'){e.preventDefault();pasteImage();return}
-    return;
-  }
-  if(e.altKey||e.shiftKey)return;
-  if(e.key===' '||e.key==='Enter'){e.preventDefault();fin.click()}
-  else if(e.key==='s'||e.key==='d'){e.preventDefault();downloadAll()}
-  else if(e.key==='c'){e.preventDefault();copyTopImage()}
-  else if(e.key==='v'){e.preventDefault();pasteImage()}
-  else if(e.key==='r'||e.key==='Escape'){e.preventDefault();clearAll()}
-  else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
-  else if(e.key==='1')window.location.href='/';
-  else if(e.key==='3'||e.key==='ArrowRight')window.location.href='/imageopt/png/';
-});
+_base.onKey({ctrl:{s:function(e){e.preventDefault();downloadAll()},c:function(e){e.preventDefault();copyTopImage()},v:function(e){e.preventDefault();pasteImage()}},' ':function(e){e.preventDefault();fin.click()},Enter:function(e){e.preventDefault();fin.click()},s:function(e){e.preventDefault();downloadAll()},d:function(e){e.preventDefault();downloadAll()},c:function(e){e.preventDefault();copyTopImage()},v:function(e){e.preventDefault();pasteImage()},r:function(e){e.preventDefault();clearAll()},Escape:function(e){e.preventDefault();clearAll()},'3':function(){location.href='/imageopt/png/'},ArrowRight:function(){location.href='/imageopt/png/'}});
 window.addEventListener('unload',function(){if(workerUrl)URL.revokeObjectURL(workerUrl)});
 </script>
 </body>

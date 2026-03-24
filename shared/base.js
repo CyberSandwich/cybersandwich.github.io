@@ -110,6 +110,23 @@
     return{press:press,clear:clear};
   }
 
-  /* Expose for project-specific keyboard handlers */
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,setupDragDrop:setupDragDrop,twoPress:twoPress};
+  /* localStorage helpers — JSON parse/stringify with try/catch */
+  function load(key,def){try{var v=localStorage.getItem(key);return v!==null?JSON.parse(v):def!==undefined?def:null}catch(_){return def!==undefined?def:null}}
+  function save(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(_){}}
+
+  /* Keyboard shortcut boilerplate: handles Ctrl combos, input bail, theme, Home
+     map: {key:fn(e), ctrl:{key:fn(e)}} — 't' and '1' are built-in */
+  function onKey(map){
+    document.addEventListener('keydown',function(e){
+      if(map.ctrl&&(e.metaKey||e.ctrlKey)&&!e.altKey&&!e.shiftKey){var f=map.ctrl[e.key];if(f)f(e);return}
+      var tag=(document.activeElement||e.target).tagName;
+      if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape')document.activeElement.blur();return}
+      if(e.metaKey||e.ctrlKey||e.altKey)return;
+      if(e.key==='t'){setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length]);return}
+      if(e.key==='1'){location.href='/';return}
+      var f=map[e.key];if(f)f(e)
+    });
+  }
+
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
 })();

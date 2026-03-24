@@ -145,7 +145,7 @@ Drop Here
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <canvas id="cvs" style="display:none"></canvas>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script>
 'use strict';
 var $=function(id){return document.getElementById(id)},PI=Math.PI;
@@ -452,8 +452,8 @@ var lastValidHex='';
 
 // ===================== STORAGE =====================
 
-function loadHist(){try{var r=localStorage.getItem('palit-history');if(r){var p=JSON.parse(r);if(Array.isArray(p))hist=p}}catch(_){}}
-function saveHist(){try{localStorage.setItem('palit-history',JSON.stringify(hist))}catch(_){}}
+function loadHist(){var p=_base.load('palit-history',[]);if(Array.isArray(p))hist=p}
+function saveHist(){_base.save('palit-history',hist)}
 
 // ===================== GENERATE & EXTRACT =====================
 
@@ -839,24 +839,7 @@ e.preventDefault();baseUserSet=true;setBaseColor(rgb);
 if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
 if(ruleIdx>=0)generate()}}});
 
-document.addEventListener('keydown',function(e){
-if(e.metaKey||e.ctrlKey||e.altKey)return;
-var tag=document.activeElement.tagName;
-if(tag==='INPUT'||tag==='TEXTAREA'){if(e.key==='Escape')document.activeElement.blur();return}
-if(e.key==='1'){location.href='/';return}
-if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);return}
-if(e.key==='/'){e.preventDefault();$('cinp').focus();return}
-if(e.key==='ArrowUp'){navSwatch(-1);return}
-if(e.key==='ArrowDown'){navSwatch(1);return}
-if(e.key==='Enter'&&activeIdx>=0){copyColor(activeIdx);return}
-if(e.key==='c'&&palette.length>0){doCopyAll();return}
-if(e.key==='r'){$('rs-btn').click();return}
-if(e.key==='n'&&ruleIdx>=0){$('neutral-row').click();return}
-if(e.key==='d'&&palette.length>0){toggleExport();return}
-if(e.key==='f'){globalFmt=(globalFmt+1)%3;updateFmtRows();refreshColorValues();return}
-if(e.key==='='||e.key==='+'){$('cnt-up').click();return}
-if(e.key==='-'){$('cnt-dn').click();return}
-if(e.key==='Escape'){closeExport();return}});
+_base.onKey({'/':function(e){e.preventDefault();$('cinp').focus()},ArrowUp:function(){navSwatch(-1)},ArrowDown:function(){navSwatch(1)},Enter:function(e){if(activeIdx>=0){e.preventDefault();copyColor(activeIdx)}},c:function(){if(palette.length>0)doCopyAll()},r:function(){$('rs-btn').click()},n:function(){if(ruleIdx>=0)$('neutral-row').click()},d:function(){if(palette.length>0)toggleExport()},f:function(){globalFmt=(globalFmt+1)%3;updateFmtRows();refreshColorValues()},'=':function(){$('cnt-up').click()},'+':function(){$('cnt-up').click()},'-':function(){$('cnt-dn').click()},Escape:function(){closeExport()}});
 
 function navSwatch(dir){
 var rows=$('color-rows').children;if(rows.length===0)return;

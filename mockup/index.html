@@ -102,7 +102,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script type="module">
 import*as THREE from'three';
 import{OrbitControls}from'three/addons/controls/OrbitControls.js';
@@ -557,35 +557,7 @@ function resetAll(){resetCtrl.press()}
 rsBtn.addEventListener('click',resetAll);
 
 /* ---- Keyboard ---- */
-document.addEventListener('keydown',function(e){
-if(e.metaKey||e.ctrlKey){
-if(e.key==='s'){e.preventDefault();if(img)dlBtn.click();return}
-if(e.key==='c'&&!getSelection().toString()){e.preventDefault();if(img)cpBtn.click();return}
-return}
-if(e.altKey)return;
-var tag=document.activeElement&&document.activeElement.tagName;
-if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){if(e.key==='Escape')document.activeElement.blur();return}
-if(e.key==='1'){location.href='/';return}
-if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);return}
-if(e.key==='Escape'){var n=document.querySelector('.notif');if(n){n.click();return}return}
-if(e.key==='v'){pasteClipboard();return}
-if(!img)return;
-if(e.key==='d'){dlBtn.click();return}
-if(e.key==='c'){cpBtn.click();return}
-if(e.key==='r'||e.key==='0'){resetAll();return}
-if(e.key==='l'){setBg(0);return}
-if(e.key==='b'){setBg(1);return}
-if(e.key==='x'){setBg(2);return}
-if(e.key==='p'){setFmt(0);return}
-if(e.key==='j'){setFmt(1);return}
-if(e.key==='w'){setFmt(2);return}
-if(e.key==='='){stepAngle('y',STEP);return}
-if(e.key==='-'){stepAngle('y',-STEP);return}
-if(e.key===']'){stepAngle('x',STEP);return}
-if(e.key==='['){stepAngle('x',-STEP);return}
-if(e.key===';'){if(resIdx>0){resIdx--;updateResUI()}return}
-if(e.key==='\''){if(resIdx<RES_W.length-1){resIdx++;updateResUI()}return}
-});
+_base.onKey({ctrl:{s:function(e){e.preventDefault();if(img)dlBtn.click()},c:function(e){if(!getSelection().toString()){e.preventDefault();if(img)cpBtn.click()}}},Escape:function(){var n=document.querySelector('.notif');if(n)n.click()},v:function(){pasteClipboard()},d:function(){if(img)dlBtn.click()},c:function(){if(img)cpBtn.click()},r:function(){if(img)resetAll()},'0':function(){if(img)resetAll()},l:function(){if(img)setBg(0)},b:function(){if(img)setBg(1)},x:function(){if(img)setBg(2)},p:function(){if(img)setFmt(0)},j:function(){if(img)setFmt(1)},w:function(){if(img)setFmt(2)},'=':function(){if(img)stepAngle('y',STEP)},'-':function(){if(img)stepAngle('y',-STEP)},']':function(){if(img)stepAngle('x',STEP)},'[':function(){if(img)stepAngle('x',-STEP)},';':function(){if(img&&resIdx>0){resIdx--;updateResUI()}},"'":function(){if(img&&resIdx<RES_W.length-1){resIdx++;updateResUI()}}});
 
 /* ---- Double-click reset ---- */
 renderer.domElement.addEventListener('dblclick',resetView);

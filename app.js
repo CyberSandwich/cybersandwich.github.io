@@ -242,15 +242,16 @@ function mkIcon(s){const ic=document.createElement('div');ic.className='picon';v
 function showSkel(el,n){for(var i=0;i<n;i++){var s=document.createElement('div');s.className='skel';el.appendChild(s)}}
 function mkEmpty(text,cls){var d=document.createElement('div');d.className=cls||'empty';d.textContent=text;d.setAttribute('role','status');return d}
 function mkSection(label,cls){var s=document.createElement('div');s.className=cls;var h=document.createElement('h3');h.textContent=label;s.appendChild(h);return s}
+function setSearchVis(sw,v){if(sw)sw.parentNode.style.display=v?'block':'none'}
 
 // Render categorized cards (projects & links)
 function renderCards(cfg,el,sw,items){
   el.replaceChildren();
   if(!items||!items.length){
-    if(sw)sw.parentNode.style.display='none';
+    setSearchVis(sw,false);
     el.appendChild(mkEmpty(cfg.get.err?'Unable to load. Please check your connection.':'Coming Soon!'));return;
   }
-  if(sw)sw.parentNode.style.display='block';
+  setSearchVis(sw,true);
   const frag=document.createDocumentFragment();
   cfg.groups(items).forEach(g=>{
     if(!g.items.length)return;
@@ -279,7 +280,7 @@ function showCards(cfg){
   const el=$(cfg.el);
   const sw=$(cfg.si);
   if(cfg.data&&el.children.length){
-    if(sw)sw.parentNode.style.display='block';
+    setSearchVis(sw,true);
     if(sw&&sw.value)filterList(sw,el);
     return;
   }
@@ -310,10 +311,10 @@ function renderCV(el,data){
   const sw=$('#csearch');
   el.replaceChildren();
   if(!data||!data.length){
-    if(sw)sw.parentNode.style.display='none';
+    setSearchVis(sw,false);
     el.appendChild(mkEmpty(getCV.err?'Unable to load. Please check your connection.':'Coming Soon!'));return;
   }
-  if(sw)sw.parentNode.style.display='block';
+  setSearchVis(sw,true);
   const frag=document.createDocumentFragment();
   data.forEach(section=>{
     const sec=mkSection(section.section,'cv-sec');
@@ -529,6 +530,7 @@ function scoreWord(w,t,cvPenalty){
   var f=0.3+nw.length/(last-first+1)*1.2;
   return cvPenalty?f*0.7:f;
 }
+function scoreItem(w,q,tl,isCV){var fs=scoreWord(w,q,isCV);if(tl){var ts=scoreWord(w,tl,isCV)*1.5;if(ts>fs)fs=ts}return fs}
 
 // Generic list filter — scores, sorts, flattens results when searching
 function filterList(input,container){
@@ -565,8 +567,7 @@ function filterList(input,container){
     const isCV=c.classList.contains('cve');
     let total=0;
     const ok=words.every(w=>{
-      var fs=scoreWord(w,t,isCV);
-      if(tl){var ts=scoreWord(w,tl,isCV)*1.5;if(ts>fs)fs=ts}
+      var fs=scoreItem(w,t,tl,isCV);
       total+=fs;return fs>0;
     });
     if(ok)scored.push({el:c,score:total});
@@ -786,9 +787,7 @@ function cmdSearch(q){
     let total=0;
     const isCV=it.type==='CV';
     const ok=words.every(w=>{
-      const ts=scoreWord(w,it.tl,isCV)*1.5;
-      const fs=scoreWord(w,it.q,isCV);
-      const s=ts>fs?ts:fs;
+      var s=scoreItem(w,it.q,it.tl,isCV);
       total+=s;return s>0;
     });
     if(ok)scored.push({item:it,score:total+(cmdTypePri[it.type]||0)*0.1});
@@ -888,6 +887,7 @@ function kbMove(dir){
 }
 
 var _kbTick=false;
+function kbAsync(dir){if(!_kbTick){_kbTick=true;requestAnimationFrame(function(){kbMove(dir);_kbTick=false})}}
 document.addEventListener('mousemove',()=>{if(kbIdx>=0)kbClear(true)},{passive:true});
 
 const tabPaths=['/','/projects','/cv','/updates','/links'];
@@ -934,8 +934,8 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  if(key==='j'||key==='ArrowDown'){e.preventDefault();if(!_kbTick){_kbTick=true;var d=1;requestAnimationFrame(function(){kbMove(d);_kbTick=false})}return}
-  if(key==='k'||key==='ArrowUp'){e.preventDefault();if(!_kbTick){_kbTick=true;var d=-1;requestAnimationFrame(function(){kbMove(d);_kbTick=false})}return}
+  if(key==='j'||key==='ArrowDown'){e.preventDefault();kbAsync(1);return}
+  if(key==='k'||key==='ArrowUp'){e.preventDefault();kbAsync(-1);return}
 
   if(key==='ArrowRight'||key==='ArrowLeft'){
     let ci=tabPaths.indexOf(location.pathname==='/'?'/':location.pathname);

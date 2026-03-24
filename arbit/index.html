@@ -75,13 +75,13 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script>
 function $(id){return document.getElementById(id)}
 var items=[],mode=false,picked=null;
 var pickTimer=null,copyTimer=null,hiTimer=null;
-function load(){try{var r=localStorage.getItem('arbit-items');if(r){var p=JSON.parse(r);if(Array.isArray(p))items=p}var m=localStorage.getItem('arbit-mode');if(m==='true')mode=true}catch(_){}}
-function save(){try{localStorage.setItem('arbit-items',JSON.stringify(items));localStorage.setItem('arbit-mode',mode?'true':'false')}catch(_){}}
+function load(){var p=_base.load('arbit-items',[]);if(Array.isArray(p))items=p;var m=_base.load('arbit-mode',false);if(m===true||m==='true')mode=true}
+function save(){_base.save('arbit-items',items);_base.save('arbit-mode',mode)}
 function render(){
   var c=$('items');
   c.textContent='';
@@ -188,18 +188,7 @@ $('pick-btn').addEventListener('click',doPick);
 $('mode-btn').addEventListener('click',toggleMode);
 $('reset-btn').addEventListener('click',function(){resetCtrl.press()});
 $('copy-btn').addEventListener('click',doCopy);
-document.addEventListener('keydown',function(e){
-  var tag=e.target.tagName;if(tag==='INPUT'||tag==='TEXTAREA')return;
-  if(e.metaKey||e.ctrlKey||e.altKey||e.shiftKey)return;
-  if(e.key===' '||e.key==='Enter'){e.preventDefault();doPick()}
-  else if(e.key==='c'){e.preventDefault();doCopy()}
-  else if(e.key==='p')toggleMode();
-  else if(e.key==='r')doReset();
-  else if(e.key==='x'){if(items.length>0)removeItem(0)}
-  else if(e.key==='/'){e.preventDefault();$('inp').focus()}
-  else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
-  else if(e.key==='1')window.location.href='/';
-});
+_base.onKey({' ':function(e){e.preventDefault();doPick()},Enter:function(e){e.preventDefault();doPick()},c:function(e){e.preventDefault();doCopy()},p:function(){toggleMode()},r:function(){doReset()},x:function(){if(items.length>0)removeItem(0)},'/':function(e){e.preventDefault();$('inp').focus()}});
 _base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(files,text){
   if(files&&files.length>0){
     for(var i=0;i<files.length;i++){

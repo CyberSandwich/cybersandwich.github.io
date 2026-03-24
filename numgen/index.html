@@ -53,7 +53,7 @@ body{display:flex;align-items:center;justify-content:center}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=6"></script>
+<script src="/shared/base.js?v=8"></script>
 <script>
 var $=s=>document.getElementById(s),
 /* reserved/invalid UK 07 area codes */ X=new Set([700,781,797,829,839,911,924,937]),
@@ -65,7 +65,7 @@ render();
 el.onclick=e=>{e.preventDefault();doCopy()};
 gb.onclick=function(){clearTimeout(gm);render();gs.textContent='Regenerated';gb.classList.remove('regen');gb.offsetWidth;gb.classList.add('regen');gm=setTimeout(function(){gs.textContent='Regenerate';gb.classList.remove('regen')},800)};
 cb.onclick=doCopy;
-document.addEventListener('keydown',function(e){var t=document.activeElement&&document.activeElement.tagName;if(t==='INPUT'||t==='TEXTAREA')return;if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='1'){location.href='/';return}if(e.key===' '||e.key==='Enter'||e.key==='r'){e.preventDefault();gb.click()}if(e.key==='c'){e.preventDefault();doCopy()}if(e.key==='t'){_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length])}});
+_base.onKey({' ':function(e){e.preventDefault();gb.click()},Enter:function(e){e.preventDefault();gb.click()},r:function(e){e.preventDefault();gb.click()},c:function(e){e.preventDefault();doCopy()}});
 </script>
 </body>
 </html>
