@@ -518,7 +518,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   editor.addEventListener('keyup',()=>queuePersist(SAVE_STATE));
   editor.addEventListener('click',()=>queuePersist(SAVE_STATE));
   let selTimer=0;
-  document.addEventListener('selectionchange',()=>{if(document.activeElement!==editor)return;if(selTimer)clearTimeout(selTimer);selTimer=setTimeout(()=>{selTimer=0;queuePaint();},50);});
+  document.addEventListener('selectionchange',()=>{if(document.activeElement!==editor)return;if(selTimer)clearTimeout(selTimer);selTimer=setTimeout(()=>{selTimer=0;queuePaint();},150);});
 
   editor.addEventListener('keydown',event=>{
     if(event.key==='Tab'&&!event.shiftKey){
