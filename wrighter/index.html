@@ -119,6 +119,8 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   let pendingState='';
   const oldCounts={w:0,l:0,ns:0};
   const newCounts={w:0,l:0,ns:0};
+  const selCounts={w:0,l:0,ns:0};
+  let selMode=false;
 
   const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
   function getLineStart(v,s){return v.lastIndexOf('\n',s-1)+1}
@@ -367,14 +369,19 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
 
   function paint(){
     rafId=0;
-    const sec=Math.round(nonSpace*60/LPM);
-    if(words!==shownWords){
-      shownWords=words;
-      wordsOut.textContent=words+(words===1?' Word':' Words');
+    let w=words,l=letters,ns=nonSpace;
+    const ss=editor.selectionStart,se=editor.selectionEnd;
+    const hasSel=document.activeElement===editor&&ss!==se;
+    if(hasSel){countRange(editor.value,ss,se,selCounts);w=selCounts.w;l=selCounts.l;ns=selCounts.ns;}
+    if(hasSel!==selMode){selMode=hasSel;shownWords=shownLetters=shownSec=-1;}
+    const sec=Math.round(ns*60/LPM);
+    if(w!==shownWords){
+      shownWords=w;
+      wordsOut.textContent=w+(w===1?' Word':' Words');
     }
-    if(letters!==shownLetters){
-      shownLetters=letters;
-      lettersOut.textContent=letters+(letters===1?' Character':' Characters');
+    if(l!==shownLetters){
+      shownLetters=l;
+      lettersOut.textContent=l+(l===1?' Character':' Characters');
     }
     if(sec!==shownSec){
       shownSec=sec;
@@ -510,6 +517,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   editor.addEventListener('scroll',()=>queuePersist(SAVE_STATE),{passive:true});
   editor.addEventListener('keyup',()=>queuePersist(SAVE_STATE));
   editor.addEventListener('click',()=>queuePersist(SAVE_STATE));
+  document.addEventListener('selectionchange',()=>{if(document.activeElement===editor)queuePaint();});
 
   editor.addEventListener('keydown',event=>{
     if(event.key==='Tab'&&!event.shiftKey){
