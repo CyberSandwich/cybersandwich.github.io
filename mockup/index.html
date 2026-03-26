@@ -108,8 +108,8 @@ var $=function(s){return document.getElementById(s)};
 
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
-{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.38,sh:15.87,sz:0.44,so:0.005,sr:1.26,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.7,ei:1.2},
-{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.77,sh:14.53,sz:0.44,so:0.005,sr:1.26,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.65,ei:1.2},
+{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.38,sh:15.87,sz:0.44,so:0.005,sr:1.26,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.7,ei:1.2,bs:1.015},
+{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.77,sh:14.53,sz:0.44,so:0.005,sr:1.26,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.65,ei:1.2,bs:1.015},
 {name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:10,irx:19,sw:6.69,sh:14.24,sz:0.3927,so:0.005,sr:1.07,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1}
 ];
 var curDev=0,loadId=0;
@@ -246,7 +246,7 @@ scrTex.dispose();scrTex=new THREE.CanvasTexture(scrCanvas);
 scrTex.colorSpace=THREE.SRGBColorSpace;scrTex.minFilter=THREE.LinearMipmapLinearFilter;scrTex.magFilter=THREE.LinearFilter;scrTex.generateMipmaps=true;scrTex.anisotropy=renderer.capabilities.getMaxAnisotropy();
 camera.position.set(0,0,d.cz);controls.update();
 phoneModel=gltf.scene;
-if(d.ns&&d.ns!==1)phoneModel.scale.multiplyScalar(d.ns);
+var bs=d.bs||1;if(d.ns&&d.ns!==1)phoneModel.scale.set(d.ns*bs,d.ns*bs,d.ns);
 if(d.ry)phoneModel.rotation.y=d.ry;
 gltf.scene.traverse(function(child){
 if(child.isMesh){
