@@ -108,12 +108,12 @@ var $=function(s){return document.getElementById(s)};
 
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
-{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.38,sh:15.87,sz:0.44,so:0.005,sr:1.26,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.7,ei:1.2},
-{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.77,sh:14.53,sz:0.44,so:0.005,sr:1.26,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.65,ei:1.2},
+{name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.38,sh:15.87,sz:0.44,so:0.005,sr:1.26,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.7,ei:1.2,bz:4},
+{name:'iPhone 17 Pro',url:'/mockup/iphone_17_pro.glb',pw:402,ph:874,iw:126,ih:37,iy:12,irx:19,sw:6.77,sh:14.53,sz:0.44,so:0.005,sr:1.26,cz:26.3,ns:100,ry:Math.PI,mm:1.0,mr:0.65,ei:1.2,bz:4},
 {name:'iPhone 16',url:'/mockup/iphone_16.glb',pw:393,ph:852,iw:126,ih:37,iy:10,irx:19,sw:6.69,sh:14.24,sz:0.3927,so:0.005,sr:1.07,cz:25.81,ns:1,ry:0,mm:0.8,mr:0.2,ei:1}
 ];
 var curDev=0,loadId=0;
-var PW,PH,IW,IH,IX,IY,IRX;
+var PW,PH,IW,IH,IX,IY,IRX,BZ;
 
 var STEP=5,DEG=Math.PI/180;
 var BG_CLS=['bg-white','bg-black','bg-none'];
@@ -205,6 +205,7 @@ ctx.clearRect(0,0,PW*s,PH*s);
 if(img){
 ctx.fillStyle='#000';ctx.fillRect(0,0,PW*s,PH*s);
 drawCover(ctx,img,0,0,PW*s,PH*s);
+if(BZ){var b=BZ*s,w=PW*s,h=PH*s;ctx.fillStyle='#000';ctx.fillRect(0,0,w,b);ctx.fillRect(0,h-b,w,b);ctx.fillRect(0,0,b,h);ctx.fillRect(w-b,0,b,h)}
 if(IW&&IH){ctx.fillStyle='#000';rrPath(ctx,IX*s,IY*s,IW*s,IH*s,IRX*s);ctx.fill()}
 if(screenMesh)screenMesh.visible=true;
 }else{
@@ -229,7 +230,7 @@ return s
 var gltfLoader=new GLTFLoader();
 function loadModel(idx){
 curDev=idx;var d=DEVICES[idx];
-PW=d.pw;PH=d.ph;IW=d.iw;IH=d.ih;IX=(PW-IW)/2;IY=d.iy;IRX=d.irx;
+PW=d.pw;PH=d.ph;IW=d.iw;IH=d.ih;IX=(PW-IW)/2;IY=d.iy;IRX=d.irx;BZ=d.bz||0;
 modelReady=false;var myId=++loadId;var is17=idx<2;
 hemiL.intensity=is17?0.1:0.2;keyL.intensity=is17?1.8:1.5;keyL.color.set(is17?0xFFE8D6:0xffffff);
 fillL.intensity=is17?0.5:0.4;fillL.color.set(is17?0xF0F2FF:0xffffff);
