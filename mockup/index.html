@@ -205,7 +205,7 @@ ctx.clearRect(0,0,PW*s,PH*s);
 if(img){
 ctx.fillStyle='#000';ctx.fillRect(0,0,PW*s,PH*s);
 drawCover(ctx,img,0,0,PW*s,PH*s);
-if(BZ){rrPath(ctx,0,0,PW*s,PH*s,SCR*s);ctx.strokeStyle='#000';ctx.lineWidth=BZ*s*2;ctx.stroke()}
+if(BZ){var b=BZ*s,w=PW*s,h=PH*s,or=SCR*s,ir=Math.max(0,or-b);ctx.fillStyle='#000';ctx.beginPath();ctx.moveTo(or,0);ctx.lineTo(w-or,0);ctx.arcTo(w,0,w,or,or);ctx.lineTo(w,h-or);ctx.arcTo(w,h,w-or,h,or);ctx.lineTo(or,h);ctx.arcTo(0,h,0,h-or,or);ctx.lineTo(0,or);ctx.arcTo(0,0,or,0,or);ctx.closePath();ctx.moveTo(b+ir,b);ctx.lineTo(w-b-ir,b);ctx.arcTo(w-b,b,w-b,b+ir,ir);ctx.lineTo(w-b,h-b-ir);ctx.arcTo(w-b,h-b,w-b-ir,h-b,ir);ctx.lineTo(b+ir,h-b);ctx.arcTo(b,h-b,b,h-b-ir,ir);ctx.lineTo(b,b+ir);ctx.arcTo(b,b,b+ir,b,ir);ctx.closePath();ctx.fill('evenodd')}
 if(IW&&IH){ctx.fillStyle='#000';rrPath(ctx,IX*s,IY*s,IW*s,IH*s,IRX*s);ctx.fill()}
 if(screenMesh)screenMesh.visible=true;
 }else{
