@@ -20,4 +20,14 @@ item5.X-APPLE-SUBLOCALITY:Wainbody Ward
 item5.X-APPLE-SUBADMINISTRATIVEAREA:West Midlands
 item6.URL;type=pref:https://saputra.co.uk
 item6.X-ABLabel:_$!<HomePage>!$_
+item7.URL:https://www.instagram.com/probablyduke/
+item7.X-ABLabel:Instagram
+item8.URL:https://www.youtube.com/@DukeSaputra
+item8.X-ABLabel:YouTube
+item9.URL:https://x.com/probablyduke
+item9.X-ABLabel:X (Twitter)
+item10.URL:https://www.tiktok.com/@isthisduke
+item10.X-ABLabel:TikTok
+item11.URL:https://www.linkedin.com/in/dukedj
+item11.X-ABLabel:LinkedIn
 END:VCARD
