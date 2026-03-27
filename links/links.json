@@ -546,6 +546,12 @@
     "category": "Initiatives"
   },
   {
+    "title": "Meta Accounts Center",
+    "url": "https://accountscenter.instagram.com/",
+    "icon": "users",
+    "category": "Initiatives"
+  },
+  {
     "title": "Neovim",
     "url": "https://neovim.io",
     "icon": "code",
@@ -567,6 +573,12 @@
     "title": "Startium",
     "url": "https://warwick.startium.co.uk/community",
     "icon": "rocket",
+    "category": "Initiatives"
+  },
+  {
+    "title": "TikTok Studio",
+    "url": "https://www.tiktok.com/tiktokstudio",
+    "icon": "video",
     "category": "Initiatives"
   },
   {
