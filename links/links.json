@@ -588,6 +588,12 @@
     "category": "Initiatives"
   },
   {
+    "title": "YouTube Studio",
+    "url": "https://studio.youtube.com/channel/",
+    "icon": "video",
+    "category": "Initiatives"
+  },
+  {
     "title": "Academic Phrasebank",
     "url": "https://www.phrasebank.manchester.ac.uk/",
     "icon": "book",
