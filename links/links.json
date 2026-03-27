@@ -111,7 +111,7 @@
     "title": "Facebook",
     "url": "https://www.facebook.com/",
     "icon": "users",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "Financial Times",
@@ -195,13 +195,13 @@
     "title": "Instagram",
     "url": "https://www.instagram.com/",
     "icon": "camera",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "LinkedIn",
     "url": "https://www.linkedin.com",
     "icon": "users",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "Microsoft Excel",
@@ -291,7 +291,7 @@
     "title": "Reddit",
     "url": "https://www.reddit.com/",
     "icon": "message",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "Smallpdf",
@@ -333,7 +333,7 @@
     "title": "TikTok",
     "url": "https://www.tiktok.com/",
     "icon": "video",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "TIME.IS",
@@ -381,7 +381,7 @@
     "title": "WhatsApp Web",
     "url": "https://web.whatsapp.com/",
     "icon": "message",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "What is my IP Address",
@@ -393,13 +393,13 @@
     "title": "X (Twitter)",
     "url": "https://x.com/",
     "icon": "message",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "YouTube (Subscriptions)",
     "url": "https://www.youtube.com/feed/subscriptions",
     "icon": "video",
-    "category": "Personal"
+    "category": "Social Media"
   },
   {
     "title": "App Store Connect",
@@ -441,7 +441,7 @@
     "title": "Facebook Ads Manager",
     "url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit/standalone",
     "icon": "megaphone",
-    "category": "Initiatives"
+    "category": "Social Media"
   },
   {
     "title": "Firebase Console",
@@ -549,7 +549,7 @@
     "title": "Meta Accounts Center",
     "url": "https://accountscenter.instagram.com/",
     "icon": "users",
-    "category": "Initiatives"
+    "category": "Social Media"
   },
   {
     "title": "Neovim",
@@ -579,7 +579,7 @@
     "title": "TikTok Studio",
     "url": "https://www.tiktok.com/tiktokstudio",
     "icon": "video",
-    "category": "Initiatives"
+    "category": "Social Media"
   },
   {
     "title": "tmux",
@@ -591,7 +591,7 @@
     "title": "YouTube Studio",
     "url": "https://studio.youtube.com/channel/",
     "icon": "video",
-    "category": "Initiatives"
+    "category": "Social Media"
   },
   {
     "title": "Academic Phrasebank",
@@ -762,12 +762,6 @@
     "category": "Career"
   },
   {
-    "title": "LinkedIn",
-    "url": "https://www.linkedin.com/feed/",
-    "icon": "users",
-    "category": "Career"
-  },
-  {
     "title": "milkround",
     "url": "https://www.milkround.com/",
     "icon": "search",
@@ -873,18 +867,6 @@
     "title": "Warwick Residence Hubs",
     "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs/",
     "icon": "home",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "WBS Outstanding Contribution to Pastoral Care Awards 2026",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/pastoral-26/",
-    "icon": "award",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "WBS Outstanding Contribution to Teaching Awards 2026",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/teaching/octa/octa-2026/",
-    "icon": "award",
     "category": "Miscellaneous"
   }
 ]
