@@ -32,9 +32,12 @@ item7.X-ABLabel:WhatsApp
 item8.URL:https://fantastical.app/DukeSaputra/gm
 item8.X-ABLabel:Book Time
 X-SOCIALPROFILE;type=linkedin;x-user=dukedj:https://www.linkedin.com/in/dukedj
-X-SOCIALPROFILE;type=instagram;x-user=probablyduke:https://www.instagram.com/probablyduke/
-X-SOCIALPROFILE;x-service=YouTube;x-user=DukeSaputra:https://www.youtube.com/@DukeSaputra
 X-SOCIALPROFILE;type=twitter;x-user=probablyduke:https://x.com/probablyduke
-X-SOCIALPROFILE;x-service=TikTok;x-user=isthisduke:https://www.tiktok.com/@isthisduke
+item9.URL:https://www.instagram.com/probablyduke/
+item9.X-ABLabel:Instagram
+item10.URL:https://www.youtube.com/@DukeSaputra
+item10.X-ABLabel:YouTube
+item11.URL:https://www.tiktok.com/@isthisduke
+item11.X-ABLabel:TikTok
 REV:2026-03-27T00:00:00Z
 END:VCARD
