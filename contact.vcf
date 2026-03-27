@@ -10,36 +10,36 @@ BDAY:2004-07-24
 NOTE:
 X-PHONETIC-FIRST-NAME:Dook
 X-PHONETIC-LAST-NAME:Suh-poo-trah
-item1.EMAIL;type=INTERNET;type=pref:duke@saputra.co.uk
-item1.X-ABLabel:A1
-item2.EMAIL;type=INTERNET:ventures@saputra.co.uk
-item2.X-ABLabel:A2
-item3.EMAIL;type=INTERNET:duke.saputra@warwick.ac.uk
-item3.X-ABLabel:C
-item4.TEL;type=pref:+44 7985 667166
-item4.X-ABLabel:Mobile
 X-ADDRESSING-GRAMMAR;type=pref:eyJsYW5ndWFnZSI6ImVuIiwicHJvbm91bnMiOlt7InByb25vdW4iOiJIZSIsIm1vcnBob2xvZ3kiOnsiZ3JhbW1hdGljYWxDYXNlIjoibm9taW5hdGl2ZSJ9fSx7InByb25vdW4iOiJIaW0iLCJtb3JwaG9sb2d5Ijp7ImdyYW1tYXRpY2FsQ2FzZSI6ImFjY3VzYXRpdmUifX0seyJwcm9ub3VuIjoiSGlzIiwibW9ycGhvbG9neSI6eyJncmFtbWF0aWNhbENhc2UiOiJnZW5pdGl2ZSIsImRldGVybWluYXRpb24iOiJpbmRlcGVuZGVudCJ9fV19AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-item5.ADR;type=WORK;type=pref:;;Warwick Business School\nGibbet Hill Road;Coventry;England;CV4 7AL;United Kingdom
-item5.X-ABADR:gb
-item5.X-APPLE-SUBLOCALITY:Wainbody Ward
-item5.X-APPLE-SUBADMINISTRATIVEAREA:West Midlands
+item1.TEL;type=pref:+44 7985 667166
+item1.X-ABLabel:Mobile
+item2.EMAIL;type=INTERNET;type=pref:duke@saputra.co.uk
+item2.X-ABLabel:A1
+item3.EMAIL;type=INTERNET:ventures@saputra.co.uk
+item3.X-ABLabel:A2
+item4.EMAIL;type=INTERNET:duke.saputra@warwick.ac.uk
+item4.X-ABLabel:C
+item5.URL:https://wa.me/qr/EYDEYNUZSEK4B1
+item5.X-ABLabel:WhatsApp
+item6.URL:https://www.linkedin.com/in/dukedj
+item6.X-ABLabel:LinkedIn
+item7.URL:https://www.instagram.com/probablyduke/
+item7.X-ABLabel:Instagram
+item8.URL:https://www.youtube.com/@DukeSaputra
+item8.X-ABLabel:YouTube
+item9.URL:https://x.com/probablyduke
+item9.X-ABLabel:X (Twitter)
+item10.URL:https://www.tiktok.com/@isthisduke
+item10.X-ABLabel:TikTok
+item11.URL:https://fantastical.app/DukeSaputra/gm
+item11.X-ABLabel:Book Time
+item12.URL;type=pref:https://saputra.co.uk
+item12.X-ABLabel:Homepage
+item13.ADR;type=WORK;type=pref:;;Warwick Business School\nGibbet Hill Road;Coventry;England;CV4 7AL;United Kingdom
+item13.X-ABADR:gb
+item13.X-APPLE-SUBLOCALITY:Wainbody Ward
+item13.X-APPLE-SUBADMINISTRATIVEAREA:West Midlands
 GEO:52.38131;-1.56447
 TZ:Europe/London
-item6.URL;type=pref:https://saputra.co.uk
-item6.X-ABLabel:_$!<HomePage>!$_
-item7.URL:https://wa.me/qr/EYDEYNUZSEK4B1
-item7.X-ABLabel:WhatsApp
-item8.URL:https://fantastical.app/DukeSaputra/gm
-item8.X-ABLabel:Book Time
-item9.URL:https://www.linkedin.com/in/dukedj
-item9.X-ABLabel:LinkedIn
-item10.URL:https://www.instagram.com/probablyduke/
-item10.X-ABLabel:Instagram
-item11.URL:https://www.youtube.com/@DukeSaputra
-item11.X-ABLabel:YouTube
-item12.URL:https://x.com/probablyduke
-item12.X-ABLabel:X (Twitter)
-item13.URL:https://www.tiktok.com/@isthisduke
-item13.X-ABLabel:TikTok
 REV:2026-03-27T00:00:00Z
 END:VCARD
