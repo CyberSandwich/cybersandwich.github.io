@@ -5,6 +5,11 @@ N:Saputra;Duke;DJ;;
 FN:Duke DJ Saputra
 ORG:University of Warwick;Warwick Business School
 TITLE:Undergraduate
+PHOTO;VALUE=uri:https://saputra.co.uk/apple-touch-icon.png
+BDAY:2004-07-24
+NOTE:
+X-PHONETIC-FIRST-NAME:Dook
+X-PHONETIC-LAST-NAME:Suh-poo-trah
 item1.EMAIL;type=INTERNET;type=pref:duke@saputra.co.uk
 item1.X-ABLabel:A1
 item2.EMAIL;type=INTERNET:ventures@saputra.co.uk
@@ -18,16 +23,19 @@ item5.ADR;type=WORK;type=pref:;;Warwick Business School\nGibbet Hill Road;Covent
 item5.X-ABADR:gb
 item5.X-APPLE-SUBLOCALITY:Wainbody Ward
 item5.X-APPLE-SUBADMINISTRATIVEAREA:West Midlands
+GEO:52.38131;-1.56447
+TZ:Europe/London
 item6.URL;type=pref:https://saputra.co.uk
 item6.X-ABLabel:_$!<HomePage>!$_
-item7.URL:https://www.instagram.com/probablyduke/
-item7.X-ABLabel:Instagram
-item8.URL:https://www.youtube.com/@DukeSaputra
-item8.X-ABLabel:YouTube
-item9.URL:https://x.com/probablyduke
-item9.X-ABLabel:X (Twitter)
-item10.URL:https://www.tiktok.com/@isthisduke
-item10.X-ABLabel:TikTok
-item11.URL:https://www.linkedin.com/in/dukedj
-item11.X-ABLabel:LinkedIn
+item7.URL:https://wa.me/qr/EYDEYNUZSEK4B1
+item7.X-ABLabel:WhatsApp
+item8.URL:https://fantastical.app/DukeSaputra/gm
+item8.X-ABLabel:Book Time
+X-SOCIALPROFILE;type=linkedin;x-user=dukedj:https://www.linkedin.com/in/dukedj
+X-SOCIALPROFILE;type=instagram;x-user=probablyduke:https://www.instagram.com/probablyduke/
+X-SOCIALPROFILE;type=twitter;x-user=probablyduke:https://x.com/probablyduke
+X-SOCIALPROFILE;type=facebook:https://www.facebook.com/
+X-SOCIALPROFILE;x-service=YouTube;x-user=DukeSaputra:https://www.youtube.com/@DukeSaputra
+X-SOCIALPROFILE;x-service=TikTok;x-user=isthisduke:https://www.tiktok.com/@isthisduke
+REV:2026-03-27T00:00:00Z
 END:VCARD
