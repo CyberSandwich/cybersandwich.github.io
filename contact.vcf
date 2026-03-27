@@ -5,12 +5,12 @@ N:Saputra;Duke;DJ;;
 FN:Duke DJ Saputra
 ORG:University of Warwick;Warwick Business School
 TITLE:Undergraduate
-item1.EMAIL;type=INTERNET;type=pref:ventures@saputra.co.uk
-item1.X-ABLabel:A2
-item2.EMAIL;type=INTERNET:duke.saputra@warwick.ac.uk
-item2.X-ABLabel:C
-item3.EMAIL;type=INTERNET:duke@saputra.co.uk
-item3.X-ABLabel:A1
+item1.EMAIL;type=INTERNET;type=pref:duke@saputra.co.uk
+item1.X-ABLabel:A1
+item2.EMAIL;type=INTERNET:ventures@saputra.co.uk
+item2.X-ABLabel:A2
+item3.EMAIL;type=INTERNET:duke.saputra@warwick.ac.uk
+item3.X-ABLabel:C
 item4.TEL;type=pref:+44 7985 667166
 item4.X-ABLabel:Mobile
 X-ADDRESSING-GRAMMAR;type=pref:eyJsYW5ndWFnZSI6ImVuIiwicHJvbm91bnMiOlt7InByb25vdW4iOiJIZSIsIm1vcnBob2xvZ3kiOnsiZ3JhbW1hdGljYWxDYXNlIjoibm9taW5hdGl2ZSJ9fSx7InByb25vdW4iOiJIaW0iLCJtb3JwaG9sb2d5Ijp7ImdyYW1tYXRpY2FsQ2FzZSI6ImFjY3VzYXRpdmUifX0seyJwcm9ub3VuIjoiSGlzIiwibW9ycGhvbG9neSI6eyJncmFtbWF0aWNhbENhc2UiOiJnZW5pdGl2ZSIsImRldGVybWluYXRpb24iOiJpbmRlcGVuZGVudCJ9fV19AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
