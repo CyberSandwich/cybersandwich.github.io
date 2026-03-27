@@ -31,13 +31,15 @@ item7.URL:https://wa.me/qr/EYDEYNUZSEK4B1
 item7.X-ABLabel:WhatsApp
 item8.URL:https://fantastical.app/DukeSaputra/gm
 item8.X-ABLabel:Book Time
-X-SOCIALPROFILE;type=linkedin;x-user=dukedj:https://www.linkedin.com/in/dukedj
-X-SOCIALPROFILE;type=twitter;x-user=probablyduke:https://x.com/probablyduke
-item9.URL:https://www.instagram.com/probablyduke/
-item9.X-ABLabel:Instagram
-item10.URL:https://www.youtube.com/@DukeSaputra
-item10.X-ABLabel:YouTube
-item11.URL:https://www.tiktok.com/@isthisduke
-item11.X-ABLabel:TikTok
+item9.URL:https://www.linkedin.com/in/dukedj
+item9.X-ABLabel:LinkedIn
+item10.URL:https://www.instagram.com/probablyduke/
+item10.X-ABLabel:Instagram
+item11.URL:https://www.youtube.com/@DukeSaputra
+item11.X-ABLabel:YouTube
+item12.URL:https://x.com/probablyduke
+item12.X-ABLabel:X (Twitter)
+item13.URL:https://www.tiktok.com/@isthisduke
+item13.X-ABLabel:TikTok
 REV:2026-03-27T00:00:00Z
 END:VCARD
