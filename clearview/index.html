@@ -23,9 +23,9 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .actions button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s}
 .actions button:last-child{border-bottom:none}
 .actions button:active{opacity:.7}
-.schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.seg:hover:not(.active){color:var(--t2);background:var(--bg2)}}
 .seg-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--bdr2)}
+.seg-row:last-child{border-bottom:none}
 .seg{padding:12px;min-height:46px;display:flex;align-items:center;justify-content:center;font:500 .875rem/1 var(--font);color:var(--t3);background:none;border:none;cursor:pointer;text-align:center;transition:background .2s,color .2s}
 .seg.active{background:var(--tab-active);color:var(--tab-active-c)}
 .seg:active{opacity:.7}
@@ -72,15 +72,18 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 <button class="seg" id="bg-1" role="radio" aria-checked="false">Light</button>
 <button class="seg" id="bg-2" role="radio" aria-checked="false">Dark</button>
 </div>
-<div class="srow" id="bg-5" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="bg-3" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="bg-4" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="seg-row">
+<button class="seg" id="bg-5" role="radio" aria-checked="false">Auto</button>
+<button class="seg" id="bg-3" role="radio" aria-checked="false">Warm</button>
+<button class="seg" id="bg-4" role="radio" aria-checked="false">Cool</button>
+</div>
 </div>
 </div>
 <div id="s3" class="card">
-<div class="srow" id="sr-fmt">
-<label class="slbl"><span id="fmt-ic"></span><span id="fmt-nm" style="transition:opacity .15s"></span></label>
-<div class="schips" id="fmt-chips"></div>
+<div class="seg-row" id="sr-fmt">
+<button class="seg active" id="fmt-0">PNG</button>
+<button class="seg" id="fmt-1">JPEG</button>
+<button class="seg" id="fmt-2">WebP</button>
 </div>
 </div>
 </div>
@@ -112,11 +115,6 @@ var FMT_NAMES=['PNG','JPEG','WebP'];
 var FMT_MIME=['image/png','image/jpeg','image/webp'];
 var FMT_QUAL=[undefined,0.92,0.92];
 var FMT_EXT=['png','jpeg','webp'];
-var FMT_ICS=[
-'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
-'<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
-];
 var MAX_DIM=8192;
 
 var canvas=$('cv'),ctx=canvas.getContext('2d'),emptyEl=$('empty');
@@ -256,15 +254,9 @@ psBtn.addEventListener('click',pasteClipboard);
 
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
-BG_NAMES.forEach(function(n,i){
-var el=$('bg-'+i);
-if(i<3){el.classList.toggle('active',i===m)}
-else{el.classList.toggle('sel',i===m)}
-el.setAttribute('aria-checked',i===m?'true':'false')
-});
-if(m>=3){var chk=$('bg-'+m).querySelector('.bg-chk');
-if(chk){chk.style.animation='none';void chk.offsetWidth;chk.style.animation='';
-var pl=chk.querySelector('polyline');if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}}}
+var row1=[0,1,2],row2=[5,3,4];
+var grp=row1.indexOf(m)>=0?row1:row2;
+grp.forEach(function(i){var el=$('bg-'+i);el.classList.toggle('active',i===m);el.setAttribute('aria-checked',i===m?'true':'false')})
 render()
 }
 BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
@@ -290,29 +282,16 @@ $('rad-inc').addEventListener('click',function(){if(radiusIdx<RAD_PCT.length-1){
 $('shd-dec').addEventListener('click',function(){if(shadowIdx>0){shadowIdx--;updateShdUI();render()}});
 $('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}});
 
-function buildFmtChips(){
-var el=$('fmt-chips');el.textContent='';
-FMT_NAMES.forEach(function(n,i){
-if(i===fmtIdx)return;
-var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=n;
-b.addEventListener('click',function(){setFmt(i)});
-el.appendChild(b)
-})
-}
 function setFmt(i){
 fmtIdx=i;
-var ic=$('fmt-ic');ic.replaceChildren();var t=document.createElement('template');t.innerHTML=FMT_ICS[i];ic.appendChild(t.content);
-var nm=$('fmt-nm');nm.style.opacity='.3';
-setTimeout(function(){nm.textContent=FMT_NAMES[i];nm.style.opacity='1'},100);
-buildFmtChips()
+FMT_NAMES.forEach(function(n,j){$('fmt-'+j).classList.toggle('active',j===i)})
 }
-setFmt(0);
+FMT_NAMES.forEach(function(n,i){$('fmt-'+i).addEventListener('click',function(){setFmt(i)})});
 
 var RESET_IC='<svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
 var groups=[
 {_row:$('sr-rad'),_reset:function(){radiusIdx=4;updateRadUI();render()}},
-{_row:$('sr-shd'),_reset:function(){shadowIdx=4;updateShdUI();render()}},
-{_row:$('sr-fmt'),_reset:function(){setFmt(0)}}
+{_row:$('sr-shd'),_reset:function(){shadowIdx=4;updateShdUI();render()}}
 ];
 function animateReset(g){
 var row=g._row,lbl=row.querySelector('.slbl'),ic=lbl.querySelector('svg');
