@@ -456,15 +456,15 @@ function parseMd(md){
 }
 
 function il(t){
-  return t
-    .replace(/`([^`]+)`/g,(_,c)=>'<code>'+esc(c)+'</code>')
+  return esc(t)
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g,'<em>$1</em>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(_,alt,src)=>{
-      return '<img src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async">';
+      return '<img src="'+src+'" alt="'+alt+'" loading="lazy" decoding="async">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_,text,href)=>{
-      return '<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+'</a>';
+      return '<a href="'+href+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';
     });
 }
 
