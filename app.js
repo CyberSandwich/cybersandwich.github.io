@@ -71,6 +71,13 @@ function route(){
   }
 }
 
+// Screen-reader announcement region for copy feedback (WCAG 4.1.3)
+var copyLive=document.createElement('div');
+copyLive.className='sr-only';
+copyLive.setAttribute('aria-live','polite');
+copyLive.setAttribute('role','status');
+document.body.appendChild(copyLive);
+
 // Click handler: copy buttons + SPA link interception
 // Note: CHECK_SVG innerHTML below uses hardcoded SVG constant, not user content — safe from XSS
 document.addEventListener('click',e=>{
@@ -86,12 +93,14 @@ document.addEventListener('click',e=>{
       var tmp=document.createElement('span');
       tmp.innerHTML=CHECK_SVG;
       btn.appendChild(tmp.firstChild);
+      copyLive.textContent='Copied';
       btn._t1=setTimeout(()=>{
         btn.style.opacity='0';
         btn._t2=setTimeout(()=>{
           btn.classList.remove('copied');
           btn.textContent='Copy';
           btn.style.opacity='';
+          copyLive.textContent='';
         },200);
       },1500);
     }
@@ -241,7 +250,7 @@ const DEFAULT_LINK_ICON='<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 0
 function mkIcon(s){const ic=document.createElement('div');ic.className='picon';var v=s.slice(0,4)==='<svg'?s:SVG_WRAP_OPEN+s+SVG_WRAP_CLOSE;ic.textContent='';ic.insertAdjacentHTML('afterbegin',v);return ic}
 
 // Skeleton loading placeholders
-function showSkel(el,n){for(var i=0;i<n;i++){var s=document.createElement('div');s.className='skel';el.appendChild(s)}}
+function showSkel(el,n){el.setAttribute('aria-busy','true');for(var i=0;i<n;i++){var s=document.createElement('div');s.className='skel';el.appendChild(s)}}
 function mkEmpty(text,cls){var d=document.createElement('div');d.className=cls||'empty';d.textContent=text;d.setAttribute('role','status');return d}
 function mkSection(label,cls){var s=document.createElement('div');s.className=cls;var h=document.createElement('h3');h.textContent=label;s.appendChild(h);return s}
 function setSearchVis(sw,v){if(sw)sw.parentNode.style.display=v?'block':'none'}
@@ -249,6 +258,7 @@ function setSearchX(p,v){var x=p.querySelector('.search-x');if(x)x.style.display
 
 // Render categorized cards (projects & links)
 function renderCards(cfg,el,sw,items){
+  el.removeAttribute('aria-busy');
   el.replaceChildren();
   if(!items||!items.length){
     setSearchVis(sw,false);
@@ -293,6 +303,7 @@ function showCards(cfg){
   cfg.get().then(items=>{
     renderCards(cfg,el,sw,items);
     cfg.get.onFresh=function(d){
+      kbClear();
       el.style.opacity='0';
       cfg.get.onFresh=null;
       setTimeout(function(){el._saved=null;renderCards(cfg,el,sw,d);el.style.opacity=''},150);
@@ -312,6 +323,7 @@ function showLinks(){showCards({el:'#llist',data:links,get:getLinks,si:'#lsearch
 // Render CV
 function renderCV(el,data){
   const sw=$('#csearch');
+  el.removeAttribute('aria-busy');
   el.replaceChildren();
   if(!data||!data.length){
     setSearchVis(sw,false);
@@ -372,6 +384,7 @@ function showCV(){
   getCV().then(data=>{
     renderCV(el,data);
     getCV.onFresh=function(d){
+      kbClear();
       el.style.opacity='0';
       getCV.onFresh=null;
       setTimeout(function(){el._saved=null;renderCV(el,d);el.style.opacity=''},150);
