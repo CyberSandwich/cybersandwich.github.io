@@ -97,7 +97,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=16"></script>
+<script src="/shared/base.js?v=17"></script>
 <script type="module">
 import*as THREE from'three';
 import{OrbitControls}from'three/addons/controls/OrbitControls.js';
@@ -126,7 +126,7 @@ var pv=$('pv'),sceneEl=$('scene');
 var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),psBtn=$('psBtn'),rsBtn=$('rsBtn');
 var rxV=$('rx-val'),ryV=$('ry-val'),ov=$('drop-ov');
 var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
-var tm={},toastT,toastFadeT;
+
 
 /* ---- Three.js Scene ---- */
 var scene=new THREE.Scene();
@@ -269,7 +269,7 @@ screenMesh.visible=!!img;
 scene.add(screenMesh);
 modelReady=true;
 updateScreen();render()
-},undefined,function(){notify('Failed to Load Model',false)})
+},undefined,function(){_base.notify('Failed to Load Model',false)})
 }
 var initDev=0;try{var sd=localStorage.getItem('mockup-dev');if(sd!=null&&DEVICES[+sd])initDev=+sd}catch(_){}
 loadModel(initDev);
@@ -321,35 +321,14 @@ var sph=new THREE.Spherical().setFromVector3(camera.position);
 return{rx:(sph.phi-Math.PI/2)/DEG,ry:sph.theta/DEG}
 }
 
-/* ---- Notify / Feedback ---- */
-function notify(msg,ok){
-var old=document.querySelector('.notif');if(old)old.remove();
-clearTimeout(toastT);clearTimeout(toastFadeT);
-var w=document.createElement('div');w.className='notif fx-bottom';w.setAttribute('role','status');
-var p=document.createElement('div');p.className='notif-pill '+(ok?'nf-ok':'nf-err');
-p.textContent=msg;w.appendChild(p);
-var dis=function(){clearTimeout(toastT);clearTimeout(toastFadeT);w.style.animation='notifOut .2s ease forwards';toastFadeT=setTimeout(function(){w.remove()},200)};
-w.addEventListener('click',dis);document.body.appendChild(w);
-toastT=setTimeout(dis,5000)
-}
-function feedback(btn,cls,text){
-clearTimeout(tm[btn.id]);
-var sp=btn.querySelector('span');
-btn.classList.remove('ok','ps-fb','dl-fb','rs-fb','err-fb','ld');
-var pl=btn.querySelector('.ic polyline');
-if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}
-btn.classList.add(cls);sp.textContent=text;
-tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.dataset.l},800)
-}
-
 /* ---- Image Loading ---- */
 function loadImg(file){
-if(!file||!file.type.startsWith('image/')){notify('Invalid Image',false);return}
+if(!file||!file.type.startsWith('image/')){_base.notify('Invalid Image',false);return}
 if(blobUrl)URL.revokeObjectURL(blobUrl);
 blobUrl=URL.createObjectURL(file);
 var i=new Image();
 i.onload=function(){img=i;updateScreen()};
-i.onerror=function(){URL.revokeObjectURL(blobUrl);blobUrl=null;notify('Failed to Load Image',false)};
+i.onerror=function(){URL.revokeObjectURL(blobUrl);blobUrl=null;_base.notify('Failed to Load Image',false)};
 i.src=blobUrl
 }
 
@@ -361,23 +340,23 @@ _base.setupDragDrop({overlay:ov,onDrop:function(files){
 /* ---- Paste (keyboard Cmd+V) ---- */
 document.addEventListener('paste',function(e){
 var items=e.clipboardData&&e.clipboardData.items;if(!items)return;
-for(var i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){e.preventDefault();var f=items[i].getAsFile();if(f){loadImg(f);feedback(psBtn,'ps-fb','Pasted')}return}}
+for(var i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){e.preventDefault();var f=items[i].getAsFile();if(f){loadImg(f);_base.feedback(psBtn,'ps-fb','Pasted')}return}}
 });
 
 /* ---- Paste button (Clipboard API) ---- */
 function pasteClipboard(){
-if(!navigator.clipboard||!navigator.clipboard.read){notify('Clipboard Not Available',false);return}
+if(!navigator.clipboard||!navigator.clipboard.read){_base.notify('Clipboard Not Available',false);return}
 psBtn.classList.add('ld');psBtn.querySelector('span').textContent='Reading\u2026';
 navigator.clipboard.read().then(function(items){
 for(var i=0;i<items.length;i++){var types=items[i].types;for(var j=0;j<types.length;j++){if(types[j].startsWith('image/')){items[i].getType(types[j]).then(function(blob){
 loadImg(new File([blob],'paste.png',{type:blob.type}));
-feedback(psBtn,'ps-fb','Pasted')
+_base.feedback(psBtn,'ps-fb','Pasted')
 });return}}}
 psBtn.classList.remove('ld');psBtn.querySelector('span').textContent=psBtn.dataset.l;
-notify('No Image in Clipboard',false)
+_base.notify('No Image in Clipboard',false)
 }).catch(function(){
 psBtn.classList.remove('ld');psBtn.querySelector('span').textContent=psBtn.dataset.l;
-notify('Clipboard Not Available',false)
+_base.notify('Clipboard Not Available',false)
 })
 }
 psBtn.addEventListener('click',pasteClipboard);
@@ -521,23 +500,23 @@ cb(blob)
 }
 
 cpBtn.addEventListener('click',function(){
-if(!img){notify('No Screenshot Loaded',false);return}
-if(!navigator.clipboard||!navigator.clipboard.write){notify('Clipboard Not Available',false);return}
+if(!img){_base.notify('No Screenshot Loaded',false);return}
+if(!navigator.clipboard||!navigator.clipboard.write){_base.notify('Clipboard Not Available',false);return}
 navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(function(resolve,reject){
 doExport(function(b){if(b)resolve(b);else reject()})
 })})]).then(
-function(){feedback(cpBtn,'ok','Copied')},
-function(){notify('Copy Failed',false)})
+function(){_base.feedback(cpBtn,'ok','Copied')},
+function(){_base.notify('Copy Failed',false)})
 });
 
 dlBtn.addEventListener('click',function(){
-if(!img){notify('No Screenshot Loaded',false);return}
+if(!img){_base.notify('No Screenshot Loaded',false);return}
 doExport(function(b){
-if(!b){notify('Export Failed',false);return}
+if(!b){_base.notify('Export Failed',false);return}
 var u=URL.createObjectURL(b);
 dlA.download='mockup.'+FMT_EXT[fmtIdx];dlA.href=u;dlA.click();
 setTimeout(function(){URL.revokeObjectURL(u)},1e4);
-feedback(dlBtn,'dl-fb','Downloaded')
+_base.feedback(dlBtn,'dl-fb','Downloaded')
 })
 });
 

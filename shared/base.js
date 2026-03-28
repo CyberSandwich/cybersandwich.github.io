@@ -112,6 +112,33 @@
     return{press:press,clear:clear};
   }
 
+  var tm={},toastT,toastFadeT;
+
+  function feedback(btn,cls,text,dur){
+    clearTimeout(tm[btn.id]);
+    var sp=btn.querySelector('span');
+    btn.classList.remove('ok','ps-fb','dl-fb','rs-fb','err-fb','ld');
+    var pl=btn.querySelector('.ic polyline');
+    if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}
+    void btn.offsetWidth;
+    btn.classList.add(cls);sp.textContent=text;
+    tm[btn.id]=setTimeout(function(){btn.classList.remove(cls);sp.textContent=btn.dataset.l},dur||800);
+  }
+
+  function notify(msg,ok,onTap){
+    var old=document.querySelector('.notif');if(old)old.remove();
+    clearTimeout(toastT);clearTimeout(toastFadeT);
+    var wrap=document.createElement('div');
+    wrap.className='notif fx-bottom';wrap.setAttribute('role','status');
+    var pill=document.createElement('div');
+    pill.className='notif-pill '+(ok?'nf-ok':'nf-err');
+    pill.textContent=msg;wrap.appendChild(pill);
+    var dismiss=function(){clearTimeout(toastT);clearTimeout(toastFadeT);wrap.style.animation='notifOut .2s ease forwards';toastFadeT=setTimeout(function(){wrap.remove()},200)};
+    wrap.addEventListener('click',function(){if(onTap)onTap();dismiss()});
+    document.body.appendChild(wrap);
+    toastT=setTimeout(dismiss,5000);
+  }
+
   /* localStorage helpers — JSON parse/stringify with try/catch */
   function load(key,def){try{var v=localStorage.getItem(key);return v!==null?JSON.parse(v):def!==undefined?def:null}catch(_){return def!==undefined?def:null}}
   function save(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch(_){}}
@@ -130,5 +157,5 @@
     });
   }
 
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
 })();
