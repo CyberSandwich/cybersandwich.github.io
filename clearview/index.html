@@ -281,7 +281,9 @@ $('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){
 
 function setFmt(i){
 fmtIdx=i;
-FMT_NAMES.forEach(function(n,j){$('fmt-'+j).classList.toggle('active',j===i)})
+FMT_NAMES.forEach(function(n,j){$('fmt-'+j).classList.toggle('active',j===i)});
+$('bg-0').disabled=(i===1);
+if(i===1&&bgMode===0)setBg(1)
 }
 FMT_NAMES.forEach(function(n,i){$('fmt-'+i).addEventListener('click',function(){setFmt(i)})});
 
