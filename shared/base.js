@@ -13,6 +13,7 @@
 
   function setThemeIcon(next){
     var b=document.getElementById('theme-btn');
+    if(!b)return;
     b.replaceChildren();
     /* Trusted first-party SVG icon strings — safe to parse as HTML */
     var d=document.createElement('template');
@@ -30,12 +31,13 @@
 
   /* Init icon for current theme (data-theme already set by inline FOUC script) */
   var t=curTheme();
-  setThemeIcon(THEMES[(THEMES.indexOf(t)+1)%THEMES.length]);
-
-  /* Theme toggle click */
-  document.getElementById('theme-btn').addEventListener('click',function(){
-    setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length]);
-  });
+  var tb=document.getElementById('theme-btn');
+  if(tb){
+    setThemeIcon(THEMES[(THEMES.indexOf(t)+1)%THEMES.length]);
+    tb.addEventListener('click',function(){
+      setTheme(THEMES[(THEMES.indexOf(curTheme())+1)%THEMES.length]);
+    });
+  }
 
   /* Cross-tab sync + iOS Safari nav repaint hack */
   document.addEventListener('visibilitychange',function(){

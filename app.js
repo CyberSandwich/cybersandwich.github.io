@@ -569,48 +569,37 @@ function wireSearch(iid,cid){
 }
 [['#psearch','#plist'],['#csearch','#cvlist'],['#usearch','#ulist'],['#lsearch','#llist']].forEach(function(p){wireSearch(p[0],p[1])});
 
-// Theme toggle
+// Theme toggle (delegates to _base for data-theme, theme-color, localStorage)
 const themeBtn=$('#theme-toggle');
 const themeLabel=$('#theme-label');
-const themeOrder=['light','sepia','dark'];
-const themeColors={light:'#FAFAFA',sepia:'#F5EDDA',dark:'#1C1C1E'};
 function setThemeLabel(t){if(themeLabel)themeLabel.textContent='Theme: '+t[0].toUpperCase()+t.slice(1)}
-function curTheme(){return document.documentElement.getAttribute('data-theme')||'light'}
 function applyTheme(t){
-  if(t==='light'){document.documentElement.removeAttribute('data-theme')}
-  else{document.documentElement.setAttribute('data-theme',t)}
+  _base.setTheme(t);
   setThemeLabel(t);
-  const mt=$('meta[name="theme-color"]');if(mt)mt.content=themeColors[t];
   const ms=$('meta[name="color-scheme"]');if(ms)ms.content=t==='dark'?'dark':'light';
 }
 if(themeBtn){
-  setThemeLabel(curTheme());
+  setThemeLabel(_base.curTheme());
   themeBtn.addEventListener('click',e=>{
     e.preventDefault();
-    const cur=curTheme();
-    const next=themeOrder[(themeOrder.indexOf(cur)+1)%themeOrder.length];
-    if(next==='light')localStorage.removeItem('theme');
-    else localStorage.setItem('theme',next);
+    const cur=_base.curTheme();
+    const next=_base.THEMES[(_base.THEMES.indexOf(cur)+1)%_base.THEMES.length];
     applyTheme(next);
   });
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden)return;
-  const stored=localStorage.getItem('theme')||'light';
-  if(stored!==curTheme())applyTheme(stored);
-  // Reset any stuck copy buttons (timers throttled while tab was hidden)
+  setThemeLabel(_base.curTheme());
+  const ms=$('meta[name="color-scheme"]');if(ms)ms.content=_base.curTheme()==='dark'?'dark':'light';
   document.querySelectorAll('.copy-btn.copied').forEach(b=>{
     clearTimeout(b._t1);clearTimeout(b._t2);
     b.classList.remove('copied');b.textContent='Copy';b.style.opacity='';
   });
-  // iOS Safari: force nav repaint after tab switch to restore touch hit-testing
-  const n=document.querySelector('nav');
-  if(n){n.style.display='none';n.offsetHeight;n.style.display=''}
 },{passive:true});
 window.addEventListener('storage',function(e){
   if(e.key==='theme'){
     var t=e.newValue||'light';
-    if(t!==curTheme())applyTheme(t);
+    if(t!==_base.curTheme())applyTheme(t);
   }
 },{passive:true});
 

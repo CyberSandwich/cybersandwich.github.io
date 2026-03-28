@@ -141,13 +141,13 @@ cmd_status() {
   printf "%-14s %-10s %-8s %-8s %s\n" "──────────" "───────" "─────" "────" "─────"
 
   for f in base.css base.js; do
-    local v=$(current_version "$f" "${SUB_HTMLS[@]}")
-    local fc=$(count_files "$f" "$v" "${SUB_HTMLS[@]}")
-    local rc=$(count_refs "$f" "$v" "${SUB_HTMLS[@]}")
+    local v=$(current_version "$f" "${ALL_HTMLS[@]}")
+    local fc=$(count_files "$f" "$v" "${ALL_HTMLS[@]}")
+    local rc=$(count_refs "$f" "$v" "${ALL_HTMLS[@]}")
     local drift=""
-    local versions=(${(f)"$(find_versions "$f" "${SUB_HTMLS[@]}")"})
+    local versions=(${(f)"$(find_versions "$f" "${ALL_HTMLS[@]}")"})
     (( ${#versions} > 1 )) && drift=" ${R}DRIFT${Z}"
-    printf "%-14s %-10s %-8s %-8s %b\n" "$f" "v=${v:-?}" "$fc" "$rc" "sub-projects${drift}"
+    printf "%-14s %-10s %-8s %-8s %b\n" "$f" "v=${v:-?}" "$fc" "$rc" "all HTML${drift}"
   done
 
   for f in search.js; do
@@ -167,8 +167,8 @@ cmd_status() {
   done
 
   # Sync check
-  local css_v=$(current_version "base.css" "${SUB_HTMLS[@]}")
-  local js_v=$(current_version "base.js" "${SUB_HTMLS[@]}")
+  local css_v=$(current_version "base.css" "${ALL_HTMLS[@]}")
+  local js_v=$(current_version "base.js" "${ALL_HTMLS[@]}")
   printf "\n"
   if [[ "$css_v" == "$js_v" ]] 2>/dev/null; then
     ok "Shared files in sync (both v=${css_v})"
@@ -184,11 +184,11 @@ cmd_status() {
 cmd_verify() {
   local errors=0
   for f in base.css base.js; do
-    local versions=(${(f)"$(find_versions "$f" "${SUB_HTMLS[@]}")"})
+    local versions=(${(f)"$(find_versions "$f" "${ALL_HTMLS[@]}")"})
     if (( ${#versions} > 1 )); then
       err "Version drift in ${B}${f}${Z}: ${versions[*]}"
       for v in "${versions[@]}"; do
-        for t in "${SUB_HTMLS[@]}"; do
+        for t in "${ALL_HTMLS[@]}"; do
           grep -q "${f}?v=${v}" "$t" 2>/dev/null && dim "  v=${v}: ${t#./}"
         done
       done
@@ -222,12 +222,12 @@ cmd_auto() {
 
   if echo "$changed" | grep -q "shared/base.css"; then
     info "Detected shared/base.css change"
-    bump "base.css" "${SUB_HTMLS[@]}"
+    bump "base.css" "${ALL_HTMLS[@]}"
     bumped=true
   fi
   if echo "$changed" | grep -q "shared/base.js"; then
     info "Detected shared/base.js change"
-    bump "base.js" "${SUB_HTMLS[@]}"
+    bump "base.js" "${ALL_HTMLS[@]}"
     bumped=true
   fi
   if echo "$changed" | grep -q "shared/search.js"; then
@@ -267,15 +267,15 @@ $DRY_RUN && info "Dry-run mode — no files will be modified."
 case "$CMD" in
   status|s)    cmd_status ;;
   verify|check) cmd_verify ;;
-  css)         bump "base.css" "${SUB_HTMLS[@]}" ;;
-  js)          bump "base.js" "${SUB_HTMLS[@]}" ;;
+  css)         bump "base.css" "${ALL_HTMLS[@]}" ;;
+  js)          bump "base.js" "${ALL_HTMLS[@]}" ;;
   search-js)   bump "search.js" "${ALL_HTMLS[@]}" ;;
-  both|shared) bump "base.css" "${SUB_HTMLS[@]}"; bump "base.js" "${SUB_HTMLS[@]}"
+  both|shared) bump "base.css" "${ALL_HTMLS[@]}"; bump "base.js" "${ALL_HTMLS[@]}"
                bump "search.js" "${ALL_HTMLS[@]}" ;;
   main-css)    bump "style.css" "$MAIN_HTML" ;;
   main-js)     bump "app.js" "$MAIN_HTML" ;;
   main)        bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
-  all)         bump "base.css" "${SUB_HTMLS[@]}"; bump "base.js" "${SUB_HTMLS[@]}"
+  all)         bump "base.css" "${ALL_HTMLS[@]}"; bump "base.js" "${ALL_HTMLS[@]}"
                bump "search.js" "${ALL_HTMLS[@]}"
                bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
   set)
@@ -283,8 +283,8 @@ case "$CMD" in
     if [[ -z "$V" ]] || ! [[ "$V" =~ ^[0-9]+$ ]]; then
       err "Usage: $0 set <version-number>"; exit 1
     fi
-    set_ver "base.css" "$V" "${SUB_HTMLS[@]}"
-    set_ver "base.js" "$V" "${SUB_HTMLS[@]}"
+    set_ver "base.css" "$V" "${ALL_HTMLS[@]}"
+    set_ver "base.js" "$V" "${ALL_HTMLS[@]}"
     set_ver "search.js" "$V" "${ALL_HTMLS[@]}"
     ;;
   auto)        cmd_auto ;;
