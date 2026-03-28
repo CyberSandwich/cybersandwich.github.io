@@ -1,0 +1,52 @@
+html{height:100%}
+body{display:flex;align-items:center;justify-content:center}
+.w{width:100%;max-width:440px;padding:20px 20px 100px;margin:auto 0}
+.actions{margin-bottom:0}
+.settings{margin-top:14px;margin-bottom:0}
+.preview{
+  background:#fff;
+  padding:24px;
+  display:flex;align-items:center;justify-content:center;
+  min-height:180px;contain:content;
+  transition:background .3s,transform .15s;cursor:pointer
+}
+.preview.dark{background:#000000}
+.preview.checker{
+  background-color:#fff;
+  background-image:
+    linear-gradient(45deg,#E8E8E8 25%,transparent 25%,transparent 75%,#E8E8E8 75%),
+    linear-gradient(45deg,#E8E8E8 25%,transparent 25%,transparent 75%,#E8E8E8 75%);
+  background-size:16px 16px;background-position:0 0,8px 8px
+}
+.msg{text-align:center;font-size:.8125rem;color:#C41E3A;padding:2px 20px 10px}
+.in{margin-bottom:14px}
+.in textarea{
+  width:100%;padding:14px 20px;
+  border:1px solid var(--bdr2);border-radius:16px;
+  font:400 1rem/1.5 var(--font);color:var(--t1);background:var(--card);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  resize:none;display:block;overflow:hidden;max-height:140px
+}
+.in textarea.scroll{overflow-y:auto}
+.in textarea:focus{
+  border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)
+}
+.actions button{
+  display:flex;align-items:center;gap:12px;
+  width:100%;padding:12px 20px;
+  font:500 .9375rem/1 var(--font);
+  color:var(--t2);background:none;border:none;
+  border-bottom:1px solid var(--bdr2);
+  cursor:pointer;text-align:left;
+  transition:background .25s
+}
+.actions button:last-child{border-bottom:none}
+.schips{display:flex;gap:4px}
+.id,.ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.ic{stroke-width:2.5;display:none}
+@media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}}
+.preview:active{transform:scale(.97)}
+@keyframes pvPop{from{transform:scale(.97)}to{transform:scale(1)}}
+::selection{background:rgba(72,72,74,.15)}
+.cam-wrap{padding:0}.cam-wrap video{width:100%;display:block;border-radius:20px;background:#000}
+.cam-active span{color:#C41E3A!important}.cam-active .slbl svg{color:#C41E3A!important}
