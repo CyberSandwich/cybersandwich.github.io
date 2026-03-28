@@ -35,7 +35,7 @@ button:focus:not(:focus-visible){outline:none}
 <div class="w">
 <div id="pv" class="card pv-card bg-clear">
 <div class="pv-wrap">
-<canvas id="cv" style="display:none"></canvas>
+<canvas id="cv" style="display:none" role="img" aria-label="Image preview with background removal"></canvas>
 <div id="empty" class="empty">
 <svg width="48" height="48" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
 </div>
@@ -65,15 +65,17 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </div>
 </div>
-<div class="card">
-<div class="srow sel" id="bg-0"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="bg-1"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Light</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="bg-2"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div id="bg-group" role="radiogroup" aria-label="Background">
+<div class="card" id="bg-card-1">
+<div class="srow sel" id="bg-0" tabindex="0" role="radio" aria-checked="true"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Clear</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="bg-1" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span>Light</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="bg-2" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span>Dark</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 </div>
-<div class="card">
-<div class="srow" id="bg-5"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="bg-3"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="bg-4"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="card" id="bg-card-2">
+<div class="srow" id="bg-5" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="bg-3" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="bg-4" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+</div>
 </div>
 <div id="s3" class="card">
 <div class="srow" id="sr-fmt">
@@ -272,13 +274,15 @@ psBtn.addEventListener('click',pasteClipboard);
 
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
-BG_NAMES.forEach(function(n,i){$('bg-'+i).classList.toggle('sel',i===m)});
+BG_NAMES.forEach(function(n,i){$('bg-'+i).classList.toggle('sel',i===m);$('bg-'+i).setAttribute('aria-checked',i===m?'true':'false')});
 var chk=$('bg-'+m).querySelector('.bg-chk');
 if(chk){chk.style.animation='none';void chk.offsetWidth;chk.style.animation='';
 var pl=chk.querySelector('polyline');if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}}
 render()
 }
 BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
+function rowKey(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();var row=e.target.closest('.srow');if(row)row.click()}}
+$('bg-group').addEventListener('keydown',rowKey);
 
 function updateRadUI(){
 var v=RAD_PCT[radiusIdx];

@@ -80,10 +80,10 @@ button:focus:not(:focus-visible){outline:none}
 </div>
 </div>
 </div>
-<div id="s4" class="card">
-<div class="srow sel" id="dv-0"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>iPhone 17 Pro Max</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="dv-1"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>iPhone 17 Pro</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" id="dv-2"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>iPhone 16</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div id="s4" class="card" role="radiogroup" aria-label="Device">
+<div class="srow sel" id="dv-0" tabindex="0" role="radio" aria-checked="true"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>iPhone 17 Pro Max</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="dv-1" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>iPhone 17 Pro</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="srow" id="dv-2" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/></svg><span>iPhone 16</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 </div>
 </div>
 <div id="drop-ov" class="drop-overlay" role="status" aria-live="assertive">
@@ -140,6 +140,8 @@ renderer.toneMappingExposure=1.0;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.domElement.setAttribute('role','img');
+renderer.domElement.setAttribute('aria-label','Device mockup preview');
 sceneEl.appendChild(renderer.domElement);
 
 /* Studio HDRI for cinematic metallic reflections */
@@ -271,7 +273,7 @@ updateScreen();render()
 }
 var initDev=0;try{var sd=localStorage.getItem('mockup-dev');if(sd!=null&&DEVICES[+sd])initDev=+sd}catch(_){}
 loadModel(initDev);
-if(initDev)DEVICES.forEach(function(d,i){$('dv-'+i).classList.toggle('sel',i===initDev)});
+if(initDev)DEVICES.forEach(function(d,i){$('dv-'+i).classList.toggle('sel',i===initDev);$('dv-'+i).setAttribute('aria-checked',i===initDev?'true':'false')});
 
 /* Resize */
 function resize(){
@@ -421,12 +423,14 @@ $('ry-inc').addEventListener('click',function(){stepAngle('y',STEP)});
 function setDevice(idx){
 if(idx===curDev)return;
 loadModel(idx);
-DEVICES.forEach(function(d,i){$('dv-'+i).classList.toggle('sel',i===idx)});
+DEVICES.forEach(function(d,i){$('dv-'+i).classList.toggle('sel',i===idx);$('dv-'+i).setAttribute('aria-checked',i===idx?'true':'false')});
 var chk=$('dv-'+idx).querySelector('.bg-chk');
 if(chk){chk.style.animation='none';void chk.offsetWidth;chk.style.animation='';
 var pl=chk.querySelector('polyline');if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}}
 }
 DEVICES.forEach(function(d,i){$('dv-'+i).addEventListener('click',function(){setDevice(i)})});
+function rowKey(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();var row=e.target.closest('.srow');if(row)row.click()}}
+$('s4').addEventListener('keydown',rowKey);
 
 /* ---- Format (codegen format pattern) ---- */
 var FMT_MIME=['image/png','image/jpeg','image/webp'];

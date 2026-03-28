@@ -45,6 +45,8 @@ function route(){
     });
   }
   window.scrollTo(0,0);
+  const ft=page==='home'?$('#main'):$('#'+page+' .stitle');
+  if(ft){ft.setAttribute('tabindex','-1');ft.focus()}
 
   $$('.tabs a').forEach(a=>{
     const href=a.getAttribute('href');
@@ -667,16 +669,23 @@ qrOverlay.tabIndex=-1;
 qrOverlay.setAttribute('role','dialog');
 qrOverlay.setAttribute('aria-modal','true');
 qrOverlay.setAttribute('aria-label','QR Code');
+qrOverlay.setAttribute('aria-hidden','true');
 const qrCard=document.createElement('div');qrCard.className='qr-card';
 const qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';qrImg.width=23;qrImg.height=23;
-qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
+const qrClose=document.createElement('button');qrClose.className='qr-close';qrClose.setAttribute('aria-label','Close');
+var qrSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');qrSvg.setAttribute('viewBox','0 0 24 24');qrSvg.setAttribute('fill','none');qrSvg.setAttribute('stroke','currentColor');qrSvg.setAttribute('stroke-width','2');qrSvg.setAttribute('stroke-linecap','round');
+var qrL1=document.createElementNS('http://www.w3.org/2000/svg','line');qrL1.setAttribute('x1','6');qrL1.setAttribute('y1','6');qrL1.setAttribute('x2','18');qrL1.setAttribute('y2','18');
+var qrL2=document.createElementNS('http://www.w3.org/2000/svg','line');qrL2.setAttribute('x1','18');qrL2.setAttribute('y1','6');qrL2.setAttribute('x2','6');qrL2.setAttribute('y2','18');
+qrSvg.appendChild(qrL1);qrSvg.appendChild(qrL2);qrClose.appendChild(qrSvg);
+qrClose.addEventListener('click',function(){closeQR()});
+qrCard.appendChild(qrClose);qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
 
 var qrModal=mkModal(qrOverlay);
 function openQR(){
   if(qrModal.isOpen)return;
   if(cmdModal.isOpen)closeCmd();
   if(!qrImg.src)qrImg.src='/qr-homepage.png';
-  qrModal.open(qrOverlay);
+  qrModal.open(qrClose);
 }
 function closeQR(){qrModal.close()}
 const nameCard=$('.name-card');
@@ -841,9 +850,21 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  if(cmdModal.isOpen){if(e.key==='Escape')closeCmd();return}
+  if(cmdModal.isOpen){
+    if(e.key==='Escape'){closeCmd();return}
+    if(e.key==='Tab'){
+      var els=cmdPalette.querySelectorAll('input,button:not([style*="display:none"]):not([style*="display: none"])');
+      var focusable=[].slice.call(els).filter(function(el){return el.offsetParent!==null});
+      if(focusable.length){
+        var first=focusable[0],last=focusable[focusable.length-1];
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+      }
+    }
+    return;
+  }
 
-  if(qrModal.isOpen){if(e.key==='Tab'){e.preventDefault();return}if(e.key==='Escape')closeQR();return}
+  if(qrModal.isOpen){if(e.key==='Tab'){e.preventDefault();qrClose.focus();return}if(e.key==='Escape')closeQR();return}
 
   const tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'){

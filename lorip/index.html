@@ -59,7 +59,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
     <input id="cnt" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
     <button id="inc" type="button" aria-label="Increase Count"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
-  <div class="card" id="modes"></div>
+  <div class="card" id="modes" role="radiogroup" aria-label="Mode"></div>
   <div class="card links">
     <button id="g" type="button" aria-label="Regenerate text"><svg id="gi" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="gl">Regenerate</span></button>
     <button id="c" type="button" aria-label="Copy text to clipboard"><svg id="ci" aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="ck" aria-hidden="true" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6" stroke-width="2.5"/></svg><span id="csl">Copy</span></button>
@@ -179,6 +179,7 @@ function updateUI(){
   for(var i=0;i<rows.length;i++){
     var wasSel=rows[i].classList.contains('sel');
     rows[i].classList.toggle('sel',i===mode);
+    rows[i].setAttribute('aria-checked',i===mode?'true':'false');
     if(i===mode&&!wasSel){
       var chk=rows[i].querySelector('.bg-chk');
       if(chk){chk.style.animation='none';void chk.offsetWidth;chk.style.animation='';
@@ -230,6 +231,7 @@ function doReset(){resetCtrl.press()}
   for(var i=0;i<MODES.length;i++){
     var row=document.createElement('div');
     row.className='srow'+(i===0?' sel':'');
+    row.setAttribute('tabindex','0');row.setAttribute('role','radio');row.setAttribute('aria-checked',i===0?'true':'false');
     var lbl=document.createElement('label');
     lbl.className='slbl';
     lbl.appendChild(mkSvg(MODE_PATHS[i]));
@@ -245,6 +247,8 @@ function doReset(){resetCtrl.press()}
     container.appendChild(row);
   }
 })();
+function rowKey(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();var row=e.target.closest('.srow');if(row)row.click()}}
+$('modes').addEventListener('keydown',rowKey);
 /* Events */
 $('dec').onclick=function(){setCount(count-STEPS[mode])};
 $('inc').onclick=function(){setCount(count+STEPS[mode])};

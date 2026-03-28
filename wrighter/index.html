@@ -805,14 +805,18 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   });
 
   document.querySelectorAll('nav a').forEach(function(a){
-    a.addEventListener('click',function(e){
-      if(editor.value.trim()&&!confirm('Leave? Unsaved text will be lost.')){e.preventDefault();e.stopImmediatePropagation();}
+    a.addEventListener('click',function(){
+      if(saveMask)flush(true);
     });
   });
-  document.querySelector('.tabs a.active').addEventListener('click',e=>{
-    e.preventDefault();
-    setText('');
+  var wTab=document.querySelector('.tabs a.active');
+  var wReset=_base.twoPress(wTab,{
+    label:wTab,
+    text:'Wrighter',
+    guard:function(){return !!editor.value.trim()},
+    onConfirm:function(){setText('')}
   });
+  wTab.addEventListener('click',function(e){e.preventDefault();wReset.press()});
 })();
 </script>
 </body>
