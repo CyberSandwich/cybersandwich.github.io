@@ -85,7 +85,9 @@ function quantizeCanvas(ctx,w,h,hasBg){
 
 function resetGroup(g){
   g._reset();
-  var row=g._row,lbl=row.querySelector('.slbl'),ic=lbl.querySelector('svg'),orig=ic.outerHTML;
+  var row=g._row,lbl=row.querySelector('.slbl');
+  if(!lbl)return;
+  var ic=lbl.querySelector('svg'),orig=ic.outerHTML;
   ic.outerHTML=window._cgResetSvg;
   row.classList.remove('rs-fb');
   void row.offsetWidth;
@@ -101,7 +103,33 @@ function initSettings(container,groups){
     var lbl=document.createElement('div');
     lbl.className='slbl';
 
-    if(g.type==='format'){
+    if(g.type==='seg'){
+      var segIdx=g.def;
+      var segRow=document.createElement('div');
+      segRow.className='seg-row';
+      var btns=[];
+      g.formats.forEach(function(name,i){
+        var btn=document.createElement('button');
+        btn.type='button';btn.className='seg'+(i===g.def?' active':'');
+        btn.textContent=name;
+        if(g.disable&&g.disable(i))btn.disabled=true;
+        btn.addEventListener('click',function(){
+          if(btn.disabled)return;
+          segIdx=i;
+          btns.forEach(function(b,j){b.classList.toggle('active',j===i)});
+          g.onChange(segIdx);
+        });
+        btns.push(btn);
+        segRow.appendChild(btn);
+      });
+      g._reset=function(){segIdx=g.def;btns.forEach(function(b,j){b.classList.toggle('active',j===g.def);if(g.disable)b.disabled=g.disable(j)});g.onChange(g.def)};
+      g._rebuild=function(){btns.forEach(function(b,j){b.disabled=g.disable?g.disable(j):false})};
+      g._refresh=g._rebuild;
+      g._set=function(i){if(i===segIdx||i<0||i>=g.formats.length)return;if(btns[i].disabled)return;segIdx=i;btns.forEach(function(b,j){b.classList.toggle('active',j===i)});g.onChange(segIdx)};
+      g._cur=function(){return segIdx};
+      row.appendChild(segRow);
+
+    }else if(g.type==='format'){
       var fmtIdx=g.def;
       var iconWrap=document.createElement('span');
       var getIcon=function(i){return g.icons?g.icons[i]:g.icon};
