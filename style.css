@@ -109,7 +109,7 @@ body{line-height:1.5}
   flex-shrink:0;
   min-width:58px;
   text-align:center;
-  transition:.2s ease
+  transition:background .2s ease,color .2s ease,border-color .2s ease
 }
 .copy-btn:hover{background:var(--bg2);color:var(--t2);border-color:var(--t4)}
 .copy-btn.copied{background:var(--ok-bg);color:var(--ok-c);border-color:var(--ok-bdr);animation:pop .35s ease}
@@ -347,7 +347,7 @@ html[data-theme="dark"] .cmd-row-type{background:var(--bg)}
 }
 .cmd-overlay.open .cmd-palette{transform:translateX(-50%) scale(1);opacity:1}
 .cmd-input-wrap{position:relative}
-.cmd-input{padding:14px 42px 14px 44px;border:none;box-sizing:border-box;box-shadow:var(--modal-shadow)}
+.cmd-input{padding:14px 42px 14px 44px;border:none;box-shadow:var(--modal-shadow)}
 .cmd-input::placeholder{color:var(--t4)}
 .cmd-results{
   max-height:min(40vh,320px);overflow-y:auto;padding:6px 0;
