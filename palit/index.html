@@ -86,9 +86,11 @@ html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-
 <div id="color-rows" aria-live="polite" aria-label="Generated Colors"></div>
 </div>
 <div class="card" id="fmt-card" style="display:none" role="radiogroup" aria-label="Color Format">
-<div class="srow sel" data-f="0" tabindex="0" role="radio" aria-checked="true"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>HEX</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-f="1" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span>RGB</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
-<div class="srow" data-f="2" tabindex="0" role="radio" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20"/></svg><span>HSL</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+<div class="seg-row">
+<button class="seg active" data-f="0">HEX</button>
+<button class="seg" data-f="1">RGB</button>
+<button class="seg" data-f="2">HSL</button>
+</div>
 </div>
 <div class="card" id="neutral-card" style="display:none">
 <div class="srow" id="neutral-row" tabindex="0" role="switch" aria-checked="false"><span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg><span>Neutral Anchor</span></span><span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span></div>
@@ -574,10 +576,9 @@ el.appendChild(row)}}
 activeIdx=-1;closeExport()}
 
 function updateFmtRows(){
-var rows=$('fmt-card').querySelectorAll('.srow[data-f]');
-for(var i=0;i<rows.length;i++){var f=parseInt(rows[i].getAttribute('data-f'));
-rows[i].className='srow'+(f===globalFmt?' sel':'');
-rows[i].setAttribute('aria-checked',f===globalFmt?'true':'false')}
+var btns=$('fmt-card').querySelectorAll('.seg[data-f]');
+for(var i=0;i<btns.length;i++){var f=parseInt(btns[i].getAttribute('data-f'));
+btns[i].classList.toggle('active',f===globalFmt)}
 try{localStorage.setItem('palit-fmt',globalFmt)}catch(_){}}
 
 function refreshColorValues(){
@@ -756,10 +757,9 @@ if(cntRsTimer)clearTimeout(cntRsTimer);
 cntRsTimer=setTimeout(function(){row.classList.remove('rs-fb')},600)});
 
 $('fmt-card').addEventListener('click',function(e){
-var row=e.target.closest('.srow[data-f]');if(!row)return;
-var f=parseInt(row.getAttribute('data-f'));if(f===globalFmt)return;
+var btn=e.target.closest('.seg[data-f]');if(!btn)return;
+var f=parseInt(btn.getAttribute('data-f'));if(f===globalFmt)return;
 globalFmt=f;updateFmtRows();refreshColorValues()});
-$('fmt-card').addEventListener('keydown',rowKey);
 
 $('color-rows').addEventListener('click',function(e){
 var row=e.target.closest('.srow[data-ci]');if(!row)return;
