@@ -139,8 +139,6 @@ window._cgResetSvg=IC.reset;
 window._cgResetInner=IC.reset.replace(/<\/?svg[^>]*>/g,'');
 _cg.mkActions('az');
 
-var FMT_ICONS=[IC.png,IC.svg,IC.jpeg];
-var STYLE_ICONS=[IC.sun,IC.moon,IC.clear];
 
 /* Elements */
 var azIn=$('azIn'),azC=$('azC'),azPv=$('azPv');
@@ -260,11 +258,11 @@ azIn.addEventListener('input',function(){_cg.autoGrow(azIn);genAZD()});
 var azGroups1=[
   {type:'stepper',icon:IC.shield,steps:[23,36,50,75],def:0,format:function(v){return '~'+v+'% EC'},onChange:function(i){azS.ec=i;genAZS()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){azS.marginIdx=i;azS.exactSz=0;genAZS()}},
-  {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&azS.fmt===2},onChange:function(i){azS.style=i;_cg.updatePvStyle(azPv,i);genAZS()}}
+  {type:'seg',formats:['Light','Dark','Clear'],def:0,disable:function(i){return i===2&&azS.fmt===2},onChange:function(i){azS.style=i;_cg.updatePvStyle(azPv,i);genAZS()}}
 ];
 _cg.initSettings($('azCh1'),azGroups1);
 var azGroups2=[
-  {type:'format',icons:FMT_ICONS,formats:FMTS,def:0,onChange:function(i){azS.fmt=i;azGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&azS.style===2)_cg.resetGroup(azGroups1[2]);else azGroups1[2]._rebuild()}},
+  {type:'seg',formats:FMTS,def:0,onChange:function(i){azS.fmt=i;azGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&azS.style===2)_cg.resetGroup(azGroups1[2]);else azGroups1[2]._rebuild()}},
   {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:15,format:function(v){return v+' \u00D7 '+v},onChange:function(i){azS.sizeIdx=i;azS.exactSz=0}}
 ];
 _cg.initSettings($('azCh2'),azGroups2);
