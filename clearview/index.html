@@ -26,7 +26,7 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.seg:hover:not(.active){color:var(--t2);background:var(--bg2)}}
 .seg-row{display:grid;grid-template-columns:1fr 1fr 1fr}
-.seg{padding:12px;font:500 .875rem/1 var(--font);color:var(--t3);background:none;border:none;cursor:pointer;text-align:center;transition:background .2s,color .2s}
+.seg{padding:12px;min-height:46px;display:flex;align-items:center;justify-content:center;font:500 .875rem/1 var(--font);color:var(--t3);background:none;border:none;cursor:pointer;text-align:center;transition:background .2s,color .2s}
 .seg.active{background:var(--tab-active);color:var(--tab-active-c)}
 .seg:active{opacity:.7}
 </style>
