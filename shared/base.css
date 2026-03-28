@@ -116,6 +116,8 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 .chip{padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
 .chip:active{transform:scale(.95)}
 .chip.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+html[data-theme="dark"] .chip.active{color:#0D1B2A}
+html[data-theme="sepia"] .chip.active{color:#1A0E05}
 .stepper{display:flex;align-items:center;gap:6px}
 .step-btn{width:28px;height:28px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,opacity .15s;padding:0}
 .step-btn svg{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;width:14px;height:14px}

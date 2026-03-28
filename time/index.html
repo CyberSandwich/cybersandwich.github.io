@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FAFAFA">
 <link rel="icon" href="data:,">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=15">
+<link rel="stylesheet" href="/shared/base.css?v=16">
 <style>
 :root{--bg3:#EFEFEF;--accl:rgba(72,72,74,.06);--ok:#2D7D46;--err:#C41E3A;--mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
 html[data-theme="dark"]{--bg3:#3A3A3C;--accl:rgba(100,181,246,.08);--ok:#4ADE80;--err:#F87171}
@@ -232,7 +232,7 @@ main{max-width:960px;margin:0 auto;padding:20px 24px 100px}
     </div>
   </div>
 </div>
-<script src="/shared/base.js?v=17"></script>
+<script src="/shared/base.js?v=18"></script>
 <script>
 const CIRC=565.49,$=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),q=s=>document.querySelector(s),qa=s=>document.querySelectorAll(s);
 const SA='aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"';
@@ -242,6 +242,15 @@ let alarms=[],aNextId=0;
 let swOn=false,swT0=0,swE=0,swLaps=[],swRaf=null,swLastDisplay='';
 let timers=[],tNextId=0,tArcRaf=null,tFullId=null;
 let audioCtx,sndInt,fired=null,firedTid=null,lastChk='';
+var wakeLock=null;
+function needsWake(){return swOn||fired||firedTid!==null||timers.some(function(t){return !t.done&&!t.paused})}
+async function updateWake(){
+  if(needsWake()){
+    if(!wakeLock&&navigator.wakeLock){try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',function(){wakeLock=null})}catch(e){}}
+  }else{
+    if(wakeLock){try{wakeLock.release()}catch(e){}wakeLock=null}
+  }
+}
 const heroHM=$('heroHM'),heroS=$('heroS'),swMainEl=$('swMain'),swMsEl=$('swMs');
 function save(){_base.save('clk',{alarms,aNextId})}
 function load(){const d=_base.load('clk');if(d){alarms=d.alarms||[];aNextId=d.aNextId||0}}
@@ -289,13 +298,13 @@ function fireAlarm(a){
   fired=a;firedTid=null;
   $('fireTime').textContent=a.time;
   $('fireLbl').textContent='Alarm';
-  $('fireOv').classList.add('active');$('fireOv').querySelector('.btn').focus();checkSound();
+  $('fireOv').classList.add('active');$('fireOv').querySelector('.btn').focus();checkSound();updateWake();
 }
 function fireTimer(t){
   firedTid=t.id;fired=null;
   $('fireTime').textContent=fmtTimer(t.dur);
   $('fireLbl').textContent='Timer';
-  $('fireOv').classList.add('active');$('fireOv').querySelector('.btn').focus();checkSound();
+  $('fireOv').classList.add('active');$('fireOv').querySelector('.btn').focus();checkSound();updateWake();
 }
 function dismiss(){
   if(firedTid!==null){tRemove(firedTid);firedTid=null}
@@ -303,7 +312,7 @@ function dismiss(){
   $('fireOv').classList.remove('active');
   const next=timers.find(t=>t.done);
   if(next)fireTimer(next);
-  else checkSound();
+  else{checkSound();updateWake()}
 }
 function initAudio(){
   if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -334,15 +343,15 @@ function swToggle(){swOn?swStop():swStart()}
 function swStart(){
   swOn=true;swT0=performance.now()-swE;
   const b=$('swBtnS');b.textContent='Stop';b.ariaLabel='Stop stopwatch';b.classList.add('btn-stop');
-  $('swBtnL').disabled=false;$('swBtnL').textContent='Lap';$('swBtnL').ariaLabel='Lap';swTick();
+  $('swBtnL').disabled=false;$('swBtnL').textContent='Lap';$('swBtnL').ariaLabel='Lap';swTick();updateWake();
 }
 function swStop(){
   swOn=false;swE=performance.now()-swT0;cancelAnimationFrame(swRaf);swRaf=null;
   const b=$('swBtnS');b.textContent='Start';b.ariaLabel='Start stopwatch';b.classList.remove('btn-stop');
-  $('swBtnL').textContent='Reset';$('swBtnL').ariaLabel='Reset stopwatch';
+  $('swBtnL').textContent='Reset';$('swBtnL').ariaLabel='Reset stopwatch';updateWake();
 }
 function swLap(){
-  if(!swOn){swE=0;swLaps=[];swLastDisplay='';swMainEl.textContent='00:00';swMsEl.textContent='.00';$('swBtnL').disabled=true;$('swBtnL').textContent='Lap';$('swBtnL').ariaLabel='Lap';$('lapWrap').style.display='none';return}
+  if(!swOn){swE=0;swLaps=[];swLastDisplay='';swMainEl.textContent='00:00';swMsEl.textContent='.00';$('swBtnL').disabled=true;$('swBtnL').textContent='Lap';$('swBtnL').ariaLabel='Lap';$('lapWrap').style.display='none';updateWake();return}
   const tot=performance.now()-swT0,prev=swLaps.reduce((s,l)=>s+l,0);
   swLaps.push(tot-prev);renderLaps();
 }
@@ -398,7 +407,7 @@ function tScheduleBg(t){
 }
 function tGo(sec){
   const t={id:++tNextId,dur:sec,rem:sec,end:performance.now()+sec*1000,paused:false,done:false,_card:null,_arc:null,_val:null,_bgTO:null};
-  timers.push(t);renderTimerGrid();tEnsureLoops();tScheduleBg(t);tEnterFull(t.id);
+  timers.push(t);renderTimerGrid();tEnsureLoops();tScheduleBg(t);tEnterFull(t.id);updateWake();
 }
 function tClear(){$('cH').value='';$('cM').value='';$('cS').value=''}
 function tStartCustom(){
@@ -437,6 +446,7 @@ function tFinish(t){
   if(!fired&&firedTid===null&&!inFull)fireTimer(t);
   else checkSound();
   if(navigator.vibrate)navigator.vibrate([300,100,300,100,300]);
+  updateWake();
 }
 
 function tToggle(id){
@@ -444,13 +454,13 @@ function tToggle(id){
   if(t.paused){t.end=performance.now()+t.rem*1000;t.paused=false;tEnsureLoops();tScheduleBg(t)}
   else{t.paused=true;if(t._bgTO){clearTimeout(t._bgTO);t._bgTO=null}}
   if(t._card)t._card.querySelector('.tc-btns .btn-p').textContent=t.paused?'Resume':'Pause';
-  if(tFullId===id)updateFullView();
+  if(tFullId===id)updateFullView();updateWake();
 }
 function tRemove(id){
   if(tFullId===id)tExitFull();
   const rm=timers.find(t=>t.id===id);if(rm&&rm._bgTO){clearTimeout(rm._bgTO);rm._bgTO=null}
   timers=timers.filter(t=>t.id!==id);
-  renderTimerGrid();checkSound();
+  renderTimerGrid();checkSound();updateWake();
   if(!tHasActive()){if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}}
 }
 function renderTimerGrid(){
@@ -483,7 +493,7 @@ function updateFullView(){
 }
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden){
-    if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(timers.length)tTickArcs(performance.now());checkSound();
+    if(tArcRaf){cancelAnimationFrame(tArcRaf);tArcRaf=null}if(timers.length)tTickArcs(performance.now());checkSound();updateWake();
     if(alarms.length&&!fired&&lastChk){
       const n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());
       if(lastChk!==hm){
