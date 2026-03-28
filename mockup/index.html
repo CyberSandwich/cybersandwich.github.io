@@ -24,13 +24,17 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .actions button:active{opacity:.7}
 .step-val{min-width:36px;text-align:center;font:600 .8125rem/1 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}}
+.loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;transition:opacity .3s}
+.loader.hidden{opacity:0;pointer-events:none}
+.loader svg{width:32px;height:32px;animation:spin .8s linear infinite;color:var(--t4)}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
 <div class="w">
 <div id="pv" class="card pv-card bg-none">
-<div class="scene" id="scene"></div>
+<div class="scene" id="scene"><div class="loader" id="loader"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a10 10 0 0 1 10 10" /></svg></div></div>
 </div>
 <div id="acts" class="card">
 <div class="actions">
@@ -105,6 +109,23 @@ import{RGBELoader}from'three/addons/loaders/RGBELoader.js';
 
 var $=function(s){return document.getElementById(s)};
 
+/* Asset cache — SWR: serve from cache instantly, revalidate in background */
+var CACHE_NAME='mockup-assets-v1';
+var memCache={};
+function cachedFetch(url){
+  if(memCache[url])return Promise.resolve(memCache[url]);
+  return caches.open(CACHE_NAME).then(function(c){
+    return c.match(url).then(function(r){
+      if(r){
+        // Stale-while-revalidate: return cached, refresh in background
+        fetch(url).then(function(r2){if(r2.ok){c.put(url,r2)}}).catch(function(){});
+        return r.arrayBuffer().then(function(b){memCache[url]=b;return b});
+      }
+      return fetch(url).then(function(r2){c.put(url,r2.clone());return r2.arrayBuffer().then(function(b){memCache[url]=b;return b})});
+    });
+  });
+}
+
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
 {name:'iPhone 17 Pro Max',url:'/mockup/iphone_17_pro_max.glb',pw:440,ph:956,iw:126,ih:37,iy:14,irx:19,sw:7.304,sh:15.87,sz:0.44,so:0.005,sr:1.24,cz:28.6,ns:100,ry:0,mm:1.0,mr:0.7,ei:1.2,bs:1.003},
@@ -145,7 +166,9 @@ sceneEl.appendChild(renderer.domElement);
 
 /* Studio HDRI for cinematic metallic reflections */
 var envReady=false;
-new RGBELoader().load('/mockup/studio.hdr',function(tex){
+var rgbeLoader=new RGBELoader();
+cachedFetch('/mockup/studio.hdr').then(function(buf){
+var tex=rgbeLoader.parse(buf);
 tex.mapping=THREE.EquirectangularReflectionMapping;
 var pmrem=new THREE.PMREMGenerator(renderer);
 scene.environment=pmrem.fromEquirectangular(tex).texture;
@@ -231,14 +254,15 @@ var gltfLoader=new GLTFLoader();
 function loadModel(idx){
 curDev=idx;var d=DEVICES[idx];
 PW=d.pw;PH=d.ph;IW=d.iw;IH=d.ih;IX=(PW-IW)/2;IY=d.iy;IRX=d.irx;
-modelReady=false;var myId=++loadId;var is17=idx<2;
+modelReady=false;$('loader').classList.remove('hidden');var myId=++loadId;var is17=idx<2;
 hemiL.intensity=is17?0.1:0.2;keyL.intensity=is17?1.8:1.5;keyL.color.set(is17?0xFFE8D6:0xffffff);
 fillL.intensity=is17?0.5:0.4;fillL.color.set(is17?0xF0F2FF:0xffffff);
 rimL.intensity=is17?1.0:0.7;rimR.intensity=is17?1.0:0.7;btmL.intensity=is17?0.2:0.2;
 camFill.intensity=is17?0.3:0.15;
 scene.environmentIntensity=is17?0.4:0.5;
 try{localStorage.setItem('mockup-dev',idx)}catch(_){}
-gltfLoader.load(d.url,function(gltf){
+cachedFetch(d.url).then(function(buf){
+gltfLoader.parse(buf.slice(0),'',function(gltf){
 if(myId!==loadId)return;
 if(phoneModel){scene.remove(phoneModel);phoneModel.traverse(function(c){if(c.isMesh){c.geometry.dispose();(Array.isArray(c.material)?c.material:[c.material]).forEach(function(m){if(m)m.dispose()})}});phoneModel=null}
 if(screenMesh){scene.remove(screenMesh);screenMesh.geometry.dispose();screenMesh=null}
@@ -266,9 +290,10 @@ screenMesh=new THREE.Mesh(geom,mat);
 screenMesh.position.set(0,0,d.sz+d.so);
 screenMesh.visible=!!img;
 scene.add(screenMesh);
-modelReady=true;
+modelReady=true;$('loader').classList.add('hidden');
 updateScreen();render()
-},undefined,function(){_base.notify('Failed to Load Model',false)})
+},function(){$('loader').classList.add('hidden');_base.notify('Failed to Load Model',false)})
+})
 }
 var initDev=0;try{var sd=localStorage.getItem('mockup-dev');if(sd!=null&&DEVICES[+sd])initDev=+sd}catch(_){}
 loadModel(initDev);
