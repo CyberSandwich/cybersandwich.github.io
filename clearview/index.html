@@ -25,7 +25,7 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .actions button:active{opacity:.7}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}.seg:hover:not(.active){color:var(--t2);background:var(--bg2)}}
-.seg-row{display:grid;grid-template-columns:1fr 1fr 1fr}
+.seg-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--bdr2)}
 .seg{padding:12px;min-height:46px;display:flex;align-items:center;justify-content:center;font:500 .875rem/1 var(--font);color:var(--t3);background:none;border:none;cursor:pointer;text-align:center;transition:background .2s,color .2s}
 .seg.active{background:var(--tab-active);color:var(--tab-active-c)}
 .seg:active{opacity:.7}
@@ -72,8 +72,6 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 <button class="seg" id="bg-1" role="radio" aria-checked="false">Light</button>
 <button class="seg" id="bg-2" role="radio" aria-checked="false">Dark</button>
 </div>
-</div>
-<div class="card" id="bg-card-2">
 <div class="srow" id="bg-5" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg><span>Auto</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" id="bg-3" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg><span>Warm</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
 <div class="srow" id="bg-4" tabindex="0" role="radio" aria-checked="false"><label class="slbl"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg><span>Cool</span></label><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
