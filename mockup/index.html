@@ -168,14 +168,17 @@ sceneEl.appendChild(renderer.domElement);
 var envReady=false;
 var rgbeLoader=new RGBELoader();
 cachedFetch('/mockup/studio.hdr').then(function(buf){
-var tex=rgbeLoader.parse(buf);
+var blob=new Blob([buf]);
+var blobUrl=URL.createObjectURL(blob);
+rgbeLoader.load(blobUrl,function(tex){
+URL.revokeObjectURL(blobUrl);
 tex.mapping=THREE.EquirectangularReflectionMapping;
 var pmrem=new THREE.PMREMGenerator(renderer);
 scene.environment=pmrem.fromEquirectangular(tex).texture;
 scene.environmentIntensity=0.3;
 scene.environmentRotation=new THREE.Euler(0,Math.PI*0.25,0);
 tex.dispose();pmrem.dispose();envReady=true;render()
-});
+})});
 
 var controls=new OrbitControls(camera,renderer.domElement);
 controls.enableZoom=false;
@@ -262,7 +265,10 @@ camFill.intensity=is17?0.3:0.15;
 scene.environmentIntensity=is17?0.4:0.5;
 try{localStorage.setItem('mockup-dev',idx)}catch(_){}
 cachedFetch(d.url).then(function(buf){
-gltfLoader.parse(buf.slice(0),'',function(gltf){
+var blob=new Blob([buf],{type:'model/gltf-binary'});
+var blobUrl=URL.createObjectURL(blob);
+gltfLoader.load(blobUrl,function(gltf){
+URL.revokeObjectURL(blobUrl);
 if(myId!==loadId)return;
 if(phoneModel){scene.remove(phoneModel);phoneModel.traverse(function(c){if(c.isMesh){c.geometry.dispose();(Array.isArray(c.material)?c.material:[c.material]).forEach(function(m){if(m)m.dispose()})}});phoneModel=null}
 if(screenMesh){scene.remove(screenMesh);screenMesh.geometry.dispose();screenMesh=null}
@@ -292,7 +298,7 @@ screenMesh.visible=!!img;
 scene.add(screenMesh);
 modelReady=true;$('loader').classList.add('hidden');
 updateScreen();render()
-},function(){$('loader').classList.add('hidden');_base.notify('Failed to Load Model',false)})
+},undefined,function(){$('loader').classList.add('hidden');_base.notify('Failed to Load Model',false)})
 })
 }
 var initDev=0;try{var sd=localStorage.getItem('mockup-dev');if(sd!=null&&DEVICES[+sd])initDev=+sd}catch(_){}
