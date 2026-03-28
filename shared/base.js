@@ -157,5 +157,13 @@
     });
   }
 
+  /* Delegated step-button press animation */
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.step-btn');
+    if(!btn||btn.disabled)return;
+    btn.classList.remove('step-press');void btn.offsetWidth;btn.classList.add('step-press');
+    clearTimeout(btn._sa);btn._sa=setTimeout(function(){btn.classList.remove('step-press')},300);
+  });
+
   window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
 })();

@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Palit</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=20">
+<link rel="stylesheet" href="/shared/base.css?v=21">
 <style>
 body{display:flex;flex-direction:column;align-items:center}
 .w{max-width:440px;width:100%;padding:20px 20px calc(86px + env(safe-area-inset-bottom,0px))}
@@ -22,9 +22,6 @@ body{display:flex;flex-direction:column;align-items:center}
 .cp-btn.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
 html[data-theme="dark"] .cp-btn.copied{background:#1A3A2A;color:#34D399;border-color:#2D5A3E}
 html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
-.stepper{gap:4px}
-.step-btn{width:36px;height:36px}
-.step-btn svg{width:16px;height:16px}
 .cdot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:1px solid var(--bdr2)}
 .clbl{flex:1;min-width:0;font:500 .9375rem/1 var(--font);color:var(--t2);word-break:break-all}
 .clbl .cg{font:500 .8125rem/1 var(--font);color:var(--t3);margin-left:6px}
@@ -143,7 +140,7 @@ Drop Here
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <canvas id="cvs" style="display:none"></canvas>
-<script src="/shared/base.js?v=20"></script>
+<script src="/shared/base.js?v=21"></script>
 <script>
 'use strict';
 var $=function(id){return document.getElementById(id)},PI=Math.PI;

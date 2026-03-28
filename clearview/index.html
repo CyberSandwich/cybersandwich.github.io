@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>ClearView</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=20">
+<link rel="stylesheet" href="/shared/base.css?v=21">
 <style>
 body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fill-available}
 .w{max-width:440px;width:100%;padding:20px 20px calc(88px + env(safe-area-inset-bottom,0px))}
@@ -25,28 +25,6 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .actions button:active{opacity:.7}
 .schips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover:not(.active){border-color:var(--t4);color:var(--t2)}}
-#s2 .srow{display:grid;grid-template-columns:2fr 1fr 1fr;padding:0;gap:0}
-#s2 .slbl{padding:8px 16px;min-height:46px}
-#s2 .stepper{display:contents;gap:0}
-#s2 .step-btn{width:100%;height:100%;min-height:46px;border:none;border-radius:0;transition:opacity .15s,filter .15s}
-#s2 .step-btn svg{width:18px;height:18px;stroke-width:2.5}
-#s2 .step-btn:active:not(:disabled){transform:none;filter:brightness(.92)}
-#s2 .step-btn[id$="-dec"]{background:#FEF2F2;color:#B91C1C;border-left:1px solid var(--bdr2)}
-#s2 .step-btn[id$="-inc"]{background:#F0FDF4;color:#15803D}
-#s2 .step-btn:disabled{opacity:.35;filter:saturate(0)}
-@media(hover:hover){#s2 .step-btn:hover:not(:disabled){filter:brightness(.95)}}
-html[data-theme="dark"] #s2 .step-btn[id$="-dec"]{background:#3B1C1C;color:#FCA5A5;border-left-color:var(--bdr2)}
-html[data-theme="dark"] #s2 .step-btn[id$="-inc"]{background:#1A3A2A;color:#86EFAC}
-html[data-theme="sepia"] #s2 .step-btn[id$="-dec"]{background:#E8D5C8;color:#9A3412;border-left-color:var(--bdr2)}
-html[data-theme="sepia"] #s2 .step-btn[id$="-inc"]{background:#D5E0C8;color:#3F6212}
-#s2 .srow.rs-fb .step-btn,#s2 .srow.rs-fb .step-btn svg{animation:none!important;color:inherit!important}
-#s2 .srow.rs-fb .step-btn[id$="-dec"]{background:#FEF2F2!important;color:#B91C1C!important}
-#s2 .srow.rs-fb .step-btn[id$="-inc"]{background:#F0FDF4!important;color:#15803D!important}
-html[data-theme="dark"] #s2 .srow.rs-fb .step-btn[id$="-dec"]{background:#3B1C1C!important;color:#FCA5A5!important}
-html[data-theme="dark"] #s2 .srow.rs-fb .step-btn[id$="-inc"]{background:#1A3A2A!important;color:#86EFAC!important}
-html[data-theme="sepia"] #s2 .srow.rs-fb .step-btn[id$="-dec"]{background:#E8D5C8!important;color:#9A3412!important}
-html[data-theme="sepia"] #s2 .srow.rs-fb .step-btn[id$="-inc"]{background:#D5E0C8!important;color:#3F6212!important}
-#s2 .step-btn.step-press svg{animation:pop .25s ease}
 </style>
 </head>
 <body>
@@ -113,7 +91,7 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=20"></script>
+<script src="/shared/base.js?v=21"></script>
 <script>
 var $=function(s){return document.getElementById(s)};
 
@@ -298,11 +276,10 @@ $('shd-inc').disabled=shadowIdx===SHD_PCT.length-1
 }
 updateRadUI();updateShdUI();
 
-function stepAnim(el){el.classList.remove('step-press');void el.offsetWidth;el.classList.add('step-press');clearTimeout(el._sa);el._sa=setTimeout(function(){el.classList.remove('step-press')},300)}
-$('rad-dec').addEventListener('click',function(){if(radiusIdx>0){radiusIdx--;updateRadUI();render();stepAnim(this)}});
-$('rad-inc').addEventListener('click',function(){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render();stepAnim(this)}});
-$('shd-dec').addEventListener('click',function(){if(shadowIdx>0){shadowIdx--;updateShdUI();render();stepAnim(this)}});
-$('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render();stepAnim(this)}});
+$('rad-dec').addEventListener('click',function(){if(radiusIdx>0){radiusIdx--;updateRadUI();render()}});
+$('rad-inc').addEventListener('click',function(){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render()}});
+$('shd-dec').addEventListener('click',function(){if(shadowIdx>0){shadowIdx--;updateShdUI();render()}});
+$('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}});
 
 function buildFmtChips(){
 var el=$('fmt-chips');el.textContent='';
