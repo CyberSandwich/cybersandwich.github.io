@@ -14,12 +14,13 @@ on:
         required: true
         type: choice
         options:
-          - Personal
-          - Career
+          - Modules
           - Initiatives
           - Academic
-          - Modules
+          - Career
           - Community
+          - Personal
+          - Social Media
           - Miscellaneous
       icon:
         description: 'Icon name from ICONS map (optional)'
@@ -93,7 +94,7 @@ jobs:
           data.append(entry)
 
           # Sort alphabetically by title within each category, preserving category order
-          categories = ['Personal', 'Career', 'Initiatives', 'Academic', 'Modules', 'Community', 'Miscellaneous']
+          categories = ['Modules', 'Initiatives', 'Academic', 'Career', 'Community', 'Personal', 'Social Media', 'Miscellaneous']
           cat_order = {c: i for i, c in enumerate(categories)}
           data.sort(key=lambda x: (cat_order.get(x['category'], 999), x['title'].lower()))
 

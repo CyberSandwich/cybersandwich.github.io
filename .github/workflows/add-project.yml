@@ -17,9 +17,12 @@ on:
         required: true
         type: choice
         options:
-          - Mobile
-          - Web
-          - Extensions
+          - Flagship Projects
+          - Image Tools
+          - Text Tools
+          - Generators
+          - Utilities
+          - Miscellaneous
           - In Development
 
 permissions:
@@ -92,7 +95,7 @@ jobs:
           data.append({'title': title, 'subtitle': subtitle, 'url': url, 'category': category})
 
           # Sort alphabetically by title within each category, preserving category order
-          categories = ['Mobile', 'Web', 'Extensions', 'In Development']
+          categories = ['Flagship Projects', 'Image Tools', 'Text Tools', 'Generators', 'Utilities', 'Miscellaneous', 'In Development']
           cat_order = {c: i for i, c in enumerate(categories)}
           data.sort(key=lambda x: (cat_order.get(x['category'], 999), x['title'].lower()))
 
