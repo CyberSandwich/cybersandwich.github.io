@@ -88,9 +88,7 @@ body{line-height:1.5}
 }
 .links a:last-child{border-bottom:none}
 .links a:hover{background:var(--bg2);color:var(--t1)}
-.links svg{width:18px;height:18px;flex-shrink:0;color:var(--brand,var(--t4));transition:opacity .15s}
-[style*="--brand"]>a svg{opacity:.45}
-[style*="--brand"]:hover>a svg{opacity:.75}
+.links svg{width:18px;height:18px;flex-shrink:0;color:var(--t4);transition:opacity .15s}
 .copy-row{display:flex;align-items:center;border-bottom:1px solid var(--bdr2);transition:background .15s}
 .copy-row:hover{background:var(--bg2)}
 .copy-row:hover a{color:var(--t1)}
