@@ -39,8 +39,6 @@ html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-
 .del{width:36px;height:36px;border-radius:50%;border:none;background:none;cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s;margin-left:8px}
 .del svg{width:14px;height:14px}
 .del:active{opacity:.7}
-.paste-hint{display:none;text-align:center;font:400 .75rem/1 var(--font);color:var(--t4);padding:0 20px 4px;cursor:pointer}
-@media(hover:none){.paste-hint{display:block}}
 @media(hover:hover){
 .actions button:hover{background:var(--bg2)}
 .del:hover{color:var(--t2);background:var(--bg2)}
@@ -127,7 +125,6 @@ html[data-theme="sepia"] .cp-btn.copied{background:#E8E0CE;color:#2D7D46;border-
 <span>Reset</span>
 </button>
 </div>
-<label class="paste-hint" for="file-inp">Tap to Upload or Paste Image</label>
 <input type="file" id="file-inp" accept="image/*" style="display:none">
 <div id="hist-wrap" style="display:none">
 <div class="card items" id="hist-items"></div>

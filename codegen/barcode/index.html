@@ -290,7 +290,7 @@ bcFmtSel.addEventListener('change',function(){
 
 /* Barcode Settings */
 var bcGroups1=[
-  {type:'chips',icon:IC.height,label:'Height',opts:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBCS()}},
+  {type:'seg',formats:['S','M','L'],def:0,onChange:function(i){bcS.height=i;genBCS()}},
   {type:'format',icons:[IC.type,IC.clear],formats:['Text On','Text Off'],def:1,onChange:function(i){bcS.text=i;genBCS()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:5,format:function(v){return v+' px Margin'},onChange:function(i){bcS.marginIdx=i;genBCS()}},
   {type:'seg',formats:['Light','Dark','Clear'],def:0,disable:function(i){return i===2&&bcS.fmt===2},onChange:function(i){bcS.style=i;_cg.updatePvStyle(bcPv,i);genBCS()}}
