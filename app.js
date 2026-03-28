@@ -44,7 +44,7 @@ function route(){
       p.classList.toggle('active',p.id===page)
     });
   }
-  window.scrollTo(0,0);
+  window.scrollTo({top:0,behavior:'instant'});
   const ft=page==='home'?$('#main'):$('#'+page+' .stitle');
   if(ft){ft.setAttribute('tabindex','-1');ft.focus()}
 
@@ -138,7 +138,7 @@ function makeLoader(url,cb){
         if(cached&&loader.onFresh)loader.onFresh(d);
         return d;
       })
-      .catch(function(e){p=null;fails++;console.error('Load failed:',e);if(cached){loader.err=false;return cb(cached)}loader.err=true;return[]});
+      .catch(function(e){p=null;fails++;console.error('Load failed:',e);if(cached){loader.err=false;return cached}loader.err=true;return[]});
     if(cached){cb(cached);return Promise.resolve(cached)}
     return p;
   };

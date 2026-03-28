@@ -194,6 +194,7 @@ async function processFile(file,card){
   _io.updateCard(card,'Encoding...',20);await _io.tick();
   if(aborted())throw new Error('Cancelled');
   var canvasBlob=await new Promise(function(r){cv.toBlob(r,'image/png')});
+  cv.width=0;cv.height=0;
   if(aborted())throw new Error('Cancelled');
   var canvasPng=new Uint8Array(await canvasBlob.arrayBuffer());
   if(aborted())throw new Error('Cancelled');

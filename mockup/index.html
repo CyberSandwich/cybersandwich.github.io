@@ -161,7 +161,7 @@ controls.enablePan=false;
 controls.enableDamping=true;
 controls.dampingFactor=0.05;
 controls.rotateSpeed=0.5;
-controls.addEventListener('change',function(){updateAngles()});
+controls.addEventListener('change',function(){updateAngles();render();clearTimeout(_settleT);_settleT=setTimeout(_stopDamp,200)});
 
 /* Lighting — warm key / cool fill / warm rim / camera fill */
 var hemiL=new THREE.HemisphereLight(0xEBEEFF,0x3d3020,0.15);scene.add(hemiL);
@@ -285,8 +285,10 @@ new ResizeObserver(resize).observe(sceneEl);
 resize();
 
 function render(){renderer.render(scene,camera)}
-function tick(){requestAnimationFrame(tick);controls.update();render()}
-tick();
+var _dampId=null,_settleT=null;
+function _dampLoop(){_dampId=requestAnimationFrame(_dampLoop);controls.update()}
+function _stopDamp(){if(_dampId!==null){cancelAnimationFrame(_dampId);_dampId=null}}
+controls.addEventListener('start',function(){if(_dampId===null)_dampLoop()});
 
 function updateAngles(){
 var sph=new THREE.Spherical().setFromVector3(camera.position);

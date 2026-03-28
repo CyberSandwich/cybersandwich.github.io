@@ -152,8 +152,16 @@ async function compileWasm(){
   workerUrl=URL.createObjectURL(new Blob([WORKER_SRC],{type:'application/javascript'}));
 }
 
+var _pngCache=new WeakMap();
 function copyBlob(blob,btn){
   if(!navigator.clipboard||!navigator.clipboard.write){_io.showNotif('Clipboard Not Available');return}
+  var cached=_pngCache.get(blob);
+  if(cached){
+    navigator.clipboard.write([new ClipboardItem({'image/png':cached})]).then(function(){
+      btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy'},1500);
+    }).catch(function(){_io.showNotif('Copy Failed')});
+    return;
+  }
   var img=new Image();
   var url=URL.createObjectURL(blob);
   img.onload=function(){
@@ -161,7 +169,9 @@ function copyBlob(blob,btn){
     var ctx=cv.getContext('2d');ctx.drawImage(img,0,0);
     URL.revokeObjectURL(url);
     cv.toBlob(function(pngBlob){
+      cv.width=0;cv.height=0;
       if(!pngBlob){_io.showNotif('Copy Failed');return}
+      _pngCache.set(blob,pngBlob);
       navigator.clipboard.write([
         new ClipboardItem({'image/png':pngBlob})
       ]).then(function(){
@@ -194,9 +204,11 @@ async function processFile(file,card){
   if(aborted())throw new Error('Cancelled');
   if(wasmFailed){
     var canvasBlob=await new Promise(function(r){cv.toBlob(r,'image/jpeg',0.75)});
+    cv.width=0;cv.height=0;
     _io.updateCard(card,'Done',100);
     return canvasBlob;
   }
+  cv.width=0;cv.height=0;
   return new Promise(function(resolve,reject){
     var w=new Worker(workerUrl);
     activeWorker=w;activeReject=reject;
