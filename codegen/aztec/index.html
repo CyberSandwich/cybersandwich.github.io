@@ -160,7 +160,9 @@ function scanOk(btn,cpBtn,result){
   _base.notify('Tap to Copy',true,function(){cpBtn.click()});
 }
 function scanFail(btn){_base.feedback(btn,'err-fb',_cg.NF,1500);_base.notify(_cg.NF,false)}
+function scanUnsupported(btn){_base.feedback(btn,'err-fb','Not Supported',1500);_base.notify('Aztec Scanning Not Supported in This Browser',false)}
 function scanBlob(blob,psBtn,cpBtn){
+  if(!bcDetAZ){scanUnsupported(psBtn);return}
   psBtn.classList.add('ld');psBtn.querySelector('span').textContent='Scanning\u2026';
   scanImage(blob).then(function(r){if(r)scanOk(psBtn,cpBtn,r);else scanFail(psBtn)}).catch(function(){scanFail(psBtn)});
 }
@@ -284,6 +286,7 @@ function handlePaste(btn){
   var cpBtn=$('azCp');
   function onScanResult(result){if(result)scanOk(btn,cpBtn,result);else scanFail(btn)}
   function tryImages(){
+    if(!bcDetAZ){scanUnsupported(btn);return}
     if(!navigator.clipboard||!navigator.clipboard.read){_base.feedback(btn,'err-fb','No Access',1500);return}
     navigator.clipboard.read().then(function(items){
       for(var x=0;x<items.length;x++){

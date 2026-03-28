@@ -378,7 +378,7 @@ text:'Reset All',
 guard:function(){return !!img},
 onConfirm:function(){
 img=null;if(blobUrl){URL.revokeObjectURL(blobUrl);blobUrl=null}
-render();setBg(0);radiusIdx=4;shadowIdx=2;
+render();setBg(0);radiusIdx=4;shadowIdx=4;
 updateRadUI();updateShdUI();setFmt(0);
 groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
 groups.forEach(function(g){animateReset(g)});

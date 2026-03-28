@@ -623,7 +623,7 @@ nr.setAttribute('aria-checked',neutral?'true':'false')}
 
 // ===================== COPY =====================
 
-function copyText(text){_base.copyText(text)}
+function copyText(text,cb,onErr){_base.copyText(text,cb,onErr)}
 
 var mkCheckSvg=_base.mkCheck;
 
@@ -631,7 +631,7 @@ function copyColor(idx){
 if(idx<0||idx>=palette.length)return;
 var row=$('color-rows').children[idx];if(!row)return;
 var btn=row.querySelector('.cp-btn');if(!btn)return;
-copyText(fmtVal(palette[idx],globalFmt));
+copyText(fmtVal(palette[idx],globalFmt),function(){
 if(copyTimers[idx]){clearTimeout(copyTimers[idx]);copyTimers[idx]=null}
 btn.classList.remove('copied');btn.offsetWidth;btn.classList.add('copied');
 btn.textContent='';btn.appendChild(mkCheckSvg());
@@ -639,12 +639,13 @@ copyTimers[idx]=setTimeout(function(){
 btn.style.opacity='0';
 copyTimers[idx]=setTimeout(function(){
 btn.classList.remove('copied');btn.textContent='Copy';btn.style.opacity='';
-copyTimers[idx]=null},200)},1300)}
+copyTimers[idx]=null},200)},1300)},function(){
+btnFeedback(btn,'err-fb','Copy','Failed',800)})}
 
 function doCopyAll(){
 if(palette.length===0)return;
 var out=palette.map(function(p){return fmtVal(p,globalFmt)}).join(', ');
-copyText(out);btnFeedback($('ca-btn'),'ok','Copy All','Copied',1500)}
+copyText(out,function(){btnFeedback($('ca-btn'),'ok','Copy All','Copied',1500)},function(){btnFeedback($('ca-btn'),'err-fb','Copy All','Failed',800)})}
 
 function dlFile(name,content,type){
 var b=new Blob([content],{type:type||'text/plain'});
@@ -665,7 +666,7 @@ if(btn)btnFeedback(btn,'ok','','Downloaded',1200)}
 
 var fbTimers=new WeakMap();
 function btnFeedback(btn,cls,origText,fbText,dur){
-var prev=fbTimers.get(btn);if(prev){clearTimeout(prev);btn.classList.remove('ok','rs-fb','rs-warn')}
+var prev=fbTimers.get(btn);if(prev){clearTimeout(prev);btn.classList.remove('ok','rs-fb','rs-warn','err-fb')}
 var sp=btn.querySelector('span'),orig=sp?sp.textContent:'';
 btn.classList.remove(cls);btn.offsetWidth;btn.classList.add(cls);
 if(sp&&fbText)sp.textContent=fbText;
@@ -789,8 +790,23 @@ var row=e.target.closest('.hist-row');if(row){e.preventDefault();e.stopPropagati
 
 $('file-inp').addEventListener('change',function(){if(this.files&&this.files.length>0){processImage(this.files[0]);this.value=''}});
 
+function handlePastedText(btn,text){
+if(!text){btnFeedback(btn,'rs-warn','Paste','Empty',1200);return}
+var multi=parseMultiColor(text);
+if(multi){processPastedColors(multi);btnFeedback(btn,'ok','Paste','Pasted',1200);return}
+var rgb=parseColor(text.trim());
+if(rgb){baseUserSet=true;setBaseColor(rgb);
+if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
+if(ruleIdx>=0)generate();btnFeedback(btn,'ok','Paste','Pasted',1200);return}
+btnFeedback(btn,'rs-warn','Paste','Invalid',1200)}
+
 $('paste-btn').addEventListener('click',function(){
 var btn=$('paste-btn');
+if(!navigator.clipboard||!navigator.clipboard.read){
+if(!navigator.clipboard||!navigator.clipboard.readText){btnFeedback(btn,'rs-warn','Paste','Denied',1200);return}
+navigator.clipboard.readText().then(function(text){
+handlePastedText(btn,text)
+}).catch(function(){btnFeedback(btn,'rs-warn','Paste','Denied',1200)});return}
 navigator.clipboard.read().then(function(items){
 for(var i=0;i<items.length;i++){var types=items[i].types;
 for(var j=0;j<types.length;j++){if(types[j].startsWith('image/')){
@@ -798,25 +814,11 @@ items[i].getType(types[j]).then(function(blob){processImage(new File([blob],'pas
 btnFeedback(btn,'ok','Paste','Pasted',1200);return}}}
 // No image — try text
 return navigator.clipboard.readText().then(function(text){
-if(!text){btnFeedback(btn,'rs-warn','Paste','Empty',1200);return}
-var multi=parseMultiColor(text);
-if(multi){processPastedColors(multi);btnFeedback(btn,'ok','Paste','Pasted',1200);return}
-var rgb=parseColor(text.trim());
-if(rgb){baseUserSet=true;setBaseColor(rgb);
-if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
-if(ruleIdx>=0)generate();btnFeedback(btn,'ok','Paste','Pasted',1200);return}
-btnFeedback(btn,'rs-warn','Paste','Invalid',1200)})
+handlePastedText(btn,text)})
 }).catch(function(){
 // Clipboard API denied — fall back to readText
 navigator.clipboard.readText().then(function(text){
-if(!text){btnFeedback(btn,'rs-warn','Paste','Empty',1200);return}
-var multi=parseMultiColor(text);
-if(multi){processPastedColors(multi);btnFeedback(btn,'ok','Paste','Pasted',1200);return}
-var rgb=parseColor(text.trim());
-if(rgb){baseUserSet=true;setBaseColor(rgb);
-if(mode!=='harmony'){mode='harmony';lastShownMode=undefined;showOutput()}
-if(ruleIdx>=0)generate();btnFeedback(btn,'ok','Paste','Pasted',1200);return}
-btnFeedback(btn,'rs-warn','Paste','Invalid',1200)
+handlePastedText(btn,text)
 }).catch(function(){btnFeedback(btn,'rs-warn','Paste','Denied',1200)})})});
 
 _base.setupDragDrop({overlay:$('drop-ov'),onDrop:function(files,text){

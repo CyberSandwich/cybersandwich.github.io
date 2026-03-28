@@ -176,6 +176,7 @@ function initSettings(container,groups){
         row.appendChild(chips);
 
       }else if(g.type==='stepper'){
+        g.steps=g.steps.slice();
         sp.style.fontVariantNumeric='tabular-nums';
         sp.textContent=g.format(g.steps[g.def]);
         var stepper=document.createElement('div');
