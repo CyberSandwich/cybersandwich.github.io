@@ -262,7 +262,7 @@ var azGroups1=[
 ];
 _cg.initSettings($('azCh1'),azGroups1);
 var azGroups2=[
-  {type:'seg',formats:FMTS,def:0,onChange:function(i){azS.fmt=i;azGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&azS.style===2)_cg.resetGroup(azGroups1[2]);else azGroups1[2]._rebuild()}},
+  {type:'seg',formats:FMTS,def:0,onChange:function(i){azS.fmt=i;azGroups2[1]._row.classList.toggle('disabled',i===1);if(i===2&&azS.style===2)_cg.resetGroup(azGroups1[2]);else azGroups1[2]._rebuild()}},
   {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:15,format:function(v){return v+' \u00D7 '+v},onChange:function(i){azS.sizeIdx=i;azS.exactSz=0}}
 ];
 _cg.initSettings($('azCh2'),azGroups2);

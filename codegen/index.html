@@ -230,7 +230,7 @@ var qrGroups1=[
 ];
 _cg.initSettings($('qrCh1'),qrGroups1);
 var qrGroups2=[
-  {type:'seg',formats:FMTS,def:0,onChange:function(i){qrS.fmt=i;qrGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&qrS.style===2)_cg.resetGroup(qrGroups1[2]);else qrGroups1[2]._rebuild()}},
+  {type:'seg',formats:FMTS,def:0,onChange:function(i){qrS.fmt=i;qrGroups2[1]._row.classList.toggle('disabled',i===1);if(i===2&&qrS.style===2)_cg.resetGroup(qrGroups1[2]);else qrGroups1[2]._rebuild()}},
   {type:'stepper',icon:IC.maximize,steps:QRSIZES,def:15,format:function(v){return v+' \u00D7 '+v},onChange:function(i){qrS.sizeIdx=i;qrS.exactSz=0}}
 ];
 _cg.initSettings($('qrCh2'),qrGroups2);

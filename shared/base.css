@@ -96,6 +96,7 @@ nav{
 .srow{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;min-height:46px;border-bottom:1px solid var(--bdr2);cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}
 .srow:last-child{border-bottom:none}
 .srow:active{opacity:.7}
+.srow.disabled{opacity:.35;pointer-events:none}
 @media(hover:hover){.srow:hover{background:var(--bg2)}}
 .slbl{display:flex;align-items:center;gap:12px;font:500 .9375rem/1 var(--font);color:var(--t2)}
 .slbl svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}

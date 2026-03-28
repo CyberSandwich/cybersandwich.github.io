@@ -297,7 +297,7 @@ var bcGroups1=[
 ];
 _cg.initSettings($('bcCh1'),bcGroups1);
 var bcGroups2=[
-  {type:'seg',formats:FMTS,def:0,onChange:function(i){bcS.fmt=i;bcGroups2[1]._row.style.display=i===1?'none':'';if(i===2&&bcS.style===2)_cg.resetGroup(bcGroups1[3]);else bcGroups1[3]._rebuild()}},
+  {type:'seg',formats:FMTS,def:0,onChange:function(i){bcS.fmt=i;bcGroups2[1]._row.classList.toggle('disabled',i===1);if(i===2&&bcS.style===2)_cg.resetGroup(bcGroups1[3]);else bcGroups1[3]._rebuild()}},
   {type:'stepper',icon:IC.maximize,steps:BCSIZES,def:6,format:function(v){return v+' px'},onChange:function(i){bcS.sizeIdx=i}}
 ];
 _cg.initSettings($('bcCh2'),bcGroups2);
