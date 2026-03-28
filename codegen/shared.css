@@ -42,11 +42,8 @@ body{display:flex;align-items:center;justify-content:center}
 }
 .actions button:last-child{border-bottom:none}
 .schips{display:flex;gap:4px}
-.id,.ic{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
-.ic{stroke-width:2.5;display:none}
 @media(hover:hover){.actions button:hover{background:var(--bg2);color:var(--t1)}.chip:hover{border-color:var(--t4);color:var(--t2)}}
 .preview:active{transform:scale(.97)}
 @keyframes pvPop{from{transform:scale(.97)}to{transform:scale(1)}}
-::selection{background:rgba(72,72,74,.15)}
 .cam-wrap{padding:0}.cam-wrap video{width:100%;display:block;border-radius:20px;background:#000}
 .cam-active span{color:#C41E3A!important}.cam-active .slbl svg{color:#C41E3A!important}
