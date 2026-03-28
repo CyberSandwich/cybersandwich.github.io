@@ -254,9 +254,11 @@ psBtn.addEventListener('click',pasteClipboard);
 
 function setBg(m){
 bgMode=m;BG_CLS.forEach(function(c){pv.classList.remove(c)});pv.classList.add(BG_CLS[m]);
-var row1=[0,1,2],row2=[5,3,4];
-var grp=row1.indexOf(m)>=0?row1:row2;
-grp.forEach(function(i){var el=$('bg-'+i);el.classList.toggle('active',i===m);el.setAttribute('aria-checked',i===m?'true':'false')})
+BG_NAMES.forEach(function(n,i){
+var el=$('bg-'+i);
+el.classList.toggle('active',i===m);
+el.setAttribute('aria-checked',i===m?'true':'false')
+})
 render()
 }
 BG_NAMES.forEach(function(n,i){$('bg-'+i).addEventListener('click',function(){setBg(i)})});
