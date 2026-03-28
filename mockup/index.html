@@ -101,6 +101,7 @@ Drop Image Here
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <script src="/shared/base.js?v=22"></script>
+<script src="/shared/swr.js?v=1"></script>
 <script type="module">
 import*as THREE from'three';
 import{OrbitControls}from'three/addons/controls/OrbitControls.js';
@@ -109,22 +110,7 @@ import{RGBELoader}from'three/addons/loaders/RGBELoader.js';
 
 var $=function(s){return document.getElementById(s)};
 
-/* Asset cache — SWR: serve from cache instantly, revalidate in background */
-var CACHE_NAME='mockup-assets-v1';
-var memCache={};
-function cachedFetch(url){
-  if(memCache[url])return Promise.resolve(memCache[url]);
-  return caches.open(CACHE_NAME).then(function(c){
-    return c.match(url).then(function(r){
-      if(r){
-        // Stale-while-revalidate: return cached, refresh in background
-        fetch(url).then(function(r2){if(r2.ok){c.put(url,r2)}}).catch(function(){});
-        return r.arrayBuffer().then(function(b){memCache[url]=b;return b});
-      }
-      return fetch(url).then(function(r2){c.put(url,r2.clone());return r2.arrayBuffer().then(function(b){memCache[url]=b;return b})});
-    });
-  });
-}
+/* Asset loading via shared/swr.js (binary SWR: Cache API + memory) */
 
 /* Device configs: screen dims, dynamic island, 3D surface, camera, normalization, material */
 var DEVICES=[
@@ -167,7 +153,7 @@ sceneEl.appendChild(renderer.domElement);
 /* Studio HDRI for cinematic metallic reflections */
 var envReady=false;
 var rgbeLoader=new RGBELoader();
-cachedFetch('/mockup/studio.hdr').then(function(buf){
+_swr('/mockup/studio.hdr',{binary:true}).then(function(buf){
 var blob=new Blob([buf]);
 var blobUrl=URL.createObjectURL(blob);
 rgbeLoader.load(blobUrl,function(tex){
@@ -264,7 +250,7 @@ rimL.intensity=is17?1.0:0.7;rimR.intensity=is17?1.0:0.7;btmL.intensity=is17?0.2:
 camFill.intensity=is17?0.3:0.15;
 scene.environmentIntensity=is17?0.4:0.5;
 try{localStorage.setItem('mockup-dev',idx)}catch(_){}
-cachedFetch(d.url).then(function(buf){
+_swr(d.url,{binary:true}).then(function(buf){
 var blob=new Blob([buf],{type:'model/gltf-binary'});
 var blobUrl=URL.createObjectURL(blob);
 gltfLoader.load(blobUrl,function(gltf){

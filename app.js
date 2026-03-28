@@ -128,37 +128,11 @@ document.addEventListener('click',e=>{
   }
 });
 
-// Data loaders (SWR: stale-while-revalidate with retry cap and error logging)
-function makeLoader(url,cb){
-  let p=null,fails=0;const key='swr_'+url;
-  const loader=function(){
-    if(p)return p;
-    if(fails>=3)return Promise.resolve([]);
-    let raw,cached;
-    try{raw=localStorage.getItem(key);if(raw)cached=JSON.parse(raw)}catch(e){}
-    p=fetch(url,{cache:'no-cache'})
-      .then(function(r){if(!r.ok)throw new Error(url+' HTTP '+r.status);return r.text()})
-      .then(function(text){
-        fails=0;loader.err=false;
-        if(text===raw)return cached;
-        try{localStorage.setItem(key,text)}catch(e){}
-        const d=JSON.parse(text);
-        cb(d);
-        if(cached&&loader.onFresh)loader.onFresh(d);
-        return d;
-      })
-      .catch(function(e){p=null;fails++;console.error('Load failed:',e);if(cached){loader.err=false;return cached}loader.err=true;return[]});
-    if(cached){cb(cached);return Promise.resolve(cached)}
-    return p;
-  };
-  loader.err=false;
-  loader.onFresh=null;
-  return loader;
-}
-const getProjects=makeLoader('/projects/projects.json',d=>{projects=d;return d});
-const getLinks=makeLoader('/links/links.json',d=>{links=d;return d});
-const getCV=makeLoader('/cv/cv.json',d=>{cv=d;return d});
-const getPosts=makeLoader('/updates/posts.json',d=>{
+// Data loaders (SWR via shared/swr.js)
+const getProjects=_swr.loader('/projects/projects.json',d=>{projects=d;return d});
+const getLinks=_swr.loader('/links/links.json',d=>{links=d;return d});
+const getCV=_swr.loader('/cv/cv.json',d=>{cv=d;return d});
+const getPosts=_swr.loader('/updates/posts.json',d=>{
   d.sort((a,b)=>b.date>a.date?1:b.date<a.date?-1:a.title.localeCompare(b.title));
   posts=d;return d;
 });
@@ -416,19 +390,18 @@ function showPost(slug){
     window.scrollTo(0,0);
   }
   if(postCache[slug]){render(postCache[slug]);return}
-  fetch('/updates/'+encodeURIComponent(slug)+'.md')
-    .then(r=>{if(!r.ok)throw new Error('Post '+r.status);return r.text()})
-    .then(md=>{
-      let html;
-      try{html=parseMd(md)}catch(e){console.error('Parse error:',e);html='<p>Unable to render this post.</p>'}
-      postCache[slug]=html;
-      render(html);
-    })
-    .catch(e=>{
-      if(ver!==postVer)return;
-      console.error('Post load failed:',slug,e);
-      el.appendChild(mkEmpty('Unable to load this post. Please check your connection and try again.'));
-    });
+  _swr('/updates/'+encodeURIComponent(slug)+'.md',{
+    parse:function(md){try{return parseMd(md)}catch(e){console.error('Parse error:',e);return'<p>Unable to render this post.</p>'}},
+    key:'swr_post_'+slug,
+    onFresh:function(html){postCache[slug]=html;render(html)}
+  }).then(function(html){
+    postCache[slug]=html;
+    render(html);
+  }).catch(function(e){
+    if(ver!==postVer)return;
+    console.error('Post load failed:',slug,e);
+    el.appendChild(mkEmpty('Unable to load this post. Please check your connection and try again.'));
+  });
 }
 
 // Markdown parser — processes first-party .md files only
