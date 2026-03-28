@@ -226,7 +226,7 @@ qrIn.addEventListener('input',function(){_cg.autoGrow(qrIn);genQRD()});
 
 /* QR Settings */
 var qrGroups1=[
-  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% Error Correction'},onChange:function(i){qrS.ec=i;genQRS()}},
+  {type:'stepper',icon:IC.shield,steps:[7,15,25,30],def:2,format:function(v){return '~'+v+'% EC'},onChange:function(i){qrS.ec=i;genQRS()}},
   {type:'stepper',icon:IC.crop,steps:MARGINS,def:4,format:function(v){return v+' px Margin'},onChange:function(i){qrS.marginIdx=i;qrS.exactSz=0;genQRS()}},
   {type:'format',icons:STYLE_ICONS,formats:['Light','Dark','Clear'],def:0,hide:function(i){return i===2&&qrS.fmt===2},onChange:function(i){qrS.style=i;_cg.updatePvStyle(qrPv,i);genQRS()}}
 ];
