@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 # bump-shared.sh — Cache buster manager for saputra.co.uk
 # Bumps ?v= params for shared/base.css, shared/base.js, shared/search.js, style.css, app.js,
-# codegen/shared.js, and codegen/shared.css.
+# codegen/shared.js, codegen/shared.css, imageopt/shared.js, and imageopt/shared.css.
 #
 # Usage:
 #   ./scripts/bump-shared.sh              Auto-detect git changes and bump
@@ -16,6 +16,9 @@
 #   ./scripts/bump-shared.sh codegen-js    Bump codegen/shared.js across codegen files
 #   ./scripts/bump-shared.sh codegen-css  Bump codegen/shared.css across codegen files
 #   ./scripts/bump-shared.sh codegen      Bump both codegen shared files
+#   ./scripts/bump-shared.sh imageopt-js   Bump imageopt/shared.js across imageopt files
+#   ./scripts/bump-shared.sh imageopt-css  Bump imageopt/shared.css across imageopt files
+#   ./scripts/bump-shared.sh imageopt      Bump both imageopt shared files
 #   ./scripts/bump-shared.sh all          Bump everything
 #   ./scripts/bump-shared.sh set <N>      Set all shared versions to specific number
 #   ./scripts/bump-shared.sh --dry-run .. Preview without writing
@@ -141,6 +144,9 @@ ALL_HTMLS=("${SUB_HTMLS[@]}" "$MAIN_HTML")
 # Codegen HTML files (consumers of codegen/shared.js and codegen/shared.css)
 CODEGEN_HTMLS=("./codegen/index.html" "./codegen/barcode/index.html" "./codegen/aztec/index.html")
 
+# ImageOpt HTML files (consumers of imageopt/shared.js and imageopt/shared.css)
+IMAGEOPT_HTMLS=("./imageopt/index.html" "./imageopt/png/index.html")
+
 # ── Commands ────────────────────────────────────────────────────────
 cmd_status() {
   printf "\n${B}Cache Buster Status${Z}\n"
@@ -175,6 +181,16 @@ cmd_status() {
     local versions=(${(f)"$(find_versions "$f" "${CODEGEN_HTMLS[@]}")"})
     (( ${#versions} > 1 )) && drift=" ${R}DRIFT${Z}"
     printf "%-14s %-10s %-8s %-8s %b\n" "cg/$f" "v=${v:-?}" "$fc" "$rc" "codegen${drift}"
+  done
+
+  for f in shared.js shared.css; do
+    local v=$(current_version "$f" "${IMAGEOPT_HTMLS[@]}")
+    local fc=$(count_files "$f" "$v" "${IMAGEOPT_HTMLS[@]}")
+    local rc=$(count_refs "$f" "$v" "${IMAGEOPT_HTMLS[@]}")
+    local drift=""
+    local versions=(${(f)"$(find_versions "$f" "${IMAGEOPT_HTMLS[@]}")"})
+    (( ${#versions} > 1 )) && drift=" ${R}DRIFT${Z}"
+    printf "%-14s %-10s %-8s %-8s %b\n" "io/$f" "v=${v:-?}" "$fc" "$rc" "imageopt${drift}"
   done
 
   for f in style.css app.js; do
@@ -236,6 +252,18 @@ cmd_verify() {
       (( errors++ ))
     fi
   done
+  for f in shared.js shared.css; do
+    local versions=(${(f)"$(find_versions "$f" "${IMAGEOPT_HTMLS[@]}")"})
+    if (( ${#versions} > 1 )); then
+      err "Version drift in ${B}imageopt/${f}${Z}: ${versions[*]}"
+      for v in "${versions[@]}"; do
+        for t in "${IMAGEOPT_HTMLS[@]}"; do
+          grep -q "${f}?v=${v}" "$t" 2>/dev/null && dim "  v=${v}: ${t#./}"
+        done
+      done
+      (( errors++ ))
+    fi
+  done
   if (( errors == 0 )); then
     ok "All versions in sync."
   else
@@ -284,6 +312,16 @@ cmd_auto() {
     bump "shared.css" "${CODEGEN_HTMLS[@]}"
     bumped=true
   fi
+  if echo "$changed" | grep -q "imageopt/shared.js"; then
+    info "Detected imageopt/shared.js change"
+    bump "shared.js" "${IMAGEOPT_HTMLS[@]}"
+    bumped=true
+  fi
+  if echo "$changed" | grep -q "imageopt/shared.css"; then
+    info "Detected imageopt/shared.css change"
+    bump "shared.css" "${IMAGEOPT_HTMLS[@]}"
+    bumped=true
+  fi
 
   if ! $bumped; then
     dim "No CSS/JS changes detected. Nothing to bump."
@@ -317,9 +355,13 @@ case "$CMD" in
   codegen-js)  bump "shared.js" "${CODEGEN_HTMLS[@]}" ;;
   codegen-css) bump "shared.css" "${CODEGEN_HTMLS[@]}" ;;
   codegen)     bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}" ;;
+  imageopt-js)  bump "shared.js" "${IMAGEOPT_HTMLS[@]}" ;;
+  imageopt-css) bump "shared.css" "${IMAGEOPT_HTMLS[@]}" ;;
+  imageopt)     bump "shared.js" "${IMAGEOPT_HTMLS[@]}"; bump "shared.css" "${IMAGEOPT_HTMLS[@]}" ;;
   all)         bump "base.css" "${ALL_HTMLS[@]}"; bump "base.js" "${ALL_HTMLS[@]}"
                bump "search.js" "${ALL_HTMLS[@]}"
                bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}"
+               bump "shared.js" "${IMAGEOPT_HTMLS[@]}"; bump "shared.css" "${IMAGEOPT_HTMLS[@]}"
                bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
   set)
     V="${ARGS[2]:-}"
@@ -347,6 +389,9 @@ case "$CMD" in
     printf "  ${C}codegen-js${Z}  Bump codegen/shared.js\n"
     printf "  ${C}codegen-css${Z} Bump codegen/shared.css\n"
     printf "  ${C}codegen${Z}     Bump both codegen shared files\n"
+    printf "  ${C}imageopt-js${Z} Bump imageopt/shared.js\n"
+    printf "  ${C}imageopt-css${Z} Bump imageopt/shared.css\n"
+    printf "  ${C}imageopt${Z}    Bump both imageopt shared files\n"
     printf "  ${C}all${Z}         Bump everything\n"
     printf "  ${C}set <N>${Z}     Set all shared versions to N\n"
     printf "\nFlags:\n"

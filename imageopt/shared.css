@@ -1,0 +1,31 @@
+body{display:flex;align-items:center;justify-content:center;cursor:pointer}
+body.has-files{align-items:flex-start;cursor:default}
+.w{max-width:440px;padding:20px 20px 100px;width:100%}
+.zone{border:2px dashed var(--bdr);border-radius:20px;padding:48px;text-align:center;transition:border-color .2s,background .2s}
+.zone svg{color:var(--t4)}
+.sum{padding:20px;display:none}
+.sum-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sum-count{font:600 .9375rem/1 var(--font);color:var(--t1)}
+.sum-save{font:700 .9375rem/1 var(--font);color:#34D399}
+.sum-sizes{font:400 .8125rem/1 var(--font);color:var(--t3)}
+.fcard{padding:16px 20px;margin-bottom:10px;animation:fi .25s ease}
+.fc-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fc-name{font:500 .875rem/1.2 var(--font);color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fc-orig{font:500 .75rem/1 var(--font);color:var(--t3);flex-shrink:0}
+.fc-save{font:700 .8125rem/1 var(--font);color:#34D399;flex-shrink:0}
+.fc-grow{font:700 .8125rem/1 var(--font);color:#F59E0B;flex-shrink:0}
+.fc-err{font:500 .75rem/1 var(--font);color:#EF4444;flex-shrink:0}
+.fc-bar{height:4px;background:var(--bdr);border-radius:4px;margin-top:10px;overflow:hidden}
+.fc-fill{height:100%;background:var(--t4);border-radius:4px;transition:width .3s ease;width:0}
+.fc-stage{font:400 .75rem/1 var(--font);color:var(--t3);margin-top:6px}
+.fc-sizes{font:400 .8125rem/1 var(--font);color:var(--t3);margin-top:6px}
+.fc-acts{display:flex;gap:8px;margin-top:10px}
+.fc-acts button{flex:1;padding:10px;border-radius:12px;border:1px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t2);cursor:pointer;text-align:center;transition:background .2s,color .15s}
+.links>button.danger{color:#EF4444}
+.links>button.danger svg{color:#EF4444}
+.notif{position:fixed;bottom:calc(86px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:50px;font:500 .8125rem/1 var(--font);background:var(--card);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;white-space:nowrap;color:var(--t2)}
+.notif.show{opacity:1}
+@media(hover:hover){
+  .fc-acts button:hover{background:var(--bg2);color:var(--t1)}
+  .zone:hover{border-color:var(--t4);background:var(--bg2)}
+}
