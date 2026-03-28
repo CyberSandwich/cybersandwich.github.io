@@ -568,7 +568,7 @@ function copyCanvas(canvas,btn){
     feedback(btn,'ok','Copied');
   },function(){
     var text=azIn.value.trim();
-    if(text)_base.copyText(text,function(){feedback(btn,'ok','Copied Text')});
+    if(text)_base.copyText(text,function(){feedback(btn,'ok','Copied Text')},function(){feedback(btn,'err-fb','Error')});
     else feedback(btn,'err-fb','Error');
   });
 }
