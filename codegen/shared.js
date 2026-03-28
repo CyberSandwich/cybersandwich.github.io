@@ -104,9 +104,8 @@ function initSettings(container,groups){
     lbl.className='slbl';
 
     if(g.type==='seg'){
+      row.className='seg-row';
       var segIdx=g.def;
-      var segRow=document.createElement('div');
-      segRow.className='seg-row';
       var btns=[];
       g.formats.forEach(function(name,i){
         var btn=document.createElement('button');
@@ -120,14 +119,16 @@ function initSettings(container,groups){
           g.onChange(segIdx);
         });
         btns.push(btn);
-        segRow.appendChild(btn);
+        row.appendChild(btn);
       });
       g._reset=function(){segIdx=g.def;btns.forEach(function(b,j){b.classList.toggle('active',j===g.def);if(g.disable)b.disabled=g.disable(j)});g.onChange(g.def)};
       g._rebuild=function(){btns.forEach(function(b,j){b.disabled=g.disable?g.disable(j):false})};
       g._refresh=g._rebuild;
       g._set=function(i){if(i===segIdx||i<0||i>=g.formats.length)return;if(btns[i].disabled)return;segIdx=i;btns.forEach(function(b,j){b.classList.toggle('active',j===i)});g.onChange(segIdx)};
       g._cur=function(){return segIdx};
-      row.appendChild(segRow);
+      g._row=row;
+      container.appendChild(row);
+      return;
 
     }else if(g.type==='format'){
       var fmtIdx=g.def;
