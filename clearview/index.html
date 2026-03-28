@@ -46,6 +46,8 @@ html[data-theme="dark"] #s2 .srow.rs-fb .step-btn[id$="-dec"]{background:#3B1C1C
 html[data-theme="dark"] #s2 .srow.rs-fb .step-btn[id$="-inc"]{background:#1A3A2A!important;color:#86EFAC!important}
 html[data-theme="sepia"] #s2 .srow.rs-fb .step-btn[id$="-dec"]{background:#E8D5C8!important;color:#9A3412!important}
 html[data-theme="sepia"] #s2 .srow.rs-fb .step-btn[id$="-inc"]{background:#D5E0C8!important;color:#3F6212!important}
+#s2 .step-btn.step-press{animation:pop .3s ease}
+#s2 .step-btn.step-press line{stroke-dasharray:14;stroke-dashoffset:14;animation:draw .3s ease .05s forwards}
 </style>
 </head>
 <body>
@@ -297,10 +299,11 @@ $('shd-inc').disabled=shadowIdx===SHD_PCT.length-1
 }
 updateRadUI();updateShdUI();
 
-$('rad-dec').addEventListener('click',function(){if(radiusIdx>0){radiusIdx--;updateRadUI();render()}});
-$('rad-inc').addEventListener('click',function(){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render()}});
-$('shd-dec').addEventListener('click',function(){if(shadowIdx>0){shadowIdx--;updateShdUI();render()}});
-$('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render()}});
+function stepAnim(el){el.classList.remove('step-press');void el.offsetWidth;el.classList.add('step-press')}
+$('rad-dec').addEventListener('click',function(){if(radiusIdx>0){radiusIdx--;updateRadUI();render();stepAnim(this)}});
+$('rad-inc').addEventListener('click',function(){if(radiusIdx<RAD_PCT.length-1){radiusIdx++;updateRadUI();render();stepAnim(this)}});
+$('shd-dec').addEventListener('click',function(){if(shadowIdx>0){shadowIdx--;updateShdUI();render();stepAnim(this)}});
+$('shd-inc').addEventListener('click',function(){if(shadowIdx<SHD_PCT.length-1){shadowIdx++;updateShdUI();render();stepAnim(this)}});
 
 function buildFmtChips(){
 var el=$('fmt-chips');el.textContent='';
