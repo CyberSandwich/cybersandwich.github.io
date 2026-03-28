@@ -137,7 +137,7 @@ html[data-theme="sepia"] .chip.active{color:#1A0E05}
 .ok svg,.ok span{color:#34D399!important}
 .ok .id{display:none!important}.ok .ic{display:inline!important}
 .ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-.rs-fb{background:#FEF9C3!important}
+.rs-fb{background:#FEF9C3!important;color:#CA8A04!important}
 .rs-fb svg{color:#CA8A04!important;animation:spin .4s ease}
 .rs-fb span{color:#CA8A04!important}
 .regen{background:#FEF9C3!important}
