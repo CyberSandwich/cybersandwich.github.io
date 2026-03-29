@@ -642,10 +642,40 @@ function extractDates(text){
 /* ══════════════════════════════════════════════════════════════════ */
 /*  MONEY PARSER                                                     */
 /* ══════════════════════════════════════════════════════════════════ */
-var CODE_SYM={GBP:'\xA3',USD:'$',EUR:'\u20AC',JPY:'\xA5',CNY:'\xA5',INR:'\u20B9',KRW:'\u20A9',CHF:'CHF ',AUD:'A$',CAD:'C$',NZD:'NZ$',SGD:'S$',HKD:'HK$',MYR:'RM',ZAR:'R'};
+var CODE_SYM={
+  GBP:'\xA3',USD:'$',EUR:'\u20AC',JPY:'\xA5',CNY:'\xA5',INR:'\u20B9',KRW:'\u20A9',
+  CHF:'CHF ',AUD:'A$',CAD:'C$',NZD:'NZ$',SGD:'S$',HKD:'HK$',MYR:'RM',ZAR:'R',
+  SEK:'kr',NOK:'kr',DKK:'kr',ISK:'kr',
+  IDR:'Rp',THB:'\u0E3F',PHP:'\u20B1',VND:'\u20AB',BDT:'\u09F3',PKR:'Rs',LKR:'Rs',NPR:'Rs',
+  TWD:'NT$',MXN:'MX$',BRL:'R$',ARS:'AR$',CLP:'CL$',COP:'CO$',PEN:'S/',CRC:'\u20A1',
+  AED:'AED ',SAR:'SAR ',QAR:'QR',KWD:'KD',BHD:'BD',OMR:'RO',JOD:'JD',
+  TRY:'\u20BA',ILS:'\u20AA',EGP:'LE',NGN:'\u20A6',KES:'Sh',GHS:'\u20B5',TZS:'Sh',UGX:'Sh',
+  RUB:'\u20BD',UAH:'\u20B4',PLN:'z\u0142',CZK:'K\u010D',HUF:'Ft',RON:'Leu ',BGN:'лв',RSD:'DIN ',HRK:'kn',
+  GEL:'\u20BE',AZN:'\u20BC',KZT:'\u20B8',UZS:'so\u02BBm ',
+  MAD:'DH',TND:'DT',DZD:'DA',
+  MNT:'\u20AE',KHR:'\u17DB',LAK:'\u20AD',MMK:'K',
+  BWP:'P',MUR:'Re',MWK:'K',ZMW:'ZK',
+  XAF:'FCFA ',XOF:'FCFA ',XCD:'EC$',
+  PYG:'\u20B2',BOB:'Bs',VES:'Bs',UYU:'UY$',
+  BBD:'BB$',JMD:'J$',TTD:'TT$',BZD:'BZ$',GYD:'GY$',
+  LBP:'LL',IQD:'ID',IRR:'Rl',SYP:'LS',YER:'YER ',
+  AFN:'\u060B',
+  BAM:'KM',MDL:'Leu ',MKD:'DEN ',ALL:'L',
+  AOA:'Kz',CDF:'FC',RWF:'FRw',BIF:'FBu',SOS:'Sh',
+  ETB:'Br',ERN:'Nkf',GMD:'D',GNF:'Fr',SLE:'Le',
+  MZN:'Mt',NAD:'N$',SCR:'Re',SZL:'L',LSL:'L',
+  TOP:'T$',VUV:'Vt',WST:'WS$',FJD:'FJ$',PGK:'K',
+  MOP:'MOP$',BND:'B$',KPW:'\u20A9',
+  STN:'Db',MVR:'Rf',BTN:'Nu',
+  DJF:'Fdj',KMF:'FC',CVE:'CVE ',
+  HTG:'G',PAB:'B/',NIO:'C$',GTQ:'Q',HNL:'L',SVC:'SVC ',CUP:'CU$',DOP:'RD$',
+  AWG:'\u0192',ANG:'\u0192',BMD:'BD$',KYD:'CI$',SHP:'\xA3',GIP:'\xA3',FKP:'\xA3',
+  BYN:'Br',TJS:'SM',TMT:'m',KGS:'с'
+};
+var ALL_CODES=Object.keys(CODE_SYM).join('|');
 var MULT={k:1e3,K:1e3,m:1e6,M:1e6,b:1e9,B:1e9};
-var MONEY_SYM_RE=/([-(]?)(HK\$|NZ\$|A\$|C\$|S\$|RM|[\xA3$\u20AC\xA5\u20B9\u20A9]|R(?=\d))(\s?)(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?)(\)?)/g;
-var MONEY_CODE_RE=/(?:(GBP|USD|EUR|JPY|CNY|INR|KRW|CHF|SEK|NOK|DKK|ZAR|AUD|CAD|NZD|SGD|HKD|MYR)\s?(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?))|(?:(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?)\s?(GBP|USD|EUR|JPY|CNY|INR|KRW|CHF|SEK|NOK|DKK|ZAR|AUD|CAD|NZD|SGD|HKD|MYR))/gi;
+var MONEY_SYM_RE=/([-(]?)(HK\$|NZ\$|NT\$|MX\$|EC\$|MOP\$|N\$|T\$|A\$|C\$|S\$|R\$|RM|Rp|Rs|Sh|Ft|Kz|KD|BD|LE|DH|K\u010D|z\u0142|[\xA3$\u20AC\xA5\u20B9\u20A9\u20B1\u20AB\u09F3\u20BA\u20AA\u20A6\u20B5\u20BD\u20B4\u20BE\u20BC\u20B8\u20AE\u17DB\u20AD\u20B2\u20A1\u060B\u0192]|R(?=\d))(\s?)(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?)(\)?)/g;
+var MONEY_CODE_RE=new RegExp('(?:('+ALL_CODES+')\\s?(\\d{1,3}(?:[,.\\u00A0 ]\\d{3})*(?:[.,]\\d{1,2})?)([kKmMbB]?))|(?:(\\d{1,3}(?:[,.\\u00A0 ]\\d{3})*(?:[.,]\\d{1,2})?)([kKmMbB]?)\\s?('+ALL_CODES+'))','gi');
 var PENCE_RE=/(?:^|[\s(])(\d{1,6}(?:\.\d{1,2})?)p\b/gi;
 
 function parseNum(s,isEuro){
