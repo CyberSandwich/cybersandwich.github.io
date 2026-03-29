@@ -415,15 +415,24 @@ function cleanUrl(raw){
 }
 
 function urlHost(u){var m=u.match(/^(?:https?|ftp):\/\/(?:www\.)?([^\/:]+)/i);return m?m[1].toLowerCase():''}
+function hostBase(h){
+  var parts=h.split('.');
+  for(var i=parts.length-1;i>=1;i--){
+    var tld=parts.slice(i).join('.');
+    if(MULTI_TLDS[tld])return parts.slice(0,i).join('.');
+  }
+  if(parts.length>=2)return parts.slice(0,-1).join('.');
+  return h;
+}
 function dedupeUrls(urls){
-  var out=[];
+  var out=[],hosts=urls.map(urlHost);
   for(var i=0;i<urls.length;i++){
-    var dominated=false,u=urls[i].toLowerCase(),uh=urlHost(urls[i]);
+    var dominated=false,u=urls[i].toLowerCase(),uh=hosts[i],ub=hostBase(uh);
     for(var j=0;j<urls.length;j++){
       if(i===j)continue;
-      var v=urls[j].toLowerCase(),vh=urlHost(urls[j]);
+      var v=urls[j].toLowerCase(),vh=hosts[j],vb=hostBase(vh);
       if(v.length>u.length&&v.indexOf(u.replace(/\/$/,''))===0){dominated=true;break}
-      if(vh.length>uh.length&&vh.endsWith('.'+uh)){dominated=true;break}
+      if(ub===vb&&vh.length>uh.length){dominated=true;break}
     }
     if(!dominated)out.push(urls[i]);
   }
