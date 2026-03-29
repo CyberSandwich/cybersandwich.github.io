@@ -344,7 +344,7 @@ function extractPhones(text){
 /* ══════════════════════════════════════════════════════════════════ */
 /*  URL / LINK PARSER                                                */
 /* ══════════════════════════════════════════════════════════════════ */
-var TLDS='com,co.uk,org,net,io,dev,app,me,co,us,uk,de,fr,info,biz,edu,gov,mil,int,eu,au,ca,nz,in,jp,cn,kr,br,mx,za,ng,ke,tech,ai,xyz,online,site,store,blog,ly,tv,cc,gg,to,fm,ws'.split(',');
+var TLDS='com,co.uk,org.uk,gov.uk,ac.uk,net.uk,me.uk,org,net,io,dev,app,me,co,us,uk,de,fr,info,biz,edu,gov,mil,int,eu,au,ca,nz,in,jp,cn,kr,br,mx,za,ng,ke,tech,ai,xyz,online,site,store,blog,ly,tv,cc,gg,to,fm,ws,com.au,org.au,gov.au,edu.au,co.nz,org.nz,co.za,org.za,co.in,org.in,co.jp,co.kr,com.br,org.br,com.mx,co.ke,or.ke,com.ng,com.sg,gov.sg,edu.sg,co.id,or.id,com.my,gov.my,co.th,or.th,com.ph,gov.ph,com.cn,gov.cn,com.hk,gov.hk,com.tw,org.tw'.split(',');
 var TLD_SET={};for(var ti=0;ti<TLDS.length;ti++)TLD_SET[TLDS[ti]]=1;
 var MULTI_TLDS={};for(var ti=0;ti<TLDS.length;ti++)if(TLDS[ti].indexOf('.')!==-1)MULTI_TLDS[TLDS[ti]]=1;
 var TLDS_PAT=TLDS.map(function(t){return t.replace(/\./g,'\\.')}).sort(function(a,b){return b.length-a.length}).join('|');
