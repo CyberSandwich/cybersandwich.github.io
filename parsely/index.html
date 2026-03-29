@@ -696,7 +696,7 @@ var CODE_SYM={
 var ALL_CODES=Object.keys(CODE_SYM).join('|');
 var MULT={k:1e3,K:1e3,m:1e6,M:1e6,b:1e9,B:1e9};
 var MONEY_SYM_RE=/([-(]?)(HK\$|NZ\$|NT\$|MX\$|EC\$|MOP\$|N\$|T\$|A\$|C\$|S\$|R\$|RM|Rp|Rs|Sh|Ft|Kz|KD|BD|LE|DH|K\u010D|z\u0142|[\xA3$\u20AC\xA5\u20B9\u20A9\u20B1\u20AB\u09F3\u20BA\u20AA\u20A6\u20B5\u20BD\u20B4\u20BE\u20BC\u20B8\u20AE\u17DB\u20AD\u20B2\u20A1\u060B\u0192]|R(?=\d))(\s?)(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?)(\)?)/g;
-var MONEY_CODE_RE=new RegExp('(?:('+ALL_CODES+')\\s?(\\d{1,3}(?:[,.\\u00A0 ]\\d{3})*(?:[.,]\\d{1,2})?)([kKmMbB]?))|(?:(\\d{1,3}(?:[,.\\u00A0 ]\\d{3})*(?:[.,]\\d{1,2})?)([kKmMbB]?)\\s?('+ALL_CODES+'))','gi');
+var MONEY_CODE_RE=new RegExp('(?:\\b('+ALL_CODES+')\\s?(\\d{1,3}(?:[,.\\u00A0 ]\\d{3})*(?:[.,]\\d{1,2})?)([kKmMbB]?))|(?:(\\d{1,3}(?:[,.\\u00A0 ]\\d{3})*(?:[.,]\\d{1,2})?)([kKmMbB]?)\\s?('+ALL_CODES+')\\b)','gi');
 var PENCE_RE=/(?:^|[\s(])(\d{1,6}(?:\.\d{1,2})?)p\b/gi;
 
 function parseNum(s,isEuro){
