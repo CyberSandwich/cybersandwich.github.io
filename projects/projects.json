@@ -42,6 +42,12 @@
     "category": "Text Tools"
   },
   {
+    "title": "Parsely",
+    "subtitle": "Email, Number & Link Extractor",
+    "url": "/parsely/",
+    "category": "Text Tools"
+  },
+  {
     "title": "Lorip",
     "subtitle": "Lorem Ipsum Generator",
     "url": "/lorip/",
