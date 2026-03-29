@@ -19,7 +19,7 @@
 - [MockupGen](https://saputra.co.uk/mockup/) — iPhone mockup generator
 - [Palit](https://saputra.co.uk/palit/) — Color palette generator
 - [Clip](https://saputra.co.uk/clip/) — Clipboard text manager
-- [Parsely](https://saputra.co.uk/parsely/) — Email, number, and link extractor
+- [Parsely](https://saputra.co.uk/parsely/) — Text data extractor
 - [Lorip](https://saputra.co.uk/lorip/) — Lorem ipsum generator
 - [Wrighter](https://saputra.co.uk/wrighter/) — Minimal plain text editor
 - [Arbit](https://saputra.co.uk/arbit/) — Random picker tool
