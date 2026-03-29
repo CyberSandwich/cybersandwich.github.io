@@ -20,6 +20,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
 .items{margin-bottom:0}
+.sec-hdr{padding:12px 20px 4px;font:600 .75rem/1 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
 .item{display:flex;align-items:center;padding:14px 16px 14px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.6 var(--font);color:var(--t2);cursor:pointer;transition:background .15s,opacity .2s ease;word-break:break-all}
 .item:last-child{border-bottom:none}
 .item span{flex:1;pointer-events:none}
@@ -55,6 +56,11 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
       <button class="seg" id="f-phone" type="button">Number</button>
       <button class="seg" id="f-link" type="button">Link</button>
     </div>
+    <div class="seg-row">
+      <button class="seg" id="f-date" type="button">Date</button>
+      <button class="seg" id="f-money" type="button">Money</button>
+      <button class="seg" id="f-social" type="button">Social</button>
+    </div>
   </div>
   <div class="inp">
     <input id="inp" type="text" autocomplete="off" placeholder="Paste Text to Parse" spellcheck="false" aria-label="Text Input">
@@ -64,7 +70,7 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Results">
   </div>
-  <div class="card items" id="items" style="display:none" role="list"></div>
+  <div id="items-wrap"></div>
 </div>
 <div class="drop-overlay" id="drop-overlay">
   <svg aria-hidden="true" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>
@@ -83,9 +89,14 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
 <script>
 function $(id){return document.getElementById(id)}
 
+/* ── Constants ────────────────────────────────────────────────────── */
+var TYPE_ORDER=['phone','email','link','date','money','social'];
+var TYPE_LABELS={phone:'Numbers',email:'Emails',link:'Links',date:'Dates',money:'Money',social:'Social'};
+var TYPE_IDS=['f-email','f-phone','f-link','f-date','f-money','f-social'];
+
 /* ── State ────────────────────────────────────────────────────────── */
 var results=[];
-var filters={email:false,phone:false,link:false};
+var filters={email:false,phone:false,link:false,date:false,money:false,social:false};
 var copyTimers={},caTimer=null,paTimer=null,searchTimer=null;
 var kbIdx=-1;
 var pendingHtml=null;
@@ -95,13 +106,9 @@ var norm=_search.norm,normC=_search.normC,scoreWord=_search.scoreWord;
 /* ── Load persisted filter state ─────────────────────────────────── */
 var sf=_base.load('parsely-filters',null);
 if(sf&&typeof sf==='object'){
-  if(typeof sf.email==='boolean')filters.email=sf.email;
-  if(typeof sf.phone==='boolean')filters.phone=sf.phone;
-  if(typeof sf.link==='boolean')filters.link=sf.link;
+  for(var fk in filters)if(typeof sf[fk]==='boolean')filters[fk]=sf[fk];
 }
-if(filters.email)$('f-email').classList.add('active');
-if(filters.phone)$('f-phone').classList.add('active');
-if(filters.link)$('f-link').classList.add('active');
+TYPE_IDS.forEach(function(id){var t=id.split('-')[1];if(filters[t])$(id).classList.add('active')});
 
 /* ── Storage ──────────────────────────────────────────────────────── */
 function load(){
@@ -117,7 +124,7 @@ function save(){
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function announce(msg){var el=$('status');el.textContent='';requestAnimationFrame(function(){el.textContent=msg})}
 function updateTitle(){var n=visibleResults().length;document.title=n?'Parsely ('+n+')':'Parsely'}
-function anyFilter(){return filters.email||filters.phone||filters.link}
+function anyFilter(){for(var k in filters)if(filters[k])return true;return false}
 function visibleResults(){return anyFilter()?results.filter(function(r){return filters[r.type]}):results}
 
 /* ══════════════════════════════════════════════════════════════════ */
@@ -189,7 +196,6 @@ function isPhoneFP(raw,text,idx){
   return false;
 }
 
-/* Special formatters for countries with non-standard grouping */
 var CC_FMT={
   '1':function(d){return'+1 ('+d.slice(1,4)+') '+d.slice(4,7)+'-'+d.slice(7)},
   '7':function(d){return'+7 '+d.slice(1,4)+' '+d.slice(4,7)+'-'+d.slice(7,9)+'-'+d.slice(9)},
@@ -197,7 +203,6 @@ var CC_FMT={
   '44':function(d){var n=d.slice(2);if(n.slice(0,2)==='20')return'+44 20 '+n.slice(2,6)+' '+n.slice(6);return'+44 '+n.slice(0,4)+' '+n.slice(4)},
   '55':function(d){return'+55 '+d.slice(2,4)+' '+d.slice(4,9)+'-'+d.slice(9)}
 };
-/* Grouping patterns: space-separated digit counts for the national number */
 var CC_GRP={
   '20':'2 4 4','27':'2 3 4','30':'3 3 4','31':'2 3 4','32':'3 2 2 2','34':'3 3 3',
   '36':'2 3 4','39':'3 3 4','40':'2 3 4','41':'2 3 2 2','43':'4 6','45':'4 4',
@@ -237,7 +242,6 @@ var CC_GRP={
   '992':'2 3 4','993':'2 6','994':'2 3 4','995':'3 3 3','996':'3 3 3','998':'2 3 4',
   '971':'2 3 4'
 };
-/* Total digit length ranges [min, max] (country code + national number) */
 var CC_LEN={
   '1':[11,11],'7':[11,11],'20':[10,12],'27':[11,11],'30':[12,12],'31':[11,11],
   '32':[10,11],'33':[11,11],'34':[11,11],'36':[10,11],'39':[11,13],'40':[11,11],
@@ -345,11 +349,8 @@ function extractPhones(text){
 /*  URL / LINK PARSER                                                */
 /* ══════════════════════════════════════════════════════════════════ */
 var TLDS=[
-/* Generic */
 'com','net','org','info','biz','name','pro','int','mil','edu','gov',
-/* Popular new gTLDs */
 'io','dev','app','me','co','ai','tech','xyz','online','site','store','blog','shop','top','icu','cloud','digital','media','agency','design','studio','global','world','group','live','life','news','plus','one','zone','works','systems','solutions','services','consulting','ventures','holdings','capital','finance','money','company','business','enterprises','industries','foundation','institute','academy','university','college','school','training','health','care','clinic','dental','fitness','center','network','email','marketing','social','community',
-/* Country codes */
 'us','uk','de','fr','it','es','nl','be','at','ch','se','no','dk','fi','pt','ie','pl','cz','sk','hu','ro','bg','hr','si','rs','ba','mk','me','al','gr','cy','mt','lu','li','is','ee','lv','lt','ru','ua','by','md','ge','am','az','kz','uz','tm','kg','tj',
 'au','nz','jp','cn','kr','tw','hk','sg','my','th','id','ph','vn','in','pk','bd','lk','np','mm','kh','la','mn',
 'br','mx','ar','cl','co','pe','ve','ec','uy','py','bo','cr','pa','sv','gt','hn','ni','cu','do','pr','jm','tt','bb','bs','ky',
@@ -357,93 +358,49 @@ var TLDS=[
 'eg','ma','dz','tn','ly','sd','ss',
 'sa','ae','qa','kw','bh','om','jo','lb','il','iq','ir','ye','sy','tr',
 'ca',
-/* Popular ccTLDs used generically */
 'ly','tv','cc','gg','to','fm','ws','la','vc','sc','ac','sh','im','je','gi',
-/* Multi-part ccTLDs — UK */
 'co.uk','org.uk','gov.uk','ac.uk','net.uk','me.uk','nhs.uk','sch.uk','police.uk',
-/* Multi-part ccTLDs — Australia */
 'com.au','org.au','gov.au','edu.au','net.au','asn.au',
-/* Multi-part ccTLDs — New Zealand */
 'co.nz','org.nz','net.nz','govt.nz','ac.nz','school.nz',
-/* Multi-part ccTLDs — South Africa */
 'co.za','org.za','gov.za','edu.za','net.za',
-/* Multi-part ccTLDs — India */
 'co.in','org.in','gov.in','net.in','ac.in','edu.in',
-/* Multi-part ccTLDs — Japan */
 'co.jp','or.jp','ne.jp','ac.jp','go.jp','ed.jp',
-/* Multi-part ccTLDs — Korea */
 'co.kr','or.kr','go.kr','ac.kr','ne.kr',
-/* Multi-part ccTLDs — China */
 'com.cn','org.cn','gov.cn','net.cn','edu.cn','ac.cn',
-/* Multi-part ccTLDs — Hong Kong */
 'com.hk','org.hk','gov.hk','edu.hk','net.hk',
-/* Multi-part ccTLDs — Taiwan */
 'com.tw','org.tw','gov.tw','edu.tw','net.tw',
-/* Multi-part ccTLDs — Singapore */
 'com.sg','org.sg','gov.sg','edu.sg','net.sg',
-/* Multi-part ccTLDs — Malaysia */
 'com.my','org.my','gov.my','edu.my','net.my',
-/* Multi-part ccTLDs — Indonesia */
 'co.id','or.id','go.id','ac.id','web.id',
-/* Multi-part ccTLDs — Thailand */
 'co.th','or.th','go.th','ac.th','in.th',
-/* Multi-part ccTLDs — Philippines */
 'com.ph','org.ph','gov.ph','edu.ph','net.ph',
-/* Multi-part ccTLDs — Vietnam */
 'com.vn','org.vn','gov.vn','edu.vn','net.vn',
-/* Multi-part ccTLDs — Bangladesh */
 'com.bd','org.bd','gov.bd','edu.bd','net.bd',
-/* Multi-part ccTLDs — Pakistan */
 'com.pk','org.pk','gov.pk','edu.pk','net.pk',
-/* Multi-part ccTLDs — Sri Lanka */
 'com.lk','org.lk','gov.lk','edu.lk','net.lk',
-/* Multi-part ccTLDs — Brazil */
 'com.br','org.br','gov.br','edu.br','net.br',
-/* Multi-part ccTLDs — Mexico */
 'com.mx','org.mx','gob.mx','edu.mx','net.mx',
-/* Multi-part ccTLDs — Argentina */
 'com.ar','org.ar','gov.ar','edu.ar','net.ar',
-/* Multi-part ccTLDs — Colombia */
 'com.co','org.co','gov.co','edu.co','net.co',
-/* Multi-part ccTLDs — Peru */
 'com.pe','org.pe','gob.pe','edu.pe','net.pe',
-/* Multi-part ccTLDs — Chile */
 'co.cl',
-/* Multi-part ccTLDs — Venezuela */
 'com.ve','org.ve','gov.ve','edu.ve','net.ve',
-/* Multi-part ccTLDs — Nigeria */
 'com.ng','org.ng','gov.ng','edu.ng','net.ng',
-/* Multi-part ccTLDs — Kenya */
 'co.ke','or.ke','go.ke','ac.ke','ne.ke',
-/* Multi-part ccTLDs — Ghana */
 'com.gh','org.gh','gov.gh','edu.gh',
-/* Multi-part ccTLDs — Tanzania */
 'co.tz','or.tz','go.tz','ac.tz','ne.tz',
-/* Multi-part ccTLDs — Uganda */
 'co.ug','or.ug','go.ug','ac.ug',
-/* Multi-part ccTLDs — Egypt */
 'com.eg','org.eg','gov.eg','edu.eg','net.eg',
-/* Multi-part ccTLDs — Morocco */
 'co.ma','ac.ma','gov.ma','net.ma','org.ma',
-/* Multi-part ccTLDs — Saudi Arabia */
 'com.sa','org.sa','gov.sa','edu.sa','net.sa',
-/* Multi-part ccTLDs — UAE */
 'co.ae','org.ae','gov.ae','ac.ae','net.ae',
-/* Multi-part ccTLDs — Qatar */
 'com.qa','org.qa','gov.qa','edu.qa','net.qa',
-/* Multi-part ccTLDs — Kuwait */
 'com.kw','org.kw','gov.kw','edu.kw','net.kw',
-/* Multi-part ccTLDs — Bahrain */
 'com.bh','org.bh','gov.bh','edu.bh','net.bh',
-/* Multi-part ccTLDs — Israel */
 'co.il','org.il','gov.il','ac.il','net.il',
-/* Multi-part ccTLDs — Turkey */
 'com.tr','org.tr','gov.tr','edu.tr','net.tr',
-/* Multi-part ccTLDs — Russia */
 'com.ru','org.ru',
-/* Multi-part ccTLDs — Ukraine */
 'com.ua','org.ua','gov.ua','edu.ua','net.ua',
-/* Multi-part ccTLDs — Other */
 'co.zw','org.zw','gov.zw','ac.zw',
 'co.zm','org.zm','gov.zm','ac.zm',
 'co.bw','org.bw',
@@ -598,6 +555,227 @@ function extractUrls(text){
 }
 
 /* ══════════════════════════════════════════════════════════════════ */
+/*  DATE PARSER                                                      */
+/* ══════════════════════════════════════════════════════════════════ */
+var MFULL='january february march april may june july august september october november december'.split(' ');
+var MABBR='jan feb mar apr may jun jul aug sep oct nov dec'.split(' ');
+var MOUT='January February March April May June July August September October November December'.split(' ');
+var MMAP={};for(var mi=0;mi<12;mi++){MMAP[MFULL[mi]]=mi;MMAP[MABBR[mi]]=mi}
+MMAP['sept']=8;
+
+var MPAT='jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+var DA=new RegExp('(?:(?:mon|tue|wed|thu|fri|sat|sun)\\w*[,.]?\\s+)?(\\d{1,2})(?:st|nd|rd|th)?\\s+('+MPAT+')(?:[,\\s]+(\\d{2,4}))?','gi');
+var DB=new RegExp('(?:(?:mon|tue|wed|thu|fri|sat|sun)\\w*[,.]?\\s+)?('+MPAT+')\\s+(\\d{1,4})(?:(?:st|nd|rd|th)(?:[,\\s]+(\\d{2,4}))?|[,\\s]+(\\d{2,4}))?','gi');
+var DC=/\b(\d{1,4})[\/\-.](\d{1,2})[\/\-.](\d{1,4})\b/g;
+
+function mIdx(s){var k=s.toLowerCase().replace(/\.$/,'');if(k==='sept')k='sep';return MMAP[k]!==undefined?MMAP[k]:-1}
+function rYear(y){if(!y)return null;var n=parseInt(y,10);if(y.length===2)return n>=70?1900+n:2000+n;return n}
+function vDay(d,m,y){if(d<1||d>31)return false;var mx=[31,28,31,30,31,30,31,31,30,31,30,31];if(y&&((y%4===0&&y%100!==0)||y%400===0))mx[1]=29;return d<=mx[m]}
+function fmtD(d,m,y){var mn=MOUT[m];if(d&&y)return d+' '+mn+' '+y;if(d)return d+' '+mn;return mn+' '+y}
+
+function isDateFP(raw,text,idx){
+  var before=text.slice(Math.max(0,idx-15),idx);
+  if(/[vV]\d+\.\d+/.test(raw.trim()))return true;
+  if(/(?:version|ver|v)\s*$/i.test(before))return true;
+  if(/^\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(raw.trim()))return true;
+  if(/[$\xA3\u20AC\xA5]\s*$/.test(before))return true;
+  if(/(?:order|ref|invoice|ticket|id|case|no)\s*[:#]?\s*$/i.test(before))return true;
+  return false;
+}
+
+function parseNumD(p1,p2,p3){
+  var n1=parseInt(p1,10),n2=parseInt(p2,10),n3=parseInt(p3,10),d,m,y;
+  if(p1.length===4){y=n1;m=n2-1;d=n3}
+  else if(p3.length>=2){y=p3.length===2?rYear(p3):n3;if(n1>12){d=n1;m=n2-1}else if(n2>12){d=n2;m=n1-1}else{d=n1;m=n2-1}}
+  else return null;
+  if(m<0||m>11||!vDay(d,m,y))return null;
+  if(y&&(y<1900||y>2099))return null;
+  return{d:d,m:m,y:y};
+}
+
+function extractDates(text){
+  var out=[],seen={},used=[];
+  function ov(s,e){for(var i=0;i<used.length;i++)if(s<used[i][1]&&e>used[i][0])return true;return false}
+
+  DA.lastIndex=0;var m;
+  while((m=DA.exec(text))!==null){
+    if(ov(m.index,m.index+m[0].length))continue;
+    var d=parseInt(m[1],10),mi2=mIdx(m[2]),yr=rYear(m[3]);
+    if(mi2<0||!vDay(d,mi2,yr))continue;
+    if(yr&&(yr<1900||yr>2099))continue;
+    if(isDateFP(m[0],text,m.index))continue;
+    var n=fmtD(d,mi2,yr);
+    if(!seen[n]){seen[n]=1;out.push(n)}
+    used.push([m.index,m.index+m[0].length]);
+  }
+
+  DB.lastIndex=0;
+  while((m=DB.exec(text))!==null){
+    if(ov(m.index,m.index+m[0].length))continue;
+    var mi2=mIdx(m[1]),num=parseInt(m[2],10);
+    if(mi2<0)continue;
+    var d,yr;
+    if(num>31||m[2].length===4){d=null;yr=num}
+    else{d=num;yr=rYear(m[3]||m[4])}
+    if(d!==null&&!vDay(d,mi2,yr))continue;
+    if(yr&&(yr<1900||yr>2099))continue;
+    if(isDateFP(m[0],text,m.index))continue;
+    var n=fmtD(d,mi2,yr);
+    if(!seen[n]){seen[n]=1;out.push(n)}
+    used.push([m.index,m.index+m[0].length]);
+  }
+
+  DC.lastIndex=0;
+  while((m=DC.exec(text))!==null){
+    if(ov(m.index,m.index+m[0].length))continue;
+    if(isDateFP(m[0],text,m.index))continue;
+    var p=parseNumD(m[1],m[2],m[3]);
+    if(!p)continue;
+    var n=fmtD(p.d,p.m,p.y);
+    if(!seen[n]){seen[n]=1;out.push(n)}
+    used.push([m.index,m.index+m[0].length]);
+  }
+
+  return out;
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/*  MONEY PARSER                                                     */
+/* ══════════════════════════════════════════════════════════════════ */
+var CODE_SYM={GBP:'\xA3',USD:'$',EUR:'\u20AC',JPY:'\xA5',CNY:'\xA5',INR:'\u20B9',KRW:'\u20A9',CHF:'CHF ',AUD:'A$',CAD:'C$',NZD:'NZ$',SGD:'S$',HKD:'HK$',MYR:'RM',ZAR:'R'};
+var MULT={k:1e3,K:1e3,m:1e6,M:1e6,b:1e9,B:1e9};
+var MONEY_SYM_RE=/([-(]?)(HK\$|NZ\$|A\$|C\$|S\$|RM|[\xA3$\u20AC\xA5\u20B9\u20A9]|R(?=\d))(\s?)(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?)(\)?)/g;
+var MONEY_CODE_RE=/(?:(GBP|USD|EUR|JPY|CNY|INR|KRW|CHF|SEK|NOK|DKK|ZAR|AUD|CAD|NZD|SGD|HKD|MYR)\s?(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?))|(?:(\d{1,3}(?:[,.\u00A0 ]\d{3})*(?:[.,]\d{1,2})?)([kKmMbB]?)\s?(GBP|USD|EUR|JPY|CNY|INR|KRW|CHF|SEK|NOK|DKK|ZAR|AUD|CAD|NZD|SGD|HKD|MYR))/gi;
+var PENCE_RE=/(?:^|[\s(])(\d{1,6}(?:\.\d{1,2})?)p\b/gi;
+
+function parseNum(s,isEuro){
+  var n=s.replace(/[\s\u00A0]/g,'');
+  var hasDot=n.indexOf('.')!==-1,hasCom=n.indexOf(',')!==-1;
+  if(hasDot&&hasCom){
+    if(n.lastIndexOf(',')>n.lastIndexOf('.')){n=n.replace(/\./g,'');n=n.replace(',','.')}
+    else{n=n.replace(/,/g,'')}
+  }else if(hasCom){
+    var afterLast=n.split(',').pop();
+    if(afterLast.length===3&&n.split(',').length>1)n=n.replace(/,/g,'');
+    else n=n.replace(',','.');
+  }else if(hasDot&&isEuro){
+    var afterLastD=n.split('.').pop();
+    if(afterLastD.length===3&&n.split('.').length>1)n=n.replace(/\./g,'');
+  }
+  return parseFloat(n);
+}
+
+function fmtMoney(num,sym){
+  if(isNaN(num)||!isFinite(num))return null;
+  var neg=num<0;num=Math.abs(num);
+  var s=num.toFixed(2);
+  var parts=s.split('.');
+  parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  return(neg?'-':'')+sym+parts.join('.');
+}
+
+function isMoneyFP(raw,text,idx){
+  var after=text.slice(idx+raw.length,idx+raw.length+5);
+  if(/^\s*%/.test(after))return true;
+  var around=text.slice(Math.max(0,idx-10),idx+raw.length+10);
+  if(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(around))return true;
+  var before=text.slice(Math.max(0,idx-15),idx);
+  if(/(?:version|ver|v)\s*$/i.test(before))return true;
+  return false;
+}
+
+function extractMoney(text){
+  var out=[],seen={};
+  var EUR_CODES={EUR:1,CHF:1,SEK:1,NOK:1,DKK:1};
+
+  MONEY_SYM_RE.lastIndex=0;var m;
+  while((m=MONEY_SYM_RE.exec(text))!==null){
+    if(isMoneyFP(m[0],text,m.index))continue;
+    var neg=m[1]==='-'||m[1]==='(';
+    var sym=m[2],numStr=m[4],mult=m[5];
+    var num=parseNum(numStr,false);
+    if(isNaN(num))continue;
+    if(mult&&MULT[mult])num*=MULT[mult];
+    if(neg)num=-num;
+    var outSym=sym;
+    if(sym==='R')outSym='R';
+    var f=fmtMoney(num,outSym);
+    if(f&&!seen[f]){seen[f]=1;out.push(f)}
+  }
+
+  MONEY_CODE_RE.lastIndex=0;
+  while((m=MONEY_CODE_RE.exec(text))!==null){
+    if(isMoneyFP(m[0],text,m.index))continue;
+    var code=(m[1]||m[6]||'').toUpperCase();
+    var numStr=m[2]||m[4];
+    var mult=m[3]||m[5];
+    var isEuro=EUR_CODES[code]||false;
+    var num=parseNum(numStr,isEuro);
+    if(isNaN(num))continue;
+    if(mult&&MULT[mult])num*=MULT[mult];
+    var sym=CODE_SYM[code]||code+' ';
+    var f=fmtMoney(num,sym);
+    if(f&&!seen[f]){seen[f]=1;out.push(f)}
+  }
+
+  PENCE_RE.lastIndex=0;
+  while((m=PENCE_RE.exec(text))!==null){
+    var pence=parseInt(m[1],10);
+    if(isNaN(pence)||pence<=0)continue;
+    var f=fmtMoney(pence/100,'\xA3');
+    if(f&&!seen[f]){seen[f]=1;out.push(f)}
+  }
+
+  return out;
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
+/*  SOCIAL HANDLE PARSER                                             */
+/* ══════════════════════════════════════════════════════════════════ */
+var SOCIAL_RE=/(?:^|[\s([\u201C\u2018])@([a-zA-Z0-9][a-zA-Z0-9._]{0,29})/gm;
+var SOCIAL_PREFIX_RE=/(?:instagram|twitter|tiktok|x|threads|bluesky|mastodon)\s*(?:\(?\s*@([a-zA-Z0-9][a-zA-Z0-9._]{0,29})\s*\)?|:\s*@([a-zA-Z0-9][a-zA-Z0-9._]{0,29}))/gi;
+var SOCIAL_BLOCK={'media':1,'keyframes':1,'import':1,'charset':1,'supports':1,'page':1,'layer':1,'override':1,'param':1,'returns':1,'throws':1,'deprecated':1,'author':1,'see':1,'since':1,'version':1,'type':1,'interface':1,'property':1,'method':1,'class':1,'function':1,'var':1,'const':1,'let':1,'everyone':1,'here':1,'channel':1,'apply':1,'tailwind':1,'screen':1,'responsive':1,'variants':1};
+
+function normalizeSocial(u){
+  u=u.replace(/[.,;:!?)]+$/,'');
+  if(!u)return null;
+  u=u.toLowerCase();
+  if(!/^[a-z0-9][a-z0-9._]{0,29}$/.test(u))return null;
+  return'@'+u;
+}
+
+function isSocialFP(username,text,idx){
+  if(SOCIAL_BLOCK[username.toLowerCase()])return true;
+  var before30=text.slice(Math.max(0,idx-30),idx);
+  if(/(?:https?:\/\/|www\.)[^\s]*$/i.test(before30))return true;
+  return false;
+}
+
+function extractSocials(text){
+  var out=[],seen={};
+
+  SOCIAL_PREFIX_RE.lastIndex=0;var pm;
+  while((pm=SOCIAL_PREFIX_RE.exec(text))!==null){
+    var uname=pm[1]||pm[2];
+    if(!uname)continue;
+    var handle=normalizeSocial(uname);
+    if(handle&&!seen[handle]){seen[handle]=1;out.push(handle)}
+  }
+
+  SOCIAL_RE.lastIndex=0;var sm;
+  while((sm=SOCIAL_RE.exec(text))!==null){
+    var uname=sm[1];
+    if(!uname)continue;
+    var atIdx=sm.index+sm[0].indexOf('@');
+    if(isSocialFP(uname,text,atIdx))continue;
+    var handle=normalizeSocial(uname);
+    if(handle&&!seen[handle]){seen[handle]=1;out.push(handle)}
+  }
+
+  return out;
+}
+
+/* ══════════════════════════════════════════════════════════════════ */
 /*  MAIN PARSE + MERGE                                               */
 /* ══════════════════════════════════════════════════════════════════ */
 function parseText(text,html){
@@ -612,6 +790,12 @@ function parseText(text,html){
     for(var i=0;i<em.length;i++)items.push({text:em[i],type:'email'});
     var ph=extractPhones(text);
     for(var i=0;i<ph.length;i++)items.push({text:ph[i],type:'phone'});
+    var dt=extractDates(text);
+    for(var i=0;i<dt.length;i++)items.push({text:dt[i],type:'date'});
+    var mo=extractMoney(text);
+    for(var i=0;i<mo.length;i++)items.push({text:mo[i],type:'money'});
+    var so=extractSocials(text);
+    for(var i=0;i<so.length;i++)items.push({text:so[i],type:'social'});
     var ur=extractUrls(text);
     for(var i=0;i<ur.urls.length;i++)items.push({text:ur.urls[i],type:'link'});
     for(var i=0;i<ur.emails.length;i++)items.push({text:ur.emails[i],type:'email'});
@@ -628,8 +812,8 @@ function mergeResults(newItems){
     if(!keys[k]){keys[k]=1;results.push({id:uid(),text:newItems[i].text,type:newItems[i].type});added++}
   }
   if(added>0){
-    var typeOrder={phone:0,email:1,link:2};
-    results.sort(function(a,b){var t=typeOrder[a.type]-typeOrder[b.type];return t!==0?t:a.text.toLowerCase().localeCompare(b.text.toLowerCase())});
+    var to={};for(var i=0;i<TYPE_ORDER.length;i++)to[TYPE_ORDER[i]]=i;
+    results.sort(function(a,b){var t=(to[a.type]||99)-(to[b.type]||99);return t!==0?t:a.text.toLowerCase().localeCompare(b.text.toLowerCase())});
     save();kbIdx=-1;render();
     announce(added+' Item'+(added!==1?'s':'')+' Found');
   }
@@ -644,59 +828,95 @@ function doParse(){
 }
 
 /* ══════════════════════════════════════════════════════════════════ */
-/*  RENDER                                                            */
+/*  RENDER (grouped output with search collapsing)                   */
 /* ══════════════════════════════════════════════════════════════════ */
+function mkItem(it,idx,newId){
+  var row=document.createElement('div');row.className='item';row.setAttribute('role','listitem');row.setAttribute('data-id',it.id);
+  var s=document.createElement('span');s.textContent=it.text;
+  var btn=document.createElement('button');btn.type='button';btn.className='del';btn.setAttribute('aria-label','Remove');
+  btn.appendChild(mkX());
+  row.appendChild(s);row.appendChild(btn);
+  if(newId&&it.id===newId)row.classList.add('fi');
+  if(idx===kbIdx)row.classList.add('kb-focus');
+  return row;
+}
+
 function render(newId){
   _search.clearCache();
   var vis=visibleResults();
   var q=norm($('search').value.trim().toLowerCase());
   var words=q.split(/\s+/).filter(Boolean);
-  var list=vis;
-  if(words.length){
-    var scored=[];
-    for(var i=0;i<vis.length;i++){
-      var t=vis[i].text.toLowerCase(),total=0,ok=true;
-      for(var wi=0;wi<words.length;wi++){
-        var s=scoreWord(words[wi],t);
-        if(s<=0){ok=false;break}
-        total+=s;
-      }
-      if(ok)scored.push({it:vis[i],score:total});
-    }
-    scored.sort(function(a,b){return b.score-a.score});
-    list=scored.map(function(s){return s.it});
-  }
-  var c=$('items'),hasItems=vis.length>0;
-  var frag=document.createDocumentFragment();
+  var wrap=$('items-wrap');
+  var hasItems=vis.length>0;
   $('ca-btn').disabled=!hasItems;$('ca-btn').style.display=hasItems?'':'none';
   $('ca-l').textContent=vis.length>1?'Copy All':'Copy';
   $('rs-btn').style.display=(results.length>0||inp.value.trim())?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
   updateTitle();
-  if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
-  for(var i=0;i<list.length;i++){
-    var it=list[i];
-    var row=document.createElement('div');row.className='item';row.setAttribute('role','listitem');row.setAttribute('data-id',it.id);
-    var s=document.createElement('span');s.textContent=it.text;
-    var btn=document.createElement('button');btn.type='button';btn.className='del';btn.setAttribute('aria-label','Remove');
-    btn.appendChild(mkX());
-    row.appendChild(s);row.appendChild(btn);frag.appendChild(row);
-    if(newId&&it.id===newId)row.classList.add('fi');
-    if(i===kbIdx)row.classList.add('kb-focus');
+  if(!hasItems){wrap.textContent='';kbIdx=-1;return}
+
+  /* searching: flat scored list in one card */
+  if(words.length){
+    var scored=[];
+    for(var i=0;i<vis.length;i++){
+      var t=vis[i].text.toLowerCase(),total=0,ok=true;
+      for(var wi=0;wi<words.length;wi++){
+        var sc=scoreWord(words[wi],t);
+        if(sc<=0){ok=false;break}
+        total+=sc;
+      }
+      if(ok)scored.push({it:vis[i],score:total});
+    }
+    scored.sort(function(a,b){return b.score-a.score});
+    var frag=document.createDocumentFragment();
+    var card=document.createElement('div');card.className='card items';card.setAttribute('role','list');
+    if(!scored.length){
+      var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';card.appendChild(nm);
+      announce('Nothing Found');
+    }else{
+      for(var i=0;i<scored.length;i++)card.appendChild(mkItem(scored[i].it,i,newId));
+      announce(scored.length+' result'+(scored.length===1?'':'s'));
+    }
+    frag.appendChild(card);
+    wrap.textContent='';wrap.appendChild(frag);
+    if(kbIdx>=scored.length)kbIdx=scored.length-1;
+    return;
   }
-  if(list.length===0&&words.length){
-    var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';frag.appendChild(nm);
-    announce('Nothing Found');
-  }else if(words.length){
-    announce(list.length+' result'+(list.length===1?'':'s'));
+
+  /* not searching: grouped by type with section headers */
+  var groups={};
+  for(var i=0;i<vis.length;i++){
+    var ty=vis[i].type;
+    if(!groups[ty])groups[ty]=[];
+    groups[ty].push(vis[i]);
   }
-  c.textContent='';c.appendChild(frag);c.style.display='';
-  if(kbIdx>=list.length)kbIdx=list.length-1;
+  var activeTypes=[];
+  for(var i=0;i<TYPE_ORDER.length;i++){
+    if(groups[TYPE_ORDER[i]]&&groups[TYPE_ORDER[i]].length)activeTypes.push(TYPE_ORDER[i]);
+  }
+  var singleType=activeTypes.length===1;
+  var frag=document.createDocumentFragment();
+  var globalIdx=0;
+  for(var ti=0;ti<activeTypes.length;ti++){
+    var ty=activeTypes[ti],items=groups[ty];
+    var card=document.createElement('div');card.className='card items';card.setAttribute('role','list');
+    if(!singleType){
+      var hdr=document.createElement('div');hdr.className='sec-hdr';hdr.textContent=TYPE_LABELS[ty];
+      card.appendChild(hdr);
+    }
+    for(var i=0;i<items.length;i++){
+      card.appendChild(mkItem(items[i],globalIdx,newId));
+      globalIdx++;
+    }
+    frag.appendChild(card);
+  }
+  wrap.textContent='';wrap.appendChild(frag);
+  if(kbIdx>=globalIdx)kbIdx=globalIdx-1;
 }
 
 /* ── Remove Item ─────────────────────────────────────────────────── */
 function removeItem(id){
-  var row=$('items').querySelector('[data-id="'+id+'"]');
+  var row=$('items-wrap').querySelector('[data-id="'+id+'"]');
   if(row)row.classList.add('removing');
   for(var i=0;i<results.length;i++){if(results[i].id===id){results.splice(i,1);break}}
   if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);delete copyTimers[id]}
@@ -759,7 +979,7 @@ var resetCtrl=_base.twoPress($('rs-btn'),{
 function doReset(){resetCtrl.press()}
 
 /* ── Keyboard Navigation ─────────────────────────────────────────── */
-function kbCards(){return $('items').querySelectorAll('.item')}
+function kbCards(){return $('items-wrap').querySelectorAll('.item')}
 function kbClear(){kbIdx=-1;var all=kbCards();for(var i=0;i<all.length;i++)all[i].classList.remove('kb-focus')}
 function kbMove(dir){
   var cards=kbCards();if(!cards.length)return;
@@ -780,7 +1000,7 @@ inp.addEventListener('paste',function(e){
   if(html&&/<a\s/i.test(html))pendingHtml=html;
 });
 
-/* ── Global Paste (when textarea not focused) ────────────────────── */
+/* ── Global Paste (when input not focused) ───────────────────────── */
 document.addEventListener('paste',function(e){
   var tag=document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA')return;
@@ -792,7 +1012,7 @@ document.addEventListener('paste',function(e){
 });
 
 /* ── Item Click Delegation ───────────────────────────────────────── */
-$('items').addEventListener('click',function(e){
+$('items-wrap').addEventListener('click',function(e){
   var del=e.target.closest('.del');
   var row=e.target.closest('.item');
   if(!row)return;
@@ -825,7 +1045,7 @@ $('ca-btn').addEventListener('click',doCopyAll);
 $('rs-btn').addEventListener('click',doReset);
 
 /* ── Filter Toggles ──────────────────────────────────────────────── */
-['f-email','f-phone','f-link'].forEach(function(id){
+TYPE_IDS.forEach(function(id){
   $(id).addEventListener('click',function(){
     var type=id.split('-')[1];
     filters[type]=!filters[type];
@@ -858,6 +1078,9 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='e'){$('f-email').click()}
   else if(e.key==='n'){$('f-phone').click()}
   else if(e.key==='l'){$('f-link').click()}
+  else if(e.key==='c'){$('f-date').click()}
+  else if(e.key==='m'){$('f-money').click()}
+  else if(e.key==='o'){$('f-social').click()}
   else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
   else if(e.key==='1')window.location.href='/';
 });
@@ -898,7 +1121,7 @@ document.addEventListener('visibilitychange',function(){
     var pb=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
     pb.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';
     Object.keys(copyTimers).forEach(function(k){
-      var row=$('items').querySelector('[data-id="'+k+'"]');
+      var row=$('items-wrap').querySelector('[data-id="'+k+'"]');
       if(row){var d=row.querySelector('.del');if(d){d.classList.remove('copied');d.replaceChildren(mkX());d.style.opacity='';d.setAttribute('aria-label','Remove')}}
     });
     copyTimers={};
