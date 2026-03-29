@@ -12,9 +12,8 @@
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
-.ta-wrap{padding:0;overflow:hidden}
-#ta{display:block;width:100%;min-height:100px;max-height:200px;padding:14px 20px;border:none;outline:none;resize:vertical;font:400 .9375rem/1.6 var(--font);color:var(--t1);background:transparent;box-sizing:border-box;transition:color .3s}
-#ta::placeholder{color:var(--t4)}
+.paste-hint{display:none;font:400 .75rem/1 var(--font);color:var(--t4);text-align:center;margin-top:-6px;margin-bottom:14px}
+@media(hover:none){.paste-hint{display:block}}
 .search-wrap{display:none;margin-bottom:14px;--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
@@ -57,9 +56,11 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
       <button class="seg active" id="f-link" type="button">Link</button>
     </div>
   </div>
-  <div class="card ta-wrap">
-    <textarea id="ta" placeholder="Paste Text to Parse" rows="4" spellcheck="false" autocomplete="off" aria-label="Text Input"></textarea>
+  <div class="inp">
+    <input id="inp" type="text" autocomplete="off" placeholder="Paste Text to Parse" spellcheck="false" aria-label="Text Input">
+    <button type="button" id="add-btn" aria-label="Parse"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
+  <div class="paste-hint">Long-Press Input Box to Paste</div>
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Results">
   </div>
@@ -85,7 +86,7 @@ function $(id){return document.getElementById(id)}
 /* ── State ────────────────────────────────────────────────────────── */
 var results=[];
 var filters={email:true,phone:true,link:true};
-var copyTimers={},caTimer=null,paTimer=null,parseTimer=null,searchTimer=null;
+var copyTimers={},caTimer=null,paTimer=null,searchTimer=null;
 var kbIdx=-1;
 var pendingHtml=null;
 var mkX=_base.mkX,mkCheck=_base.mkCheck;
@@ -254,7 +255,7 @@ var TLDS='com,co.uk,org,net,io,dev,app,me,co,us,uk,de,fr,info,biz,edu,gov,mil,in
 var TLD_SET={};for(var ti=0;ti<TLDS.length;ti++)TLD_SET[TLDS[ti]]=1;
 var MULTI_TLDS={};for(var ti=0;ti<TLDS.length;ti++)if(TLDS[ti].indexOf('.')!==-1)MULTI_TLDS[TLDS[ti]]=1;
 var TLDS_PAT=TLDS.map(function(t){return t.replace(/\./g,'\\.')}).sort(function(a,b){return b.length-a.length}).join('|');
-var RE_PROTO=/(?:https?|ftp):\/\/[^\s<>\[\]{}\u201C\u201D\u2018\u2019`]+/gi;
+var RE_PROTO=/(?:https?|ftp):\/\/[a-zA-Z0-9][^\s<>\[\]{}\u201C\u201D\u2018\u2019`]*/gi;
 var RE_WWW=/www\.[a-zA-Z0-9][^\s<>\[\]{}\u201C\u201D\u2018\u2019`]*/gi;
 var RE_BARE=new RegExp('[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*?\\.(?:'+TLDS_PAT+')\\b(?:(?::\\d{1,5})?(?:\\/[^\\s<>\\[\\]{}\\u201C\\u201D\\u2018\\u2019`]*)?)','gi');
 var RE_HREF=/<a\s[^>]*?href\s*=\s*["']([^"']+)["'][^>]*>/gi;
@@ -300,6 +301,9 @@ function cleanUrl(raw){
   url=url.replace(/^[<(\["'\u201C\u2018]+/,'').replace(/[>)\]"'\u201D\u2019]+$/,'');
   url=stripTrailPunct(url);
   if(!/^(?:https?|ftp):\/\//i.test(url))url='https://'+url;
+  var afterProto=url.replace(/^(?:https?|ftp):\/\//i,'');
+  if(!afterProto||!/[a-zA-Z0-9]/.test(afterProto))return null;
+  if(!/\./.test(afterProto.split('/')[0])&&!/^\d+\.\d+\.\d+\.\d+/.test(afterProto))return null;
   url=addWww(url);
   url=addSlash(url);
   return url;
@@ -385,11 +389,12 @@ function mergeResults(newItems){
   }
 }
 
-function doParseInput(){
-  var text=$('ta').value;
+function doParse(){
+  var text=inp.value;
   var html=pendingHtml;pendingHtml=null;
   if(!text.trim()&&!html)return;
   mergeResults(parseText(text,html));
+  inp.value='';inp.focus();
 }
 
 /* ══════════════════════════════════════════════════════════════════ */
@@ -419,7 +424,7 @@ function render(newId){
   var frag=document.createDocumentFragment();
   $('ca-btn').disabled=!hasItems;$('ca-btn').style.display=hasItems?'':'none';
   $('ca-l').textContent=vis.length>1?'Copy All':'Copy';
-  $('rs-btn').style.display=(results.length>0||$('ta').value.trim())?'':'none';
+  $('rs-btn').style.display=(results.length>0||inp.value.trim())?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
   updateTitle();
   if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
@@ -493,11 +498,11 @@ function doCopyAll(){
 /* ── Reset (two-press) ───────────────────────────────────────────── */
 var resetCtrl=_base.twoPress($('rs-btn'),{
   label:$('rs-l'),
-  guard:function(){return results.length>0||$('ta').value.trim()},
+  guard:function(){return results.length>0||inp.value.trim()},
   onConfirm:function(){
     results=[];
-    $('ta').value='';
-    clearTimeout(parseTimer);clearTimeout(searchTimer);
+    inp.value='';
+    clearTimeout(searchTimer);
     Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
     copyTimers={};kbIdx=-1;pendingHtml=null;
     $('search').value='';render();
@@ -519,14 +524,13 @@ function kbMove(dir){
   cards[kbIdx].scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 
-/* ── Textarea Input ──────────────────────────────────────────────── */
-$('ta').addEventListener('paste',function(e){
+/* ── Input Handlers ──────────────────────────────────────────────── */
+var inp=$('inp');
+$('add-btn').addEventListener('click',doParse);
+inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doParse()}});
+inp.addEventListener('paste',function(e){
   var html=(e.clipboardData||window.clipboardData).getData('text/html');
   if(html&&/<a\s/i.test(html))pendingHtml=html;
-});
-$('ta').addEventListener('input',function(){
-  clearTimeout(parseTimer);
-  parseTimer=setTimeout(doParseInput,120);
 });
 
 /* ── Global Paste (when textarea not focused) ────────────────────── */
@@ -600,7 +604,7 @@ document.addEventListener('keydown',function(e){
     e.preventDefault();
     var cards=kbCards();if(kbIdx<cards.length){removeItem(cards[kbIdx].getAttribute('data-id'))}
   }
-  else if(e.key==='/'){e.preventDefault();kbClear();$('ta').focus()}
+  else if(e.key==='/'){e.preventDefault();kbClear();inp.focus()}
   else if(e.key==='s'){e.preventDefault();kbClear();$('search').focus()}
   else if(e.key==='a'){e.preventDefault();doCopyAll()}
   else if(e.key==='r')doReset();
@@ -636,7 +640,7 @@ var resetDrag=_base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(fil
 /* ── Visibility / Timer Cleanup ──────────────────────────────────── */
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){
-    clearTimeout(searchTimer);clearTimeout(caTimer);clearTimeout(paTimer);clearTimeout(parseTimer);
+    clearTimeout(searchTimer);clearTimeout(caTimer);clearTimeout(paTimer);
     Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
   }
   if(!document.hidden){
