@@ -120,7 +120,7 @@ function save(){
 /* ── Helpers ──────────────────────────────────────────────────────── */
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function announce(msg){var el=$('status');el.textContent='';requestAnimationFrame(function(){el.textContent=msg})}
-function updateTitle(){var n=visibleResults().length;document.title=n?'Parsely ('+n+')':'Parsely'}
+function updateTitle(){var n=results.length;document.title=n?'Parsely ('+n+')':'Parsely'}
 function anyFilter(){for(var k in filters)if(filters[k])return true;return false}
 function visibleResults(){return anyFilter()?results.filter(function(r){return filters[r.type]}):results}
 
@@ -864,6 +864,8 @@ function mergeResults(newItems){
     results.sort(function(a,b){var t=(to[a.type]||99)-(to[b.type]||99);return t!==0?t:a.text.toLowerCase().localeCompare(b.text.toLowerCase())});
     save();kbIdx=-1;render();
     announce(added+' Item'+(added!==1?'s':'')+' Found');
+  }else if(!newItems.length){
+    _base.notify('Nothing Found',false);
   }
 }
 
