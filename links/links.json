@@ -54,6 +54,12 @@
     "category": "Personal"
   },
   {
+    "title": "Berkeley myHome",
+    "url": "https://www.berkeleygroup.co.uk/my-home/dashboard",
+    "icon": "home",
+    "category": "Personal"
+  },
+  {
     "title": "camelcamelcamel",
     "url": "https://uk.camelcamelcamel.com",
     "icon": "trending",
