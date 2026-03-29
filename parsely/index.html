@@ -51,9 +51,9 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
   </div>
   <div class="card" id="filter-card">
     <div class="seg-row">
-      <button class="seg active" id="f-email" type="button">Email</button>
-      <button class="seg active" id="f-phone" type="button">Number</button>
-      <button class="seg active" id="f-link" type="button">Link</button>
+      <button class="seg" id="f-email" type="button">Email</button>
+      <button class="seg" id="f-phone" type="button">Number</button>
+      <button class="seg" id="f-link" type="button">Link</button>
     </div>
   </div>
   <div class="inp">
@@ -85,7 +85,7 @@ function $(id){return document.getElementById(id)}
 
 /* ── State ────────────────────────────────────────────────────────── */
 var results=[];
-var filters={email:true,phone:true,link:true};
+var filters={email:false,phone:false,link:false};
 var copyTimers={},caTimer=null,paTimer=null,searchTimer=null;
 var kbIdx=-1;
 var pendingHtml=null;
@@ -99,9 +99,9 @@ if(sf&&typeof sf==='object'){
   if(typeof sf.phone==='boolean')filters.phone=sf.phone;
   if(typeof sf.link==='boolean')filters.link=sf.link;
 }
-if(!filters.email)$('f-email').classList.remove('active');
-if(!filters.phone)$('f-phone').classList.remove('active');
-if(!filters.link)$('f-link').classList.remove('active');
+if(filters.email)$('f-email').classList.add('active');
+if(filters.phone)$('f-phone').classList.add('active');
+if(filters.link)$('f-link').classList.add('active');
 
 /* ── Storage ──────────────────────────────────────────────────────── */
 function load(){
@@ -117,7 +117,8 @@ function save(){
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function announce(msg){var el=$('status');el.textContent='';requestAnimationFrame(function(){el.textContent=msg})}
 function updateTitle(){var n=visibleResults().length;document.title=n?'Parsely ('+n+')':'Parsely'}
-function visibleResults(){return results.filter(function(r){return filters[r.type]})}
+function anyFilter(){return filters.email||filters.phone||filters.link}
+function visibleResults(){return anyFilter()?results.filter(function(r){return filters[r.type]}):results}
 
 /* ══════════════════════════════════════════════════════════════════ */
 /*  EMAIL PARSER                                                     */
