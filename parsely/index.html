@@ -20,7 +20,9 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
 .items{margin-bottom:0}
-.sec-hdr{padding:12px 20px 4px;font:600 .75rem/1 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
+.sec-hdr{padding:0 20px 6px;font:600 .75rem/1 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
+#items-wrap .card{margin-bottom:14px}
+#items-wrap .card:last-child{margin-bottom:0}
 .item{display:flex;align-items:center;padding:14px 16px 14px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.6 var(--font);color:var(--t2);cursor:pointer;transition:background .15s,opacity .2s ease;word-break:break-all}
 .item:last-child{border-bottom:none}
 .item span{flex:1;pointer-events:none}
@@ -929,11 +931,11 @@ function render(newId){
   var globalIdx=0;
   for(var ti=0;ti<activeTypes.length;ti++){
     var ty=activeTypes[ti],items=groups[ty];
-    var card=document.createElement('div');card.className='card items';card.setAttribute('role','list');
     if(!singleType){
       var hdr=document.createElement('div');hdr.className='sec-hdr';hdr.textContent=TYPE_LABELS[ty];
-      card.appendChild(hdr);
+      frag.appendChild(hdr);
     }
+    var card=document.createElement('div');card.className='card items';card.setAttribute('role','list');
     for(var i=0;i<items.length;i++){
       card.appendChild(mkItem(items[i],globalIdx,newId));
       globalIdx++;
