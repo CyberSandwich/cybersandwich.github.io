@@ -103,6 +103,16 @@ if(!filters.email)$('f-email').classList.remove('active');
 if(!filters.phone)$('f-phone').classList.remove('active');
 if(!filters.link)$('f-link').classList.remove('active');
 
+/* ── Storage ──────────────────────────────────────────────────────── */
+function load(){
+  var p=_base.load('parsely-items',[]);
+  if(Array.isArray(p))results=p.filter(function(e){return e&&e.id&&e.text&&e.type});
+}
+function save(){
+  try{localStorage.setItem('parsely-items',JSON.stringify(results))}
+  catch(e){if(e.name==='QuotaExceededError')announce('Storage Full')}
+}
+
 /* ── Helpers ──────────────────────────────────────────────────────── */
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function announce(msg){var el=$('status');el.textContent='';requestAnimationFrame(function(){el.textContent=msg})}
@@ -384,7 +394,7 @@ function mergeResults(newItems){
   }
   if(added>0){
     results.sort(function(a,b){return a.text.toLowerCase().localeCompare(b.text.toLowerCase())});
-    kbIdx=-1;render();
+    save();kbIdx=-1;render();
     announce(added+' Item'+(added!==1?'s':'')+' Found');
   }
 }
@@ -454,6 +464,7 @@ function removeItem(id){
   if(row)row.classList.add('removing');
   for(var i=0;i<results.length;i++){if(results[i].id===id){results.splice(i,1);break}}
   if(copyTimers[id]){clearTimeout(copyTimers[id].t1);clearTimeout(copyTimers[id].t2);delete copyTimers[id]}
+  save();
   setTimeout(function(){render();announce('Removed')},100);
 }
 
@@ -500,7 +511,7 @@ var resetCtrl=_base.twoPress($('rs-btn'),{
   label:$('rs-l'),
   guard:function(){return results.length>0||inp.value.trim()},
   onConfirm:function(){
-    results=[];
+    results=[];save();
     inp.value='';
     clearTimeout(searchTimer);
     Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
@@ -658,8 +669,18 @@ document.addEventListener('visibilitychange',function(){
   }
 });
 
+/* ── Cross-Tab Sync ──────────────────────────────────────────────── */
+window.addEventListener('storage',function(e){
+  if(e.key==='parsely-items'){
+    clearTimeout(searchTimer);
+    Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
+    copyTimers={};kbIdx=-1;
+    load();render();
+  }
+});
+
 /* ── Init ────────────────────────────────────────────────────────── */
-render();
+load();render();
 </script>
 </body>
 </html>
