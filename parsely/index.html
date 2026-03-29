@@ -271,11 +271,13 @@ var RE_BARE=new RegExp('[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9
 var RE_HREF=/<a\s[^>]*?href\s*=\s*["']([^"']+)["'][^>]*>/gi;
 var RE_MD=/\[(?:[^\]]*)\]\(([^)]+)\)/g;
 
+var FILE_EXTS=/\.(?:vcf|ics|txt|md|csv|json|xml|html|htm|css|js|ts|jsx|tsx|py|rb|go|java|c|h|cpp|rs|sh|bat|cmd|sql|log|yaml|yml|toml|ini|cfg|conf|env|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|tar|gz|rar|7z|dmg|iso|exe|msi|apk|ipa|png|jpg|jpeg|gif|svg|bmp|webp|ico|mp3|mp4|wav|avi|mov|mkv|flv|wmv|woff|woff2|ttf|otf|eot)(?:[\/\s?#]|$)/i;
 function isUrlFP(raw,text,idx){
   if(idx>0&&text[idx-1]==='@')return true;
   if(/^[.\/~]/.test(raw)&&!/^(?:https?|ftp):\/\//.test(raw))return true;
   if(/^(?:[A-Z]\.){2,}$/i.test(raw))return true;
   if(/^(?:Mr|Mrs|Ms|Dr|Prof|Jr|Sr|St|e\.g|i\.e|etc|vs)\./i.test(raw))return true;
+  if(!/^(?:https?|ftp):\/\//i.test(raw)&&FILE_EXTS.test(raw))return true;
   return false;
 }
 
