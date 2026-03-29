@@ -344,7 +344,119 @@ function extractPhones(text){
 /* ══════════════════════════════════════════════════════════════════ */
 /*  URL / LINK PARSER                                                */
 /* ══════════════════════════════════════════════════════════════════ */
-var TLDS='com,co.uk,org.uk,gov.uk,ac.uk,net.uk,me.uk,org,net,io,dev,app,me,co,us,uk,de,fr,info,biz,edu,gov,mil,int,eu,au,ca,nz,in,jp,cn,kr,br,mx,za,ng,ke,tech,ai,xyz,online,site,store,blog,ly,tv,cc,gg,to,fm,ws,com.au,org.au,gov.au,edu.au,co.nz,org.nz,co.za,org.za,co.in,org.in,co.jp,co.kr,com.br,org.br,com.mx,co.ke,or.ke,com.ng,com.sg,gov.sg,edu.sg,co.id,or.id,com.my,gov.my,co.th,or.th,com.ph,gov.ph,com.cn,gov.cn,com.hk,gov.hk,com.tw,org.tw'.split(',');
+var TLDS=[
+/* Generic */
+'com','net','org','info','biz','name','pro','int','mil','edu','gov',
+/* Popular new gTLDs */
+'io','dev','app','me','co','ai','tech','xyz','online','site','store','blog','shop','top','icu','cloud','digital','media','agency','design','studio','global','world','group','live','life','news','plus','one','zone','works','systems','solutions','services','consulting','ventures','holdings','capital','finance','money','company','business','enterprises','industries','foundation','institute','academy','university','college','school','training','health','care','clinic','dental','fitness','center','network','email','marketing','social','community',
+/* Country codes */
+'us','uk','de','fr','it','es','nl','be','at','ch','se','no','dk','fi','pt','ie','pl','cz','sk','hu','ro','bg','hr','si','rs','ba','mk','me','al','gr','cy','mt','lu','li','is','ee','lv','lt','ru','ua','by','md','ge','am','az','kz','uz','tm','kg','tj',
+'au','nz','jp','cn','kr','tw','hk','sg','my','th','id','ph','vn','in','pk','bd','lk','np','mm','kh','la','mn',
+'br','mx','ar','cl','co','pe','ve','ec','uy','py','bo','cr','pa','sv','gt','hn','ni','cu','do','pr','jm','tt','bb','bs','ky',
+'za','ng','ke','gh','tz','ug','et','rw','cm','ci','sn','ml','bf','ne','tg','bj','mg','mz','zw','zm','bw','na','mu','mw','ao','cd','cg',
+'eg','ma','dz','tn','ly','sd','ss',
+'sa','ae','qa','kw','bh','om','jo','lb','il','iq','ir','ye','sy','tr',
+'ca',
+/* Popular ccTLDs used generically */
+'ly','tv','cc','gg','to','fm','ws','la','vc','sc','ac','sh','im','je','gi',
+/* Multi-part ccTLDs — UK */
+'co.uk','org.uk','gov.uk','ac.uk','net.uk','me.uk','nhs.uk','sch.uk','police.uk',
+/* Multi-part ccTLDs — Australia */
+'com.au','org.au','gov.au','edu.au','net.au','asn.au',
+/* Multi-part ccTLDs — New Zealand */
+'co.nz','org.nz','net.nz','govt.nz','ac.nz','school.nz',
+/* Multi-part ccTLDs — South Africa */
+'co.za','org.za','gov.za','edu.za','net.za',
+/* Multi-part ccTLDs — India */
+'co.in','org.in','gov.in','net.in','ac.in','edu.in',
+/* Multi-part ccTLDs — Japan */
+'co.jp','or.jp','ne.jp','ac.jp','go.jp','ed.jp',
+/* Multi-part ccTLDs — Korea */
+'co.kr','or.kr','go.kr','ac.kr','ne.kr',
+/* Multi-part ccTLDs — China */
+'com.cn','org.cn','gov.cn','net.cn','edu.cn','ac.cn',
+/* Multi-part ccTLDs — Hong Kong */
+'com.hk','org.hk','gov.hk','edu.hk','net.hk',
+/* Multi-part ccTLDs — Taiwan */
+'com.tw','org.tw','gov.tw','edu.tw','net.tw',
+/* Multi-part ccTLDs — Singapore */
+'com.sg','org.sg','gov.sg','edu.sg','net.sg',
+/* Multi-part ccTLDs — Malaysia */
+'com.my','org.my','gov.my','edu.my','net.my',
+/* Multi-part ccTLDs — Indonesia */
+'co.id','or.id','go.id','ac.id','web.id',
+/* Multi-part ccTLDs — Thailand */
+'co.th','or.th','go.th','ac.th','in.th',
+/* Multi-part ccTLDs — Philippines */
+'com.ph','org.ph','gov.ph','edu.ph','net.ph',
+/* Multi-part ccTLDs — Vietnam */
+'com.vn','org.vn','gov.vn','edu.vn','net.vn',
+/* Multi-part ccTLDs — Bangladesh */
+'com.bd','org.bd','gov.bd','edu.bd','net.bd',
+/* Multi-part ccTLDs — Pakistan */
+'com.pk','org.pk','gov.pk','edu.pk','net.pk',
+/* Multi-part ccTLDs — Sri Lanka */
+'com.lk','org.lk','gov.lk','edu.lk','net.lk',
+/* Multi-part ccTLDs — Brazil */
+'com.br','org.br','gov.br','edu.br','net.br',
+/* Multi-part ccTLDs — Mexico */
+'com.mx','org.mx','gob.mx','edu.mx','net.mx',
+/* Multi-part ccTLDs — Argentina */
+'com.ar','org.ar','gov.ar','edu.ar','net.ar',
+/* Multi-part ccTLDs — Colombia */
+'com.co','org.co','gov.co','edu.co','net.co',
+/* Multi-part ccTLDs — Peru */
+'com.pe','org.pe','gob.pe','edu.pe','net.pe',
+/* Multi-part ccTLDs — Chile */
+'co.cl',
+/* Multi-part ccTLDs — Venezuela */
+'com.ve','org.ve','gov.ve','edu.ve','net.ve',
+/* Multi-part ccTLDs — Nigeria */
+'com.ng','org.ng','gov.ng','edu.ng','net.ng',
+/* Multi-part ccTLDs — Kenya */
+'co.ke','or.ke','go.ke','ac.ke','ne.ke',
+/* Multi-part ccTLDs — Ghana */
+'com.gh','org.gh','gov.gh','edu.gh',
+/* Multi-part ccTLDs — Tanzania */
+'co.tz','or.tz','go.tz','ac.tz','ne.tz',
+/* Multi-part ccTLDs — Uganda */
+'co.ug','or.ug','go.ug','ac.ug',
+/* Multi-part ccTLDs — Egypt */
+'com.eg','org.eg','gov.eg','edu.eg','net.eg',
+/* Multi-part ccTLDs — Morocco */
+'co.ma','ac.ma','gov.ma','net.ma','org.ma',
+/* Multi-part ccTLDs — Saudi Arabia */
+'com.sa','org.sa','gov.sa','edu.sa','net.sa',
+/* Multi-part ccTLDs — UAE */
+'co.ae','org.ae','gov.ae','ac.ae','net.ae',
+/* Multi-part ccTLDs — Qatar */
+'com.qa','org.qa','gov.qa','edu.qa','net.qa',
+/* Multi-part ccTLDs — Kuwait */
+'com.kw','org.kw','gov.kw','edu.kw','net.kw',
+/* Multi-part ccTLDs — Bahrain */
+'com.bh','org.bh','gov.bh','edu.bh','net.bh',
+/* Multi-part ccTLDs — Israel */
+'co.il','org.il','gov.il','ac.il','net.il',
+/* Multi-part ccTLDs — Turkey */
+'com.tr','org.tr','gov.tr','edu.tr','net.tr',
+/* Multi-part ccTLDs — Russia */
+'com.ru','org.ru',
+/* Multi-part ccTLDs — Ukraine */
+'com.ua','org.ua','gov.ua','edu.ua','net.ua',
+/* Multi-part ccTLDs — Other */
+'co.zw','org.zw','gov.zw','ac.zw',
+'co.zm','org.zm','gov.zm','ac.zm',
+'co.bw','org.bw',
+'com.om','org.om','gov.om','edu.om','net.om',
+'com.lb','org.lb','gov.lb','edu.lb','net.lb',
+'com.jo','org.jo','gov.jo','edu.jo','net.jo',
+'com.np','org.np','gov.np','edu.np','net.np',
+'com.mm','org.mm','gov.mm','edu.mm','net.mm',
+'com.kh','org.kh','gov.kh','edu.kh','net.kh',
+'com.la',
+'gov.ie','com.pa','gob.pa',
+'gob.sv','com.sv','com.gt','gob.gt','com.hn','gob.hn','com.ni','gob.ni'
+].join(',').split(',');
 var TLD_SET={};for(var ti=0;ti<TLDS.length;ti++)TLD_SET[TLDS[ti]]=1;
 var MULTI_TLDS={};for(var ti=0;ti<TLDS.length;ti++)if(TLDS[ti].indexOf('.')!==-1)MULTI_TLDS[TLDS[ti]]=1;
 var TLDS_PAT=TLDS.map(function(t){return t.replace(/\./g,'\\.')}).sort(function(a,b){return b.length-a.length}).join('|');
