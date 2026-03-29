@@ -20,10 +20,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
 .items{margin-bottom:0}
-.sec-hdr{padding:0 20px 6px;margin-top:14px;font:600 .75rem/1 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
-#items-wrap{margin-top:14px}
-#items-wrap .card{margin-bottom:14px}
-#items-wrap .card:last-child{margin-bottom:0}
+#items-wrap .card{margin-top:14px}
 .item{display:flex;align-items:center;padding:14px 16px 14px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.6 var(--font);color:var(--t2);cursor:pointer;transition:background .15s,opacity .2s ease;word-break:break-all}
 .item:last-child{border-bottom:none}
 .item span{flex:1;pointer-events:none}
@@ -917,34 +914,12 @@ function render(newId){
   }
 
   /* not searching: grouped by type with section headers */
-  var groups={};
-  for(var i=0;i<vis.length;i++){
-    var ty=vis[i].type;
-    if(!groups[ty])groups[ty]=[];
-    groups[ty].push(vis[i]);
-  }
-  var activeTypes=[];
-  for(var i=0;i<TYPE_ORDER.length;i++){
-    if(groups[TYPE_ORDER[i]]&&groups[TYPE_ORDER[i]].length)activeTypes.push(TYPE_ORDER[i]);
-  }
-  var singleType=activeTypes.length===1;
   var frag=document.createDocumentFragment();
-  var globalIdx=0;
-  for(var ti=0;ti<activeTypes.length;ti++){
-    var ty=activeTypes[ti],items=groups[ty];
-    if(!singleType){
-      var hdr=document.createElement('div');hdr.className='sec-hdr';hdr.textContent=TYPE_LABELS[ty];
-      frag.appendChild(hdr);
-    }
-    var card=document.createElement('div');card.className='card items';card.setAttribute('role','list');
-    for(var i=0;i<items.length;i++){
-      card.appendChild(mkItem(items[i],globalIdx,newId));
-      globalIdx++;
-    }
-    frag.appendChild(card);
-  }
+  var card=document.createElement('div');card.className='card items';card.setAttribute('role','list');
+  for(var i=0;i<vis.length;i++)card.appendChild(mkItem(vis[i],i,newId));
+  frag.appendChild(card);
   wrap.textContent='';wrap.appendChild(frag);
-  if(kbIdx>=globalIdx)kbIdx=globalIdx-1;
+  if(kbIdx>=vis.length)kbIdx=vis.length-1;
 }
 
 /* ── Remove Item ─────────────────────────────────────────────────── */
