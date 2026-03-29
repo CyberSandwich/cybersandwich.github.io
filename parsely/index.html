@@ -569,6 +569,7 @@ var MPAT='jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?
 var DA=new RegExp('(?:(?:mon|tue|wed|thu|fri|sat|sun)\\w*[,.]?\\s+)?(\\d{1,2})(?:st|nd|rd|th)?\\s+('+MPAT+')(?:[,\\s]+(\\d{2,4}))?','gi');
 var DB=new RegExp('(?:(?:mon|tue|wed|thu|fri|sat|sun)\\w*[,.]?\\s+)?('+MPAT+')\\s+(\\d{1,4})(?:(?:st|nd|rd|th)(?:[,\\s]+(\\d{2,4}))?|[,\\s]+(\\d{2,4}))?','gi');
 var DC=/\b(\d{1,4})[\/\-.](\d{1,2})[\/\-.](\d{1,4})\b/g;
+var DD=/\b(\d{1,2})[\/\-](\d{1,2})\b/g;
 
 function mIdx(s){var k=s.toLowerCase().replace(/\.$/,'');if(k==='sept')k='sep';return MMAP[k]!==undefined?MMAP[k]:-1}
 function rYear(y){if(!y)return null;var n=parseInt(y,10);if(y.length===2)return n>=70?1900+n:2000+n;return n}
@@ -634,6 +635,24 @@ function extractDates(text){
     var p=parseNumD(m[1],m[2],m[3]);
     if(!p)continue;
     var n=fmtD(p.d,p.m,p.y);
+    if(!seen[n]){seen[n]=1;out.push(n)}
+    used.push([m.index,m.index+m[0].length]);
+  }
+
+  DD.lastIndex=0;
+  while((m=DD.exec(text))!==null){
+    if(ov(m.index,m.index+m[0].length))continue;
+    if(isDateFP(m[0],text,m.index))continue;
+    var n1=parseInt(m[1],10),n2=parseInt(m[2],10);
+    if(n1<1||n2<1)continue;
+    var after2=text.slice(m.index+m[0].length,m.index+m[0].length+3);
+    if(/^[\/\-.]?\d/.test(after2))continue;
+    var before2=text.slice(Math.max(0,m.index-3),m.index);
+    if(/\d[\/\-.]?$/.test(before2))continue;
+    var d2,m2;
+    if(n1>12){d2=n1;m2=n2-1}else if(n2>12){d2=n2;m2=n1-1}else{d2=n1;m2=n2-1}
+    if(m2<0||m2>11||!vDay(d2,m2,null))continue;
+    var n=fmtD(d2,m2,null);
     if(!seen[n]){seen[n]=1;out.push(n)}
     used.push([m.index,m.index+m[0].length]);
   }
