@@ -600,6 +600,12 @@
     "category": "Academic"
   },
   {
+    "title": "Exeter Term Dates",
+    "url": "https://www.exeter.ac.uk/about/term-dates/",
+    "icon": "calendar",
+    "category": "Academic"
+  },
+  {
     "title": "GradIntelligence",
     "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
     "icon": "trending",
@@ -699,6 +705,12 @@
     "title": "Warwick Printer Credits",
     "url": "https://printercredits.warwick.ac.uk/",
     "icon": "printer",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Term Dates",
+    "url": "https://warwick.ac.uk/study/termdates/",
+    "icon": "calendar",
     "category": "Academic"
   },
   {
