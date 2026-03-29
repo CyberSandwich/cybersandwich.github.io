@@ -408,9 +408,24 @@ function cleanUrl(raw){
   if(!/\./.test(afterProto.split('/')[0])&&!/^\d+\.\d+\.\d+\.\d+/.test(afterProto))return null;
   var pathPart=(url.match(/^(?:https?|ftp):\/\/[^\/]+(\/[^?#]*)/i)||[])[1]||'';
   if(/\.(?:svg|png|jpg|jpeg|gif|webp|ico|bmp|tiff|avif|woff|woff2|ttf|otf|eot|css|js|map|xml|json|pdf|zip|gz|tar|rar|mp3|mp4|wav|avi|mov|mkv|exe|dmg|iso|apk)$/i.test(pathPart))return null;
+  if(NS_URIS.test(url))return null;
   url=addWww(url);
   url=addSlash(url);
   return url;
+}
+
+function dedupeUrls(urls){
+  var out=[];
+  for(var i=0;i<urls.length;i++){
+    var dominated=false,u=urls[i].toLowerCase();
+    for(var j=0;j<urls.length;j++){
+      if(i===j)continue;
+      var v=urls[j].toLowerCase();
+      if(v.length>u.length&&v.indexOf(u.replace(/\/$/,''))===0){dominated=true;break}
+    }
+    if(!dominated)out.push(urls[i]);
+  }
+  return out;
 }
 
 function extractUrls(text){
@@ -453,7 +468,7 @@ function extractUrls(text){
       var c=cleanUrl(bm[0]);if(c&&!seen[c.toLowerCase()]){seen[c.toLowerCase()]=1;urls.push(c)}
     }
   }
-  return{urls:urls,emails:emails};
+  return{urls:dedupeUrls(urls),emails:emails};
 }
 
 /* ══════════════════════════════════════════════════════════════════ */
