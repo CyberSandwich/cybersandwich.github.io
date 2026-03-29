@@ -414,14 +414,16 @@ function cleanUrl(raw){
   return url;
 }
 
+function urlHost(u){var m=u.match(/^(?:https?|ftp):\/\/(?:www\.)?([^\/:]+)/i);return m?m[1].toLowerCase():''}
 function dedupeUrls(urls){
   var out=[];
   for(var i=0;i<urls.length;i++){
-    var dominated=false,u=urls[i].toLowerCase();
+    var dominated=false,u=urls[i].toLowerCase(),uh=urlHost(urls[i]);
     for(var j=0;j<urls.length;j++){
       if(i===j)continue;
-      var v=urls[j].toLowerCase();
+      var v=urls[j].toLowerCase(),vh=urlHost(urls[j]);
       if(v.length>u.length&&v.indexOf(u.replace(/\/$/,''))===0){dominated=true;break}
+      if(vh.length>uh.length&&vh.endsWith('.'+uh)){dominated=true;break}
     }
     if(!dominated)out.push(urls[i]);
   }
