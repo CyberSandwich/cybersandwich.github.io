@@ -393,7 +393,8 @@ function mergeResults(newItems){
     if(!keys[k]){keys[k]=1;results.push({id:uid(),text:newItems[i].text,type:newItems[i].type});added++}
   }
   if(added>0){
-    results.sort(function(a,b){return a.text.toLowerCase().localeCompare(b.text.toLowerCase())});
+    var typeOrder={phone:0,email:1,link:2};
+    results.sort(function(a,b){var t=typeOrder[a.type]-typeOrder[b.type];return t!==0?t:a.text.toLowerCase().localeCompare(b.text.toLowerCase())});
     save();kbIdx=-1;render();
     announce(added+' Item'+(added!==1?'s':'')+' Found');
   }
