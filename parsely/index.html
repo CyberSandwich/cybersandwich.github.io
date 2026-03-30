@@ -200,7 +200,7 @@ function isPhoneFP(raw,text,idx){
   if(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(raw.trim()))return true;
   if(/^\d{1,4}[\/\-]\d{1,2}[\/\-]\d{1,4}$/.test(raw.trim()))return true;
   if(/(?:order|ref|invoice|ticket|id|#)\s*:?\s*$/i.test(before))return true;
-  if(digits.length>=13&&digits.length<=16&&luhnCheck(digits))return true;
+  if(digits.length>=13&&digits.length<=16&&luhnCheck(digits)&&!/^\s*(\+|00)/.test(raw))return true;
   if(digits.length<7||digits.length>15)return true;
   return false;
 }
@@ -320,6 +320,7 @@ function normalizePhone(raw,text,idx){
   var hasPlus=/^\s*\+/.test(s);
   var digits=s.replace(/\D/g,'');
   if(!hasPlus&&digits.length>=4&&digits.slice(0,2)==='00'){digits=digits.slice(2);hasPlus=true}
+  for(var cl=3;cl>=1;cl--){var tcc=digits.slice(0,cl);if(cl<digits.length&&(CC_FMT[tcc]||CC_GRP[tcc]||CC_LEN[tcc])&&digits[cl]==='0'&&!ccLenOk(tcc,digits.length)&&ccLenOk(tcc,digits.length-1)){digits=tcc+digits.slice(cl+1);break}}
   if(digits.length<7||digits.length>15)return null;
   var formatted;
   if(hasPlus){formatted=fmtPhone(digits)}
