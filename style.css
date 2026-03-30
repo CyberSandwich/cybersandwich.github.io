@@ -64,7 +64,6 @@ body{line-height:1.5}
 
 /* Shared card base */
 .pcard,.cve,.pcontent,.links{background:var(--card);box-shadow:var(--shadow)}
-.pcard,.cve,.pcontent{contain:content}
 .pcard,.cve,.links{border-radius:20px}
 .pcard,.cve{margin-bottom:14px}
 
