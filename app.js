@@ -43,6 +43,9 @@ function route(){
     $$('.page').forEach(p=>{
       p.classList.toggle('active',p.id===page)
     });
+    // Force repaint to clear ghost box-shadow artifacts (Safari)
+    document.body.style.transform='translateZ(0)';
+    requestAnimationFrame(()=>{document.body.style.transform=''});
   }
   window.scrollTo({top:0,behavior:'instant'});
   const ft=page==='home'?$('#main'):$('#'+page+' .stitle');
