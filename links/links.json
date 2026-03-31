@@ -1,5 +1,419 @@
 [
   {
+    "title": "IB3960 Financial Statement Analysis & Security Valuation",
+    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
+    "icon": "book-open",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3G40 Law for Entrepreneurs",
+    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "icon": "book-open",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3N20 Decision Making in Entrepreneurship",
+    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
+    "icon": "book-open",
+    "category": "Modules"
+  },
+  {
+    "title": "IB3N90 Managing People in a Complex World",
+    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
+    "icon": "book-open",
+    "category": "Modules"
+  },
+  {
+    "title": "App Store Connect",
+    "url": "https://appstoreconnect.apple.com/",
+    "icon": "phone",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Apple Certificates, Identifiers & Profiles",
+    "url": "https://developer.apple.com/account/resources/identifiers/list",
+    "icon": "shield",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Apple Developer - Expedited Review",
+    "url": "https://developer.apple.com/contact/app-store/?topic=expedite",
+    "icon": "rocket",
+    "category": "Initiatives"
+  },
+  {
+    "title": "CS50x 2026 Lectures",
+    "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
+    "icon": "video",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Develop in Swift",
+    "url": "https://developer.apple.com/tutorials/develop-in-swift/",
+    "icon": "code",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Device Mockup",
+    "url": "https://device-mockup-generator.garylaw.me/",
+    "icon": "phone",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Firebase Console",
+    "url": "https://console.firebase.google.com",
+    "icon": "flame",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Friendly Captcha",
+    "url": "https://friendlycaptcha.com/",
+    "icon": "shield",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console",
+    "url": "https://console.cloud.google.com/welcome",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (Credentials)",
+    "url": "https://console.cloud.google.com/apis/credentials",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (IAM)",
+    "url": "https://console.cloud.google.com/iam-admin/iam",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (reCAPTCHA)",
+    "url": "https://console.cloud.google.com/security/recaptcha",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GCP Console (Storage Buckets)",
+    "url": "https://console.cloud.google.com/storage/",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Ghostty",
+    "url": "https://ghostty.org/",
+    "icon": "terminal",
+    "category": "Initiatives"
+  },
+  {
+    "title": "GitHub",
+    "url": "https://github.com",
+    "icon": "code",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Google Analytics",
+    "url": "https://analytics.google.com/analytics/web/#/",
+    "icon": "trending",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Human Interface Guidelines",
+    "url": "https://developer.apple.com/design/human-interface-guidelines",
+    "icon": "layout",
+    "category": "Initiatives"
+  },
+  {
+    "title": "iTerm2",
+    "url": "https://iterm2.com/index.html",
+    "icon": "terminal",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Menuva Admin Portal",
+    "url": "https://admin.menuva.co.uk",
+    "icon": "utensils",
+    "category": "Initiatives"
+  },
+  {
+    "title": "menuva my.wbs Feature",
+    "url": "https://my.wbs.ac.uk/-/academic/20778/item/id/1927732/#/",
+    "icon": "newspaper",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Menuva Staging",
+    "url": "https://staging.menuva.co.uk/",
+    "icon": "utensils",
+    "category": "Initiatives"
+  },
+  {
+    "title": "menuva University of Warwick Feature",
+    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/",
+    "icon": "newspaper",
+    "category": "Initiatives"
+  },
+  {
+    "title": "menuva WBS Feature",
+    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/",
+    "icon": "newspaper",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Neovim",
+    "url": "https://neovim.io",
+    "icon": "code",
+    "category": "Initiatives"
+  },
+  {
+    "title": "reCAPTCHA Registration",
+    "url": "https://www.google.com/recaptcha/admin/create",
+    "icon": "shield",
+    "category": "Initiatives"
+  },
+  {
+    "title": "SF Symbols",
+    "url": "https://developer.apple.com/sf-symbols/",
+    "icon": "layout",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Startium",
+    "url": "https://warwick.startium.co.uk/community",
+    "icon": "rocket",
+    "category": "Initiatives"
+  },
+  {
+    "title": "tmux",
+    "url": "https://github.com/tmux/tmux/wiki",
+    "icon": "terminal",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Warwick Together Instagram Promotion Request",
+    "url": "https://forms.office.com/pages/responsepage.aspx?id=vc-6Ce9HZUSSZTVG8ur2vMnmO2qvuk9Pr-SnqVfN7JhUMVFMRDFCUzFYWkswRDlOUzVJTjQxUUQzRS4u",
+    "icon": "clipboard",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Academic Phrasebank",
+    "url": "https://www.phrasebank.manchester.ac.uk/",
+    "icon": "book",
+    "category": "Academic"
+  },
+  {
+    "title": "Exeter Term Dates",
+    "url": "https://www.exeter.ac.uk/about/term-dates/",
+    "icon": "calendar",
+    "category": "Academic"
+  },
+  {
+    "title": "GradIntelligence",
+    "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
+    "icon": "trending",
+    "category": "Academic"
+  },
+  {
+    "title": "Lettuce Meet",
+    "url": "https://lettucemeet.com",
+    "icon": "calendar",
+    "category": "Academic"
+  },
+  {
+    "title": "mini.my.wbs",
+    "url": "https://mini-my.wbs.ac.uk",
+    "icon": "school",
+    "category": "Academic"
+  },
+  {
+    "title": "my.wbs",
+    "url": "https://my.wbs.ac.uk/-/academic/homepage/",
+    "icon": "school",
+    "category": "Academic"
+  },
+  {
+    "title": "MyBib",
+    "url": "https://www.mybib.com/#/projects/",
+    "icon": "book",
+    "category": "Academic"
+  },
+  {
+    "title": "Questionmark Exam Portal",
+    "url": "https://ondemand.questionmark.eu/home/610141/assessments",
+    "icon": "clipboard",
+    "category": "Academic"
+  },
+  {
+    "title": "QuillBot",
+    "url": "https://quillbot.com/grammar-check",
+    "icon": "pen",
+    "category": "Academic"
+  },
+  {
+    "title": "Scopus",
+    "url": "https://www.scopus.com/search/form.uri?display=basic#basic",
+    "icon": "search",
+    "category": "Academic"
+  },
+  {
+    "title": "Tabula",
+    "url": "https://tabula.warwick.ac.uk/",
+    "icon": "doc",
+    "category": "Academic"
+  },
+  {
+    "title": "University of Warwick Past Papers",
+    "url": "https://warwick.ac.uk/services/exampapers/",
+    "icon": "doc",
+    "category": "Academic"
+  },
+  {
+    "title": "University of Warwick Room Booking",
+    "url": "https://abs.warwick.ac.uk/wrb2526/default.aspx",
+    "icon": "door",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Alternative Exam Portal",
+    "url": "https://altexams.warwick.ac.uk/assessments",
+    "icon": "clipboard",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick e:Vision",
+    "url": "https://warwick.ac.uk/evision",
+    "icon": "eye",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Interactive Map",
+    "url": "https://use.mazemap.com/#v=1&config=Warwick&campusid=2188&zlevel=1&center=-1.562515,52.382145&zoom=14.7",
+    "icon": "map",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Module Search",
+    "url": "https://courses.warwick.ac.uk/",
+    "icon": "search",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Print",
+    "url": "https://mobileprint.warwick.ac.uk/",
+    "icon": "printer",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Printer Credits",
+    "url": "https://printercredits.warwick.ac.uk/",
+    "icon": "printer",
+    "category": "Academic"
+  },
+  {
+    "title": "Warwick Term Dates",
+    "url": "https://warwick.ac.uk/study/termdates/",
+    "icon": "calendar",
+    "category": "Academic"
+  },
+  {
+    "title": "WBS 0.002d Room Booking",
+    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002d/?start=05082024&view=week&selectedResource=8a17841a5ec3d40a015ec3fa2bb2027e",
+    "icon": "door",
+    "category": "Academic"
+  },
+  {
+    "title": "WBS 0.002e Room Booking",
+    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
+    "icon": "door",
+    "category": "Academic"
+  },
+  {
+    "title": "WBS Academic Record",
+    "url": "https://my.wbs.ac.uk/-/profile/me/academic-record/",
+    "icon": "file",
+    "category": "Academic"
+  },
+  {
+    "title": "Bright Network Internships",
+    "url": "https://www.brightnetwork.co.uk/internships/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "e4s",
+    "url": "https://www.e4s.co.uk/search/internship-jobs",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Glassdoor",
+    "url": "https://www.glassdoor.co.in/Job/index.htm",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "GRADCRACKER",
+    "url": "https://www.gradcracker.com/search/all-disciplines/engineering-work-placements-internships",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "HIGHERiN Internships",
+    "url": "https://higherin.com/search-jobs/internships",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Indeed",
+    "url": "https://uk.indeed.com/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Internwise",
+    "url": "https://www.internwise.co.uk/internship-search",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "milkround",
+    "url": "https://www.milkround.com/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "step",
+    "url": "https://www.step.org.uk/opportunity-search/",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "targetjobs Internships",
+    "url": "https://targetjobs.co.uk/internships",
+    "icon": "search",
+    "category": "Career"
+  },
+  {
+    "title": "Trackr UK Finance Summer Internships",
+    "url": "https://app.the-trackr.com/uk-finance/summer-internships",
+    "icon": "trending",
+    "category": "Career"
+  },
+  {
+    "title": "Trackr UK Law Training Contracts",
+    "url": "https://app.the-trackr.com/uk-law/training-contracts",
+    "icon": "trending",
+    "category": "Career"
+  },
+  {
+    "title": "Trackr UK Technology Summer Internships",
+    "url": "https://app.the-trackr.com/uk-technology/summer-internships",
+    "icon": "trending",
+    "category": "Career"
+  },
+  {
     "title": "1.1.1.1",
     "url": "http://1.1.1.1",
     "icon": "wifi",
@@ -442,420 +856,6 @@
     "url": "https://studio.youtube.com/channel/",
     "icon": "video",
     "category": "Social Media"
-  },
-  {
-    "title": "App Store Connect",
-    "url": "https://appstoreconnect.apple.com/",
-    "icon": "phone",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Apple Certificates, Identifiers & Profiles",
-    "url": "https://developer.apple.com/account/resources/identifiers/list",
-    "icon": "shield",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Apple Developer - Expedited Review",
-    "url": "https://developer.apple.com/contact/app-store/?topic=expedite",
-    "icon": "rocket",
-    "category": "Initiatives"
-  },
-  {
-    "title": "CS50x 2026 Lectures",
-    "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
-    "icon": "video",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Develop in Swift",
-    "url": "https://developer.apple.com/tutorials/develop-in-swift/",
-    "icon": "code",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Device Mockup",
-    "url": "https://device-mockup-generator.garylaw.me/",
-    "icon": "phone",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Firebase Console",
-    "url": "https://console.firebase.google.com",
-    "icon": "flame",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Friendly Captcha",
-    "url": "https://friendlycaptcha.com/",
-    "icon": "shield",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console",
-    "url": "https://console.cloud.google.com/welcome",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (Credentials)",
-    "url": "https://console.cloud.google.com/apis/credentials",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (IAM)",
-    "url": "https://console.cloud.google.com/iam-admin/iam",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (reCAPTCHA)",
-    "url": "https://console.cloud.google.com/security/recaptcha",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (Storage Buckets)",
-    "url": "https://console.cloud.google.com/storage/",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Ghostty",
-    "url": "https://ghostty.org/",
-    "icon": "terminal",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GitHub",
-    "url": "https://github.com",
-    "icon": "code",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Google Analytics",
-    "url": "https://analytics.google.com/analytics/web/#/",
-    "icon": "trending",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Human Interface Guidelines",
-    "url": "https://developer.apple.com/design/human-interface-guidelines",
-    "icon": "layout",
-    "category": "Initiatives"
-  },
-  {
-    "title": "iTerm2",
-    "url": "https://iterm2.com/index.html",
-    "icon": "terminal",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Menuva Admin Portal",
-    "url": "https://admin.menuva.co.uk",
-    "icon": "utensils",
-    "category": "Initiatives"
-  },
-  {
-    "title": "menuva my.wbs Feature",
-    "url": "https://my.wbs.ac.uk/-/academic/20778/item/id/1927732/#/",
-    "icon": "newspaper",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Menuva Staging",
-    "url": "https://staging.menuva.co.uk/",
-    "icon": "utensils",
-    "category": "Initiatives"
-  },
-  {
-    "title": "menuva University of Warwick Feature",
-    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/",
-    "icon": "newspaper",
-    "category": "Initiatives"
-  },
-  {
-    "title": "menuva WBS Feature",
-    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/",
-    "icon": "newspaper",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Neovim",
-    "url": "https://neovim.io",
-    "icon": "code",
-    "category": "Initiatives"
-  },
-  {
-    "title": "reCAPTCHA Registration",
-    "url": "https://www.google.com/recaptcha/admin/create",
-    "icon": "shield",
-    "category": "Initiatives"
-  },
-  {
-    "title": "SF Symbols",
-    "url": "https://developer.apple.com/sf-symbols/",
-    "icon": "layout",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Startium",
-    "url": "https://warwick.startium.co.uk/community",
-    "icon": "rocket",
-    "category": "Initiatives"
-  },
-  {
-    "title": "tmux",
-    "url": "https://github.com/tmux/tmux/wiki",
-    "icon": "terminal",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Warwick Together Instagram Promotion Request",
-    "url": "https://forms.office.com/pages/responsepage.aspx?id=vc-6Ce9HZUSSZTVG8ur2vMnmO2qvuk9Pr-SnqVfN7JhUMVFMRDFCUzFYWkswRDlOUzVJTjQxUUQzRS4u",
-    "icon": "clipboard",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Academic Phrasebank",
-    "url": "https://www.phrasebank.manchester.ac.uk/",
-    "icon": "book",
-    "category": "Academic"
-  },
-  {
-    "title": "Exeter Term Dates",
-    "url": "https://www.exeter.ac.uk/about/term-dates/",
-    "icon": "calendar",
-    "category": "Academic"
-  },
-  {
-    "title": "GradIntelligence",
-    "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
-    "icon": "trending",
-    "category": "Academic"
-  },
-  {
-    "title": "Lettuce Meet",
-    "url": "https://lettucemeet.com",
-    "icon": "calendar",
-    "category": "Academic"
-  },
-  {
-    "title": "mini.my.wbs",
-    "url": "https://mini-my.wbs.ac.uk",
-    "icon": "school",
-    "category": "Academic"
-  },
-  {
-    "title": "my.wbs",
-    "url": "https://my.wbs.ac.uk/-/academic/homepage/",
-    "icon": "school",
-    "category": "Academic"
-  },
-  {
-    "title": "MyBib",
-    "url": "https://www.mybib.com/#/projects/",
-    "icon": "book",
-    "category": "Academic"
-  },
-  {
-    "title": "Questionmark Exam Portal",
-    "url": "https://ondemand.questionmark.eu/home/610141/assessments",
-    "icon": "clipboard",
-    "category": "Academic"
-  },
-  {
-    "title": "QuillBot",
-    "url": "https://quillbot.com/grammar-check",
-    "icon": "pen",
-    "category": "Academic"
-  },
-  {
-    "title": "Scopus",
-    "url": "https://www.scopus.com/search/form.uri?display=basic#basic",
-    "icon": "search",
-    "category": "Academic"
-  },
-  {
-    "title": "Tabula",
-    "url": "https://tabula.warwick.ac.uk/",
-    "icon": "doc",
-    "category": "Academic"
-  },
-  {
-    "title": "University of Warwick Past Papers",
-    "url": "https://warwick.ac.uk/services/exampapers/",
-    "icon": "doc",
-    "category": "Academic"
-  },
-  {
-    "title": "University of Warwick Room Booking",
-    "url": "https://abs.warwick.ac.uk/wrb2526/default.aspx",
-    "icon": "door",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Alternative Exam Portal",
-    "url": "https://altexams.warwick.ac.uk/assessments",
-    "icon": "clipboard",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick e:Vision",
-    "url": "https://warwick.ac.uk/evision",
-    "icon": "eye",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Interactive Map",
-    "url": "https://use.mazemap.com/#v=1&config=Warwick&campusid=2188&zlevel=1&center=-1.562515,52.382145&zoom=14.7",
-    "icon": "map",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Module Search",
-    "url": "https://courses.warwick.ac.uk/",
-    "icon": "search",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Print",
-    "url": "https://mobileprint.warwick.ac.uk/",
-    "icon": "printer",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Printer Credits",
-    "url": "https://printercredits.warwick.ac.uk/",
-    "icon": "printer",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Term Dates",
-    "url": "https://warwick.ac.uk/study/termdates/",
-    "icon": "calendar",
-    "category": "Academic"
-  },
-  {
-    "title": "WBS 0.002d Room Booking",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002d/?start=05082024&view=week&selectedResource=8a17841a5ec3d40a015ec3fa2bb2027e",
-    "icon": "door",
-    "category": "Academic"
-  },
-  {
-    "title": "WBS 0.002e Room Booking",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
-    "icon": "door",
-    "category": "Academic"
-  },
-  {
-    "title": "WBS Academic Record",
-    "url": "https://my.wbs.ac.uk/-/profile/me/academic-record/",
-    "icon": "file",
-    "category": "Academic"
-  },
-  {
-    "title": "Bright Network Internships",
-    "url": "https://www.brightnetwork.co.uk/internships/",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "e4s",
-    "url": "https://www.e4s.co.uk/search/internship-jobs",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "Glassdoor",
-    "url": "https://www.glassdoor.co.in/Job/index.htm",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "GRADCRACKER",
-    "url": "https://www.gradcracker.com/search/all-disciplines/engineering-work-placements-internships",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "HIGHERiN Internships",
-    "url": "https://higherin.com/search-jobs/internships",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "Indeed",
-    "url": "https://uk.indeed.com/",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "Internwise",
-    "url": "https://www.internwise.co.uk/internship-search",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "milkround",
-    "url": "https://www.milkround.com/",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "step",
-    "url": "https://www.step.org.uk/opportunity-search/",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "targetjobs Internships",
-    "url": "https://targetjobs.co.uk/internships",
-    "icon": "search",
-    "category": "Career"
-  },
-  {
-    "title": "Trackr UK Finance Summer Internships",
-    "url": "https://app.the-trackr.com/uk-finance/summer-internships",
-    "icon": "trending",
-    "category": "Career"
-  },
-  {
-    "title": "Trackr UK Law Training Contracts",
-    "url": "https://app.the-trackr.com/uk-law/training-contracts",
-    "icon": "trending",
-    "category": "Career"
-  },
-  {
-    "title": "Trackr UK Technology Summer Internships",
-    "url": "https://app.the-trackr.com/uk-technology/summer-internships",
-    "icon": "trending",
-    "category": "Career"
-  },
-  {
-    "title": "IB3960 Financial Statement Analysis & Security Valuation",
-    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3G40 Law for Entrepreneurs",
-    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3N90 Managing People in a Complex World",
-    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
-    "icon": "book-open",
-    "category": "Modules"
   },
   {
     "title": "Curiositea Allergens",
