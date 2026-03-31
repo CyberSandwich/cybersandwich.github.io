@@ -12,14 +12,14 @@
     "category": "Personal"
   },
   {
-    "title": "Amazon UK - Contact Support",
-    "url": "https://www.amazon.co.uk/hz/contact-us/foresight/hubgateway",
+    "title": "Amazon UK (Gift Card)",
+    "url": "https://www.amazon.co.uk/gc/redeem",
     "icon": "cart",
     "category": "Personal"
   },
   {
-    "title": "Amazon UK (Gift Card)",
-    "url": "https://www.amazon.co.uk/gc/redeem",
+    "title": "Amazon UK - Contact Support",
+    "url": "https://www.amazon.co.uk/hz/contact-us/foresight/hubgateway",
     "icon": "cart",
     "category": "Personal"
   },
@@ -39,12 +39,6 @@
     "title": "Apple Security Releases",
     "url": "https://support.apple.com/en-us/100100",
     "icon": "shield",
-    "category": "Personal"
-  },
-  {
-    "title": "Claude",
-    "url": "https://claude.ai/",
-    "icon": "message",
     "category": "Personal"
   },
   {
@@ -68,6 +62,12 @@
   {
     "title": "ChatGPT",
     "url": "https://chatgpt.com",
+    "icon": "message",
+    "category": "Personal"
+  },
+  {
+    "title": "Claude",
+    "url": "https://claude.ai/",
     "icon": "message",
     "category": "Personal"
   },
@@ -112,12 +112,6 @@
     "url": "https://departures.to/",
     "icon": "plane",
     "category": "Personal"
-  },
-  {
-    "title": "Facebook",
-    "url": "https://www.facebook.com/",
-    "icon": "users",
-    "category": "Social Media"
   },
   {
     "title": "Financial Times",
@@ -198,18 +192,6 @@
     "category": "Personal"
   },
   {
-    "title": "Instagram",
-    "url": "https://www.instagram.com/",
-    "icon": "camera",
-    "category": "Social Media"
-  },
-  {
-    "title": "LinkedIn",
-    "url": "https://www.linkedin.com",
-    "icon": "users",
-    "category": "Social Media"
-  },
-  {
     "title": "Microsoft Excel",
     "url": "https://excel.cloud.microsoft",
     "icon": "table",
@@ -243,6 +225,12 @@
     "title": "Microsoft Word",
     "url": "https://word.cloud.microsoft",
     "icon": "doc",
+    "category": "Personal"
+  },
+  {
+    "title": "Minecraft Classic",
+    "url": "https://classic.minecraft.net/",
+    "icon": "wand",
     "category": "Personal"
   },
   {
@@ -294,10 +282,10 @@
     "category": "Personal"
   },
   {
-    "title": "Reddit",
-    "url": "https://www.reddit.com/",
-    "icon": "message",
-    "category": "Social Media"
+    "title": "Pok\u00e9mon Showdown (Beta)",
+    "url": "https://play.pokemonshowdown.com",
+    "icon": "wand",
+    "category": "Personal"
   },
   {
     "title": "Smallpdf",
@@ -334,12 +322,6 @@
     "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
     "icon": "map",
     "category": "Personal"
-  },
-  {
-    "title": "TikTok",
-    "url": "https://www.tiktok.com/",
-    "icon": "video",
-    "category": "Social Media"
   },
   {
     "title": "TIME.IS",
@@ -384,16 +366,64 @@
     "category": "Personal"
   },
   {
-    "title": "WhatsApp Web",
-    "url": "https://web.whatsapp.com/",
-    "icon": "message",
-    "category": "Social Media"
-  },
-  {
     "title": "What is my IP Address",
     "url": "https://whatismyipaddress.com",
     "icon": "globe",
     "category": "Personal"
+  },
+  {
+    "title": "Facebook",
+    "url": "https://www.facebook.com/",
+    "icon": "users",
+    "category": "Social Media"
+  },
+  {
+    "title": "Facebook Ads Manager",
+    "url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit/standalone",
+    "icon": "megaphone",
+    "category": "Social Media"
+  },
+  {
+    "title": "Instagram",
+    "url": "https://www.instagram.com/",
+    "icon": "camera",
+    "category": "Social Media"
+  },
+  {
+    "title": "LinkedIn",
+    "url": "https://www.linkedin.com",
+    "icon": "users",
+    "category": "Social Media"
+  },
+  {
+    "title": "Meta Accounts Center",
+    "url": "https://accountscenter.instagram.com/",
+    "icon": "users",
+    "category": "Social Media"
+  },
+  {
+    "title": "Reddit",
+    "url": "https://www.reddit.com/",
+    "icon": "message",
+    "category": "Social Media"
+  },
+  {
+    "title": "TikTok",
+    "url": "https://www.tiktok.com/",
+    "icon": "video",
+    "category": "Social Media"
+  },
+  {
+    "title": "TikTok Studio",
+    "url": "https://www.tiktok.com/tiktokstudio",
+    "icon": "video",
+    "category": "Social Media"
+  },
+  {
+    "title": "WhatsApp Web",
+    "url": "https://web.whatsapp.com/",
+    "icon": "message",
+    "category": "Social Media"
   },
   {
     "title": "X (Twitter)",
@@ -404,6 +434,12 @@
   {
     "title": "YouTube (Subscriptions)",
     "url": "https://www.youtube.com/feed/subscriptions",
+    "icon": "video",
+    "category": "Social Media"
+  },
+  {
+    "title": "YouTube Studio",
+    "url": "https://studio.youtube.com/channel/",
     "icon": "video",
     "category": "Social Media"
   },
@@ -444,12 +480,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "Facebook Ads Manager",
-    "url": "https://adsmanager.facebook.com/adsmanager/manage/ads/edit/standalone",
-    "icon": "megaphone",
-    "category": "Social Media"
-  },
-  {
     "title": "Firebase Console",
     "url": "https://console.firebase.google.com",
     "icon": "flame",
@@ -486,6 +516,12 @@
     "category": "Initiatives"
   },
   {
+    "title": "GCP Console (Storage Buckets)",
+    "url": "https://console.cloud.google.com/storage/",
+    "icon": "cloud",
+    "category": "Initiatives"
+  },
+  {
     "title": "Ghostty",
     "url": "https://ghostty.org/",
     "icon": "terminal",
@@ -501,12 +537,6 @@
     "title": "Google Analytics",
     "url": "https://analytics.google.com/analytics/web/#/",
     "icon": "trending",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (Storage Buckets)",
-    "url": "https://console.cloud.google.com/storage/",
-    "icon": "cloud",
     "category": "Initiatives"
   },
   {
@@ -552,12 +582,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "Meta Accounts Center",
-    "url": "https://accountscenter.instagram.com/",
-    "icon": "users",
-    "category": "Social Media"
-  },
-  {
     "title": "Neovim",
     "url": "https://neovim.io",
     "icon": "code",
@@ -582,12 +606,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "TikTok Studio",
-    "url": "https://www.tiktok.com/tiktokstudio",
-    "icon": "video",
-    "category": "Social Media"
-  },
-  {
     "title": "tmux",
     "url": "https://github.com/tmux/tmux/wiki",
     "icon": "terminal",
@@ -598,12 +616,6 @@
     "url": "https://forms.office.com/pages/responsepage.aspx?id=vc-6Ce9HZUSSZTVG8ur2vMnmO2qvuk9Pr-SnqVfN7JhUMVFMRDFCUzFYWkswRDlOUzVJTjQxUUQzRS4u",
     "icon": "clipboard",
     "category": "Initiatives"
-  },
-  {
-    "title": "YouTube Studio",
-    "url": "https://studio.youtube.com/channel/",
-    "icon": "video",
-    "category": "Social Media"
   },
   {
     "title": "Academic Phrasebank",
