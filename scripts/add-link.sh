@@ -85,6 +85,34 @@ if (( ${#TITLE} > 100 )); then
   exit 1
 fi
 
+# Validate icon exists in ICONS map
+if [[ -n "$ICON" ]]; then
+  VALID_ICONS=$(python3 -c "
+import re
+with open('app.js') as f:
+    content = f.read()
+chunk = content[content.find('const ICONS='):content.find('const DEFAULT_')]
+print(' '.join(re.findall(r\"'([a-z-]+)'\s*:\", chunk)))
+")
+  if ! echo " $VALID_ICONS " | grep -q " $ICON "; then
+    err "Unknown icon: ${B}${ICON}${Z}"
+    info "Available icons:"
+    for ic in ${(s: :)VALID_ICONS}; do printf "  %s\n" "$ic"; done
+    printf "\n"
+    info "Add a new icon to the ICONS map in app.js first, then re-run."
+    exit 1
+  fi
+fi
+
+# Validate category
+VALID_CATS=("Personal" "Social Media" "Initiatives" "Academic" "Career" "Community" "Modules" "Miscellaneous")
+if ! (( ${VALID_CATS[(Ie)$CATEGORY]} )); then
+  err "Unknown category: ${B}${CATEGORY}${Z}"
+  info "Available categories:"
+  for c in "${VALID_CATS[@]}"; do printf "  %s\n" "$c"; done
+  exit 1
+fi
+
 $DRY_RUN && info "Dry-run mode — no files will be modified."
 
 # ── Add link ───────────────────────────────────────────────────────
