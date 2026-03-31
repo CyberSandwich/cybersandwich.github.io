@@ -1,25 +1,25 @@
 [
   {
     "title": "IB3960 Financial Statement Analysis & Security Valuation",
-    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647/",
+    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647",
     "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "IB3G40 Law for Entrepreneurs",
-    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514/",
+    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514",
     "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840/",
+    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840",
     "icon": "book-open",
     "category": "Modules"
   },
   {
     "title": "IB3N90 Managing People in a Complex World",
-    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894/",
+    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894",
     "icon": "book-open",
     "category": "Modules"
   },
@@ -49,7 +49,7 @@
   },
   {
     "title": "Develop in Swift",
-    "url": "https://developer.apple.com/tutorials/develop-in-swift/",
+    "url": "https://developer.apple.com/tutorials/develop-in-swift",
     "icon": "code",
     "category": "Initiatives"
   },
@@ -97,7 +97,7 @@
   },
   {
     "title": "GCP Console (Storage Buckets)",
-    "url": "https://console.cloud.google.com/storage/",
+    "url": "https://console.cloud.google.com/storage",
     "icon": "cloud",
     "category": "Initiatives"
   },
@@ -151,13 +151,13 @@
   },
   {
     "title": "menuva University of Warwick Feature",
-    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app/",
+    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app",
     "icon": "newspaper",
     "category": "Initiatives"
   },
   {
     "title": "menuva WBS Feature",
-    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick/",
+    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick",
     "icon": "newspaper",
     "category": "Initiatives"
   },
@@ -175,7 +175,7 @@
   },
   {
     "title": "SF Symbols",
-    "url": "https://developer.apple.com/sf-symbols/",
+    "url": "https://developer.apple.com/sf-symbols",
     "icon": "layout",
     "category": "Initiatives"
   },
@@ -205,7 +205,7 @@
   },
   {
     "title": "Exeter Term Dates",
-    "url": "https://www.exeter.ac.uk/about/term-dates/",
+    "url": "https://www.exeter.ac.uk/about/term-dates",
     "icon": "calendar",
     "category": "Academic"
   },
@@ -229,7 +229,7 @@
   },
   {
     "title": "my.wbs",
-    "url": "https://my.wbs.ac.uk/-/academic/homepage/",
+    "url": "https://my.wbs.ac.uk/-/academic/homepage",
     "icon": "school",
     "category": "Academic"
   },
@@ -265,7 +265,7 @@
   },
   {
     "title": "University of Warwick Past Papers",
-    "url": "https://warwick.ac.uk/services/exampapers/",
+    "url": "https://warwick.ac.uk/services/exampapers",
     "icon": "doc",
     "category": "Academic"
   },
@@ -313,7 +313,7 @@
   },
   {
     "title": "Warwick Term Dates",
-    "url": "https://warwick.ac.uk/study/termdates/",
+    "url": "https://warwick.ac.uk/study/termdates",
     "icon": "calendar",
     "category": "Academic"
   },
@@ -331,13 +331,13 @@
   },
   {
     "title": "WBS Academic Record",
-    "url": "https://my.wbs.ac.uk/-/profile/me/academic-record/",
+    "url": "https://my.wbs.ac.uk/-/profile/me/academic-record",
     "icon": "file",
     "category": "Academic"
   },
   {
     "title": "Bright Network Internships",
-    "url": "https://www.brightnetwork.co.uk/internships/",
+    "url": "https://www.brightnetwork.co.uk/internships",
     "icon": "search",
     "category": "Career"
   },
@@ -385,7 +385,7 @@
   },
   {
     "title": "step",
-    "url": "https://www.step.org.uk/opportunity-search/",
+    "url": "https://www.step.org.uk/opportunity-search",
     "icon": "search",
     "category": "Career"
   },
@@ -505,7 +505,7 @@
   },
   {
     "title": "Cloudflare Registrar",
-    "url": "https://www.cloudflare.com/en-gb/products/registrar/",
+    "url": "https://www.cloudflare.com/en-gb/products/registrar",
     "icon": "cloud",
     "category": "Personal"
   },
@@ -559,37 +559,37 @@
   },
   {
     "title": "Google Docs",
-    "url": "https://docs.google.com/document/",
+    "url": "https://docs.google.com/document",
     "icon": "doc",
     "category": "Personal"
   },
   {
     "title": "Google Forms",
-    "url": "https://docs.google.com/forms/",
+    "url": "https://docs.google.com/forms",
     "icon": "clipboard",
     "category": "Personal"
   },
   {
     "title": "Google Maps",
-    "url": "https://www.google.com/maps/",
+    "url": "https://www.google.com/maps",
     "icon": "map",
     "category": "Personal"
   },
   {
     "title": "Google Sheets",
-    "url": "https://docs.google.com/spreadsheets/",
+    "url": "https://docs.google.com/spreadsheets",
     "icon": "table",
     "category": "Personal"
   },
   {
     "title": "Google Slides",
-    "url": "https://docs.google.com/presentation/",
+    "url": "https://docs.google.com/presentation",
     "icon": "presentation",
     "category": "Personal"
   },
   {
     "title": "Google Vids",
-    "url": "https://docs.google.com/videos/",
+    "url": "https://docs.google.com/videos",
     "icon": "video",
     "category": "Personal"
   },
@@ -619,7 +619,7 @@
   },
   {
     "title": "Microsoft Outlook",
-    "url": "https://outlook.office.com/mail/",
+    "url": "https://outlook.office.com/mail",
     "icon": "mail",
     "category": "Personal"
   },
@@ -631,7 +631,7 @@
   },
   {
     "title": "Microsoft Teams",
-    "url": "https://teams.microsoft.com/v2/",
+    "url": "https://teams.microsoft.com/v2",
     "icon": "users",
     "category": "Personal"
   },
@@ -853,7 +853,7 @@
   },
   {
     "title": "YouTube Studio",
-    "url": "https://studio.youtube.com/channel/",
+    "url": "https://studio.youtube.com/channel",
     "icon": "video",
     "category": "Social Media"
   },
@@ -901,7 +901,7 @@
   },
   {
     "title": "Warwick Residence Hubs",
-    "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs/",
+    "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs",
     "icon": "home",
     "category": "Miscellaneous"
   }
