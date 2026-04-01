@@ -484,7 +484,7 @@ function cleanUrl(raw){
   if(!/\./.test(afterProto.split('/')[0])&&!/^\d+\.\d+\.\d+\.\d+/.test(afterProto))return null;
   var pathPart=(url.match(/^(?:https?|ftp):\/\/[^\/]+(\/[^?#]*)/i)||[])[1]||'';
   var queryPart=(url.match(/\?([^#]*)/)||[])[1]||'';
-  if(FILE_EXTS.test(pathPart))return null;
+  if(/\.(?:vcf|ics|txt|md|csv|json|xml|css|js|ts|jsx|tsx|py|rb|go|java|c|h|cpp|rs|sh|bat|cmd|sql|log|yaml|yml|toml|ini|cfg|conf|env|map|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|tar|gz|rar|7z|dmg|iso|exe|msi|apk|ipa|png|jpg|jpeg|gif|svg|bmp|tiff|avif|webp|ico|mp3|mp4|wav|avi|mov|mkv|flv|wmv|webm|ogg|flac|aac|m3u8|woff|woff2|ttf|otf|eot)(?:[^a-zA-Z0-9]|$)/i.test(pathPart))return null;
   if(/\/(?:is\/(?:image|content)|s7viewers)(?:\/|$)/i.test(pathPart))return null;
   if(/[?&](?:fmt|wid|hei|dpr|fit|qlt|crop|resize|width|height|format|quality|auto)=/i.test(queryPart?'?'+queryPart:url))return null;
   if(NS_URIS.test(url))return null;
