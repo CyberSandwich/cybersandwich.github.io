@@ -17,23 +17,30 @@ html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns=
 html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 .search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
-.inp-card{display:flex;flex-direction:column;padding:0;overflow:hidden;margin-bottom:14px}
-.inp-card .inp{border-radius:0;box-shadow:none;border:none;margin:0}
-.inp-card .inp:first-child{border-bottom:1px solid var(--bdr2)}
-.inp-card .inp input{border:none;box-shadow:none;background:transparent}
-.items{margin-bottom:0}
-.item{display:flex;align-items:center;padding:14px 16px 14px 20px;border-bottom:1px solid var(--bdr2);cursor:default;transition:background .15s,opacity .2s ease}
-.item:last-child{border-bottom:none}
+.inp-row{display:flex;gap:10px;margin-bottom:14px}
+.inp-fields{flex:1;display:flex;flex-direction:column;border-radius:20px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.inp-fields .inp{border-radius:0;box-shadow:none;border:none;margin:0}
+.inp-fields .inp:first-child{border-bottom:1px solid var(--bdr2)}
+.inp-fields .inp input{border:none;box-shadow:none;background:transparent}
+.add-tall{width:52px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s}
+.add-tall:active{opacity:.7}
+@media(hover:hover){.add-tall:hover{color:var(--t1);background:var(--bg2)}}
+.items{display:flex;flex-direction:column;gap:14px;background:none;box-shadow:none;border-radius:0;padding:0;overflow:visible}
+.item{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:0;cursor:default;transition:opacity .2s ease;overflow:hidden}
+.item-header{display:flex;align-items:center;padding:14px 16px 10px 20px}
 .item-info{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
 .item-title{font:600 .9375rem/1.4 var(--font);color:var(--t1)}
 .item-date{font:400 .75rem/1.3 var(--font);color:var(--t3)}
-.item-countdown{font:500 .875rem/1.3 var(--font);color:var(--t2);font-variant-numeric:tabular-nums;margin-top:4px}
-.item.done .item-countdown{color:var(--t4)}
+.item-cd-wrap{display:flex;gap:8px;padding:0 16px 14px 20px}
+.item-cd-unit{flex:1;background:var(--bg2);border-radius:12px;padding:8px 4px;text-align:center}
+.item-cd-val{font:600 1.125rem/1.2 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
+.item-cd-lbl{font:400 .625rem/1.2 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.item.done .item-cd-wrap{opacity:.4}
 .item.done .item-title{color:var(--t3)}
-.item .del{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:20px;align-self:flex-start;transition:color .15s,background .15s,border-color .15s}
+.item .del{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:12px;transition:color .15s,background .15s,border-color .15s}
 .item .del svg{width:14px;height:14px;pointer-events:none}
 .item.removing{opacity:0;transition:opacity .1s ease}
-.item.kb-focus{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
+.item.kb-focus{outline:2px solid var(--acc);outline-offset:2px}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 .item:active{opacity:.85}
@@ -57,7 +64,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
   @keyframes scaleUp{from{opacity:1}to{opacity:1}}
 }
 @media(hover:hover){
-  .item:hover{background:var(--bg2)}
+  .item:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08)}
   .item .del:hover{color:var(--t1);background:var(--bg2);border-color:var(--t4)}
 }
 </style>
@@ -65,21 +72,24 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 <body>
 <div class="w">
   <div class="card links" id="actions">
+    <button type="button" id="pa-btn" aria-label="Paste"><svg aria-hidden="true" id="pa-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg aria-hidden="true" id="pa-ck" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pa-l">Paste</span></button>
     <button type="button" id="rs-btn" aria-label="Reset" style="display:none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
   </div>
-  <div class="card inp-card">
-    <div class="inp">
-      <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
+  <div class="inp-row">
+    <div class="inp-fields">
+      <div class="inp">
+        <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
+      </div>
+      <div class="inp">
+        <input id="inp-date" type="text" autocomplete="off" placeholder="25 Dec 2025, Tomorrow, Christmas..." spellcheck="false" aria-label="Date">
+      </div>
     </div>
-    <div class="inp">
-      <input id="inp-date" type="text" autocomplete="off" placeholder="25 Dec 2025, Tomorrow, Christmas..." spellcheck="false" aria-label="Date">
-      <button type="button" id="add-btn" aria-label="Add Countdown"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
-    </div>
+    <button type="button" id="add-btn" class="add-tall" aria-label="Add Countdown"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Countdowns">
   </div>
-  <div class="card items" id="items" style="display:none" role="list"></div>
+  <div class="items" id="items" style="display:none" role="list"></div>
 </div>
 <div class="fire-overlay" id="fireOv" role="alertdialog" aria-modal="true" aria-labelledby="fireTitle">
   <div class="fire-card">
@@ -184,18 +194,26 @@ function nextPrecomputed(table,offsetDays){
 }
 
 function parseTime(text){
-  var m=text.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+  // Try end: "tmr 3pm", "25 dec 15:00"
+  var m=text.match(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i)||text.match(/[\s,]+(\d{1,2}):(\d{2})\s*$/i);
+  if(!m){
+    // Try start: "11p tmr", "3pm tomorrow"
+    m=text.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||text.match(/^(\d{1,2}):(\d{2})[\s,]+/i);
+  }
   if(!m)return null;
   var h=parseInt(m[1],10),min=m[2]?parseInt(m[2],10):0;
   var ap=m[3]?m[3].toLowerCase():null;
-  if(ap==='pm'&&h<12)h+=12;
-  if(ap==='am'&&h===12)h=0;
+  if(ap){ap=ap.charAt(0);if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0}
   if(h>23||min>59)return null;
   return{h:h,m:min,raw:m[0]};
 }
 
 function stripTime(text){
-  return text.replace(/\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*$/i,'').trim();
+  // Strip from end
+  var s=text.replace(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i,'').replace(/[\s,]+(\d{1,2}):(\d{2})\s*$/i,'');
+  // Strip from start
+  s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})[\s,]+/i,'');
+  return s.trim();
 }
 
 function applyTime(date,time){
@@ -417,13 +435,32 @@ function calcCountdown(targetMs){
 }
 
 function fmtCountdown(c){
-  if(!c)return 'Completed';
-  var parts=[];
-  if(c.d>0)parts.push(c.d+' Day'+(c.d!==1?'s':''));
-  if(c.d>0||c.h>0)parts.push(c.h+' Hour'+(c.h!==1?'s':''));
-  parts.push(c.m+' Min');
-  parts.push(c.s+' Sec');
-  return parts.join(' | ');
+  if(!c)return null;
+  return[
+    {v:c.d,l:'Days'},
+    {v:c.h,l:'Hours'},
+    {v:c.m,l:'Min'},
+    {v:c.s,l:'Sec'}
+  ];
+}
+
+function buildCdWrap(units,done){
+  var wrap=document.createElement('div');wrap.className='item-cd-wrap';
+  if(done){
+    var comp=document.createElement('div');
+    comp.style.cssText='flex:1;text-align:center;padding:8px;color:var(--t4);font:500 .875rem/1.3 var(--font)';
+    comp.textContent='Completed';
+    wrap.appendChild(comp);
+    return wrap;
+  }
+  if(!units)return wrap;
+  for(var i=0;i<units.length;i++){
+    var u=document.createElement('div');u.className='item-cd-unit';
+    var v=document.createElement('div');v.className='item-cd-val';v.textContent=units[i].v;
+    var l=document.createElement('div');l.className='item-cd-lbl';l.textContent=units[i].l;
+    u.appendChild(v);u.appendChild(l);wrap.appendChild(u);
+  }
+  return wrap;
 }
 
 /* ── Alarm System ────────────────────────────────────────────────── */
@@ -505,7 +542,6 @@ function render(){
 
   $('rs-btn').style.display=hasItems?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
-  $('actions').style.display=hasItems?'':'none';
 
   if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
 
@@ -533,19 +569,21 @@ function render(){
     row.setAttribute('role','listitem');
     row.setAttribute('data-id',it.id);
 
+    var header=document.createElement('div');header.className='item-header';
     var info=document.createElement('div');info.className='item-info';
     var title=document.createElement('div');title.className='item-title';title.textContent=it.title;
     var date=document.createElement('div');date.className='item-date';date.textContent=it.dateLabel;
-    var cd=document.createElement('div');cd.className='item-countdown';
-    cd.setAttribute('data-id',it.id);
-    if(it.done){cd.textContent='Completed'}
-    else{var calc=calcCountdown(it.target);cd.textContent=fmtCountdown(calc)}
-    info.appendChild(title);info.appendChild(date);info.appendChild(cd);
+    info.appendChild(title);info.appendChild(date);
 
     var btn=document.createElement('button');btn.type='button';btn.className='del';btn.setAttribute('aria-label','Remove');
     btn.appendChild(mkX());
+    header.appendChild(info);header.appendChild(btn);
 
-    row.appendChild(info);row.appendChild(btn);frag.appendChild(row);
+    var units=it.done?null:fmtCountdown(calcCountdown(it.target));
+    var cdWrap=buildCdWrap(units,it.done);
+    cdWrap.setAttribute('data-id',it.id);
+
+    row.appendChild(header);row.appendChild(cdWrap);frag.appendChild(row);
     if(i===kbIdx)row.classList.add('kb-focus');
   }
 
@@ -566,7 +604,7 @@ function addItem(){
   var dateText=$('inp-date').value.trim();
   if(!title||!dateText)return;
   var parsed=parseDate(dateText);
-  if(!parsed){announce('Could Not Parse Date');return}
+  if(!parsed){_base.notify('Could Not Parse Date',false);return}
   var id=uid();
   items.unshift({id:id,title:title,target:parsed.date.getTime(),dateLabel:parsed.label,ts:Date.now(),done:false});
   save();kbIdx=-1;render();
@@ -600,7 +638,7 @@ function doReset(){resetCtrl.press()}
 
 /* ── Tick (live updates) ─────────────────────────────────────────── */
 function tick(){
-  var els=$('items').querySelectorAll('.item-countdown');
+  var els=$('items').querySelectorAll('.item-cd-wrap[data-id]');
   for(var i=0;i<els.length;i++){
     var id=els[i].getAttribute('data-id');
     if(!id)continue;
@@ -608,12 +646,15 @@ function tick(){
     for(var j=0;j<items.length;j++){if(items[j].id===id){item=items[j];break}}
     if(!item||item.done)continue;
     var calc=calcCountdown(item.target);
-    var text=fmtCountdown(calc);
-    if(els[i].textContent!==text)els[i].textContent=text;
     if(!calc){
       if(!firedItem)fireItem(item);
       render();
       return;
+    }
+    var vals=els[i].querySelectorAll('.item-cd-val');
+    if(vals.length===4){
+      var units=[calc.d,calc.h,calc.m,calc.s];
+      for(var k=0;k<4;k++){var nv=''+units[k];if(vals[k].textContent!==nv)vals[k].textContent=nv}
     }
   }
 }
@@ -660,6 +701,32 @@ $('search').addEventListener('input',function(){
   searchTimer=setTimeout(function(){render()},80);
 });
 
+/* ── Paste Button ───────────────────────────────────────────────── */
+var paTimer=null;
+$('pa-btn').addEventListener('click',function(){
+  if(!navigator.clipboard||!navigator.clipboard.readText){_base.notify('Clipboard Not Available',false);return}
+  navigator.clipboard.readText().then(function(text){
+    if(!text||!text.trim()){_base.notify('Clipboard Empty',false);return}
+    var t=text.trim();
+    // Try to paste into whichever input is empty or focused
+    var titleEl=$('inp-title'),dateEl=$('inp-date');
+    if(!titleEl.value&&!dateEl.value){
+      // Try parsing as date first
+      var parsed=parseDate(t);
+      if(parsed){dateEl.value=t;titleEl.focus()}
+      else{titleEl.value=t;dateEl.focus()}
+    }else if(!dateEl.value){dateEl.value=t}
+    else if(!titleEl.value){titleEl.value=t}
+    else{dateEl.value=t}
+    // Feedback
+    var btn=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
+    if(paTimer){clearTimeout(paTimer);btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste'}
+    pi.style.display='none';pk.style.display='';pl.textContent='Pasted';
+    btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+    paTimer=setTimeout(function(){btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';paTimer=null},800);
+  },function(){_base.notify('Clipboard Access Denied',false)});
+});
+
 /* ── Action Buttons ──────────────────────────────────────────────── */
 $('rs-btn').addEventListener('click',doReset);
 $('dismiss-btn').addEventListener('click',dismiss);
@@ -699,10 +766,13 @@ window.addEventListener('storage',function(e){
 /* ── Visibility ──────────────────────────────────────────────────── */
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){
-    stopTick();clearTimeout(searchTimer);
+    stopTick();clearTimeout(searchTimer);clearTimeout(paTimer);
   }else{
     load();render();tick();startTick();
     resetCtrl.clear();
+    // Reset paste button state
+    var pb=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
+    pb.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';
     checkSound();updateWake();
   }
 });
