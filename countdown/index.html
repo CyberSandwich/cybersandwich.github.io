@@ -35,6 +35,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .item-cd-unit{flex:1;background:var(--bg2);border-radius:12px;padding:8px 4px;text-align:center}
 .item-cd-val{font:600 1.125rem/1.2 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
 .item-cd-lbl{font:400 .625rem/1.2 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.item-cd-unit.zero{opacity:.3}
 .item.done .item-cd-wrap{opacity:.4}
 .item.done .item-title{color:var(--t3)}
 .item .del{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:12px;transition:color .15s,background .15s,border-color .15s}
@@ -81,7 +82,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
         <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
       </div>
       <div class="inp">
-        <input id="inp-date" type="text" autocomplete="off" placeholder="25 Dec 2025, Tomorrow, Christmas..." spellcheck="false" aria-label="Date">
+        <input id="inp-date" type="text" autocomplete="off" placeholder="Date &amp; Time (Natural Language)" spellcheck="false" aria-label="Date">
       </div>
     </div>
     <button type="button" id="add-btn" class="add-tall" aria-label="Add Countdown"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -194,14 +195,39 @@ function nextPrecomputed(table,offsetDays){
 }
 
 function parseTime(text){
-  // Try end: "tmr 3pm", "25 dec 15:00"
-  var m=text.match(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i)||text.match(/[\s,]+(\d{1,2}):(\d{2})\s*$/i);
+  var t=text.trim(),h,min,m;
+
+  // noon / midday / midnight — anywhere in string
+  if(/\bnoon\b/i.test(t)||/\bmidday\b/i.test(t))return{h:12,m:0,raw:t.match(/\b(?:noon|midday)\b/i)[0]};
+  if(/\bmidnight\b/i.test(t))return{h:0,m:0,raw:t.match(/\bmidnight\b/i)[0]};
+
+  // half past X, half X → X:30
+  m=t.match(/\bhalf\s+past\s+(\d{1,2})\b/i)||t.match(/\bhalf\s+(\d{1,2})\b/i);
+  if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:30,raw:m[0]}}
+
+  // quarter past X → X:15
+  m=t.match(/\bquarter\s+past\s+(\d{1,2})\b/i);
+  if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:15,raw:m[0]}}
+
+  // quarter to X → (X-1):45
+  m=t.match(/\bquarter\s+to\s+(\d{1,2})\b/i);
+  if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:(h===1?12:h-1),m:45,raw:m[0]}}
+
+  // X o'clock / X oclock
+  m=t.match(/\b(\d{1,2})\s*o['']?clock\b/i);
+  if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:0,raw:m[0]}}
+
+  // Standard: Xam/Xpm/Xa/Xp with optional minutes — try end then start
+  m=t.match(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i)||t.match(/[\s,]+(\d{1,2}):(\d{2})\s*$/i);
   if(!m){
-    // Try start: "11p tmr", "3pm tomorrow"
-    m=text.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||text.match(/^(\d{1,2}):(\d{2})[\s,]+/i);
+    m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||t.match(/^(\d{1,2}):(\d{2})[\s,]+/i);
+  }
+  // Also try standalone (entire string is just a time)
+  if(!m){
+    m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)$/i)||t.match(/^(\d{1,2}):(\d{2})$/i);
   }
   if(!m)return null;
-  var h=parseInt(m[1],10),min=m[2]?parseInt(m[2],10):0;
+  h=parseInt(m[1],10);min=m[2]?parseInt(m[2],10):0;
   var ap=m[3]?m[3].toLowerCase():null;
   if(ap){ap=ap.charAt(0);if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0}
   if(h>23||min>59)return null;
@@ -209,38 +235,49 @@ function parseTime(text){
 }
 
 function stripTime(text){
-  // Strip from end
-  var s=text.replace(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i,'').replace(/[\s,]+(\d{1,2}):(\d{2})\s*$/i,'');
-  // Strip from start
+  var s=text;
+  // Strip word-based time expressions
+  s=s.replace(/\b(?:noon|midday|midnight)\b/gi,'');
+  s=s.replace(/\bhalf\s+past\s+\d{1,2}\b/gi,'');
+  s=s.replace(/\bhalf\s+\d{1,2}\b/gi,'');
+  s=s.replace(/\bquarter\s+(?:past|to)\s+\d{1,2}\b/gi,'');
+  s=s.replace(/\b\d{1,2}\s*o['']?clock\b/gi,'');
+  // Strip standard time from end
+  s=s.replace(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i,'').replace(/[\s,]+(\d{1,2}):(\d{2})\s*$/i,'');
+  // Strip standard time from start
   s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})[\s,]+/i,'');
+  // Strip connecting words left behind (at, for, etc.)
+  s=s.replace(/\s+at\s*$/i,'').replace(/^\s*at\s+/i,'');
   return s.trim();
 }
 
 function applyTime(date,time){
   if(time){date.setHours(time.h,time.m,0,0)}
-  else{date.setHours(0,0,0,0)}
+  else{
+    // No time specified: use current time
+    var now=new Date();
+    date.setHours(now.getHours(),now.getMinutes(),0,0);
+  }
   return date;
 }
 
 function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
 
+function fmtTime12(h,m){
+  var ap=h>=12?'PM':'AM';var hh=h%12;if(hh===0)hh=12;
+  return hh+':'+(m<10?'0':'')+m+' '+ap;
+}
 function formatLabel(date){
-  return date.getDate()+' '+MONTH_NAMES[date.getMonth()]+' '+date.getFullYear();
+  return date.getDate()+' '+MONTH_NAMES[date.getMonth()]+' '+date.getFullYear()+', '+fmtTime12(date.getHours(),date.getMinutes());
 }
 
-function parseDate(text){
-  if(!text||!text.trim())return null;
-  var raw=text.trim();
-  var time=parseTime(raw);
-  var s=stripTime(raw).toLowerCase();
-  if(!s&&time){
-    // time-only: today at that time
-    var td=new Date();
-    applyTime(td,time);
-    return{date:td,label:formatLabel(td)};
-  }
-  if(!s)s=raw.toLowerCase();
-  var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+function stripNoise(s){
+  // Remove common noise words/prepositions to expose the date pattern
+  // Strip "at" separately since it's also handled in stripTime
+  return s.replace(/\b(?:on|at|the|for|by|until|from|to|my|our|with|and|is|a|an)\b/gi,' ').replace(/\s{2,}/g,' ').trim();
+}
+
+function tryMatch(s,now,today){
   var result=null;
 
   /* 1. Relative keywords */
@@ -260,7 +297,7 @@ function parseDate(text){
     result=new Date(today.getFullYear()+1,0,1);
   }
   if(!result){
-    var rm=s.match(/^in\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)$/);
+    var rm=s.match(/(?:^|\s)in\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)(?:\s|$)/);
     if(rm){
       var n=parseInt(rm[1],10),u=rm[2].replace(/s$/,'');
       result=new Date(today);
@@ -273,7 +310,7 @@ function parseDate(text){
 
   /* 2. Named days */
   if(!result){
-    var dayMatch=s.match(/^(?:next\s+|this\s+)?(\w+)$/);
+    var dayMatch=s.match(/(?:^|\s)(?:next\s+|this\s+)?(\w+)$/);
     if(dayMatch){
       var dn=DAYS[dayMatch[1]];
       if(dn!==undefined){
@@ -293,6 +330,63 @@ function parseDate(text){
   /* 4. Date formats */
   if(!result){
     result=parseDateFormats(s);
+  }
+
+  return result;
+}
+
+function parseDuration(s){
+  var totalSec=0,found=false;
+  var r=/(\d+(?:\.\d+)?)\s*(?:(h|hr|hrs|hours?)|(m|min|mins|minutes?)|(s|sec|secs|seconds?))\b/gi;
+  var m;
+  while((m=r.exec(s))!==null){
+    var v=parseFloat(m[1]);
+    if(m[2]){totalSec+=v*3600;found=true}
+    else if(m[3]){totalSec+=v*60;found=true}
+    else if(m[4]){totalSec+=v;found=true}
+  }
+  if(!found)return null;
+  var dt=new Date(Date.now()+Math.round(totalSec*1000));
+  return{date:dt,label:formatLabel(dt)};
+}
+
+function parseDate(text){
+  if(!text||!text.trim())return null;
+  var raw=text.trim();
+
+  var dur=parseDuration(raw);
+  if(dur)return dur;
+
+  var time=parseTime(raw);
+  var s=stripTime(raw).toLowerCase();
+  if(!s&&time){
+    var td=new Date();
+    applyTime(td,time);
+    return{date:td,label:formatLabel(td)};
+  }
+  if(!s)s=raw.toLowerCase();
+  var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+
+  // Try exact match first
+  var result=tryMatch(s,now,today);
+
+  // Try after stripping noise words
+  if(!result){
+    var cleaned=stripNoise(s);
+    if(cleaned&&cleaned!==s)result=tryMatch(cleaned,now,today);
+  }
+
+  // Try progressive left-trimming: strip words from the left until something matches
+  if(!result){
+    var words=s.split(/\s+/);
+    for(var i=1;i<words.length&&!result;i++){
+      var sub=words.slice(i).join(' ');
+      result=tryMatch(sub,now,today);
+      if(!result){
+        var subClean=stripNoise(sub);
+        if(subClean&&subClean!==sub)result=tryMatch(subClean,now,today);
+      }
+    }
   }
 
   if(!result)return null;
@@ -455,7 +549,7 @@ function buildCdWrap(units,done){
   }
   if(!units)return wrap;
   for(var i=0;i<units.length;i++){
-    var u=document.createElement('div');u.className='item-cd-unit';
+    var u=document.createElement('div');u.className='item-cd-unit'+(units[i].v===0?' zero':'');
     var v=document.createElement('div');v.className='item-cd-val';v.textContent=units[i].v;
     var l=document.createElement('div');l.className='item-cd-lbl';l.textContent=units[i].l;
     u.appendChild(v);u.appendChild(l);wrap.appendChild(u);
@@ -599,17 +693,20 @@ function render(){
 }
 
 /* ── Add Item ────────────────────────────────────────────────────── */
+var autoIdx=0;
+function nextAutoTitle(){autoIdx++;return'Countdown '+autoIdx}
 function addItem(){
   var title=$('inp-title').value.trim();
   var dateText=$('inp-date').value.trim();
-  if(!title||!dateText)return;
+  if(!dateText){_base.notify('Enter a Date or Duration',false);return}
+  if(!title)title=nextAutoTitle();
   var parsed=parseDate(dateText);
   if(!parsed){_base.notify('Could Not Parse Date',false);return}
   var id=uid();
   items.unshift({id:id,title:title,target:parsed.date.getTime(),dateLabel:parsed.label,ts:Date.now(),done:false});
   save();kbIdx=-1;render();
   $('inp-title').value='';$('inp-date').value='';
-  $('inp-title').focus();
+  $('inp-date').focus();
   announce('Added');
 }
 
@@ -651,10 +748,15 @@ function tick(){
       render();
       return;
     }
-    var vals=els[i].querySelectorAll('.item-cd-val');
-    if(vals.length===4){
+    var unitEls=els[i].querySelectorAll('.item-cd-unit');
+    if(unitEls.length===4){
       var units=[calc.d,calc.h,calc.m,calc.s];
-      for(var k=0;k<4;k++){var nv=''+units[k];if(vals[k].textContent!==nv)vals[k].textContent=nv}
+      for(var k=0;k<4;k++){
+        var nv=''+units[k];
+        var valEl=unitEls[k].querySelector('.item-cd-val');
+        if(valEl&&valEl.textContent!==nv)valEl.textContent=nv;
+        unitEls[k].classList.toggle('zero',units[k]===0);
+      }
     }
   }
 }
@@ -781,7 +883,10 @@ document.addEventListener('visibilitychange',function(){
 document.addEventListener('click',function(){initAudio()},{once:true});
 
 /* ── Init ────────────────────────────────────────────────────────── */
-load();render();tick();startTick();
+load();
+// Set autoIdx from existing Countdown N titles
+items.forEach(function(it){var m=it.title.match(/^Countdown\s+(\d+)$/);if(m){var n=parseInt(m[1],10);if(n>autoIdx)autoIdx=n}});
+render();tick();startTick();
 })();
 </script>
 </body>
