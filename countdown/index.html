@@ -74,6 +74,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 <div class="w">
   <div class="card links" id="actions">
     <button type="button" id="pa-btn" aria-label="Paste"><svg aria-hidden="true" id="pa-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg aria-hidden="true" id="pa-ck" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pa-l">Paste</span></button>
+    <button type="button" id="ca-btn" disabled aria-label="Copy All"><svg aria-hidden="true" id="ca-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg aria-hidden="true" id="ca-ck" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="ca-l">Copy All</span></button>
     <button type="button" id="rs-btn" aria-label="Reset" style="display:none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
   </div>
   <div class="inp-row">
@@ -631,6 +632,7 @@ function render(){
   var frag=document.createDocumentFragment();
 
   $('rs-btn').style.display=hasItems?'':'none';
+  $('ca-btn').disabled=!hasItems;$('ca-btn').style.display=hasItems?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
 
   if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
@@ -851,14 +853,45 @@ $('search').addEventListener('input',function(){
 
 /* ── Paste Button ───────────────────────────────────────────────── */
 var paTimer=null;
+function paFeedback(){
+  var btn=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
+  if(paTimer){clearTimeout(paTimer);btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste'}
+  pi.style.display='none';pk.style.display='';pl.textContent='Pasted';
+  btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+  paTimer=setTimeout(function(){btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';paTimer=null},800);
+}
+function tryBulkPaste(text){
+  // Detect bulk format: alternating lines of title then date
+  var lines=text.split(/\n/).map(function(l){return l.trim()}).filter(Boolean);
+  if(lines.length<2||lines.length%2!==0)return false;
+  // Verify: even lines (0,2,4...) should NOT parse as dates, odd lines (1,3,5...) SHOULD
+  var pairs=[];
+  for(var i=0;i<lines.length;i+=2){
+    var title=lines[i],dateLine=lines[i+1];
+    var parsed=parseDate(dateLine);
+    if(!parsed)return false;
+    if(parsed.date<=new Date())continue; // skip past dates
+    pairs.push({title:title,parsed:parsed});
+  }
+  if(!pairs.length)return false;
+  for(var i=0;i<pairs.length;i++){
+    var id=uid();
+    items.unshift({id:id,title:pairs[i].title,target:pairs[i].parsed.date.getTime(),dateLabel:pairs[i].parsed.label,ts:Date.now(),done:false});
+  }
+  save();kbIdx=-1;render();
+  _base.notify(pairs.length+' Event'+(pairs.length!==1?'s':'')+' Added',true);
+  return true;
+}
 $('pa-btn').addEventListener('click',function(){
   if(!navigator.clipboard||!navigator.clipboard.readText){_base.notify('Clipboard Not Available',false);return}
   navigator.clipboard.readText().then(function(text){
     if(!text||!text.trim()){_base.notify('Clipboard Empty',false);return}
     var t=text.trim();
+    // Try bulk paste first (multiline title\ndate pairs)
+    if(t.indexOf('\n')!==-1&&tryBulkPaste(t)){paFeedback();return}
+    // Single item paste
     var titleEl=$('inp-title'),dateEl=$('inp-date');
     if(!titleEl.value&&!dateEl.value){
-      // Smart split: try to extract title + date from pasted text
       var split=splitTitleDate(t);
       if(split){
         if(split.title)titleEl.value=split.title;
@@ -871,13 +904,30 @@ $('pa-btn').addEventListener('click',function(){
     }else if(!dateEl.value){dateEl.value=t}
     else if(!titleEl.value){titleEl.value=t}
     else{dateEl.value=t}
-    // Feedback
-    var btn=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
-    if(paTimer){clearTimeout(paTimer);btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste'}
-    pi.style.display='none';pk.style.display='';pl.textContent='Pasted';
-    btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
-    paTimer=setTimeout(function(){btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';paTimer=null},800);
+    paFeedback();
   },function(){_base.notify('Clipboard Access Denied',false)});
+});
+
+/* ── Copy All ────────────────────────────────────────────────────── */
+var caTimer=null;
+$('ca-btn').addEventListener('click',function(){
+  if(!items.length)return;
+  var lines=[];
+  var sorted=items.slice().sort(function(a,b){if(a.done!==b.done)return a.done?1:-1;return a.target-b.target});
+  for(var i=0;i<sorted.length;i++){
+    if(sorted[i].done)continue;
+    lines.push(sorted[i].title);
+    lines.push(sorted[i].dateLabel);
+  }
+  if(!lines.length){_base.notify('No Active Countdowns',false);return}
+  var btn=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
+  _base.copyText(lines.join('\n'),function(){
+    if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All'}
+    ci.style.display='none';ck.style.display='';cl.textContent='Copied';
+    btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
+    caTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All';caTimer=null},800);
+    announce('All Countdowns Copied');
+  });
 });
 
 /* ── Action Buttons ──────────────────────────────────────────────── */
@@ -896,6 +946,7 @@ _base.onKey({
   '/':function(e){e.preventDefault();kbClear();$('inp-title').focus()},
   's':function(e){if($('search-wrap').style.display!=='none'){e.preventDefault();kbClear();$('search').focus()}},
   'p':function(){$('pa-btn').click()},
+  'a':function(){$('ca-btn').click()},
   'j':function(e){e.preventDefault();kbMove(1)},
   'k':function(e){e.preventDefault();kbMove(-1)},
   'ArrowDown':function(e){e.preventDefault();kbMove(1)},
