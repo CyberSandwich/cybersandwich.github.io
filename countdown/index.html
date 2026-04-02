@@ -528,10 +528,10 @@ function calcCountdown(targetMs){
 function fmtCountdown(c){
   if(!c)return null;
   return[
-    {v:c.d,l:'Days'},
-    {v:c.h,l:'Hours'},
-    {v:c.m,l:'Min'},
-    {v:c.s,l:'Sec'}
+    {v:c.d,l:c.d===1?'Day':'Days'},
+    {v:c.h,l:c.h===1?'Hour':'Hours'},
+    {v:c.m,l:c.m===1?'Min':'Mins'},
+    {v:c.s,l:c.s===1?'Sec':'Secs'}
   ];
 }
 
@@ -794,10 +794,13 @@ function tick(){
     var unitEls=els[i].querySelectorAll('.item-cd-unit');
     if(unitEls.length===4){
       var units=[calc.d,calc.h,calc.m,calc.s];
+      var labels=[calc.d===1?'Day':'Days',calc.h===1?'Hour':'Hours',calc.m===1?'Min':'Mins',calc.s===1?'Sec':'Secs'];
       for(var k=0;k<4;k++){
-        var nv=''+units[k];
         var valEl=unitEls[k].querySelector('.item-cd-val');
+        var lblEl=unitEls[k].querySelector('.item-cd-lbl');
+        var nv=''+units[k];
         if(valEl&&valEl.textContent!==nv)valEl.textContent=nv;
+        if(lblEl&&lblEl.textContent!==labels[k])lblEl.textContent=labels[k];
         unitEls[k].classList.toggle('zero',units[k]===0);
       }
     }
