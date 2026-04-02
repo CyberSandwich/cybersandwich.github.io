@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Countdown</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=22">
+<link rel="stylesheet" href="/shared/base.css?v=23">
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
@@ -22,7 +22,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .inp-fields .inp{border-radius:0;box-shadow:none;border:none;margin:0}
 .inp-fields .inp:first-child{border-bottom:1px solid var(--bdr2)}
 .inp-fields .inp input{border:none;box-shadow:none;background:transparent}
-.add-tall{width:52px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s}
+.add-tall{width:44px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s}
 .add-tall:active{opacity:.7}
 @media(hover:hover){.add-tall:hover{color:var(--t1);background:var(--bg2)}}
 .items{display:flex;flex-direction:column;gap:14px;background:none;box-shadow:none;border-radius:0;padding:0;overflow:visible}
@@ -112,7 +112,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=22"></script>
+<script src="/shared/base.js?v=23"></script>
 <script src="/shared/search.js?v=20"></script>
 <script>
 (function(){'use strict';
@@ -355,28 +355,25 @@ function parseDate(text){
   var raw=text.trim();
 
   var dur=parseDuration(raw);
-  if(dur)return dur;
+  if(dur){dur.hint=null;return dur}
 
   var time=parseTime(raw);
   var s=stripTime(raw).toLowerCase();
   if(!s&&time){
+    // Time only — use today (or tomorrow if time already passed)
     var td=new Date();
-    applyTime(td,time);
-    return{date:td,label:formatLabel(td)};
+    td.setHours(time.h,time.m,0,0);
+    if(td<=new Date())td.setDate(td.getDate()+1);
+    return{date:td,label:formatLabel(td),hint:'date'};
   }
   if(!s)s=raw.toLowerCase();
   var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 
-  // Try exact match first
   var result=tryMatch(s,now,today);
-
-  // Try after stripping noise words
   if(!result){
     var cleaned=stripNoise(s);
     if(cleaned&&cleaned!==s)result=tryMatch(cleaned,now,today);
   }
-
-  // Try progressive left-trimming: strip words from the left until something matches
   if(!result){
     var words=s.split(/\s+/);
     for(var i=1;i<words.length&&!result;i++){
@@ -392,7 +389,7 @@ function parseDate(text){
   if(!result)return null;
 
   applyTime(result,time);
-  return{date:result,label:formatLabel(result)};
+  return{date:result,label:formatLabel(result),hint:time?null:'time'};
 }
 
 function parseHoliday(s){
@@ -702,12 +699,15 @@ function addItem(){
   if(!title)title=nextAutoTitle();
   var parsed=parseDate(dateText);
   if(!parsed){_base.notify('Could Not Parse Date',false);return}
+  if(parsed.date<=new Date()){_base.notify('Date Is in the Past',false);return}
   var id=uid();
   items.unshift({id:id,title:title,target:parsed.date.getTime(),dateLabel:parsed.label,ts:Date.now(),done:false});
   save();kbIdx=-1;render();
   $('inp-title').value='';$('inp-date').value='';
   $('inp-date').focus();
-  announce('Added');
+  if(parsed.hint==='time')_base.notify('Current Time Used','warn');
+  else if(parsed.hint==='date')_base.notify('Today\'s Date Used','warn');
+  else announce('Added');
 }
 
 /* ── Remove Item ─────────────────────────────────────────────────── */

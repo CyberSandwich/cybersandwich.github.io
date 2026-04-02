@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Parsely</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=22">
+<link rel="stylesheet" href="/shared/base.css?v=23">
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
@@ -81,7 +81,7 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=22"></script>
+<script src="/shared/base.js?v=23"></script>
 <script src="/shared/search.js?v=20"></script>
 <script>
 function $(id){return document.getElementById(id)}
@@ -610,11 +610,28 @@ function parseNumD(p1,p2,p3){
   return{d:d,m:m,y:y};
 }
 
-var TIME_RE=/^[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i;
+var TIME_RE=/^[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\b/i;
 var TIME_24=/^[\s,]+(\d{1,2}):(\d{2})\b/;
+var TIME_WORD=/^[\s,]+(?:(noon|midday|midnight)|(half\s+past\s+(\d{1,2}))|(half\s+(\d{1,2}))|(quarter\s+past\s+(\d{1,2}))|(quarter\s+to\s+(\d{1,2}))|(\d{1,2})\s*o['']?clock)\b/i;
+function fmtTime12(h,m){var ap=h>=12?'PM':'AM';var dh=h>12?h-12:h===0?12:h;return dh+':'+(m<10?'0':'')+m+' '+ap}
 function extractTimeSuffix(text,end){
-  var after=text.slice(end,end+20),tm=after.match(TIME_RE);
-  if(tm){var h=parseInt(tm[1],10),m=tm[2]?parseInt(tm[2],10):0;if(tm[3].toLowerCase()==='pm'&&h<12)h+=12;if(tm[3].toLowerCase()==='am'&&h===12)h=0;if(h>=0&&h<24&&m>=0&&m<60)return{text:(h>12||h===0?(h===0?'12':h-12):h)+':'+(m<10?'0':'')+m+' '+(h>=12?'PM':'AM'),len:tm[0].length}}
+  var after=text.slice(end,end+30),tm;
+  // Word-based times: noon, midday, midnight, half past X, quarter past/to X, X o'clock
+  tm=after.match(TIME_WORD);
+  if(tm){
+    var h,m=0;
+    if(tm[1]){var w=tm[1].toLowerCase();h=w==='noon'||w==='midday'?12:0}
+    else if(tm[2]){h=parseInt(tm[3],10);m=30}
+    else if(tm[4]){h=parseInt(tm[5],10);m=30}
+    else if(tm[6]){h=parseInt(tm[7],10);m=15}
+    else if(tm[8]){h=parseInt(tm[9],10);h=h===1?12:h-1;m=45}
+    else if(tm[10]){h=parseInt(tm[10],10)}
+    if(h!==undefined&&h>=0&&h<24&&m>=0&&m<60)return{text:fmtTime12(h,m),len:tm[0].length};
+  }
+  // Standard am/pm (also a/p shorthand)
+  tm=after.match(TIME_RE);
+  if(tm){var h=parseInt(tm[1],10),m=tm[2]?parseInt(tm[2],10):0;var ap=tm[3].charAt(0).toLowerCase();if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;if(h>=0&&h<24&&m>=0&&m<60)return{text:fmtTime12(h,m),len:tm[0].length}}
+  // 24-hour
   tm=after.match(TIME_24);
   if(tm){var h=parseInt(tm[1],10),m=parseInt(tm[2],10);if(h>=0&&h<24&&m>=0&&m<60)return{text:h+':'+(m<10?'0':'')+m,len:tm[0].length}}
   return null;

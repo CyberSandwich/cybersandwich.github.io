@@ -246,10 +246,13 @@ button:focus:not(:focus-visible){outline:none}
 .notif-pill{display:flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--rr);font:500 .875rem/1 var(--font);white-space:nowrap;box-shadow:var(--shadow2);border:1px solid rgba(255,255,255,.45)}
 .notif-pill.nf-ok{background:#DCFCE7;color:#16A34A}
 .notif-pill.nf-err{background:#FEE2E2;color:#C41E3A}
+.notif-pill.nf-warn{background:#FEF9C3;color:#A16207}
 html[data-theme="dark"] .notif-pill{border-color:rgba(255,255,255,.12)}
 html[data-theme="dark"] .notif-pill.nf-ok{background:#1A3A2A;color:#34D399}
 html[data-theme="dark"] .notif-pill.nf-err{background:#3A2020;color:#F87171}
+html[data-theme="dark"] .notif-pill.nf-warn{background:#3A3520;color:#FBBF24}
 html[data-theme="sepia"] .notif-pill{border-color:rgba(255,250,242,.42)}
 html[data-theme="sepia"] .notif-pill.nf-ok{background:#E8E0CE;color:#2D7D46}
 html[data-theme="sepia"] .notif-pill.nf-err{background:#F0DDD0;color:#C41E3A}
+html[data-theme="sepia"] .notif-pill.nf-warn{background:#EDE5C8;color:#92400E}
 .notif-pill:active{transform:scale(.95);opacity:.8}

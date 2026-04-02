@@ -131,7 +131,7 @@
     var wrap=document.createElement('div');
     wrap.className='notif fx-bottom';wrap.setAttribute('role','status');
     var pill=document.createElement('div');
-    pill.className='notif-pill '+(ok?'nf-ok':'nf-err');
+    pill.className='notif-pill '+(ok==='warn'?'nf-warn':ok?'nf-ok':'nf-err');
     pill.textContent=msg;wrap.appendChild(pill);
     var dismiss=function(){clearTimeout(toastT);clearTimeout(toastFadeT);wrap.style.animation='notifOut .2s ease forwards';toastFadeT=setTimeout(function(){wrap.remove()},200)};
     wrap.addEventListener('click',function(){if(onTap)onTap();dismiss()});
