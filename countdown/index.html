@@ -126,7 +126,10 @@ var norm=_search.norm,scoreWord=_search.scoreWord;
 /* ── Storage ─────────────────────────────────────────────────────── */
 function load(){
   var p=_base.load('countdown-items',[]);
-  if(Array.isArray(p))items=p.filter(function(e){return e&&e.id&&e.target});
+  if(Array.isArray(p))items=p.filter(function(e){return e&&e.id&&e.target}).map(function(e){
+    // Regenerate label to include time (migrates old items without time in label)
+    e.dateLabel=formatLabel(new Date(e.target));return e;
+  });
 }
 function save(){
   try{localStorage.setItem('countdown-items',JSON.stringify(items))}
