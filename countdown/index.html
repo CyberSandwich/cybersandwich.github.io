@@ -264,7 +264,7 @@ function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
 
 function fmtTime12(h,m){
   var ap=h>=12?'PM':'AM';var hh=h%12;if(hh===0)hh=12;
-  return hh+':'+(m<10?'0':'')+m+' '+ap;
+  return m===0?hh+' '+ap:hh+':'+(m<10?'0':'')+m+' '+ap;
 }
 function formatLabel(date){
   return date.getDate()+' '+MONTH_NAMES[date.getMonth()]+' '+date.getFullYear()+', '+fmtTime12(date.getHours(),date.getMinutes());
@@ -793,7 +793,15 @@ $('items').addEventListener('click',function(e){
   if(!row)return;
   var id=row.getAttribute('data-id');
   kbClear();
-  if(del)removeItem(id);
+  if(del){removeItem(id);return}
+  // Tap card: populate inputs for editing
+  var item=null;
+  for(var i=0;i<items.length;i++){if(items[i].id===id){item=items[i];break}}
+  if(!item)return;
+  var dt=new Date(item.target);
+  $('inp-title').value=item.title;
+  $('inp-date').value=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
+  $('inp-title').focus();
 });
 
 /* ── Search ──────────────────────────────────────────────────────── */
