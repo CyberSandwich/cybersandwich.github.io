@@ -837,24 +837,28 @@ $('rs-btn').addEventListener('click',doReset);
 $('dismiss-btn').addEventListener('click',dismiss);
 
 /* ── Keyboard Shortcuts ──────────────────────────────────────────── */
+// Escape needs to work even from inputs (for alarm dismiss), so handle separately
 document.addEventListener('keydown',function(e){
-  // Dismiss alarm on Escape
-  if(e.key==='Escape'&&firedItem){dismiss();return}
-  if(e.key==='Escape'){kbClear();document.activeElement.blur();return}
-  var tag=document.activeElement.tagName;
-  if(tag==='INPUT'||tag==='TEXTAREA')return;
-  if(e.metaKey||e.ctrlKey||e.altKey)return;
-  if(e.shiftKey)return;
-  if(e.key==='j'||e.key==='ArrowDown'){e.preventDefault();kbMove(1)}
-  else if(e.key==='k'||e.key==='ArrowUp'){e.preventDefault();kbMove(-1)}
-  else if((e.key==='d'||e.key==='Backspace'||e.key==='Delete')&&kbIdx>=0){
-    e.preventDefault();
-    var cards=kbCards();if(kbIdx<cards.length){removeItem(cards[kbIdx].getAttribute('data-id'))}
+  if(e.key==='Escape'){
+    if(firedItem){dismiss();return}
+    kbClear();document.activeElement.blur();
   }
-  else if(e.key==='/'){e.preventDefault();kbClear();$('inp-title').focus()}
-  else if(e.key==='r')doReset();
-  else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
-  else if(e.key==='1')window.location.href='/';
+});
+_base.onKey({
+  '/':function(e){e.preventDefault();kbClear();$('inp-title').focus()},
+  's':function(e){if($('search-wrap').style.display!=='none'){e.preventDefault();kbClear();$('search').focus()}},
+  'p':function(){$('pa-btn').click()},
+  'j':function(e){e.preventDefault();kbMove(1)},
+  'k':function(e){e.preventDefault();kbMove(-1)},
+  'ArrowDown':function(e){e.preventDefault();kbMove(1)},
+  'ArrowUp':function(e){e.preventDefault();kbMove(-1)},
+  'd':function(e){if(kbIdx>=0){e.preventDefault();var cards=kbCards();if(kbIdx<cards.length)removeItem(cards[kbIdx].getAttribute('data-id'))}},
+  'Backspace':function(e){if(kbIdx>=0){e.preventDefault();var cards=kbCards();if(kbIdx<cards.length)removeItem(cards[kbIdx].getAttribute('data-id'))}},
+  'Delete':function(e){if(kbIdx>=0){e.preventDefault();var cards=kbCards();if(kbIdx<cards.length)removeItem(cards[kbIdx].getAttribute('data-id'))}},
+  'r':function(){doReset()},
+  ctrl:{
+    'k':function(e){e.preventDefault();if($('search-wrap').style.display!=='none'){kbClear();$('search').focus()}else{$('inp-title').focus()}}
+  }
 });
 document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear()},{passive:true});
 
