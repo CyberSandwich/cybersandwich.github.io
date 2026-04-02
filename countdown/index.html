@@ -879,26 +879,36 @@ $('pa-btn').addEventListener('click',function(){
   if(!navigator.clipboard||!navigator.clipboard.readText){_base.notify('Clipboard Not Available',false);return}
   navigator.clipboard.readText().then(function(text){
     if(!text||!text.trim()){_base.notify('Clipboard Empty',false);return}
-    var t=text.trim();
-    // Try bulk paste first (multiline title\ndate pairs)
-    if(t.indexOf('\n')!==-1&&tryBulkPaste(t)){paFeedback();return}
-    // Single item paste
-    var titleEl=$('inp-title'),dateEl=$('inp-date');
-    if(!titleEl.value&&!dateEl.value){
-      var split=splitTitleDate(t);
-      if(split){
-        if(split.title)titleEl.value=split.title;
-        var dt=split.parsed.date;
-        dateEl.value=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
-        if(split.title)dateEl.focus();else titleEl.focus();
-      }else{
-        titleEl.value=t;dateEl.focus();
-      }
-    }else if(!dateEl.value){dateEl.value=t}
-    else if(!titleEl.value){titleEl.value=t}
-    else{dateEl.value=t}
-    paFeedback();
+    handlePastedText(text.trim());
   },function(){_base.notify('Clipboard Access Denied',false)});
+});
+
+/* ── Paste Event (Cmd+V / Ctrl+V outside inputs) ────────────────── */
+function handlePastedText(t){
+  // Try bulk paste first
+  if(t.indexOf('\n')!==-1&&tryBulkPaste(t)){paFeedback();return}
+  // Single item: smart split
+  var titleEl=$('inp-title'),dateEl=$('inp-date');
+  if(!titleEl.value&&!dateEl.value){
+    var split=splitTitleDate(t);
+    if(split){
+      if(split.title)titleEl.value=split.title;
+      var dt=split.parsed.date;
+      dateEl.value=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
+      if(split.title)dateEl.focus();else titleEl.focus();
+    }else{
+      titleEl.value=t;dateEl.focus();
+    }
+  }else if(!dateEl.value){dateEl.value=t}
+  else if(!titleEl.value){titleEl.value=t}
+  else{dateEl.value=t}
+  paFeedback();
+}
+document.addEventListener('paste',function(e){
+  var tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  var text=(e.clipboardData||window.clipboardData).getData('text');
+  if(text){e.preventDefault();handlePastedText(text.trim())}
 });
 
 /* ── Copy All ────────────────────────────────────────────────────── */
@@ -938,8 +948,9 @@ document.addEventListener('keydown',function(e){
 });
 _base.onKey({
   '/':function(e){e.preventDefault();kbClear();$('inp-title').focus()},
-  's':function(e){if($('search-wrap').style.display!=='none'){e.preventDefault();kbClear();$('search').focus()}},
-  'p':function(){$('pa-btn').click()},
+  's':function(e){e.preventDefault();if($('search-wrap').style.display!=='none'){kbClear();$('search').focus()}},
+  'p':function(e){e.preventDefault();$('pa-btn').click()},
+  'v':function(e){e.preventDefault();$('pa-btn').click()},
   'a':function(){$('ca-btn').click()},
   'j':function(e){e.preventDefault();kbMove(1)},
   'k':function(e){e.preventDefault();kbMove(-1)},
@@ -948,7 +959,7 @@ _base.onKey({
   'd':function(e){if(kbIdx>=0){e.preventDefault();var cards=kbCards();if(kbIdx<cards.length)removeItem(cards[kbIdx].getAttribute('data-id'))}},
   'Backspace':function(e){if(kbIdx>=0){e.preventDefault();var cards=kbCards();if(kbIdx<cards.length)removeItem(cards[kbIdx].getAttribute('data-id'))}},
   'Delete':function(e){if(kbIdx>=0){e.preventDefault();var cards=kbCards();if(kbIdx<cards.length)removeItem(cards[kbIdx].getAttribute('data-id'))}},
-  'r':function(){doReset()},
+  'r':function(e){e.preventDefault();doReset()},
   ctrl:{
     'k':function(e){e.preventDefault();if($('search-wrap').style.display!=='none'){kbClear();$('search').focus()}else{$('inp-title').focus()}}
   }
