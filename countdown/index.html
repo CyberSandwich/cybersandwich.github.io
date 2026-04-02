@@ -828,14 +828,16 @@ $('items').addEventListener('click',function(e){
   var id=row.getAttribute('data-id');
   kbClear();
   if(del){removeItem(id);return}
-  // Tap card: populate inputs for editing
+  // Tap card: populate inputs + copy to clipboard
   var item=null;
   for(var i=0;i<items.length;i++){if(items[i].id===id){item=items[i];break}}
   if(!item)return;
   var dt=new Date(item.target);
+  var dateStr=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
   $('inp-title').value=item.title;
-  $('inp-date').value=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
+  $('inp-date').value=dateStr;
   $('inp-title').focus();
+  _base.copyText(item.title+'\n'+dateStr,function(){_base.notify('Copied',true)});
 });
 
 /* ── Search ──────────────────────────────────────────────────────── */
