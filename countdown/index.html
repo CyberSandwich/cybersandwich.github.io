@@ -631,7 +631,9 @@ function render(){
   var hasItems=items.length>0;
   var frag=document.createDocumentFragment();
 
-  $('ca-btn').disabled=!hasItems;$('ca-btn').style.display=hasItems?'':'none';
+  var activeCount=items.filter(function(e){return!e.done}).length;
+  $('ca-btn').disabled=!activeCount;$('ca-btn').style.display=activeCount?'':'none';
+  $('ca-l').textContent=activeCount>1?'Copy All':'Copy';
   $('search-wrap').style.display=hasItems?'block':'none';
 
   if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
@@ -913,10 +915,11 @@ $('ca-btn').addEventListener('click',function(){
   if(!lines.length){_base.notify('No Active Countdowns',false);return}
   var btn=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
   _base.copyText(lines.join('\n'),function(){
-    if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All'}
+    if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none'}
     ci.style.display='none';ck.style.display='';cl.textContent='Copied';
     btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
-    caTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent='Copy All';caTimer=null},800);
+    var ac=items.filter(function(e){return!e.done}).length;
+    caTimer=setTimeout(function(){btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=ac>1?'Copy All':'Copy';caTimer=null},800);
     announce('All Countdowns Copied');
   });
 });
