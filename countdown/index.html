@@ -688,6 +688,45 @@ function render(){
   if(kbIdx>=list.length)kbIdx=list.length-1;
 }
 
+/* ── Smart Split (title + date from one string) ─────────────────── */
+function splitTitleDate(text){
+  // Whole string is a date?
+  var full=parseDate(text);
+  if(full)return{title:null,date:text,parsed:full};
+
+  var words=text.split(/\s+/);
+  // Try title on LEFT, date on RIGHT: find shortest title (longest date match)
+  var bestRight=null,bestRightIdx=-1;
+  for(var i=1;i<words.length;i++){
+    var right=words.slice(i).join(' ');
+    var p=parseDate(right);
+    if(p){bestRight=p;bestRightIdx=i;break}
+  }
+  // Try title on RIGHT, date on LEFT: find longest date match from start
+  var bestLeft=null,bestLeftIdx=-1;
+  for(var i=words.length-1;i>=1;i--){
+    var left=words.slice(0,i).join(' ');
+    var p=parseDate(left);
+    if(p){bestLeft=p;bestLeftIdx=i;break}
+  }
+  // Pick the split that gives a cleaner title (no date/time words mixed in)
+  if(bestRight&&bestRightIdx>0){
+    var titlePart=words.slice(0,bestRightIdx).join(' ');
+    // Check title doesn't have stray date/time words mixed in
+    if(!parseDate(titlePart)&&!parseTime(titlePart))
+      return{title:titlePart,date:words.slice(bestRightIdx).join(' '),parsed:bestRight};
+  }
+  if(bestLeft&&bestLeftIdx<words.length){
+    var titlePart=words.slice(bestLeftIdx).join(' ');
+    if(!parseDate(titlePart)&&!parseTime(titlePart))
+      return{title:titlePart,date:words.slice(0,bestLeftIdx).join(' '),parsed:bestLeft};
+  }
+  // Couldn't cleanly split — just return date from full parse attempt (with noise stripping)
+  if(bestRight)return{title:null,date:text,parsed:bestRight};
+  if(bestLeft)return{title:null,date:text,parsed:bestLeft};
+  return null;
+}
+
 /* ── Add Item ────────────────────────────────────────────────────── */
 var autoIdx=0;
 function nextAutoTitle(){autoIdx++;return'Countdown '+autoIdx}
@@ -817,13 +856,18 @@ $('pa-btn').addEventListener('click',function(){
   navigator.clipboard.readText().then(function(text){
     if(!text||!text.trim()){_base.notify('Clipboard Empty',false);return}
     var t=text.trim();
-    // Try to paste into whichever input is empty or focused
     var titleEl=$('inp-title'),dateEl=$('inp-date');
     if(!titleEl.value&&!dateEl.value){
-      // Try parsing as date first
-      var parsed=parseDate(t);
-      if(parsed){dateEl.value=t;titleEl.focus()}
-      else{titleEl.value=t;dateEl.focus()}
+      // Smart split: try to extract title + date from pasted text
+      var split=splitTitleDate(t);
+      if(split){
+        if(split.title)titleEl.value=split.title;
+        var dt=split.parsed.date;
+        dateEl.value=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
+        if(split.title)dateEl.focus();else titleEl.focus();
+      }else{
+        titleEl.value=t;dateEl.focus();
+      }
     }else if(!dateEl.value){dateEl.value=t}
     else if(!titleEl.value){titleEl.value=t}
     else{dateEl.value=t}
