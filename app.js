@@ -152,6 +152,7 @@ const PROJECT_ICONS={
 'ClearView':'<rect x="3" y="3" width="18" height="18" rx="5"/>',
 'Clip':'<path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
 'Clock':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+'Countdown':'<path d="M5 22h14"/><path d="M5 2h14"/><path d="M12 6v6l4 2"/><path d="M17 2a15.3 15.3 0 010 20"/><path d="M7 2a15.3 15.3 0 000 20"/>',
 'Arbit':'<rect x="2" y="2" width="20" height="20" rx="3"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
 'CodeGen':'<path d="M3 7V5a2 2 0 012-2h2"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M16 7v10"/>',
 'ImageOpt':'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Countdown</title>
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=22">
+<style>
+body{display:flex;align-items:flex-start;justify-content:center}
+.w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
+.search-wrap{display:none;margin-bottom:14px;--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+.search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
+.search-wrap input:focus{border-color:var(--t4)}
+.inp-card{display:flex;flex-direction:column;padding:0;overflow:hidden;margin-bottom:14px}
+.inp-card .inp{border-radius:0;box-shadow:none;border:none;margin:0}
+.inp-card .inp:first-child{border-bottom:1px solid var(--bdr2)}
+.inp-card .inp input{border:none;box-shadow:none;background:transparent}
+.items{margin-bottom:0}
+.item{display:flex;align-items:center;padding:14px 16px 14px 20px;border-bottom:1px solid var(--bdr2);cursor:default;transition:background .15s,opacity .2s ease}
+.item:last-child{border-bottom:none}
+.item-info{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.item-title{font:600 .9375rem/1.4 var(--font);color:var(--t1)}
+.item-date{font:400 .75rem/1.3 var(--font);color:var(--t3)}
+.item-countdown{font:500 .875rem/1.3 var(--font);color:var(--t2);font-variant-numeric:tabular-nums;margin-top:4px}
+.item.done .item-countdown{color:var(--t4)}
+.item.done .item-title{color:var(--t3)}
+.item .del{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:20px;align-self:flex-start;transition:color .15s,background .15s,border-color .15s}
+.item .del svg{width:14px;height:14px;pointer-events:none}
+.item.removing{opacity:0;transition:opacity .1s ease}
+.item.kb-focus{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
+.no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.item:active{opacity:.85}
+.item .del:active{opacity:.7}
+.links>button:active:not([disabled]){opacity:.7}
+.fire-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:20px}
+.fire-overlay.active{display:flex}
+.fire-overlay:not(.active) .fire-icon{animation-play-state:paused}
+.fire-card{background:var(--card);border-radius:24px;padding:clamp(32px,6vw,48px);text-align:center;max-width:380px;width:100%;animation:scaleUp .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+@keyframes scaleUp{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.fire-icon{width:56px;height:56px;margin:0 auto 24px;color:var(--acc);animation:wiggle .4s ease infinite alternate}
+@keyframes wiggle{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+.fire-title{font:600 1.25rem/1.3 var(--font);color:var(--t1);margin-bottom:4px}
+.fire-label{font-size:.9375rem;color:var(--t2);margin-bottom:32px}
+.fire-btns button{width:100%;padding:14px 28px;border:none;border-radius:var(--rr);font:600 .9375rem/1 var(--font);cursor:pointer;background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 4px 14px rgba(0,0,0,.12);transition:box-shadow .15s}
+.fire-btns button:hover{box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.fire-btns button:active{transform:scale(.985)}
+@media(prefers-reduced-motion:reduce){
+  .fire-icon{animation:none}
+  .fire-card{animation:none}
+  @keyframes scaleUp{from{opacity:1}to{opacity:1}}
+}
+@media(hover:hover){
+  .item:hover{background:var(--bg2)}
+  .item .del:hover{color:var(--t1);background:var(--bg2);border-color:var(--t4)}
+}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="card links" id="actions">
+    <button type="button" id="rs-btn" aria-label="Reset" style="display:none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
+  </div>
+  <div class="card inp-card">
+    <div class="inp">
+      <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
+    </div>
+    <div class="inp">
+      <input id="inp-date" type="text" autocomplete="off" placeholder="25 Dec 2025, Tomorrow, Christmas..." spellcheck="false" aria-label="Date">
+      <button type="button" id="add-btn" aria-label="Add Countdown"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+  <div class="search-wrap" id="search-wrap">
+    <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Countdowns">
+  </div>
+  <div class="card items" id="items" style="display:none" role="list"></div>
+</div>
+<div class="fire-overlay" id="fireOv" role="alertdialog" aria-modal="true" aria-labelledby="fireTitle">
+  <div class="fire-card">
+    <div class="fire-icon">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="fire-title" id="fireTitle"></div>
+    <div class="fire-label" id="fireLbl"></div>
+    <div class="fire-btns">
+      <button type="button" id="dismiss-btn">Dismiss</button>
+    </div>
+  </div>
+</div>
+<div id="status" class="sr-only" aria-live="polite"></div>
+<nav>
+<div class="tabs">
+<a href="/">Home</a>
+<a class="active">Countdown</a>
+</div>
+<div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=22"></script>
+<script src="/shared/search.js?v=20"></script>
+<script>
+(function(){'use strict';
+function $(id){return document.getElementById(id)}
+var items=[],searchTimer=null,tickTimer=null;
+var kbIdx=-1;
+var audioCtx,sndInt,wakeLock=null;
+var mkX=_base.mkX;
+var norm=_search.norm,scoreWord=_search.scoreWord;
+
+/* ── Storage ─────────────────────────────────────────────────────── */
+function load(){
+  var p=_base.load('countdown-items',[]);
+  if(Array.isArray(p))items=p.filter(function(e){return e&&e.id&&e.target});
+}
+function save(){
+  try{localStorage.setItem('countdown-items',JSON.stringify(items))}
+  catch(e){if(e.name==='QuotaExceededError')announce('Storage Full')}
+}
+
+/* ── Unique ID ───────────────────────────────────────────────────── */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+/* ── Announce (a11y) ─────────────────────────────────────────────── */
+function announce(msg){var el=$('status');el.textContent='';requestAnimationFrame(function(){el.textContent=msg})}
+
+/* ── Date Parser ─────────────────────────────────────────────────── */
+var MONTHS={jan:0,january:0,feb:1,february:1,mar:2,march:2,apr:3,april:3,may:4,jun:5,june:5,jul:6,july:6,aug:7,august:7,sep:8,sept:8,september:8,oct:9,october:9,nov:10,november:10,dec:11,december:11};
+var MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAYS={sun:0,sunday:0,mon:1,monday:1,tue:2,tuesday:2,wed:3,wednesday:3,thu:4,thursday:4,fri:5,friday:5,sat:6,saturday:6};
+
+var EASTER={2025:[3,20],2026:[4,5],2027:[3,28],2028:[4,16],2029:[4,1],2030:[4,21],2031:[4,13],2032:[3,28],2033:[4,17],2034:[4,9],2035:[3,25],2036:[4,13],2037:[4,5],2038:[4,25],2039:[4,10],2040:[4,1]};
+var CNY={2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8],2036:[1,28],2037:[2,15],2038:[2,4],2039:[1,24],2040:[2,12]};
+
+function nextOccurrence(m,d){
+  var now=new Date(),y=now.getFullYear();
+  var dt=new Date(y,m,d);
+  if(dt<now){dt=new Date(y+1,m,d)}
+  return dt;
+}
+
+function nthWeekday(year,month,weekday,n){
+  var d=new Date(year,month,1);
+  var first=d.getDay();
+  var offset=(weekday-first+7)%7;
+  d.setDate(1+offset+(n-1)*7);
+  return d;
+}
+
+function lastWeekday(year,month,weekday){
+  var d=new Date(year,month+1,0);
+  var diff=(d.getDay()-weekday+7)%7;
+  d.setDate(d.getDate()-diff);
+  return d;
+}
+
+function nextNthWeekday(month,weekday,n){
+  var now=new Date(),y=now.getFullYear();
+  var dt=nthWeekday(y,month,weekday,n);
+  if(dt<now)dt=nthWeekday(y+1,month,weekday,n);
+  return dt;
+}
+
+function nextLastWeekday(month,weekday){
+  var now=new Date(),y=now.getFullYear();
+  var dt=lastWeekday(y,month,weekday);
+  if(dt<now)dt=lastWeekday(y+1,month,weekday);
+  return dt;
+}
+
+function nextPrecomputed(table,offsetDays){
+  var now=new Date();
+  for(var y=now.getFullYear();y<=2040;y++){
+    var e=table[y];if(!e)continue;
+    var dt=new Date(y,e[0]-1,e[1]);
+    if(offsetDays)dt.setDate(dt.getDate()+offsetDays);
+    if(dt>=new Date(now.getFullYear(),now.getMonth(),now.getDate()))return dt;
+  }
+  return null;
+}
+
+function parseTime(text){
+  var m=text.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+  if(!m)return null;
+  var h=parseInt(m[1],10),min=m[2]?parseInt(m[2],10):0;
+  var ap=m[3]?m[3].toLowerCase():null;
+  if(ap==='pm'&&h<12)h+=12;
+  if(ap==='am'&&h===12)h=0;
+  if(h>23||min>59)return null;
+  return{h:h,m:min,raw:m[0]};
+}
+
+function stripTime(text){
+  return text.replace(/\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*$/i,'').trim();
+}
+
+function applyTime(date,time){
+  if(time){date.setHours(time.h,time.m,0,0)}
+  else{date.setHours(0,0,0,0)}
+  return date;
+}
+
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
+
+function formatLabel(date){
+  return date.getDate()+' '+MONTH_NAMES[date.getMonth()]+' '+date.getFullYear();
+}
+
+function parseDate(text){
+  if(!text||!text.trim())return null;
+  var raw=text.trim();
+  var time=parseTime(raw);
+  var s=stripTime(raw).toLowerCase();
+  if(!s&&time){
+    // time-only: today at that time
+    var td=new Date();
+    applyTime(td,time);
+    return{date:td,label:formatLabel(td)};
+  }
+  if(!s)s=raw.toLowerCase();
+  var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var result=null;
+
+  /* 1. Relative keywords */
+  if(s==='today'){
+    result=new Date(today);
+  }else if(s==='tomorrow'||s==='tmr'||s==='tmrw'||s==='tmw'){
+    result=new Date(today);result.setDate(result.getDate()+1);
+  }else if(s==='yesterday'||s==='ytd'){
+    result=new Date(today);result.setDate(result.getDate()-1);
+  }else if(s==='next week'){
+    result=new Date(today);
+    var dw=(1-result.getDay()+7)%7;
+    result.setDate(result.getDate()+(dw===0?7:dw));
+  }else if(s==='next month'){
+    result=new Date(today.getFullYear(),today.getMonth()+1,1);
+  }else if(s==='next year'){
+    result=new Date(today.getFullYear()+1,0,1);
+  }
+  if(!result){
+    var rm=s.match(/^in\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)$/);
+    if(rm){
+      var n=parseInt(rm[1],10),u=rm[2].replace(/s$/,'');
+      result=new Date(today);
+      if(u==='day')result.setDate(result.getDate()+n);
+      else if(u==='week')result.setDate(result.getDate()+n*7);
+      else if(u==='month')result.setMonth(result.getMonth()+n);
+      else if(u==='year')result.setFullYear(result.getFullYear()+n);
+    }
+  }
+
+  /* 2. Named days */
+  if(!result){
+    var dayMatch=s.match(/^(?:next\s+|this\s+)?(\w+)$/);
+    if(dayMatch){
+      var dn=DAYS[dayMatch[1]];
+      if(dn!==undefined){
+        result=new Date(today);
+        var diff=(dn-result.getDay()+7)%7;
+        if(diff===0)diff=7;
+        result.setDate(result.getDate()+diff);
+      }
+    }
+  }
+
+  /* 3. Holidays */
+  if(!result){
+    result=parseHoliday(s);
+  }
+
+  /* 4. Date formats */
+  if(!result){
+    result=parseDateFormats(s);
+  }
+
+  if(!result)return null;
+
+  applyTime(result,time);
+  return{date:result,label:formatLabel(result)};
+}
+
+function parseHoliday(s){
+  // Fixed-date holidays
+  var fixed=[
+    [/^(?:ny|new\s*year(?:'?s)?(?:\s*day)?|nyd)$/,0,1,'New Year\'s Day'],
+    [/^(?:nye|new\s*year(?:'?s)?\s*eve)$/,11,31,'New Year\'s Eve'],
+    [/^(?:valentine(?:'?s)?(?:\s*day)?|v-?day)$/,1,14,'Valentine\'s Day'],
+    [/^(?:st\s*patrick(?:'?s)?(?:\s*day)?|paddy(?:'?s)?(?:\s*day)?|st\s*paddy(?:'?s)?(?:\s*day)?)$/,2,17,'St Patrick\'s Day'],
+    [/^(?:april\s*fool(?:'?s)?(?:\s*day)?)$/,3,1,'April Fools'],
+    [/^(?:may\s*the\s*4th|star\s*wars(?:\s*day)?)$/,4,4,'Star Wars Day'],
+    [/^(?:4th\s*of\s*july|july\s*4th|independence\s*day)$/,6,4,'Independence Day'],
+    [/^(?:bastille(?:\s*day)?)$/,6,14,'Bastille Day'],
+    [/^(?:halloween|hallows?\s*eve)$/,9,31,'Halloween'],
+    [/^(?:bonfire\s*night|guy\s*fawkes(?:\s*day)?|5th\s*of\s*november)$/,10,5,'Bonfire Night'],
+    [/^(?:veterans?\s*day|armistice\s*day|remembrance\s*day)$/,10,11,'Remembrance Day'],
+    [/^(?:christmas\s*eve|xmas\s*eve)$/,11,24,'Christmas Eve'],
+    [/^(?:christmas(?:\s*day)?|xmas|x-mas)$/,11,25,'Christmas'],
+    [/^(?:boxing\s*day)$/,11,26,'Boxing Day'],
+    [/^(?:burns(?:\s*night|supper)?)$/,0,25,'Burns Night'],
+    [/^(?:australia\s*day)$/,0,26,'Australia Day'],
+    [/^(?:groundhog\s*day|groundhog)$/,1,2,'Groundhog Day']
+  ];
+  for(var i=0;i<fixed.length;i++){
+    if(fixed[i][0].test(s))return nextOccurrence(fixed[i][1],fixed[i][2]);
+  }
+
+  // Nth-weekday holidays
+  var nth=[
+    [/^(?:mlk(?:\s*day)?|martin\s*luther\s*king(?:\s*(?:jr\.?)?(?:\s*day)?)?)$/,0,1,3],  // 3rd Mon Jan
+    [/^(?:presidents?\s*day)$/,1,1,3],  // 3rd Mon Feb
+    [/^(?:mother(?:'?s)?\s*day)$/,4,0,2],  // 2nd Sun May
+    [/^(?:father(?:'?s)?\s*day)$/,5,0,3],  // 3rd Sun Jun
+    [/^(?:labor\s*day|labour\s*day)$/,8,1,1],  // 1st Mon Sep
+    [/^(?:columbus\s*day|indigenous\s*peoples?\s*day)$/,9,1,2],  // 2nd Mon Oct
+    [/^(?:thanksgiving|turkey\s*day)$/,10,4,4],  // 4th Thu Nov
+    [/^(?:early\s*may\s*bank\s*holiday|may\s*day)$/,4,1,1],  // 1st Mon May
+  ];
+  for(var i=0;i<nth.length;i++){
+    if(nth[i][0].test(s))return nextNthWeekday(nth[i][1],nth[i][2],nth[i][3]);
+  }
+
+  // Last-weekday holidays
+  if(/^(?:memorial\s*day)$/.test(s))return nextLastWeekday(4,1);
+  if(/^(?:spring\s*bank\s*holiday)$/.test(s))return nextLastWeekday(4,1);
+  if(/^(?:summer\s*bank\s*holiday|august\s*bank\s*holiday)$/.test(s))return nextLastWeekday(7,1);
+
+  // Easter-based
+  if(/^(?:easter(?:\s*sunday)?)$/.test(s))return nextPrecomputed(EASTER,0);
+  if(/^(?:good\s*friday)$/.test(s))return nextPrecomputed(EASTER,-2);
+  if(/^(?:easter\s*monday)$/.test(s))return nextPrecomputed(EASTER,1);
+
+  // Chinese New Year
+  if(/^(?:chinese\s*new\s*year|lunar\s*new\s*year|cny)$/.test(s))return nextPrecomputed(CNY,0);
+
+  return null;
+}
+
+function parseDateFormats(s){
+  var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var m,day,mon,year,dt;
+
+  // DA: 25 December 2025, 25th Dec, 1st Jan 2026
+  m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)(?:\s+(\d{4}))?$/);
+  if(m){
+    day=parseInt(m[1],10);mon=MONTHS[m[2]];year=m[3]?parseInt(m[3],10):null;
+    if(mon!==undefined&&day>=1&&day<=31){
+      if(!year){
+        dt=new Date(now.getFullYear(),mon,day);
+        if(dt<today)dt.setFullYear(dt.getFullYear()+1);
+      }else{dt=new Date(year,mon,day)}
+      if(day<=daysInMonth(dt.getFullYear(),dt.getMonth()))return dt;
+    }
+  }
+
+  // DB: December 25 2025, Dec 25, June 5
+  m=s.match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?$/);
+  if(m){
+    mon=MONTHS[m[1]];day=parseInt(m[2],10);year=m[3]?parseInt(m[3],10):null;
+    if(mon!==undefined&&day>=1&&day<=31){
+      if(!year){
+        dt=new Date(now.getFullYear(),mon,day);
+        if(dt<today)dt.setFullYear(dt.getFullYear()+1);
+      }else{dt=new Date(year,mon,day)}
+      if(day<=daysInMonth(dt.getFullYear(),dt.getMonth()))return dt;
+    }
+  }
+
+  // DC: 2025-12-25
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){
+    year=parseInt(m[1],10);mon=parseInt(m[2],10)-1;day=parseInt(m[3],10);
+    if(mon>=0&&mon<=11&&day>=1&&day<=daysInMonth(year,mon))return new Date(year,mon,day);
+  }
+
+  // DC: 25/12/2025 (UK day/month/year)
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m){
+    var a=parseInt(m[1],10),b=parseInt(m[2],10);year=parseInt(m[3],10);
+    // If first > 12, must be day
+    if(a>12){day=a;mon=b-1}
+    else if(b>12){day=b;mon=a-1}
+    else{day=a;mon=b-1}  // UK-first: day/month
+    if(mon>=0&&mon<=11&&day>=1&&day<=daysInMonth(year,mon))return new Date(year,mon,day);
+  }
+
+  // DD: 15/03 (day/month, UK-first)
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  if(m){
+    day=parseInt(m[1],10);mon=parseInt(m[2],10)-1;
+    // If first number > 12, it's definitely day. If second > 12, swap.
+    if(m[1]>12){day=parseInt(m[1],10);mon=parseInt(m[2],10)-1}
+    else if(m[2]>12){mon=parseInt(m[1],10)-1;day=parseInt(m[2],10)}
+    // else UK-first: day/month (already set)
+    if(mon>=0&&mon<=11&&day>=1&&day<=31){
+      dt=new Date(now.getFullYear(),mon,day);
+      if(dt<today)dt.setFullYear(dt.getFullYear()+1);
+      if(day<=daysInMonth(dt.getFullYear(),dt.getMonth()))return dt;
+    }
+  }
+
+  return null;
+}
+
+/* ── Countdown Calculation ───────────────────────────────────────── */
+function calcCountdown(targetMs){
+  var diff=targetMs-Date.now();
+  if(diff<=0)return null;
+  var s=Math.floor(diff/1000);
+  var d=Math.floor(s/86400);s%=86400;
+  var h=Math.floor(s/3600);s%=3600;
+  var m=Math.floor(s/60);s%=60;
+  return{d:d,h:h,m:m,s:s};
+}
+
+function fmtCountdown(c){
+  if(!c)return 'Completed';
+  var parts=[];
+  if(c.d>0)parts.push(c.d+' Day'+(c.d!==1?'s':''));
+  if(c.d>0||c.h>0)parts.push(c.h+' Hour'+(c.h!==1?'s':''));
+  parts.push(c.m+' Min');
+  parts.push(c.s+' Sec');
+  return parts.join(' | ');
+}
+
+/* ── Alarm System ────────────────────────────────────────────────── */
+function initAudio(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+}
+function beep(){
+  initAudio();
+  if(audioCtx.state!=='running')return;
+  var t=audioCtx.currentTime;
+  [0,.2,.4].forEach(function(d){
+    var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.connect(g);g.connect(audioCtx.destination);
+    o.frequency.value=d===.2?1046:880;o.type='sine';
+    g.gain.setValueAtTime(.4,t+d);g.gain.exponentialRampToValueAtTime(.01,t+d+.15);
+    o.start(t+d);o.stop(t+d+.15);
+  });
+}
+function playSound(){
+  initAudio();
+  var tries=0;
+  var tryBeep=function(){
+    if(audioCtx.state==='running'){beep();sndInt=setInterval(beep,2000)}
+    else if(++tries<20){setTimeout(tryBeep,50)}
+  };
+  tryBeep();
+}
+function stopSound(){if(sndInt){clearInterval(sndInt);sndInt=null}}
+function needsSound(){return firedItem!==null}
+function checkSound(){if(needsSound()&&!sndInt)playSound();if(!needsSound()&&sndInt)stopSound()}
+
+var firedItem=null;
+
+async function updateWake(){
+  if(firedItem){
+    if(!wakeLock&&navigator.wakeLock){try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',function(){wakeLock=null})}catch(e){}}
+  }else{
+    if(wakeLock){try{wakeLock.release()}catch(e){}wakeLock=null}
+  }
+}
+
+function fireItem(item){
+  firedItem=item;
+  $('fireTitle').textContent=item.title;
+  $('fireLbl').textContent=item.dateLabel;
+  $('fireOv').classList.add('active');
+  $('dismiss-btn').focus();
+  checkSound();updateWake();
+  if(navigator.vibrate)navigator.vibrate([300,100,300,100,300]);
+}
+
+function dismiss(){
+  if(firedItem){
+    for(var i=0;i<items.length;i++){
+      if(items[i].id===firedItem.id){items[i].done=true;break}
+    }
+    save();
+  }
+  firedItem=null;
+  $('fireOv').classList.remove('active');
+  // Check for next expired
+  var next=null;
+  for(var i=0;i<items.length;i++){
+    if(!items[i].done&&items[i].target<=Date.now()){next=items[i];break}
+  }
+  if(next)fireItem(next);
+  else{checkSound();updateWake()}
+  render();
+}
+
+/* ── Render ───────────────────────────────────────────────────────── */
+function render(){
+  _search.clearCache();
+  var c=$('items'),q=norm($('search').value.trim().toLowerCase());
+  var words=q.split(/\s+/).filter(Boolean);
+  var hasItems=items.length>0;
+  var frag=document.createDocumentFragment();
+
+  $('rs-btn').style.display=hasItems?'':'none';
+  $('search-wrap').style.display=hasItems?'block':'none';
+  $('actions').style.display=hasItems?'':'none';
+
+  if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
+
+  var sorted=items.slice().sort(function(a,b){if(a.done!==b.done)return a.done?1:-1;return a.target-b.target});
+  var list=sorted;
+  if(words.length){
+    var scored=[];
+    for(var i=0;i<sorted.length;i++){
+      var it=sorted[i],t=(it.title+' '+it.dateLabel).toLowerCase(),total=0,ok=true;
+      for(var wi=0;wi<words.length;wi++){
+        var sc=scoreWord(words[wi],t);
+        if(sc<=0){ok=false;break}
+        total+=sc;
+      }
+      if(ok)scored.push({it:it,score:total});
+    }
+    scored.sort(function(a,b){return b.score-a.score});
+    list=scored.map(function(x){return x.it});
+  }
+
+  for(var i=0;i<list.length;i++){
+    var it=list[i];
+    var row=document.createElement('div');
+    row.className='item'+(it.done?' done':'');
+    row.setAttribute('role','listitem');
+    row.setAttribute('data-id',it.id);
+
+    var info=document.createElement('div');info.className='item-info';
+    var title=document.createElement('div');title.className='item-title';title.textContent=it.title;
+    var date=document.createElement('div');date.className='item-date';date.textContent=it.dateLabel;
+    var cd=document.createElement('div');cd.className='item-countdown';
+    cd.setAttribute('data-id',it.id);
+    if(it.done){cd.textContent='Completed'}
+    else{var calc=calcCountdown(it.target);cd.textContent=fmtCountdown(calc)}
+    info.appendChild(title);info.appendChild(date);info.appendChild(cd);
+
+    var btn=document.createElement('button');btn.type='button';btn.className='del';btn.setAttribute('aria-label','Remove');
+    btn.appendChild(mkX());
+
+    row.appendChild(info);row.appendChild(btn);frag.appendChild(row);
+    if(i===kbIdx)row.classList.add('kb-focus');
+  }
+
+  if(list.length===0&&words.length){
+    var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';frag.appendChild(nm);
+    announce('Nothing Found');
+  }else if(words.length){
+    announce(list.length+' result'+(list.length===1?'':'s'));
+  }
+
+  c.textContent='';c.appendChild(frag);c.style.display='';
+  if(kbIdx>=list.length)kbIdx=list.length-1;
+}
+
+/* ── Add Item ────────────────────────────────────────────────────── */
+function addItem(){
+  var title=$('inp-title').value.trim();
+  var dateText=$('inp-date').value.trim();
+  if(!title||!dateText)return;
+  var parsed=parseDate(dateText);
+  if(!parsed){announce('Could Not Parse Date');return}
+  var id=uid();
+  items.unshift({id:id,title:title,target:parsed.date.getTime(),dateLabel:parsed.label,ts:Date.now(),done:false});
+  save();kbIdx=-1;render();
+  $('inp-title').value='';$('inp-date').value='';
+  $('inp-title').focus();
+  announce('Added');
+}
+
+/* ── Remove Item ─────────────────────────────────────────────────── */
+function removeItem(id){
+  var row=$('items').querySelector('[data-id="'+id+'"]');
+  if(row)row.classList.add('removing');
+  for(var i=0;i<items.length;i++){if(items[i].id===id){items.splice(i,1);break}}
+  save();
+  setTimeout(function(){render();announce('Removed')},100);
+}
+
+/* ── Reset (two-press) ───────────────────────────────────────────── */
+var resetCtrl=_base.twoPress($('rs-btn'),{
+  label:$('rs-l'),
+  guard:function(){return items.length>0},
+  onConfirm:function(){
+    items=[];save();
+    clearTimeout(searchTimer);
+    kbIdx=-1;
+    $('search').value='';render();
+    announce('All Items Cleared');
+  }
+});
+function doReset(){resetCtrl.press()}
+
+/* ── Tick (live updates) ─────────────────────────────────────────── */
+function tick(){
+  var els=$('items').querySelectorAll('.item-countdown');
+  for(var i=0;i<els.length;i++){
+    var id=els[i].getAttribute('data-id');
+    if(!id)continue;
+    var item=null;
+    for(var j=0;j<items.length;j++){if(items[j].id===id){item=items[j];break}}
+    if(!item||item.done)continue;
+    var calc=calcCountdown(item.target);
+    var text=fmtCountdown(calc);
+    if(els[i].textContent!==text)els[i].textContent=text;
+    if(!calc){
+      if(!firedItem)fireItem(item);
+      render();
+      return;
+    }
+  }
+}
+
+function startTick(){
+  if(tickTimer)clearInterval(tickTimer);
+  tickTimer=setInterval(tick,1000);
+}
+function stopTick(){if(tickTimer){clearInterval(tickTimer);tickTimer=null}}
+
+/* ── Keyboard Navigation ─────────────────────────────────────────── */
+function kbCards(){return $('items').querySelectorAll('.item')}
+function kbClear(){
+  kbIdx=-1;var all=kbCards();for(var i=0;i<all.length;i++)all[i].classList.remove('kb-focus');
+}
+function kbMove(dir){
+  var cards=kbCards();if(!cards.length)return;
+  if(kbIdx>=0&&kbIdx<cards.length)cards[kbIdx].classList.remove('kb-focus');
+  kbIdx+=dir;
+  if(kbIdx<0)kbIdx=cards.length-1;
+  if(kbIdx>=cards.length)kbIdx=0;
+  cards[kbIdx].classList.add('kb-focus');
+  cards[kbIdx].scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+/* ── Input Handlers ──────────────────────────────────────────────── */
+$('add-btn').addEventListener('click',addItem);
+$('inp-date').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addItem()}});
+$('inp-title').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('inp-date').focus()}});
+
+/* ── Item Click Delegation ───────────────────────────────────────── */
+$('items').addEventListener('click',function(e){
+  var del=e.target.closest('.del');
+  var row=e.target.closest('.item');
+  if(!row)return;
+  var id=row.getAttribute('data-id');
+  kbClear();
+  if(del)removeItem(id);
+});
+
+/* ── Search ──────────────────────────────────────────────────────── */
+$('search').addEventListener('input',function(){
+  clearTimeout(searchTimer);kbIdx=-1;
+  searchTimer=setTimeout(function(){render()},80);
+});
+
+/* ── Action Buttons ──────────────────────────────────────────────── */
+$('rs-btn').addEventListener('click',doReset);
+$('dismiss-btn').addEventListener('click',dismiss);
+
+/* ── Keyboard Shortcuts ──────────────────────────────────────────── */
+document.addEventListener('keydown',function(e){
+  // Dismiss alarm on Escape
+  if(e.key==='Escape'&&firedItem){dismiss();return}
+  if(e.key==='Escape'){kbClear();document.activeElement.blur();return}
+  var tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.shiftKey)return;
+  if(e.key==='j'||e.key==='ArrowDown'){e.preventDefault();kbMove(1)}
+  else if(e.key==='k'||e.key==='ArrowUp'){e.preventDefault();kbMove(-1)}
+  else if((e.key==='d'||e.key==='Backspace'||e.key==='Delete')&&kbIdx>=0){
+    e.preventDefault();
+    var cards=kbCards();if(kbIdx<cards.length){removeItem(cards[kbIdx].getAttribute('data-id'))}
+  }
+  else if(e.key==='/'){e.preventDefault();kbClear();$('inp-title').focus()}
+  else if(e.key==='r')doReset();
+  else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
+  else if(e.key==='1')window.location.href='/';
+});
+document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear()},{passive:true});
+
+/* ── Fire overlay focus trap ─────────────────────────────────────── */
+$('fireOv').addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDefault();$('dismiss-btn').focus()}});
+
+/* ── Cross-Tab Sync ──────────────────────────────────────────────── */
+window.addEventListener('storage',function(e){
+  if(e.key==='countdown-items'){
+    kbIdx=-1;load();render();
+  }
+});
+
+/* ── Visibility ──────────────────────────────────────────────────── */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    stopTick();clearTimeout(searchTimer);
+  }else{
+    load();render();tick();startTick();
+    resetCtrl.clear();
+    checkSound();updateWake();
+  }
+});
+
+/* ── Init Audio on first click ───────────────────────────────────── */
+document.addEventListener('click',function(){initAudio()},{once:true});
+
+/* ── Init ────────────────────────────────────────────────────────── */
+load();render();tick();startTick();
+})();
+</script>
+</body>
+</html>

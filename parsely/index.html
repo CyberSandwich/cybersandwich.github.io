@@ -581,11 +581,13 @@ var DD=/\b(\d{1,2})[\/\-](\d{1,2})\b/g;
 function mIdx(s){var k=s.toLowerCase().replace(/\.$/,'');if(k==='sept')k='sep';return MMAP[k]!==undefined?MMAP[k]:-1}
 function rYear(y){if(!y)return null;var n=parseInt(y,10);if(y.length===2)return n>=70?1900+n:2000+n;return n}
 function vDay(d,m,y){if(d<1||d>31)return false;var mx=[31,28,31,30,31,30,31,31,30,31,30,31];if(y&&((y%4===0&&y%100!==0)||y%400===0))mx[1]=29;return d<=mx[m]}
-function fmtD(d,m,y){var mn=MOUT[m];if(d&&y)return d+' '+mn+' '+y;if(d)return d+' '+mn;return mn+' '+y}
+function inferYear(d,m){var now=new Date(),y=now.getFullYear();if(d){var dt=new Date(y,m,d);if(dt<new Date(now.getFullYear(),now.getMonth(),now.getDate()))y++}else{if(m<now.getMonth())y++}return y}
+function fmtD(d,m,y){var mn=MOUT[m];if(d&&y)return d+' '+mn+' '+y;if(d){var iy=inferYear(d,m);return d+' '+mn+' '+iy}if(y)return mn+' '+y;var iy=inferYear(null,m);return mn+' '+iy}
 function dateSortVal(d,m,y){
   var mx=[31,28,31,30,31,30,31,31,30,31,30,31];
-  if(y){if((y%4===0&&y%100!==0)||y%400===0)mx[1]=29;return y*10000+(m+1)*100+(d||mx[m])}
-  return 1e9+(m+1)*100+(d||mx[m]);
+  var yr=y||inferYear(d,m);
+  if((yr%4===0&&yr%100!==0)||yr%400===0)mx[1]=29;
+  return yr*10000+(m+1)*100+(d||mx[m]);
 }
 
 function isDateFP(raw,text,idx){
@@ -608,9 +610,19 @@ function parseNumD(p1,p2,p3){
   return{d:d,m:m,y:y};
 }
 
+var TIME_RE=/^[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i;
+var TIME_24=/^[\s,]+(\d{1,2}):(\d{2})\b/;
+function extractTimeSuffix(text,end){
+  var after=text.slice(end,end+20),tm=after.match(TIME_RE);
+  if(tm){var h=parseInt(tm[1],10),m=tm[2]?parseInt(tm[2],10):0;if(tm[3].toLowerCase()==='pm'&&h<12)h+=12;if(tm[3].toLowerCase()==='am'&&h===12)h=0;if(h>=0&&h<24&&m>=0&&m<60)return{text:(h>12||h===0?(h===0?'12':h-12):h)+':'+(m<10?'0':'')+m+' '+(h>=12?'PM':'AM'),len:tm[0].length}}
+  tm=after.match(TIME_24);
+  if(tm){var h=parseInt(tm[1],10),m=parseInt(tm[2],10);if(h>=0&&h<24&&m>=0&&m<60)return{text:h+':'+(m<10?'0':'')+m,len:tm[0].length}}
+  return null;
+}
 function extractDates(text){
   var out=[],seen={},used=[];
   function ov(s,e){for(var i=0;i<used.length;i++)if(s<used[i][1]&&e>used[i][0])return true;return false}
+  function addWithTime(n,sort,mEnd){var ts=extractTimeSuffix(text,mEnd);if(ts)n+=', '+ts.text;if(!seen[n]){seen[n]=1;out.push({text:n,sort:sort})}}
 
   DA.lastIndex=0;var m;
   while((m=DA.exec(text))!==null){
@@ -619,9 +631,11 @@ function extractDates(text){
     if(mi2<0||!vDay(d,mi2,yr))continue;
     if(yr&&(yr<1900||yr>2099))continue;
     if(isDateFP(m[0],text,m.index))continue;
+    var mEnd=m.index+m[0].length;
+    var ts=extractTimeSuffix(text,mEnd);
     var n=fmtD(d,mi2,yr);
-    if(!seen[n]){seen[n]=1;out.push({text:n,sort:dateSortVal(d,mi2,yr)})}
-    used.push([m.index,m.index+m[0].length]);
+    addWithTime(n,dateSortVal(d,mi2,yr),mEnd);
+    used.push([m.index,mEnd+(ts?ts.len:0)]);
   }
 
   DB.lastIndex=0;
@@ -635,9 +649,11 @@ function extractDates(text){
     if(d!==null&&!vDay(d,mi2,yr))continue;
     if(yr&&(yr<1900||yr>2099))continue;
     if(isDateFP(m[0],text,m.index))continue;
+    var mEnd=m.index+m[0].length;
+    var ts=extractTimeSuffix(text,mEnd);
     var n=fmtD(d,mi2,yr);
-    if(!seen[n]){seen[n]=1;out.push({text:n,sort:dateSortVal(d,mi2,yr)})}
-    used.push([m.index,m.index+m[0].length]);
+    addWithTime(n,dateSortVal(d,mi2,yr),mEnd);
+    used.push([m.index,mEnd+(ts?ts.len:0)]);
   }
 
   DC.lastIndex=0;
@@ -646,9 +662,11 @@ function extractDates(text){
     if(isDateFP(m[0],text,m.index))continue;
     var p=parseNumD(m[1],m[2],m[3]);
     if(!p)continue;
+    var mEnd=m.index+m[0].length;
+    var ts=extractTimeSuffix(text,mEnd);
     var n=fmtD(p.d,p.m,p.y);
-    if(!seen[n]){seen[n]=1;out.push({text:n,sort:dateSortVal(p.d,p.m,p.y)})}
-    used.push([m.index,m.index+m[0].length]);
+    addWithTime(n,dateSortVal(p.d,p.m,p.y),mEnd);
+    used.push([m.index,mEnd+(ts?ts.len:0)]);
   }
 
   DD.lastIndex=0;
