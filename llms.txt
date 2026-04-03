@@ -24,6 +24,7 @@
 - [Wrighter](https://saputra.co.uk/wrighter/) — Minimal plain text editor
 - [Arbit](https://saputra.co.uk/arbit/) — Random picker tool
 - [NumGen](https://saputra.co.uk/numgen/) — UK phone number generator
+- [PasswdGen](https://saputra.co.uk/passwdgen/) — Secure password and passphrase generator
 - [Clock](https://saputra.co.uk/time/) — Minimal 8KB clock
 - [Countdown](https://saputra.co.uk/countdown/) — Countdown timer manager with natural language date parsing
 - [Miele Laundry Guide](https://saputra.co.uk/laundry/) — Vita Student Cannon Park laundry guide

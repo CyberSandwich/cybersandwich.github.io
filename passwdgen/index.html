@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>PasswdGen</title>
+<meta name="theme-color" content="#FAFAFA">
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PasswdGen">
+<meta name="description" content="Secure password and passphrase generator with customizable options">
+<meta property="og:title" content="PasswdGen">
+<meta property="og:description" content="Secure password and passphrase generator">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=23">
+<style>
+:root{--num-bg:#48484A}
+html[data-theme="sepia"]{--num-bg:#6B5744}
+body{display:flex;align-items:flex-start;justify-content:center}
+.w{max-width:440px;width:100%;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
+.out{
+  background:var(--num-bg);border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:20px 24px;margin-bottom:14px;
+  transition:background .3s;cursor:pointer
+}
+.out:active{opacity:.85}
+.out.cp-fb{animation:cpFlash .35s ease}
+@keyframes cpFlash{0%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px rgba(52,211,153,.4),var(--shadow)}100%{box-shadow:var(--shadow)}}
+#pw{
+  font:500 clamp(1rem,5vw,1.375rem)/1.3 'SF Mono',ui-monospace,Menlo,Monaco,'Cascadia Code','Courier New',monospace;
+  color:#fff;text-align:center;
+  word-break:break-all;
+  transition:font-size .15s;
+  user-select:all;-webkit-user-select:all
+}
+#pw::selection{background:rgba(255,255,255,.2)}
+#ent{
+  font:500 .75rem/1 var(--font);
+  text-align:center;margin-top:12px;
+  color:rgba(255,255,255,.5);
+  font-variant-numeric:tabular-nums
+}
+.ent-w{color:#FCA5A5}
+.ent-f{color:#FBBF24}
+.ent-s{color:#86EFAC}
+.ent-v{color:#67E8F9}
+.ent-m{color:#C4B5FD}
+#pp-set .seg-row{padding:4px 10px 10px}
+.links{margin-bottom:0}
+#cp-k{stroke-width:2.5}
+@media(hover:hover){
+.out:hover{opacity:.92}
+}
+</style>
+</head>
+<body>
+<div class="w">
+
+<div class="out" id="out" role="button" tabindex="0" aria-label="Click to Copy Password">
+<div id="pw" aria-live="polite"></div>
+<div id="ent"></div>
+</div>
+
+<div class="card" id="md-card" role="radiogroup" aria-label="Generation Mode">
+<div class="seg-row">
+<button class="seg active" data-m="0">Password</button>
+<button class="seg" data-m="1">Passphrase</button>
+</div>
+</div>
+
+<div class="card" id="pw-set">
+<div class="srow" style="cursor:default">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h20"/><path d="M6 8v8"/><path d="M12 6v12"/><path d="M18 8v8"/></svg><span id="len-l">20 Characters</span></span>
+<div class="stepper">
+<button class="step-btn" id="len-dn" aria-label="Decrease Length"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+<button class="step-btn" id="len-up" aria-label="Increase Length"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+</div>
+<div class="srow sel" id="t-uc" tabindex="0" role="switch" aria-checked="true">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18l5-14 5 14"/><path d="M8.5 13h7"/></svg><span>Uppercase (A–Z)</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+<div class="srow sel" id="t-lc" tabindex="0" role="switch" aria-checked="true">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="5"/><path d="M17 9v9"/></svg><span>Lowercase (a–z)</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+<div class="srow sel" id="t-dg" tabindex="0" role="switch" aria-checked="true">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>Digits (0–9)</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+<div class="srow sel" id="t-sy" tabindex="0" role="switch" aria-checked="true">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg><span>Symbols (!@#$...)</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+<div class="srow" id="t-ex" tabindex="0" role="switch" aria-checked="false">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg><span>Exclude Ambiguous</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+</div>
+
+<div class="card" id="pp-set" style="display:none">
+<div class="srow" style="cursor:default">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg><span id="wrd-l">6 Words</span></span>
+<div class="stepper">
+<button class="step-btn" id="wrd-dn" aria-label="Fewer Words"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+<button class="step-btn" id="wrd-up" aria-label="More Words"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+</div>
+<div class="seg-row" role="radiogroup" aria-label="Separator">
+<button class="seg active" data-s="-">-</button>
+<button class="seg" data-s=".">.</button>
+<button class="seg" data-s="_">_</button>
+<button class="seg" data-s=" ">Space</button>
+</div>
+<div class="srow sel" id="t-cap" tabindex="0" role="switch" aria-checked="true">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18l5-14 5 14"/><path d="M8.5 13h7"/></svg><span>Capitalize Words</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+<div class="srow" id="t-num" tabindex="0" role="switch" aria-checked="false">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3l-2 18"/><path d="M16 3l-2 18"/></svg><span>Include Number</span></span>
+<span class="bg-chk"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 12 9 17 20 6"/></svg></span>
+</div>
+</div>
+
+<div class="card links">
+<button id="gen-btn" type="button" aria-label="Generate password"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="gen-l">Generate</span></button>
+<button id="cp-btn" type="button" aria-label="Copy password to clipboard"><svg id="cp-i" aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="cp-k" aria-hidden="true" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cp-l">Copy</span></button>
+<button id="rs-btn" type="button" aria-label="Reset to defaults"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
+</div>
+
+</div>
+<nav aria-label="Primary">
+<div class="tabs">
+<a href="/">Home</a>
+<a class="active">PasswdGen</a>
+</div>
+<div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=23"></script>
+<script>
+(()=>{
+'use strict';
+
+/* BIP39 English word list — 2048 words, 11 bits per word */
+var WORDS='abandon,ability,able,about,above,absent,absorb,abstract,absurd,abuse,access,accident,account,accuse,achieve,acid,acoustic,acquire,across,act,action,actor,actress,actual,adapt,add,addict,address,adjust,admit,adult,advance,advice,aerobic,affair,afford,afraid,again,age,agent,agree,ahead,aim,air,airport,aisle,alarm,album,alcohol,alert,alien,all,alley,allow,almost,alone,alpha,already,also,alter,always,amateur,amazing,among,amount,amused,analyst,anchor,ancient,anger,angle,angry,animal,ankle,announce,annual,another,answer,antenna,antique,anxiety,any,apart,apology,appear,apple,approve,april,arch,arctic,area,arena,argue,arm,armed,armor,army,around,arrange,arrest,arrive,arrow,art,artefact,artist,artwork,ask,aspect,assault,asset,assist,assume,asthma,athlete,atom,attack,attend,attitude,attract,auction,audit,august,aunt,author,auto,autumn,average,avocado,avoid,awake,aware,away,awesome,awful,awkward,axis,baby,bachelor,bacon,badge,bag,balance,balcony,ball,bamboo,banana,banner,bar,barely,bargain,barrel,base,basic,basket,battle,beach,bean,beauty,because,become,beef,before,begin,behave,behind,believe,below,belt,bench,benefit,best,betray,better,between,beyond,bicycle,bid,bike,bind,biology,bird,birth,bitter,black,blade,blame,blanket,blast,bleak,bless,blind,blood,blossom,blouse,blue,blur,blush,board,boat,body,boil,bomb,bone,bonus,book,boost,border,boring,borrow,boss,bottom,bounce,box,boy,bracket,brain,brand,brass,brave,bread,breeze,brick,bridge,brief,bright,bring,brisk,broccoli,broken,bronze,broom,brother,brown,brush,bubble,buddy,budget,buffalo,build,bulb,bulk,bullet,bundle,bunker,burden,burger,burst,bus,business,busy,butter,buyer,buzz,cabbage,cabin,cable,cactus,cage,cake,call,calm,camera,camp,can,canal,cancel,candy,cannon,canoe,canvas,canyon,capable,capital,captain,car,carbon,card,cargo,carpet,carry,cart,case,cash,casino,castle,casual,cat,catalog,catch,category,cattle,caught,cause,caution,cave,ceiling,celery,cement,census,century,cereal,certain,chair,chalk,champion,change,chaos,chapter,charge,chase,chat,cheap,check,cheese,chef,cherry,chest,chicken,chief,child,chimney,choice,choose,chronic,chuckle,chunk,churn,cigar,cinnamon,circle,citizen,city,civil,claim,clap,clarify,claw,clay,clean,clerk,clever,click,client,cliff,climb,clinic,clip,clock,clog,close,cloth,cloud,clown,club,clump,cluster,clutch,coach,coast,coconut,code,coffee,coil,coin,collect,color,column,combine,come,comfort,comic,common,company,concert,conduct,confirm,congress,connect,consider,control,convince,cook,cool,copper,copy,coral,core,corn,correct,cost,cotton,couch,country,couple,course,cousin,cover,coyote,crack,cradle,craft,cram,crane,crash,crater,crawl,crazy,cream,credit,creek,crew,cricket,crime,crisp,critic,crop,cross,crouch,crowd,crucial,cruel,cruise,crumble,crunch,crush,cry,crystal,cube,culture,cup,cupboard,curious,current,curtain,curve,cushion,custom,cute,cycle,dad,damage,damp,dance,danger,daring,dash,daughter,dawn,day,deal,debate,debris,decade,december,decide,decline,decorate,decrease,deer,defense,define,defy,degree,delay,deliver,demand,demise,denial,dentist,deny,depart,depend,deposit,depth,deputy,derive,describe,desert,design,desk,despair,destroy,detail,detect,develop,device,devote,diagram,dial,diamond,diary,dice,diesel,diet,differ,digital,dignity,dilemma,dinner,dinosaur,direct,dirt,disagree,discover,disease,dish,dismiss,disorder,display,distance,divert,divide,divorce,dizzy,doctor,document,dog,doll,dolphin,domain,donate,donkey,donor,door,dose,double,dove,draft,dragon,drama,drastic,draw,dream,dress,drift,drill,drink,drip,drive,drop,drum,dry,duck,dumb,dune,during,dust,dutch,duty,dwarf,dynamic,eager,eagle,early,earn,earth,easily,east,easy,echo,ecology,economy,edge,edit,educate,effort,egg,eight,either,elbow,elder,electric,elegant,element,elephant,elevator,elite,else,embark,embody,embrace,emerge,emotion,employ,empower,empty,enable,enact,end,endless,endorse,enemy,energy,enforce,engage,engine,enhance,enjoy,enlist,enough,enrich,enroll,ensure,enter,entire,entry,envelope,episode,equal,equip,era,erase,erode,erosion,error,erupt,escape,essay,essence,estate,eternal,ethics,evidence,evil,evoke,evolve,exact,example,excess,exchange,excite,exclude,excuse,execute,exercise,exhaust,exhibit,exile,exist,exit,exotic,expand,expect,expire,explain,expose,express,extend,extra,eye,eyebrow,fabric,face,faculty,fade,faint,faith,fall,false,fame,family,famous,fan,fancy,fantasy,farm,fashion,fat,fatal,father,fatigue,fault,favorite,feature,february,federal,fee,feed,feel,female,fence,festival,fetch,fever,few,fiber,fiction,field,figure,file,film,filter,final,find,fine,finger,finish,fire,firm,first,fiscal,fish,fit,fitness,fix,flag,flame,flash,flat,flavor,flee,flight,flip,float,flock,floor,flower,fluid,flush,fly,foam,focus,fog,foil,fold,follow,food,foot,force,forest,forget,fork,fortune,forum,forward,fossil,foster,found,fox,fragile,frame,frequent,fresh,friend,fringe,frog,front,frost,frown,frozen,fruit,fuel,fun,funny,furnace,fury,future,gadget,gain,galaxy,gallery,game,gap,garage,garbage,garden,garlic,garment,gas,gasp,gate,gather,gauge,gaze,general,genius,genre,gentle,genuine,gesture,ghost,giant,gift,giggle,ginger,giraffe,girl,give,glad,glance,glare,glass,glide,glimpse,globe,gloom,glory,glove,glow,glue,goat,goddess,gold,good,goose,gorilla,gospel,gossip,govern,gown,grab,grace,grain,grant,grape,grass,gravity,great,green,grid,grief,grit,grocery,group,grow,grunt,guard,guess,guide,guilt,guitar,gun,gym,habit,hair,half,hammer,hamster,hand,happy,harbor,hard,harsh,harvest,hat,have,hawk,hazard,head,health,heart,heavy,hedgehog,height,hello,helmet,help,hen,hero,hidden,high,hill,hint,hip,hire,history,hobby,hockey,hold,hole,holiday,hollow,home,honey,hood,hope,horn,horror,horse,hospital,host,hotel,hour,hover,hub,huge,human,humble,humor,hundred,hungry,hunt,hurdle,hurry,hurt,husband,hybrid,ice,icon,idea,identify,idle,ignore,ill,illegal,illness,image,imitate,immense,immune,impact,impose,improve,impulse,inch,include,income,increase,index,indicate,indoor,industry,infant,inflict,inform,inhale,inherit,initial,inject,injury,inmate,inner,innocent,input,inquiry,insane,insect,inside,inspire,install,intact,interest,into,invest,invite,involve,iron,island,isolate,issue,item,ivory,jacket,jaguar,jar,jazz,jealous,jeans,jelly,jewel,job,join,joke,journey,joy,judge,juice,jump,jungle,junior,junk,just,kangaroo,keen,keep,ketchup,key,kick,kid,kidney,kind,kingdom,kiss,kit,kitchen,kite,kitten,kiwi,knee,knife,knock,know,lab,label,labor,ladder,lady,lake,lamp,language,laptop,large,later,latin,laugh,laundry,lava,law,lawn,lawsuit,layer,lazy,leader,leaf,learn,leave,lecture,left,leg,legal,legend,leisure,lemon,lend,length,lens,leopard,lesson,letter,level,liar,liberty,library,license,life,lift,light,like,limb,limit,link,lion,liquid,list,little,live,lizard,load,loan,lobster,local,lock,logic,lonely,long,loop,lottery,loud,lounge,love,loyal,lucky,luggage,lumber,lunar,lunch,luxury,lyrics,machine,mad,magic,magnet,maid,mail,main,major,make,mammal,man,manage,mandate,mango,mansion,manual,maple,marble,march,margin,marine,market,marriage,mask,mass,master,match,material,math,matrix,matter,maximum,maze,meadow,mean,measure,meat,mechanic,medal,media,melody,melt,member,memory,mention,menu,mercy,merge,merit,merry,mesh,message,metal,method,middle,midnight,milk,million,mimic,mind,minimum,minor,minute,miracle,mirror,misery,miss,mistake,mix,mixed,mixture,mobile,model,modify,mom,moment,monitor,monkey,monster,month,moon,moral,more,morning,mosquito,mother,motion,motor,mountain,mouse,move,movie,much,muffin,mule,multiply,muscle,museum,mushroom,music,must,mutual,myself,mystery,myth,naive,name,napkin,narrow,nasty,nation,nature,near,neck,need,negative,neglect,neither,nephew,nerve,nest,net,network,neutral,never,news,next,nice,night,noble,noise,nominee,noodle,normal,north,nose,notable,note,nothing,notice,novel,now,nuclear,number,nurse,nut,oak,obey,object,oblige,obscure,observe,obtain,obvious,occur,ocean,october,odor,off,offer,office,often,oil,okay,old,olive,olympic,omit,once,one,onion,online,only,open,opera,opinion,oppose,option,orange,orbit,orchard,order,ordinary,organ,orient,original,orphan,ostrich,other,outdoor,outer,output,outside,oval,oven,over,own,owner,oxygen,oyster,ozone,pact,paddle,page,pair,palace,palm,panda,panel,panic,panther,paper,parade,parent,park,parrot,party,pass,patch,path,patient,patrol,pattern,pause,pave,payment,peace,peanut,pear,peasant,pelican,pen,penalty,pencil,people,pepper,perfect,permit,person,pet,phone,photo,phrase,physical,piano,picnic,picture,piece,pig,pigeon,pill,pilot,pink,pioneer,pipe,pistol,pitch,pizza,place,planet,plastic,plate,play,please,pledge,pluck,plug,plunge,poem,poet,point,polar,pole,police,pond,pony,pool,popular,portion,position,possible,post,potato,pottery,poverty,powder,power,practice,praise,predict,prefer,prepare,present,pretty,prevent,price,pride,primary,print,priority,prison,private,prize,problem,process,produce,profit,program,project,promote,proof,property,prosper,protect,proud,provide,public,pudding,pull,pulp,pulse,pumpkin,punch,pupil,puppy,purchase,purity,purpose,purse,push,put,puzzle,pyramid,quality,quantum,quarter,question,quick,quit,quiz,quote,rabbit,raccoon,race,rack,radar,radio,rail,rain,raise,rally,ramp,ranch,random,range,rapid,rare,rate,rather,raven,raw,razor,ready,real,reason,rebel,rebuild,recall,receive,recipe,record,recycle,reduce,reflect,reform,refuse,region,regret,regular,reject,relax,release,relief,rely,remain,remember,remind,remove,render,renew,rent,reopen,repair,repeat,replace,report,require,rescue,resemble,resist,resource,response,result,retire,retreat,return,reunion,reveal,review,reward,rhythm,rib,ribbon,rice,rich,ride,ridge,rifle,right,rigid,ring,riot,ripple,risk,ritual,rival,river,road,roast,robot,robust,rocket,romance,roof,rookie,room,rose,rotate,rough,round,route,royal,rubber,rude,rug,rule,run,runway,rural,sad,saddle,sadness,safe,sail,salad,salmon,salon,salt,salute,same,sample,sand,satisfy,satoshi,sauce,sausage,save,say,scale,scan,scare,scatter,scene,scheme,school,science,scissors,scorpion,scout,scrap,screen,script,scrub,sea,search,season,seat,second,secret,section,security,seed,seek,segment,select,sell,seminar,senior,sense,sentence,series,service,session,settle,setup,seven,shadow,shaft,shallow,share,shed,shell,sheriff,shield,shift,shine,ship,shiver,shock,shoe,shoot,shop,short,shoulder,shove,shrimp,shrug,shuffle,shy,sibling,sick,side,siege,sight,sign,silent,silk,silly,silver,similar,simple,since,sing,siren,sister,situate,six,size,skate,sketch,ski,skill,skin,skirt,skull,slab,slam,sleep,slender,slice,slide,slight,slim,slogan,slot,slow,slush,small,smart,smile,smoke,smooth,snack,snake,snap,sniff,snow,soap,soccer,social,sock,soda,soft,solar,soldier,solid,solution,solve,someone,song,soon,sorry,sort,soul,sound,soup,source,south,space,spare,spatial,spawn,speak,special,speed,spell,spend,sphere,spice,spider,spike,spin,spirit,split,spoil,sponsor,spoon,sport,spot,spray,spread,spring,spy,square,squeeze,squirrel,stable,stadium,staff,stage,stairs,stamp,stand,start,state,stay,steak,steel,stem,step,stereo,stick,still,sting,stock,stomach,stone,stool,story,stove,strategy,street,strike,strong,struggle,student,stuff,stumble,style,subject,submit,subway,success,such,sudden,suffer,sugar,suggest,suit,summer,sun,sunny,sunset,super,supply,supreme,sure,surface,surge,surprise,surround,survey,suspect,sustain,swallow,swamp,swap,swarm,swear,sweet,swift,swim,swing,switch,sword,symbol,symptom,syrup,system,table,tackle,tag,tail,talent,talk,tank,tape,target,task,taste,tattoo,taxi,teach,team,tell,ten,tenant,tennis,tent,term,test,text,thank,that,theme,then,theory,there,they,thing,this,thought,three,thrive,throw,thumb,thunder,ticket,tide,tiger,tilt,timber,time,tiny,tip,tired,tissue,title,toast,tobacco,today,toddler,toe,together,toilet,token,tomato,tomorrow,tone,tongue,tonight,tool,tooth,top,topic,topple,torch,tornado,tortoise,toss,total,tourist,toward,tower,town,toy,track,trade,traffic,tragic,train,transfer,trap,trash,travel,tray,treat,tree,trend,trial,tribe,trick,trigger,trim,trip,trophy,trouble,truck,true,truly,trumpet,trust,truth,try,tube,tuition,tumble,tuna,tunnel,turkey,turn,turtle,twelve,twenty,twice,twin,twist,two,type,typical,ugly,umbrella,unable,unaware,uncle,uncover,under,undo,unfair,unfold,unhappy,uniform,unique,unit,universe,unknown,unlock,until,unusual,unveil,update,upgrade,uphold,upon,upper,upset,urban,urge,usage,use,used,useful,useless,usual,utility,vacant,vacuum,vague,valid,valley,valve,van,vanish,vapor,various,vast,vault,vehicle,velvet,vendor,venture,venue,verb,verify,version,very,vessel,veteran,viable,vibrant,vicious,victory,video,view,village,vintage,violin,virtual,virus,visa,visit,visual,vital,vivid,vocal,voice,void,volcano,volume,vote,voyage,wage,wagon,wait,walk,wall,walnut,want,warfare,warm,warrior,wash,wasp,waste,water,wave,way,wealth,weapon,wear,weasel,weather,web,wedding,weekend,weird,welcome,west,wet,whale,what,wheat,wheel,when,where,whip,whisper,wide,width,wife,wild,will,win,window,wine,wing,wink,winner,winter,wire,wisdom,wise,wish,witness,wolf,woman,wonder,wood,wool,word,work,world,worry,worth,wrap,wreck,wrestle,wrist,write,wrong,yard,year,yellow,you,young,youth,zebra,zero,zone,zoo'.split(',');
+
+/* Character sets */
+var LOWER='abcdefghijklmnopqrstuvwxyz',UPPER='ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+DIGITS='0123456789',SYMBOLS='!@#$%^&*-_+=.?',AMBIG='0OoIl1|';
+
+/* Element refs */
+var $=function(id){return document.getElementById(id)},
+pwEl=$('pw'),entEl=$('ent'),outEl=$('out'),
+lenL=$('len-l'),wrdL=$('wrd-l'),
+pwSet=$('pw-set'),ppSet=$('pp-set'),
+genBtn=$('gen-btn'),genL=$('gen-l'),
+cpBtn=$('cp-btn'),cpI=$('cp-i'),cpK=$('cp-k'),cpL=$('cp-l'),
+rsL=$('rs-l');
+
+/* State */
+var mode=0,cur='',
+pwLen=20,pwUpper=true,pwLower=true,pwDigits=true,pwSymbols=true,pwExclude=false,
+ppWords=6,ppSep='-',ppCap=true,ppNum=false,
+clipTimer=null,clipCount=0,cpTm;
+
+/* Persistence */
+function loadSettings(){
+  mode=_base.load('pwdgen:mode',0);
+  var pw=_base.load('pwdgen:pw',{});
+  pwLen=pw.len!==undefined?pw.len:20;
+  pwUpper=pw.upper!==undefined?pw.upper:true;
+  pwLower=pw.lower!==undefined?pw.lower:true;
+  pwDigits=pw.digits!==undefined?pw.digits:true;
+  pwSymbols=pw.symbols!==undefined?pw.symbols:true;
+  pwExclude=pw.exclude!==undefined?pw.exclude:false;
+  var pp=_base.load('pwdgen:pp',{});
+  ppWords=pp.words!==undefined?pp.words:6;
+  ppSep=pp.sep!==undefined?pp.sep:'-';
+  ppCap=pp.cap!==undefined?pp.cap:true;
+  ppNum=pp.num!==undefined?pp.num:false;
+}
+function saveSettings(){
+  _base.save('pwdgen:mode',mode);
+  _base.save('pwdgen:pw',{len:pwLen,upper:pwUpper,lower:pwLower,digits:pwDigits,symbols:pwSymbols,exclude:pwExclude});
+  _base.save('pwdgen:pp',{words:ppWords,sep:ppSep,cap:ppCap,num:ppNum});
+}
+
+/* CSPRNG: unbiased random integer in [0, n) via rejection sampling */
+function randBelow(n){
+  var lim=256-(256%n),b=new Uint8Array(1);
+  do{crypto.getRandomValues(b)}while(b[0]>=lim);
+  return b[0]%n;
+}
+
+/* Build charset from current settings */
+function buildCharset(){
+  var cs='';
+  if(pwLower)cs+=LOWER;
+  if(pwUpper)cs+=UPPER;
+  if(pwDigits)cs+=DIGITS;
+  if(pwSymbols)cs+=SYMBOLS;
+  if(pwExclude)for(var i=0;i<AMBIG.length;i++)cs=cs.split(AMBIG[i]).join('');
+  return cs;
+}
+
+/* Check that all enabled character types appear in the password */
+function meetsConstraints(pw){
+  var types=0;
+  if(pwUpper)types++;if(pwLower)types++;if(pwDigits)types++;if(pwSymbols)types++;
+  if(pwLen<types)return true;
+  if(pwUpper&&!/[A-Z]/.test(pw))return false;
+  if(pwLower&&!/[a-z]/.test(pw))return false;
+  if(pwDigits&&!/[0-9]/.test(pw))return false;
+  if(pwSymbols&&!/[!@#$%^&*\-_+=.?]/.test(pw))return false;
+  return true;
+}
+
+/* Generate random password with batched CSPRNG + rejection sampling */
+function generatePw(){
+  var cs=buildCharset();
+  if(!cs.length)return'';
+  var N=cs.length,lim=256-(256%N);
+  var buf=new Uint8Array(Math.ceil(pwLen*1.5)+16);
+  for(var a=0;a<100;a++){
+    var r='',idx=0;
+    crypto.getRandomValues(buf);
+    while(r.length<pwLen){
+      if(idx>=buf.length){crypto.getRandomValues(buf);idx=0}
+      if(buf[idx]<lim)r+=cs[buf[idx]%N];
+      idx++;
+    }
+    if(meetsConstraints(r))return r;
+  }
+  return r;
+}
+
+/* Generate random passphrase (2048 = 2^11, zero modulo bias with Uint32) */
+function generatePp(){
+  var n=ppWords+(ppNum?2:0);
+  var buf=new Uint32Array(n);
+  crypto.getRandomValues(buf);
+  var parts=[],i,w;
+  for(i=0;i<ppWords;i++){
+    w=WORDS[buf[i]%2048];
+    if(ppCap)w=w[0].toUpperCase()+w.slice(1);
+    parts.push(w);
+  }
+  var result=parts.join(ppSep);
+  if(ppNum)result+=ppSep+(buf[ppWords]%10)+''+(buf[ppWords+1]%10);
+  return result;
+}
+
+/* Entropy: H = L * log2(C) for passwords, N * log2(W) for passphrases */
+function calcEntropy(){
+  if(mode===0){
+    var cs=buildCharset();
+    return cs.length?pwLen*Math.log2(cs.length):0;
+  }
+  var h=ppWords*Math.log2(2048);
+  if(ppNum)h+=Math.log2(100);
+  return h;
+}
+
+/* Strength label + CSS class */
+function strengthLabel(bits){
+  if(bits>=128)return['Maximum','ent-m'];
+  if(bits>=80)return['Very Strong','ent-v'];
+  if(bits>=60)return['Strong','ent-s'];
+  if(bits>=40)return['Fair','ent-f'];
+  return['Weak','ent-w'];
+}
+
+/* Adaptive font size for password display */
+function sizePw(text){
+  var len=text.length;
+  if(len>64)pwEl.style.fontSize='clamp(.55rem,2.2vw,.75rem)';
+  else if(len>40)pwEl.style.fontSize='clamp(.65rem,2.8vw,.85rem)';
+  else if(len>24)pwEl.style.fontSize='clamp(.75rem,3.2vw,1rem)';
+  else if(len>16)pwEl.style.fontSize='clamp(.85rem,3.8vw,1.15rem)';
+  else pwEl.style.fontSize='';
+}
+
+/* Update entropy display using safe DOM methods */
+function updateEntropy(){
+  var bits=calcEntropy();
+  var s=strengthLabel(bits);
+  entEl.textContent='';
+  entEl.appendChild(document.createTextNode(bits.toFixed(1)+' Bits \u00B7 '));
+  var sp=document.createElement('span');
+  sp.className=s[1];
+  sp.textContent=s[0];
+  entEl.appendChild(sp);
+}
+
+/* Render: generate + display */
+function render(){
+  cur=mode===0?generatePw():generatePp();
+  pwEl.classList.remove('fi');pwEl.offsetWidth;
+  pwEl.textContent=cur;
+  pwEl.classList.add('fi');
+  sizePw(cur);
+  updateEntropy();
+}
+
+/* Mode switching */
+function switchMode(m){
+  if(mode===m)return;
+  mode=m;
+  var segs=document.querySelectorAll('#md-card .seg');
+  for(var i=0;i<segs.length;i++)segs[i].classList.toggle('active',parseInt(segs[i].dataset.m)===m);
+  pwSet.style.display=m===0?'':'none';
+  ppSet.style.display=m===1?'':'none';
+  saveSettings();render();
+}
+
+/* Update all settings UI from state */
+function updateSettingsUI(){
+  var segs=document.querySelectorAll('#md-card .seg');
+  for(var i=0;i<segs.length;i++)segs[i].classList.toggle('active',parseInt(segs[i].dataset.m)===mode);
+  pwSet.style.display=mode===0?'':'none';
+  ppSet.style.display=mode===1?'':'none';
+  lenL.textContent=pwLen+(pwLen===1?' Character':' Characters');
+  setRow('t-uc',pwUpper);setRow('t-lc',pwLower);setRow('t-dg',pwDigits);
+  setRow('t-sy',pwSymbols);setRow('t-ex',pwExclude);
+  wrdL.textContent=ppWords+(ppWords===1?' Word':' Words');
+  var sepSegs=document.querySelectorAll('#pp-set .seg[data-s]');
+  for(var j=0;j<sepSegs.length;j++)sepSegs[j].classList.toggle('active',sepSegs[j].dataset.s===ppSep);
+  setRow('t-cap',ppCap);setRow('t-num',ppNum);
+}
+function setRow(id,on){
+  var row=$(id);row.classList.toggle('sel',on);row.setAttribute('aria-checked',on?'true':'false');
+}
+
+/* Toggle a setting row with checkmark animation */
+function doToggle(id,getter,setter){
+  var isOn=getter();
+  if(isOn&&(id==='t-uc'||id==='t-lc'||id==='t-dg'||id==='t-sy')){
+    var on=0;
+    if(pwUpper)on++;if(pwLower)on++;if(pwDigits)on++;if(pwSymbols)on++;
+    if(on<=1){_base.notify('At Least One Type Required',false);return}
+  }
+  var newOn=!isOn;
+  setter(newOn);
+  var row=$(id);
+  row.classList.toggle('sel',newOn);
+  row.setAttribute('aria-checked',newOn?'true':'false');
+  if(newOn){
+    var pl=row.querySelector('.bg-chk polyline');
+    if(pl){var n=pl.cloneNode(true);pl.parentNode.replaceChild(n,pl)}
+  }
+  saveSettings();render();
+}
+
+/* Clipboard auto-clear */
+function clearClipTimer(){
+  if(clipTimer){clearInterval(clipTimer);clipTimer=null}
+  clipCount=0;
+}
+function startClipTimer(){
+  clearClipTimer();clipCount=30;
+  cpL.textContent='Copied (30s)';
+  clipTimer=setInterval(function(){
+    clipCount--;
+    if(clipCount<=0){
+      clearClipTimer();
+      navigator.clipboard.writeText('').catch(function(){});
+      cpI.style.display='';cpK.style.display='none';
+      cpL.textContent='Copy';cpBtn.classList.remove('ok');
+    }else{
+      cpL.textContent='Copied ('+clipCount+'s)';
+    }
+  },1000);
+}
+
+/* Copy password */
+function doCopy(){
+  if(!cur)return;
+  _base.copyText(cur,function(){
+    cpI.style.display='none';cpK.style.display='';
+    cpBtn.classList.add('ok');
+    startClipTimer();
+  },function(){
+    cpL.textContent='Failed';
+    clearTimeout(cpTm);
+    cpTm=setTimeout(function(){cpL.textContent='Copy'},800);
+  });
+}
+
+/* Generate with feedback */
+function doGenerate(){
+  render();
+  genL.textContent='Generated';
+  _base.btnFeedback(genBtn,'ok',800,function(){genL.textContent='Generate'});
+}
+
+/* Reset */
+var resetCtrl=_base.twoPress($('rs-btn'),{
+  label:rsL,
+  onConfirm:function(){
+    mode=0;pwLen=20;pwUpper=true;pwLower=true;pwDigits=true;pwSymbols=true;pwExclude=false;
+    ppWords=6;ppSep='-';ppCap=true;ppNum=false;
+    clearClipTimer();
+    cpI.style.display='';cpK.style.display='none';cpL.textContent='Copy';cpBtn.classList.remove('ok');
+    saveSettings();updateSettingsUI();render();
+  }
+});
+
+/* Steppers */
+function stepLen(d){
+  pwLen=Math.max(8,Math.min(128,pwLen+d));
+  lenL.textContent=pwLen+(pwLen===1?' Character':' Characters');
+  saveSettings();render();
+}
+function stepWrd(d){
+  ppWords=Math.max(3,Math.min(12,ppWords+d));
+  wrdL.textContent=ppWords+(ppWords===1?' Word':' Words');
+  saveSettings();render();
+}
+function stepUp(){mode===0?stepLen(1):stepWrd(1)}
+function stepDn(){mode===0?stepLen(-1):stepWrd(-1)}
+
+/* Events: mode switch */
+document.querySelector('#md-card .seg-row').addEventListener('click',function(e){
+  var seg=e.target.closest('.seg[data-m]');
+  if(seg)switchMode(parseInt(seg.dataset.m));
+});
+
+/* Events: separator switch */
+document.querySelector('#pp-set .seg-row').addEventListener('click',function(e){
+  var seg=e.target.closest('.seg[data-s]');
+  if(!seg)return;
+  ppSep=seg.dataset.s;
+  var all=document.querySelectorAll('#pp-set .seg[data-s]');
+  for(var i=0;i<all.length;i++)all[i].classList.toggle('active',all[i]===seg);
+  saveSettings();render();
+});
+
+/* Events: toggle rows */
+function bindToggle(id,getter,setter){
+  $(id).addEventListener('click',function(){doToggle(id,getter,setter)});
+}
+bindToggle('t-uc',function(){return pwUpper},function(v){pwUpper=v});
+bindToggle('t-lc',function(){return pwLower},function(v){pwLower=v});
+bindToggle('t-dg',function(){return pwDigits},function(v){pwDigits=v});
+bindToggle('t-sy',function(){return pwSymbols},function(v){pwSymbols=v});
+bindToggle('t-ex',function(){return pwExclude},function(v){pwExclude=v});
+bindToggle('t-cap',function(){return ppCap},function(v){ppCap=v});
+bindToggle('t-num',function(){return ppNum},function(v){ppNum=v});
+
+/* Events: steppers */
+$('len-dn').onclick=function(){stepLen(-1)};
+$('len-up').onclick=function(){stepLen(1)};
+$('wrd-dn').onclick=function(){stepWrd(-1)};
+$('wrd-up').onclick=function(){stepWrd(1)};
+
+/* Events: action buttons */
+genBtn.onclick=doGenerate;
+cpBtn.onclick=doCopy;
+$('rs-btn').onclick=function(){resetCtrl.press()};
+
+/* Events: click output to copy */
+outEl.onclick=function(){
+  if(!cur)return;
+  clearTimeout(cpTm);
+  _base.copyText(cur,function(){
+    outEl.classList.remove('cp-fb');outEl.offsetWidth;outEl.classList.add('cp-fb');
+    cpTm=setTimeout(function(){outEl.classList.remove('cp-fb')},400);
+    cpI.style.display='none';cpK.style.display='';
+    cpBtn.classList.add('ok');
+    startClipTimer();
+  });
+};
+
+/* Keyboard: Enter/Space on toggle rows */
+function rowKey(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.closest('.srow').click()}}
+var toggleRows=document.querySelectorAll('.srow[role="switch"]');
+for(var i=0;i<toggleRows.length;i++)toggleRows[i].addEventListener('keydown',rowKey);
+
+/* Keyboard shortcuts */
+var _su=function(e){e.preventDefault();stepUp()},_sd=function(e){e.preventDefault();stepDn()};
+_base.onKey({
+  ' ':function(e){e.preventDefault();doGenerate()},
+  Enter:function(e){e.preventDefault();doGenerate()},
+  g:function(e){e.preventDefault();doGenerate()},
+  c:function(e){e.preventDefault();doCopy()},
+  r:function(){resetCtrl.press()},
+  m:function(){switchMode(mode===0?1:0)},
+  ArrowUp:_su,'=':_su,'+':_su,
+  ArrowDown:_sd,'-':_sd,
+  u:function(){if(mode===0)doToggle('t-uc',function(){return pwUpper},function(v){pwUpper=v})},
+  l:function(){if(mode===0)doToggle('t-lc',function(){return pwLower},function(v){pwLower=v})},
+  d:function(){if(mode===0)doToggle('t-dg',function(){return pwDigits},function(v){pwDigits=v})},
+  s:function(){if(mode===0)doToggle('t-sy',function(){return pwSymbols},function(v){pwSymbols=v})},
+  x:function(){if(mode===0)doToggle('t-ex',function(){return pwExclude},function(v){pwExclude=v})}
+});
+
+/* Init */
+loadSettings();
+updateSettingsUI();
+render();
+
+})();
+</script>
+</body>
+</html>

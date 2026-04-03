@@ -72,6 +72,12 @@
     "category": "Generators"
   },
   {
+    "title": "PasswdGen",
+    "subtitle": "Secure Password Generator",
+    "url": "/passwdgen/",
+    "category": "Generators"
+  },
+  {
     "title": "Clock",
     "subtitle": "A Minimal 8KB Clock",
     "url": "/time/",
