@@ -455,9 +455,25 @@ $('len-up').onclick=function(){stepLen(1)};
 $('wrd-dn').onclick=function(){stepWrd(-1)};
 $('wrd-up').onclick=function(){stepWrd(1)};
 
-/* Events: click label to reset to default */
-lenL.onclick=function(){pwLen=20;lenL.textContent='20 Characters';saveSettings();render()};
-wrdL.onclick=function(){ppWords=6;wrdL.textContent='6 Words';saveSettings();render()};
+/* Srow tap-to-reset (mockupgen pattern) */
+var RESET_IC='<svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
+var lenRow=$('pw-set').querySelector('.srow'),wrdRow=$('pp-set').querySelector('.srow'),_rft1,_rft2;
+function animateReset(row){
+  var lbl=row.querySelector('.slbl'),ic=lbl.querySelector('svg'),orig=ic.outerHTML;
+  ic.outerHTML=RESET_IC;
+  row.classList.remove('rs-fb');void row.offsetWidth;row.classList.add('rs-fb');
+  var ft=row===lenRow?'_rft1':'_rft2';
+  clearTimeout(window[ft]);
+  window[ft]=setTimeout(function(){row.classList.remove('rs-fb');lbl.querySelector('svg').outerHTML=orig},600);
+}
+lenRow.addEventListener('click',function(e){
+  if(e.target.closest('button'))return;
+  pwLen=20;lenL.textContent='20 Characters';saveSettings();render();animateReset(lenRow);
+});
+wrdRow.addEventListener('click',function(e){
+  if(e.target.closest('button'))return;
+  ppWords=6;wrdL.textContent='6 Words';saveSettings();render();animateReset(wrdRow);
+});
 
 /* Events: action buttons */
 genBtn.onclick=doGenerate;
