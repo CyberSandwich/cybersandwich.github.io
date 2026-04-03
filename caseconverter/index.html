@@ -29,8 +29,8 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
 #editor::-webkit-scrollbar{display:none}
 #editor::selection{background:var(--sel);color:inherit}
 .modes{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;padding:0 14px calc(86px + env(safe-area-inset-bottom,0px))}
-.mode-pill{max-width:none}
-.modes .mode-btn{padding:8px clamp(8px,2vw,12px);font-size:clamp(.625rem,1.8vw,.75rem)}
+.mode-pill{max-width:none;padding:3px}
+.modes .tabs .mode-btn{padding:6px clamp(6px,1.5vw,10px);font-size:clamp(.5625rem,1.5vw,.6875rem)}
 @media(max-width:480px){main{padding:0 calc(28px + env(safe-area-inset-right,0px)) 0 calc(28px + env(safe-area-inset-left,0px))}#editor{height:100dvh}.modes{gap:4px;padding-inline:10px}}
 @media(prefers-reduced-motion:reduce){main,#editor{transition:none}}
 @media(print){.modes,nav{display:none!important}main{padding:0}#editor{height:auto;padding:10mm;font:400 12pt/1.8 var(--mono);color:#000;white-space:pre-wrap;word-wrap:break-word}@page{margin:15mm}}
