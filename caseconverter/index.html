@@ -28,10 +28,13 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
 #editor{scrollbar-width:none;-ms-overflow-style:none}
 #editor::-webkit-scrollbar{display:none}
 #editor::selection{background:var(--sel);color:inherit}
-.modes{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center;padding:0 14px calc(86px + env(safe-area-inset-bottom,0px))}
-.mode-btn{padding:6px 10px;border-radius:var(--rr);border:none;background:none;font:500 .6875rem/1 var(--font);color:var(--t3);cursor:pointer;white-space:nowrap;transition:color .15s}
+.modes{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:9;display:flex;max-width:calc(100% - 40px);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--tab-bg);border-radius:var(--rr);padding:5px;border:1px solid var(--tab-border);box-shadow:var(--tab-shadow)}
+.modes::-webkit-scrollbar{display:none}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.modes{background:var(--tab-blur);backdrop-filter:blur(6px) saturate(180%);-webkit-backdrop-filter:blur(6px) saturate(180%)}}
+.mode-btn{background:none;border:none;padding:8px clamp(10px,2.5vw,16px);border-radius:var(--rr);font:500 clamp(.6875rem,2.2vw,.8125rem)/1 var(--font);color:var(--t3);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:color .15s,background .15s,box-shadow .15s}
+.mode-btn.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)}
 .mode-btn:active{opacity:.7}
-@media(hover:hover){.mode-btn:hover{color:var(--t1)}}
+@media(hover:hover){.mode-btn:hover:not(.active){color:var(--t2)}}
 @media(max-width:480px){main{padding:0 calc(28px + env(safe-area-inset-right,0px)) 0 calc(28px + env(safe-area-inset-left,0px))}#editor{height:100dvh}.modes{gap:4px;padding-inline:10px}}
 @media(prefers-reduced-motion:reduce){main,#editor{transition:none}}
 @media(print){.modes,nav{display:none!important}main{padding:0}#editor{height:auto;padding:10mm;font:400 12pt/1.8 var(--mono);color:#000;white-space:pre-wrap;word-wrap:break-word}@page{margin:15mm}}
@@ -752,9 +755,15 @@ _base.onKey({
 
 // === Mode pill clicks ===
 
-document.querySelector('.modes').addEventListener('click',function(e){
+var modesEl=document.querySelector('.modes');
+function markActive(btn){
+  modesEl.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+}
+modesEl.addEventListener('click',function(e){
   var btn=e.target.closest('.mode-btn');
   if(!btn)return;
+  markActive(btn);
   var m=parseInt(btn.dataset.mode);
   if(m===mode){
     var text=editor.value;
