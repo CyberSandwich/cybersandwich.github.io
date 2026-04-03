@@ -740,6 +740,23 @@ function splitTitleDate(text){
   return null;
 }
 
+/* ── Duplicate Detection ─────────────────────────────────────────── */
+function isDupeExact(title,targetMs,extra){
+  var t=title.toLowerCase(),tMin=Math.floor(targetMs/60000);
+  for(var i=0;i<items.length;i++){
+    if(items[i].title.toLowerCase()===t&&Math.floor(items[i].target/60000)===tMin)return true;
+  }
+  if(extra){for(var i=0;i<extra.length;i++){
+    if(extra[i].title.toLowerCase()===t&&Math.floor(extra[i].parsed.date.getTime()/60000)===tMin)return true;
+  }}
+  return false;
+}
+function hasDupeTitle(title){
+  var t=title.toLowerCase();
+  for(var i=0;i<items.length;i++){if(items[i].title.toLowerCase()===t)return true}
+  return false;
+}
+
 /* ── Add Item ────────────────────────────────────────────────────── */
 var autoIdx=0;
 function nextAutoTitle(){autoIdx++;return'Countdown '+autoIdx}
@@ -751,12 +768,15 @@ function addItem(){
   var parsed=parseDate(dateText);
   if(!parsed){_base.notify('Could Not Parse Date',false);return}
   if(parsed.date<=new Date()){_base.notify('Date Is in the Past',false);return}
+  if(isDupeExact(title,parsed.date.getTime())){_base.notify('Duplicate Blocked',false);return}
+  var titleWarn=hasDupeTitle(title);
   var id=uid();
   items.unshift({id:id,title:title,target:parsed.date.getTime(),dateLabel:parsed.label,ts:Date.now(),done:false});
   save();kbIdx=-1;render();
   $('inp-title').value='';$('inp-date').value='';
   $('inp-date').focus();
-  if(parsed.hint==='time')_base.notify('Current Time Used','warn');
+  if(titleWarn)_base.notify('Duplicate Title Exists','warn');
+  else if(parsed.hint==='time')_base.notify('Current Time Used','warn');
   else if(parsed.hint==='date')_base.notify('Today\'s Date Used','warn');
   else announce('Added');
 }
@@ -869,12 +889,22 @@ function paFeedback(){
   paTimer=setTimeout(function(){btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';paTimer=null},800);
 }
 function addBulkPairs(pairs){
+  var blocked=0,titleWarns=0,toAdd=[];
   for(var i=0;i<pairs.length;i++){
+    if(isDupeExact(pairs[i].title,pairs[i].parsed.date.getTime(),toAdd)){blocked++;continue}
+    if(hasDupeTitle(pairs[i].title))titleWarns++;
+    toAdd.push(pairs[i]);
+  }
+  for(var i=0;i<toAdd.length;i++){
     var id=uid();
-    items.unshift({id:id,title:pairs[i].title,target:pairs[i].parsed.date.getTime(),dateLabel:pairs[i].parsed.label,ts:Date.now(),done:false});
+    items.unshift({id:id,title:toAdd[i].title,target:toAdd[i].parsed.date.getTime(),dateLabel:toAdd[i].parsed.label,ts:Date.now(),done:false});
   }
   save();kbIdx=-1;render();
-  _base.notify(pairs.length+' Event'+(pairs.length!==1?'s':'')+' Added',true);
+  var bl=blocked===1?'Duplicate':'Duplicates';
+  if(blocked&&!toAdd.length)_base.notify(blocked+' '+bl+' Blocked',false);
+  else if(blocked)_base.notify(toAdd.length+' Added, '+blocked+' '+bl+' Blocked',false);
+  else if(titleWarns)_base.notify(toAdd.length+' Event'+(toAdd.length!==1?'s':'')+' Added — '+titleWarns+' Duplicate Title'+(titleWarns!==1?'s':''),'warn');
+  else _base.notify(toAdd.length+' Event'+(toAdd.length!==1?'s':'')+' Added',true);
 }
 function tryBulkPaste(text){
   var lines=text.split(/\n/).map(function(l){return l.trim()}).filter(Boolean);
