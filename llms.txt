@@ -18,6 +18,7 @@
 - [ImageOpt](https://saputra.co.uk/imageopt/) — JPEG and PNG image optimizer
 - [MockupGen](https://saputra.co.uk/mockup/) — iPhone mockup generator
 - [Palit](https://saputra.co.uk/palit/) — Color palette generator
+- [CaseConverter](https://saputra.co.uk/caseconverter/) — Text case conversion tool
 - [Clip](https://saputra.co.uk/clip/) — Clipboard text manager
 - [Parsely](https://saputra.co.uk/parsely/) — Text data extractor
 - [Lorip](https://saputra.co.uk/lorip/) — Lorem ipsum generator

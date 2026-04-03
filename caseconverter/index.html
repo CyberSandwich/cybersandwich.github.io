@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<title>CaseConverter</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CaseConverter">
+<meta name="description" content="A text case conversion tool with smart normalization and live formatting.">
+<meta property="og:title" content="CaseConverter">
+<meta property="og:description" content="A text case conversion tool with smart normalization and live formatting.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=24">
+<style>
+:root{--sel:rgba(59,130,246,.18);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace}
+html[data-theme="dark"]{--sel:rgba(59,130,246,.28)}
+html[data-theme="sepia"]{--sel:rgba(139,115,85,.18)}
+html,body{height:100%}
+main{min-height:100vh;min-height:100dvh;padding:0 calc(40px + env(safe-area-inset-right,0px)) 0 calc(40px + env(safe-area-inset-left,0px));transition:background .3s}
+main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset:-12px}
+#editor{display:block;width:100%;height:100dvh;min-height:240px;padding:24px 0 calc(200px + env(safe-area-inset-bottom,0px));border:none;outline:0;resize:none;background:transparent;background-clip:padding-box;color:var(--t1);caret-color:var(--t1);font:400 22px/42px var(--mono);-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;transition:color .3s}
+#editor{scrollbar-width:none;-ms-overflow-style:none}
+#editor::-webkit-scrollbar{display:none}
+#editor::selection{background:var(--sel);color:inherit}
+.modes{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;padding:0 14px calc(86px + env(safe-area-inset-bottom,0px))}
+.mode-pill{max-width:none}
+.modes .mode-btn{padding:8px clamp(8px,2vw,12px);font-size:clamp(.625rem,1.8vw,.75rem)}
+@media(max-width:480px){main{padding:0 calc(28px + env(safe-area-inset-right,0px)) 0 calc(28px + env(safe-area-inset-left,0px))}#editor{height:100dvh}.modes{gap:4px;padding-inline:10px}}
+@media(prefers-reduced-motion:reduce){main,#editor{transition:none}}
+@media(print){.modes,nav{display:none!important}main{padding:0}#editor{height:auto;padding:10mm;font:400 12pt/1.8 var(--mono);color:#000;white-space:pre-wrap;word-wrap:break-word}@page{margin:15mm}}
+</style>
+</head>
+<body>
+<main id="drop" aria-label="Case Converter" aria-dropeffect="copy">
+  <label for="editor" style="position:absolute;left:-9999px">Case Converter Editor</label>
+  <textarea id="editor" aria-multiline="true" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" autofocus></textarea>
+</main>
+
+<div class="modes" role="radiogroup" aria-label="Case Mode">
+  <div class="tabs mode-pill"><button class="mode-btn active" data-mode="0" role="radio" aria-checked="true">UPPER</button></div>
+  <div class="tabs mode-pill"><button class="mode-btn" data-mode="1" role="radio" aria-checked="false">lower</button></div>
+  <div class="tabs mode-pill"><button class="mode-btn" data-mode="2" role="radio" aria-checked="false">Title</button></div>
+  <div class="tabs mode-pill"><button class="mode-btn" data-mode="3" role="radio" aria-checked="false">camelCase</button></div>
+  <div class="tabs mode-pill"><button class="mode-btn" data-mode="4" role="radio" aria-checked="false">snake_case</button></div>
+  <div class="tabs mode-pill"><button class="mode-btn" data-mode="5" role="radio" aria-checked="false">kebab-case</button></div>
+</div>
+
+<nav aria-label="Primary">
+  <div class="tabs">
+    <a href="/">Home</a>
+    <a class="active">CaseConverter</a>
+  </div>
+  <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+
+<script src="/shared/base.js?v=23"></script>
+<script>
+(()=>{
+'use strict';
+
+var KEY_TEXT='cc:text:v1';
+var KEY_STATE='cc:state:v1';
+var DB_NAME='caseconverter-db';
+var DB_STORE='kv';
+var SAVE_MS=140;
+var SAVE_TEXT=1;
+var SAVE_STATE=2;
+var SMALL=new Set('a an and as at but by for if in nor not of on or per so the to up via vs yet'.split(' '));
+
+var editor=document.getElementById('editor');
+var drop=document.getElementById('drop');
+var modeBtns=document.querySelectorAll('.mode-btn');
+
+var mode=0;
+var transforming=false;
+var composing=false;
+var touched=0;
+var dragDepth=0;
+var saveTimer=0;
+var saveMask=0;
+var storedText='';
+var storedState='';
+var dbPromise=0;
+var dbFailed=false;
+var writeToken=0;
+var writeBusy=false;
+var pendingMask=0;
+var pendingText='';
+var pendingState='';
+
+var clamp=function(n,a,b){return Math.min(b,Math.max(a,n))};
+function getLineStart(v,s){return v.lastIndexOf('\n',s-1)+1}
+function getLineEnd(v,s){var i=v.indexOf('\n',s);return i<0?v.length:i}
+
+var cachedLH=0;
+function editorLineHeight(){
+  if(!cachedLH){var s=getComputedStyle(editor);cachedLH=parseFloat(s.lineHeight)||parseFloat(s.fontSize)*1.5}
+  return cachedLH;
+}
+
+// === IndexedDB + localStorage persistence ===
+
+function safeGetLocal(key){try{return localStorage.getItem(key)}catch(_){return null}}
+function safeSetLocal(key,value){try{localStorage.setItem(key,value)}catch(_){try{localStorage.removeItem(key)}catch(e){}}}
+
+function clearDb(){dbPromise=0}
+
+function openDb(){
+  if(dbPromise)return dbPromise;
+  if(dbFailed)return Promise.resolve(null);
+  if(!('indexedDB' in window))return Promise.resolve(null);
+  dbPromise=new Promise(function(resolve){
+    var req;
+    try{req=indexedDB.open(DB_NAME,1)}catch(_){resolve(null);return}
+    req.onupgradeneeded=function(event){
+      var db=event.target.result;
+      if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE,{keyPath:'k'});
+    };
+    req.onsuccess=function(){
+      var db=req.result;
+      db.onversionchange=function(){try{db.close()}catch(_){}clearDb()};
+      db.onclose=clearDb;
+      resolve(db);
+    };
+    req.onerror=function(){resolve(null)};
+    req.onblocked=function(){resolve(null)};
+  });
+  return dbPromise.then(function(db){
+    if(!db){dbPromise=0;dbFailed=true}
+    return db;
+  });
+}
+
+function readDb(key){
+  return openDb().then(function(db){
+    if(!db)return null;
+    return new Promise(function(resolve){
+      var req;
+      try{req=db.transaction(DB_STORE).objectStore(DB_STORE).get(key)}catch(_){resolve(null);return}
+      req.onsuccess=function(){resolve(req.result?req.result.v:null)};
+      req.onerror=function(){resolve(null)};
+    });
+  }).catch(function(){return null});
+}
+
+function txDone(tx){
+  return new Promise(function(resolve,reject){
+    tx.oncomplete=resolve;
+    tx.onabort=function(){reject(tx.error||new Error('Abort'))};
+    tx.onerror=function(){reject(tx.error||new Error('Error'))};
+  });
+}
+
+function scheduleIdle(fn){
+  if('requestIdleCallback' in window)return requestIdleCallback(fn,{timeout:600});
+  return setTimeout(fn,0);
+}
+
+function queueDbWrite(key,value){
+  if(key===KEY_TEXT){pendingText=value;pendingMask|=SAVE_TEXT}
+  else if(key===KEY_STATE){pendingState=value;pendingMask|=SAVE_STATE}
+  else return;
+  if(writeToken)return;
+  writeToken=scheduleIdle(drainWrites);
+}
+
+function writeLocalMask(mask,textValue,stateValue){
+  if(mask&SAVE_TEXT)safeSetLocal(KEY_TEXT,textValue);
+  if(mask&SAVE_STATE)safeSetLocal(KEY_STATE,stateValue);
+}
+
+async function drainWrites(){
+  writeToken=0;
+  if(writeBusy)return;
+  writeBusy=true;
+  while(pendingMask){
+    var mask=pendingMask;
+    var textValue=pendingText;
+    var stateValue=pendingState;
+    pendingMask=0;
+    var db=await openDb();
+    if(!db){writeLocalMask(mask,textValue,stateValue);continue}
+    try{
+      var tx=db.transaction(DB_STORE,'readwrite');
+      var store=tx.objectStore(DB_STORE);
+      if(mask&SAVE_TEXT)store.put({k:KEY_TEXT,v:textValue});
+      if(mask&SAVE_STATE)store.put({k:KEY_STATE,v:stateValue});
+      await txDone(tx);
+    }catch(_){
+      clearDb();
+      writeLocalMask(mask,textValue,stateValue);
+    }
+  }
+  writeBusy=false;
+  if(pendingMask&&!writeToken)writeToken=scheduleIdle(drainWrites);
+}
+
+function readPersisted(key){
+  return readDb(key).then(function(value){
+    if(value!==null&&value!==undefined)return String(value);
+    var local=safeGetLocal(key);
+    return local===null?null:String(local);
+  });
+}
+
+function stateSnapshot(){
+  var len=editor.value.length;
+  var ss=clamp(editor.selectionStart|0,0,len);
+  var se=clamp(editor.selectionEnd|0,ss,len);
+  var lh=editorLineHeight();
+  var raw=Math.max(0,Number(editor.scrollTop)||0);
+  var snapped=Math.max(0,Math.round(raw/lh)*lh);
+  return mode+'|'+ss+'|'+se+'|'+snapped;
+}
+
+function persist(mask,hard){
+  var wText=!!(mask&SAVE_TEXT);
+  var wState=!!(mask&SAVE_STATE);
+  var value=(wText||hard)?editor.value:'';
+  if(wText){
+    if(value!==storedText){storedText=value;queueDbWrite(KEY_TEXT,value)}
+  }
+  var stNow=(wState||hard)?stateSnapshot():'';
+  if(wState){
+    if(stNow!==storedState){storedState=stNow;queueDbWrite(KEY_STATE,stNow)}
+  }
+  if(hard){
+    safeSetLocal(KEY_TEXT,(wText||hard)?value:editor.value);
+    safeSetLocal(KEY_STATE,(wState||hard)?stNow:stateSnapshot());
+  }
+}
+
+function queuePersist(mask){
+  saveMask|=mask;
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(doFlush,SAVE_MS,false);
+}
+
+function doFlush(hard){
+  if(saveTimer){clearTimeout(saveTimer);saveTimer=0}
+  if(!saveMask){
+    if(!hard)return;
+    saveMask=SAVE_TEXT|SAVE_STATE;
+  }
+  var mask=saveMask;
+  saveMask=0;
+  persist(mask,!!hard);
+}
+
+// === Transformation functions ===
+
+function toWords(text){
+  var s=text
+    .replace(/([a-z\d])([A-Z])/g,'$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g,'$1 $2');
+  return s.replace(/[^a-zA-Z0-9\u00C0-\u024F]+/g,' ').trim().split(/\s+/).filter(Boolean);
+}
+
+function capFirst(word){
+  for(var i=0;i<word.length;i++){
+    if(word[i]!==word[i].toUpperCase())return word.substring(0,i)+word[i].toUpperCase()+word.substring(i+1);
+  }
+  return word;
+}
+
+function toUpper(text){return text.toUpperCase()}
+function toLower(text){return text.toLowerCase()}
+
+function toTitle(text){
+  return text.split('\n').map(function(line){
+    var first=true;
+    return line.replace(/\S+/g,function(word,off){
+      var lo=word.toLowerCase();
+      var clean=lo.replace(/[^a-z\u00E0-\u00FF]/g,'');
+      var after=off>0&&/[.!?]\s*$/.test(line.substring(0,off));
+      var res;
+      if(first||after||!SMALL.has(clean)){res=capFirst(lo)}else{res=lo}
+      first=false;
+      return res;
+    });
+  }).join('\n');
+}
+
+function toCamel(text){
+  return text.split('\n').map(function(line){
+    var w=toWords(line);
+    if(!w.length)return '';
+    return w.map(function(s,i){
+      var lo=s.toLowerCase();
+      return i===0?lo:lo.charAt(0).toUpperCase()+lo.slice(1);
+    }).join('');
+  }).join('\n');
+}
+
+function toSnake(text){
+  return text.split('\n').map(function(line){
+    return toWords(line).map(function(s){return s.toLowerCase()}).join('_');
+  }).join('\n');
+}
+
+function toKebab(text){
+  return text.split('\n').map(function(line){
+    return toWords(line).map(function(s){return s.toLowerCase()}).join('-');
+  }).join('\n');
+}
+
+var TRANSFORMS=[toUpper,toLower,toTitle,toCamel,toSnake,toKebab];
+
+function transform(text,m){
+  if(!text)return text;
+  return TRANSFORMS[m](text);
+}
+
+// === Cursor mapping for length-changing transforms ===
+
+function mapCursor(oldText,newText,oldPos){
+  if(oldText.length===newText.length)return oldPos;
+  var count=0;
+  for(var i=0;i<oldPos&&i<oldText.length;i++){
+    if(/[a-zA-Z0-9]/.test(oldText[i]))count++;
+  }
+  if(count===0)return 0;
+  var c=0;
+  for(var j=0;j<newText.length;j++){
+    if(/[a-zA-Z0-9]/.test(newText[j]))c++;
+    if(c>=count)return j+1;
+  }
+  return newText.length;
+}
+
+// === Apply transform with undo support ===
+
+function applyTransform(newText){
+  var text=editor.value;
+  if(newText===text)return;
+  var pos=editor.selectionStart;
+  var end=editor.selectionEnd;
+  var nPos=mapCursor(text,newText,pos);
+  var nEnd=pos===end?nPos:mapCursor(text,newText,end);
+  transforming=true;
+  editor.focus();
+  editor.select();
+  if(!document.execCommand('insertText',false,newText))editor.value=newText;
+  editor.setSelectionRange(nPos,nEnd);
+  transforming=false;
+}
+
+// === Mode switching ===
+
+function updatePills(){
+  modeBtns.forEach(function(btn,i){
+    btn.classList.toggle('active',i===mode);
+    btn.setAttribute('aria-checked',i===mode?'true':'false');
+  });
+}
+
+function setMode(m){
+  if(m<0||m>5)return;
+  var text=editor.value;
+  var result=transform(text,m);
+  mode=m;
+  updatePills();
+  if(result!==text)applyTransform(result);
+  queuePersist(SAVE_TEXT|SAVE_STATE);
+  doFlush(true);
+}
+
+// === Input handler (live enforcement for UPPER/lower/Title) ===
+
+function onInput(){
+  if(transforming||composing)return;
+  touched=1;
+  if(mode<=2){
+    var text=editor.value;
+    var result=transform(text,mode);
+    if(result!==text){
+      var pos=editor.selectionStart;
+      var end=editor.selectionEnd;
+      transforming=true;
+      editor.value=result;
+      editor.setSelectionRange(pos,end);
+      transforming=false;
+    }
+  }
+  queuePersist(SAVE_TEXT|SAVE_STATE);
+}
+
+editor.addEventListener('compositionstart',function(){composing=true});
+editor.addEventListener('compositionend',function(){composing=false;onInput()});
+editor.addEventListener('input',onInput);
+editor.addEventListener('scroll',function(){queuePersist(SAVE_STATE)},{passive:true});
+editor.addEventListener('keyup',function(){queuePersist(SAVE_STATE)});
+editor.addEventListener('click',function(){queuePersist(SAVE_STATE)});
+
+// === Editor keyboard shortcuts ===
+
+editor.addEventListener('keydown',function(event){
+  if(event.key==='Tab'&&!event.shiftKey){
+    event.preventDefault();
+    var s=editor.selectionStart;
+    var e=editor.selectionEnd;
+    var v=editor.value;
+    editor.value=v.substring(0,s)+'  '+v.substring(e);
+    editor.selectionStart=editor.selectionEnd=s+2;
+    onInput();
+    return;
+  }
+  if(event.key==='Tab'&&event.shiftKey){
+    event.preventDefault();
+    var s=editor.selectionStart;
+    var v=editor.value;
+    var ls=getLineStart(v,s);
+    if(v[ls]===' '&&v[ls+1]===' '){
+      editor.value=v.substring(0,ls)+v.substring(ls+2);
+      editor.selectionStart=editor.selectionEnd=Math.max(ls,s-2);
+      onInput();
+    }
+    return;
+  }
+  if(event.key==='Enter'&&!event.metaKey&&!event.ctrlKey){
+    var s=editor.selectionStart;
+    var v=editor.value;
+    var lineStart=getLineStart(v,s);
+    var m=v.slice(lineStart,s).match(/^[ \t]*/);
+    var indent=m?m[0]:'';
+    if(indent){
+      event.preventDefault();
+      var e=editor.selectionEnd;
+      editor.value=v.substring(0,s)+'\n'+indent+v.substring(e);
+      editor.selectionStart=editor.selectionEnd=s+1+indent.length;
+      onInput();
+    }
+    return;
+  }
+  var mod=event.metaKey||event.ctrlKey;
+  if(!mod)return;
+  if(!event.shiftKey&&!event.altKey&&event.code==='KeyS'){
+    event.preventDefault();
+    doDownload();
+    return;
+  }
+  if(event.shiftKey&&!event.altKey&&event.code==='KeyK'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var ls=getLineStart(v,s);
+    var le=v.indexOf('\n',s);
+    var lineEnd=le<0?v.length:le+1;
+    editor.value=v.substring(0,ls)+v.substring(lineEnd);
+    editor.selectionStart=editor.selectionEnd=Math.min(ls,editor.value.length);
+    onInput();
+    return;
+  }
+  if(event.shiftKey&&!event.altKey&&event.code==='ArrowUp'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var ls=getLineStart(v,s);
+    var le=v.indexOf('\n',s);
+    if(ls===0)return;
+    var prevLs=getLineStart(v,ls-1);
+    var prevLine=v.substring(prevLs,ls);
+    var curLine=v.substring(ls,le<0?v.length:le+1);
+    var atEnd=le<0;
+    var swap=atEnd?curLine+'\n'+prevLine.replace(/\n$/,''):curLine+prevLine;
+    editor.value=v.substring(0,prevLs)+swap+v.substring(atEnd?v.length:le+1);
+    editor.selectionStart=editor.selectionEnd=s-prevLine.length;
+    onInput();
+    return;
+  }
+  if(event.shiftKey&&!event.altKey&&event.code==='ArrowDown'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var ls=getLineStart(v,s);
+    var le=v.indexOf('\n',s);
+    if(le<0)return;
+    var nextLe=v.indexOf('\n',le+1);
+    var curLine=v.substring(ls,le+1);
+    var nextLine=v.substring(le+1,nextLe<0?v.length:nextLe+1);
+    var atEnd=nextLe<0;
+    var swap=atEnd?nextLine+'\n'+curLine.replace(/\n$/,''):nextLine+curLine;
+    editor.value=v.substring(0,ls)+swap+v.substring(atEnd?v.length:nextLe+1);
+    editor.selectionStart=editor.selectionEnd=s+nextLine.length+(atEnd?1:0);
+    onInput();
+    return;
+  }
+  if(event.shiftKey&&!event.altKey&&event.code==='KeyD'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var ls=getLineStart(v,s);
+    var le=getLineEnd(v,s);
+    var line=v.substring(ls,le);
+    var ins='\n'+line;
+    editor.value=v.substring(0,le)+ins+v.substring(le);
+    editor.selectionStart=editor.selectionEnd=s+ins.length;
+    onInput();
+    return;
+  }
+  if(!event.shiftKey&&!event.altKey&&event.code==='KeyL'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var ls=getLineStart(v,s);
+    var le=v.indexOf('\n',s);
+    editor.selectionStart=ls;
+    editor.selectionEnd=le<0?v.length:le+1;
+    return;
+  }
+  if(!event.shiftKey&&!event.altKey&&event.code==='Enter'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var pos=getLineEnd(v,s);
+    editor.value=v.substring(0,pos)+'\n'+v.substring(pos);
+    editor.selectionStart=editor.selectionEnd=pos+1;
+    onInput();
+    return;
+  }
+  if(event.shiftKey&&!event.altKey&&event.code==='Enter'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var ls=getLineStart(v,s);
+    editor.value=v.substring(0,ls)+'\n'+v.substring(ls);
+    editor.selectionStart=editor.selectionEnd=ls;
+    onInput();
+    return;
+  }
+  if(!event.shiftKey&&!event.altKey&&event.code==='KeyJ'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var le=v.indexOf('\n',s);
+    if(le<0)return;
+    var nextNonSpace=v.substring(le+1).match(/^[ \t]*/)[0].length;
+    editor.value=v.substring(0,le)+' '+v.substring(le+1+nextNonSpace);
+    editor.selectionStart=editor.selectionEnd=le+1;
+    onInput();
+    return;
+  }
+  if(!event.shiftKey&&!event.altKey&&event.code==='BracketRight'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var e=editor.selectionEnd;
+    var ls=getLineStart(v,s);
+    var le=getLineEnd(v,e-1);
+    var block=v.substring(ls,le);
+    var indented=block.split('\n').map(function(l){return '  '+l}).join('\n');
+    editor.value=v.substring(0,ls)+indented+v.substring(le);
+    editor.selectionStart=s+2;
+    editor.selectionEnd=e+(indented.length-block.length);
+    onInput();
+    return;
+  }
+  if(!event.shiftKey&&!event.altKey&&event.code==='BracketLeft'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var e=editor.selectionEnd;
+    var ls=getLineStart(v,s);
+    var le=getLineEnd(v,e-1);
+    var block=v.substring(ls,le);
+    var outdented=block.split('\n').map(function(l){return l.startsWith('  ')?l.substring(2):l.replace(/^[ \t]/,'')}).join('\n');
+    var diff=block.length-outdented.length;
+    if(!diff)return;
+    editor.value=v.substring(0,ls)+outdented+v.substring(le);
+    var firstLineDiff=block.split('\n')[0].length-outdented.split('\n')[0].length;
+    editor.selectionStart=Math.max(ls,s-firstLineDiff);
+    editor.selectionEnd=e-diff;
+    onInput();
+    return;
+  }
+  if(!event.shiftKey&&!event.altKey&&event.code==='KeyD'){
+    event.preventDefault();
+    var v=editor.value;
+    var s=editor.selectionStart;
+    var e=editor.selectionEnd;
+    if(s===e){
+      var wl=v.substring(0,s).search(/\w+$/);
+      var wr=v.substring(s).search(/\W/);
+      var ws=wl<0?s:wl;
+      var we=wr<0?v.length:s+wr;
+      editor.selectionStart=ws;
+      editor.selectionEnd=we;
+    }
+    return;
+  }
+});
+
+// === Drag and drop ===
+
+function isTextFile(file){
+  var name=(file&&file.name?file.name:'').toLowerCase();
+  var type=(file&&file.type?file.type:'').toLowerCase();
+  return type.startsWith('text/')||type==='application/json'||type==='application/xml'||type==='application/javascript'||/\.(txt|text|md|markdown|log|csv|tsv|json|xml|html|htm|css|js|ts|tsx|jsx|yaml|yml|toml|ini|cfg|conf|sh|py|rb|rs|go|java|c|h|cpp|hpp|cs|swift|sql|svg)$/.test(name);
+}
+
+function hasFiles(dt){return !!dt&&Array.from(dt.types||[]).includes('Files')}
+
+function setText(text){
+  var next=String(text||'').replace(/\r\n?/g,'\n');
+  if(next)next=transform(next,mode);
+  editor.value=next;
+  var end=next.length;
+  editor.focus();
+  editor.setSelectionRange(end,end);
+  queuePersist(SAVE_TEXT|SAVE_STATE);
+  doFlush(true);
+}
+
+drop.addEventListener('dragenter',function(event){
+  if(!hasFiles(event.dataTransfer))return;
+  event.preventDefault();
+  dragDepth++;
+  drop.classList.add('drag');
+});
+
+drop.addEventListener('dragover',function(event){
+  if(!hasFiles(event.dataTransfer))return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect='copy';
+});
+
+drop.addEventListener('dragleave',function(event){
+  if(!hasFiles(event.dataTransfer))return;
+  event.preventDefault();
+  dragDepth=Math.max(0,dragDepth-1);
+  if(!dragDepth)drop.classList.remove('drag');
+});
+
+drop.addEventListener('drop',async function(event){
+  event.preventDefault();
+  dragDepth=0;
+  drop.classList.remove('drag');
+  var dt=event.dataTransfer;
+  if(!dt)return;
+  var file=Array.from(dt.files||[]).find(isTextFile);
+  if(file){try{setText(await file.text())}catch(_){}return}
+  var plain=dt.getData('text/plain');
+  if(plain)setText(plain);
+});
+
+window.addEventListener('dragover',function(event){
+  if(hasFiles(event.dataTransfer))event.preventDefault();
+});
+
+window.addEventListener('drop',function(event){
+  if(hasFiles(event.dataTransfer)&&!drop.contains(event.target))event.preventDefault();
+});
+
+// === Download ===
+
+function doDownload(){
+  doFlush(true);
+  var blob=new Blob([editor.value],{type:'text/plain'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  var fname=editor.value.trim().split(/\s+/).slice(0,5).join('_').toLowerCase().replace(/[^a-z0-9_]/g,'')||'caseconverter';
+  a.download=fname+'.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// === Flush on visibility/page events ===
+
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden')doFlush(true);
+});
+window.addEventListener('pagehide',function(){doFlush(true)});
+window.addEventListener('beforeunload',function(){doFlush(true)},{capture:true});
+
+// === Cross-tab sync ===
+
+window.addEventListener('storage',function(event){
+  if(event.key===KEY_TEXT&&!document.hasFocus()){
+    var next=event.newValue;
+    if(next!==null&&next!==editor.value){
+      editor.value=next;
+      storedText=next;
+    }
+  }
+});
+
+// === Global keyboard shortcuts ===
+
+_base.onKey({
+  '2':function(){setMode(0)},
+  '3':function(){setMode(1)},
+  '4':function(){setMode(2)},
+  '5':function(){setMode(3)},
+  '6':function(){setMode(4)},
+  '7':function(){setMode(5)},
+  'ArrowLeft':function(){setMode((mode+5)%6)},
+  'ArrowRight':function(){setMode((mode+1)%6)},
+  ctrl:{
+    's':function(e){e.preventDefault();doDownload()}
+  }
+});
+
+// === Mode pill clicks ===
+
+document.querySelector('.modes').addEventListener('click',function(e){
+  var btn=e.target.closest('.mode-btn');
+  if(!btn)return;
+  var m=parseInt(btn.dataset.mode);
+  if(m===mode){
+    var text=editor.value;
+    var result=transform(text,m);
+    if(result!==text)applyTransform(result);
+    return;
+  }
+  setMode(m);
+});
+
+// === Reset (project name click) ===
+
+document.querySelectorAll('nav a').forEach(function(a){
+  a.addEventListener('click',function(){if(saveMask)doFlush(true)});
+});
+var wTab=document.querySelector('.tabs a.active');
+var wReset=_base.twoPress(wTab,{
+  label:wTab,
+  text:'CaseConverter',
+  guard:function(){return !!editor.value.trim()},
+  onConfirm:function(){
+    applyTransform('');
+    mode=0;
+    updatePills();
+    queuePersist(SAVE_TEXT|SAVE_STATE);
+    doFlush(true);
+  }
+});
+wTab.addEventListener('click',function(e){e.preventDefault();wReset.press()});
+
+// === Selection change tracking ===
+
+var selTimer=0;
+document.addEventListener('selectionchange',function(){
+  if(document.activeElement!==editor)return;
+  if(selTimer)clearTimeout(selTimer);
+  selTimer=setTimeout(function(){selTimer=0;queuePersist(SAVE_STATE)},150);
+});
+
+// === Initialization ===
+
+Promise.all([readPersisted(KEY_TEXT),readPersisted(KEY_STATE)]).then(function(values){
+  var text=values[0];
+  var state=values[1];
+  if(!touched&&text!==null){
+    editor.value=text;
+    storedText=text;
+  }
+  if(state){
+    var parts=state.split('|');
+    var m=parseInt(parts[0])||0;
+    if(m>=0&&m<=5)mode=m;
+    updatePills();
+    var len=editor.value.length;
+    var ss=clamp(parseInt(parts[1])||0,0,len);
+    var se=clamp(parseInt(parts[2])||ss,ss,len);
+    var scroll=Math.max(0,parseInt(parts[3])||0);
+    storedState=state;
+    requestAnimationFrame(function(){
+      var lh=editorLineHeight();
+      var snapped=Math.max(0,Math.round(scroll/lh)*lh);
+      var maxScroll=editor.scrollHeight-editor.clientHeight;
+      editor.setSelectionRange(ss,se);
+      editor.scrollTop=Math.min(snapped,Math.max(0,maxScroll));
+    });
+  }
+  editor.focus();
+}).catch(function(){
+  editor.focus();
+});
+
+})();
+</script>
+</body>
+</html>

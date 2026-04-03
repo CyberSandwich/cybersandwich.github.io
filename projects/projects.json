@@ -36,6 +36,12 @@
     "category": "Image Tools"
   },
   {
+    "title": "CaseConverter",
+    "subtitle": "Text Case Conversion Tool",
+    "url": "/caseconverter/",
+    "category": "Text Tools"
+  },
+  {
     "title": "Clip",
     "subtitle": "Clipboard Text Manager",
     "url": "/clip/",
