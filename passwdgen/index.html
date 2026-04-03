@@ -16,7 +16,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=23">
+<link rel="stylesheet" href="/shared/base.css?v=24">
 <style>
 :root{--num-bg:#48484A}
 html[data-theme="sepia"]{--num-bg:#6B5744}
@@ -39,18 +39,6 @@ body{display:flex;align-items:flex-start;justify-content:center}
   user-select:all;-webkit-user-select:all
 }
 #pw::selection{background:rgba(255,255,255,.2)}
-#ent{
-  font:500 .75rem/1 var(--font);
-  text-align:center;margin-top:12px;
-  color:rgba(255,255,255,.5);
-  font-variant-numeric:tabular-nums
-}
-.ent-w{color:#FCA5A5}
-.ent-f{color:#FBBF24}
-.ent-s{color:#86EFAC}
-.ent-v{color:#67E8F9}
-.ent-m{color:#C4B5FD}
-#pp-set .seg-row{padding:4px 10px 10px}
 .links{margin-bottom:0}
 #cp-k{stroke-width:2.5}
 @media(hover:hover){
@@ -63,11 +51,10 @@ body{display:flex;align-items:flex-start;justify-content:center}
 
 <div class="out" id="out" role="button" tabindex="0" aria-label="Click to Copy Password">
 <div id="pw" aria-live="polite"></div>
-<div id="ent"></div>
 </div>
 
 <div class="card" id="md-card" role="radiogroup" aria-label="Generation Mode">
-<div class="seg-row">
+<div class="seg-row c2">
 <button class="seg active" data-m="0">Password</button>
 <button class="seg" data-m="1">Passphrase</button>
 </div>
@@ -111,7 +98,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
 <button class="step-btn" id="wrd-up" aria-label="More Words"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 </div>
-<div class="seg-row" role="radiogroup" aria-label="Separator">
+<div class="seg-row c4" role="radiogroup" aria-label="Separator">
 <button class="seg active" data-s="-">-</button>
 <button class="seg" data-s=".">.</button>
 <button class="seg" data-s="_">_</button>
@@ -155,7 +142,7 @@ DIGITS='0123456789',SYMBOLS='!@#$%^&*-_+=.?',AMBIG='0OoIl1|';
 
 /* Element refs */
 var $=function(id){return document.getElementById(id)},
-pwEl=$('pw'),entEl=$('ent'),outEl=$('out'),
+pwEl=$('pw'),outEl=$('out'),
 lenL=$('len-l'),wrdL=$('wrd-l'),
 pwSet=$('pw-set'),ppSet=$('pp-set'),
 genBtn=$('gen-btn'),genL=$('gen-l'),
@@ -166,7 +153,7 @@ rsL=$('rs-l');
 var mode=0,cur='',
 pwLen=20,pwUpper=true,pwLower=true,pwDigits=true,pwSymbols=true,pwExclude=false,
 ppWords=6,ppSep='-',ppCap=true,ppNum=false,
-clipTimer=null,clipCount=0,cpTm;
+clipTimer=null,clipCount=0,cpTm,genTm;
 
 /* Persistence */
 function loadSettings(){
@@ -255,26 +242,6 @@ function generatePp(){
   return result;
 }
 
-/* Entropy: H = L * log2(C) for passwords, N * log2(W) for passphrases */
-function calcEntropy(){
-  if(mode===0){
-    var cs=buildCharset();
-    return cs.length?pwLen*Math.log2(cs.length):0;
-  }
-  var h=ppWords*Math.log2(2048);
-  if(ppNum)h+=Math.log2(100);
-  return h;
-}
-
-/* Strength label + CSS class */
-function strengthLabel(bits){
-  if(bits>=128)return['Maximum','ent-m'];
-  if(bits>=80)return['Very Strong','ent-v'];
-  if(bits>=60)return['Strong','ent-s'];
-  if(bits>=40)return['Fair','ent-f'];
-  return['Weak','ent-w'];
-}
-
 /* Adaptive font size for password display */
 function sizePw(text){
   var len=text.length;
@@ -285,18 +252,6 @@ function sizePw(text){
   else pwEl.style.fontSize='';
 }
 
-/* Update entropy display using safe DOM methods */
-function updateEntropy(){
-  var bits=calcEntropy();
-  var s=strengthLabel(bits);
-  entEl.textContent='';
-  entEl.appendChild(document.createTextNode(bits.toFixed(1)+' Bits \u00B7 '));
-  var sp=document.createElement('span');
-  sp.className=s[1];
-  sp.textContent=s[0];
-  entEl.appendChild(sp);
-}
-
 /* Render: generate + display */
 function render(){
   cur=mode===0?generatePw():generatePp();
@@ -304,7 +259,6 @@ function render(){
   pwEl.textContent=cur;
   pwEl.classList.add('fi');
   sizePw(cur);
-  updateEntropy();
 }
 
 /* Mode switching */
@@ -393,9 +347,10 @@ function doCopy(){
 
 /* Generate with feedback */
 function doGenerate(){
+  clearTimeout(genTm);
   render();
   genL.textContent='Generated';
-  _base.btnFeedback(genBtn,'ok',800,function(){genL.textContent='Generate'});
+  genTm=setTimeout(function(){genL.textContent='Generate'},800);
 }
 
 /* Reset */

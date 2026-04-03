@@ -123,6 +123,8 @@ html[data-theme="sepia"] .drop-overlay{background:rgba(245,237,218,.95)}
 html[data-theme="dark"] .chip.active{color:#0D1B2A}
 html[data-theme="sepia"] .chip.active{color:#1A0E05}
 .seg-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--bdr2)}
+.seg-row.c2{grid-template-columns:1fr 1fr}
+.seg-row.c4{grid-template-columns:repeat(4,1fr)}
 .seg-row:last-child{border-bottom:none}
 .seg{padding:12px;min-height:46px;display:flex;align-items:center;justify-content:center;font:500 .875rem/1 var(--font);color:var(--t3);background:none;border:none;cursor:pointer;text-align:center;transition:background .2s,color .2s}
 .seg.active{background:var(--tab-active);color:var(--tab-active-c)}
