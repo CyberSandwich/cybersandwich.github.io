@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<title>ReSolve</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ReSolve">
+<meta name="description" content="Word unscrambler and anagram solver. Enter jumbled letters to find all possible words.">
+<meta property="og:title" content="ReSolve">
+<meta property="og:description" content="Word unscrambler and anagram solver. Enter jumbled letters to find all possible words.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=24">
+<style>
+body{display:flex;align-items:flex-start;justify-content:center}
+.w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
+@media(min-width:768px){.w{padding:32px 48px calc(100px + env(safe-area-inset-bottom,0px))}}
+.cc{padding:4px 20px 12px;color:var(--t4);font-size:13px;font-weight:500}
+:root{--rex:#16A34A;--rcl:#D97706;--rbg:#F0F0F0;--rok:#DCFCE7}
+html[data-theme="dark"]{--rex:#4ADE80;--rcl:#FBBF24;--rbg:#3A3A3C;--rok:#14532D50}
+html[data-theme="sepia"]{--rex:#65A30D;--rcl:#B45309;--rbg:#E8DFC8;--rok:#D1FAE550}
+.rh{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 8px;font-weight:600;font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.rn{background:var(--rbg);padding:2px 8px;border-radius:var(--rr);font-size:11px;font-weight:600;color:var(--t3)}
+.ri{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--bdr2);cursor:pointer;transition:background .15s,color .15s}
+.ri:last-child{border-bottom:none}
+.ri:active{opacity:.7}
+.ri.kf{background:var(--bg);outline:2px solid var(--acc);outline-offset:-2px;border-radius:4px}
+.ri.ok{background:var(--rok);animation:pop .35s ease}
+.rw{font-weight:500;letter-spacing:.3px;color:var(--t1)}
+.rw .plus{color:var(--t4);margin:0 4px;font-weight:400}
+.rb{font-size:12px;padding:2px 8px;border-radius:var(--rr);background:var(--rbg);color:var(--t3);font-weight:500;white-space:nowrap;flex-shrink:0;margin-left:12px}
+.rb.ex{color:var(--rex)}
+.rb.cl{color:var(--rcl)}
+.mb{width:100%;padding:10px 20px;border:none;background:none;color:var(--acc);font:500 13px/1 var(--font);cursor:pointer;border-top:1px solid var(--bdr2);text-align:center}
+.mb:active{opacity:.7}
+.sts{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1.4 var(--font)}
+.sts.ld{animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fi .25s ease}
+.fw{margin-bottom:14px;--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="sepia"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="dark"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+.fw input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
+.fw input:focus{border-color:var(--t4)}
+.fw{position:relative}
+#filter-x{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;background:none;cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
+#filter-x:active{opacity:.7}
+@media(hover:hover){
+  .ri:hover{background:var(--bg)}
+  .mb:hover{background:var(--bg)}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="w">
+  <div class="card">
+    <div class="inp">
+      <input id="inp" type="text" placeholder="Enter Letters" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Enter Letters to Unscramble">
+      <button type="button" id="go-btn" aria-label="Solve"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+    </div>
+    <div class="cc" id="cc">0 Letters</div>
+  </div>
+  <div class="card">
+    <div class="seg-row c2" id="mode-row">
+      <button class="seg active" data-mode="single">Single Word</button>
+      <button class="seg" data-mode="multi">Multi Word</button>
+    </div>
+  </div>
+  <div class="card" id="status-card">
+    <div class="sts ld" id="sts">Loading Dictionary...</div>
+  </div>
+  <div class="fw" id="filter-wrap" style="display:none">
+    <input id="filter" type="text" placeholder="Filter Results" autocomplete="off" spellcheck="false" aria-label="Filter Results">
+    <button id="filter-x" type="button" aria-label="Clear Filter" style="display:none"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="card fi" id="res-card" style="display:none">
+    <div id="res" role="status" aria-live="polite"></div>
+  </div>
+</main>
+<nav aria-label="Primary">
+<div class="tabs">
+<a href="/">Home</a>
+<a class="active" id="nav-active">ReSolve</a>
+</div>
+<div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=23"></script>
+<script src="/shared/search.js?v=20"></script>
+<script src="/shared/swr.js?v=1"></script>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+
+/* ── State ──────────────────────────────────────────────────────── */
+var W=[],WC=0,AI=null,SG=null;
+var ready=false,mode=_base.load('resolve:mode','single');
+var lastInput=_base.load('resolve:input','');
+var allRes=[],visRes=[],kbIdx=-1,copyTm={};
+var filterTimer=null,SHOW_LIMIT=20;
+
+/* ── DOM ────────────────────────────────────────────────────────── */
+var inp=$('inp'),goBtn=$('go-btn'),cc=$('cc');
+var stsCard=$('status-card'),sts=$('sts');
+var resCard=$('res-card'),resEl=$('res');
+var filterWrap=$('filter-wrap'),filterInp=$('filter'),filterX=$('filter-x');
+var modeRow=$('mode-row');
+
+/* ── Utilities ──────────────────────────────────────────────────── */
+function clean(s){return s.replace(/[^a-zA-Z]/g,'').toLowerCase()}
+function lc(s){var c=new Int8Array(26);for(var i=0;i<s.length;i++)c[s.charCodeAt(i)-97]++;return c}
+
+/* ── Dictionary & Index ─────────────────────────────────────────── */
+function buildIndex(text){
+  var lines=text.split('\n'),i,j,w,off,c,key;
+  W=[];AI=new Map();
+  for(i=0;i<lines.length;i++){
+    w=lines[i].trim();
+    if(w.length>=2)W.push(w);
+  }
+  WC=W.length;
+  SG=new Int8Array(WC*26);
+  for(i=0;i<WC;i++){
+    w=W[i];off=i*26;key=w.split('').sort().join('');
+    for(j=0;j<w.length;j++)SG[off+w.charCodeAt(j)-97]++;
+    var arr=AI.get(key);
+    if(arr)arr.push(i);else AI.set(key,[i]);
+  }
+  ready=true;
+  stsCard.style.display='none';
+  if(lastInput){inp.value=lastInput;updateCC();solve()}
+  else showEmpty();
+}
+
+function showEmpty(){
+  stsCard.style.display='';sts.className='sts';
+  sts.textContent='Enter Letters to Find Words';
+  resCard.style.display='none';filterWrap.style.display='none';
+}
+function showStatus(msg,loading){
+  stsCard.style.display='';sts.className=loading?'sts ld':'sts';
+  sts.textContent=msg;resCard.style.display='none';filterWrap.style.display='none';
+}
+
+/* ── Single Word Solver ─────────────────────────────────────────── */
+function solveSingle(input){
+  var ic=lc(input),il=input.length,results=[],found=new Set();
+  var letters=[],maxC=[],c;
+  for(c=0;c<26;c++){if(ic[c]>0){letters.push(c);maxC.push(ic[c])}}
+  var n=letters.length;
+
+  // Sub-multiset enumeration
+  (function rec(d,key){
+    if(d===n){
+      if(key.length>=2){
+        var arr=AI.get(key);
+        if(arr)for(var i=0;i<arr.length;i++){
+          var idx=arr[i];
+          if(!found.has(idx)){
+            found.add(idx);
+            results.push({idx:idx,type:W[idx].length===il?'exact':'subset',used:key.length,deficit:0,dl:''});
+          }
+        }
+      }
+      return;
+    }
+    var ch=String.fromCharCode(97+letters[d]);
+    for(var c=0;c<=maxC[d];c++)rec(d+1,c===0?key:key+ch.repeat(c));
+  })(0,'');
+
+  // Close match scan (+1, +2)
+  for(var w=0;w<WC;w++){
+    if(found.has(w))continue;
+    var off=w*26,wl=0;
+    for(c=0;c<26;c++)wl+=SG[off+c];
+    if(wl>il+2||wl<3)continue;
+    var def=0;
+    for(c=0;c<26;c++){
+      if(SG[off+c]>ic[c])def+=SG[off+c]-ic[c];
+      if(def>2)break;
+    }
+    if(def>0&&def<=2){
+      var dl='';
+      for(c=0;c<26;c++){var d=SG[off+c]-ic[c];if(d>0)for(var j=0;j<d;j++)dl+=String.fromCharCode(65+c)}
+      results.push({idx:w,type:'close',used:wl-def,deficit:def,dl:dl});
+    }
+  }
+  return results;
+}
+
+/* ── Multi-Word Solver ──────────────────────────────────────────── */
+function solveMulti(input,singleResults){
+  var ic=lc(input),il=input.length,i,c;
+  var cands=[];
+  for(i=0;i<singleResults.length;i++){
+    var r=singleResults[i];
+    if(r.type!=='close'&&W[r.idx].length>=3)cands.push(r.idx);
+  }
+  cands.sort(function(a,b){return W[b].length-W[a].length||a-b});
+
+  var combos=[],deadline=Date.now()+2000,nodes=0;
+
+  (function dfs(rem,remLen,chosen,start){
+    if(remLen===0&&chosen.length>=2){combos.push(chosen.slice());return}
+    if(chosen.length>=4||remLen<3||combos.length>=200)return;
+    for(var i=start;i<cands.length;i++){
+      if(++nodes%10000===0&&Date.now()>deadline)return;
+      var idx=cands[i],wl=W[idx].length;
+      if(wl>remLen)continue;
+      var off=idx*26,fits=true;
+      for(c=0;c<26;c++){if(SG[off+c]>rem[c]){fits=false;break}}
+      if(!fits)continue;
+      for(c=0;c<26;c++)rem[c]-=SG[off+c];
+      chosen.push(idx);
+      dfs(rem,remLen-wl,chosen,i+1);
+      chosen.pop();
+      for(c=0;c<26;c++)rem[c]+=SG[off+c];
+      if(combos.length>=200||(nodes%10000===0&&Date.now()>deadline))return;
+    }
+  })(new Int8Array(ic),il,[],0);
+  return combos;
+}
+
+/* ── Ranking ────────────────────────────────────────────────────── */
+function scoreResult(r,il){
+  var mt,wl=r.wlen||W[r.idx].length;
+  if(r.type==='close')mt=r.deficit===1?3:1;
+  else if(r.type==='exact')mt=10;
+  else if(r.type==='multi')mt=r.used>=il?9:7;
+  else{var cv=r.used/il;mt=cv>=.8?8:cv>=.6?6:cv>=.4?4:2}
+  var rank=r.idx!==undefined?r.idx:r.bestRank||50000;
+  var ll=Math.min(wl,10);
+  var ff=10*(1-rank/WC);
+  var cvs=10*(r.used/il);
+  var cb=rank<5000?4:rank<20000?2:rank<50000?1:0;
+  var wcp=r.wc?-(r.wc-1)*15:0;
+  var dp=r.type==='close'?-r.deficit*20:0;
+  return mt*100+ll*10+ff*5+cvs*8+cb*3+wcp+dp;
+}
+
+/* ── Solve Orchestrator ─────────────────────────────────────────── */
+function solve(){
+  var raw=inp.value,input=clean(raw);
+  if(!input){showEmpty();return}
+  if(input.length>20){_base.notify('20 Letters Max',false);return}
+  if(!ready){_base.notify('Dictionary Loading...',false);return}
+  _base.save('resolve:input',raw);
+
+  var singles=solveSingle(input),il=input.length,i,j;
+  allRes=[];
+  for(i=0;i<singles.length;i++){
+    var r=singles[i];
+    r.score=scoreResult(r,il);
+    r.word=W[r.idx].toUpperCase();
+    allRes.push(r);
+  }
+  if(mode==='multi'){
+    var combos=solveMulti(input,singles);
+    for(i=0;i<combos.length;i++){
+      var c=combos[i],ws=[],tl=0,best=Infinity;
+      for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j]}
+      var mr={type:'multi',used:tl,wc:c.length,wlen:tl,bestRank:best,
+              word:ws.join(' + '),words:ws,idxs:c,deficit:0,dl:''};
+      mr.score=scoreResult(mr,il);allRes.push(mr);
+    }
+  }
+  allRes.sort(function(a,b){return b.score-a.score||a.word.localeCompare(b.word)});
+  filterInp.value='';visRes=allRes;kbIdx=-1;render();
+}
+
+/* ── Result Grouping ────────────────────────────────────────────── */
+function groupResults(list,il){
+  var gs=[
+    {key:'exact',label:'Exact Matches',items:[]},
+    {key:'multi',label:'Multi-Word Solutions',items:[]},
+    {key:'sub1',label:'1 Letter Short',items:[]},
+    {key:'sub2',label:'2 Letters Short',items:[]},
+    {key:'sub3',label:'3+ Letters Short',items:[]},
+    {key:'close1',label:'Near Matches (+1 Letter)',items:[]},
+    {key:'close2',label:'Near Matches (+2 Letters)',items:[]}
+  ];
+  for(var i=0;i<list.length;i++){
+    var r=list[i];
+    if(r.type==='exact')gs[0].items.push(r);
+    else if(r.type==='multi')gs[1].items.push(r);
+    else if(r.type==='close')(r.deficit===1?gs[5]:gs[6]).items.push(r);
+    else{var m=il-r.used;(m===1?gs[2]:m===2?gs[3]:gs[4]).items.push(r)}
+  }
+  return gs.filter(function(g){return g.items.length>0});
+}
+
+/* ── Render ──────────────────────────────────────────────────────── */
+function render(){
+  var il=clean(inp.value).length,groups=groupResults(visRes,il);
+  if(!groups.length){
+    if(il>0)showStatus('No Matches Found',false);else showEmpty();
+    return;
+  }
+  stsCard.style.display='none';resCard.style.display='';
+  filterWrap.style.display=allRes.length>10?'':'none';
+
+  // Build DOM with fragments
+  var frag=document.createDocumentFragment();
+  for(var g=0;g<groups.length;g++){
+    var gr=groups[g],items=gr.items;
+    // Section header
+    var hdr=document.createElement('div');hdr.className='rh';
+    var hl=document.createElement('span');hl.textContent=gr.label;
+    var hn=document.createElement('span');hn.className='rn';hn.textContent=items.length;
+    hdr.appendChild(hl);hdr.appendChild(hn);frag.appendChild(hdr);
+    // Items
+    var limit=Math.min(items.length,SHOW_LIMIT);
+    for(var i=0;i<limit;i++)frag.appendChild(mkItem(items[i],il));
+    // Show more
+    if(items.length>SHOW_LIMIT){
+      var btn=document.createElement('button');btn.className='mb';
+      btn.textContent='Show All '+items.length;
+      btn.dataset.gkey=gr.key;
+      frag.appendChild(btn);
+    }
+  }
+  resEl.textContent='';
+  resEl.appendChild(frag);
+}
+
+function mkItem(r,il){
+  var div=document.createElement('div');
+  div.className='ri';
+  div.dataset.w=r.words?r.words.join(' '):r.word;
+
+  var wSpan=document.createElement('span');wSpan.className='rw';
+  if(r.words){
+    for(var i=0;i<r.words.length;i++){
+      if(i>0){var pl=document.createElement('span');pl.className='plus';pl.textContent='+';wSpan.appendChild(pl)}
+      var ws=document.createElement('span');ws.textContent=r.words[i];wSpan.appendChild(ws);
+    }
+  }else{wSpan.textContent=r.word}
+
+  var badge=document.createElement('span');badge.className='rb';
+  if(r.type==='exact'||(r.type==='multi'&&r.used>=il)){badge.classList.add('ex');badge.textContent=r.used+'/'+il}
+  else if(r.type==='close'){badge.classList.add('cl');badge.textContent='+'+r.dl}
+  else if(r.type==='multi'){badge.textContent=r.used+'/'+il}
+  else{badge.textContent=r.used+'/'+il}
+
+  div.appendChild(wSpan);div.appendChild(badge);
+  return div;
+}
+
+/* ── Show More Handler ──────────────────────────────────────────── */
+resEl.addEventListener('click',function(e){
+  var mb=e.target.closest('.mb');
+  if(mb){
+    var gkey=mb.dataset.gkey,il=clean(inp.value).length;
+    var groups=groupResults(visRes,il);
+    var gr=groups.filter(function(g){return g.key===gkey})[0];
+    if(!gr)return;
+    var frag=document.createDocumentFragment();
+    for(var i=SHOW_LIMIT;i<gr.items.length;i++){
+      var el=mkItem(gr.items[i],il);el.classList.add('fi');frag.appendChild(el);
+    }
+    mb.parentNode.insertBefore(frag,mb);mb.remove();
+    return;
+  }
+  var ri=e.target.closest('.ri');
+  if(ri)copyWord(ri);
+});
+
+/* ── Filter ──────────────────────────────────────────────────────── */
+function applyFilter(){
+  var q=_search.norm(filterInp.value.trim().toLowerCase());
+  if(!q){visRes=allRes;kbIdx=-1;render();return}
+  var words=q.split(/\s+/).filter(Boolean),scored=[],i,j;
+  for(i=0;i<allRes.length;i++){
+    var r=allRes[i],txt=_search.normC(r.word.toLowerCase());
+    var total=0,ok=true;
+    for(j=0;j<words.length;j++){
+      var s=_search.scoreWord(words[j],txt);
+      if(s<=0){ok=false;break}
+      total+=s;
+    }
+    if(ok)scored.push({r:r,fs:total});
+  }
+  scored.sort(function(a,b){return b.fs-a.fs});
+  visRes=scored.map(function(s){return s.r});
+  kbIdx=-1;render();
+}
+filterInp.addEventListener('input',function(){
+  filterX.style.display=filterInp.value?'flex':'none';
+  clearTimeout(filterTimer);filterTimer=setTimeout(applyFilter,80);
+});
+filterX.addEventListener('click',function(){filterInp.value='';filterX.style.display='none';applyFilter();filterInp.focus()});
+
+/* ── Copy ────────────────────────────────────────────────────────── */
+function copyWord(el){
+  var w=el.dataset.w;
+  _base.copyText(w,function(){
+    el.classList.remove('ok');void el.offsetWidth;el.classList.add('ok');
+    clearTimeout(copyTm[w]);copyTm[w]=setTimeout(function(){el.classList.remove('ok')},800);
+  });
+}
+
+/* ── Keyboard Navigation ────────────────────────────────────────── */
+function getVisItems(){return resEl.querySelectorAll('.ri')}
+function setKb(idx){
+  var items=getVisItems();
+  if(kbIdx>=0&&kbIdx<items.length)items[kbIdx].classList.remove('kf');
+  kbIdx=idx;
+  if(kbIdx>=0&&kbIdx<items.length){items[kbIdx].classList.add('kf');items[kbIdx].scrollIntoView({block:'nearest'})}
+}
+function moveKb(dir){
+  var items=getVisItems();if(!items.length)return;
+  var next=kbIdx+dir;
+  if(next<0)next=items.length-1;if(next>=items.length)next=0;
+  setKb(next);
+}
+
+/* ── Events ──────────────────────────────────────────────────────── */
+function updateCC(){var n=clean(inp.value).length;cc.textContent=n+' Letter'+(n!==1?'s':'')}
+inp.addEventListener('input',updateCC);
+
+function doSolve(){
+  if(!clean(inp.value)){_base.notify('Enter Some Letters',false);return}
+  solve();
+}
+goBtn.addEventListener('click',doSolve);
+inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doSolve()}});
+
+// Mode switch
+modeRow.addEventListener('click',function(e){
+  var b=e.target.closest('.seg[data-mode]');if(!b)return;
+  var m=b.dataset.mode;
+  if(m===mode){if(clean(inp.value))solve();return}
+  mode=m;_base.save('resolve:mode',mode);
+  modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s.dataset.mode===mode)});
+  if(clean(inp.value))solve();
+});
+
+// Paste
+document.addEventListener('paste',function(e){
+  if(document.activeElement===inp||document.activeElement===filterInp)return;
+  var text=e.clipboardData&&e.clipboardData.getData('text');
+  if(text){e.preventDefault();inp.value=text;updateCC();if(ready)solve()}
+});
+
+// Reset
+function doReset(){
+  inp.value='';filterInp.value='';updateCC();
+  allRes=[];visRes=[];kbIdx=-1;_base.save('resolve:input','');
+  showEmpty();inp.focus();
+}
+var navActive=$('nav-active');
+var resetH=_base.twoPress(navActive,{label:navActive,text:'ReSolve',onConfirm:doReset,guard:function(){return allRes.length>0||clean(inp.value).length>0}});
+navActive.addEventListener('click',function(e){e.preventDefault();resetH.press()});
+
+function doPaste(){navigator.clipboard.readText().then(function(t){if(t){inp.value=t;updateCC();if(ready)solve()}}).catch(function(){})}
+
+/* ── Keyboard Shortcuts ─────────────────────────────────────────── */
+_base.onKey({
+  '/':function(e){e.preventDefault();inp.focus()},
+  'r':function(e){e.preventDefault();doReset()},
+  's':function(e){if(filterWrap.style.display!=='none'){e.preventDefault();filterInp.focus()}},
+  'm':function(){
+    var next=mode==='single'?'multi':'single';mode=next;_base.save('resolve:mode',mode);
+    modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s.dataset.mode===mode)});
+    if(clean(inp.value))solve();
+  },
+  'v':doPaste,'p':doPaste,
+  'j':function(){moveKb(1)},'k':function(){moveKb(-1)},
+  'ArrowDown':function(){moveKb(1)},'ArrowUp':function(){moveKb(-1)},
+  'Enter':function(){if(kbIdx>=0){var items=getVisItems();if(items[kbIdx])copyWord(items[kbIdx])}},
+  'Escape':function(){
+    if(filterInp===document.activeElement){filterInp.value='';filterX.style.display='none';applyFilter();filterInp.blur()}
+    else{kbIdx=-1;var items=getVisItems();for(var i=0;i<items.length;i++)items[i].classList.remove('kf')}
+  }
+});
+
+/* ── Init ────────────────────────────────────────────────────────── */
+modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s.dataset.mode===mode)});
+if(lastInput)inp.value=lastInput;
+updateCC();
+
+_swr('/resolve/words.txt',{parse:function(t){return t},key:'resolve:dict'}).then(function(text){
+  if(text)buildIndex(text);else showStatus('Failed to Load Dictionary',false);
+}).catch(function(){showStatus('Failed to Load Dictionary',false)});
+
+})();
+</script>
+</body>
+</html>

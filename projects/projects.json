@@ -54,6 +54,12 @@
     "category": "Text Tools"
   },
   {
+    "title": "ReSolve",
+    "subtitle": "Word Unscrambler & Anagram Solver",
+    "url": "/resolve/",
+    "category": "Text Tools"
+  },
+  {
     "title": "Lorip",
     "subtitle": "Lorem Ipsum Generator",
     "url": "/lorip/",
