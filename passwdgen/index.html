@@ -26,7 +26,8 @@ body{display:flex;align-items:flex-start;justify-content:center}
   background:var(--num-bg);border-radius:20px;
   box-shadow:var(--shadow);
   padding:20px 24px;margin-bottom:14px;
-  transition:background .3s;cursor:pointer
+  transition:background .3s;cursor:pointer;
+  min-height:92px;display:flex;align-items:center;justify-content:center
 }
 .out:active{opacity:.85}
 .out.cp-fb{animation:cpFlash .35s ease}
@@ -40,7 +41,9 @@ body{display:flex;align-items:flex-start;justify-content:center}
 }
 #pw::selection{background:rgba(255,255,255,.2)}
 .links{margin-bottom:0}
+#len-l,#wrd-l{cursor:pointer}
 #cp-k{stroke-width:2.5}
+.str-w{color:#DC2626}.str-f{color:#D97706}.str-s{color:#16A34A}.str-v{color:#0891B2}.str-m{color:#7C3AED}
 @media(hover:hover){
 .out:hover{opacity:.92}
 }
@@ -120,6 +123,12 @@ body{display:flex;align-items:flex-start;justify-content:center}
 <button id="rs-btn" type="button" aria-label="Reset to defaults"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
 </div>
 
+<div class="card" id="str-card">
+<div class="srow" style="cursor:default">
+<span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span id="str-l"></span></span>
+</div>
+</div>
+
 </div>
 <nav aria-label="Primary">
 <div class="tabs">
@@ -147,7 +156,7 @@ lenL=$('len-l'),wrdL=$('wrd-l'),
 pwSet=$('pw-set'),ppSet=$('pp-set'),
 genBtn=$('gen-btn'),genL=$('gen-l'),
 cpBtn=$('cp-btn'),cpI=$('cp-i'),cpK=$('cp-k'),cpL=$('cp-l'),
-rsL=$('rs-l');
+rsL=$('rs-l'),strL=$('str-l');
 
 /* State */
 var mode=0,cur='',
@@ -242,6 +251,32 @@ function generatePp(){
   return result;
 }
 
+/* Entropy: H = L * log2(C) for passwords, N * log2(W) for passphrases */
+function calcEntropy(){
+  if(mode===0){
+    var cs=buildCharset();
+    return cs.length?pwLen*Math.log2(cs.length):0;
+  }
+  var h=ppWords*Math.log2(2048);
+  if(ppNum)h+=Math.log2(100);
+  return h;
+}
+function strengthLabel(bits){
+  if(bits>=128)return['Maximum','str-m'];
+  if(bits>=80)return['Very Strong','str-v'];
+  if(bits>=60)return['Strong','str-s'];
+  if(bits>=40)return['Fair','str-f'];
+  return['Weak','str-w'];
+}
+function updateStrength(){
+  var bits=calcEntropy(),s=strengthLabel(bits);
+  strL.textContent='';
+  strL.appendChild(document.createTextNode(bits.toFixed(1)+' Bits \u00B7 '));
+  var sp=document.createElement('span');
+  sp.className=s[1];sp.textContent=s[0];
+  strL.appendChild(sp);
+}
+
 /* Adaptive font size for password display */
 function sizePw(text){
   var len=text.length;
@@ -259,11 +294,12 @@ function render(){
   pwEl.textContent=cur;
   pwEl.classList.add('fi');
   sizePw(cur);
+  updateStrength();
 }
 
 /* Mode switching */
 function switchMode(m){
-  if(mode===m)return;
+  if(mode===m){doGenerate();return}
   mode=m;
   var segs=document.querySelectorAll('#md-card .seg');
   for(var i=0;i<segs.length;i++)segs[i].classList.toggle('active',parseInt(segs[i].dataset.m)===m);
@@ -317,14 +353,13 @@ function clearClipTimer(){
 }
 function startClipTimer(){
   clearClipTimer();clipCount=30;
-  cpL.textContent='Copied (30s)';
   clipTimer=setInterval(function(){
     clipCount--;
     if(clipCount<=0){
       clearClipTimer();
       navigator.clipboard.writeText('').catch(function(){});
       cpI.style.display='';cpK.style.display='none';
-      cpL.textContent='Copy';cpBtn.classList.remove('ok');
+      cpL.textContent='Copy';
     }else{
       cpL.textContent='Copied ('+clipCount+'s)';
     }
@@ -336,7 +371,10 @@ function doCopy(){
   if(!cur)return;
   _base.copyText(cur,function(){
     cpI.style.display='none';cpK.style.display='';
-    cpBtn.classList.add('ok');
+    cpL.textContent='Copied (30s)';
+    _base.btnFeedback(cpBtn,'ok',800,function(){
+      cpI.style.display='';cpK.style.display='none';
+    });
     startClipTimer();
   },function(){
     cpL.textContent='Failed';
@@ -350,7 +388,8 @@ function doGenerate(){
   clearTimeout(genTm);
   render();
   genL.textContent='Generated';
-  genTm=setTimeout(function(){genL.textContent='Generate'},800);
+  genBtn.classList.add('ok');
+  genTm=setTimeout(function(){genL.textContent='Generate';genBtn.classList.remove('ok')},800);
 }
 
 /* Reset */
@@ -413,6 +452,10 @@ $('len-up').onclick=function(){stepLen(1)};
 $('wrd-dn').onclick=function(){stepWrd(-1)};
 $('wrd-up').onclick=function(){stepWrd(1)};
 
+/* Events: click label to reset to default */
+lenL.onclick=function(){pwLen=20;lenL.textContent='20 Characters';saveSettings();render()};
+wrdL.onclick=function(){ppWords=6;wrdL.textContent='6 Words';saveSettings();render()};
+
 /* Events: action buttons */
 genBtn.onclick=doGenerate;
 cpBtn.onclick=doCopy;
@@ -421,14 +464,10 @@ $('rs-btn').onclick=function(){resetCtrl.press()};
 /* Events: click output to copy */
 outEl.onclick=function(){
   if(!cur)return;
+  doCopy();
+  outEl.classList.remove('cp-fb');outEl.offsetWidth;outEl.classList.add('cp-fb');
   clearTimeout(cpTm);
-  _base.copyText(cur,function(){
-    outEl.classList.remove('cp-fb');outEl.offsetWidth;outEl.classList.add('cp-fb');
-    cpTm=setTimeout(function(){outEl.classList.remove('cp-fb')},400);
-    cpI.style.display='none';cpK.style.display='';
-    cpBtn.classList.add('ok');
-    startClipTimer();
-  });
+  cpTm=setTimeout(function(){outEl.classList.remove('cp-fb')},400);
 };
 
 /* Keyboard: Enter/Space on toggle rows */
