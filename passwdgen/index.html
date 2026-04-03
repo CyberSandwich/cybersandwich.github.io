@@ -25,11 +25,12 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .out{
   background:var(--num-bg);border-radius:20px;
   box-shadow:var(--shadow);
-  padding:20px 24px;margin-bottom:14px;
+  margin-bottom:14px;
   transition:background .3s;cursor:pointer;
-  height:98px;display:flex;align-items:center;justify-content:center;
-  overflow:hidden
+  height:98px;overflow:hidden;
+  display:table;width:100%;table-layout:fixed
 }
+.out-in{display:table-cell;vertical-align:middle;padding:12px 24px}
 .out:active{opacity:.85}
 .out.cp-fb{animation:cpFlash .35s ease}
 @keyframes cpFlash{0%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px rgba(52,211,153,.4),var(--shadow)}100%{box-shadow:var(--shadow)}}
@@ -57,7 +58,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
 <div class="w">
 
 <div class="out" id="out" role="button" tabindex="0" aria-label="Click to Copy Password">
-<div id="pw" aria-live="polite"></div>
+<div class="out-in"><div id="pw" aria-live="polite"></div></div>
 </div>
 
 <div class="card" id="str-card">
@@ -281,20 +282,20 @@ function updateStrength(){
   strL.appendChild(sp);
 }
 
-/* Adaptive font size — pick largest size that fits within the box (98px - 40px pad = 58px content) */
+/* Adaptive font size — pick largest size that fits within 2 lines inside the 98px box */
 var SIZES=['1.375rem','1.2rem','1.05rem','.95rem','.85rem','.75rem','.65rem','.55rem'];
-var MAX_H=58;
+function fits(){return pwEl.scrollHeight<=outEl.clientHeight-24}
 function sizePw(){
   pwEl.style.wordBreak=mode===1?'normal':'break-all';
   for(var i=0;i<SIZES.length;i++){
     pwEl.style.fontSize=SIZES[i];
-    if(pwEl.scrollHeight<=MAX_H)return;
+    if(fits())return;
   }
   if(mode===1){
     pwEl.style.wordBreak='break-all';
     for(var j=0;j<SIZES.length;j++){
       pwEl.style.fontSize=SIZES[j];
-      if(pwEl.scrollHeight<=MAX_H)return;
+      if(fits())return;
     }
   }
 }
