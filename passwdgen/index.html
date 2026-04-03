@@ -27,7 +27,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
   box-shadow:var(--shadow);
   padding:20px 24px;margin-bottom:14px;
   transition:background .3s;cursor:pointer;
-  height:92px;display:flex;align-items:center;justify-content:center;
+  height:98px;display:flex;align-items:center;justify-content:center;
   overflow:hidden
 }
 .out:active{opacity:.85}
@@ -282,12 +282,13 @@ function updateStrength(){
   strL.appendChild(sp);
 }
 
-/* Adaptive font size — pick largest size that fits within fixed 2-line box */
+/* Adaptive font size — pick largest size that fits within 2 lines */
 var SIZES=['clamp(1rem,5vw,1.375rem)','clamp(.9rem,4.2vw,1.2rem)','clamp(.8rem,3.5vw,1.05rem)','clamp(.7rem,3vw,.9rem)','clamp(.6rem,2.5vw,.78rem)','clamp(.5rem,2vw,.65rem)'];
 function sizePw(){
   for(var i=0;i<SIZES.length;i++){
     pwEl.style.fontSize=SIZES[i];
-    if(pwEl.scrollHeight<=52)return;
+    var lh=parseFloat(getComputedStyle(pwEl).lineHeight);
+    if(pwEl.scrollHeight<=lh*2+1)return;
   }
 }
 
