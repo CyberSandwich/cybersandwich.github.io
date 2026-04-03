@@ -44,6 +44,8 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .pp #pw{word-break:normal}
 #pw::selection{background:rgba(255,255,255,.2)}
 .links{margin-bottom:0}
+.links button{transition:background .25s,color .25s}
+.links button.ok{animation:pop .35s ease}
 #len-l,#wrd-l{cursor:pointer}
 #cp-k{stroke-width:2.5}
 .str-w{color:#DC2626}.str-f{color:#D97706}.str-s{color:#16A34A}.str-v{color:#0891B2}.str-m{color:#7C3AED}
@@ -370,14 +372,18 @@ function startClipTimer(){
 }
 
 /* Copy password */
+var cpFb;
 function doCopy(){
   if(!cur)return;
   _base.copyText(cur,function(){
     cpI.style.display='none';cpK.style.display='';
     cpL.textContent='Copied (30s)';
-    _base.btnFeedback(cpBtn,'ok',800,function(){
+    cpBtn.classList.remove('ok');cpBtn.offsetWidth;cpBtn.classList.add('ok');
+    clearTimeout(cpFb);
+    cpFb=setTimeout(function(){
+      cpBtn.classList.remove('ok');
       cpI.style.display='';cpK.style.display='none';
-    });
+    },800);
     startClipTimer();
   },function(){
     cpL.textContent='Failed';
@@ -391,7 +397,7 @@ function doGenerate(){
   clearTimeout(genTm);
   render();
   genL.textContent='Generated';
-  genBtn.classList.add('ok');
+  genBtn.classList.remove('ok');genBtn.offsetWidth;genBtn.classList.add('ok');
   genTm=setTimeout(function(){genL.textContent='Generate';genBtn.classList.remove('ok')},800);
 }
 
