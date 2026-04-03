@@ -282,20 +282,27 @@ function updateStrength(){
 }
 
 /* Adaptive font size — pick largest size that fits within 2 lines */
-var SIZES=['1.375rem','1.2rem','1.05rem','.9rem','.78rem','.65rem','.55rem','.45rem'];
-function fits2(){var lh=parseFloat(getComputedStyle(pwEl).lineHeight);return pwEl.scrollHeight<=lh*2+1}
+var SIZES=['1.375rem','1.2rem','1.05rem','.95rem','.85rem','.75rem','.65rem','.55rem'];
+function lineCount(){
+  /* Measure single-line height by temporarily forcing nowrap */
+  var wb=pwEl.style.wordBreak,ws=pwEl.style.whiteSpace;
+  pwEl.style.whiteSpace='nowrap';pwEl.style.wordBreak='normal';
+  var oneLine=pwEl.scrollHeight;
+  pwEl.style.whiteSpace=ws;pwEl.style.wordBreak=wb;
+  if(oneLine<1)return 1;
+  return Math.round(pwEl.scrollHeight/oneLine);
+}
 function sizePw(){
   pwEl.style.wordBreak=mode===1?'normal':'break-all';
   for(var i=0;i<SIZES.length;i++){
     pwEl.style.fontSize=SIZES[i];
-    if(fits2())return;
+    if(lineCount()<=2)return;
   }
-  /* If still doesn't fit (long passphrase), allow break-all and retry */
   if(mode===1){
     pwEl.style.wordBreak='break-all';
     for(var j=0;j<SIZES.length;j++){
       pwEl.style.fontSize=SIZES[j];
-      if(fits2())return;
+      if(lineCount()<=2)return;
     }
   }
 }
