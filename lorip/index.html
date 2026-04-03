@@ -39,6 +39,8 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .inp button:active:not(:disabled){transform:scale(.9)}
 .inp button:disabled{opacity:.3;cursor:not-allowed}
 .links{margin-bottom:0}
+.links button{transition:background .25s,color .25s}
+.links button.ok{animation:pop .35s ease}
 @keyframes cpFlash{0%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px rgba(52,211,153,.4),var(--shadow)}100%{box-shadow:var(--shadow)}}
 @media(hover:hover){
   .out:hover{opacity:.92}
@@ -201,11 +203,13 @@ function validateInput(){
   if(n!==n||n<0){count=prevCount;$('cnt').value=count;return}
   setCount(n);
 }
+var cpFb;
 function doCopy(){
   if(!output)return;
   _base.copyText(output,function(){
     $('ci').style.display='none';$('ck').style.display='';$('csl').textContent='Copied';
-    _base.btnFeedback($('c'),'ok',800,function(){$('ci').style.display='';$('ck').style.display='none';$('csl').textContent='Copy'})
+    $('c').classList.remove('ok');$('c').offsetWidth;$('c').classList.add('ok');
+    clearTimeout(cpFb);cpFb=setTimeout(function(){$('c').classList.remove('ok');$('ci').style.display='';$('ck').style.display='none';$('csl').textContent='Copy'},800)
   },function(){$('csl').textContent='Failed';setTimeout(function(){$('csl').textContent='Copy'},800)});
 }
 function doRegen(){
