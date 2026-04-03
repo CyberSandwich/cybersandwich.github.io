@@ -28,9 +28,10 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
 #editor{scrollbar-width:none;-ms-overflow-style:none}
 #editor::-webkit-scrollbar{display:none}
 #editor::selection{background:var(--sel);color:inherit}
-.modes{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;padding:0 14px calc(86px + env(safe-area-inset-bottom,0px))}
-.mode-pill{max-width:none;padding:3px}
-.modes .tabs .mode-btn{padding:6px clamp(6px,1.5vw,10px);font-size:clamp(.5625rem,1.5vw,.6875rem)}
+.modes{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center;padding:0 14px calc(86px + env(safe-area-inset-bottom,0px))}
+.mode-btn{padding:6px 10px;border-radius:var(--rr);border:none;background:none;font:500 .6875rem/1 var(--font);color:var(--t3);cursor:pointer;white-space:nowrap;transition:color .15s}
+.mode-btn:active{opacity:.7}
+@media(hover:hover){.mode-btn:hover{color:var(--t1)}}
 @media(max-width:480px){main{padding:0 calc(28px + env(safe-area-inset-right,0px)) 0 calc(28px + env(safe-area-inset-left,0px))}#editor{height:100dvh}.modes{gap:4px;padding-inline:10px}}
 @media(prefers-reduced-motion:reduce){main,#editor{transition:none}}
 @media(print){.modes,nav{display:none!important}main{padding:0}#editor{height:auto;padding:10mm;font:400 12pt/1.8 var(--mono);color:#000;white-space:pre-wrap;word-wrap:break-word}@page{margin:15mm}}
@@ -42,13 +43,13 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   <textarea id="editor" aria-multiline="true" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" autofocus></textarea>
 </main>
 
-<div class="modes" role="radiogroup" aria-label="Case Mode">
-  <div class="tabs mode-pill"><button class="mode-btn active" data-mode="0" role="radio" aria-checked="true">UPPER</button></div>
-  <div class="tabs mode-pill"><button class="mode-btn" data-mode="1" role="radio" aria-checked="false">lower</button></div>
-  <div class="tabs mode-pill"><button class="mode-btn" data-mode="2" role="radio" aria-checked="false">Title</button></div>
-  <div class="tabs mode-pill"><button class="mode-btn" data-mode="3" role="radio" aria-checked="false">camelCase</button></div>
-  <div class="tabs mode-pill"><button class="mode-btn" data-mode="4" role="radio" aria-checked="false">snake_case</button></div>
-  <div class="tabs mode-pill"><button class="mode-btn" data-mode="5" role="radio" aria-checked="false">kebab-case</button></div>
+<div class="modes" aria-label="Case Modes">
+  <button class="mode-btn" data-mode="0">UPPER</button>
+  <button class="mode-btn" data-mode="1">lower</button>
+  <button class="mode-btn" data-mode="2">Title</button>
+  <button class="mode-btn" data-mode="3">camelCase</button>
+  <button class="mode-btn" data-mode="4">snake_case</button>
+  <button class="mode-btn" data-mode="5">kebab-case</button>
 </div>
 
 <nav aria-label="Primary">
@@ -75,11 +76,13 @@ var SMALL=new Set('a an and as at but by for if in nor not of on or per so the t
 
 var editor=document.getElementById('editor');
 var drop=document.getElementById('drop');
-var modeBtns=document.querySelectorAll('.mode-btn');
-
 var mode=0;
 var transforming=false;
 var composing=false;
+var undoing=false;
+var history=[];
+var historyIdx=-1;
+var lastTransformText='';
 var touched=0;
 var dragDepth=0;
 var saveTimer=0;
@@ -334,7 +337,42 @@ function mapCursor(oldText,newText,oldPos){
   return newText.length;
 }
 
-// === Apply transform with undo support ===
+// === Transform undo stack ===
+
+function pushHistory(){
+  history.length=historyIdx+1;
+  history.push({text:editor.value,mode:mode});
+  if(history.length>50)history.shift();
+  historyIdx=history.length-1;
+}
+
+function undoTransform(){
+  if(historyIdx<=0)return false;
+  historyIdx--;
+  var entry=history[historyIdx];
+  transforming=true;
+  editor.value=entry.text;
+  transforming=false;
+  mode=entry.mode;
+  lastTransformText=entry.text;
+  queuePersist(SAVE_TEXT|SAVE_STATE);
+  return true;
+}
+
+function redoTransform(){
+  if(historyIdx>=history.length-1)return false;
+  historyIdx++;
+  var entry=history[historyIdx];
+  transforming=true;
+  editor.value=entry.text;
+  transforming=false;
+  mode=entry.mode;
+  lastTransformText=entry.text;
+  queuePersist(SAVE_TEXT|SAVE_STATE);
+  return true;
+}
+
+// === Apply transform ===
 
 function applyTransform(newText){
   var text=editor.value;
@@ -344,28 +382,21 @@ function applyTransform(newText){
   var nPos=mapCursor(text,newText,pos);
   var nEnd=pos===end?nPos:mapCursor(text,newText,end);
   transforming=true;
-  editor.focus();
-  editor.select();
-  if(!document.execCommand('insertText',false,newText))editor.value=newText;
+  editor.value=newText;
+  lastTransformText=newText;
   editor.setSelectionRange(nPos,nEnd);
   transforming=false;
 }
 
 // === Mode switching ===
 
-function updatePills(){
-  modeBtns.forEach(function(btn,i){
-    btn.classList.toggle('active',i===mode);
-    btn.setAttribute('aria-checked',i===mode?'true':'false');
-  });
-}
-
 function setMode(m){
   if(m<0||m>5)return;
+  pushHistory();
   var text=editor.value;
   var result=transform(text,m);
   mode=m;
-  updatePills();
+
   if(result!==text)applyTransform(result);
   queuePersist(SAVE_TEXT|SAVE_STATE);
   doFlush(true);
@@ -376,6 +407,7 @@ function setMode(m){
 function onInput(){
   if(transforming||composing)return;
   touched=1;
+  if(undoing){undoing=false;queuePersist(SAVE_TEXT|SAVE_STATE);return}
   if(mode<=2){
     var text=editor.value;
     var result=transform(text,mode);
@@ -391,6 +423,9 @@ function onInput(){
   queuePersist(SAVE_TEXT|SAVE_STATE);
 }
 
+editor.addEventListener('beforeinput',function(e){
+  if(e.inputType==='historyUndo'||e.inputType==='historyRedo')undoing=true;
+});
 editor.addEventListener('compositionstart',function(){composing=true});
 editor.addEventListener('compositionend',function(){composing=false;onInput()});
 editor.addEventListener('input',onInput);
@@ -440,6 +475,14 @@ editor.addEventListener('keydown',function(event){
   }
   var mod=event.metaKey||event.ctrlKey;
   if(!mod)return;
+  if(!event.shiftKey&&!event.altKey&&event.code==='KeyZ'){
+    if(editor.value===lastTransformText&&undoTransform()){event.preventDefault();return}
+    return;
+  }
+  if((event.shiftKey&&event.code==='KeyZ')||(!event.shiftKey&&event.code==='KeyY')){
+    if(editor.value===lastTransformText&&redoTransform()){event.preventDefault();return}
+    return;
+  }
   if(!event.shiftKey&&!event.altKey&&event.code==='KeyS'){
     event.preventDefault();
     doDownload();
@@ -716,7 +759,7 @@ document.querySelector('.modes').addEventListener('click',function(e){
   if(m===mode){
     var text=editor.value;
     var result=transform(text,m);
-    if(result!==text)applyTransform(result);
+    if(result!==text){pushHistory();applyTransform(result)}
     return;
   }
   setMode(m);
@@ -733,9 +776,10 @@ var wReset=_base.twoPress(wTab,{
   text:'CaseConverter',
   guard:function(){return !!editor.value.trim()},
   onConfirm:function(){
+    pushHistory();
     applyTransform('');
     mode=0;
-    updatePills();
+  
     queuePersist(SAVE_TEXT|SAVE_STATE);
     doFlush(true);
   }
@@ -764,7 +808,7 @@ Promise.all([readPersisted(KEY_TEXT),readPersisted(KEY_STATE)]).then(function(va
     var parts=state.split('|');
     var m=parseInt(parts[0])||0;
     if(m>=0&&m<=5)mode=m;
-    updatePills();
+  
     var len=editor.value.length;
     var ss=clamp(parseInt(parts[1])||0,0,len);
     var se=clamp(parseInt(parts[2])||ss,ss,len);
@@ -778,8 +822,14 @@ Promise.all([readPersisted(KEY_TEXT),readPersisted(KEY_STATE)]).then(function(va
       editor.scrollTop=Math.min(snapped,Math.max(0,maxScroll));
     });
   }
+  history=[{text:editor.value,mode:mode}];
+  historyIdx=0;
+  lastTransformText=editor.value;
   editor.focus();
 }).catch(function(){
+  history=[{text:editor.value,mode:mode}];
+  historyIdx=0;
+  lastTransformText=editor.value;
   editor.focus();
 });
 
