@@ -281,28 +281,20 @@ function updateStrength(){
   strL.appendChild(sp);
 }
 
-/* Adaptive font size — pick largest size that fits within 2 lines */
+/* Adaptive font size — pick largest size that fits within the box (98px - 40px pad = 58px content) */
 var SIZES=['1.375rem','1.2rem','1.05rem','.95rem','.85rem','.75rem','.65rem','.55rem'];
-function lineCount(){
-  /* Measure single-line height by temporarily forcing nowrap */
-  var wb=pwEl.style.wordBreak,ws=pwEl.style.whiteSpace;
-  pwEl.style.whiteSpace='nowrap';pwEl.style.wordBreak='normal';
-  var oneLine=pwEl.scrollHeight;
-  pwEl.style.whiteSpace=ws;pwEl.style.wordBreak=wb;
-  if(oneLine<1)return 1;
-  return Math.round(pwEl.scrollHeight/oneLine);
-}
+var MAX_H=58;
 function sizePw(){
   pwEl.style.wordBreak=mode===1?'normal':'break-all';
   for(var i=0;i<SIZES.length;i++){
     pwEl.style.fontSize=SIZES[i];
-    if(lineCount()<=2)return;
+    if(pwEl.scrollHeight<=MAX_H)return;
   }
   if(mode===1){
     pwEl.style.wordBreak='break-all';
     for(var j=0;j<SIZES.length;j++){
       pwEl.style.fontSize=SIZES[j];
-      if(lineCount()<=2)return;
+      if(pwEl.scrollHeight<=MAX_H)return;
     }
   }
 }
