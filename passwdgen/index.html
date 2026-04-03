@@ -41,7 +41,6 @@ body{display:flex;align-items:flex-start;justify-content:center}
   user-select:all;-webkit-user-select:all;
   width:100%
 }
-.pp #pw{word-break:normal}
 #pw::selection{background:rgba(255,255,255,.2)}
 .links{margin-bottom:0}
 .links button{transition:background .25s,color .25s}
@@ -283,19 +282,27 @@ function updateStrength(){
 }
 
 /* Adaptive font size — pick largest size that fits within 2 lines */
-var SIZES=['clamp(1rem,5vw,1.375rem)','clamp(.9rem,4.2vw,1.2rem)','clamp(.8rem,3.5vw,1.05rem)','clamp(.7rem,3vw,.9rem)','clamp(.6rem,2.5vw,.78rem)','clamp(.5rem,2vw,.65rem)'];
+var SIZES=['1.375rem','1.2rem','1.05rem','.9rem','.78rem','.65rem','.55rem','.45rem'];
+function fits2(){var lh=parseFloat(getComputedStyle(pwEl).lineHeight);return pwEl.scrollHeight<=lh*2+1}
 function sizePw(){
+  pwEl.style.wordBreak=mode===1?'normal':'break-all';
   for(var i=0;i<SIZES.length;i++){
     pwEl.style.fontSize=SIZES[i];
-    var lh=parseFloat(getComputedStyle(pwEl).lineHeight);
-    if(pwEl.scrollHeight<=lh*2+1)return;
+    if(fits2())return;
+  }
+  /* If still doesn't fit (long passphrase), allow break-all and retry */
+  if(mode===1){
+    pwEl.style.wordBreak='break-all';
+    for(var j=0;j<SIZES.length;j++){
+      pwEl.style.fontSize=SIZES[j];
+      if(fits2())return;
+    }
   }
 }
 
 /* Render: generate + display */
 function render(){
   cur=mode===0?generatePw():generatePp();
-  outEl.classList.toggle('pp',mode===1);
   pwEl.classList.remove('fi');pwEl.offsetWidth;
   pwEl.textContent=cur;
   sizePw();
