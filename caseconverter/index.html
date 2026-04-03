@@ -31,7 +31,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
 .modes{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:9;display:flex;max-width:calc(100% - 40px);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--tab-bg);border-radius:var(--rr);padding:5px;border:1px solid var(--tab-border);box-shadow:var(--tab-shadow)}
 .modes::-webkit-scrollbar{display:none}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.modes{background:var(--tab-blur);backdrop-filter:blur(6px) saturate(180%);-webkit-backdrop-filter:blur(6px) saturate(180%)}}
-.mode-btn{background:none;border:none;padding:8px clamp(10px,2.5vw,16px);border-radius:var(--rr);font:500 clamp(.6875rem,2.2vw,.8125rem)/1 var(--font);color:var(--t3);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:color .15s,background .15s,box-shadow .15s}
+.mode-btn{background:none;border:none;padding:12px clamp(12px,3.5vw,22px);border-radius:var(--rr);font:500 clamp(.8125rem,2.8vw,.875rem)/1 var(--font);color:var(--t3);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:color .15s,background .15s,box-shadow .15s}
 .mode-btn.active{background:var(--tab-active);color:var(--tab-active-c);box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)}
 .mode-btn:active{opacity:.7}
 @media(hover:hover){.mode-btn:hover:not(.active){color:var(--t2)}}
