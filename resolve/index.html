@@ -335,6 +335,41 @@ function solveMulti(input,singleResults){
     }
   })(new Int8Array(ic),il,[],0);
 
+  /* Pass 3 — two-word subset combos (budget: 200 combos, 1s) */
+  var subCands=[],subMap=[];
+  for(i=0;i<cands.length;i++){if(WT[cands[i].rep]<=1){subMap.push(i);subCands.push(cands[i])}}
+  var subCSigs=new Int8Array(subCands.length*26);
+  for(i=0;i<subCands.length;i++){var so=subCands[i].rep*26;for(c=0;c<26;c++)subCSigs[i*26+c]=SG[so+c]}
+  var subsetCombos=[],subSeen=new Set(),p3count=0,maxUnused=Math.floor(il/4);
+  var dl3=Date.now()+1000;nodes=0;
+  (function dfs2s(rem,remLen,chosen,start){
+    if(chosen.length===2){
+      if(remLen>0&&remLen<=maxUnused){
+        var ck=chosen[0]+','+chosen[1];
+        if(!subSeen.has(ck)){subSeen.add(ck);subsetCombos.push({ci:chosen.slice(),unused:remLen});p3count++}
+      }
+      return;
+    }
+    if(chosen.length>=2||remLen<2||p3count>=200)return;
+    for(var i=start;i<subCands.length;i++){
+      if(++nodes%1000===0&&Date.now()>dl3)return;
+      var wl=WL[subCands[i].rep];if(wl>remLen)continue;
+      var co=i*26,fits=true;
+      for(c=0;c<26;c++){if(subCSigs[co+c]>rem[c]){fits=false;break}}
+      if(!fits)continue;
+      /* skip if this exact pair already found in pass 1 */
+      if(chosen.length===1&&remLen-wl===0){
+        var ek=subMap[chosen[0]]+','+subMap[i];
+        if(seenKeys.has(ek)){continue}
+      }
+      for(c=0;c<26;c++)rem[c]-=subCSigs[co+c];
+      chosen.push(i);dfs2s(rem,remLen-wl,chosen,i);chosen.pop();
+      for(c=0;c<26;c++)rem[c]+=subCSigs[co+c];
+      if(p3count>=200||(nodes%1000===0&&Date.now()>dl3))return;
+    }
+  })(new Int8Array(ic),il,[],0);
+
+  /* Expand exact combos */
   var expanded=[];
   for(i=0;i<combos.length&&expanded.length<800;i++){
     var gs=combos[i].map(function(ci){return cands[ci].all.sort(function(a,b){return a-b}).slice(0,3)});
@@ -345,7 +380,21 @@ function solveMulti(input,singleResults){
     })(0,[]);
   }
   expanded.sort(function(a,b){return multiScore(a)-multiScore(b)});
-  return expanded.slice(0,200);
+
+  /* Expand subset combos */
+  var subExpanded=[];
+  for(i=0;i<subsetCombos.length&&subExpanded.length<400;i++){
+    var sc=subsetCombos[i],unused=sc.unused;
+    var gs=sc.ci.map(function(ci){return subCands[ci].all.filter(function(idx){return WT[idx]<=1}).sort(function(a,b){return a-b}).slice(0,3)});
+    (function ep(d,cur){
+      if(subExpanded.length>=400)return;
+      if(d===gs.length){subExpanded.push({idxs:cur.slice(),unused:unused});return}
+      for(var k=0;k<gs[d].length&&subExpanded.length<400;k++){cur.push(gs[d][k]);ep(d+1,cur);cur.pop()}
+    })(0,[]);
+  }
+  subExpanded.sort(function(a,b){return(multiScore(a.idxs)+a.unused*3)-(multiScore(b.idxs)+b.unused*3)});
+
+  return {exact:expanded.slice(0,200),subset:subExpanded.slice(0,200)};
 }
 
 /* ── Solve Orchestrator ─────────────────────────────────────────── */
@@ -373,11 +422,19 @@ function solve(){
   }
 
   if(mode==='multi'){
-    var combos=solveMulti(input,singles);
-    for(i=0;i<combos.length;i++){
-      var c=combos[i],ws=[],tl=0,best=Infinity;
+    var mr=solveMulti(input,singles);
+    for(i=0;i<mr.exact.length;i++){
+      var c=mr.exact[i],ws=[],tl=0,best=Infinity;
       for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j]}
       allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c),word:ws.join(' + '),words:ws,idxs:c,ul:'',dl:'',idx:best,dist:il-tl});
+    }
+    var ic=lc(input);
+    for(i=0;i<mr.subset.length;i++){
+      var se=mr.subset[i],c=se.idxs,ws=[],tl=0,best=Infinity;
+      var used=new Int8Array(26);
+      for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j];var off=c[j]*26;for(var k=0;k<26;k++)used[k]+=SG[off+k]}
+      var ul='';for(var k=0;k<26;k++){var d=ic[k]-used[k];if(d>0)for(var q=0;q<d;q++)ul+=String.fromCharCode(65+k)}
+      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c)+se.unused*3,word:ws.join(' + '),words:ws,idxs:c,ul:ul,dl:'',idx:best,dist:il-tl});
     }
   }
 
@@ -466,6 +523,9 @@ function mkItem(r){
     if(r.ul){var bm=document.createElement('span');bm.className='rb sub';bm.textContent='\u2212'+r.ul;div.appendChild(bm)}
     var bp=document.createElement('span');bp.className='rb cl';bp.textContent='+'+r.dl;div.appendChild(bp);
   }else if(r.type==='subset'&&r.ul){
+    var badge=document.createElement('span');badge.className='rb sub';
+    badge.textContent='\u2212'+r.ul;div.appendChild(badge);
+  }else if(r.type==='multi'&&r.ul){
     var badge=document.createElement('span');badge.className='rb sub';
     badge.textContent='\u2212'+r.ul;div.appendChild(badge);
   }
