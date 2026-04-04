@@ -560,7 +560,12 @@ function groupResults(list,il){
 function render(flat){
   var il=clean(inp.value).length;
   if(!visRes.length){
-    if(il>0){showStatus('No Matches Found',false);updateActions(false)}
+    if(allRes.length>0){
+      stsCard.style.display='none';filterWrap.style.display='block';
+      rc.textContent='';
+      var nm=document.createElement('div');nm.className='no-match';nm.textContent='No Matches';rc.appendChild(nm);
+    }
+    else if(il>0){showStatus('No Results Found',false);updateActions(false)}
     else showEmpty();
     return;
   }
@@ -573,7 +578,6 @@ function render(flat){
     var card=document.createElement('div');card.className='card fi';
     var limit=Math.min(visRes.length,GROUP_MAX);
     for(var i=0;i<limit;i++)card.appendChild(mkItem(visRes[i]));
-    if(!visRes.length){var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';card.appendChild(nm)}
     rc.appendChild(card);
   }else{
     var groups=groupResults(visRes,il);
