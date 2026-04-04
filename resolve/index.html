@@ -257,13 +257,14 @@ function rankScore(r,il){
 
 /* ── Multi-Word Solver (dedup by anagram key) ───────────────────── */
 function multiScore(idxs){
-  var n=idxs.length,maxLog=0,k;
+  var n=idxs.length,maxLog=0,maxTier=0,k;
   for(k=0;k<n;k++){
     var li=Math.log(idxs[k]+2);
     if(li>maxLog)maxLog=li;
+    if(WT[idxs[k]]>maxTier)maxTier=WT[idxs[k]];
   }
   var wordPenalty=(n-2)*15;
-  return wordPenalty+maxLog;
+  return wordPenalty+maxTier*8+maxLog;
 }
 
 function solveMulti(input,singleResults){
@@ -279,24 +280,53 @@ function solveMulti(input,singleResults){
     else{entry.all.push(r.idx);if(r.idx<entry.rep)entry.rep=r.idx}
   }
   var cands=[];keyMap.forEach(function(v){cands.push(v)});
-  cands.sort(function(a,b){return WL[b.rep]-WL[a.rep]||a.rep-b.rep});
+  cands.sort(function(a,b){return WT[a.rep]-WT[b.rep]||WL[b.rep]-WL[a.rep]||a.rep-b.rep});
   var cSigs=new Int8Array(cands.length*26);
   for(i=0;i<cands.length;i++){var off=cands[i].rep*26;for(c=0;c<26;c++)cSigs[i*26+c]=SG[off+c]}
 
-  var combos=[],deadline=Date.now()+2000,nodes=0;
-  (function dfs(rem,remLen,chosen,start){
-    if(remLen===0&&chosen.length>=2){combos.push(chosen.slice());return}
-    if(chosen.length>=4||remLen<2||combos.length>=500)return;
+  var combos=[],seenKeys=new Set(),nodes=0;
+
+  /* Pass 1 — two-word splits only (budget: 300 combos, 1s) */
+  var dl1=Date.now()+1000;
+  (function dfs2(rem,remLen,chosen,start){
+    if(remLen===0&&chosen.length===2){
+      var ck=chosen[0]+','+chosen[1];
+      if(!seenKeys.has(ck)){seenKeys.add(ck);combos.push(chosen.slice())}
+      return;
+    }
+    if(chosen.length>=2||remLen<2||combos.length>=300)return;
     for(var i=start;i<cands.length;i++){
-      if(++nodes%1000===0&&Date.now()>deadline)return;
+      if(++nodes%1000===0&&Date.now()>dl1)return;
       var wl=WL[cands[i].rep];if(wl>remLen)continue;
       var co=i*26,fits=true;
       for(c=0;c<26;c++){if(cSigs[co+c]>rem[c]){fits=false;break}}
       if(!fits)continue;
       for(c=0;c<26;c++)rem[c]-=cSigs[co+c];
-      chosen.push(i);dfs(rem,remLen-wl,chosen,i);chosen.pop();
+      chosen.push(i);dfs2(rem,remLen-wl,chosen,i);chosen.pop();
       for(c=0;c<26;c++)rem[c]+=cSigs[co+c];
-      if(combos.length>=500||(nodes%1000===0&&Date.now()>deadline))return;
+      if(combos.length>=300||(nodes%1000===0&&Date.now()>dl1))return;
+    }
+  })(new Int8Array(ic),il,[],0);
+
+  /* Pass 2 — three/four-word splits (budget: 300 combos, 1.5s) */
+  var p2count=0,dl2=Date.now()+1500;nodes=0;
+  (function dfs34(rem,remLen,chosen,start){
+    if(remLen===0&&chosen.length>=2){
+      var ck=chosen.slice().sort(function(a,b){return a-b}).join(',');
+      if(!seenKeys.has(ck)){seenKeys.add(ck);combos.push(chosen.slice());p2count++}
+      return;
+    }
+    if(chosen.length>=4||remLen<2||p2count>=300)return;
+    for(var i=start;i<cands.length;i++){
+      if(++nodes%1000===0&&Date.now()>dl2)return;
+      var wl=WL[cands[i].rep];if(wl>remLen)continue;
+      var co=i*26,fits=true;
+      for(c=0;c<26;c++){if(cSigs[co+c]>rem[c]){fits=false;break}}
+      if(!fits)continue;
+      for(c=0;c<26;c++)rem[c]-=cSigs[co+c];
+      chosen.push(i);dfs34(rem,remLen-wl,chosen,i);chosen.pop();
+      for(c=0;c<26;c++)rem[c]+=cSigs[co+c];
+      if(p2count>=300||(nodes%1000===0&&Date.now()>dl2))return;
     }
   })(new Int8Array(ic),il,[],0);
 
