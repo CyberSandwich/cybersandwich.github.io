@@ -245,11 +245,10 @@ var MW2=new Set('ad ah am an as at aw ax ay be by do eh em en ex go ha he hi ho 
 
 function solveMulti(input,singleResults){
   var ic=lc(input),il=input.length,i,c;
-  var FREQ_CAP=40000;
   var keyMap=new Map();
   for(i=0;i<singleResults.length;i++){
     var r=singleResults[i];
-    if(r.type==='close'||WL[r.idx]<2||r.idx>=FREQ_CAP)continue;
+    if(r.type==='close'||WL[r.idx]<2)continue;
     if(WL[r.idx]===2&&!MW2.has(W[r.idx]))continue;
     var key=W[r.idx].split('').sort().join('');
     var entry=keyMap.get(key);
