@@ -313,7 +313,10 @@ function solve(){
     var r=singles[i];
     if(r.type!=='close'&&r.wl<minLen)continue;
     r.word=W[r.idx].toUpperCase();
-    r.dist=r.type==='exact'?0:r.type==='close'?r.deficit:(il-r.wl);
+    if(r.type==='close'){r.removed=il-r.used;r.added=r.deficit}
+    else{r.removed=r.type==='exact'?0:il-r.wl;r.added=0}
+    r.dist=r.removed+r.added;
+    r.changeType=r.added===0?0:r.removed===0?1:2;
     r.rank=rankScore(r,il);
     allRes.push(r);
   }
@@ -332,8 +335,7 @@ function solve(){
     var ma=a.type==='multi'?1:0,mb=b.type==='multi'?1:0;
     if(ma!==mb)return ma-mb;
     if(ma&&mb)return a.ms-b.ms;
-    var ta=a.type==='close'?1:0,tb=b.type==='close'?1:0;
-    if(ta!==tb)return ta-tb;
+    if(a.changeType!==b.changeType)return a.changeType-b.changeType;
     if(a.wl!==b.wl)return b.wl-a.wl;
     return a.rank-b.rank;
   });
@@ -346,15 +348,10 @@ function solve(){
 function groupResults(list,il){
   var map=new Map(),order=[];
   for(var i=0;i<list.length;i++){
-    var r=list[i],key;
-    if(r.type==='close')key='close'+r.deficit;
-    else if(r.type==='multi')key='len'+r.wl;
-    else key='len'+r.wl;
+    var r=list[i],key,label;
+    if(r.dist===0){key='exact';label=il+' Letters (Exact)'}
+    else{key='away'+r.dist;label=r.dist===1?'1 Letter Away':r.dist+' Letters Away'}
     if(!map.has(key)){
-      var label;
-      if(r.type==='close')label=r.deficit===1?'1 Letter Away':'2 Letters Away';
-      else if(r.wl===il)label=r.wl+' Letters (Exact)';
-      else label=r.wl+' Letter'+(r.wl!==1?'s':'');
       map.set(key,{key:key,label:label,items:[]});order.push(map.get(key));
     }
     map.get(key).items.push(r);
