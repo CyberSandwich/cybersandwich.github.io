@@ -109,7 +109,7 @@ html[data-theme="dark"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://ww
 var $=function(id){return document.getElementById(id)};
 
 /* ── State ──────────────────────────────────────────────────────── */
-var W=[],WC=0,AI=null,SG=null,WL=null;
+var W=[],WC=0,AI=null,SG=null,WL=null,LI=null;
 var ready=false,mode=_base.load('resolve:mode','single');
 var lastInput=_base.load('resolve:input','');
 var allRes=[],visRes=[],kbIdx=-1;
@@ -142,6 +142,8 @@ function buildIndex(text){
     WL[i]=w.length;
     var arr=AI.get(key);if(arr)arr.push(i);else AI.set(key,[i]);
   }
+  LI=[];for(i=0;i<=20;i++)LI[i]=[];
+  for(i=0;i<WC;i++)if(WL[i]<=20)LI[WL[i]].push(i);
   ready=true;stsCard.style.display='none';
   if(lastInput){inp.value=lastInput;solve()}
   else showEmpty();
@@ -189,17 +191,20 @@ function solveSingle(input){
     })(0,'');
   }else{
     // Wildcard mode: scan dictionary, blanks fill any letter deficit
-    var wMinLen=Math.max(2,Math.ceil(il/3));
-    for(var w=0;w<WC;w++){
-      var wl=WL[w];if(wl>il||wl<wMinLen)continue;
-      var off=w*26,def=0;
-      for(c=0;c<26;c++){if(SG[off+c]>ic[c])def+=SG[off+c]-ic[c];if(def>blanks)break}
-      if(def<=blanks){
-        found.add(w);
-        var ul='';
-        for(c=0;c<26;c++){var d2=ic[c]-Math.min(SG[off+c],ic[c]);if(d2>0)for(var j=0;j<d2;j++)ul+=String.fromCharCode(65+c)}
-        var blanksUsed=def,lettersUnused=il-wl-blanks+def;
-        results.push({idx:w,type:wl===il&&def===blanks?'exact':'subset',wl:wl,ul:ul+(blanksUsed<blanks?'?'.repeat(blanks-blanksUsed):''),dl:''});
+    var wMinLen=Math.max(2,Math.ceil(il/3)),wMaxLen=Math.min(il,20);
+    for(var li=wMinLen;li<=wMaxLen;li++){
+      var bucket=LI[li];
+      for(var bi=0;bi<bucket.length;bi++){
+        var w=bucket[bi],wl=li;
+        var off=w*26,def=0;
+        for(c=0;c<26;c++){if(SG[off+c]>ic[c])def+=SG[off+c]-ic[c];if(def>blanks)break}
+        if(def<=blanks){
+          found.add(w);
+          var ul='';
+          for(c=0;c<26;c++){var d2=ic[c]-Math.min(SG[off+c],ic[c]);if(d2>0)for(var j=0;j<d2;j++)ul+=String.fromCharCode(65+c)}
+          var blanksUsed=def,lettersUnused=il-wl-blanks+def;
+          results.push({idx:w,type:wl===il&&def===blanks?'exact':'subset',wl:wl,ul:ul+(blanksUsed<blanks?'?'.repeat(blanks-blanksUsed):''),dl:''});
+        }
       }
     }
   }
@@ -207,27 +212,30 @@ function solveSingle(input){
   // Close match scan (skip if wildcards — already covered above)
   if(blanks>0)return results;
   var closeMin=Math.max(3,Math.floor(il*0.7));
+  var closeMax=Math.min(il+2,20);
   var closeUseMin=Math.max(3,il-Math.max(1,Math.floor(il/6)));
-  for(var w=0;w<WC;w++){
-    if(found.has(w))continue;
-    var wl=WL[w];
-    if(wl>il+2||wl<closeMin)continue;
-    var off=w*26,def=0,used=0;
-    for(c=0;c<26;c++){
-      var need=SG[off+c],have=ic[c];
-      if(need>have)def+=need-have;
-      used+=Math.min(need,have);
-      if(def>2)break;
-    }
-    if(def>0&&def<=2&&used>=closeUseMin){
-      var dl='',ul='';
+  for(var li=closeMin;li<=closeMax;li++){
+    var bucket=LI[li];
+    for(var bi=0;bi<bucket.length;bi++){
+      var w=bucket[bi];
+      if(found.has(w))continue;
+      var off=w*26,def=0,used=0;
       for(c=0;c<26;c++){
-        var d=SG[off+c]-ic[c];
-        if(d>0)for(var j=0;j<d;j++)dl+=String.fromCharCode(65+c);
-        var u=ic[c]-Math.min(SG[off+c],ic[c]);
-        if(u>0)for(var j=0;j<u;j++)ul+=String.fromCharCode(65+c);
+        var need=SG[off+c],have=ic[c];
+        if(need>have)def+=need-have;
+        used+=Math.min(need,have);
+        if(def>2)break;
       }
-      results.push({idx:w,type:'close',wl:wl,ul:ul,dl:dl,deficit:def,used:used});
+      if(def>0&&def<=2&&used>=closeUseMin){
+        var dl='',ul='';
+        for(c=0;c<26;c++){
+          var d=SG[off+c]-ic[c];
+          if(d>0)for(var j=0;j<d;j++)dl+=String.fromCharCode(65+c);
+          var u=ic[c]-Math.min(SG[off+c],ic[c]);
+          if(u>0)for(var j=0;j<u;j++)ul+=String.fromCharCode(65+c);
+        }
+        results.push({idx:w,type:'close',wl:li,ul:ul,dl:dl,deficit:def,used:used});
+      }
     }
   }
   return results;
