@@ -126,7 +126,7 @@ var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
 var rsBtn=$('rs-btn'),rsL=$('rs-l');
 
 /* ── Utilities ──────────────────────────────────────────────────── */
-function clean(s){return s.replace(/[^a-zA-Z]/g,'').toLowerCase()}
+function clean(s){return s.replace(/[^a-zA-Z?*]/g,'').toLowerCase()}
 function lc(s){var c=new Int8Array(26);for(var i=0;i<s.length;i++)c[s.charCodeAt(i)-97]++;return c}
 /* ── Dictionary & Index ─────────────────────────────────────────── */
 function buildIndex(text){
@@ -156,34 +156,57 @@ function showStatus(msg,loading){
 
 /* ── Single Word Solver ─────────────────────────────────────────── */
 function solveSingle(input){
-  var ic=lc(input),il=input.length,results=[],found=new Set();
+  // Count blanks (? or *), strip from letter counts
+  var blanks=0;
+  for(var b=0;b<input.length;b++){if(input[b]==='?'||input[b]==='*')blanks++}
+  var alpha=input.replace(/[?*]/g,'');
+  var ic=lc(alpha),il=input.length,results=[],found=new Set();
   var letters=[],maxC=[],c;
   for(c=0;c<26;c++){if(ic[c]>0){letters.push(c);maxC.push(ic[c])}}
   var n=letters.length;
 
-  (function rec(d,key){
-    if(d===n){
-      if(key.length>=2){
-        var arr=AI.get(key);
-        if(arr)for(var i=0;i<arr.length;i++){
-          var idx=arr[i];
-          if(!found.has(idx)){
-            found.add(idx);
-            var off=idx*26,ul='';
-            for(var c2=0;c2<26;c2++){var d2=ic[c2]-SG[off+c2];if(d2>0)for(var j=0;j<d2;j++)ul+=String.fromCharCode(65+c2)}
-            results.push({idx:idx,type:W[idx].length===il?'exact':'subset',wl:W[idx].length,ul:ul,dl:''});
+  if(blanks===0){
+    // Fast path: sub-multiset enumeration
+    (function rec(d,key){
+      if(d===n){
+        if(key.length>=2){
+          var arr=AI.get(key);
+          if(arr)for(var i=0;i<arr.length;i++){
+            var idx=arr[i];
+            if(!found.has(idx)){
+              found.add(idx);
+              var off=idx*26,ul='';
+              for(var c2=0;c2<26;c2++){var d2=ic[c2]-SG[off+c2];if(d2>0)for(var j=0;j<d2;j++)ul+=String.fromCharCode(65+c2)}
+              results.push({idx:idx,type:WL[idx]===il?'exact':'subset',wl:WL[idx],ul:ul,dl:''});
+            }
           }
         }
+        return;
       }
-      return;
+      var ch=String.fromCharCode(97+letters[d]);
+      for(var c=0;c<=maxC[d];c++)rec(d+1,c===0?key:key+ch.repeat(c));
+    })(0,'');
+  }else{
+    // Wildcard mode: scan dictionary, blanks fill any letter deficit
+    var wMinLen=Math.max(2,Math.floor(il/2));
+    for(var w=0;w<WC;w++){
+      var wl=WL[w];if(wl>il||wl<wMinLen)continue;
+      var off=w*26,def=0;
+      for(c=0;c<26;c++){if(SG[off+c]>ic[c])def+=SG[off+c]-ic[c];if(def>blanks)break}
+      if(def<=blanks){
+        found.add(w);
+        var ul='';
+        for(c=0;c<26;c++){var d2=ic[c]-Math.min(SG[off+c],ic[c]);if(d2>0)for(var j=0;j<d2;j++)ul+=String.fromCharCode(65+c)}
+        var blanksUsed=def,lettersUnused=il-wl-blanks+def;
+        results.push({idx:w,type:wl===il&&def===blanks?'exact':'subset',wl:wl,ul:ul+(blanksUsed<blanks?'?'.repeat(blanks-blanksUsed):''),dl:''});
+      }
     }
-    var ch=String.fromCharCode(97+letters[d]);
-    for(var c=0;c<=maxC[d];c++)rec(d+1,c===0?key:key+ch.repeat(c));
-  })(0,'');
+  }
 
-  // Close match scan — tight filter: must use almost all input letters
+  // Close match scan (skip if wildcards — already covered above)
+  if(blanks>0)return results;
   var closeMin=Math.max(3,Math.floor(il*0.7));
-  var closeUseMin=Math.max(3,il-1);
+  var closeUseMin=Math.max(3,il-Math.max(1,Math.floor(il/6)));
   for(var w=0;w<WC;w++){
     if(found.has(w))continue;
     var wl=WL[w];
@@ -196,9 +219,14 @@ function solveSingle(input){
       if(def>2)break;
     }
     if(def>0&&def<=2&&used>=closeUseMin){
-      var dl='';
-      for(c=0;c<26;c++){var d=SG[off+c]-ic[c];if(d>0)for(var j=0;j<d;j++)dl+=String.fromCharCode(65+c)}
-      results.push({idx:w,type:'close',wl:wl,ul:'',dl:dl,deficit:def});
+      var dl='',ul='';
+      for(c=0;c<26;c++){
+        var d=SG[off+c]-ic[c];
+        if(d>0)for(var j=0;j<d;j++)dl+=String.fromCharCode(65+c);
+        var u=ic[c]-Math.min(SG[off+c],ic[c]);
+        if(u>0)for(var j=0;j<u;j++)ul+=String.fromCharCode(65+c);
+      }
+      results.push({idx:w,type:'close',wl:wl,ul:ul,dl:dl,deficit:def});
     }
   }
   return results;
@@ -234,7 +262,7 @@ function solveMulti(input,singleResults){
       for(c=0;c<26;c++){if(cSigs[co+c]>rem[c]){fits=false;break}}
       if(!fits)continue;
       for(c=0;c<26;c++)rem[c]-=cSigs[co+c];
-      chosen.push(i);dfs(rem,remLen-wl,chosen,i+1);chosen.pop();
+      chosen.push(i);dfs(rem,remLen-wl,chosen,i);chosen.pop();
       for(c=0;c<26;c++)rem[c]+=cSigs[co+c];
       if(combos.length>=300||(nodes%1000===0&&Date.now()>deadline))return;
     }
@@ -286,6 +314,8 @@ function solve(){
   // Sort: distance asc → subset before close at same distance → frequency asc
   allRes.sort(function(a,b){
     if(a.dist!==b.dist)return a.dist-b.dist;
+    var ma=a.type==='multi'?1:0,mb=b.type==='multi'?1:0;
+    if(ma!==mb)return ma-mb;
     var ta=a.type==='close'?1:0,tb=b.type==='close'?1:0;
     if(ta!==tb)return ta-tb;
     if(a.wl!==b.wl)return b.wl-a.wl;
@@ -370,8 +400,8 @@ function mkItem(r){
   }else{wSpan.textContent=r.word}
   div.appendChild(wSpan);
   if(r.type==='close'&&r.dl){
-    var badge=document.createElement('span');badge.className='rb cl';
-    badge.textContent='+'+r.dl;div.appendChild(badge);
+    if(r.ul){var bm=document.createElement('span');bm.className='rb sub';bm.textContent='\u2212'+r.ul;div.appendChild(bm)}
+    var bp=document.createElement('span');bp.className='rb cl';bp.textContent='+'+r.dl;div.appendChild(bp);
   }else if(r.type==='subset'&&r.ul){
     var badge=document.createElement('span');badge.className='rb sub';
     badge.textContent='\u2212'+r.ul;div.appendChild(badge);
@@ -482,10 +512,10 @@ inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault(
 modeRow.addEventListener('click',function(e){
   var b=e.target.closest('.seg[data-mode]');if(!b)return;
   var m=b.dataset.mode;
-  if(m===mode){if(clean(inp.value))solve();return}
+  if(m===mode){if(clean(inp.value))solve();else showEmpty();return}
   mode=m;_base.save('resolve:mode',mode);
   modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s.dataset.mode===mode)});
-  if(clean(inp.value))solve();
+  if(clean(inp.value))solve();else showEmpty();
 });
 paBtn.addEventListener('click',doPaste);
 cpBtn.addEventListener('click',doCopyAll);
