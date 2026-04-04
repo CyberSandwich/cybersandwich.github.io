@@ -149,7 +149,7 @@ const CHEVRON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 // Project icons — hardcoded SVGs keyed by title, safe for innerHTML
 const PROJECT_ICONS={
 'menuva':'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3"/><path d="M18 15v7"/>',
-'CaseConverter':'<path d="M3 20L8 4l5 16M5 14h6"/><circle cx="18.5" cy="16" r="3"/><path d="M21.5 12v8"/>',
+'CaseConverter':'<path d="M5 20L12 4l7 16M7.5 14h9"/>',
 'ClearView':'<rect x="3" y="3" width="18" height="18" rx="5"/>',
 'Clip':'<path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
 'Clock':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
