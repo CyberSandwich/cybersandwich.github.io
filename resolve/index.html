@@ -197,7 +197,7 @@ function solveSingle(input){
   else if(il<=7){maxDef=2;closeMin=Math.max(3,il-2);closeUseMin=il-2}
   else if(il<=12){maxDef=2;closeMin=Math.max(4,il-3);closeUseMin=il-3}
   else{maxDef=3;closeMin=Math.max(5,il-4);closeUseMin=il-4}
-  var closeMax=Math.min(il+maxDef,20),closeCount=0;
+  var closeMax=Math.min(il+maxDef,20),closeAll=[];
   for(var li=closeMin;li<=closeMax;li++){
     var bucket=LI[li];
     for(var bi=0;bi<bucket.length;bi++){
@@ -220,12 +220,12 @@ function solveSingle(input){
           var u=ic[c]-Math.min(SG[off+c],ic[c]);
           if(u>0)for(var j=0;j<u;j++)ul+=String.fromCharCode(65+c);
         }
-        results.push({idx:w,type:'close',wl:li,ul:ul,dl:dl,deficit:def,used:used});
-        if(++closeCount>=200)break;
+        closeAll.push({idx:w,type:'close',wl:li,ul:ul,dl:dl,deficit:def,used:used});
       }
     }
-    if(closeCount>=200)break;
   }
+  closeAll.sort(function(a,b){return((il-a.used)+a.deficit)-((il-b.used)+b.deficit)});
+  for(var ci2=0;ci2<closeAll.length&&ci2<200;ci2++)results.push(closeAll[ci2]);
   return results;
 }
 
