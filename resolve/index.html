@@ -484,7 +484,10 @@ function showStatus(msg,loading){
 }
 
 /* ── Worker Setup ──────────────────────────────────────────────── */
-solver=new Worker(URL.createObjectURL(new Blob(['('+workerFn.toString()+')()'],{type:'application/javascript'})));
+var blobUrl=URL.createObjectURL(new Blob(['('+workerFn.toString()+')()'],{type:'application/javascript'}));
+solver=new Worker(blobUrl);
+URL.revokeObjectURL(blobUrl);
+solver.onerror=function(){showStatus('Solver Error',false)};
 
 solver.onmessage=function(e){
   var d=e.data;
