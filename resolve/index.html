@@ -189,7 +189,7 @@ function solveSingle(input){
     })(0,'');
   }else{
     // Wildcard mode: scan dictionary, blanks fill any letter deficit
-    var wMinLen=Math.max(2,Math.floor(il/2));
+    var wMinLen=Math.max(2,Math.ceil(il/3));
     for(var w=0;w<WC;w++){
       var wl=WL[w];if(wl>il||wl<wMinLen)continue;
       var off=w*26,def=0;
@@ -227,10 +227,16 @@ function solveSingle(input){
         var u=ic[c]-Math.min(SG[off+c],ic[c]);
         if(u>0)for(var j=0;j<u;j++)ul+=String.fromCharCode(65+c);
       }
-      results.push({idx:w,type:'close',wl:wl,ul:ul,dl:dl,deficit:def});
+      results.push({idx:w,type:'close',wl:wl,ul:ul,dl:dl,deficit:def,used:used});
     }
   }
   return results;
+}
+
+function rankScore(r,il){
+  var freq=Math.log(r.idx+2);
+  if(r.type==='close')return freq-r.used*0.8;
+  return freq-r.wl*0.5;
 }
 
 /* ── Multi-Word Solver (dedup by anagram key) ───────────────────── */
@@ -300,7 +306,7 @@ function solve(){
   _base.save('resolve:input',raw);
 
   var singles=solveSingle(input),il=input.length,i,j;
-  var minLen=Math.max(2,Math.floor(il/2));
+  var minLen=Math.max(2,Math.ceil(il/3));
   allRes=[];
 
   for(i=0;i<singles.length;i++){
@@ -308,6 +314,7 @@ function solve(){
     if(r.type!=='close'&&r.wl<minLen)continue;
     r.word=W[r.idx].toUpperCase();
     r.dist=r.type==='exact'?0:r.type==='close'?r.deficit:(il-r.wl);
+    r.rank=rankScore(r,il);
     allRes.push(r);
   }
 
@@ -328,7 +335,7 @@ function solve(){
     var ta=a.type==='close'?1:0,tb=b.type==='close'?1:0;
     if(ta!==tb)return ta-tb;
     if(a.wl!==b.wl)return b.wl-a.wl;
-    return a.idx-b.idx;
+    return a.rank-b.rank;
   });
 
   filterInp.value='';filterX.style.display='none';
