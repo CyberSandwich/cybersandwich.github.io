@@ -426,7 +426,8 @@ self.onmessage=function(e){
         }
         var ord=tryM(input,0,[]);
         if(ord){var r=[];for(var q=0;q<n;q++)r.push(ws[ord[q]]);return{w:r,m:true}}
-        return{w:ws.slice().sort(function(a,b){return b.length-a.length}),m:false};
+        var fw=new Set(['the','a','an','of','in','on','at','to','for','by','with','and','or','but','is','it','be','as','no','so','if','he','we','my','do','up','me']);
+        return{w:ws.slice().sort(function(a,b){var af=fw.has(a.toLowerCase())?0:1,bf=fw.has(b.toLowerCase())?0:1;return af!==bf?af-bf:b.length-a.length}),m:false};
       }
       for(i=0;i<mr.exact.length;i++){
         var c=mr.exact[i],ws=[],tl=0;
