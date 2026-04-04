@@ -21,13 +21,13 @@
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
 @media(min-width:768px){.w{padding:32px 48px calc(100px + env(safe-area-inset-bottom,0px))}}
-:root{--rcl:#D97706;--rbg:#F0F0F0}
-html[data-theme="dark"]{--rcl:#FBBF24;--rbg:#3A3A3C}
-html[data-theme="sepia"]{--rcl:#B45309;--rbg:#E8DFC8}
+:root{--rsub:#D97706;--rcls:#DC2626;--rbg:#F0F0F0}
+html[data-theme="dark"]{--rsub:#FBBF24;--rcls:#F87171;--rbg:#3A3A3C}
+html[data-theme="sepia"]{--rsub:#B45309;--rcls:#B91C1C;--rbg:#E8DFC8}
 .links>button{transition:background .25s,color .25s}
 .links>button.ok{animation:pop .35s ease}
 .links>button.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-.rh{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 8px;font-weight:600;font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.rh{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;margin-top:6px;font-weight:600;font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
 .rn{background:var(--rbg);padding:2px 8px;border-radius:var(--rr);font-size:11px;font-weight:600;color:var(--t3)}
 .ri{display:flex;justify-content:space-between;align-items:center;padding:13px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.6 var(--font);color:var(--t2);cursor:pointer;transition:background .15s}
 .ri:last-child{border-bottom:none}
@@ -36,7 +36,8 @@ html[data-theme="sepia"]{--rcl:#B45309;--rbg:#E8DFC8}
 .rw{font-weight:500;color:var(--t1);pointer-events:none}
 .rw .plus{color:var(--t4);margin:0 4px;font-weight:400}
 .rb{font-size:12px;padding:2px 8px;border-radius:var(--rr);background:var(--rbg);color:var(--t3);font-weight:500;white-space:nowrap;flex-shrink:0;margin-left:12px;pointer-events:none}
-.rb.cl{color:var(--rcl)}
+.rb.sub{color:var(--rsub)}
+.rb.cl{color:var(--rcls)}
 .mb{width:100%;padding:10px 20px;border:none;background:none;color:var(--acc);font:500 13px/1 var(--font);cursor:pointer;border-top:1px solid var(--bdr2);text-align:center}
 .mb:active{opacity:.7}
 .sts{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1.4 var(--font)}
@@ -123,7 +124,7 @@ var rsBtn=$('rs-btn'),rsL=$('rs-l');
 /* ── Utilities ──────────────────────────────────────────────────── */
 function clean(s){return s.replace(/[^a-zA-Z]/g,'').toLowerCase()}
 function lc(s){var c=new Int8Array(26);for(var i=0;i<s.length;i++)c[s.charCodeAt(i)-97]++;return c}
-function fmtLetters(s){return s.split('').join(', ')}
+function fmtLetters(s){return s}
 
 /* ── Dictionary & Index ─────────────────────────────────────────── */
 function buildIndex(text){
@@ -142,7 +143,7 @@ function buildIndex(text){
   else showEmpty();
 }
 function showEmpty(){
-  stsCard.style.display='';sts.className='sts';sts.textContent='Enter Letters to Find Words';
+  stsCard.style.display='none';
   rc.textContent='';filterWrap.style.display='none';updateActions(false);
 }
 function showStatus(msg,loading){
@@ -182,7 +183,8 @@ function solveSingle(input){
     if(found.has(w))continue;
     var off=w*26,wl=0;
     for(c=0;c<26;c++)wl+=SG[off+c];
-    if(wl>il+2||wl<3)continue;
+    var closeMin=Math.max(3,Math.floor(il*0.7));
+    if(wl>il+2||wl<closeMin)continue;
     var def=0;
     for(c=0;c<26;c++){if(SG[off+c]>ic[c])def+=SG[off+c]-ic[c];if(def>2)break}
     if(def>0&&def<=2){
@@ -207,7 +209,7 @@ function solveMulti(input,singleResults){
     if(remLen===0&&chosen.length>=2){combos.push(chosen.slice());return}
     if(chosen.length>=4||remLen<3||combos.length>=200)return;
     for(var i=start;i<cands.length;i++){
-      if(++nodes%10000===0&&Date.now()>deadline)return;
+      if(++nodes%1000===0&&Date.now()>deadline)return;
       var idx=cands[i],wl=W[idx].length;if(wl>remLen)continue;
       var off=idx*26,fits=true;
       for(c=0;c<26;c++){if(SG[off+c]>rem[c]){fits=false;break}}
@@ -215,7 +217,7 @@ function solveMulti(input,singleResults){
       for(c=0;c<26;c++)rem[c]-=SG[off+c];
       chosen.push(idx);dfs(rem,remLen-wl,chosen,i+1);chosen.pop();
       for(c=0;c<26;c++)rem[c]+=SG[off+c];
-      if(combos.length>=200||(nodes%10000===0&&Date.now()>deadline))return;
+      if(combos.length>=200||(nodes%1000===0&&Date.now()>deadline))return;
     }
   })(new Int8Array(ic),il,[],0);
   return combos;
@@ -230,11 +232,13 @@ function solve(){
   _base.save('resolve:input',raw);
 
   var singles=solveSingle(input),il=input.length,i,j;
-  var minLen=Math.max(2,il-4);
+  var minLen=Math.max(2,Math.floor(il/2));
   allRes=[];
 
+  var closeMin=Math.max(3,Math.floor(il*0.7));
   for(i=0;i<singles.length;i++){
     var r=singles[i];
+    if(r.type==='close'&&r.wl<closeMin)continue;
     if(r.type!=='close'&&r.wl<minLen)continue;
     r.word=W[r.idx].toUpperCase();
     allRes.push(r);
@@ -272,7 +276,7 @@ function groupResults(list,il){
     else key='len'+r.wl;
     if(!map.has(key)){
       var label;
-      if(r.type==='close')label='Need +'+(r.deficit===1?'1 Letter':'2 Letters');
+      if(r.type==='close')label=r.deficit===1?'1 Letter Away':'2 Letters Away';
       else if(r.wl===il)label=r.wl+' Letters (Exact)';
       else label=r.wl+' Letter'+(r.wl!==1?'s':'');
       map.set(key,{key:key,label:label,items:[]});order.push(map.get(key));
@@ -305,16 +309,17 @@ function render(flat){
     var groups=groupResults(visRes,il);
     for(var g=0;g<groups.length;g++){
       var gr=groups[g],items=gr.items;
-      var card=document.createElement('div');card.className='card fi';
       var hdr=document.createElement('div');hdr.className='rh';
       var hl=document.createElement('span');hl.textContent=gr.label;
       var hn=document.createElement('span');hn.className='rn';hn.textContent=items.length;
-      hdr.appendChild(hl);hdr.appendChild(hn);card.appendChild(hdr);
+      hdr.appendChild(hl);hdr.appendChild(hn);rc.appendChild(hdr);
+      var card=document.createElement('div');card.className='card fi';
       var cap=Math.min(items.length,GROUP_CAP);
       for(var i=0;i<cap;i++)card.appendChild(mkItem(items[i]));
       if(items.length>GROUP_CAP){
+        var more=Math.min(items.length,GROUP_MAX)-GROUP_CAP;
         var mb=document.createElement('button');mb.className='mb';
-        mb.textContent='Show '+Math.min(items.length,GROUP_MAX)+' of '+items.length;
+        mb.textContent='Show '+more+' More';
         mb.dataset.gkey=gr.key;card.appendChild(mb);
       }
       rc.appendChild(card);
@@ -337,7 +342,7 @@ function mkItem(r){
     var badge=document.createElement('span');badge.className='rb cl';
     badge.textContent='+'+fmtLetters(r.dl);div.appendChild(badge);
   }else if(r.type==='subset'&&r.ul&&r.ul.length<=3){
-    var badge=document.createElement('span');badge.className='rb';
+    var badge=document.createElement('span');badge.className='rb sub';
     badge.textContent='\u2212'+fmtLetters(r.ul);div.appendChild(badge);
   }
   return div;
@@ -378,8 +383,8 @@ function doCopyWord(w){
 }
 
 function doCopyAll(){
-  if(!visRes.length)return;
-  var all=[];for(var i=0;i<visRes.length;i++)all.push(visRes[i].word);
+  var items=rc.querySelectorAll('.ri');if(!items.length)return;
+  var all=[];for(var i=0;i<items.length;i++)all.push(items[i].dataset.w);
   doCopyWord(all.join('\n'));
 }
 
