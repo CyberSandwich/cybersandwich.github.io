@@ -108,28 +108,13 @@ html[data-theme="dark"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://ww
 'use strict';
 var $=function(id){return document.getElementById(id)};
 
-/* ── State ──────────────────────────────────────────────────────── */
+/* ── Solver Worker ─────────────────────────────────────────────── */
+var workerFn=function(){
+'use strict';
 var W=[],WC=0,AI=null,SG=null,WL=null,LI=null,WT=null,WM=null,maxLogIdx=0;
-var ready=false,mode=_base.load('resolve:mode','single');
-var lastInput=_base.load('resolve:input','');
-var allRes=[],visRes=[],kbIdx=-1;
-var cpTimer=null,paTimer=null,filterTimer=null;
-var GROUP_CAP=30,GROUP_MAX=100;
 
-/* ── DOM ────────────────────────────────────────────────────────── */
-var inp=$('inp'),goBtn=$('go-btn');
-var stsCard=$('status-card'),sts=$('sts');
-var rc=$('rc');
-var filterWrap=$('filter-wrap'),filterInp=$('filter'),filterX=$('filter-x');
-var modeRow=$('mode-row');
-var cpBtn=$('cp-btn'),cpI=$('cp-i'),cpCk=$('cp-ck'),cpL=$('cp-l');
-var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
-var rsBtn=$('rs-btn'),rsL=$('rs-l');
-
-/* ── Utilities ──────────────────────────────────────────────────── */
-function clean(s){return s.replace(/[^a-zA-Z?*]/g,'').toLowerCase()}
 function lc(s){var c=new Int8Array(26);for(var i=0;i<s.length;i++)c[s.charCodeAt(i)-97]++;return c}
-/* ── Dictionary & Index ─────────────────────────────────────────── */
+
 function buildIndex(text){
   var lines=text.split('\n'),i,j,w,off,key;
   W=[];AI=new Map();
@@ -153,22 +138,9 @@ function buildIndex(text){
     else if(i<15000)WT[i]=1;
     else WT[i]=2;
   }
-  ready=true;stsCard.style.display='none';
-  if(lastInput){inp.value=lastInput;solve()}
-  else showEmpty();
-}
-function showEmpty(){
-  stsCard.style.display='none';
-  rc.textContent='';filterWrap.style.display='none';updateActions(false);
-}
-function showStatus(msg,loading){
-  stsCard.style.display='';sts.className=loading?'sts ld':'sts';sts.textContent=msg;
-  rc.textContent='';filterWrap.style.display='none';
 }
 
-/* ── Single Word Solver ─────────────────────────────────────────── */
 function solveSingle(input){
-  // Count blanks (? or *), strip from letter counts
   var blanks=0;
   for(var b=0;b<input.length;b++){if(input[b]==='?'||input[b]==='*')blanks++}
   var alpha=input.replace(/[?*]/g,'');
@@ -179,7 +151,6 @@ function solveSingle(input){
   var n=letters.length;
 
   if(blanks===0){
-    // Fast path: sub-multiset enumeration
     (function rec(d,key){
       if(d===n){
         if(key.length>=2){
@@ -197,10 +168,9 @@ function solveSingle(input){
         return;
       }
       var ch=String.fromCharCode(97+letters[d]);
-      for(var c=0;c<=maxC[d];c++)rec(d+1,c===0?key:key+ch.repeat(c));
+      for(var cc=0;cc<=maxC[d];cc++)rec(d+1,cc===0?key:key+ch.repeat(cc));
     })(0,'');
   }else{
-    // Wildcard mode: scan dictionary, blanks fill any letter deficit
     var wMinLen=Math.max(2,Math.ceil(il/3)),wMaxLen=Math.min(il,20);
     for(var li=wMinLen;li<=wMaxLen;li++){
       var bucket=LI[li];
@@ -214,14 +184,13 @@ function solveSingle(input){
           found.add(w);
           var ul='';
           for(c=0;c<26;c++){var d2=ic[c]-Math.min(SG[off+c],ic[c]);if(d2>0)for(var j=0;j<d2;j++)ul+=String.fromCharCode(65+c)}
-          var blanksUsed=def,lettersUnused=il-wl-blanks+def;
+          var blanksUsed=def;
           results.push({idx:w,type:wl===il&&def===blanks?'exact':'subset',wl:wl,ul:ul+(blanksUsed<blanks?'?'.repeat(blanks-blanksUsed):''),dl:''});
         }
       }
     }
   }
 
-  // Close match scan (skip if wildcards — already covered above)
   if(blanks>0)return results;
   var maxDef,closeMin,closeUseMin;
   if(il<=4){maxDef=1;closeMin=Math.max(3,il-1);closeUseMin=il-1}
@@ -266,7 +235,6 @@ function rankScore(r,il){
   return tier*10+freq-r.wl*0.3;
 }
 
-/* ── Multi-Word Solver (dedup by anagram key) ───────────────────── */
 function multiScore(idxs){
   var n=idxs.length,maxLog=0,maxTier=0,k;
   for(k=0;k<n;k++){
@@ -274,11 +242,11 @@ function multiScore(idxs){
     if(li>maxLog)maxLog=li;
     if(WT[idxs[k]]>maxTier)maxTier=WT[idxs[k]];
   }
-  var wordPenalty=(n-2)*15;
-  return wordPenalty+maxTier*8+maxLog;
+  return(n-2)*15+maxTier*8+maxLog;
 }
 
 var MW2=new Set('ad ah am an as at aw ax ay be by do eh em en ex go ha he hi ho if in is it lo ma me my no of oh ok on or ow ox pa pi re sh so to uh um un up us we wo'.split(' '));
+
 function solveMulti(input,singleResults){
   var ic=lc(input),il=input.length,i,c;
   var FREQ_CAP=40000;
@@ -312,7 +280,6 @@ function solveMulti(input,singleResults){
 
   var combos=[],seenKeys=new Set(),nodes=0;
 
-  /* Pass 1 — two-word splits only (budget: 300 combos, 1s) */
   var dl1=Date.now()+1000;
   (function dfs2(rem,remLen,chosen,start){
     if(remLen===0&&chosen.length===2){
@@ -333,7 +300,6 @@ function solveMulti(input,singleResults){
     }
   })(new Int8Array(ic),il,[],0);
 
-  /* Pass 2 — three/four-word splits (budget: 300 combos, 1.5s) */
   var p2count=0,dl2=Date.now()+1500;nodes=0;
   (function dfs34(rem,remLen,chosen,start){
     if(remLen===0&&chosen.length>=3){
@@ -354,7 +320,6 @@ function solveMulti(input,singleResults){
     }
   })(new Int8Array(ic),il,[],0);
 
-  /* Pass 3 — two-word subset combos (budget: 200 combos, 1s) */
   var subCands=[],subMap=[];
   for(i=0;i<cands.length;i++){if(WT[cands[i].rep]<=1){subMap.push(i);subCands.push(cands[i])}}
   var subCSigs=new Int8Array(subCands.length*26);
@@ -389,10 +354,9 @@ function solveMulti(input,singleResults){
       var i=fitting[fi];if(i<start)continue;
       if(++nodes%1000===0&&Date.now()>dl3)return;
       var wl=WL[subCands[i].rep];if(wl>remLen)continue;
-      /* skip if this exact pair already found in pass 1 */
       if(chosen.length===1&&remLen-wl===0){
         var ek=subMap[chosen[0]]+','+subMap[i];
-        if(seenKeys.has(ek)){continue}
+        if(seenKeys.has(ek))continue;
       }
       for(c=0;c<26;c++)rem[c]-=subCSigs[i*26+c];
       chosen.push(i);dfs2s(rem,remLen-wl,chosen,i);chosen.pop();
@@ -401,7 +365,6 @@ function solveMulti(input,singleResults){
     }
   })(new Int8Array(ic),il,[],0);
 
-  /* Expand exact combos */
   var expanded=[];
   for(i=0;i<combos.length&&expanded.length<800;i++){
     var gs=combos[i].map(function(ci){return cands[ci].all.sort(function(a,b){return a-b}).slice(0,3)});
@@ -413,15 +376,14 @@ function solveMulti(input,singleResults){
   }
   expanded.sort(function(a,b){return multiScore(a)-multiScore(b)});
 
-  /* Expand subset combos */
   var subExpanded=[];
   for(i=0;i<subsetCombos.length&&subExpanded.length<400;i++){
     var sc=subsetCombos[i],unused=sc.unused;
-    var gs=sc.ci.map(function(ci){return subCands[ci].all.filter(function(idx){return WT[idx]<=1}).sort(function(a,b){return a-b}).slice(0,3)});
+    var gs2=sc.ci.map(function(ci){return subCands[ci].all.filter(function(idx){return WT[idx]<=1}).sort(function(a,b){return a-b}).slice(0,3)});
     (function ep(d,cur){
       if(subExpanded.length>=400)return;
-      if(d===gs.length){subExpanded.push({idxs:cur.slice(),unused:unused});return}
-      for(var k=0;k<gs[d].length&&subExpanded.length<400;k++){cur.push(gs[d][k]);ep(d+1,cur);cur.pop()}
+      if(d===gs2.length){subExpanded.push({idxs:cur.slice(),unused:unused});return}
+      for(var k=0;k<gs2[d].length&&subExpanded.length<400;k++){cur.push(gs2[d][k]);ep(d+1,cur);cur.pop()}
     })(0,[]);
   }
   subExpanded.sort(function(a,b){return(multiScore(a.idxs)+a.unused*3)-(multiScore(b.idxs)+b.unused*3)});
@@ -429,7 +391,143 @@ function solveMulti(input,singleResults){
   return {exact:expanded.slice(0,200),subset:subExpanded.slice(0,200)};
 }
 
-/* ── Solve Orchestrator ─────────────────────────────────────────── */
+self.onmessage=function(e){
+  var d=e.data;
+  if(d.cmd==='init'){
+    buildIndex(d.text);
+    self.postMessage({cmd:'ready'});
+  }
+  else if(d.cmd==='solve'){
+    var input=d.input,mode=d.mode,il=d.il,id=d.id;
+    var singles=solveSingle(input);
+    var minLen=Math.max(2,Math.ceil(il/3));
+    var singleRes=[],i,j;
+
+    for(i=0;i<singles.length;i++){
+      var r=singles[i];
+      if(r.type!=='close'&&r.wl<minLen)continue;
+      r.word=W[r.idx].toUpperCase();
+      if(r.type==='close'){r.removed=il-r.used;r.added=r.deficit}
+      else{r.removed=r.type==='exact'?0:il-r.wl;r.added=0}
+      r.dist=r.removed+r.added;
+      if(r.dist>=4)continue;
+      r.changeType=r.added===0?0:r.removed===0?1:2;
+      r.rank=rankScore(r,il);
+      singleRes.push({word:r.word,type:r.type,wl:r.wl,ul:r.ul,dl:r.dl||'',dist:r.dist,changeType:r.changeType,rank:r.rank});
+    }
+    self.postMessage({cmd:'singles',results:singleRes,id:id});
+
+    var isFallback=mode==='single'&&!singleRes.length;
+    if(mode==='multi'||isFallback){
+      var mr=solveMulti(input,singles);
+      var multiRes=[];
+      for(i=0;i<mr.exact.length;i++){
+        var c=mr.exact[i],ws=[],tl=0;
+        for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length}
+        var mdist=il-tl;if(mdist>=4)continue;
+        multiRes.push({type:'multi',wl:tl,word:ws.join(' + '),words:ws,ul:'',dl:'',dist:mdist,ms:multiScore(c)});
+      }
+      var ic=lc(input);
+      for(i=0;i<mr.subset.length;i++){
+        var se=mr.subset[i],sc=se.idxs,ws2=[],tl2=0;
+        var used=new Int8Array(26);
+        for(j=0;j<sc.length;j++){ws2.push(W[sc[j]].toUpperCase());tl2+=W[sc[j]].length;var soff=sc[j]*26;for(var k=0;k<26;k++)used[k]+=SG[soff+k]}
+        var ul='';for(var k=0;k<26;k++){var dd=ic[k]-used[k];if(dd>0)for(var q=0;q<dd;q++)ul+=String.fromCharCode(65+k)}
+        var mdist2=il-tl2;if(mdist2>=4)continue;
+        multiRes.push({type:'multi',wl:tl2,word:ws2.join(' + '),words:ws2,ul:ul,dl:'',dist:mdist2,ms:multiScore(sc)+se.unused*3});
+      }
+      self.postMessage({cmd:'multi',results:multiRes,id:id,fallback:isFallback});
+    }
+    self.postMessage({cmd:'done',id:id});
+  }
+};
+};
+
+/* ── State ──────────────────────────────────────────────────────── */
+var solver,solveId=0;
+var ready=false,mode=_base.load('resolve:mode','single');
+var lastInput=_base.load('resolve:input','');
+var allRes=[],visRes=[],kbIdx=-1;
+var cpTimer=null,paTimer=null,filterTimer=null;
+var GROUP_CAP=30,GROUP_MAX=100;
+
+/* ── DOM ────────────────────────────────────────────────────────── */
+var inp=$('inp'),goBtn=$('go-btn');
+var stsCard=$('status-card'),sts=$('sts');
+var rc=$('rc');
+var filterWrap=$('filter-wrap'),filterInp=$('filter'),filterX=$('filter-x');
+var modeRow=$('mode-row');
+var cpBtn=$('cp-btn'),cpI=$('cp-i'),cpCk=$('cp-ck'),cpL=$('cp-l');
+var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
+var rsBtn=$('rs-btn'),rsL=$('rs-l');
+
+/* ── Utilities ──────────────────────────────────────────────────── */
+function clean(s){return s.replace(/[^a-zA-Z?*]/g,'').toLowerCase()}
+
+function sortFn(a,b){
+  if(a.dist!==b.dist)return a.dist-b.dist;
+  var ma=a.type==='multi'?1:0,mb=b.type==='multi'?1:0;
+  if(ma!==mb)return ma-mb;
+  if(ma&&mb)return a.ms-b.ms;
+  if(a.changeType!==b.changeType)return a.changeType-b.changeType;
+  if(a.wl!==b.wl)return b.wl-a.wl;
+  return a.rank-b.rank;
+}
+
+function showEmpty(){
+  stsCard.style.display='none';
+  rc.textContent='';filterWrap.style.display='none';updateActions(false);
+}
+function showStatus(msg,loading){
+  stsCard.style.display='';sts.className=loading?'sts ld':'sts';sts.textContent=msg;
+  rc.textContent='';filterWrap.style.display='none';
+}
+
+/* ── Worker Setup ──────────────────────────────────────────────── */
+solver=new Worker(URL.createObjectURL(new Blob(['('+workerFn.toString()+')()'],{type:'application/javascript'})));
+
+solver.onmessage=function(e){
+  var d=e.data;
+  if(d.cmd==='ready'){
+    ready=true;stsCard.style.display='none';
+    if(lastInput){inp.value=lastInput;solve()}
+    else showEmpty();
+    return;
+  }
+  if(d.id!==solveId)return;
+  if(d.cmd==='singles'){
+    allRes=d.results;
+    allRes.sort(sortFn);
+    var segs=modeRow.querySelectorAll('.seg');
+    segs.forEach(function(s){s.disabled=false;s.classList.toggle('active',s.dataset.mode===mode)});
+    filterInp.value='';filterX.style.display='none';
+    visRes=allRes;kbIdx=-1;
+    if(allRes.length){render(false);updateActions(true)}
+    else if(mode==='multi'){showStatus('Computing Multi-Word...',true);updateActions(false)}
+    else{showStatus('No Results Found',false);updateActions(false)}
+  }
+  else if(d.cmd==='multi'){
+    if(d.fallback&&d.results.length){
+      _base.notify('No Single Word Results',false);
+      var segs=modeRow.querySelectorAll('.seg');
+      segs.forEach(function(s){
+        if(s.dataset.mode==='single'){s.disabled=true;s.classList.remove('active')}
+        else s.classList.add('active');
+      });
+    }
+    allRes=allRes.concat(d.results);
+    allRes.sort(sortFn);
+    filterInp.value='';filterX.style.display='none';
+    visRes=allRes;kbIdx=-1;
+    if(allRes.length){render(false);updateActions(true)}
+    else{_base.notify('No Results Found',false);showEmpty()}
+  }
+  else if(d.cmd==='done'){
+    if(!allRes.length){_base.notify('No Results Found',false);showEmpty()}
+  }
+};
+
+/* ── Solve Orchestrator ────────────────────────────────────────── */
 function solve(){
   var raw=inp.value,input=clean(raw);
   var segs=modeRow.querySelectorAll('.seg');
@@ -438,68 +536,13 @@ function solve(){
   if(input.length>20){_base.notify('20 Letters Max',false);return}
   if(!ready){_base.notify('Dictionary Loading...',false);return}
   _base.save('resolve:input',raw);
-
-  var singles=solveSingle(input),il=input.length,i,j;
-  var minLen=Math.max(2,Math.ceil(il/3));
-  allRes=[];
-
-  for(i=0;i<singles.length;i++){
-    var r=singles[i];
-    if(r.type!=='close'&&r.wl<minLen)continue;
-    r.word=W[r.idx].toUpperCase();
-    if(r.type==='close'){r.removed=il-r.used;r.added=r.deficit}
-    else{r.removed=r.type==='exact'?0:il-r.wl;r.added=0}
-    r.dist=r.removed+r.added;
-    if(r.dist>=4)continue;
-    r.changeType=r.added===0?0:r.removed===0?1:2;
-    r.rank=rankScore(r,il);
-    allRes.push(r);
-  }
-
-  var isFallback=mode==='single'&&!allRes.length;
-  if(mode==='multi'||isFallback){
-    var mr=solveMulti(input,singles);
-    for(i=0;i<mr.exact.length;i++){
-      var c=mr.exact[i],ws=[],tl=0,best=Infinity;
-      for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j]}
-      var mdist=il-tl;if(mdist>=4)continue;
-      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c),word:ws.join(' + '),words:ws,idxs:c,ul:'',dl:'',idx:best,dist:mdist});
-    }
-    var ic=lc(input);
-    for(i=0;i<mr.subset.length;i++){
-      var se=mr.subset[i],c=se.idxs,ws=[],tl=0,best=Infinity;
-      var used=new Int8Array(26);
-      for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j];var off=c[j]*26;for(var k=0;k<26;k++)used[k]+=SG[off+k]}
-      var ul='';for(var k=0;k<26;k++){var d=ic[k]-used[k];if(d>0)for(var q=0;q<d;q++)ul+=String.fromCharCode(65+k)}
-      var mdist=il-tl;if(mdist>=4)continue;
-      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c)+se.unused*3,word:ws.join(' + '),words:ws,idxs:c,ul:ul,dl:'',idx:best,dist:mdist});
-    }
-  }
-
-  allRes.sort(function(a,b){
-    if(a.dist!==b.dist)return a.dist-b.dist;
-    var ma=a.type==='multi'?1:0,mb=b.type==='multi'?1:0;
-    if(ma!==mb)return ma-mb;
-    if(ma&&mb)return a.ms-b.ms;
-    if(a.changeType!==b.changeType)return a.changeType-b.changeType;
-    if(a.wl!==b.wl)return b.wl-a.wl;
-    return a.rank-b.rank;
-  });
-
-  if(isFallback&&allRes.length){
-    _base.notify('No Single Word Results',false);
-    segs.forEach(function(s){
-      if(s.dataset.mode==='single'){s.disabled=true;s.classList.remove('active')}
-      else s.classList.add('active');
-    });
-  }
-  if(!allRes.length&&input){_base.notify('No Results Found',false)}
-
-  filterInp.value='';filterX.style.display='none';
-  visRes=allRes;kbIdx=-1;render(false);
+  solveId++;
+  allRes=[];visRes=[];
+  showStatus('Solving...',true);
+  solver.postMessage({cmd:'solve',input:input,mode:mode,il:input.length,id:solveId});
 }
 
-/* ── Grouping (interleaved by distance) ─────────────────────────── */
+/* ── Grouping (interleaved by distance) ────────────────────────── */
 function groupResults(list,il){
   var map=new Map(),order=[];
   for(var i=0;i<list.length;i++){
@@ -607,12 +650,10 @@ function updateActions(hasResults){
 var rowTimer=null;
 function doCopyWord(w,row){
   _base.copyText(w,function(){
-    // Copy button feedback
     if(cpTimer){clearTimeout(cpTimer);cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none'}
     cpI.style.display='none';cpCk.style.display='';cpL.textContent='Copied';
     cpBtn.classList.remove('ok');void cpBtn.offsetWidth;cpBtn.classList.add('ok');
     cpTimer=setTimeout(function(){cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none';cpL.textContent=visRes.length>1?'Copy All':'Copy';cpTimer=null},800);
-    // Row highlight
     if(row){
       if(rowTimer){clearTimeout(rowTimer);var old=rc.querySelector('.ri.ok');if(old)old.classList.remove('ok')}
       row.classList.remove('ok');void row.offsetWidth;row.classList.add('ok');
@@ -731,12 +772,13 @@ _base.onKey({
   }
 });
 
-/* ── Init ────────────────────────────────────────────────────────── */
+/* ── Init ──────────────────────────────────────────────────────── */
 modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s.dataset.mode===mode)});
 if(lastInput)inp.value=lastInput;
 
 _swr('/resolve/words.txt',{parse:function(t){return t},key:'resolve:dict'}).then(function(text){
-  if(text)buildIndex(text);else showStatus('Failed to Load Dictionary',false);
+  if(text)solver.postMessage({cmd:'init',text:text});
+  else showStatus('Failed to Load Dictionary',false);
 }).catch(function(){showStatus('Failed to Load Dictionary',false)});
 
 })();
