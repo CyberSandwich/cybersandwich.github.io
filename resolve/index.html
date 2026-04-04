@@ -109,7 +109,7 @@ html[data-theme="dark"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://ww
 var $=function(id){return document.getElementById(id)};
 
 /* ── State ──────────────────────────────────────────────────────── */
-var W=[],WC=0,AI=null,SG=null,WL=null,LI=null;
+var W=[],WC=0,AI=null,SG=null,WL=null,LI=null,WT=null,maxLogIdx=0;
 var ready=false,mode=_base.load('resolve:mode','single');
 var lastInput=_base.load('resolve:input','');
 var allRes=[],visRes=[],kbIdx=-1;
@@ -144,6 +144,14 @@ function buildIndex(text){
   }
   LI=[];for(i=0;i<=20;i++)LI[i]=[];
   for(i=0;i<WC;i++)if(WL[i]<=20)LI[WL[i]].push(i);
+  var jargon=new Set('seo html faq url www http php pdf rss css xml jpg png gif nav btn img dns api cdn ico svg src href div mysql smtp isp tcp ip asp cgi ssl ftp'.split(' '));
+  WT=new Uint8Array(WC);maxLogIdx=Math.log(WC+1);
+  for(i=0;i<WC;i++){
+    if(jargon.has(W[i]))WT[i]=2;
+    else if(i<3000)WT[i]=0;
+    else if(i<15000)WT[i]=1;
+    else WT[i]=2;
+  }
   ready=true;stsCard.style.display='none';
   if(lastInput){inp.value=lastInput;solve()}
   else showEmpty();
@@ -242,9 +250,9 @@ function solveSingle(input){
 }
 
 function rankScore(r,il){
-  var freq=Math.log(r.idx+2);
-  if(r.type==='close')return freq-r.used*0.8;
-  return freq-r.wl*0.5;
+  var tier=WT[r.idx],freq=Math.log(r.idx+2)/maxLogIdx*5;
+  if(r.type==='close')return tier*10+freq-r.used*0.8;
+  return tier*10+freq-r.wl*0.3;
 }
 
 /* ── Multi-Word Solver (dedup by anagram key) ───────────────────── */
