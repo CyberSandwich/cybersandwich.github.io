@@ -256,7 +256,7 @@ function solveMulti(input,singleResults){
   var keyMap=new Map();
   for(i=0;i<singleResults.length;i++){
     var r=singleResults[i];
-    if(r.type==='close'||WL[r.idx]<3||r.idx>=FREQ_CAP)continue;
+    if(r.type==='close'||WL[r.idx]<2||r.idx>=FREQ_CAP)continue;
     var key=W[r.idx].split('').sort().join('');
     var entry=keyMap.get(key);
     if(!entry){keyMap.set(key,{rep:r.idx,all:[r.idx]})}
@@ -270,7 +270,7 @@ function solveMulti(input,singleResults){
   var combos=[],deadline=Date.now()+2000,nodes=0;
   (function dfs(rem,remLen,chosen,start){
     if(remLen===0&&chosen.length>=2){combos.push(chosen.slice());return}
-    if(chosen.length>=4||remLen<3||combos.length>=500)return;
+    if(chosen.length>=4||remLen<2||combos.length>=500)return;
     for(var i=start;i<cands.length;i++){
       if(++nodes%1000===0&&Date.now()>deadline)return;
       var wl=WL[cands[i].rep];if(wl>remLen)continue;
