@@ -416,20 +416,31 @@ self.onmessage=function(e){
     if(mode==='multi'||isFallback){
       var mr=solveMulti(input,singles);
       var multiRes=[];
+      function inputOrder(wds){
+        var n=wds.length;
+        function tryM(rem,used){
+          if(rem.length===0)return true;
+          for(var q=0;q<n;q++){if(used&(1<<q))continue;if(rem.indexOf(wds[q])===0&&tryM(rem.slice(wds[q].length),used|(1<<q)))return true}
+          return false;
+        }
+        return tryM(input,0);
+      }
       for(i=0;i<mr.exact.length;i++){
-        var c=mr.exact[i],ws=[],tl=0;
-        for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length}
+        var c=mr.exact[i],ws=[],lws=[],tl=0;
+        for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());lws.push(W[c[j]]);tl+=W[c[j]].length}
         var mdist=il-tl;if(mdist>=3)continue;
-        multiRes.push({type:'multi',wl:tl,word:ws.join(' + '),words:ws,ul:'',dl:'',dist:mdist,ms:multiScore(c)});
+        var ms=multiScore(c);if(inputOrder(lws))ms-=1000;
+        multiRes.push({type:'multi',wl:tl,word:ws.join(' + '),words:ws,ul:'',dl:'',dist:mdist,ms:ms});
       }
       var ic=lc(input);
       for(i=0;i<mr.subset.length;i++){
-        var se=mr.subset[i],sc=se.idxs,ws2=[],tl2=0;
+        var se=mr.subset[i],sc=se.idxs,ws2=[],lws2=[],tl2=0;
         var used=new Int8Array(26);
-        for(j=0;j<sc.length;j++){ws2.push(W[sc[j]].toUpperCase());tl2+=W[sc[j]].length;var soff=sc[j]*26;for(var k=0;k<26;k++)used[k]+=SG[soff+k]}
+        for(j=0;j<sc.length;j++){ws2.push(W[sc[j]].toUpperCase());lws2.push(W[sc[j]]);tl2+=W[sc[j]].length;var soff=sc[j]*26;for(var k=0;k<26;k++)used[k]+=SG[soff+k]}
         var ul='';for(var k=0;k<26;k++){var dd=ic[k]-used[k];if(dd>0)for(var q=0;q<dd;q++)ul+=String.fromCharCode(65+k)}
         var mdist2=il-tl2;if(mdist2>=3)continue;
-        multiRes.push({type:'multi',wl:tl2,word:ws2.join(' + '),words:ws2,ul:ul,dl:'',dist:mdist2,ms:multiScore(sc)+se.unused*3});
+        var ms2=multiScore(sc)+se.unused*3;if(inputOrder(lws2))ms2-=1000;
+        multiRes.push({type:'multi',wl:tl2,word:ws2.join(' + '),words:ws2,ul:ul,dl:'',dist:mdist2,ms:ms2});
       }
       self.postMessage({cmd:'multi',results:multiRes,id:id,fallback:isFallback});
     }
