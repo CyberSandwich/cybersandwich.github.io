@@ -219,9 +219,12 @@ function solveSingle(input){
 
   // Close match scan (skip if wildcards — already covered above)
   if(blanks>0)return results;
-  var closeMin=Math.max(3,Math.floor(il*0.7));
-  var closeMax=Math.min(il+2,20);
-  var closeUseMin=Math.max(3,il-Math.max(1,Math.floor(il/6)));
+  var maxDef,closeMin,closeUseMin;
+  if(il<=4){maxDef=1;closeMin=Math.max(3,il-1);closeUseMin=il-1}
+  else if(il<=7){maxDef=2;closeMin=Math.max(3,il-2);closeUseMin=il-2}
+  else if(il<=12){maxDef=2;closeMin=Math.max(4,il-3);closeUseMin=il-3}
+  else{maxDef=3;closeMin=Math.max(5,il-4);closeUseMin=il-4}
+  var closeMax=Math.min(il+maxDef,20),closeCount=0;
   for(var li=closeMin;li<=closeMax;li++){
     var bucket=LI[li];
     for(var bi=0;bi<bucket.length;bi++){
@@ -232,9 +235,9 @@ function solveSingle(input){
         var need=SG[off+c],have=ic[c];
         if(need>have)def+=need-have;
         used+=Math.min(need,have);
-        if(def>2)break;
+        if(def>maxDef)break;
       }
-      if(def>0&&def<=2&&used>=closeUseMin){
+      if(def>0&&def<=maxDef&&used>=closeUseMin){
         var dl='',ul='';
         for(c=0;c<26;c++){
           var d=SG[off+c]-ic[c];
@@ -243,8 +246,10 @@ function solveSingle(input){
           if(u>0)for(var j=0;j<u;j++)ul+=String.fromCharCode(65+c);
         }
         results.push({idx:w,type:'close',wl:li,ul:ul,dl:dl,deficit:def,used:used});
+        if(++closeCount>=200)break;
       }
     }
+    if(closeCount>=200)break;
   }
   return results;
 }
