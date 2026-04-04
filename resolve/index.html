@@ -311,7 +311,7 @@ function solveMulti(input,singleResults){
   /* Pass 2 — three/four-word splits (budget: 300 combos, 1.5s) */
   var p2count=0,dl2=Date.now()+1500;nodes=0;
   (function dfs34(rem,remLen,chosen,start){
-    if(remLen===0&&chosen.length>=2){
+    if(remLen===0&&chosen.length>=3){
       var ck=chosen.slice().sort(function(a,b){return a-b}).join(',');
       if(!seenKeys.has(ck)){seenKeys.add(ck);combos.push(chosen.slice());p2count++}
       return;
