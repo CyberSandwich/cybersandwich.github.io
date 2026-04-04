@@ -21,18 +21,22 @@
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
 @media(min-width:768px){.w{padding:32px 48px calc(100px + env(safe-area-inset-bottom,0px))}}
-:root{--rsub:#D97706;--rcls:#DC2626;--rbg:#F0F0F0}
-html[data-theme="dark"]{--rsub:#FBBF24;--rcls:#F87171;--rbg:#3A3A3C}
-html[data-theme="sepia"]{--rsub:#B45309;--rcls:#B91C1C;--rbg:#E8DFC8}
+:root{--rsub:#DC2626;--rcls:#16A34A;--rbg:#F0F0F0}
+html[data-theme="dark"]{--rsub:#F87171;--rcls:#4ADE80;--rbg:#3A3A3C}
+html[data-theme="sepia"]{--rsub:#B91C1C;--rcls:#65A30D;--rbg:#E8DFC8}
 .links>button{transition:background .25s,color .25s}
 .links>button.ok{}
 .links>button.ok polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
-.rh{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;margin-top:6px;font-weight:600;font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
-.rn{background:var(--rbg);padding:2px 8px;border-radius:var(--rr);font-size:11px;font-weight:600;color:var(--t3)}
+.rh{padding:6px 4px;margin-top:6px;font-weight:600;font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.rh span{color:var(--t4);font-weight:500}
 .ri{display:flex;justify-content:space-between;align-items:center;padding:13px 20px;border-bottom:1px solid var(--bdr2);font:400 .9375rem/1.6 var(--font);color:var(--t2);cursor:pointer;transition:background .15s}
 .ri:last-child{border-bottom:none}
 .ri:active{opacity:.85}
 .ri.kf{background:var(--bg);outline:2px solid var(--acc);outline-offset:-2px}
+.ri.ok{background:var(--rok);transition:background .25s}
+:root{--rok:#DCFCE7}
+html[data-theme="dark"]{--rok:#14532D50}
+html[data-theme="sepia"]{--rok:#D1FAE550}
 .rw{font-weight:500;color:var(--t1);pointer-events:none}
 .rw .plus{color:var(--t4);margin:0 4px;font-weight:400}
 .rb{font-size:12px;padding:2px 8px;border-radius:var(--rr);background:var(--rbg);color:var(--t3);font-weight:500;white-space:nowrap;flex-shrink:0;margin-left:12px;pointer-events:none}
@@ -104,7 +108,7 @@ html[data-theme="dark"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://ww
 var $=function(id){return document.getElementById(id)};
 
 /* ── State ──────────────────────────────────────────────────────── */
-var W=[],WC=0,AI=null,SG=null;
+var W=[],WC=0,AI=null,SG=null,WL=null;
 var ready=false,mode=_base.load('resolve:mode','single');
 var lastInput=_base.load('resolve:input','');
 var allRes=[],visRes=[],kbIdx=-1;
@@ -124,18 +128,17 @@ var rsBtn=$('rs-btn'),rsL=$('rs-l');
 /* ── Utilities ──────────────────────────────────────────────────── */
 function clean(s){return s.replace(/[^a-zA-Z]/g,'').toLowerCase()}
 function lc(s){var c=new Int8Array(26);for(var i=0;i<s.length;i++)c[s.charCodeAt(i)-97]++;return c}
-function fmtLetters(s){return s}
-
 /* ── Dictionary & Index ─────────────────────────────────────────── */
 function buildIndex(text){
   var lines=text.split('\n'),i,j,w,off,key;
   W=[];AI=new Map();
   for(i=0;i<lines.length;i++){w=lines[i].trim();if(w.length>=2)W.push(w)}
   WC=W.length;
-  SG=new Int8Array(WC*26);
+  SG=new Int8Array(WC*26);WL=new Uint8Array(WC);
   for(i=0;i<WC;i++){
     w=W[i];off=i*26;key=w.split('').sort().join('');
     for(j=0;j<w.length;j++)SG[off+w.charCodeAt(j)-97]++;
+    WL[i]=w.length;
     var arr=AI.get(key);if(arr)arr.push(i);else AI.set(key,[i]);
   }
   ready=true;stsCard.style.display='none';
@@ -178,16 +181,21 @@ function solveSingle(input){
     for(var c=0;c<=maxC[d];c++)rec(d+1,c===0?key:key+ch.repeat(c));
   })(0,'');
 
-  // Close match scan
+  // Close match scan — tight filter: must use almost all input letters
+  var closeMin=Math.max(3,Math.floor(il*0.7));
+  var closeUseMin=Math.max(3,il-1);
   for(var w=0;w<WC;w++){
     if(found.has(w))continue;
-    var off=w*26,wl=0;
-    for(c=0;c<26;c++)wl+=SG[off+c];
-    var closeMin=Math.max(3,Math.floor(il*0.7));
+    var wl=WL[w];
     if(wl>il+2||wl<closeMin)continue;
-    var def=0;
-    for(c=0;c<26;c++){if(SG[off+c]>ic[c])def+=SG[off+c]-ic[c];if(def>2)break}
-    if(def>0&&def<=2){
+    var off=w*26,def=0,used=0;
+    for(c=0;c<26;c++){
+      var need=SG[off+c],have=ic[c];
+      if(need>have)def+=need-have;
+      used+=Math.min(need,have);
+      if(def>2)break;
+    }
+    if(def>0&&def<=2&&used>=closeUseMin){
       var dl='';
       for(c=0;c<26;c++){var d=SG[off+c]-ic[c];if(d>0)for(var j=0;j<d;j++)dl+=String.fromCharCode(65+c)}
       results.push({idx:w,type:'close',wl:wl,ul:'',dl:dl,deficit:def});
@@ -196,31 +204,54 @@ function solveSingle(input){
   return results;
 }
 
-/* ── Multi-Word Solver ──────────────────────────────────────────── */
+/* ── Multi-Word Solver (dedup by anagram key) ───────────────────── */
 function solveMulti(input,singleResults){
   var ic=lc(input),il=input.length,i,c;
-  var cands=[];
+  var FREQ_CAP=40000;
+  // Group candidates by anagram key — DFS uses one rep per key
+  var keyMap=new Map();
   for(i=0;i<singleResults.length;i++){
-    var r=singleResults[i];if(r.type!=='close'&&W[r.idx].length>=3)cands.push(r.idx);
+    var r=singleResults[i];
+    if(r.type==='close'||WL[r.idx]<3||r.idx>=FREQ_CAP)continue;
+    var key=W[r.idx].split('').sort().join('');
+    var entry=keyMap.get(key);
+    if(!entry){keyMap.set(key,{rep:r.idx,all:[r.idx]})}
+    else{entry.all.push(r.idx);if(r.idx<entry.rep)entry.rep=r.idx}
   }
-  cands.sort(function(a,b){return W[b].length-W[a].length||a-b});
+  var cands=[];keyMap.forEach(function(v){cands.push(v)});
+  cands.sort(function(a,b){return WL[b.rep]-WL[a.rep]||a.rep-b.rep});
+  var cSigs=new Int8Array(cands.length*26);
+  for(i=0;i<cands.length;i++){var off=cands[i].rep*26;for(c=0;c<26;c++)cSigs[i*26+c]=SG[off+c]}
+
   var combos=[],deadline=Date.now()+2000,nodes=0;
   (function dfs(rem,remLen,chosen,start){
     if(remLen===0&&chosen.length>=2){combos.push(chosen.slice());return}
-    if(chosen.length>=4||remLen<3||combos.length>=200)return;
+    if(chosen.length>=4||remLen<3||combos.length>=300)return;
     for(var i=start;i<cands.length;i++){
       if(++nodes%1000===0&&Date.now()>deadline)return;
-      var idx=cands[i],wl=W[idx].length;if(wl>remLen)continue;
-      var off=idx*26,fits=true;
-      for(c=0;c<26;c++){if(SG[off+c]>rem[c]){fits=false;break}}
+      var wl=WL[cands[i].rep];if(wl>remLen)continue;
+      var co=i*26,fits=true;
+      for(c=0;c<26;c++){if(cSigs[co+c]>rem[c]){fits=false;break}}
       if(!fits)continue;
-      for(c=0;c<26;c++)rem[c]-=SG[off+c];
-      chosen.push(idx);dfs(rem,remLen-wl,chosen,i+1);chosen.pop();
-      for(c=0;c<26;c++)rem[c]+=SG[off+c];
-      if(combos.length>=200||(nodes%1000===0&&Date.now()>deadline))return;
+      for(c=0;c<26;c++)rem[c]-=cSigs[co+c];
+      chosen.push(i);dfs(rem,remLen-wl,chosen,i+1);chosen.pop();
+      for(c=0;c<26;c++)rem[c]+=cSigs[co+c];
+      if(combos.length>=300||(nodes%1000===0&&Date.now()>deadline))return;
     }
   })(new Int8Array(ic),il,[],0);
-  return combos;
+
+  // Expand: top 3 anagram variants per group, score by total rank
+  var expanded=[];
+  for(i=0;i<combos.length&&expanded.length<500;i++){
+    var gs=combos[i].map(function(ci){return cands[ci].all.sort(function(a,b){return a-b}).slice(0,3)});
+    (function ep(d,cur){
+      if(expanded.length>=500)return;
+      if(d===gs.length){expanded.push(cur.slice());return}
+      for(var k=0;k<gs[d].length&&expanded.length<500;k++){cur.push(gs[d][k]);ep(d+1,cur);cur.pop()}
+    })(0,[]);
+  }
+  expanded.sort(function(a,b){var sa=0,sb=0;for(var k=0;k<a.length;k++)sa+=a[k];for(var k=0;k<b.length;k++)sb+=b[k];return sa-sb});
+  return expanded.slice(0,200);
 }
 
 /* ── Solve Orchestrator ─────────────────────────────────────────── */
@@ -235,12 +266,11 @@ function solve(){
   var minLen=Math.max(2,Math.floor(il/2));
   allRes=[];
 
-  var closeMin=Math.max(3,Math.floor(il*0.7));
   for(i=0;i<singles.length;i++){
     var r=singles[i];
-    if(r.type==='close'&&r.wl<closeMin)continue;
     if(r.type!=='close'&&r.wl<minLen)continue;
     r.word=W[r.idx].toUpperCase();
+    r.dist=r.type==='exact'?0:r.type==='close'?r.deficit:(il-r.wl);
     allRes.push(r);
   }
 
@@ -249,15 +279,15 @@ function solve(){
     for(i=0;i<combos.length;i++){
       var c=combos[i],ws=[],tl=0,best=Infinity;
       for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j]}
-      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,word:ws.join(' + '),words:ws,idxs:c,ul:'',dl:'',idx:best});
+      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,word:ws.join(' + '),words:ws,idxs:c,ul:'',dl:'',idx:best,dist:il-tl});
     }
   }
 
+  // Sort: distance asc → subset before close at same distance → frequency asc
   allRes.sort(function(a,b){
-    var ta=a.type==='exact'?0:a.type==='close'?2:1;
-    var tb=b.type==='exact'?0:b.type==='close'?2:1;
+    if(a.dist!==b.dist)return a.dist-b.dist;
+    var ta=a.type==='close'?1:0,tb=b.type==='close'?1:0;
     if(ta!==tb)return ta-tb;
-    if(a.type==='close'&&b.type==='close'&&a.deficit!==b.deficit)return a.deficit-b.deficit;
     if(a.wl!==b.wl)return b.wl-a.wl;
     var ra=a.bestRank||a.idx,rb=b.bestRank||b.idx;
     return ra-rb;
@@ -267,12 +297,13 @@ function solve(){
   visRes=allRes;kbIdx=-1;render(false);
 }
 
-/* ── Grouping ───────────────────────────────────────────────────── */
+/* ── Grouping (interleaved by distance) ─────────────────────────── */
 function groupResults(list,il){
   var map=new Map(),order=[];
   for(var i=0;i<list.length;i++){
     var r=list[i],key;
     if(r.type==='close')key='close'+r.deficit;
+    else if(r.type==='multi')key='len'+r.wl;
     else key='len'+r.wl;
     if(!map.has(key)){
       var label;
@@ -310,9 +341,9 @@ function render(flat){
     for(var g=0;g<groups.length;g++){
       var gr=groups[g],items=gr.items;
       var hdr=document.createElement('div');hdr.className='rh';
-      var hl=document.createElement('span');hl.textContent=gr.label;
-      var hn=document.createElement('span');hn.className='rn';hn.textContent=items.length;
-      hdr.appendChild(hl);hdr.appendChild(hn);rc.appendChild(hdr);
+      hdr.textContent=gr.label+' ';
+      var hn=document.createElement('span');hn.textContent='('+items.length+')';
+      hdr.appendChild(hn);rc.appendChild(hdr);
       var card=document.createElement('div');card.className='card fi';
       var cap=Math.min(items.length,GROUP_CAP);
       for(var i=0;i<cap;i++)card.appendChild(mkItem(items[i]));
@@ -340,10 +371,10 @@ function mkItem(r){
   div.appendChild(wSpan);
   if(r.type==='close'&&r.dl){
     var badge=document.createElement('span');badge.className='rb cl';
-    badge.textContent='+'+fmtLetters(r.dl);div.appendChild(badge);
-  }else if(r.type==='subset'&&r.ul&&r.ul.length<=3){
+    badge.textContent='+'+r.dl;div.appendChild(badge);
+  }else if(r.type==='subset'&&r.ul){
     var badge=document.createElement('span');badge.className='rb sub';
-    badge.textContent='\u2212'+fmtLetters(r.ul);div.appendChild(badge);
+    badge.textContent='\u2212'+r.ul;div.appendChild(badge);
   }
   return div;
 }
@@ -363,7 +394,7 @@ rc.addEventListener('click',function(e){
     return;
   }
   var ri=e.target.closest('.ri');
-  if(ri)doCopyWord(ri.dataset.w);
+  if(ri)doCopyWord(ri.dataset.w,ri);
 });
 
 /* ── Action Buttons ──────────────────────────────────────────────── */
@@ -373,12 +404,20 @@ function updateActions(hasResults){
   rsBtn.style.display=hasResults||clean(inp.value)?'':'none';
 }
 
-function doCopyWord(w){
+var rowTimer=null;
+function doCopyWord(w,row){
   _base.copyText(w,function(){
+    // Copy button feedback
     if(cpTimer){clearTimeout(cpTimer);cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none'}
     cpI.style.display='none';cpCk.style.display='';cpL.textContent='Copied';
     cpBtn.classList.remove('ok');void cpBtn.offsetWidth;cpBtn.classList.add('ok');
     cpTimer=setTimeout(function(){cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none';cpL.textContent=visRes.length>1?'Copy All':'Copy';cpTimer=null},800);
+    // Row highlight
+    if(row){
+      if(rowTimer){clearTimeout(rowTimer);var old=rc.querySelector('.ri.ok');if(old)old.classList.remove('ok')}
+      row.classList.remove('ok');void row.offsetWidth;row.classList.add('ok');
+      rowTimer=setTimeout(function(){row.classList.remove('ok');rowTimer=null},800);
+    }
   });
 }
 
@@ -484,7 +523,7 @@ _base.onKey({
   'a':function(){doCopyAll()},
   'j':function(){moveKb(1)},'k':function(){moveKb(-1)},
   'ArrowDown':function(){moveKb(1)},'ArrowUp':function(){moveKb(-1)},
-  'Enter':function(){if(kbIdx>=0){var items=getVisItems();if(items[kbIdx])doCopyWord(items[kbIdx].dataset.w)}},
+  'Enter':function(){if(kbIdx>=0){var items=getVisItems();if(items[kbIdx])doCopyWord(items[kbIdx].dataset.w,items[kbIdx])}},
   'Escape':function(){
     if(filterInp===document.activeElement){filterInp.value='';filterX.style.display='none';applyFilter();filterInp.blur()}
     else{kbIdx=-1;var items=getVisItems();for(var i=0;i<items.length;i++)items[i].classList.remove('kf')}
