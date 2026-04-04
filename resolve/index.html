@@ -144,7 +144,7 @@ function buildIndex(text){
   }
   LI=[];for(i=0;i<=20;i++)LI[i]=[];
   for(i=0;i<WC;i++)if(WL[i]<=20)LI[WL[i]].push(i);
-  var jargon=new Set('seo html faq url www http php pdf rss css xml jpg png gif nav btn img dns api cdn ico svg src href div mysql smtp isp tcp ip asp cgi ssl ftp'.split(' '));
+  var jargon=new Set('seo html faq url www http php pdf rss css xml jpg png gif nav btn img dns api cdn ico svg src href div mysql smtp isp tcp ip asp cgi ssl ftp oclc'.split(' '));
   WT=new Uint8Array(WC);maxLogIdx=Math.log(WC+1);
   for(i=0;i<WC;i++){
     if(jargon.has(W[i]))WT[i]=2;
@@ -272,6 +272,7 @@ function multiScore(idxs){
   return wordPenalty+maxTier*8+maxLog;
 }
 
+var MW2=new Set('ad ah am an as at aw ax ay be by do eh em en ex go ha he hi ho if in is it lo ma me my no of oh ok on or ow ox pa pi re sh so to uh um un up us we wo'.split(' '));
 function solveMulti(input,singleResults){
   var ic=lc(input),il=input.length,i,c;
   var FREQ_CAP=40000;
@@ -279,6 +280,7 @@ function solveMulti(input,singleResults){
   for(i=0;i<singleResults.length;i++){
     var r=singleResults[i];
     if(r.type==='close'||WL[r.idx]<2||r.idx>=FREQ_CAP)continue;
+    if(WL[r.idx]===2&&!MW2.has(W[r.idx]))continue;
     var key=W[r.idx].split('').sort().join('');
     var entry=keyMap.get(key);
     if(!entry){keyMap.set(key,{rep:r.idx,all:[r.idx]})}
@@ -400,6 +402,8 @@ function solveMulti(input,singleResults){
 /* ── Solve Orchestrator ─────────────────────────────────────────── */
 function solve(){
   var raw=inp.value,input=clean(raw);
+  var segs=modeRow.querySelectorAll('.seg');
+  segs.forEach(function(s){s.disabled=false;s.classList.toggle('active',s.dataset.mode===mode)});
   if(!input){showEmpty();return}
   if(input.length>20){_base.notify('20 Letters Max',false);return}
   if(!ready){_base.notify('Dictionary Loading...',false);return}
@@ -416,17 +420,20 @@ function solve(){
     if(r.type==='close'){r.removed=il-r.used;r.added=r.deficit}
     else{r.removed=r.type==='exact'?0:il-r.wl;r.added=0}
     r.dist=r.removed+r.added;
+    if(r.dist>=4)continue;
     r.changeType=r.added===0?0:r.removed===0?1:2;
     r.rank=rankScore(r,il);
     allRes.push(r);
   }
 
-  if(mode==='multi'){
+  var isFallback=mode==='single'&&!allRes.length;
+  if(mode==='multi'||isFallback){
     var mr=solveMulti(input,singles);
     for(i=0;i<mr.exact.length;i++){
       var c=mr.exact[i],ws=[],tl=0,best=Infinity;
       for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j]}
-      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c),word:ws.join(' + '),words:ws,idxs:c,ul:'',dl:'',idx:best,dist:il-tl});
+      var mdist=il-tl;if(mdist>=4)continue;
+      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c),word:ws.join(' + '),words:ws,idxs:c,ul:'',dl:'',idx:best,dist:mdist});
     }
     var ic=lc(input);
     for(i=0;i<mr.subset.length;i++){
@@ -434,7 +441,8 @@ function solve(){
       var used=new Int8Array(26);
       for(j=0;j<c.length;j++){ws.push(W[c[j]].toUpperCase());tl+=W[c[j]].length;if(c[j]<best)best=c[j];var off=c[j]*26;for(var k=0;k<26;k++)used[k]+=SG[off+k]}
       var ul='';for(var k=0;k<26;k++){var d=ic[k]-used[k];if(d>0)for(var q=0;q<d;q++)ul+=String.fromCharCode(65+k)}
-      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c)+se.unused*3,word:ws.join(' + '),words:ws,idxs:c,ul:ul,dl:'',idx:best,dist:il-tl});
+      var mdist=il-tl;if(mdist>=4)continue;
+      allRes.push({type:'multi',wl:tl,wc:c.length,bestRank:best,ms:multiScore(c)+se.unused*3,word:ws.join(' + '),words:ws,idxs:c,ul:ul,dl:'',idx:best,dist:mdist});
     }
   }
 
@@ -447,6 +455,15 @@ function solve(){
     if(a.wl!==b.wl)return b.wl-a.wl;
     return a.rank-b.rank;
   });
+
+  if(isFallback&&allRes.length){
+    _base.notify('No Single Word Results',false);
+    segs.forEach(function(s){
+      if(s.dataset.mode==='single'){s.disabled=true;s.classList.remove('active')}
+      else s.classList.add('active');
+    });
+  }
+  if(!allRes.length&&input){_base.notify('No Results Found',false)}
 
   filterInp.value='';filterX.style.display='none';
   visRes=allRes;kbIdx=-1;render(false);
@@ -595,6 +612,7 @@ function doPaste(){
 function doReset(){
   inp.value='';filterInp.value='';filterX.style.display='none';
   allRes=[];visRes=[];kbIdx=-1;_base.save('resolve:input','');
+  modeRow.querySelectorAll('.seg').forEach(function(s){s.disabled=false;s.classList.toggle('active',s.dataset.mode===mode)});
   showEmpty();inp.focus();
 }
 
