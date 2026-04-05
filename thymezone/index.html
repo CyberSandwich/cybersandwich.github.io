@@ -127,6 +127,7 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
 </nav>
 <script src="/shared/base.js?v=24"></script>
 <script src="/shared/search.js?v=20"></script>
+<script src="places.js?v=1"></script>
 <script>
 (function(){
 'use strict';
@@ -403,176 +404,6 @@ UY:"Uruguay",UZ:"Uzbekistan",VE:"Venezuela",VN:"Vietnam",WS:"Samoa",YE:"Yemen",Z
 ZM:"Zambia",ZW:"Zimbabwe","--":"UTC"
 };
 
-// -- Extended Places Dataset --
-// Format: "CC|IANA_ID":"city1,city2,state1,region1,..."
-// Adds ~1000 searchable places on top of the ~160 primary zones in Z
-var P={
-// ---- EUROPE ----
-"GB|Europe/London":"Aberdeen,Ayr,Bangor,Barnsley,Basildon,Basingstoke,Bath,Bedford,Belfast,Birkenhead,Birmingham,Blackburn,Blackpool,Bolton,Bournemouth,Bradford,Bridgend,Brighton,Bristol,Bromley,Burnley,Burton upon Trent,Bury,Cambridge,Canterbury,Cardiff,Carlisle,Chatham,Chelmsford,Cheltenham,Chester,Chesterfield,Chichester,Colchester,Corby,Coventry,Crawley,Crewe,Croydon,Darlington,Dartford,Derby,Dewsbury,Doncaster,Dudley,Dumfries,Dundee,Durham,Eastbourne,Edinburgh,Enfield,Epsom,Exeter,Falkirk,Folkestone,Gateshead,Gillingham,Glasgow,Gloucester,Gravesend,Grimsby,Guildford,Halifax,Hamilton,Harlow,Harrogate,Hartlepool,Hastings,Hemel Hempstead,Hereford,High Wycombe,Horsham,Huddersfield,Hull,Ilford,Ipswich,Keighley,Kettering,Kilmarnock,Kings Lynn,Kingston upon Thames,Kirkcaldy,Lancaster,Leeds,Leicester,Lewisham,Lichfield,Lincoln,Lisburn,Liverpool,Livingston,Londonderry,Derry,Loughborough,Luton,Macclesfield,Maidenhead,Maidstone,Manchester,Mansfield,Margate,Medway,Middlesbrough,Milton Keynes,Motherwell,Newcastle upon Tyne,Newport,Newry,Northampton,Norwich,Nottingham,Nuneaton,Oldham,Oxford,Paisley,Perth,Peterborough,Plymouth,Poole,Portsmouth,Preston,Reading,Rochdale,Rotherham,Royal Tunbridge Wells,Rugby,Salford,Salisbury,Scarborough,Scunthorpe,Sheffield,Shrewsbury,Slough,Solihull,South Shields,Southampton,Southend-on-Sea,Southport,St Albans,St Helens,Stafford,Stevenage,Stirling,Stockport,Stockton-on-Tees,Stoke-on-Trent,Stratford-upon-Avon,Sunderland,Sutton Coldfield,Swansea,Swindon,Tamworth,Taunton,Telford,Torquay,Truro,Wakefield,Walsall,Warrington,Warwick,Washington,Watford,West Bromwich,Weston-super-Mare,Wigan,Winchester,Windsor,Woking,Wolverhampton,Worcester,Worthing,Wrexham,York,Bedfordshire,Berkshire,Buckinghamshire,Cambridgeshire,Cheshire,Cornwall,Cumbria,Derbyshire,Devon,Dorset,East Sussex,Essex,Gloucestershire,Greater London,Greater Manchester,Hampshire,Hertfordshire,Isle of Wight,Kent,Lancashire,Leicestershire,Lincolnshire,Merseyside,Norfolk,North Yorkshire,Northamptonshire,Northumberland,Nottinghamshire,Oxfordshire,Rutland,Shropshire,Somerset,South Yorkshire,Staffordshire,Suffolk,Surrey,Tyne and Wear,Warwickshire,West Midlands,West Sussex,West Yorkshire,Wiltshire,Worcestershire,England,Scotland,Wales,Northern Ireland,East Anglia,East Midlands,North East England,North West England,South East England,South West England,Yorkshire,Highlands,Lothian,Fife,Tayside",
-"IE|Europe/Dublin":"Cork,Galway,Limerick,Waterford,Drogheda,Dundalk,Kilkenny,Sligo,Wexford,Athlone,Tralee,Ennis,Carlow,Letterkenny,Leinster,Munster,Connacht,Ulster",
-"PT|Europe/Lisbon":"Porto,Braga,Coimbra,Funchal,Faro,Setubal,Aveiro,Evora,Guimaraes,Viseu,Leiria,Algarve",
-"IS|Atlantic/Reykjavik":"Akureyri,Keflavik,Hafnarfjordur",
-"FR|Europe/Paris":"Marseille,Lyon,Toulouse,Nice,Nantes,Strasbourg,Montpellier,Bordeaux,Lille,Rennes,Reims,Saint-Etienne,Toulon,Le Havre,Grenoble,Dijon,Angers,Nimes,Clermont-Ferrand,Aix-en-Provence,Brest,Tours,Amiens,Limoges,Perpignan,Metz,Besancon,Orleans,Rouen,Caen,Mulhouse,Nancy,Avignon,Cannes,Ile-de-France,Provence,Normandy,Brittany,Alsace,Aquitaine",
-"DE|Europe/Berlin":"Cologne,Dusseldorf,Stuttgart,Dortmund,Essen,Leipzig,Bremen,Dresden,Hanover,Nuremberg,Duisburg,Bochum,Wuppertal,Bielefeld,Bonn,Munster,Mannheim,Karlsruhe,Augsburg,Wiesbaden,Aachen,Freiburg,Heidelberg,Kiel,Mainz,Rostock,Lubeck,Potsdam,Erfurt,Magdeburg,Saarbrucken,Bavaria,Baden-Wurttemberg,North Rhine-Westphalia,Lower Saxony,Hesse,Saxony,Rhineland-Palatinate,Thuringia,Schleswig-Holstein,Brandenburg,Saxony-Anhalt,Mecklenburg-Vorpommern,Saarland",
-"NL|Europe/Amsterdam":"Rotterdam,The Hague,Utrecht,Eindhoven,Groningen,Tilburg,Almere,Breda,Nijmegen,Haarlem,Arnhem,Maastricht,Leiden,Dordrecht,Den Bosch",
-"BE|Europe/Brussels":"Antwerp,Ghent,Charleroi,Liege,Bruges,Namur,Leuven,Mons,Mechelen,Aalst,Hasselt,Kortrijk,Flanders,Wallonia",
-"ES|Europe/Madrid":"Barcelona,Valencia,Seville,Zaragoza,Malaga,Murcia,Palma,Bilbao,Alicante,Cordoba,Valladolid,Vigo,Gijon,Granada,San Sebastian,Santa Cruz de Tenerife,Las Palmas,Pamplona,Santander,Oviedo,Salamanca,Cadiz,Toledo,Catalonia,Andalusia,Basque Country,Galicia,Castilla y Leon,Aragon,Canary Islands,Asturias,Navarre,Balearic Islands",
-"IT|Europe/Rome":"Milan,Naples,Turin,Palermo,Genoa,Bologna,Florence,Bari,Catania,Venice,Verona,Messina,Padua,Trieste,Brescia,Parma,Modena,Perugia,Cagliari,Bergamo,Como,Pisa,Siena,Ravenna,Rimini,Lecce,Lombardy,Lazio,Campania,Sicily,Sardinia,Piedmont,Veneto,Emilia-Romagna,Puglia,Tuscany,Calabria,Liguria,Umbria,Abruzzo,Trentino",
-"AT|Europe/Vienna":"Graz,Linz,Salzburg,Innsbruck,Klagenfurt,Villach,Wels,Tyrol,Styria,Carinthia,Upper Austria",
-"CH|Europe/Zurich":"Geneva,Bern,Basel,Lausanne,Winterthur,Lucerne,St Gallen,Lugano,Biel",
-"SE|Europe/Stockholm":"Gothenburg,Malmo,Uppsala,Linkoping,Vasteras,Orebro,Norrkoping,Helsingborg,Umea,Lund",
-"NO|Europe/Oslo":"Bergen,Trondheim,Stavanger,Drammen,Tromso,Sandnes,Kristiansand,Fredrikstad,Bodo",
-"DK|Europe/Copenhagen":"Aarhus,Odense,Aalborg,Esbjerg,Roskilde,Horsens,Kolding,Vejle",
-"PL|Europe/Warsaw":"Krakow,Lodz,Wroclaw,Poznan,Gdansk,Szczecin,Bydgoszcz,Lublin,Bialystok,Katowice,Gdynia,Czestochowa,Radom,Torun,Sosnowiec,Rzeszow,Kielce,Olsztyn,Silesia,Pomerania,Greater Poland,Masovia,Lesser Poland",
-"CZ|Europe/Prague":"Brno,Ostrava,Pilsen,Liberec,Olomouc,Ceske Budejovice,Hradec Kralove,Bohemia,Moravia",
-"HU|Europe/Budapest":"Debrecen,Szeged,Miskolc,Pecs,Gyor,Nyiregyhaza,Kecskemet",
-"RS|Europe/Belgrade":"Novi Sad,Nis,Kragujevac,Subotica,Vojvodina",
-"HR|Europe/Zagreb":"Split,Rijeka,Osijek,Zadar,Dubrovnik,Pula,Dalmatia,Istria,Slavonia",
-"SI|Europe/Ljubljana":"Maribor,Celje,Kranj,Koper",
-"SK|Europe/Bratislava":"Kosice,Zilina,Presov,Nitra,Banska Bystrica,Trnava",
-"FI|Europe/Helsinki":"Espoo,Tampere,Vantaa,Oulu,Turku,Jyvaskyla,Lahti,Kuopio,Rovaniemi",
-"GR|Europe/Athens":"Thessaloniki,Patras,Heraklion,Larissa,Volos,Rhodes,Ioannina,Crete,Peloponnese,Macedonia,Thessaly",
-"RO|Europe/Bucharest":"Cluj-Napoca,Timisoara,Iasi,Constanta,Craiova,Brasov,Galati,Ploiesti,Sibiu,Oradea,Transylvania,Moldavia,Wallachia",
-"UA|Europe/Kyiv":"Kharkiv,Odesa,Dnipro,Donetsk,Zaporizhzhia,Lviv,Mykolaiv,Vinnytsia,Kherson,Poltava,Chernihiv",
-"TR|Europe/Istanbul":"Izmir,Bursa,Adana,Antalya,Konya,Gaziantep,Mersin,Kayseri,Eskisehir,Diyarbakir,Samsun,Trabzon,Denizli,Anatolia",
-"BG|Europe/Sofia":"Plovdiv,Varna,Burgas,Ruse,Stara Zagora,Pleven",
-"LT|Europe/Vilnius":"Kaunas,Klaipeda,Siauliai,Panevezys",
-"LV|Europe/Riga":"Daugavpils,Liepaja,Jelgava,Jurmala",
-"EE|Europe/Tallinn":"Tartu,Narva,Parnu",
-"MD|Europe/Chisinau":"Tiraspol,Balti",
-"BY|Europe/Minsk":"Gomel,Mogilev,Vitebsk,Grodno,Brest",
-"RU|Europe/Moscow":"St Petersburg,Saint Petersburg,Nizhny Novgorod,Kazan,Rostov-on-Don,Ufa,Volgograd,Perm,Voronezh,Krasnodar,Saratov,Togliatti,Izhevsk,Barnaul,Sochi,Tula,Kursk,Ryazan,Murmansk,Arkhangelsk,Kaliningrad,Bryansk",
-"RU|Asia/Yekaterinburg":"Chelyabinsk,Orenburg,Tyumen",
-"RU|Asia/Novosibirsk":"Tomsk",
-"RU|Asia/Irkutsk":"Ulan-Ude",
-"RU|Asia/Vladivostok":"Khabarovsk",
-// ---- AFRICA ----
-"NG|Africa/Lagos":"Abuja,Kano,Ibadan,Port Harcourt,Benin City,Kaduna,Enugu,Ilorin,Jos,Abeokuta,Onitsha,Warri,Calabar,Uyo,Owerri,Sokoto,Maiduguri",
-"EG|Africa/Cairo":"Alexandria,Giza,Shubra El Kheima,Port Said,Suez,Luxor,Aswan,Ismailia,Tanta,Mansoura",
-"ZA|Africa/Johannesburg":"Cape Town,Durban,Pretoria,Port Elizabeth,Bloemfontein,Nelspruit,Pietermaritzburg,Polokwane,Kimberley,Rustenburg,East London,Soweto,Sandton,Stellenbosch,Gauteng,KwaZulu-Natal,Western Cape,Eastern Cape,Free State,Limpopo,Mpumalanga",
-"KE|Africa/Nairobi":"Mombasa,Kisumu,Nakuru,Eldoret,Naivasha,Malindi,Thika",
-"ET|Africa/Addis_Ababa":"Dire Dawa,Mekelle,Adama,Gondar,Hawassa",
-"TZ|Africa/Dar_es_Salaam":"Dodoma,Mwanza,Arusha,Zanzibar,Mbeya,Tanga",
-"GH|Africa/Accra":"Kumasi,Tamale,Takoradi,Cape Coast",
-"MA|Africa/Casablanca":"Rabat,Fes,Marrakech,Tangier,Agadir,Meknes,Oujda,Kenitra",
-"DZ|Africa/Algiers":"Oran,Constantine,Annaba,Batna,Setif,Blida",
-"SN|Africa/Dakar":"Thies,Saint-Louis,Ziguinchor,Kaolack",
-"CM|Africa/Douala":"Yaounde,Garoua,Bamenda,Bafoussam,Maroua",
-"CI|Africa/Abidjan":"Bouake,Yamoussoukro,Daloa,San Pedro",
-"UG|Africa/Kampala":"Entebbe,Gulu,Jinja,Mbarara,Mbale",
-"RW|Africa/Kigali":"Butare,Gitarama,Gisenyi",
-"AO|Africa/Luanda":"Huambo,Lobito,Benguela,Lubango",
-"MZ|Africa/Maputo":"Beira,Nampula,Matola,Chimoio",
-"ZM|Africa/Lusaka":"Kitwe,Ndola,Livingstone,Kabwe",
-"ZW|Africa/Harare":"Bulawayo,Chitungwiza,Mutare",
-"BW|Africa/Gaborone":"Francistown,Maun",
-"SD|Africa/Khartoum":"Omdurman,Port Sudan,Kassala,Nyala",
-"CD|Africa/Kinshasa":"Lubumbashi,Mbuji-Mayi,Kananga,Bukavu,Goma,Kisangani",
-"MG|Indian/Antananarivo":"Toamasina,Antsirabe,Fianarantsoa,Mahajanga",
-"TN|Africa/Tunis":"Sfax,Sousse,Kairouan,Bizerte,Gabes",
-"SO|Africa/Mogadishu":"Hargeisa,Berbera,Kismayo,Marka",
-"NA|Africa/Windhoek":"Walvis Bay,Swakopmund,Rundu,Oshakati",
-// ---- MIDDLE EAST ----
-"SA|Asia/Riyadh":"Jeddah,Mecca,Medina,Dammam,Khobar,Tabuk,Taif,Hail,Jubail,Yanbu,Abha,Najran",
-"AE|Asia/Dubai":"Abu Dhabi,Sharjah,Ajman,Ras Al Khaimah,Fujairah,Al Ain,Umm Al Quwain",
-"IL|Asia/Jerusalem":"Tel Aviv,Haifa,Rishon LeZion,Petah Tikva,Ashdod,Netanya,Beersheba,Holon,Ramat Gan",
-"IQ|Asia/Baghdad":"Basra,Erbil,Mosul,Sulaymaniyah,Kirkuk,Najaf,Karbala",
-"JO|Asia/Amman":"Zarqa,Irbid,Aqaba",
-"LB|Asia/Beirut":"Tripoli,Sidon,Tyre,Jounieh,Byblos",
-"KW|Asia/Kuwait":"Hawalli,Salmiya,Jahra,Farwaniya",
-"QA|Asia/Qatar":"Al Wakrah,Al Khor,Lusail",
-"BH|Asia/Bahrain":"Muharraq,Riffa,Hamad Town",
-"OM|Asia/Muscat":"Salalah,Sohar,Nizwa,Sur",
-"IR|Asia/Tehran":"Isfahan,Mashhad,Tabriz,Shiraz,Ahvaz,Karaj,Kerman,Urmia,Rasht,Hamadan,Qom",
-"YE|Asia/Aden":"Sanaa,Taiz,Hodeidah,Mukalla",
-// ---- SOUTH ASIA ----
-"IN|Asia/Kolkata":"Mumbai,Delhi,Bangalore,Chennai,Hyderabad,Ahmedabad,Pune,Surat,Jaipur,Lucknow,Kanpur,Nagpur,Patna,Indore,Thane,Bhopal,Visakhapatnam,Vadodara,Ludhiana,Agra,Nashik,Ranchi,Faridabad,Meerut,Rajkot,Varanasi,Srinagar,Aurangabad,Amritsar,Allahabad,Gwalior,Jabalpur,Coimbatore,Vijayawada,Jodhpur,Madurai,Raipur,Kochi,Chandigarh,Guwahati,Mysore,Bareilly,Gurgaon,Gurugram,Aligarh,Udaipur,Jamshedpur,Dehradun,Noida,Greater Noida,Pondicherry,Shimla,Darjeeling,Thiruvananthapuram,Mangalore,Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal,Jammu and Kashmir",
-"PK|Asia/Karachi":"Lahore,Islamabad,Rawalpindi,Faisalabad,Multan,Peshawar,Quetta,Sialkot,Gujranwala,Hyderabad PK,Bahawalpur,Sargodha,Abbottabad,Punjab PK,Sindh,Balochistan,Khyber Pakhtunkhwa",
-"BD|Asia/Dhaka":"Chittagong,Khulna,Rajshahi,Sylhet,Rangpur,Comilla,Gazipur,Narayanganj",
-"LK|Asia/Colombo":"Kandy,Galle,Jaffna,Negombo,Trincomalee,Batticaloa",
-"NP|Asia/Kathmandu":"Pokhara,Lalitpur,Biratnagar,Birgunj,Bharatpur",
-"AF|Asia/Kabul":"Kandahar,Herat,Mazar-i-Sharif,Jalalabad",
-// ---- EAST ASIA ----
-"CN|Asia/Shanghai":"Beijing,Guangzhou,Shenzhen,Chengdu,Wuhan,Hangzhou,Nanjing,Tianjin,Xian,Shenyang,Chongqing,Harbin,Dalian,Changsha,Kunming,Jinan,Qingdao,Zhengzhou,Fuzhou,Xiamen,Dongguan,Foshan,Suzhou,Wuxi,Hefei,Nanning,Changchun,Guiyang,Urumqi,Lhasa,Hohhot,Lanzhou,Taiyuan,Nanchang,Yinchuan,Haikou,Xining,Zhuhai,Shantou,Wenzhou,Ningbo,Sanya,Guangdong,Zhejiang,Jiangsu,Shandong,Henan,Sichuan,Hubei,Hunan,Fujian,Anhui,Hebei,Liaoning,Yunnan,Shaanxi,Heilongjiang,Jiangxi,Guangxi,Guizhou,Shanxi,Inner Mongolia,Gansu,Xinjiang,Tibet,Hainan,Jilin,Qinghai",
-"HK|Asia/Hong_Kong":"Kowloon,Tsim Sha Tsui,Wan Chai,Central,Causeway Bay,Mong Kok,Sha Tin,Tuen Mun",
-"TW|Asia/Taipei":"Kaohsiung,Taichung,Tainan,Hsinchu,Keelung,Taoyuan,Changhua,Pingtung",
-"JP|Asia/Tokyo":"Osaka,Yokohama,Nagoya,Sapporo,Kobe,Kyoto,Fukuoka,Kawasaki,Hiroshima,Sendai,Kitakyushu,Chiba,Niigata,Hamamatsu,Kumamoto,Okayama,Shizuoka,Kagoshima,Nara,Kanazawa,Matsuyama,Okinawa,Hakodate,Nagasaki,Hokkaido,Honshu,Shikoku,Kyushu,Tohoku,Kanto,Chubu,Kansai,Chugoku",
-"KR|Asia/Seoul":"Busan,Incheon,Daegu,Daejeon,Gwangju,Ulsan,Suwon,Seongnam,Goyang,Yongin,Bucheon,Cheongju,Jeonju,Jeju,Gangnam,Gyeonggi",
-"MN|Asia/Ulaanbaatar":"Erdenet,Darkhan",
-// ---- SOUTHEAST ASIA ----
-"TH|Asia/Bangkok":"Chiang Mai,Pattaya,Nonthaburi,Hat Yai,Udon Thani,Nakhon Ratchasima,Khon Kaen,Phuket,Krabi,Koh Samui,Chiang Rai,Ayutthaya,Hua Hin",
-"VN|Asia/Ho_Chi_Minh":"Hanoi,Da Nang,Hai Phong,Can Tho,Nha Trang,Hue,Vung Tau,Bien Hoa,Da Lat,Quy Nhon",
-"ID|Asia/Jakarta":"Surabaya,Bandung,Medan,Semarang,Tangerang,Depok,Bekasi,Palembang,Bogor,Batam,Padang,Bandar Lampung,Pekanbaru,Jambi,Pontianak,Malang,Yogyakarta,Solo,Cirebon,Tegal,Serang,Cilegon,Java,Sumatra,West Java,East Java,Central Java,Banten,DKI Jakarta,North Sumatra,South Sumatra,West Sumatra,Riau,Riau Islands,Kepulauan Riau,Lampung,Aceh,West Kalimantan,Bengkulu",
-"ID|Asia/Makassar":"Bali,Denpasar,Manado,Balikpapan,Samarinda,Banjarmasin,Makassar,Palu,Kendari,Gorontalo,Mataram,Kupang,Sulawesi,South Sulawesi,North Sulawesi,East Kalimantan,South Kalimantan,Central Kalimantan,Bali Province,West Nusa Tenggara,East Nusa Tenggara",
-"ID|Asia/Jayapura":"Papua,West Papua,Ambon,Ternate,Sorong,Maluku,North Maluku",
-"PH|Asia/Manila":"Quezon City,Davao,Caloocan,Cebu,Zamboanga,Antipolo,Taguig,Pasig,Cagayan de Oro,Makati,Iloilo,Bacolod,Baguio,Luzon,Visayas,Mindanao",
-"MY|Asia/Kuala_Lumpur":"Penang,George Town,Johor Bahru,Ipoh,Shah Alam,Petaling Jaya,Kuching,Kota Kinabalu,Malacca,Seremban,Miri,Subang Jaya,Sabah,Sarawak,Selangor,Johor,Perak",
-"SG|Asia/Singapore":"Jurong,Tampines,Woodlands,Bedok,Clementi,Sentosa,Marina Bay,Orchard",
-"KH|Asia/Phnom_Penh":"Siem Reap,Battambang,Sihanoukville",
-"LA|Asia/Vientiane":"Luang Prabang,Pakse,Savannakhet",
-"MM|Asia/Yangon":"Mandalay,Naypyidaw,Mawlamyine,Bago,Pathein",
-"BN|Asia/Brunei":"Seria,Tutong",
-// ---- CENTRAL ASIA ----
-"KZ|Asia/Almaty":"Astana,Nur-Sultan,Shymkent,Karaganda,Aktobe,Taraz,Pavlodar,Semey,Atyrau,Kostanay",
-"UZ|Asia/Tashkent":"Samarkand,Bukhara,Namangan,Andijan,Fergana,Nukus",
-"KG|Asia/Bishkek":"Osh,Jalal-Abad,Karakol",
-"TJ|Asia/Dushanbe":"Khujand,Kulob,Istaravshan",
-"TM|Asia/Ashgabat":"Turkmenabat,Dasoguz,Mary",
-// ---- CAUCASUS ----
-"GE|Asia/Tbilisi":"Batumi,Kutaisi,Rustavi",
-"AM|Asia/Yerevan":"Gyumri,Vanadzor",
-"AZ|Asia/Baku":"Ganja,Sumgait,Mingachevir",
-// ---- AMERICAS - USA ----
-"US|America/New_York":"Albany,Annapolis,Atlanta,Augusta GA,Baltimore,Boston,Buffalo,Cape Coral,Charleston,Charlotte,Chattanooga,Cincinnati,Cleveland,Columbia SC,Columbus OH,Concord NH,Dayton,Detroit,Dover DE,Durham NC,Fort Lauderdale,Grand Rapids,Greensboro,Hartford,Hollywood FL,Indianapolis,Jacksonville,Jersey City,Key West,Knoxville,Lexington,Louisville,Manchester NH,Miami,Montpelier,Myrtle Beach,New Haven,Newark,Norfolk VA,Orlando,Palm Beach,Philadelphia,Pittsburgh,Portland ME,Providence,Raleigh,Richmond,Rochester NY,Savannah,Stamford,Syracuse,Tallahassee,Tampa,Trenton,Virginia Beach,West Palm Beach,Wilmington DE,Winston-Salem,Connecticut,Delaware,Florida,Georgia,Indiana,Kentucky,Maine,Maryland,Massachusetts,Michigan,New Hampshire,New Jersey,New York State,North Carolina,Ohio,Pennsylvania,Rhode Island,South Carolina,Vermont,Virginia,West Virginia,District of Columbia,Washington DC",
-"US|America/Chicago":"Abilene,Amarillo,Arlington TX,Austin,Baton Rouge,Birmingham AL,Cedar Rapids,Champaign,Corpus Christi,Dallas,Des Moines,Fargo,Fort Worth,Galveston,Green Bay,Houston,Huntsville,Jackson MS,Kansas City,Laredo,Lincoln NE,Little Rock,Lubbock,Madison WI,McAllen,Memphis,Milwaukee,Minneapolis,Mobile,Montgomery,Naperville,Nashville,New Orleans,Oklahoma City,Omaha,Pensacola,Plano,Rochester MN,San Antonio,Shreveport,Sioux Falls,Springfield IL,Springfield MO,St Louis,St Paul,Topeka,Tulsa,Waco,Wichita,Alabama,Arkansas,Illinois,Iowa,Kansas,Louisiana,Minnesota,Mississippi,Missouri,Nebraska,North Dakota,Oklahoma,South Dakota,Tennessee,Texas,Wisconsin",
-"US|America/Denver":"Albuquerque,Billings,Boise,Boulder,Casper,Cheyenne,Colorado Springs,El Paso,Fort Collins,Grand Junction,Great Falls,Helena,Idaho Falls,Las Cruces,Missoula,Ogden,Provo,Pueblo,Rapid City,Salt Lake City,Santa Fe,Colorado,Idaho,Montana,New Mexico,Utah,Wyoming",
-"US|America/Phoenix":"Tucson,Mesa,Chandler,Scottsdale,Glendale AZ,Tempe,Peoria AZ,Flagstaff,Yuma,Arizona",
-"US|America/Los_Angeles":"Anaheim,Bakersfield,Berkeley,Carson City,Eugene,Fresno,Henderson,Irvine,Las Vegas,Long Beach,Medford,Modesto,Oakland,Olympia,Pasadena,Portland OR,Reno,Riverside,Sacramento,Salem OR,San Bernardino,San Diego,San Francisco,San Jose,Santa Ana,Santa Barbara,Santa Cruz,Santa Monica,Seattle,Spokane,Stockton,Tacoma,California,Nevada,Oregon,Washington State",
-"US|America/Anchorage":"Fairbanks,Juneau,Sitka,Kodiak,Wasilla,Kenai,Palmer,Alaska",
-"US|Pacific/Honolulu":"Hilo,Kailua,Pearl City,Kaneohe,Waipahu,Kahului,Maui,Oahu,Kauai,Big Island,Hawaii",
-// ---- AMERICAS - CANADA ----
-"CA|America/Toronto":"Ottawa,Montreal,Quebec City,Hamilton ON,Kitchener,London ON,Mississauga,Brampton,Markham,Vaughan,Oshawa,Barrie,Guelph,Kingston ON,Thunder Bay,Sudbury,Windsor ON,Niagara Falls,St Catharines,Cambridge ON,Waterloo ON,Peterborough ON,Brantford,Sarnia,Ontario,Quebec",
-"CA|America/Vancouver":"Victoria,Surrey,Burnaby,Richmond BC,Kelowna,Nanaimo,Kamloops,Prince George,Abbotsford,Whistler,British Columbia",
-"CA|America/Edmonton":"Calgary,Red Deer,Lethbridge,Medicine Hat,Grande Prairie,Fort McMurray,Saskatoon,Regina,Moose Jaw,Prince Albert,Alberta,Saskatchewan",
-"CA|America/Winnipeg":"Brandon,Thompson,Steinbach,Manitoba",
-"CA|America/Halifax":"Fredericton,Saint John,Moncton,Charlottetown,Sydney NS,Dartmouth,New Brunswick,Nova Scotia,Prince Edward Island",
-"CA|America/St_Johns":"Corner Brook,Gander,Labrador City,Newfoundland,Labrador",
-// ---- AMERICAS - LATIN AMERICA ----
-"MX|America/Mexico_City":"Guadalajara,Monterrey,Puebla,Toluca,Leon,Queretaro,San Luis Potosi,Merida,Aguascalientes,Morelia,Oaxaca,Veracruz,Villahermosa,Chiapas,Nuevo Leon,Jalisco,Guanajuato",
-"MX|America/Tijuana":"Mexicali,Ensenada,Rosarito,Baja California",
-"BR|America/Sao_Paulo":"Rio de Janeiro,Belo Horizonte,Porto Alegre,Curitiba,Recife,Fortaleza,Salvador,Brasilia,Goiania,Campinas,Guarulhos,Natal,Teresina,Sao Jose dos Campos,Ribeirao Preto,Uberlandia,Sorocaba,Florianopolis,Santos,Vitoria,Maceio,Joao Pessoa,Aracaju,Sao Paulo State,Minas Gerais,Rio Grande do Sul,Parana,Bahia,Pernambuco,Ceara,Goias",
-"BR|America/Manaus":"Manaus,Amazonas",
-"AR|America/Argentina/Buenos_Aires":"Cordoba,Rosario,Mendoza,La Plata,Tucuman,Mar del Plata,Salta,Santa Fe,San Juan,Neuquen,Patagonia",
-"CO|America/Bogota":"Medellin,Cali,Barranquilla,Cartagena,Cucuta,Bucaramanga,Pereira,Santa Marta,Manizales,Ibague,Antioquia",
-"CL|America/Santiago":"Valparaiso,Concepcion,Antofagasta,Temuco,Iquique,Rancagua,Talca,Punta Arenas",
-"PE|America/Lima":"Arequipa,Trujillo,Chiclayo,Cusco,Huancayo,Piura,Iquitos,Tacna",
-"VE|America/Caracas":"Maracaibo,Valencia VE,Barquisimeto,Maracay,Ciudad Guayana,Merida VE,Cumana",
-"EC|America/Guayaquil":"Quito,Cuenca,Ambato,Machala,Portoviejo,Manta,Loja",
-"UY|America/Montevideo":"Salto,Paysandu,Las Piedras",
-"PY|America/Asuncion":"Ciudad del Este,San Lorenzo,Luque,Encarnacion",
-"BO|America/La_Paz":"Santa Cruz,Cochabamba,Sucre,Oruro,Potosi,Tarija",
-"PA|America/Panama":"Colon,David PA",
-"CR|America/Costa_Rica":"Alajuela,Heredia,Cartago,Liberia CR",
-"GT|America/Guatemala":"Quetzaltenango,Mixco,Villa Nueva",
-"CU|America/Havana":"Santiago de Cuba,Camaguey,Holguin,Santa Clara,Guantanamo,Cienfuegos,Matanzas,Varadero",
-"HN|America/Tegucigalpa":"San Pedro Sula,La Ceiba,Choloma",
-"SV|America/El_Salvador":"Santa Ana SV,San Miguel,Soyapango",
-"NI|America/Managua":"Leon NI,Masaya,Chinandega,Matagalpa",
-"DO|America/Santo_Domingo":"Santiago DO,San Pedro de Macoris,La Romana,Punta Cana",
-"JM|America/Jamaica":"Montego Bay,Spanish Town,Portmore,Ocho Rios",
-"TT|America/Port_of_Spain":"San Fernando TT,Chaguanas,Arima",
-"PR|America/Puerto_Rico":"Ponce,Bayamon,Carolina PR,Caguas,Mayaguez",
-// ---- OCEANIA ----
-"AU|Australia/Sydney":"Canberra,Newcastle AU,Wollongong,Geelong,Ballarat,Bendigo,Albury,Wagga Wagga,Hobart,Launceston,New South Wales,Victoria,Tasmania,ACT",
-"AU|Australia/Brisbane":"Gold Coast,Sunshine Coast,Rockhampton,Mackay,Bundaberg,Cairns,Townsville,Toowoomba,Queensland",
-"AU|Australia/Perth":"Bunbury,Geraldton,Kalgoorlie,Broome,Western Australia",
-"AU|Australia/Adelaide":"Mount Gambier,Whyalla,Port Augusta,South Australia",
-"AU|Australia/Darwin":"Alice Springs,Katherine,Northern Territory",
-"NZ|Pacific/Auckland":"Wellington,Christchurch,Hamilton NZ,Tauranga,Dunedin,Palmerston North,Napier,Rotorua,New Plymouth,Whangarei,Invercargill,Nelson,Queenstown,North Island,South Island",
-"FJ|Pacific/Fiji":"Nadi,Lautoka,Labasa",
-"PG|Pacific/Port_Moresby":"Lae,Madang,Mount Hagen,Wewak"
-};
-
 // Parse primary zones from Z
 var zones=Z.map(function(s){
   var p=s.split('|');
@@ -592,12 +423,12 @@ var zones=Z.map(function(s){
 var abbrMap={};
 for(var i=0;i<zones.length;i++){if(zones[i].abbr.length&&!abbrMap[zones[i].tz])abbrMap[zones[i].tz]=zones[i].abbr}
 
-// Expand P into additional searchable place entries
-var pKeys=Object.keys(P);
+// Expand TZ_PLACES into additional searchable place entries
+var pKeys=Object.keys(TZ_PLACES);
 for(var k=0;k<pKeys.length;k++){
   var pp=pKeys[k].split('|'),pcc=pp[0],ptz=pp[1];
   var pcountry=CC[pcc]||pcc,pabbrs=abbrMap[ptz]||[];
-  var pnames=P[pKeys[k]].split(',');
+  var pnames=TZ_PLACES[pKeys[k]].split(',');
   for(var n=0;n<pnames.length;n++){
     var nm=pnames[n].trim();if(!nm)continue;
     var sp=[nm,pcountry].concat(pabbrs).concat([ptz.replace(/\//g,' ').replace(/_/g,' ')]);
