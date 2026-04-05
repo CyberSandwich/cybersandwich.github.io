@@ -22,6 +22,7 @@
 - [Clip](https://saputra.co.uk/clip/) — Clipboard text manager
 - [Parsely](https://saputra.co.uk/parsely/) — Text data extractor
 - [ReSolve](https://saputra.co.uk/resolve/) — Word unscrambler and anagram solver
+- [ThymeZone](https://saputra.co.uk/thymezone/) — Compare two timezones side by side with a 24-hour alignment grid
 - [Lorip](https://saputra.co.uk/lorip/) — Lorem ipsum generator
 - [Wrighter](https://saputra.co.uk/wrighter/) — Minimal plain text editor
 - [Arbit](https://saputra.co.uk/arbit/) — Random picker tool
