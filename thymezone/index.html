@@ -1240,15 +1240,15 @@ document.addEventListener('paste',function(e){
 // -- Reset --
 var resetCtrl=_base.twoPress(resetBtn,{
   onConfirm:function(){
+    incMin=60;rangeMode='24';
+    _base.save('tz:view',{inc:60,range:'24'});
+    for(var j=0;j<incBtns.length;j++)incBtns[j].classList.toggle('active',parseInt(incBtns[j].dataset.inc,10)===60);
+    for(var j=0;j<rangeBtns.length;j++)rangeBtns[j].classList.toggle('active',rangeBtns[j].dataset.range==='24');
     var local;
     try{local=Intl.DateTimeFormat().resolvedOptions().timeZone}catch(e){local='UTC'}
     selectTz(1,findZone(local)||findZone('UTC')||zones[0]);
     selectTz(2,findZone('UTC')||zones[0]);
     closeAllDrops();
-    incMin=60;rangeMode='24';
-    _base.save('tz:view',{inc:60,range:'24'});
-    for(var j=0;j<incBtns.length;j++)incBtns[j].classList.toggle('active',parseInt(incBtns[j].dataset.inc,10)===60);
-    for(var j=0;j<rangeBtns.length;j++)rangeBtns[j].classList.toggle('active',rangeBtns[j].dataset.range==='24');
   }
 });
 resetBtn.addEventListener('click',function(){resetCtrl.press()});
