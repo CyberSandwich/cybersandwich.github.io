@@ -627,7 +627,7 @@ function renderGrid(){
   }
   gridEl.innerHTML=html;
   gf1.textContent=sel1.city;
-  gf2.textContent=sel2.city;
+  gf2.innerHTML=sel2.city+dayTag;
 }
 
 function renderAll(){renderSummary();renderGrid()}
