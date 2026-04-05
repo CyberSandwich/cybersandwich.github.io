@@ -37,7 +37,7 @@ html[data-theme="dark"]{
 html[data-theme="sepia"]{
   --tz-noon:#D4851F;
   --tz-now:#A67B5B;
-  --tz-now-bg:rgba(166,123,91,.08);
+  --tz-now-bg:rgba(166,123,91,.15);
   --tz-stripe:rgba(91,70,54,.03)
 }
 
@@ -63,6 +63,7 @@ html[data-theme="sepia"]{
 .links>button:active:not([disabled]){opacity:.7}
 
 .tz-gh{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;font:600 .8125rem/1 var(--font);color:var(--t2);border-bottom:1px solid var(--bdr2);text-align:center}
+.tz-gf{border-bottom:none;border-top:1px solid var(--bdr2)}
 .tz-row{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;cursor:pointer;transition:background .15s;font-variant-numeric:tabular-nums;user-select:none;border-left:3px solid transparent;border-right:3px solid transparent}
 .tz-row:nth-child(odd){background:var(--tz-stripe)}
 .tz-row .tz-h{font-size:.9375rem;line-height:1.4;font-family:var(--font);font-weight:400;color:var(--t3);text-align:center}
@@ -119,9 +120,10 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
   <div class="card" style="contain:content">
     <div class="tz-gh"><span id="gh1">Timezone 1</span><span id="gh2">Timezone 2</span></div>
     <div id="grid" aria-live="polite"></div>
+    <div class="tz-gh tz-gf" id="tz-footer" style="display:none"><span id="gf1"></span><span id="gf2"></span></div>
   </div>
   <div class="card links" id="tz-bottom" style="display:none">
-    <button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span>Swap</span></button>
+    <button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span id="swap-label">Swap</span></button>
   </div>
 </main>
 <nav aria-label="Primary">
@@ -500,6 +502,7 @@ function getCurrentHour(tz){
 var tz1Inp=$('tz1-inp'),tz1Drop=$('tz1-drop');
 var tz2Inp=$('tz2-inp'),tz2Drop=$('tz2-drop');
 var sumCard=$('tz-sum-card'),sumEl=$('tz-sum'),gridEl=$('grid'),gh1=$('gh1'),gh2=$('gh2');
+var footerEl=$('tz-footer'),gf1=$('gf1'),gf2=$('gf2'),swapLabel=$('swap-label');
 var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),bottomCard=$('tz-bottom'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
 
@@ -565,8 +568,10 @@ function cellCls(hour){
 }
 
 function renderGrid(){
-  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';bottomCard.style.display='none';return}
+  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';footerEl.style.display='none';bottomCard.style.display='none';return}
   bottomCard.style.display='';
+  footerEl.style.display='';
+  swapLabel.textContent='Swap ('+sel2.city+' as Anchor)';
   gh1.textContent=sel1.city;
   var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
   var diff=m2-m1;
@@ -621,6 +626,8 @@ function renderGrid(){
     html+='</div>';
   }
   gridEl.innerHTML=html;
+  gf1.textContent=sel1.city;
+  gf2.textContent=sel2.city;
 }
 
 function renderAll(){renderSummary();renderGrid()}
