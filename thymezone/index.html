@@ -62,12 +62,6 @@ html[data-theme="sepia"]{
 .links>button.ok{animation:none}
 .links>button:active:not([disabled]){opacity:.7}
 
-.tz-ctrl{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
-.tz-inc{display:flex;gap:6px}
-.tz-inc-btn{flex:1;padding:8px;border:1px solid var(--bdr2);border-radius:var(--r);background:transparent;color:var(--t3);font:500 .75rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
-.tz-inc-btn.active{background:var(--bg2);color:var(--t1);border-color:var(--t3)}
-@media(hover:hover){.tz-inc-btn:hover{background:var(--bg2);color:var(--t2)}}
-.tz-inc-btn:active{opacity:.7}
 
 .tz-gh{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;font:600 .8125rem/1 var(--font);color:var(--t2);border-bottom:1px solid var(--bdr2);text-align:center}
 .tz-gf{border-bottom:none;border-top:1px solid var(--bdr2)}
@@ -129,15 +123,15 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
   <div class="card links" id="tz-swap-card" style="display:none">
     <button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span id="swap-label">Swap</span></button>
   </div>
-  <div class="card tz-ctrl" id="tz-ctrl" style="display:none">
-    <div class="tz-inc" role="radiogroup" aria-label="Time Increment">
-      <button type="button" class="tz-inc-btn active" data-inc="60" aria-pressed="true">1h</button>
-      <button type="button" class="tz-inc-btn" data-inc="30" aria-pressed="false">30m</button>
-      <button type="button" class="tz-inc-btn" data-inc="15" aria-pressed="false">15m</button>
+  <div class="card" id="tz-ctrl" style="display:none">
+    <div class="seg-row">
+      <button type="button" class="seg active" data-inc="60">1h</button>
+      <button type="button" class="seg" data-inc="30">30m</button>
+      <button type="button" class="seg" data-inc="15">15m</button>
     </div>
-    <div class="tz-inc" role="radiogroup" aria-label="Time Range">
-      <button type="button" class="tz-inc-btn active" data-range="24" aria-pressed="true">24 Hours</button>
-      <button type="button" class="tz-inc-btn" data-range="wk" aria-pressed="false">9 AM \u2013 5 PM</button>
+    <div class="seg-row c2">
+      <button type="button" class="seg active" data-range="24">24 Hours</button>
+      <button type="button" class="seg" data-range="wk">9 AM to 5 PM</button>
     </div>
   </div>
   <div class="card" id="tz-sum-card" style="display:none"><div id="tz-sum" aria-live="polite" style="padding:16px 20px;text-align:center;font:400 .9375rem/1.5 var(--font);color:var(--t2)"></div></div>
@@ -1262,11 +1256,7 @@ for(var i=0;i<incBtns.length;i++){
     var v=parseInt(this.dataset.inc,10);
     if(v===incMin)return;
     incMin=v;
-    for(var j=0;j<incBtns.length;j++){
-      var active=parseInt(incBtns[j].dataset.inc,10)===v;
-      incBtns[j].classList.toggle('active',active);
-      incBtns[j].setAttribute('aria-pressed',active?'true':'false');
-    }
+    for(var j=0;j<incBtns.length;j++)incBtns[j].classList.toggle('active',parseInt(incBtns[j].dataset.inc,10)===v);
     renderGrid();
   });
 }
@@ -1275,11 +1265,7 @@ for(var i=0;i<rangeBtns.length;i++){
     var v=this.dataset.range;
     if(v===rangeMode)return;
     rangeMode=v;
-    for(var j=0;j<rangeBtns.length;j++){
-      var active=rangeBtns[j].dataset.range===v;
-      rangeBtns[j].classList.toggle('active',active);
-      rangeBtns[j].setAttribute('aria-pressed',active?'true':'false');
-    }
+    for(var j=0;j<rangeBtns.length;j++)rangeBtns[j].classList.toggle('active',rangeBtns[j].dataset.range===v);
     renderGrid();
   });
 }
