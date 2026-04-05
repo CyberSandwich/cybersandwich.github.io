@@ -581,24 +581,31 @@ function init(){
 
 init();
 
-// -- Live current hour update --
-var tickTimer=null;
+// -- Live current time update --
 function tick(){
-  if(!sel1)return;
-  var now=getCurrentHour(sel1.tz);
+  if(!sel1||!sel2)return;
+  var now1=getCurrentHour(sel1.tz),now2=getCurrentHour(sel2.tz);
   var rows=gridEl.children;
   for(var i=0;i<rows.length;i++){
     var r=rows[i],h=parseInt(r.dataset.h,10);
-    if(h===now.h){if(!r.classList.contains('tz-now'))r.classList.add('tz-now')}
-    else{r.classList.remove('tz-now')}
+    var isNow=h===now1.h;
+    if(isNow){
+      if(!r.classList.contains('tz-now'))r.classList.add('tz-now');
+      // Update displayed minutes
+      var spans=r.querySelectorAll('.tz-h');
+      var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz),diff=m2-m1;
+      var t2min=((h*60+diff)%1440+1440)%1440;
+      var h2=Math.floor(t2min/60),min2=t2min%60;
+      var t1Txt=fmtHour(h,now1.m),t2Txt=fmtHour(h2,now2.m);
+      if(spans[0]&&spans[0].textContent!==t1Txt)spans[0].textContent=t1Txt;
+      if(spans[1]&&spans[1].textContent!==t2Txt)spans[1].textContent=t2Txt;
+    }else{
+      r.classList.remove('tz-now');
+    }
   }
 }
-function startTick(){clearInterval(tickTimer);tickTimer=setInterval(tick,60000)}
-startTick();
-document.addEventListener('visibilitychange',function(){
-  if(document.hidden){clearInterval(tickTimer)}
-  else{tick();startTick()}
-});
+(function tickLoop(){if(!document.hidden)tick();setTimeout(tickLoop,1000-Date.now()%1000)})();
+document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});
 
 // -- Search --
 var norm=_search.norm,scoreWord=_search.scoreWord;
