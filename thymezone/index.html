@@ -1059,13 +1059,6 @@ function matchZone(text){
   if(!text)return null;
   var t=norm(text);
 
-  // 0. GMT/UTC offset notation: "gmt+7", "utc-5", "utc7", "+5:30"
-  var offMin=parseOffsetQuery(text);
-  if(offMin!==null&&/(?:^[+-]|^(?:gmt|utc)|^\d{1,2}(?::\d{2})$)/.test(text.replace(/\s+/g,''))){
-    for(var i=0;i<primaryCount;i++){if(getOffsetMin(zones[i].tz)===offMin)return zones[i]}
-    for(var i=primaryCount;i<zones.length;i++){if(getOffsetMin(zones[i].tz)===offMin)return zones[i]}
-  }
-
   // 1. Exact IANA match
   for(var i=0;i<zones.length;i++)if(zones[i].tz.toLowerCase()===text)return zones[i];
   // 2. City name match
@@ -1077,7 +1070,16 @@ function matchZone(text){
   for(var i=0;i<zones.length;i++)if(norm(zones[i].country.toLowerCase())===t)return zones[i];
   // 5. Alias match
   for(var i=0;i<zones.length;i++)for(var j=0;j<zones[i].aliases.length;j++)if(norm(zones[i].aliases[j].toLowerCase())===t)return zones[i];
-  // 6. Fuzzy -- scoreWord with city boost, threshold 3 for typo tolerance
+
+  // 6. GMT/UTC offset notation: "gmt+7", "utc-5", "utc7", "+5:30"
+  // Checked after exact matches so "UTC" resolves to the UTC zone, not Azores-in-summer
+  var offMin=parseOffsetQuery(text);
+  if(offMin!==null&&/(?:^[+-]|^(?:gmt|utc)|^\d{1,2}(?::\d{2})$)/.test(text.replace(/\s+/g,''))){
+    for(var i=0;i<primaryCount;i++){if(getOffsetMin(zones[i].tz)===offMin)return zones[i]}
+    for(var i=primaryCount;i<zones.length;i++){if(getOffsetMin(zones[i].tz)===offMin)return zones[i]}
+  }
+
+  // 7. Fuzzy -- scoreWord with city boost, threshold 3 for typo tolerance
   var best=null,bs=0;
   for(var i=0;i<zones.length;i++){
     var s=scoreWord(t,zones[i].q);
