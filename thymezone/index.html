@@ -470,16 +470,16 @@ for(var i=0;i<ccKeys.length;i++){
 }
 
 // Runtime offset computation -- DST-aware via Intl
-function getOffset(tz){
+function getOffset(tz,date){
   try{
-    var parts=new Intl.DateTimeFormat('en-GB',{timeZone:tz,timeZoneName:'shortOffset'}).formatToParts(new Date());
+    var parts=new Intl.DateTimeFormat('en-GB',{timeZone:tz,timeZoneName:'shortOffset'}).formatToParts(date||new Date());
     var tzn=parts.find(function(p){return p.type==='timeZoneName'});
     return tzn?tzn.value:'GMT';
   }catch(e){return'GMT'}
 }
 
-function getOffsetMin(tz){
-  var s=getOffset(tz);
+function getOffsetMin(tz,date){
+  var s=getOffset(tz,date);
   if(s==='GMT'||s==='UTC')return 0;
   var m=s.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
   if(!m)return 0;
@@ -501,6 +501,32 @@ function getCurrentHour(tz){
     var min=parseInt(parts.find(function(p){return p.type==='minute'}).value,10);
     return{h:h===24?0:h,m:min};
   }catch(e){return{h:0,m:0}}
+}
+
+// Build a Date for a specific hour (0-23) in a timezone, using today's date in that tz
+function dateForHour(tz,h){
+  var now=new Date();
+  // Get today's date in the target timezone
+  var parts=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).format(now).split('-');
+  // Build an ISO string and adjust — use noon to avoid DST edge, then shift
+  var base=new Date(parts[0]+'-'+parts[1]+'-'+parts[2]+'T12:00:00Z');
+  // Get the offset at noon to find the UTC equivalent of midnight
+  var noonOff=getOffsetMin(tz,base);
+  // Midnight in this tz = midnight_utc - offset
+  var midnight=new Date(base.getTime()-noonOff*60000-12*3600000);
+  // The target hour
+  return new Date(midnight.getTime()+h*3600000);
+}
+
+// Get tz2 hour/min and day offset for a specific tz1 hour
+function tz2ForHour(tz1,tz2,h){
+  var d=dateForHour(tz1,h);
+  var off1=getOffsetMin(tz1,d),off2=getOffsetMin(tz2,d);
+  var diff=off2-off1;
+  var t2min=((h*60+diff)%1440+1440)%1440;
+  var raw=h*60+diff;
+  var dayOff=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
+  return{h2:Math.floor(t2min/60),m2:t2min%60,diff:diff,dayOff:dayOff};
 }
 
 // -- DOM Cache --
@@ -583,17 +609,18 @@ function renderGrid(){
   var warn1=sel1Abbr&&sel1Abbr!==a1,warn2=sel2Abbr&&sel2Abbr!==a2;
   gh1.className=warn1?'tz-warn':'';
   gh1.textContent=sel1.city;
-  var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
-  var diff=m2-m1;
-  // Day label for TZ2 header
-  var dayOff0=Math.floor(diff/1440);
-  if(diff<0)dayOff0=Math.ceil(diff/1440)||-0||0;
+  // Pre-compute tz2 time for each tz1 hour (DST-aware per hour)
+  var rows=[];
   var hasNextDay=false,hasPrevDay=false;
+  var now1=getCurrentHour(sel1.tz);
+  var now2=getCurrentHour(sel2.tz);
+  var mtgStart=-1,mtgEnd=-1;
   for(var hh=0;hh<24;hh++){
-    var raw=hh*60+diff;
-    var d=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
-    if(d>0)hasNextDay=true;
-    if(d<0)hasPrevDay=true;
+    var r=tz2ForHour(sel1.tz,sel2.tz,hh);
+    rows.push(r);
+    if(r.dayOff>0)hasNextDay=true;
+    if(r.dayOff<0)hasPrevDay=true;
+    if(hh>=9&&hh<=17&&r.h2>=9&&r.h2<=17){if(mtgStart<0)mtgStart=hh;mtgEnd=hh}
   }
   var dayTag='';
   if(hasNextDay&&hasPrevDay)dayTag=' <span class="tz-day">-1/+1d</span>';
@@ -601,28 +628,16 @@ function renderGrid(){
   else if(hasPrevDay)dayTag=' <span class="tz-day">-1d</span>';
   gh2.className=warn2?'tz-warn':'';
   gh2.innerHTML=sel2.city+dayTag;
-  var now1=getCurrentHour(sel1.tz);
-  var now2=getCurrentHour(sel2.tz);
-  // Compute meeting window (overlap of both 9-5)
-  var mtgStart=-1,mtgEnd=-1;
-  for(var hh=0;hh<24;hh++){
-    var t=((hh*60+diff)%1440+1440)%1440;
-    var hh2=Math.floor(t/60);
-    if(hh>=9&&hh<=17&&hh2>=9&&hh2<=17){if(mtgStart<0)mtgStart=hh;mtgEnd=hh}
-  }
   var prevH2=-1;
   /* Build all 24 rows as a single innerHTML batch -- trusted first-party strings */
   var html='';
   for(var h=0;h<24;h++){
-    var t2min=((h*60+diff)%1440+1440)%1440;
-    var h2=Math.floor(t2min/60),min2=t2min%60;
+    var r=rows[h],h2=r.h2,min2=r.m2,dayOff=r.dayOff;
     var isNow=h===now1.h;
     var rowCls='tz-row';
     if(isNow)rowCls+=' tz-now';
     if(h===mtgStart)rowCls+=' mtg-top';
     if(h===mtgEnd)rowCls+=' mtg-btm';
-    var raw=h*60+diff;
-    var dayOff=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
     if(h>=9&&h<=17)rowCls+=' wk-l';
     if(h2>=9&&h2<=17)rowCls+=' '+(dayOff!==0?'wk-r-off':'wk-r');
     // Midnight marker: when TZ2 wraps around
@@ -702,10 +717,7 @@ function tick(){
       if(!r.classList.contains('tz-now'))r.classList.add('tz-now');
       // Update displayed minutes
       var spans=r.querySelectorAll('.tz-h');
-      var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz),diff=m2-m1;
-      var t2min=((h*60+diff)%1440+1440)%1440;
-      var h2=Math.floor(t2min/60),min2=t2min%60;
-      var t1Txt=fmtHour(h,now1.m),t2Txt=fmtHour(h2,now2.m);
+      var t1Txt=fmtHour(h,now1.m),t2Txt=fmtHour(now2.h,now2.m);
       if(spans[0]&&spans[0].textContent!==t1Txt)spans[0].textContent=t1Txt;
       if(spans[1]&&spans[1].textContent!==t2Txt)spans[1].textContent=t2Txt;
     }else{
@@ -713,11 +725,9 @@ function tick(){
         r.classList.remove('tz-now');
         // Revert to static format (no minutes)
         var spans=r.querySelectorAll('.tz-h');
-        var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz),diff=m2-m1;
-        var t2min=((h*60+diff)%1440+1440)%1440;
-        var h2=Math.floor(t2min/60),min2=t2min%60;
+        var rv=tz2ForHour(sel1.tz,sel2.tz,h);
         if(spans[0])spans[0].textContent=fmtHour(h,0);
-        if(spans[1])spans[1].textContent=fmtHour(h2,min2);
+        if(spans[1])spans[1].textContent=fmtHour(rv.h2,rv.m2);
       }
     }
   }
@@ -933,18 +943,14 @@ function padTime(s){while(s.length<5)s=' '+s;return s}
 function buildCopyTable(){
   if(!sel1||!sel2)return'';
   var a1=getAbbr(sel1.tz),a2=getAbbr(sel2.tz);
-  var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
-  var diff=m2-m1;
+  var diff=getOffsetMin(sel2.tz)-getOffsetMin(sel1.tz);
   var header=sel1.city+' ('+a1+') \u2192 '+sel2.city+' ('+a2+') | '+fmtDiffShort(diff);
   var lines=[header];
   for(var h=0;h<24;h++){
-    var t2min=((h*60+diff)%1440+1440)%1440;
-    var h2=Math.floor(t2min/60),min2=t2min%60;
-    var raw=h*60+diff;
-    var dayOff=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
+    var r=tz2ForHour(sel1.tz,sel2.tz,h);
     var t1=padTime(fmtHour(h,0));
-    var t2=padTime(fmtHour(h2,min2));
-    var dayStr=dayOff>0?' (+'+dayOff+'d)':dayOff<0?' ('+dayOff+'d)':'';
+    var t2=padTime(fmtHour(r.h2,r.m2));
+    var dayStr=r.dayOff>0?' (+'+r.dayOff+'d)':r.dayOff<0?' ('+r.dayOff+'d)':'';
     lines.push(t1+'  \u2192  '+t2+dayStr);
   }
   return lines.join('\n');
@@ -968,10 +974,8 @@ gridEl.addEventListener('click',function(e){
   var row=e.target.closest('.tz-row');
   if(!row||!sel1||!sel2)return;
   var h=parseInt(row.dataset.h,10);
-  var diff=getOffsetMin(sel2.tz)-getOffsetMin(sel1.tz);
-  var t2min=((h*60+diff)%1440+1440)%1440;
-  var h2=Math.floor(t2min/60),min2=t2min%60;
-  var text=fmtHour(h,0)+' ('+sel1.city+') \u2192 '+fmtHour(h2,min2)+' ('+sel2.city+')';
+  var r=tz2ForHour(sel1.tz,sel2.tz,h);
+  var text=fmtHour(h,0)+' ('+sel1.city+') \u2192 '+fmtHour(r.h2,r.m2)+' ('+sel2.city+')';
   _base.copyText(text,function(){
     row.classList.remove('ok');row.offsetWidth;row.classList.add('ok');
     _base.notify('Copied',true);
