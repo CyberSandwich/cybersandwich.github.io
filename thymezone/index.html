@@ -64,6 +64,9 @@ html[data-theme="sepia"]{
 
 .tz-gh{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;font:600 .8125rem/1 var(--font);color:var(--t2);border-bottom:1px solid var(--bdr2);text-align:center}
 .tz-gf{border-bottom:none;border-top:1px solid var(--bdr2)}
+.tz-gh .tz-warn{color:#E06B50}
+html[data-theme="dark"] .tz-gh .tz-warn{color:#F08A72}
+html[data-theme="sepia"] .tz-gh .tz-warn{color:#C2614A}
 .tz-row{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;cursor:pointer;transition:background .15s;font-variant-numeric:tabular-nums;user-select:none;border-left:3px solid transparent;border-right:3px solid transparent}
 .tz-row:nth-child(odd){background:var(--tz-stripe)}
 .tz-row .tz-h{font-size:.9375rem;line-height:1.4;font-family:var(--font);font-weight:400;color:var(--t3);text-align:center}
@@ -507,6 +510,7 @@ var sumCard=$('tz-sum-card'),sumEl=$('tz-sum'),gridEl=$('grid'),gh1=$('gh1'),gh2
 var footerEl=$('tz-footer'),gf1=$('gf1'),gf2=$('gf2'),swapLabel=$('swap-label');
 var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),bottomCard=$('tz-bottom'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
+var sel1Abbr=null,sel2Abbr=null;// tracked searched abbreviation per slot
 
 // -- Time Formatting --
 function fmtHour(h,m){
@@ -574,6 +578,10 @@ function renderGrid(){
   bottomCard.style.display='';
   footerEl.style.display='';
   swapLabel.textContent='Swap ('+sel2.city+' as Anchor)';
+  // DST mismatch warning — coral header when searched abbr != current live abbr
+  var a1=getAbbr(sel1.tz),a2=getAbbr(sel2.tz);
+  var warn1=sel1Abbr&&sel1Abbr!==a1,warn2=sel2Abbr&&sel2Abbr!==a2;
+  gh1.className=warn1?'tz-warn':'';
   gh1.textContent=sel1.city;
   var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
   var diff=m2-m1;
@@ -591,6 +599,7 @@ function renderGrid(){
   if(hasNextDay&&hasPrevDay)dayTag=' <span class="tz-day">-1/+1d</span>';
   else if(hasNextDay)dayTag=' <span class="tz-day">+1d</span>';
   else if(hasPrevDay)dayTag=' <span class="tz-day">-1d</span>';
+  gh2.className=warn2?'tz-warn':'';
   gh2.innerHTML=sel2.city+dayTag;
   var now1=getCurrentHour(sel1.tz);
   var now2=getCurrentHour(sel2.tz);
@@ -628,7 +637,9 @@ function renderGrid(){
     html+='</div>';
   }
   gridEl.innerHTML=html;
+  gf1.className=warn1?'tz-warn':'';
   gf1.textContent=sel1.city;
+  gf2.className=warn2?'tz-warn':'';
   gf2.innerHTML=sel2.city+dayTag;
 }
 
@@ -637,13 +648,13 @@ function renderAll(){renderSummary();renderGrid()}
 // -- Selection --
 function tzLabel(zone){return zone.city+' ('+getAbbr(zone.tz)+')'}
 
-function selectTz(slot,zone){
+function selectTz(slot,zone,abbr){
   if(slot===1){
-    sel1=zone;
+    sel1=zone;sel1Abbr=abbr||null;
     tz1Inp.value='';
     tz1Inp.placeholder=tzLabel(zone);
   }else{
-    sel2=zone;
+    sel2=zone;sel2Abbr=abbr||null;
     tz2Inp.value='';
     tz2Inp.placeholder=tzLabel(zone);
   }
@@ -755,6 +766,17 @@ function searchZones(query){
     }
   }
 
+  // Abbreviation search — exact match on primary zones ranks high
+  var abbrResults=[];
+  if(q.length>=2&&q.length<=5&&offsetMin===null){
+    var qu=q.toUpperCase();
+    for(var i=0;i<primaryCount;i++){
+      for(var a=0;a<zones[i].abbr.length;a++){
+        if(zones[i].abbr[a]===qu){abbrResults.push({z:zones[i],s:10});break}
+      }
+    }
+  }
+
   // Text search — skip for single-char queries (only offset meaningful)
   // and skip if offset already found enough results
   var scored=[];
@@ -775,7 +797,7 @@ function searchZones(query){
   }
 
   // Merge and dedupe
-  var all=offsetResults.concat(scored);
+  var all=abbrResults.concat(offsetResults).concat(scored);
   all.sort(function(a,b){return b.s-a.s||a.z.city.localeCompare(b.z.city)});
   var merged=[],seenTz={};
   for(var i=0;i<all.length;i++){
@@ -798,7 +820,7 @@ function renderDrop(drop,results){
   for(var i=0;i<results.length;i++){
     var z=results[i].z;
     var offset=fmtOffset(getOffsetMin(z.tz));
-    var abbrStr=z.abbr.length?z.abbr[0]+', ':'';
+    var abbrStr=getAbbr(z.tz);abbrStr=abbrStr?abbrStr+', ':'';
     html+='<div class="tz-opt'+(i===dropIdx?' tz-active':'')+'" role="option" data-i="'+i+'">';
     html+='<span class="tz-city">'+z.city+', '+z.country+'</span>';
     html+='<span class="tz-meta">'+abbrStr+offset+'</span>';
@@ -830,7 +852,12 @@ function openDrop(slot,query){
 
 function selectFromDrop(slot,idx){
   if(idx<0||idx>=dropResults.length)return;
-  selectTz(slot,dropResults[idx].z);
+  var zone=dropResults[idx].z;
+  var inp=slot===1?tz1Inp:tz2Inp;
+  var searchQ=inp.value.trim().toUpperCase();
+  var abbrMatch=null;
+  for(var a=0;a<zone.abbr.length;a++){if(zone.abbr[a]===searchQ){abbrMatch=searchQ;break}}
+  selectTz(slot,zone,abbrMatch);
   closeDrop(slot);
 }
 
@@ -1100,9 +1127,9 @@ resetBtn.addEventListener('click',function(){resetCtrl.press()});
 // -- Swap --
 function doSwap(){
   if(!sel1||!sel2)return;
-  var tmp=sel1;
-  selectTz(1,sel2);
-  selectTz(2,tmp);
+  var tmp=sel1,tmpA=sel1Abbr;
+  selectTz(1,sel2,sel2Abbr);
+  selectTz(2,tmp,tmpA);
   closeAllDrops();
 }
 swapBtn.addEventListener('click',doSwap);
