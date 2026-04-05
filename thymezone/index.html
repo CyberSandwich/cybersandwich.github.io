@@ -486,12 +486,20 @@ function getOffsetMin(tz,date){
   return(m[1]==='+'?1:-1)*(parseInt(m[2],10)*60+parseInt(m[3]||'0',10));
 }
 
-function getAbbr(tz){
+function getAbbr(tz,date){
   try{
-    var parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,timeZoneName:'short'}).formatToParts(new Date());
+    var parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,timeZoneName:'short'}).formatToParts(date||new Date());
     var tzn=parts.find(function(p){return p.type==='timeZoneName'});
     return tzn?tzn.value:'';
   }catch(e){return''}
+}
+
+function getOffsetForAbbr(tz,abbr){
+  var y=new Date().getFullYear();
+  var jan=new Date(y,0,15),jul=new Date(y,6,15);
+  if(getAbbr(tz,jan)===abbr)return getOffsetMin(tz,jan);
+  if(getAbbr(tz,jul)===abbr)return getOffsetMin(tz,jul);
+  return getOffsetMin(tz);
 }
 
 function getCurrentHour(tz){
@@ -537,6 +545,7 @@ var footerEl=$('tz-footer'),gf1=$('gf1'),gf2=$('gf2'),swapLabel=$('swap-label');
 var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),bottomCard=$('tz-bottom'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
 var sel1Abbr=null,sel2Abbr=null;// tracked searched abbreviation per slot
+var sel1Off=null,sel2Off=null;// fixed offset override (minutes) when abbr searched
 
 // -- Time Formatting --
 function fmtHour(h,m){
@@ -584,8 +593,9 @@ function fmtDiffLong(diffMin){
 // -- Rendering --
 function renderSummary(){
   if(!sel1||!sel2){sumCard.style.display='none';sumEl.textContent='';return}
-  var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
-  var diff=m2-m1;
+  var o1=sel1Off!==null?sel1Off:getOffsetMin(sel1.tz);
+  var o2=sel2Off!==null?sel2Off:getOffsetMin(sel2.tz);
+  var diff=o2-o1;
   /* Trusted first-party strings from embedded timezone data -- safe to set as HTML */
   sumEl.innerHTML='<strong>'+sel2.city+'</strong> is '+fmtDiffLong(diff)+' <strong>'+sel1.city+'</strong>';
   sumCard.style.display='';
@@ -609,14 +619,26 @@ function renderGrid(){
   var warn1=sel1Abbr&&sel1Abbr!==a1,warn2=sel2Abbr&&sel2Abbr!==a2;
   gh1.className=warn1?'tz-warn':'';
   gh1.textContent=sel1.city;
-  // Pre-compute tz2 time for each tz1 hour (DST-aware per hour)
+  // Pre-compute tz2 time for each tz1 hour
+  // If abbreviation override is active, use fixed offset; otherwise DST-aware per hour
+  var useFixed=sel1Off!==null||sel2Off!==null;
   var rows=[];
   var hasNextDay=false,hasPrevDay=false;
   var now1=getCurrentHour(sel1.tz);
   var now2=getCurrentHour(sel2.tz);
   var mtgStart=-1,mtgEnd=-1;
   for(var hh=0;hh<24;hh++){
-    var r=tz2ForHour(sel1.tz,sel2.tz,hh);
+    var r;
+    if(useFixed){
+      var o1=sel1Off!==null?sel1Off:getOffsetMin(sel1.tz);
+      var o2=sel2Off!==null?sel2Off:getOffsetMin(sel2.tz);
+      var diff=o2-o1;
+      var t2min=((hh*60+diff)%1440+1440)%1440;
+      var raw=hh*60+diff;
+      r={h2:Math.floor(t2min/60),m2:t2min%60,diff:diff,dayOff:raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440)};
+    }else{
+      r=tz2ForHour(sel1.tz,sel2.tz,hh);
+    }
     rows.push(r);
     if(r.dayOff>0)hasNextDay=true;
     if(r.dayOff<0)hasPrevDay=true;
@@ -666,14 +688,16 @@ function tzLabel(zone){return zone.city+' ('+getAbbr(zone.tz)+')'}
 function selectTz(slot,zone,abbr){
   if(slot===1){
     sel1=zone;sel1Abbr=abbr||null;
+    sel1Off=abbr&&abbr!==getAbbr(zone.tz)?getOffsetForAbbr(zone.tz,abbr):null;
     tz1Inp.value='';
     tz1Inp.placeholder=tzLabel(zone);
   }else{
     sel2=zone;sel2Abbr=abbr||null;
+    sel2Off=abbr&&abbr!==getAbbr(zone.tz)?getOffsetForAbbr(zone.tz,abbr):null;
     tz2Inp.value='';
     tz2Inp.placeholder=tzLabel(zone);
   }
-  _base.save('tz:pair',{tz1:sel1?{tz:sel1.tz,city:sel1.city}:null,tz2:sel2?{tz:sel2.tz,city:sel2.city}:null});
+  _base.save('tz:pair',{tz1:sel1?{tz:sel1.tz,city:sel1.city}:null,tz2:sel2?{tz:sel2.tz,city:sel2.city}:null,a1:sel1Abbr,a2:sel2Abbr});
   renderAll();
 }
 
@@ -699,8 +723,9 @@ function init(){
     z1=findZone(local)||findZone('UTC')||zones[0];
   }
   if(!z2)z2=findZone('UTC')||zones[0];
-  selectTz(1,z1);
-  selectTz(2,z2);
+  var sa1=saved&&saved.a1||null,sa2=saved&&saved.a2||null;
+  selectTz(1,z1,sa1);
+  selectTz(2,z2,sa2);
 }
 
 init();
@@ -942,12 +967,20 @@ function padTime(s){while(s.length<5)s=' '+s;return s}
 
 function buildCopyTable(){
   if(!sel1||!sel2)return'';
-  var a1=getAbbr(sel1.tz),a2=getAbbr(sel2.tz);
-  var diff=getOffsetMin(sel2.tz)-getOffsetMin(sel1.tz);
+  var a1=sel1Abbr||getAbbr(sel1.tz),a2=sel2Abbr||getAbbr(sel2.tz);
+  var o1=sel1Off!==null?sel1Off:getOffsetMin(sel1.tz);
+  var o2=sel2Off!==null?sel2Off:getOffsetMin(sel2.tz);
+  var diff=o2-o1;
   var header=sel1.city+' ('+a1+') \u2192 '+sel2.city+' ('+a2+') | '+fmtDiffShort(diff);
   var lines=[header];
+  var useFixed=sel1Off!==null||sel2Off!==null;
   for(var h=0;h<24;h++){
-    var r=tz2ForHour(sel1.tz,sel2.tz,h);
+    var r;
+    if(useFixed){
+      var t2min=((h*60+diff)%1440+1440)%1440;
+      var raw=h*60+diff;
+      r={h2:Math.floor(t2min/60),m2:t2min%60,dayOff:raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440)};
+    }else{r=tz2ForHour(sel1.tz,sel2.tz,h)}
     var t1=padTime(fmtHour(h,0));
     var t2=padTime(fmtHour(r.h2,r.m2));
     var dayStr=r.dayOff>0?' (+'+r.dayOff+'d)':r.dayOff<0?' ('+r.dayOff+'d)':'';
@@ -974,7 +1007,12 @@ gridEl.addEventListener('click',function(e){
   var row=e.target.closest('.tz-row');
   if(!row||!sel1||!sel2)return;
   var h=parseInt(row.dataset.h,10);
-  var r=tz2ForHour(sel1.tz,sel2.tz,h);
+  var r;
+  if(sel1Off!==null||sel2Off!==null){
+    var o1=sel1Off!==null?sel1Off:getOffsetMin(sel1.tz),o2=sel2Off!==null?sel2Off:getOffsetMin(sel2.tz);
+    var d=o2-o1,t2=((h*60+d)%1440+1440)%1440;
+    r={h2:Math.floor(t2/60),m2:t2%60};
+  }else{r=tz2ForHour(sel1.tz,sel2.tz,h)}
   var text=fmtHour(h,0)+' ('+sel1.city+') \u2192 '+fmtHour(r.h2,r.m2)+' ('+sel2.city+')';
   _base.copyText(text,function(){
     row.classList.remove('ok');row.offsetWidth;row.classList.add('ok');
