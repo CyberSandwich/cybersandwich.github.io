@@ -699,6 +699,13 @@ function selectTz(slot,zone,abbr){
   }
   _base.save('tz:pair',{tz1:sel1?{tz:sel1.tz,city:sel1.city}:null,tz2:sel2?{tz:sel2.tz,city:sel2.city}:null,a1:sel1Abbr,a2:sel2Abbr});
   renderAll();
+  // Sync URL so it's always shareable
+  if(sel1&&sel2){
+    var p=new URLSearchParams();
+    p.set('tz1',sel1Abbr||sel1.city);
+    p.set('tz2',sel2Abbr||sel2.city);
+    history.replaceState(null,'',location.pathname+'?'+p.toString());
+  }
 }
 
 function findZone(tz,city){
@@ -708,24 +715,45 @@ function findZone(tz,city){
 }
 
 // -- Init --
+function abbrForParam(zone,param){
+  // Check if the URL param matches an abbreviation of the resolved zone
+  if(!param||!zone)return null;
+  var qu=param.trim().toUpperCase();
+  for(var a=0;a<zone.abbr.length;a++){if(zone.abbr[a]===qu)return qu}
+  return null;
+}
+
 function init(){
-  var saved=_base.load('tz:pair',null);
-  var z1=null,z2=null;
-  if(saved){
-    if(typeof saved.tz1==='string')z1=findZone(saved.tz1);
-    else if(saved.tz1)z1=findZone(saved.tz1.tz,saved.tz1.city);
-    if(typeof saved.tz2==='string')z2=findZone(saved.tz2);
-    else if(saved.tz2)z2=findZone(saved.tz2.tz,saved.tz2.city);
+  // URL params take priority over localStorage
+  var params=new URLSearchParams(location.search);
+  var p1=params.get('tz1'),p2=params.get('tz2');
+  var z1=null,z2=null,a1=null,a2=null;
+
+  if(p1||p2){
+    // Resolve from URL
+    if(p1){z1=matchZone(p1);a1=abbrForParam(z1,p1)}
+    if(p2){z2=matchZone(p2);a2=abbrForParam(z2,p2)}
+  }else{
+    // Fall back to localStorage
+    var saved=_base.load('tz:pair',null);
+    if(saved){
+      if(typeof saved.tz1==='string')z1=findZone(saved.tz1);
+      else if(saved.tz1)z1=findZone(saved.tz1.tz,saved.tz1.city);
+      if(typeof saved.tz2==='string')z2=findZone(saved.tz2);
+      else if(saved.tz2)z2=findZone(saved.tz2.tz,saved.tz2.city);
+      a1=saved&&saved.a1||null;
+      a2=saved&&saved.a2||null;
+    }
   }
+
   if(!z1){
     var local;
     try{local=Intl.DateTimeFormat().resolvedOptions().timeZone}catch(e){local='UTC'}
     z1=findZone(local)||findZone('UTC')||zones[0];
   }
   if(!z2)z2=findZone('UTC')||zones[0];
-  var sa1=saved&&saved.a1||null,sa2=saved&&saved.a2||null;
-  selectTz(1,z1,sa1);
-  selectTz(2,z2,sa2);
+  selectTz(1,z1,a1);
+  selectTz(2,z2,a2);
 }
 
 init();
