@@ -73,6 +73,8 @@ html[data-theme="sepia"]{
 .tz-dusk{color:#7C6AE8!important;font-weight:600}
 html[data-theme="dark"] .tz-dusk{color:#A594F9!important}
 html[data-theme="sepia"] .tz-dusk{color:#7C5BAD!important}
+.tz-mid{border-top:2px dashed var(--t4)}
+.tz-day{font-size:.625rem;color:var(--t4);vertical-align:super;margin-left:2px}
 .tz-row.tz-now{background:var(--tz-now-bg)}
 .tz-row.ok{background:var(--tz-now-bg);transition:background .25s}
 .tz-row:active{opacity:.85}
@@ -516,11 +518,26 @@ function cellCls(hour){
 function renderGrid(){
   if(!sel1||!sel2){gridEl.innerHTML='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';return}
   gh1.textContent=sel1.city;
-  gh2.textContent=sel2.city;
   var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
   var diff=m2-m1;
+  // Day label for TZ2 header
+  var dayOff0=Math.floor(diff/1440);
+  if(diff<0)dayOff0=Math.ceil(diff/1440)||-0||0;
+  var hasNextDay=false,hasPrevDay=false;
+  for(var hh=0;hh<24;hh++){
+    var raw=hh*60+diff;
+    var d=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
+    if(d>0)hasNextDay=true;
+    if(d<0)hasPrevDay=true;
+  }
+  var dayTag='';
+  if(hasNextDay&&hasPrevDay)dayTag=' <span class="tz-day">-1/+1d</span>';
+  else if(hasNextDay)dayTag=' <span class="tz-day">+1d</span>';
+  else if(hasPrevDay)dayTag=' <span class="tz-day">-1d</span>';
+  gh2.innerHTML=sel2.city+dayTag;
   var now1=getCurrentHour(sel1.tz);
   var now2=getCurrentHour(sel2.tz);
+  var prevH2=-1;
   /* Build all 24 rows as a single innerHTML batch -- trusted first-party strings */
   var html='';
   for(var h=0;h<24;h++){
@@ -531,11 +548,18 @@ function renderGrid(){
     if(isNow)rowCls+=' tz-now';
     if(h>=9&&h<=17)rowCls+=' wk-l';
     if(h2>=9&&h2<=17)rowCls+=' wk-r';
+    // Midnight marker: when TZ2 wraps around (previous h2 was larger)
+    if(h>0&&prevH2>=0&&h2<prevH2)rowCls+=' tz-mid';
+    prevH2=h2;
     var t1Txt=isNow?fmtHour(h,now1.m):fmtHour(h,0);
     var t2Txt=isNow?fmtHour(h2,now2.m):fmtHour(h2,min2);
+    // Day offset tag on TZ2 cell
+    var raw=h*60+diff;
+    var dayOff=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
+    var dayStr=dayOff>0?'<span class="tz-day">+'+dayOff+'d</span>':dayOff<0?'<span class="tz-day">'+dayOff+'d</span>':'';
     html+='<div class="'+rowCls+'" data-h="'+h+'">';
     html+='<span class="'+cellCls(h)+'">'+t1Txt+'</span>';
-    html+='<span class="'+cellCls(h2)+'">'+t2Txt+'</span>';
+    html+='<span class="'+cellCls(h2)+'">'+t2Txt+dayStr+'</span>';
     html+='</div>';
   }
   gridEl.innerHTML=html;
