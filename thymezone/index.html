@@ -86,6 +86,11 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
 @media(hover:hover){.tz-row:hover{background:var(--bg2)}}
 @media(hover:hover){.tz-row.tz-now:hover{background:var(--tz-now-bg)}}
 
+.tz-swap{display:none;padding:10px 20px;border-top:1px solid var(--bdr2)}
+.tz-swap button{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:none;border-radius:var(--r);background:var(--bg2);color:var(--t2);font:500 .8125rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s}
+@media(hover:hover){.tz-swap button:hover{background:var(--bg3,var(--bdr));color:var(--t1)}}
+.tz-swap button:active{opacity:.7}
+
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fi .25s ease}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
@@ -116,6 +121,7 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
   <div class="card" style="contain:content">
     <div class="tz-gh"><span id="gh1">Timezone 1</span><span id="gh2">Timezone 2</span></div>
     <div id="grid" aria-live="polite"></div>
+    <div class="tz-swap" id="tz-swap"><button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span>Swap</span></button></div>
   </div>
 </main>
 <nav aria-label="Primary">
@@ -474,7 +480,7 @@ function getCurrentHour(tz){
 var tz1Inp=$('tz1-inp'),tz1Drop=$('tz1-drop');
 var tz2Inp=$('tz2-inp'),tz2Drop=$('tz2-drop');
 var sumCard=$('tz-sum-card'),sumEl=$('tz-sum'),gridEl=$('grid'),gh1=$('gh1'),gh2=$('gh2');
-var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn');
+var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),swapWrap=$('tz-swap'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
 
 // -- Time Formatting --
@@ -539,7 +545,8 @@ function cellCls(hour){
 }
 
 function renderGrid(){
-  if(!sel1||!sel2){gridEl.innerHTML='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';return}
+  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';swapWrap.style.display='none';return}
+  swapWrap.style.display='';
   gh1.textContent=sel1.city;
   var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
   var diff=m2-m1;
@@ -697,6 +704,7 @@ function searchZones(query){
 }
 
 function renderDrop(drop,results){
+  drop.scrollTop=0;
   if(!results.length){
     drop.innerHTML='<div class="tz-empty">No Timezones Found</div>';
     drop.classList.add('open');return;
@@ -918,6 +926,16 @@ var resetCtrl=_base.twoPress(resetBtn,{
 });
 resetBtn.addEventListener('click',function(){resetCtrl.press()});
 
+// -- Swap --
+function doSwap(){
+  if(!sel1||!sel2)return;
+  var tmp=sel1;
+  selectTz(1,sel2);
+  selectTz(2,tmp);
+  closeAllDrops();
+}
+swapBtn.addEventListener('click',doSwap);
+
 // -- Keyboard Shortcuts --
 _base.onKey({
   '/':function(e){e.preventDefault();tz1Inp.focus();tz1Inp.select()},
@@ -926,6 +944,7 @@ _base.onKey({
   'v':function(){doPaste()},
   'p':function(){doPaste()},
   'r':function(){resetCtrl.press()},
+  'x':function(){doSwap()},
   ctrl:{'k':function(e){e.preventDefault();tz1Inp.focus();tz1Inp.select()}}
 });
 
