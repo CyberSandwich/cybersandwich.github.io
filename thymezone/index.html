@@ -772,7 +772,7 @@ function searchZones(query){
     var qu=q.toUpperCase();
     for(var i=0;i<primaryCount;i++){
       for(var a=0;a<zones[i].abbr.length;a++){
-        if(zones[i].abbr[a]===qu){abbrResults.push({z:zones[i],s:10});break}
+        if(zones[i].abbr[a]===qu){abbrResults.push({z:zones[i],s:10,ma:qu});break}
       }
     }
   }
@@ -820,7 +820,8 @@ function renderDrop(drop,results){
   for(var i=0;i<results.length;i++){
     var z=results[i].z;
     var offset=fmtOffset(getOffsetMin(z.tz));
-    var abbrStr=getAbbr(z.tz);abbrStr=abbrStr?abbrStr+', ':'';
+    var liveAbbr=getAbbr(z.tz);
+    var abbrStr=results[i].ma&&results[i].ma!==liveAbbr?results[i].ma+' \u2192 '+liveAbbr+', ':liveAbbr?liveAbbr+', ':'';
     html+='<div class="tz-opt'+(i===dropIdx?' tz-active':'')+'" role="option" data-i="'+i+'">';
     html+='<span class="tz-city">'+z.city+', '+z.country+'</span>';
     html+='<span class="tz-meta">'+abbrStr+offset+'</span>';
