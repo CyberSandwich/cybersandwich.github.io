@@ -44,7 +44,7 @@ html[data-theme="sepia"]{
 .tz-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .tz-inp-wrap{position:relative;min-width:0}
 .tz-inp-wrap .inp{margin-bottom:0}
-.tz-inp-wrap .inp input{padding:12px 12px;min-width:0}
+.tz-inp-wrap .inp input{padding:12px 16px;min-width:0}
 
 .tz-drop{position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);box-shadow:var(--shadow2);max-height:320px;overflow-y:auto;display:none}
 .tz-drop.open{display:block}
@@ -63,10 +63,12 @@ html[data-theme="sepia"]{
 .links>button:active:not([disabled]){opacity:.7}
 
 .tz-gh{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;font:600 .8125rem/1 var(--font);color:var(--t2);border-bottom:1px solid var(--bdr2);text-align:center}
-.tz-row{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;cursor:pointer;transition:background .15s;font-variant-numeric:tabular-nums;user-select:none;border-left:3px solid transparent}
+.tz-row{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;cursor:pointer;transition:background .15s;font-variant-numeric:tabular-nums;user-select:none;border-left:3px solid transparent;border-right:3px solid transparent}
 .tz-row:nth-child(odd){background:var(--tz-stripe)}
 .tz-row .tz-h{font-size:.9375rem;line-height:1.4;font-family:var(--font);font-weight:400;color:var(--t3);text-align:center}
-.tz-wk{color:var(--t1)!important;font-weight:600}
+.tz-wk{color:var(--t1)!important}
+.tz-row.wk-l{border-left-color:var(--tz-now)}
+.tz-row.wk-r{border-right-color:var(--tz-now)}
 .tz-noon{color:var(--tz-noon)!important;font-weight:600}
 .tz-dusk{color:#7C6AE8!important;font-weight:600}
 html[data-theme="dark"] .tz-dusk{color:#A594F9!important}
@@ -525,7 +527,10 @@ function renderGrid(){
     var t2min=((h*60+diff)%1440+1440)%1440;
     var h2=Math.floor(t2min/60),min2=t2min%60;
     var isNow=h===now1.h;
-    var rowCls='tz-row'+(isNow?' tz-now':'');
+    var rowCls='tz-row';
+    if(isNow)rowCls+=' tz-now';
+    if(h>=9&&h<=17)rowCls+=' wk-l';
+    if(h2>=9&&h2<=17)rowCls+=' wk-r';
     var t1Txt=isNow?fmtHour(h,now1.m):fmtHour(h,0);
     var t2Txt=isNow?fmtHour(h2,now2.m):fmtHour(h2,min2);
     html+='<div class="'+rowCls+'" data-h="'+h+'">';
