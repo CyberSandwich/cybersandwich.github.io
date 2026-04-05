@@ -73,7 +73,7 @@ html[data-theme="sepia"]{
 .tz-dusk{color:#7C6AE8!important;font-weight:600}
 html[data-theme="dark"] .tz-dusk{color:#A594F9!important}
 html[data-theme="sepia"] .tz-dusk{color:#7C5BAD!important}
-.tz-row.tz-mid{border-top:2px dashed var(--t4)}
+.tz-mid{border-top:2px dashed var(--t4);margin-top:2px}
 .tz-day{font-size:.625rem;color:var(--t4);vertical-align:super;margin-left:2px}
 .tz-row.tz-now{background:var(--tz-now-bg)}
 .tz-row.ok{background:var(--tz-now-bg);transition:background .25s}
@@ -549,8 +549,8 @@ function renderGrid(){
     if(h>=9&&h<=17)rowCls+=' wk-l';
     if(h2>=9&&h2<=17)rowCls+=' wk-r';
     // Midnight marker: when TZ2 wraps around (previous h2 was larger)
-    // Midnight marker: when TZ2 wraps around
-    if(h>0&&prevH2>=0&&h2<prevH2)rowCls+=' tz-mid';
+    // Midnight marker: when TZ2 wraps around (only on TZ2 cell)
+    var isMid=h>0&&prevH2>=0&&h2<prevH2;
     prevH2=h2;
     var t1Txt=isNow?fmtHour(h,now1.m):fmtHour(h,0);
     var t2Txt=isNow?fmtHour(h2,now2.m):fmtHour(h2,min2);
@@ -558,9 +558,10 @@ function renderGrid(){
     var raw=h*60+diff;
     var dayOff=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
     var dayStr=dayOff>0?'<span class="tz-day">+'+dayOff+'d</span>':dayOff<0?'<span class="tz-day">'+dayOff+'d</span>':'';
+    var t2Cls=cellCls(h2)+(isMid?' tz-mid':'');
     html+='<div class="'+rowCls+'" data-h="'+h+'">';
     html+='<span class="'+cellCls(h)+'">'+t1Txt+'</span>';
-    html+='<span class="'+cellCls(h2)+'">'+t2Txt+dayStr+'</span>';
+    html+='<span class="'+t2Cls+'">'+t2Txt+dayStr+'</span>';
     html+='</div>';
   }
   gridEl.innerHTML=html;
