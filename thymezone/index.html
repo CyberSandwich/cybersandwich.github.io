@@ -74,7 +74,9 @@ html[data-theme="sepia"]{
 html[data-theme="dark"] .tz-dusk{color:#A594F9!important}
 html[data-theme="sepia"] .tz-dusk{color:#7C5BAD!important}
 .tz-row{position:relative}
-.tz-row.tz-mid::after{content:'';position:absolute;top:0;left:50%;right:0;border-top:2px dashed var(--t4)}
+.tz-row.tz-mid::after{content:'';position:absolute;top:0;left:50%;right:0;border-top:2px dashed #E06B50}
+html[data-theme="dark"] .tz-row.tz-mid::after{border-top-color:#F08A72}
+html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
 .tz-day{font-size:.625rem;color:var(--t4);vertical-align:super;margin-left:2px}
 .tz-row.mtg-top::before{content:'';position:absolute;top:0;left:0;right:0;border-top:2px dashed var(--t3)}
 .tz-row.mtg-btm::before{content:'';position:absolute;bottom:0;left:0;right:0;border-bottom:2px dashed var(--t3)}
