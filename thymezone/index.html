@@ -443,6 +443,25 @@ for(var k=0;k<pKeys.length;k++){
   }
 }
 
+// Build country-level entries for single-timezone countries
+// e.g. "Thailand" is selectable because all Thai cities share Asia/Bangkok
+var ccTzMap={};
+for(var i=0;i<zones.length;i++){
+  var z=zones[i];
+  if(z.cc==='--')continue;
+  if(!ccTzMap[z.cc])ccTzMap[z.cc]={tz:z.tz,zone:z};
+  else if(ccTzMap[z.cc].tz!==z.tz)ccTzMap[z.cc]=null;// multi-tz country
+}
+var ccKeys=Object.keys(ccTzMap);
+for(var i=0;i<ccKeys.length;i++){
+  var entry=ccTzMap[ccKeys[i]];
+  if(!entry)continue;// skip multi-tz
+  var country=CC[ccKeys[i]]||ccKeys[i];
+  var pabbrs=entry.zone.abbr;
+  var sp=[country].concat(pabbrs).concat([entry.tz.replace(/\//g,' ').replace(/_/g,' ')]);
+  zones.push({tz:entry.tz,city:country,cc:ccKeys[i],country:country,abbr:pabbrs,aliases:[],q:_search.norm(sp.join(' ').toLowerCase()),tl:_search.norm(country.toLowerCase())});
+}
+
 // Runtime offset computation -- DST-aware via Intl
 function getOffset(tz){
   try{
@@ -670,7 +689,16 @@ function tick(){
       if(spans[0]&&spans[0].textContent!==t1Txt)spans[0].textContent=t1Txt;
       if(spans[1]&&spans[1].textContent!==t2Txt)spans[1].textContent=t2Txt;
     }else{
-      r.classList.remove('tz-now');
+      if(r.classList.contains('tz-now')){
+        r.classList.remove('tz-now');
+        // Revert to static format (no minutes)
+        var spans=r.querySelectorAll('.tz-h');
+        var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz),diff=m2-m1;
+        var t2min=((h*60+diff)%1440+1440)%1440;
+        var h2=Math.floor(t2min/60),min2=t2min%60;
+        if(spans[0])spans[0].textContent=fmtHour(h,0);
+        if(spans[1])spans[1].textContent=fmtHour(h2,min2);
+      }
     }
   }
 }
