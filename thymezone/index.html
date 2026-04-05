@@ -617,11 +617,11 @@ function renderSummary(){
   sumCard.style.display='';
 }
 
-function cellCls(hour){
+function cellCls(hour,min){
   var c=['tz-h'];
   if(hour>=9&&hour<=17)c.push('tz-wk');
-  if(hour===12)c.push('tz-noon');
-  if(hour===18)c.push('tz-dusk');
+  if(hour===12&&!min)c.push('tz-noon');
+  if(hour===18&&!min)c.push('tz-dusk');
   return c.join(' ');
 }
 
@@ -697,8 +697,8 @@ function renderGrid(){
     var t2Txt=isNow?fmtHour(now2.h,now2.m,fm):fmtHour(h2,min2,fm);
     var dayStr=dayOff>0?'<span class="tz-day">+'+dayOff+'d</span>':dayOff<0?'<span class="tz-day">'+dayOff+'d</span>':'';
     html+='<div class="'+rowCls+'" data-h="'+h1+'" data-m="'+m1v+'">';
-    html+='<span class="'+cellCls(h1)+'">'+t1Txt+'</span>';
-    html+='<span class="'+cellCls(h2)+'">'+t2Txt+dayStr+'</span>';
+    html+='<span class="'+cellCls(h1,m1v)+'">'+t1Txt+'</span>';
+    html+='<span class="'+cellCls(h2,min2)+'">'+t2Txt+dayStr+'</span>';
     html+='</div>';
   }
   gridEl.innerHTML=html;
@@ -784,6 +784,12 @@ function init(){
   selectTz(2,z2,a2);
 }
 
+// Restore view settings before init (buttons synced after DOM setup below)
+var savedView=_base.load('tz:view',null);
+if(savedView){
+  if(savedView.inc&&[15,30,60].indexOf(savedView.inc)>=0)incMin=savedView.inc;
+  if(savedView.range&&(savedView.range==='24'||savedView.range==='wk'))rangeMode=savedView.range;
+}
 init();
 
 // -- Live current time update --
@@ -799,9 +805,14 @@ function tick(){
     if(isNow){
       if(!r.classList.contains('tz-now'))r.classList.add('tz-now');
       var spans=r.querySelectorAll('.tz-h');
-      var t1Txt=fmtHour(now1.h,now1.m),t2Txt=fmtHour(now2.h,now2.m);
+      var t1Txt=fmtHour(now1.h,now1.m);
       if(spans[0]&&spans[0].textContent!==t1Txt)spans[0].textContent=t1Txt;
-      if(spans[1]&&spans[1].textContent!==t2Txt)spans[1].textContent=t2Txt;
+      // Preserve day offset tag in tz2 span
+      var dayTag=r.querySelector('.tz-day');
+      var dayHtml=dayTag?dayTag.outerHTML:'';
+      var t2Txt=fmtHour(now2.h,now2.m);
+      var t2Html=t2Txt+dayHtml;
+      if(spans[1]&&spans[1].innerHTML!==t2Html)spans[1].innerHTML=t2Html;
     }else{
       if(r.classList.contains('tz-now')){
         r.classList.remove('tz-now');
@@ -1235,6 +1246,7 @@ var resetCtrl=_base.twoPress(resetBtn,{
     selectTz(2,findZone('UTC')||zones[0]);
     closeAllDrops();
     incMin=60;rangeMode='24';
+    _base.save('tz:view',{inc:60,range:'24'});
     for(var j=0;j<incBtns.length;j++)incBtns[j].classList.toggle('active',parseInt(incBtns[j].dataset.inc,10)===60);
     for(var j=0;j<rangeBtns.length;j++)rangeBtns[j].classList.toggle('active',rangeBtns[j].dataset.range==='24');
   }
@@ -1259,6 +1271,7 @@ for(var i=0;i<incBtns.length;i++){
     var v=parseInt(this.dataset.inc,10);
     if(v===incMin)return;
     incMin=v;
+    _base.save('tz:view',{inc:incMin,range:rangeMode});
     for(var j=0;j<incBtns.length;j++)incBtns[j].classList.toggle('active',parseInt(incBtns[j].dataset.inc,10)===v);
     renderGrid();
   });
@@ -1268,10 +1281,15 @@ for(var i=0;i<rangeBtns.length;i++){
     var v=this.dataset.range;
     if(v===rangeMode)return;
     rangeMode=v;
+    _base.save('tz:view',{inc:incMin,range:rangeMode});
     for(var j=0;j<rangeBtns.length;j++)rangeBtns[j].classList.toggle('active',rangeBtns[j].dataset.range===v);
     renderGrid();
   });
 }
+// Sync button active states from restored view settings
+for(var i=0;i<incBtns.length;i++)incBtns[i].classList.toggle('active',parseInt(incBtns[i].dataset.inc,10)===incMin);
+for(var i=0;i<rangeBtns.length;i++)rangeBtns[i].classList.toggle('active',rangeBtns[i].dataset.range===rangeMode);
+if(incMin!==60||rangeMode!=='24')renderGrid();
 
 // -- Keyboard Shortcuts --
 _base.onKey({
