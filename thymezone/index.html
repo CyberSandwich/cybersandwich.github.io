@@ -453,8 +453,8 @@ var ccTzMap={};
 for(var i=0;i<zones.length;i++){
   var z=zones[i];
   if(z.cc==='--')continue;
-  if(!ccTzMap[z.cc])ccTzMap[z.cc]={tz:z.tz,zone:z};
-  else if(ccTzMap[z.cc].tz!==z.tz)ccTzMap[z.cc]=null;// multi-tz country
+  if(!(z.cc in ccTzMap))ccTzMap[z.cc]={tz:z.tz,zone:z};
+  else if(ccTzMap[z.cc]&&ccTzMap[z.cc].tz!==z.tz)ccTzMap[z.cc]=null;// multi-tz country
 }
 var ccKeys=Object.keys(ccTzMap);
 for(var i=0;i<ccKeys.length;i++){
