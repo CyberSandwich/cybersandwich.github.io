@@ -740,12 +740,17 @@ function searchZones(query){
   var offsetMin=parseOffsetQuery(q);
   var offsetResults=[];
   if(offsetMin!==null){
-    var seen={};
+    var seen={},qu=q.toUpperCase();
     for(var i=0;i<zones.length;i++){
       if(seen[zones[i].tz])continue;
       if(getOffsetMin(zones[i].tz)===offsetMin){
         seen[zones[i].tz]=true;
-        offsetResults.push({z:zones[i],s:i<primaryCount?9.5:9});
+        // Bonus for direct name match so "gmt" → UTC first, not London
+        var bonus=0;
+        if(zones[i].city.toLowerCase()===q)bonus=0.4;
+        else{for(var a=0;!bonus&&a<zones[i].aliases.length;a++){if(norm(zones[i].aliases[a].toLowerCase())===q)bonus=0.3}
+          for(var a=0;!bonus&&a<zones[i].abbr.length;a++){if(zones[i].abbr[a]===qu)bonus=0.2}}
+        offsetResults.push({z:zones[i],s:(i<primaryCount?9.5:9)+bonus});
       }
     }
   }
