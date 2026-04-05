@@ -511,6 +511,8 @@ function getCurrentHour(tz){
   }catch(e){return{h:0,m:0}}
 }
 
+var norm=_search.norm,scoreWord=_search.scoreWord;
+
 // Build a Date for a specific hour (0-23) in a timezone, using today's date in that tz
 function dateForHour(tz,h){
   var now=new Date();
@@ -789,7 +791,6 @@ function tick(){
 document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});
 
 // -- Search --
-var norm=_search.norm,scoreWord=_search.scoreWord;
 var activeDropSlot=0,dropIdx=-1,dropResults=[];
 
 function parseOffsetQuery(q){
