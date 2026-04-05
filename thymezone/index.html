@@ -62,10 +62,7 @@ html[data-theme="sepia"]{
 .links>button.ok{animation:none}
 .links>button:active:not([disabled]){opacity:.7}
 
-.tz-ctrl{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
-.tz-swap-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;border:none;border-radius:var(--r);background:var(--bg2);color:var(--t2);font:500 .8125rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s}
-@media(hover:hover){.tz-swap-btn:hover{background:var(--bdr);color:var(--t1)}}
-.tz-swap-btn:active{opacity:.7}
+.tz-ctrl{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
 .tz-inc{display:flex;gap:6px}
 .tz-inc-btn{flex:1;padding:8px;border:1px solid var(--bdr2);border-radius:var(--r);background:transparent;color:var(--t3);font:500 .75rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
 .tz-inc-btn.active{background:var(--bg2);color:var(--t1);border-color:var(--t3)}
@@ -129,12 +126,18 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
       <div class="tz-drop" id="tz2-drop" role="listbox" aria-label="Timezone 2 Results"></div>
     </div>
   </div>
+  <div class="card links" id="tz-swap-card" style="display:none">
+    <button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span id="swap-label">Swap</span></button>
+  </div>
   <div class="card tz-ctrl" id="tz-ctrl" style="display:none">
-    <button type="button" id="swap-btn" class="tz-swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span id="swap-label">Swap</span></button>
     <div class="tz-inc" role="radiogroup" aria-label="Time Increment">
       <button type="button" class="tz-inc-btn active" data-inc="60" aria-pressed="true">1h</button>
       <button type="button" class="tz-inc-btn" data-inc="30" aria-pressed="false">30m</button>
       <button type="button" class="tz-inc-btn" data-inc="15" aria-pressed="false">15m</button>
+    </div>
+    <div class="tz-inc" role="radiogroup" aria-label="Time Range">
+      <button type="button" class="tz-inc-btn active" data-range="24" aria-pressed="true">24 Hours</button>
+      <button type="button" class="tz-inc-btn" data-range="wk" aria-pressed="false">9 AM \u2013 5 PM</button>
     </div>
   </div>
   <div class="card" id="tz-sum-card" style="display:none"><div id="tz-sum" aria-live="polite" style="padding:16px 20px;text-align:center;font:400 .9375rem/1.5 var(--font);color:var(--t2)"></div></div>
@@ -559,11 +562,12 @@ var tz1Inp=$('tz1-inp'),tz1Drop=$('tz1-drop');
 var tz2Inp=$('tz2-inp'),tz2Drop=$('tz2-drop');
 var sumCard=$('tz-sum-card'),sumEl=$('tz-sum'),gridEl=$('grid'),gh1=$('gh1'),gh2=$('gh2');
 var footerEl=$('tz-footer'),gf1=$('gf1'),gf2=$('gf2'),swapLabel=$('swap-label');
-var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),ctrlCard=$('tz-ctrl'),swapBtn=$('swap-btn');
+var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),swapCard=$('tz-swap-card'),ctrlCard=$('tz-ctrl'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
 var sel1Abbr=null,sel2Abbr=null;// tracked searched abbreviation per slot
 var sel1Off=null,sel2Off=null;// fixed offset override (minutes) when abbr searched
 var incMin=60;// grid increment in minutes: 60, 30, or 15
+var rangeMode='24';// '24' or 'wk' (9-5 working hours filter)
 
 // -- Time Formatting --
 function fmtHour(h,m,forceMin){
@@ -628,7 +632,8 @@ function cellCls(hour){
 }
 
 function renderGrid(){
-  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';footerEl.style.display='none';ctrlCard.style.display='none';return}
+  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';footerEl.style.display='none';swapCard.style.display='none';ctrlCard.style.display='none';return}
+  swapCard.style.display='';
   ctrlCard.style.display='';
   footerEl.style.display='';
   swapLabel.textContent='Swap ('+sel2.city+' as Anchor)';
@@ -682,6 +687,8 @@ function renderGrid(){
   var html='';
   for(var si=0;si<totalSlots;si++){
     var r=slots[si],h1=r.h1,m1v=r.m1,h2=r.h2,min2=r.m2,dayOff=r.dayOff;
+    // Working hours filter: skip rows where neither tz is in 9-17
+    if(rangeMode==='wk'&&!(h1>=9&&h1<=17)&&!(h2>=9&&h2<=17))continue;
     var isNow=h1===now1.h&&(incMin>=60||now1Min>=r.slot&&now1Min<r.slot+incMin);
     var rowCls='tz-row';
     if(isNow)rowCls+=' tz-now';
@@ -1247,8 +1254,9 @@ function doSwap(){
 }
 swapBtn.addEventListener('click',doSwap);
 
-// -- Increment --
-var incBtns=document.querySelectorAll('.tz-inc-btn');
+// -- Increment & Range --
+var incBtns=document.querySelectorAll('[data-inc]');
+var rangeBtns=document.querySelectorAll('[data-range]');
 for(var i=0;i<incBtns.length;i++){
   incBtns[i].addEventListener('click',function(){
     var v=parseInt(this.dataset.inc,10);
@@ -1258,6 +1266,19 @@ for(var i=0;i<incBtns.length;i++){
       var active=parseInt(incBtns[j].dataset.inc,10)===v;
       incBtns[j].classList.toggle('active',active);
       incBtns[j].setAttribute('aria-pressed',active?'true':'false');
+    }
+    renderGrid();
+  });
+}
+for(var i=0;i<rangeBtns.length;i++){
+  rangeBtns[i].addEventListener('click',function(){
+    var v=this.dataset.range;
+    if(v===rangeMode)return;
+    rangeMode=v;
+    for(var j=0;j<rangeBtns.length;j++){
+      var active=rangeBtns[j].dataset.range===v;
+      rangeBtns[j].classList.toggle('active',active);
+      rangeBtns[j].setAttribute('aria-pressed',active?'true':'false');
     }
     renderGrid();
   });
