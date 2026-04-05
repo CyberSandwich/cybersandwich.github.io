@@ -89,11 +89,6 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
 @media(hover:hover){.tz-row:hover{background:var(--bg2)}}
 @media(hover:hover){.tz-row.tz-now:hover{background:var(--tz-now-bg)}}
 
-.tz-swap{display:none;padding:10px 20px;border-top:1px solid var(--bdr2)}
-.tz-swap button{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:none;border-radius:var(--r);background:var(--bg2);color:var(--t2);font:500 .8125rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s}
-@media(hover:hover){.tz-swap button:hover{background:var(--bg3,var(--bdr));color:var(--t1)}}
-.tz-swap button:active{opacity:.7}
-
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fi .25s ease}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
@@ -103,7 +98,7 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
 <main class="w">
   <div class="card links">
     <button type="button" id="paste-btn" aria-label="Paste"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><span>Paste</span></button>
-    <button type="button" id="copy-btn" aria-label="Copy"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span>Copy</span></button>
+    <button type="button" id="copy-btn" aria-label="Copy Table"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span>Copy Table</span></button>
     <button type="button" id="reset-btn" aria-label="Reset"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 11-3-7.7L21 8"/></svg><span>Reset</span></button>
   </div>
   <div class="tz-inputs">
@@ -124,7 +119,9 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
   <div class="card" style="contain:content">
     <div class="tz-gh"><span id="gh1">Timezone 1</span><span id="gh2">Timezone 2</span></div>
     <div id="grid" aria-live="polite"></div>
-    <div class="tz-swap" id="tz-swap"><button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span>Swap</span></button></div>
+  </div>
+  <div class="card links" id="tz-bottom" style="display:none">
+    <button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span>Swap</span></button>
   </div>
 </main>
 <nav aria-label="Primary">
@@ -432,6 +429,7 @@ var zones=Z.map(function(s){
 var abbrMap={};
 for(var i=0;i<zones.length;i++){if(zones[i].abbr.length&&!abbrMap[zones[i].tz])abbrMap[zones[i].tz]=zones[i].abbr}
 
+var primaryCount=zones.length;
 // Expand TZ_PLACES into additional searchable place entries
 var pKeys=Object.keys(TZ_PLACES);
 for(var k=0;k<pKeys.length;k++){
@@ -483,7 +481,7 @@ function getCurrentHour(tz){
 var tz1Inp=$('tz1-inp'),tz1Drop=$('tz1-drop');
 var tz2Inp=$('tz2-inp'),tz2Drop=$('tz2-drop');
 var sumCard=$('tz-sum-card'),sumEl=$('tz-sum'),gridEl=$('grid'),gh1=$('gh1'),gh2=$('gh2');
-var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),swapWrap=$('tz-swap'),swapBtn=$('swap-btn');
+var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),bottomCard=$('tz-bottom'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
 
 // -- Time Formatting --
@@ -500,7 +498,7 @@ function fmtOffset(min){
   var abs=Math.abs(min);
   var h=Math.floor(abs/60);
   var m=abs%60;
-  return'UTC'+sign+h+(m?':'+(m<10?'0':'')+m:'');
+  return'GMT'+sign+h+(m?':'+(m<10?'0':'')+m:'');
 }
 
 function fmtDiffShort(diffMin){
@@ -548,8 +546,8 @@ function cellCls(hour){
 }
 
 function renderGrid(){
-  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';swapWrap.style.display='none';return}
-  swapWrap.style.display='';
+  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';bottomCard.style.display='none';return}
+  bottomCard.style.display='';
   gh1.textContent=sel1.city;
   var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
   var diff=m2-m1;
@@ -683,9 +681,37 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)tick
 var norm=_search.norm,scoreWord=_search.scoreWord;
 var activeDropSlot=0,dropIdx=-1,dropResults=[];
 
+function parseOffsetQuery(q){
+  q=q.replace(/\s+/g,'').toLowerCase();
+  var stripped=q.replace(/^(?:gmt|utc)/,'');
+  if(!stripped&&(q==='gmt'||q==='utc'))return 0;
+  if(!stripped)return null;
+  var m=stripped.match(/^([+-]?)(\d{1,2})(?::(\d{2}))?$/);
+  if(!m)return null;
+  var h=parseInt(m[2],10);
+  var min=parseInt(m[3]||'0',10);
+  if(h>14||min>59)return null;
+  var sign=m[1]==='-'?-1:1;
+  return sign*(h*60+min);
+}
+
 function searchZones(query){
   var q=norm(query.trim().toLowerCase());
   if(!q)return[];
+
+  var offsetMin=parseOffsetQuery(q);
+  var offsetResults=[];
+  if(offsetMin!==null){
+    var seen={};
+    for(var i=0;i<zones.length;i++){
+      if(seen[zones[i].tz])continue;
+      if(getOffsetMin(zones[i].tz)===offsetMin){
+        seen[zones[i].tz]=true;
+        offsetResults.push({z:zones[i],s:i<primaryCount?9.5:9});
+      }
+    }
+  }
+
   var words=q.split(/\s+/).filter(Boolean);
   var scored=[];
   for(var i=0;i<zones.length;i++){
@@ -699,8 +725,17 @@ function searchZones(query){
     }
     if(ok)scored.push({z:z,s:total});
   }
-  scored.sort(function(a,b){return b.s-a.s||a.z.city.localeCompare(b.z.city)});
-  return scored.slice(0,8);
+
+  var all=offsetResults.concat(scored);
+  all.sort(function(a,b){return b.s-a.s||a.z.city.localeCompare(b.z.city)});
+  var merged=[],seenTz={};
+  for(var i=0;i<all.length;i++){
+    if(seenTz[all[i].z.tz])continue;
+    seenTz[all[i].z.tz]=true;
+    merged.push(all[i]);
+    if(merged.length>=8)break;
+  }
+  return merged;
 }
 
 function renderDrop(drop,results){
@@ -813,22 +848,37 @@ document.addEventListener('click',function(e){
 // -- Copy --
 var cpTimer=null;
 
-function buildCopyText(){
+function padTime(s){while(s.length<5)s=' '+s;return s}
+
+function buildCopyTable(){
   if(!sel1||!sel2)return'';
   var a1=getAbbr(sel1.tz),a2=getAbbr(sel2.tz);
-  var now1=getCurrentHour(sel1.tz),now2=getCurrentHour(sel2.tz);
-  return sel1.city+' ('+a1+') \u2192 '+sel2.city+' ('+a2+') | '+fmtDiffShort(getOffsetMin(sel2.tz)-getOffsetMin(sel1.tz))+' | Now: '+fmtHour(now1.h,now1.m)+' \u2192 '+fmtHour(now2.h,now2.m);
+  var m1=getOffsetMin(sel1.tz),m2=getOffsetMin(sel2.tz);
+  var diff=m2-m1;
+  var header=sel1.city+' ('+a1+') \u2192 '+sel2.city+' ('+a2+') | '+fmtDiffShort(diff);
+  var lines=[header];
+  for(var h=0;h<24;h++){
+    var t2min=((h*60+diff)%1440+1440)%1440;
+    var h2=Math.floor(t2min/60),min2=t2min%60;
+    var raw=h*60+diff;
+    var dayOff=raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440);
+    var t1=padTime(fmtHour(h,0));
+    var t2=padTime(fmtHour(h2,min2));
+    var dayStr=dayOff>0?' (+'+dayOff+'d)':dayOff<0?' ('+dayOff+'d)':'';
+    lines.push(t1+'  \u2192  '+t2+dayStr);
+  }
+  return lines.join('\n');
 }
 
 function doCopy(){
-  var text=buildCopyText();
+  var text=buildCopyTable();
   if(!text){_base.notify('Select Both Timezones',false);return}
   var span=copyBtn.querySelector('span');
   _base.copyText(text,function(){
     copyBtn.classList.remove('ok');copyBtn.offsetWidth;copyBtn.classList.add('ok');
     span.textContent='Copied';
     clearTimeout(cpTimer);
-    cpTimer=setTimeout(function(){copyBtn.classList.remove('ok');span.textContent='Copy'},800);
+    cpTimer=setTimeout(function(){copyBtn.classList.remove('ok');span.textContent='Copy Table'},800);
   },function(){_base.notify('Copy Failed',false)});
 }
 
@@ -853,7 +903,18 @@ gridEl.addEventListener('click',function(e){
 var paTimer=null;
 
 function matchZone(text){
+  if(!text)return null;
+  text=text.trim().toLowerCase();
+  if(!text)return null;
   var t=norm(text);
+
+  // 0. GMT/UTC offset notation: "gmt+7", "utc-5", "utc7", "+5:30"
+  var offMin=parseOffsetQuery(text);
+  if(offMin!==null&&/(?:^[+-]|^(?:gmt|utc)|^\d{1,2}(?::\d{2})$)/.test(text.replace(/\s+/g,''))){
+    for(var i=0;i<primaryCount;i++){if(getOffsetMin(zones[i].tz)===offMin)return zones[i]}
+    for(var i=primaryCount;i<zones.length;i++){if(getOffsetMin(zones[i].tz)===offMin)return zones[i]}
+  }
+
   // 1. Exact IANA match
   for(var i=0;i<zones.length;i++)if(zones[i].tz.toLowerCase()===text)return zones[i];
   // 2. City name match
@@ -865,22 +926,79 @@ function matchZone(text){
   for(var i=0;i<zones.length;i++)if(norm(zones[i].country.toLowerCase())===t)return zones[i];
   // 5. Alias match
   for(var i=0;i<zones.length;i++)for(var j=0;j<zones[i].aliases.length;j++)if(norm(zones[i].aliases[j].toLowerCase())===t)return zones[i];
-  // 6. Fuzzy -- best scoreWord match above threshold
+  // 6. Fuzzy -- scoreWord with city boost, threshold 3 for typo tolerance
   var best=null,bs=0;
-  for(var i=0;i<zones.length;i++){var s=scoreWord(t,zones[i].q);if(s>bs){bs=s;best=zones[i]}}
-  return bs>=4?best:null;
+  for(var i=0;i<zones.length;i++){
+    var s=scoreWord(t,zones[i].q);
+    var ts=scoreWord(t,zones[i].tl)*1.5;
+    var ms=Math.max(s,ts);
+    if(ms>bs){bs=ms;best=zones[i]}
+  }
+  return bs>=3?best:null;
+}
+
+function stripTzNoise(s){
+  return s
+    .replace(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm|a\.m\.|p\.m\.)\b/gi,'')
+    .replace(/\b([2-9]\d|1[3-9]):\d{2}\b/g,'')
+    .replace(/\([+-]\d+d\)/g,'')
+    .replace(/\b\d+h\b/gi,'').replace(/\b\d+m\b/gi,'')
+    .replace(/\b(?:ahead|behind|now|currently|same\s+time|time\s+in)\b/gi,'')
+    .replace(/\s+/g,' ').trim();
+}
+
+function hasTz(found,z){
+  for(var i=0;i<found.length;i++)if(found[i].tz===z.tz)return true;
+  return false;
 }
 
 function parseTzFromText(text){
   var found=[];
-  var parts=text.toLowerCase().trim().split(/\s*(?:\u2192|->|\/|,|\n|\|)\s*/);
-  for(var i=0;i<parts.length&&found.length<2;i++){
-    var p=parts[i].trim();
-    if(!p)continue;
-    var m=matchZone(p);
-    if(m&&found.indexOf(m)<0)found.push(m);
+  var raw=text.trim();
+  if(!raw)return found;
+
+  // Strategy A: Header-line format — "City1 (X) → City2 (Y) ..."
+  var hm=raw.match(/^(.+?)\s*\(([^)]+)\)\s*(?:\u2192|->)\s*(.+?)\s*\(([^)]+)\)/);
+  if(hm){
+    var z1=matchZone(hm[1].trim())||matchZone(hm[2].trim());
+    var z2=matchZone(hm[3].trim())||matchZone(hm[4].trim());
+    if(z1)found.push(z1);
+    if(z2&&!hasTz(found,z2))found.push(z2);
+    if(found.length>=2)return found;
   }
-  if(found.length<2){var m=matchZone(text.toLowerCase().trim());if(m&&found.indexOf(m)<0)found.push(m)}
+
+  // Strategy B: Parenthetical extraction — "(City1)", "(ABBR)", "(GMT+7)"
+  var parens=[];
+  raw.replace(/\(([^)]+)\)/g,function(_,p){parens.push(p)});
+  for(var i=0;i<parens.length&&found.length<2;i++){
+    var z=matchZone(parens[i].trim());
+    if(z&&!hasTz(found,z))found.push(z);
+  }
+  if(found.length>=2)return found;
+
+  // Strategy C: Delimiter split with noise stripping
+  var parts=raw.split(/\s*(?:\u2192|\u2014|\u2013|->|--|,|\||\t|\n)\s*/);
+  if(parts.length<2){
+    var toParts=raw.split(/\s+to\s+/i);
+    if(toParts.length>=2)parts=toParts;
+  }
+  for(var i=0;i<parts.length&&found.length<2;i++){
+    var clean=stripTzNoise(parts[i]);
+    if(!clean)continue;
+    var z=matchZone(clean);
+    if(z&&!hasTz(found,z))found.push(z);
+  }
+  if(found.length>=2)return found;
+
+  // Strategy D: Freeform — try full cleaned text
+  if(found.length<1){
+    var clean=stripTzNoise(raw);
+    if(clean){
+      var z=matchZone(clean);
+      if(z&&!hasTz(found,z))found.push(z);
+    }
+  }
+
   return found;
 }
 
@@ -891,13 +1009,13 @@ function doPaste(){
     var found=parseTzFromText(text);
     if(found.length>=2){
       selectTz(1,found[0]);selectTz(2,found[1]);
-      pasteBtn.classList.remove('ok');pasteBtn.offsetWidth;pasteBtn.classList.add('ok');
-      span.textContent='Pasted';
-      clearTimeout(paTimer);
-      paTimer=setTimeout(function(){pasteBtn.classList.remove('ok');span.textContent='Paste'},800);
     }else if(found.length===1){
-      selectTz(1,found[0]);_base.notify('1 Timezone Found','warn');
-    }else{_base.notify('No Timezone Found',false)}
+      selectTz(2,found[0]);
+    }else{_base.notify('No Timezone Found',false);return}
+    pasteBtn.classList.remove('ok');pasteBtn.offsetWidth;pasteBtn.classList.add('ok');
+    span.textContent='Pasted';
+    clearTimeout(paTimer);
+    paTimer=setTimeout(function(){pasteBtn.classList.remove('ok');span.textContent='Paste'},800);
   }).catch(function(){_base.notify('Clipboard Access Denied','warn')});
 }
 
@@ -910,7 +1028,7 @@ document.addEventListener('paste',function(e){
     e.preventDefault();
     var found=parseTzFromText(text);
     if(found.length>=2){selectTz(1,found[0]);selectTz(2,found[1]);_base.notify('Pasted',true)}
-    else if(found.length===1){selectTz(1,found[0]);_base.notify('1 Timezone Found','warn')}
+    else if(found.length===1){selectTz(2,found[0]);_base.notify('Pasted',true)}
   }
 });
 
