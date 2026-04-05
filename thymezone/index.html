@@ -146,6 +146,8 @@ var $=function(id){return document.getElementById(id)};
 // ~160 entries covering all UTC offsets from -12 to +14 including half-hour/45-min zones
 var Z=[
 // UTC-12
+"Etc/GMT+12|Baker Island|UM||International Date Line West,UTC-12",
+// UTC-11
 "Pacific/Pago_Pago|Pago Pago|AS|SST|American Samoa",
 // UTC-10
 "Pacific/Honolulu|Honolulu|US|HST|Hawaii",
@@ -734,6 +736,7 @@ function searchZones(query){
   var q=norm(query.trim().toLowerCase());
   if(!q)return[];
 
+  // Offset search (fast — only checks primary zones)
   var offsetMin=parseOffsetQuery(q);
   var offsetResults=[];
   if(offsetMin!==null){
@@ -747,20 +750,26 @@ function searchZones(query){
     }
   }
 
-  var words=q.split(/\s+/).filter(Boolean);
+  // Text search — skip for single-char queries (only offset meaningful)
+  // and skip if offset already found enough results
   var scored=[];
-  for(var i=0;i<zones.length;i++){
-    var z=zones[i],total=0,ok=true;
-    for(var j=0;j<words.length;j++){
-      var s=scoreWord(words[j],z.q);
-      var ts=scoreWord(words[j],z.tl)*1.5;
-      var best=Math.max(s,ts);
-      if(best<=0){ok=false;break}
-      total+=best;
+  if(q.length>=2&&offsetResults.length<8){
+    var words=q.split(/\s+/).filter(Boolean);
+    // Search primary zones first, then places
+    for(var i=0;i<zones.length;i++){
+      var z=zones[i],total=0,ok=true;
+      for(var j=0;j<words.length;j++){
+        var s=scoreWord(words[j],z.q);
+        var ts=scoreWord(words[j],z.tl)*1.5;
+        var best=Math.max(s,ts);
+        if(best<=0){ok=false;break}
+        total+=best;
+      }
+      if(ok)scored.push({z:z,s:total});
     }
-    if(ok)scored.push({z:z,s:total});
   }
 
+  // Merge and dedupe
   var all=offsetResults.concat(scored);
   all.sort(function(a,b){return b.s-a.s||a.z.city.localeCompare(b.z.city)});
   var merged=[],seenTz={};
@@ -827,16 +836,20 @@ function updateDropHighlight(drop){
 }
 
 // -- Search Input Handlers --
-var searchTimer=null;
+var searchTimer=null,searchRaf=0;
 
 function handleSearchInput(slot){
   var inp=slot===1?tz1Inp:tz2Inp;
   clearTimeout(searchTimer);
+  cancelAnimationFrame(searchRaf);
   searchTimer=setTimeout(function(){
-    var v=inp.value.trim();
-    if(v.length>0)openDrop(slot,v);
-    else closeDrop(slot);
-  },80);
+    // Yield to browser for repaint, then run search
+    searchRaf=requestAnimationFrame(function(){
+      var v=inp.value.trim();
+      if(v.length>0)openDrop(slot,v);
+      else closeDrop(slot);
+    });
+  },120);
 }
 
 tz1Inp.addEventListener('input',function(){handleSearchInput(1)});
