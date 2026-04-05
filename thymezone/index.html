@@ -76,6 +76,8 @@ html[data-theme="sepia"] .tz-dusk{color:#7C5BAD!important}
 .tz-row{position:relative}
 .tz-row.tz-mid::after{content:'';position:absolute;top:0;left:50%;right:0;border-top:2px dashed var(--t4)}
 .tz-day{font-size:.625rem;color:var(--t4);vertical-align:super;margin-left:2px}
+.tz-row.mtg-top::before{content:'';position:absolute;top:0;left:0;right:0;border-top:2px dashed var(--t3)}
+.tz-row.mtg-btm::before{content:'';position:absolute;bottom:0;left:0;right:0;border-bottom:2px dashed var(--t3)}
 .tz-row.tz-now{background:var(--tz-now-bg)}
 .tz-row.ok{background:var(--tz-now-bg);transition:background .25s}
 .tz-row:active{opacity:.85}
@@ -538,6 +540,13 @@ function renderGrid(){
   gh2.innerHTML=sel2.city+dayTag;
   var now1=getCurrentHour(sel1.tz);
   var now2=getCurrentHour(sel2.tz);
+  // Compute meeting window (overlap of both 9-5)
+  var mtgStart=-1,mtgEnd=-1;
+  for(var hh=0;hh<24;hh++){
+    var t=((hh*60+diff)%1440+1440)%1440;
+    var hh2=Math.floor(t/60);
+    if(hh>=9&&hh<=17&&hh2>=9&&hh2<=17){if(mtgStart<0)mtgStart=hh;mtgEnd=hh}
+  }
   var prevH2=-1;
   /* Build all 24 rows as a single innerHTML batch -- trusted first-party strings */
   var html='';
@@ -547,6 +556,8 @@ function renderGrid(){
     var isNow=h===now1.h;
     var rowCls='tz-row';
     if(isNow)rowCls+=' tz-now';
+    if(h===mtgStart)rowCls+=' mtg-top';
+    if(h===mtgEnd)rowCls+=' mtg-btm';
     if(h>=9&&h<=17)rowCls+=' wk-l';
     if(h2>=9&&h2<=17)rowCls+=' wk-r';
     // Midnight marker: when TZ2 wraps around (previous h2 was larger)
