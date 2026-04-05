@@ -68,9 +68,6 @@ html[data-theme="sepia"]{
 .tz-row .tz-h{font-size:.9375rem;line-height:1.4;font-family:var(--font);font-weight:400;color:var(--t3);text-align:center}
 .tz-wk{color:var(--t1)!important;font-weight:600}
 .tz-noon{color:var(--tz-noon)!important;font-weight:600}
-.tz-dawn{color:#E06B50!important;font-weight:600}
-html[data-theme="dark"] .tz-dawn{color:#F08A72!important}
-html[data-theme="sepia"] .tz-dawn{color:#C2614A!important}
 .tz-dusk{color:#7C6AE8!important;font-weight:600}
 html[data-theme="dark"] .tz-dusk{color:#A594F9!important}
 html[data-theme="sepia"] .tz-dusk{color:#7C5BAD!important}
@@ -509,7 +506,6 @@ function renderSummary(){
 function cellCls(hour){
   var c=['tz-h'];
   if(hour>=9&&hour<=17)c.push('tz-wk');
-  if(hour===6)c.push('tz-dawn');
   if(hour===12)c.push('tz-noon');
   if(hour===18)c.push('tz-dusk');
   return c.join(' ');
