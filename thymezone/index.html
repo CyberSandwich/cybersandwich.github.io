@@ -62,6 +62,16 @@ html[data-theme="sepia"]{
 .links>button.ok{animation:none}
 .links>button:active:not([disabled]){opacity:.7}
 
+.tz-ctrl{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.tz-swap-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;border:none;border-radius:var(--r);background:var(--bg2);color:var(--t2);font:500 .8125rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s}
+@media(hover:hover){.tz-swap-btn:hover{background:var(--bdr);color:var(--t1)}}
+.tz-swap-btn:active{opacity:.7}
+.tz-inc{display:flex;gap:6px}
+.tz-inc-btn{flex:1;padding:8px;border:1px solid var(--bdr2);border-radius:var(--r);background:transparent;color:var(--t3);font:500 .75rem/1 var(--font);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.tz-inc-btn.active{background:var(--bg2);color:var(--t1);border-color:var(--t3)}
+@media(hover:hover){.tz-inc-btn:hover{background:var(--bg2);color:var(--t2)}}
+.tz-inc-btn:active{opacity:.7}
+
 .tz-gh{display:grid;grid-template-columns:1fr 1fr;padding:10px 20px;font:600 .8125rem/1 var(--font);color:var(--t2);border-bottom:1px solid var(--bdr2);text-align:center}
 .tz-gf{border-bottom:none;border-top:1px solid var(--bdr2)}
 .tz-gh .tz-warn{color:#E06B50}
@@ -119,14 +129,19 @@ html[data-theme="sepia"] .tz-row.tz-mid::after{border-top-color:#C2614A}
       <div class="tz-drop" id="tz2-drop" role="listbox" aria-label="Timezone 2 Results"></div>
     </div>
   </div>
+  <div class="card tz-ctrl" id="tz-ctrl" style="display:none">
+    <button type="button" id="swap-btn" class="tz-swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span id="swap-label">Swap</span></button>
+    <div class="tz-inc" role="radiogroup" aria-label="Time Increment">
+      <button type="button" class="tz-inc-btn active" data-inc="60" aria-pressed="true">1h</button>
+      <button type="button" class="tz-inc-btn" data-inc="30" aria-pressed="false">30m</button>
+      <button type="button" class="tz-inc-btn" data-inc="15" aria-pressed="false">15m</button>
+    </div>
+  </div>
   <div class="card" id="tz-sum-card" style="display:none"><div id="tz-sum" aria-live="polite" style="padding:16px 20px;text-align:center;font:400 .9375rem/1.5 var(--font);color:var(--t2)"></div></div>
   <div class="card" style="contain:content">
     <div class="tz-gh"><span id="gh1">Timezone 1</span><span id="gh2">Timezone 2</span></div>
     <div id="grid" aria-live="polite"></div>
     <div class="tz-gh tz-gf" id="tz-footer" style="display:none"><span id="gf1"></span><span id="gf2"></span></div>
-  </div>
-  <div class="card links" id="tz-bottom" style="display:none">
-    <button type="button" id="swap-btn" aria-label="Swap Timezones"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h18"/><path d="M17 8l4 4-4 4"/></svg><span id="swap-label">Swap</span></button>
   </div>
 </main>
 <nav aria-label="Primary">
@@ -544,16 +559,17 @@ var tz1Inp=$('tz1-inp'),tz1Drop=$('tz1-drop');
 var tz2Inp=$('tz2-inp'),tz2Drop=$('tz2-drop');
 var sumCard=$('tz-sum-card'),sumEl=$('tz-sum'),gridEl=$('grid'),gh1=$('gh1'),gh2=$('gh2');
 var footerEl=$('tz-footer'),gf1=$('gf1'),gf2=$('gf2'),swapLabel=$('swap-label');
-var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),bottomCard=$('tz-bottom'),swapBtn=$('swap-btn');
+var copyBtn=$('copy-btn'),pasteBtn=$('paste-btn'),resetBtn=$('reset-btn'),ctrlCard=$('tz-ctrl'),swapBtn=$('swap-btn');
 var sel1=null,sel2=null;
 var sel1Abbr=null,sel2Abbr=null;// tracked searched abbreviation per slot
 var sel1Off=null,sel2Off=null;// fixed offset override (minutes) when abbr searched
+var incMin=60;// grid increment in minutes: 60, 30, or 15
 
 // -- Time Formatting --
-function fmtHour(h,m){
+function fmtHour(h,m,forceMin){
   var ap=h>=12?'PM':'AM';
   var hh=h%12;if(hh===0)hh=12;
-  if(m&&m>0)return hh+':'+(m<10?'0':'')+m+' '+ap;
+  if((m&&m>0)||forceMin)return hh+':'+(m<10?'0':'')+(m||0)+' '+ap;
   return hh+' '+ap;
 }
 
@@ -612,8 +628,8 @@ function cellCls(hour){
 }
 
 function renderGrid(){
-  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';footerEl.style.display='none';bottomCard.style.display='none';return}
-  bottomCard.style.display='';
+  if(!sel1||!sel2){gridEl.textContent='';gh1.textContent='Timezone 1';gh2.textContent='Timezone 2';footerEl.style.display='none';ctrlCard.style.display='none';return}
+  ctrlCard.style.display='';
   footerEl.style.display='';
   swapLabel.textContent='Swap ('+sel2.city+' as Anchor)';
   // DST mismatch warning — coral header when searched abbr != current live abbr
@@ -621,30 +637,39 @@ function renderGrid(){
   var warn1=sel1Abbr&&sel1Abbr!==a1,warn2=sel2Abbr&&sel2Abbr!==a2;
   gh1.className=warn1?'tz-warn':'';
   gh1.textContent=sel1.city;
-  // Pre-compute tz2 time for each tz1 hour
-  // If abbreviation override is active, use fixed offset; otherwise DST-aware per hour
+  // Pre-compute tz2 time for each tz1 slot (increment-aware)
   var useFixed=sel1Off!==null||sel2Off!==null;
-  var rows=[];
+  var totalSlots=1440/incMin;
   var hasNextDay=false,hasPrevDay=false;
   var now1=getCurrentHour(sel1.tz);
   var now2=getCurrentHour(sel2.tz);
-  var mtgStart=-1,mtgEnd=-1;
-  for(var hh=0;hh<24;hh++){
+  var now1Min=now1.h*60+now1.m;
+  var mtgStartSlot=-1,mtgEndSlot=-1;
+  var slots=[];
+  for(var si=0;si<totalSlots;si++){
+    var m=si*incMin,h1=Math.floor(m/60),m1=m%60;
     var r;
     if(useFixed){
       var o1=sel1Off!==null?sel1Off:getOffsetMin(sel1.tz);
       var o2=sel2Off!==null?sel2Off:getOffsetMin(sel2.tz);
       var diff=o2-o1;
-      var t2min=((hh*60+diff)%1440+1440)%1440;
-      var raw=hh*60+diff;
-      r={h2:Math.floor(t2min/60),m2:t2min%60,diff:diff,dayOff:raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440)};
+      var t2min=((m+diff)%1440+1440)%1440;
+      var raw=m+diff;
+      r={h2:Math.floor(t2min/60),m2:t2min%60,dayOff:raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440)};
     }else{
-      r=tz2ForHour(sel1.tz,sel2.tz,hh);
+      r=tz2ForHour(sel1.tz,sel2.tz,h1);
+      // Adjust for sub-hour offset within the slot
+      if(m1>0){
+        var t2min=((m+(r.diff||0))%1440+1440)%1440;
+        var raw=m+(r.diff||0);
+        r={h2:Math.floor(t2min/60),m2:t2min%60,dayOff:raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440)};
+      }
     }
-    rows.push(r);
+    r.h1=h1;r.m1=m1;r.slot=m;
+    slots.push(r);
     if(r.dayOff>0)hasNextDay=true;
     if(r.dayOff<0)hasPrevDay=true;
-    if(hh>=9&&hh<=17&&r.h2>=9&&r.h2<=17){if(mtgStart<0)mtgStart=hh;mtgEnd=hh}
+    if(h1>=9&&h1<=17&&r.h2>=9&&r.h2<=17){if(mtgStartSlot<0)mtgStartSlot=si;mtgEndSlot=si}
   }
   var dayTag='';
   if(hasNextDay&&hasPrevDay)dayTag=' <span class="tz-day">-1/+1d</span>';
@@ -653,25 +678,25 @@ function renderGrid(){
   gh2.className=warn2?'tz-warn':'';
   gh2.innerHTML=sel2.city+dayTag;
   var prevH2=-1;
-  /* Build all 24 rows as a single innerHTML batch -- trusted first-party strings */
+  /* Build all rows as a single innerHTML batch -- trusted first-party strings */
   var html='';
-  for(var h=0;h<24;h++){
-    var r=rows[h],h2=r.h2,min2=r.m2,dayOff=r.dayOff;
-    var isNow=h===now1.h;
+  for(var si=0;si<totalSlots;si++){
+    var r=slots[si],h1=r.h1,m1v=r.m1,h2=r.h2,min2=r.m2,dayOff=r.dayOff;
+    var isNow=h1===now1.h&&(incMin>=60||now1Min>=r.slot&&now1Min<r.slot+incMin);
     var rowCls='tz-row';
     if(isNow)rowCls+=' tz-now';
-    if(h===mtgStart)rowCls+=' mtg-top';
-    if(h===mtgEnd)rowCls+=' mtg-btm';
-    if(h>=9&&h<=17)rowCls+=' wk-l';
+    if(si===mtgStartSlot)rowCls+=' mtg-top';
+    if(si===mtgEndSlot)rowCls+=' mtg-btm';
+    if(h1>=9&&h1<=17)rowCls+=' wk-l';
     if(h2>=9&&h2<=17)rowCls+=' '+(dayOff!==0?'wk-r-off':'wk-r');
-    // Midnight marker: when TZ2 wraps around
-    if(h>0&&prevH2>=0&&h2<prevH2)rowCls+=' tz-mid';
+    if(si>0&&prevH2>=0&&h2<prevH2)rowCls+=' tz-mid';
     prevH2=h2;
-    var t1Txt=isNow?fmtHour(h,now1.m):fmtHour(h,0);
-    var t2Txt=isNow?fmtHour(h2,now2.m):fmtHour(h2,min2);
+    var fm=incMin<60;
+    var t1Txt=isNow?fmtHour(now1.h,now1.m,fm):fmtHour(h1,m1v,fm);
+    var t2Txt=isNow?fmtHour(now2.h,now2.m,fm):fmtHour(h2,min2,fm);
     var dayStr=dayOff>0?'<span class="tz-day">+'+dayOff+'d</span>':dayOff<0?'<span class="tz-day">'+dayOff+'d</span>':'';
-    html+='<div class="'+rowCls+'" data-h="'+h+'">';
-    html+='<span class="'+cellCls(h)+'">'+t1Txt+'</span>';
+    html+='<div class="'+rowCls+'" data-h="'+h1+'" data-m="'+m1v+'">';
+    html+='<span class="'+cellCls(h1)+'">'+t1Txt+'</span>';
     html+='<span class="'+cellCls(h2)+'">'+t2Txt+dayStr+'</span>';
     html+='</div>';
   }
@@ -764,25 +789,30 @@ init();
 function tick(){
   if(!sel1||!sel2)return;
   var now1=getCurrentHour(sel1.tz),now2=getCurrentHour(sel2.tz);
+  var now1Min=now1.h*60+now1.m;
   var rows=gridEl.children;
   for(var i=0;i<rows.length;i++){
-    var r=rows[i],h=parseInt(r.dataset.h,10);
-    var isNow=h===now1.h;
+    var r=rows[i],h=parseInt(r.dataset.h,10),sm=parseInt(r.dataset.m||'0',10);
+    var slotMin=h*60+sm;
+    var isNow=now1Min>=slotMin&&now1Min<slotMin+incMin;
     if(isNow){
       if(!r.classList.contains('tz-now'))r.classList.add('tz-now');
-      // Update displayed minutes
       var spans=r.querySelectorAll('.tz-h');
-      var t1Txt=fmtHour(h,now1.m),t2Txt=fmtHour(now2.h,now2.m);
+      var t1Txt=fmtHour(now1.h,now1.m),t2Txt=fmtHour(now2.h,now2.m);
       if(spans[0]&&spans[0].textContent!==t1Txt)spans[0].textContent=t1Txt;
       if(spans[1]&&spans[1].textContent!==t2Txt)spans[1].textContent=t2Txt;
     }else{
       if(r.classList.contains('tz-now')){
         r.classList.remove('tz-now');
-        // Revert to static format (no minutes)
         var spans=r.querySelectorAll('.tz-h');
-        var rv=tz2ForHour(sel1.tz,sel2.tz,h);
-        if(spans[0])spans[0].textContent=fmtHour(h,0);
-        if(spans[1])spans[1].textContent=fmtHour(rv.h2,rv.m2);
+        if(spans[0])spans[0].textContent=fmtHour(h,sm);
+        if(useFixed||!sel1||!sel2){
+          if(spans[1])spans[1].textContent=fmtHour(h,sm);
+        }else{
+          var rv=tz2ForHour(sel1.tz,sel2.tz,h);
+          var t2min=((slotMin+(rv.diff||0))%1440+1440)%1440;
+          if(spans[1])spans[1].textContent=fmtHour(Math.floor(t2min/60),t2min%60);
+        }
       }
     }
   }
@@ -992,7 +1022,7 @@ document.addEventListener('click',function(e){
 // -- Copy --
 var cpTimer=null;
 
-function padTime(s){while(s.length<5)s=' '+s;return s}
+function padTime(s){var w=incMin<60?8:5;while(s.length<w)s=' '+s;return s}
 
 function buildCopyTable(){
   if(!sel1||!sel2)return'';
@@ -1003,14 +1033,19 @@ function buildCopyTable(){
   var header=sel1.city+' ('+a1+') \u2192 '+sel2.city+' ('+a2+') | '+fmtDiffShort(diff);
   var lines=[header];
   var useFixed=sel1Off!==null||sel2Off!==null;
-  for(var h=0;h<24;h++){
+  var totalSlots=1440/incMin;
+  for(var si=0;si<totalSlots;si++){
+    var m=si*incMin,h1=Math.floor(m/60),m1=m%60;
     var r;
     if(useFixed){
-      var t2min=((h*60+diff)%1440+1440)%1440;
-      var raw=h*60+diff;
+      var t2min=((m+diff)%1440+1440)%1440;
+      var raw=m+diff;
       r={h2:Math.floor(t2min/60),m2:t2min%60,dayOff:raw>=0?Math.floor(raw/1440):-Math.ceil(-raw/1440)};
-    }else{r=tz2ForHour(sel1.tz,sel2.tz,h)}
-    var t1=padTime(fmtHour(h,0));
+    }else{
+      r=tz2ForHour(sel1.tz,sel2.tz,h1);
+      if(m1>0){var t2m=((m+(r.diff||0))%1440+1440)%1440;var rw=m+(r.diff||0);r={h2:Math.floor(t2m/60),m2:t2m%60,dayOff:rw>=0?Math.floor(rw/1440):-Math.ceil(-rw/1440)}}
+    }
+    var t1=padTime(fmtHour(h1,m1));
     var t2=padTime(fmtHour(r.h2,r.m2));
     var dayStr=r.dayOff>0?' (+'+r.dayOff+'d)':r.dayOff<0?' ('+r.dayOff+'d)':'';
     lines.push(t1+'  \u2192  '+t2+dayStr);
@@ -1035,14 +1070,19 @@ copyBtn.addEventListener('click',doCopy);
 gridEl.addEventListener('click',function(e){
   var row=e.target.closest('.tz-row');
   if(!row||!sel1||!sel2)return;
-  var h=parseInt(row.dataset.h,10);
+  var h=parseInt(row.dataset.h,10),sm=parseInt(row.dataset.m||'0',10);
+  var slotMin=h*60+sm;
   var r;
   if(sel1Off!==null||sel2Off!==null){
     var o1=sel1Off!==null?sel1Off:getOffsetMin(sel1.tz),o2=sel2Off!==null?sel2Off:getOffsetMin(sel2.tz);
-    var d=o2-o1,t2=((h*60+d)%1440+1440)%1440;
+    var d=o2-o1,t2=((slotMin+d)%1440+1440)%1440;
     r={h2:Math.floor(t2/60),m2:t2%60};
-  }else{r=tz2ForHour(sel1.tz,sel2.tz,h)}
-  var text=fmtHour(h,0)+' ('+sel1.city+') \u2192 '+fmtHour(r.h2,r.m2)+' ('+sel2.city+')';
+  }else{
+    var rv=tz2ForHour(sel1.tz,sel2.tz,h);
+    var t2=((slotMin+(rv.diff||0))%1440+1440)%1440;
+    r={h2:Math.floor(t2/60),m2:t2%60};
+  }
+  var text=fmtHour(h,sm)+' ('+sel1.city+') \u2192 '+fmtHour(r.h2,r.m2)+' ('+sel2.city+')';
   _base.copyText(text,function(){
     row.classList.remove('ok');row.offsetWidth;row.classList.add('ok');
     _base.notify('Copied',true);
@@ -1206,6 +1246,22 @@ function doSwap(){
   closeAllDrops();
 }
 swapBtn.addEventListener('click',doSwap);
+
+// -- Increment --
+var incBtns=document.querySelectorAll('.tz-inc-btn');
+for(var i=0;i<incBtns.length;i++){
+  incBtns[i].addEventListener('click',function(){
+    var v=parseInt(this.dataset.inc,10);
+    if(v===incMin)return;
+    incMin=v;
+    for(var j=0;j<incBtns.length;j++){
+      var active=parseInt(incBtns[j].dataset.inc,10)===v;
+      incBtns[j].classList.toggle('active',active);
+      incBtns[j].setAttribute('aria-pressed',active?'true':'false');
+    }
+    renderGrid();
+  });
+}
 
 // -- Keyboard Shortcuts --
 _base.onKey({
