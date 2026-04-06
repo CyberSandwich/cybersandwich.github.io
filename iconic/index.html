@@ -10,9 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Iconic">
-<meta name="description" content="Search and copy 1,700+ Lucide SVG icons.">
+<meta name="description" content="Search and copy Lucide SVG icons.">
 <meta property="og:title" content="Iconic">
-<meta property="og:description" content="Search and copy 1,700+ Lucide SVG icons.">
+<meta property="og:description" content="Search and copy Lucide SVG icons.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
@@ -25,7 +25,6 @@ html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns=
 html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 .search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
-.count{padding:0 4px 10px;font:400 .8125rem/1 var(--font);color:var(--t4);text-align:right}
 #list-card{overflow:hidden}
 #list{position:relative;contain:layout style}
 .ii{position:absolute;left:0;right:0;height:52px;display:flex;align-items:center;padding:0 16px 0 20px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .2s,color .2s;user-select:none}
@@ -33,7 +32,6 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .ii .ico{width:24px;height:24px;flex-shrink:0;color:var(--t3)}
 .ii .ico svg{width:24px;height:24px;display:block}
 .ii .nm{flex:1;padding:0 12px;font:500 .9375rem/1 var(--font);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ii .tg{font:400 .75rem/1 var(--font);color:var(--t4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;text-align:right}
 .ii.ok{background:#DCFCE7;transition:background .25s,color .25s}
 .ii.ok .ico{color:#34D399}
 .ii.ok .nm{color:#16A34A}
@@ -70,7 +68,6 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Icons">
   </div>
-  <div class="count" id="count"></div>
   <div class="card" id="list-card">
     <div id="list" role="list">
       <div class="loading" id="loading">Loading Icons...</div>
@@ -97,7 +94,7 @@ var SVG_PRE='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" view
 var SVG_SUF='</svg>';
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
-var list=$('list'),listCard=$('list-card'),searchEl=$('search'),countEl=$('count'),statusEl=$('status');
+var list=$('list'),listCard=$('list-card'),searchEl=$('search'),statusEl=$('status');
 var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
 var cpBtn=$('cp-btn'),cpI=$('cp-i'),cpCk=$('cp-ck'),cpL=$('cp-l');
 var rsBtn=$('rs-btn'),rsL=$('rs-l');
@@ -139,6 +136,7 @@ function fullSvg(inner){return SVG_PRE+inner+SVG_SUF}
 
 /* ── Render Icon Into Element (trusted SVG from own files) ───────── */
 function setIco(el,inner){
+  el.textContent='';
   var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('viewBox','0 0 24 24');
   svg.setAttribute('fill','none');
@@ -146,19 +144,8 @@ function setIco(el,inner){
   svg.setAttribute('stroke-width','2');
   svg.setAttribute('stroke-linecap','round');
   svg.setAttribute('stroke-linejoin','round');
-  var t=document.createElement('template');
-  t.innerHTML=inner;
-  while(t.content.firstChild)svg.appendChild(t.content.firstChild);
-  el.textContent='';
+  svg.innerHTML=inner;
   el.appendChild(svg);
-}
-
-/* ── Count Label ─────────────────────────────────────────────────── */
-function updateCount(){
-  var q=searchEl.value.trim();
-  if(!q)countEl.textContent=icons.length.toLocaleString()+' Icons';
-  else if(!filtered.length)countEl.textContent='';
-  else countEl.textContent=filtered.length.toLocaleString()+' Result'+(filtered.length===1?'':'s');
 }
 
 /* ── Title ───────────────────────────────────────────────────────── */
@@ -205,7 +192,7 @@ function renderVisible(){
   var frag=document.createDocumentFragment();
   for(var i=start;i<end;i++){
     var ic=filtered[i];
-    var name=ic[0],tags=ic[2];
+    var name=ic[0];
     var row=document.createElement('div');
     row.className='ii'+(i===kbIdx?' kb':'');
     row.setAttribute('role','listitem');
@@ -220,13 +207,8 @@ function renderVisible(){
     nmSpan.className='nm';
     nmSpan.textContent=titleCase(name);
 
-    var tgSpan=document.createElement('span');
-    tgSpan.className='tg';
-    tgSpan.textContent=tags;
-
     row.appendChild(ico);
     row.appendChild(nmSpan);
-    row.appendChild(tgSpan);
     frag.appendChild(row);
 
     // Lazy-load SVG into icon element
@@ -262,7 +244,7 @@ function doSearch(){
 
   if(!words.length){
     filtered=icons;
-    updateCount();updateTitle();renderVisible();
+    updateTitle();renderVisible();
     return;
   }
 
@@ -284,7 +266,7 @@ function doSearch(){
   scored.sort(function(a,b){return b.score-a.score||icons[a.i][0].localeCompare(icons[b.i][0])});
   filtered=scored.map(function(s){return icons[s.i]});
 
-  updateCount();updateTitle();renderVisible();
+  updateTitle();renderVisible();
 
   if(!filtered.length)announce('Nothing Found');
   else announce(filtered.length+' result'+(filtered.length===1?'':'s'));
@@ -351,7 +333,7 @@ var resetCtrl=_base.twoPress(rsBtn,{
     searchEl.value='';
     kbIdx=-1;lastStart=lastEnd=-1;
     filtered=icons;
-    updateCount();updateTitle();renderVisible();
+    updateTitle();renderVisible();
     window.scrollTo({top:0,behavior:'smooth'});
     announce('Reset');
   }
@@ -447,7 +429,7 @@ _base.onKey({
   'Escape':function(){
     if(searchEl.value){
       searchEl.value='';kbIdx=-1;lastStart=lastEnd=-1;
-      filtered=icons;updateCount();updateTitle();renderVisible();
+      filtered=icons;updateTitle();renderVisible();
     }
     kbClear();document.activeElement.blur();
   }

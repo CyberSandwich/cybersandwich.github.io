@@ -15,7 +15,7 @@
 - [menuva](https://menuva.co.uk) — Digital restaurant menu platform
 - [ClearView](https://saputra.co.uk/clearview/) — Screenshot prettifier
 - [CodeGen](https://saputra.co.uk/codegen/) — QR, barcode, and Aztec code generator
-- [Iconic](https://saputra.co.uk/iconic/) — Search and copy 1,700+ Lucide SVG icons
+- [Iconic](https://saputra.co.uk/iconic/) — Search and copy Lucide SVG icons
 - [ImageOpt](https://saputra.co.uk/imageopt/) — JPEG and PNG image optimizer
 - [MockupGen](https://saputra.co.uk/mockup/) — iPhone mockup generator
 - [Palit](https://saputra.co.uk/palit/) — Color palette generator
