@@ -390,8 +390,7 @@ modeRow.addEventListener('click',function(e){
   var b=e.target.closest('.seg');if(!b||b.disabled)return;
   mode=b.dataset.mode;
   modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s===b)});
-  colorRow.classList.toggle('show',mode==='custom');
-  updateColorPreview();
+  applyFmtVisibility();
   saveSt();
   announce(titleCase(mode)+' Mode');
 });
@@ -928,12 +927,10 @@ function cycleFmt(){
 }
 function cycleMode(){
   var i=(MODES.indexOf(mode)+1)%MODES.length;
-  // Skip clear when JPEG
   if(MODES[i]==='clear'&&fmt==='jpeg')i=(i+1)%MODES.length;
   mode=MODES[i];
   modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
-  colorRow.classList.toggle('show',mode==='custom');
-  updateColorPreview();
+  applyFmtVisibility();
   saveSt();
   announce(titleCase(mode)+' Mode');
 }
