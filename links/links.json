@@ -137,6 +137,12 @@
     "category": "Initiatives"
   },
   {
+    "title": "Lucide Icons",
+    "url": "https://lucide.dev/icons/",
+    "icon": "image",
+    "category": "Initiatives"
+  },
+  {
     "title": "Menuva Admin Portal",
     "url": "https://admin.menuva.co.uk",
     "icon": "utensils",
@@ -175,6 +181,12 @@
     "title": "Neovim",
     "url": "https://neovim.io",
     "icon": "code",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Pixabay Sound Effects",
+    "url": "https://pixabay.com/sound-effects/",
+    "icon": "mic",
     "category": "Initiatives"
   },
   {
