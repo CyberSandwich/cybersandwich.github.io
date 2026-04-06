@@ -220,9 +220,11 @@ function titleCase(s){return s.replace(/-/g,' ').replace(/\b\w/g,function(c){ret
 /* ── Settings UI ─────────────────────────────────────────────────── */
 function applyFmtVisibility(){
   var isInline=fmt==='inline';
+  var needsSize=fmt==='png'||fmt==='jpeg';
   modeRow.style.display=isInline?'none':'';
   customColors.classList.toggle('show',!isInline&&mode==='custom');
   sizeCard.style.display=isInline?'none':'';
+  sizeRow.style.display=needsSize?'':'none';
   // JPEG has no Clear option — force Light if Clear+JPEG
   var clearBtn=modeRow.querySelector('[data-mode="clear"]');
   if(clearBtn)clearBtn.disabled=fmt==='jpeg';
@@ -349,7 +351,8 @@ function getBgRect(pad,vbSz){
 function buildSvgDoc(inner){
   var sz=SIZES[sizeIdx],mg=MARGINS[marginIdx],sw=STROKES[strokeIdx];
   var pad=sz>0?mg*24/sz:0,vbSz=24+2*pad;
-  return'<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="'+(-pad)+' '+(-pad)+' '+vbSz+' '+vbSz+'" fill="none" stroke="'+getStrokeColor()+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+getBgRect(pad,vbSz)+inner+'</svg>';
+  var dims=(fmt==='svg'||fmt==='inline')?'':' width="'+sz+'" height="'+sz+'"';
+  return'<svg xmlns="http://www.w3.org/2000/svg"'+dims+' viewBox="'+(-pad)+' '+(-pad)+' '+vbSz+' '+vbSz+'" fill="none" stroke="'+getStrokeColor()+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+getBgRect(pad,vbSz)+inner+'</svg>';
 }
 
 /* ── Copy Formatted (respects format/mode/size) ──────────────────── */
