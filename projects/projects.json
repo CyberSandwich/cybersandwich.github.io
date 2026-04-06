@@ -18,6 +18,12 @@
     "category": "Image Tools"
   },
   {
+    "title": "Iconic",
+    "subtitle": "Search and Copy 1,700+ SVG Icons",
+    "url": "/iconic/",
+    "category": "Image Tools"
+  },
+  {
     "title": "ImageOpt",
     "subtitle": "JPEG & PNG Image Optimizer",
     "url": "/imageopt/",
@@ -99,12 +105,6 @@
     "title": "Countdown",
     "subtitle": "Countdown Timer Manager",
     "url": "/countdown/",
-    "category": "Utilities"
-  },
-  {
-    "title": "Iconic",
-    "subtitle": "Search and Copy 1,700+ SVG Icons",
-    "url": "/iconic/",
     "category": "Utilities"
   },
   {
