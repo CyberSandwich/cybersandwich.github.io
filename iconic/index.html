@@ -31,7 +31,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .ii:last-child{border-bottom:none}
 .ii .ico{width:24px;height:24px;flex-shrink:0;color:var(--t3)}
 .ii .ico svg{width:24px;height:24px;display:block}
-.ii .nm{flex:1;padding:0 12px;font:500 .9375rem/1 var(--font);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ii .nm{flex:1;padding:0 12px;font:500 .9375rem/1.2 var(--font);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ii.ok{background:#DCFCE7;transition:background .25s,color .25s}
 .ii.ok .ico{color:#34D399}
 .ii.ok .nm{color:#16A34A}
@@ -84,6 +84,7 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
 </nav>
 <script src="/shared/base.js?v=24"></script>
 <script src="/shared/search.js?v=20"></script>
+<script src="/shared/swr.js?v=1"></script>
 <script>
 (function(){
 'use strict';
@@ -117,16 +118,52 @@ function announce(msg){statusEl.textContent='';requestAnimationFrame(function(){
 /* ── Title Case ──────────────────────────────────────────────────── */
 function titleCase(s){return s.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()})}
 
-/* ── Fetch SVG (lazy, cached, deduped) ───────────────────────────── */
+/* ── IndexedDB (L2 cache for SVG content) ────────────────────────── */
+var idb=null;
+var IDB_NAME='iconic',IDB_STORE='svgs',IDB_VER=1;
+
+function openIDB(){
+  return new Promise(function(resolve){
+    try{
+      var req=indexedDB.open(IDB_NAME,IDB_VER);
+      req.onupgradeneeded=function(e){e.target.result.createObjectStore(IDB_STORE)};
+      req.onsuccess=function(e){idb=e.target.result;resolve(idb)};
+      req.onerror=function(){resolve(null)};
+    }catch(e){resolve(null)}
+  });
+}
+
+function idbGet(name){
+  if(!idb)return Promise.resolve(null);
+  return new Promise(function(resolve){
+    try{
+      var tx=idb.transaction(IDB_STORE,'readonly');
+      var req=tx.objectStore(IDB_STORE).get(name);
+      req.onsuccess=function(){resolve(req.result||null)};
+      req.onerror=function(){resolve(null)};
+    }catch(e){resolve(null)}
+  });
+}
+
+function idbPut(name,inner){
+  if(!idb)return;
+  try{idb.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).put(inner,name)}catch(e){}
+}
+
+/* ── Fetch SVG (L1: memory → L2: IndexedDB → L3: network) ───────── */
 function fetchSvg(name){
   if(svgCache[name])return Promise.resolve(svgCache[name]);
   if(pendingFetch[name])return pendingFetch[name];
-  pendingFetch[name]=fetch('icons/'+name+'.svg').then(function(r){return r.text()}).then(function(svg){
-    var m=svg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
-    var inner=m?m[1].trim().replace(/\n\s*/g,''):'';
-    svgCache[name]=inner;
-    delete pendingFetch[name];
-    return inner;
+  pendingFetch[name]=idbGet(name).then(function(cached){
+    if(cached){svgCache[name]=cached;delete pendingFetch[name];return cached}
+    return fetch('icons/'+name+'.svg').then(function(r){return r.text()}).then(function(svg){
+      var m=svg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+      var inner=m?m[1].trim().replace(/\n\s*/g,''):'';
+      svgCache[name]=inner;
+      idbPut(name,inner);
+      delete pendingFetch[name];
+      return inner;
+    });
   }).catch(function(){delete pendingFetch[name];return''});
   return pendingFetch[name];
 }
@@ -455,19 +492,29 @@ document.addEventListener('visibilitychange',function(){
 });
 
 /* ── Init ────────────────────────────────────────────────────────── */
-fetch('manifest.json').then(function(r){return r.json()}).then(function(data){
+function onData(data){
   icons=data;
   filtered=icons;
   var ld=$('loading');if(ld)ld.remove();
-  updateCount();updateTitle();
-  renderVisible();
-  // Pre-fetch first viewport of icons
-  var prefetch=Math.min(20,icons.length);
-  for(var i=0;i<prefetch;i++)fetchSvg(icons[i][0]);
-}).catch(function(){
-  var ld=$('loading');
-  if(ld)ld.textContent='Failed to Load Icons';
-  announce('Failed to Load Icons');
+  updateTitle();
+  requestAnimationFrame(function(){
+    renderVisible();
+    var prefetch=Math.min(20,icons.length);
+    for(var i=0;i<prefetch;i++)fetchSvg(icons[i][0]);
+  });
+}
+
+// SWR: instant from localStorage on repeat visits, revalidate in background
+var getManifest=_swr.loader('manifest.json',onData);
+getManifest.onFresh=function(data){onData(data)};
+
+// Open IndexedDB, then load manifest
+openIDB().then(function(){
+  getManifest().catch(function(){
+    var ld=$('loading');
+    if(ld)ld.textContent='Failed to Load Icons';
+    announce('Failed to Load Icons');
+  });
 });
 
 })();
