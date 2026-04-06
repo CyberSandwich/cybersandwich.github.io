@@ -87,14 +87,14 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
       <button class="seg active" data-fmt="png">PNG</button>
     </div>
     <div class="seg-row c4" id="mode-row">
+      <button class="seg" data-mode="custom">Custom</button>
       <button class="seg" data-mode="dark">Dark</button>
       <button class="seg" data-mode="light">Light</button>
       <button class="seg active" data-mode="clear">Clear</button>
-      <button class="seg" data-mode="custom">Custom</button>
     </div>
     <div id="custom-colors">
-      <input id="fg-input" type="text" placeholder="#000000" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Foreground Color">
-      <input id="bg-input" type="text" placeholder="#FFFFFF" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color">
+      <input id="bg-input" type="text" placeholder="Background (#1C1C1E)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color">
+      <input id="fg-input" type="text" placeholder="Foreground (#FFFFFF)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Foreground Color">
     </div>
   </div>
   <div class="card settings" id="size-card">
@@ -202,7 +202,7 @@ var norm=_search.norm,scoreWord=_search.scoreWord;
 // Format settings (persisted)
 var st=_base.load('iconic:settings',{action:'copy',fmt:'png',mode:'clear',customFg:'#000000',customBg:'#FFFFFF',sizeIdx:SIZE_DEF,strokeIdx:STROKE_DEF,marginIdx:MARGIN_DEF});
 var action=st.action||'copy',fmt=st.fmt,mode=st.mode,sizeIdx=st.sizeIdx;
-var customFg=st.customFg||'#000000',customBg=st.customBg||'#FFFFFF';
+var customFg=st.customFg||'#FFFFFF',customBg=st.customBg||'#1C1C1E';
 var strokeIdx=st.strokeIdx!=null?st.strokeIdx:STROKE_DEF;
 var marginIdx=st.marginIdx!=null?st.marginIdx:MARGIN_DEF;
 if(sizeIdx<0||sizeIdx>=SIZES.length)sizeIdx=SIZE_DEF;
@@ -237,7 +237,8 @@ function initSettings(){
   actionRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.action===action)});
   fmtRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.fmt===fmt)});
   modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
-  fgInput.value=customFg;bgInput.value=customBg;
+  fgInput.value=customFg==='#FFFFFF'?'':customFg;
+  bgInput.value=customBg==='#1C1C1E'?'':customBg;
   applyFmtVisibility();
   updateStrokeLabel();
   updateSizeLabel();
@@ -292,8 +293,8 @@ modeRow.addEventListener('click',function(e){
   saveSt();
 });
 
-fgInput.addEventListener('input',function(){customFg=fgInput.value.trim()||'#000000';saveSt()});
-bgInput.addEventListener('input',function(){customBg=bgInput.value.trim()||'#FFFFFF';saveSt()});
+fgInput.addEventListener('input',function(){customFg=fgInput.value.trim()||'#FFFFFF';saveSt()});
+bgInput.addEventListener('input',function(){customBg=bgInput.value.trim()||'#1C1C1E';saveSt()});
 
 function updateStrokeLabel(){
   var sw=STROKES[strokeIdx];
@@ -364,6 +365,7 @@ function copyFormatted(inner,onDone,onErr){
     _base.copyText(buildSvgDoc(inner),onDone,onErr);return;
   }
   var svgDoc=buildSvgDoc(inner);
+  var sz=SIZES[sizeIdx];
 
   navigator.clipboard.write([
     new ClipboardItem({'image/png':new Promise(function(resolve,reject){
@@ -664,7 +666,7 @@ var resetCtrl=_base.twoPress(rsBtn,{
   onConfirm:function(){
     searchEl.value='';updateSearchX();
     action='copy';fmt='png';mode='clear';
-    customFg='#000000';customBg='#FFFFFF';
+    customFg='#FFFFFF';customBg='#1C1C1E';
     strokeIdx=STROKE_DEF;sizeIdx=SIZE_DEF;marginIdx=MARGIN_DEF;
     saveSt();initSettings();
     kbIdx=-1;lastStart=lastEnd=-1;
