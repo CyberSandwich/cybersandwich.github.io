@@ -64,11 +64,13 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
     <button type="button" id="pa-btn" aria-label="Paste"><svg aria-hidden="true" id="pa-i" width="18" height="18" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg aria-hidden="true" id="pa-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pa-l">Paste</span></button>
     <button type="button" id="rs-btn" aria-label="Reset"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
   </div>
-  <div class="card settings" id="settings">
+  <div class="card settings" id="action-card">
     <div class="seg-row c2" id="action-row">
       <button class="seg" data-action="download">Download</button>
       <button class="seg active" data-action="copy">Copy</button>
     </div>
+  </div>
+  <div class="card settings" id="settings">
     <div class="seg-row c4" id="fmt-row">
       <button class="seg" data-fmt="inline">Inline</button>
       <button class="seg" data-fmt="jpeg">JPEG</button>
@@ -187,7 +189,7 @@ var action=st.action||'copy',fmt=st.fmt,mode=st.mode,sizeIdx=st.sizeIdx;
 var strokeIdx=st.strokeIdx!=null?st.strokeIdx:STROKE_DEF;
 var marginIdx=st.marginIdx!=null?st.marginIdx:MARGIN_DEF;
 if(sizeIdx<0||sizeIdx>=SIZES.length)sizeIdx=SIZE_DEF;
-if(strokeIdx<0||strokeIdx>=STROKES.length)strokeIdx=STROKE_DEF;
+if(strokeIdx<0||strokeIdx>=STROKES.length||STROKES[strokeIdx]==null)strokeIdx=STROKE_DEF;
 if(marginIdx<0||marginIdx>=MARGINS.length)marginIdx=MARGIN_DEF;
 
 function saveSt(){_base.save('iconic:settings',{action:action,fmt:fmt,mode:mode,sizeIdx:sizeIdx,strokeIdx:strokeIdx,marginIdx:marginIdx})}
@@ -634,11 +636,17 @@ function doPaste(){
 }
 
 /* ── Reset ────────────────────────────────────────────────────────── */
+function isDefault(){
+  return !searchEl.value&&action==='copy'&&fmt==='png'&&mode==='clear'&&strokeIdx===STROKE_DEF&&sizeIdx===SIZE_DEF&&marginIdx===MARGIN_DEF;
+}
 var resetCtrl=_base.twoPress(rsBtn,{
   label:rsL,
-  guard:function(){return searchEl.value.length>0},
+  guard:function(){return !isDefault()},
   onConfirm:function(){
     searchEl.value='';
+    action='copy';fmt='png';mode='clear';
+    strokeIdx=STROKE_DEF;sizeIdx=SIZE_DEF;marginIdx=MARGIN_DEF;
+    saveSt();initSettings();
     kbIdx=-1;lastStart=lastEnd=-1;
     filtered=icons;
     updateTitle();renderVisible();
