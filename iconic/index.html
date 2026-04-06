@@ -217,7 +217,7 @@ var FMTS=['inline','jpeg','svg','png'];
 var MODES=['custom','dark','light','clear'];
 var HEX_RE=/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 var IDB_NAME='iconic',IDB_STORE='svgs',IDB_META='meta',IDB_VER=2;
-var MANIFEST_VER='1.7.0a';
+var MANIFEST_VER='1.7.0b';
 
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
@@ -599,6 +599,18 @@ function idbPutMeta(key,val){
   try{idb.transaction(IDB_META,'readwrite').objectStore(IDB_META).put(val,key)}catch(e){}
 }
 
+function idbClearSvgs(){
+  if(!idb)return Promise.resolve();
+  return new Promise(function(resolve){
+    try{
+      var tx=idb.transaction(IDB_STORE,'readwrite');
+      tx.objectStore(IDB_STORE).clear();
+      tx.oncomplete=function(){resolve()};
+      tx.onerror=function(){resolve()};
+    }catch(e){resolve()}
+  });
+}
+
 /* ── Fetch SVG (L1: memory → L2: IndexedDB → L3: network) ───────── */
 function fetchSvg(name){
   if(svgCache[name])return Promise.resolve(svgCache[name]);
@@ -822,7 +834,7 @@ function downloadFormatted(inner,name){
         resolve();
       },mime,fmt==='jpeg'?0.95:undefined);
     });
-  }).catch(function(){});
+  }).catch(function(){return Promise.reject()});
 }
 
 /* ── Handle Icon Tap (copy or download based on action mode) ─────── */
@@ -841,10 +853,11 @@ function handleIcon(idx,rowEl){
       _base.notify(msg,true);
       announce(msg+' '+titleCase(name));
     };
+    var fail=function(){_base.notify('Export Failed',false);announce('Export Failed')};
     if(action==='download'){
-      downloadFormatted(inner,name).then(done);
+      downloadFormatted(inner,name).then(done).catch(fail);
     }else{
-      copyFormatted(inner,done,function(){_base.notify('Copy Failed',false)});
+      copyFormatted(inner,done,fail);
     }
   });
 }
@@ -1066,11 +1079,12 @@ function onData(data){
     // Check IDB version — if stale or missing, prefetch all in background
     idbGetMeta('version').then(function(ver){
       if(ver===MANIFEST_VER){
-        // Still prefetch first 20 for L1 memory warm-up
         var warm=Math.min(20,icons.length);
         for(var i=0;i<warm;i++)fetchSvg(icons[i][0]);
       }else{
-        prefetchAll();
+        // Version mismatch — clear stale cache, flush L1, re-fetch all
+        svgCache={};
+        idbClearSvgs().then(function(){prefetchAll()});
       }
     });
   });
