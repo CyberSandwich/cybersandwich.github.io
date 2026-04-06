@@ -23,8 +23,17 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .search-wrap{margin-bottom:14px;--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
-.search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
+.search-wrap{position:relative}
+.search-wrap input{width:100%;padding:12px 36px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
+.search-x{display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:none;background:var(--bdr);color:var(--t3);cursor:pointer;align-items:center;justify-content:center;padding:0;transition:background .15s,color .15s}
+.search-x::before,.search-x::after{content:'';position:absolute;width:10px;height:1.5px;background:currentColor;border-radius:1px}
+.search-x::before{transform:rotate(45deg)}
+.search-x::after{transform:rotate(-45deg)}
+#custom-colors{display:none;padding:8px 12px 12px;gap:8px}
+#custom-colors.show{display:flex}
+#custom-colors input{flex:1;padding:10px 16px;border:1px solid var(--bdr2);border-radius:var(--rr);font:400 .875rem/1 var(--font);color:var(--t1);background:var(--bg);outline:none;transition:border-color .15s;min-width:0}
+#custom-colors input:focus{border-color:var(--t4)}
 #list-card{overflow:hidden}
 #list{position:relative;contain:layout style}
 .ii{position:absolute;left:0;right:0;height:52px;display:flex;align-items:center;padding:0 16px 0 20px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .2s,color .2s;user-select:none}
@@ -77,10 +86,15 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
       <button class="seg" data-fmt="svg">SVG</button>
       <button class="seg active" data-fmt="png">PNG</button>
     </div>
-    <div class="seg-row" id="mode-row">
+    <div class="seg-row c4" id="mode-row">
       <button class="seg" data-mode="dark">Dark</button>
       <button class="seg" data-mode="light">Light</button>
       <button class="seg active" data-mode="clear">Clear</button>
+      <button class="seg" data-mode="custom">Custom</button>
+    </div>
+    <div id="custom-colors">
+      <input id="fg-input" type="text" placeholder="#000000" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Foreground Color">
+      <input id="bg-input" type="text" placeholder="#FFFFFF" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color">
     </div>
   </div>
   <div class="card settings" id="size-card">
@@ -129,6 +143,7 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
   </div>
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Icons">
+    <button type="button" class="search-x" id="search-x" aria-label="Clear Search"></button>
   </div>
   <div class="card" id="list-card">
     <div id="list" role="list">
@@ -163,7 +178,8 @@ var RESET_SVG='<path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/>';
 
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
-var list=$('list'),listCard=$('list-card'),searchEl=$('search'),statusEl=$('status');
+var list=$('list'),listCard=$('list-card'),searchEl=$('search'),searchX=$('search-x'),statusEl=$('status');
+var fgInput=$('fg-input'),bgInput=$('bg-input'),customColors=$('custom-colors');
 var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
 var rsBtn=$('rs-btn'),rsL=$('rs-l');
 var settingsCard=$('settings'),actionRow=$('action-row'),fmtRow=$('fmt-row'),modeRow=$('mode-row'),sizeCard=$('size-card');
@@ -184,15 +200,16 @@ var copyTimers={};
 var norm=_search.norm,scoreWord=_search.scoreWord;
 
 // Format settings (persisted)
-var st=_base.load('iconic:settings',{action:'copy',fmt:'png',mode:'clear',sizeIdx:SIZE_DEF,strokeIdx:STROKE_DEF,marginIdx:MARGIN_DEF});
+var st=_base.load('iconic:settings',{action:'copy',fmt:'png',mode:'clear',customFg:'#000000',customBg:'#FFFFFF',sizeIdx:SIZE_DEF,strokeIdx:STROKE_DEF,marginIdx:MARGIN_DEF});
 var action=st.action||'copy',fmt=st.fmt,mode=st.mode,sizeIdx=st.sizeIdx;
+var customFg=st.customFg||'#000000',customBg=st.customBg||'#FFFFFF';
 var strokeIdx=st.strokeIdx!=null?st.strokeIdx:STROKE_DEF;
 var marginIdx=st.marginIdx!=null?st.marginIdx:MARGIN_DEF;
 if(sizeIdx<0||sizeIdx>=SIZES.length)sizeIdx=SIZE_DEF;
 if(strokeIdx<0||strokeIdx>=STROKES.length||STROKES[strokeIdx]==null)strokeIdx=STROKE_DEF;
 if(marginIdx<0||marginIdx>=MARGINS.length)marginIdx=MARGIN_DEF;
 
-function saveSt(){_base.save('iconic:settings',{action:action,fmt:fmt,mode:mode,sizeIdx:sizeIdx,strokeIdx:strokeIdx,marginIdx:marginIdx})}
+function saveSt(){_base.save('iconic:settings',{action:action,fmt:fmt,mode:mode,customFg:customFg,customBg:customBg,sizeIdx:sizeIdx,strokeIdx:strokeIdx,marginIdx:marginIdx})}
 
 /* ── Announce (a11y) ─────────────────────────────────────────────── */
 function announce(msg){statusEl.textContent='';requestAnimationFrame(function(){statusEl.textContent=msg})}
@@ -204,6 +221,7 @@ function titleCase(s){return s.replace(/-/g,' ').replace(/\b\w/g,function(c){ret
 function applyFmtVisibility(){
   var isInline=fmt==='inline';
   modeRow.style.display=isInline?'none':'';
+  customColors.classList.toggle('show',!isInline&&mode==='custom');
   sizeCard.style.display=isInline?'none':'';
   // JPEG has no Clear option — force Light if Clear+JPEG
   var clearBtn=modeRow.querySelector('[data-mode="clear"]');
@@ -219,6 +237,7 @@ function initSettings(){
   actionRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.action===action)});
   fmtRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.fmt===fmt)});
   modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
+  fgInput.value=customFg;bgInput.value=customBg;
   applyFmtVisibility();
   updateStrokeLabel();
   updateSizeLabel();
@@ -269,8 +288,12 @@ modeRow.addEventListener('click',function(e){
   var b=e.target.closest('.seg');if(!b||b.disabled)return;
   mode=b.dataset.mode;
   modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s===b)});
+  customColors.classList.toggle('show',mode==='custom');
   saveSt();
 });
+
+fgInput.addEventListener('input',function(){customFg=fgInput.value.trim()||'#000000';saveSt()});
+bgInput.addEventListener('input',function(){customBg=bgInput.value.trim()||'#FFFFFF';saveSt()});
 
 function updateStrokeLabel(){
   var sw=STROKES[strokeIdx];
@@ -308,16 +331,24 @@ marginRow.addEventListener('click',function(e){
 });
 marginLbl.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();marginRow.click()}});
 
+/* ── Color Helpers ────────────────────────────────────────────────── */
+function getStrokeColor(){
+  if(mode==='custom')return customFg||'#000000';
+  return mode==='dark'?'#FFFFFF':'#000000';
+}
+function getBgRect(pad,vbSz){
+  var x=(-pad),w=vbSz;
+  if(mode==='custom'&&customBg)return'<rect x="'+x+'" y="'+x+'" width="'+w+'" height="'+w+'" fill="'+customBg+'"/>';
+  if(mode==='dark')return'<rect x="'+x+'" y="'+x+'" width="'+w+'" height="'+w+'" fill="#1C1C1E"/>';
+  if(mode==='light'||(mode==='clear'&&fmt==='jpeg'))return'<rect x="'+x+'" y="'+x+'" width="'+w+'" height="'+w+'" fill="#FFFFFF"/>';
+  return'';
+}
+
 /* ── Build Standalone SVG Document (with margin via viewBox) ──────── */
 function buildSvgDoc(inner){
   var sz=SIZES[sizeIdx],mg=MARGINS[marginIdx],sw=STROKES[strokeIdx];
-  var pad=sz>0?mg*24/sz:0;
-  var vbSz=24+2*pad;
-  var stroke=mode==='dark'?'#FFFFFF':'#000000';
-  var bg='';
-  if(mode==='dark')bg='<rect x="'+(-pad)+'" y="'+(-pad)+'" width="'+vbSz+'" height="'+vbSz+'" fill="#1C1C1E"/>';
-  else if(mode==='light')bg='<rect x="'+(-pad)+'" y="'+(-pad)+'" width="'+vbSz+'" height="'+vbSz+'" fill="#FFFFFF"/>';
-  return'<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="'+(-pad)+' '+(-pad)+' '+vbSz+' '+vbSz+'" fill="none" stroke="'+stroke+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+bg+inner+'</svg>';
+  var pad=sz>0?mg*24/sz:0,vbSz=24+2*pad;
+  return'<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="'+(-pad)+' '+(-pad)+' '+vbSz+' '+vbSz+'" fill="none" stroke="'+getStrokeColor()+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+getBgRect(pad,vbSz)+inner+'</svg>';
 }
 
 /* ── Copy Formatted (respects format/mode/size) ──────────────────── */
@@ -332,13 +363,7 @@ function copyFormatted(inner,onDone,onErr){
   if(!navigator.clipboard||!navigator.clipboard.write){
     _base.copyText(buildSvgDoc(inner),onDone,onErr);return;
   }
-  var sz=SIZES[sizeIdx],mg=MARGINS[marginIdx],sw=STROKES[strokeIdx];
-  var pad=sz>0?mg*24/sz:0,vbSz=24+2*pad;
-  var stroke=mode==='dark'?'#FFFFFF':'#000000';
-  var bg='';
-  if(mode==='dark')bg='<rect x="'+(-pad)+'" y="'+(-pad)+'" width="'+vbSz+'" height="'+vbSz+'" fill="#1C1C1E"/>';
-  else if(mode==='light'||(mode==='clear'&&fmt==='jpeg'))bg='<rect x="'+(-pad)+'" y="'+(-pad)+'" width="'+vbSz+'" height="'+vbSz+'" fill="#FFFFFF"/>';
-  var svgDoc='<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="'+(-pad)+' '+(-pad)+' '+vbSz+' '+vbSz+'" fill="none" stroke="'+stroke+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+bg+inner+'</svg>';
+  var svgDoc=buildSvgDoc(inner);
 
   navigator.clipboard.write([
     new ClipboardItem({'image/png':new Promise(function(resolve,reject){
@@ -567,13 +592,8 @@ function downloadFormatted(inner,name){
   }
   // PNG or JPEG
   return new Promise(function(resolve){
-    var sz=SIZES[sizeIdx],mg=MARGINS[marginIdx],sw=STROKES[strokeIdx];
-    var pad=sz>0?mg*24/sz:0,vbSz=24+2*pad;
-    var stroke=mode==='dark'?'#FFFFFF':'#000000';
-    var bg='';
-    if(mode==='dark')bg='<rect x="'+(-pad)+'" y="'+(-pad)+'" width="'+vbSz+'" height="'+vbSz+'" fill="#1C1C1E"/>';
-    else if(mode==='light'||(mode==='clear'&&fmt==='jpeg'))bg='<rect x="'+(-pad)+'" y="'+(-pad)+'" width="'+vbSz+'" height="'+vbSz+'" fill="#FFFFFF"/>';
-    var svgDoc='<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="'+(-pad)+' '+(-pad)+' '+vbSz+' '+vbSz+'" fill="none" stroke="'+stroke+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+bg+inner+'</svg>';
+    var svgDoc=buildSvgDoc(inner);
+    var sz=SIZES[sizeIdx];
     var canvas=document.createElement('canvas');canvas.width=sz;canvas.height=sz;
     var ctx=canvas.getContext('2d');
     var img=new Image();
@@ -636,14 +656,15 @@ function doPaste(){
 
 /* ── Reset ────────────────────────────────────────────────────────── */
 function isDefault(){
-  return !searchEl.value&&action==='copy'&&fmt==='png'&&mode==='clear'&&strokeIdx===STROKE_DEF&&sizeIdx===SIZE_DEF&&marginIdx===MARGIN_DEF;
+  return !searchEl.value&&action==='copy'&&fmt==='png'&&mode==='clear'&&customFg==='#000000'&&customBg==='#FFFFFF'&&strokeIdx===STROKE_DEF&&sizeIdx===SIZE_DEF&&marginIdx===MARGIN_DEF;
 }
 var resetCtrl=_base.twoPress(rsBtn,{
   label:rsL,
   guard:function(){return !isDefault()},
   onConfirm:function(){
-    searchEl.value='';
+    searchEl.value='';updateSearchX();
     action='copy';fmt='png';mode='clear';
+    customFg='#000000';customBg='#FFFFFF';
     strokeIdx=STROKE_DEF;sizeIdx=SIZE_DEF;marginIdx=MARGIN_DEF;
     saveSt();initSettings();
     kbIdx=-1;lastStart=lastEnd=-1;
@@ -695,9 +716,16 @@ listCard.addEventListener('click',function(e){
 });
 
 /* ── Event Listeners ─────────────────────────────────────────────── */
+function updateSearchX(){searchX.style.display=searchEl.value?'flex':'none'}
 searchEl.addEventListener('input',function(){
   clearTimeout(searchTimer);
   searchTimer=setTimeout(doSearch,80);
+  updateSearchX();
+});
+searchX.addEventListener('click',function(){
+  searchEl.value='';updateSearchX();
+  kbIdx=-1;lastStart=lastEnd=-1;filtered=icons;updateTitle();renderVisible();
+  searchEl.focus();
 });
 
 paBtn.addEventListener('click',doPaste);
@@ -742,7 +770,7 @@ _base.onKey({
   },
   'Escape':function(){
     if(searchEl.value){
-      searchEl.value='';kbIdx=-1;lastStart=lastEnd=-1;
+      searchEl.value='';updateSearchX();kbIdx=-1;lastStart=lastEnd=-1;
       filtered=icons;updateTitle();renderVisible();
     }
     kbClear();document.activeElement.blur();
