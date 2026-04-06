@@ -52,7 +52,7 @@ for(var i=0;i<entries.length;i++){
   // Extract inner content (between <svg ...> and </svg>)
   var innerMatch=svg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
   if(!innerMatch){console.warn('Skipping '+name+': no svg content');continue}
-  var inner=innerMatch[1].trim().replace(/\n\s*/g,'');
+  var inner=innerMatch[1].trim().replace(/\n\s*/g,' ').replace(/\s{2,}/g,' ');
 
   // Copy raw SVG file
   fs.copyFileSync(svgPath,path.join(OUT_ICONS,file));

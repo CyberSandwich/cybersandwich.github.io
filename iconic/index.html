@@ -217,7 +217,7 @@ var FMTS=['inline','jpeg','svg','png'];
 var MODES=['custom','dark','light','clear'];
 var HEX_RE=/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 var IDB_NAME='iconic',IDB_STORE='svgs',IDB_META='meta',IDB_VER=2;
-var MANIFEST_VER='1.7.0';
+var MANIFEST_VER='1.7.0a';
 
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
@@ -610,7 +610,7 @@ function fetchSvg(name){
       return r.text();
     }).then(function(svg){
       var m=svg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
-      var inner=m?m[1].trim().replace(/\n\s*/g,''):'';
+      var inner=m?m[1].trim().replace(/\n\s*/g,' ').replace(/\s{2,}/g,' '):'';
       svgCache[name]=inner;
       idbPut(name,inner);
       delete pendingFetch[name];
