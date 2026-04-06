@@ -25,6 +25,8 @@ html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns=
 html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
 .search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
 .search-wrap input:focus{border-color:var(--t4)}
+#mode-row,#size-row{transition:opacity .15s}
+.fmt-inline #mode-row,.fmt-inline #size-row{display:none}
 #list-card{overflow:hidden}
 #list{position:relative;contain:layout style}
 .ii{position:absolute;left:0;right:0;height:52px;display:flex;align-items:center;padding:0 16px 0 20px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .2s,color .2s;user-select:none}
@@ -65,6 +67,31 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
     <button type="button" id="cp-btn" aria-label="Copy Top Result"><svg aria-hidden="true" id="cp-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg aria-hidden="true" id="cp-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cp-l">Copy Top Result</span></button>
     <button type="button" id="rs-btn" aria-label="Reset"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
   </div>
+  <div class="card" id="settings">
+    <div class="seg-row c4" id="fmt-row">
+      <button class="seg" data-fmt="inline">Inline</button>
+      <button class="seg" data-fmt="jpeg">JPEG</button>
+      <button class="seg" data-fmt="svg">SVG</button>
+      <button class="seg active" data-fmt="png">PNG</button>
+    </div>
+    <div class="seg-row" id="mode-row">
+      <button class="seg" data-mode="dark">Dark</button>
+      <button class="seg" data-mode="light">Light</button>
+      <button class="seg active" data-mode="clear">Clear</button>
+    </div>
+    <div class="srow" id="size-row">
+      <div class="slbl" id="size-lbl" tabindex="0" role="button">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        <span id="size-val" style="font-variant-numeric:tabular-nums;cursor:pointer">128 &times; 128</span>
+      </div>
+      <button type="button" class="step-btn" id="size-dec" aria-label="Decrease Size">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button type="button" class="step-btn" id="size-inc" aria-label="Increase Size">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Icons">
   </div>
@@ -93,12 +120,17 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
 var ITEM_H=52,BUFFER=10;
 var SVG_PRE='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
 var SVG_SUF='</svg>';
+var SIZES=[16,20,24,32,48,64,72,96,128,192,256,512,1024];
+var SIZE_DEF=8; // 128px
+
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
 var list=$('list'),listCard=$('list-card'),searchEl=$('search'),statusEl=$('status');
 var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
 var cpBtn=$('cp-btn'),cpI=$('cp-i'),cpCk=$('cp-ck'),cpL=$('cp-l');
 var rsBtn=$('rs-btn'),rsL=$('rs-l');
+var settingsCard=$('settings'),fmtRow=$('fmt-row'),modeRow=$('mode-row');
+var sizeVal=$('size-val'),sizeDec=$('size-dec'),sizeInc=$('size-inc'),sizeLbl=$('size-lbl');
 
 /* ── State ───────────────────────────────────────────────────────── */
 var icons=[];
@@ -112,11 +144,125 @@ var lastStart=-1,lastEnd=-1;
 var copyTimers={};
 var norm=_search.norm,scoreWord=_search.scoreWord;
 
+// Format settings (persisted)
+var st=_base.load('iconic:settings',{fmt:'png',mode:'clear',sizeIdx:SIZE_DEF});
+var fmt=st.fmt,mode=st.mode,sizeIdx=st.sizeIdx;
+if(sizeIdx<0||sizeIdx>=SIZES.length)sizeIdx=SIZE_DEF;
+
+function saveSt(){_base.save('iconic:settings',{fmt:fmt,mode:mode,sizeIdx:sizeIdx})}
+
 /* ── Announce (a11y) ─────────────────────────────────────────────── */
 function announce(msg){statusEl.textContent='';requestAnimationFrame(function(){statusEl.textContent=msg})}
 
 /* ── Title Case ──────────────────────────────────────────────────── */
 function titleCase(s){return s.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()})}
+
+/* ── Settings UI ─────────────────────────────────────────────────── */
+function initSettings(){
+  // Apply persisted format
+  fmtRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.fmt===fmt)});
+  modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
+  settingsCard.classList.toggle('fmt-inline',fmt==='inline');
+  updateSizeLabel();
+}
+
+function updateSizeLabel(){
+  var sz=SIZES[sizeIdx];
+  sizeVal.textContent=sz+' \u00d7 '+sz;
+  sizeDec.disabled=sizeIdx===0;
+  sizeInc.disabled=sizeIdx===SIZES.length-1;
+}
+
+fmtRow.addEventListener('click',function(e){
+  var b=e.target.closest('.seg');if(!b)return;
+  fmt=b.dataset.fmt;
+  fmtRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s===b)});
+  settingsCard.classList.toggle('fmt-inline',fmt==='inline');
+  saveSt();
+});
+
+modeRow.addEventListener('click',function(e){
+  var b=e.target.closest('.seg');if(!b)return;
+  mode=b.dataset.mode;
+  modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s===b)});
+  saveSt();
+});
+
+sizeDec.addEventListener('click',function(){if(sizeIdx>0){sizeIdx--;updateSizeLabel();saveSt()}});
+sizeInc.addEventListener('click',function(){if(sizeIdx<SIZES.length-1){sizeIdx++;updateSizeLabel();saveSt()}});
+
+// Tap label to reset size
+var sizeRSVG='<svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
+var sizeOrigSVG=sizeLbl.querySelector('svg').outerHTML;
+var sizeRsTimer=0;
+sizeLbl.addEventListener('click',function(e){
+  if(e.target.closest('button'))return;
+  if(sizeIdx===SIZE_DEF)return;
+  sizeIdx=SIZE_DEF;updateSizeLabel();saveSt();
+  var row=$('size-row');
+  row.classList.add('rs-fb');
+  sizeLbl.querySelector('svg').outerHTML=sizeRSVG;
+  clearTimeout(sizeRsTimer);
+  sizeRsTimer=setTimeout(function(){row.classList.remove('rs-fb');sizeLbl.querySelector('svg').outerHTML=sizeOrigSVG},600);
+});
+sizeLbl.addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();sizeLbl.click()}
+});
+
+/* ── Render SVG to Canvas Blob (for PNG/JPEG copy) ───────────────── */
+function renderToBlob(inner,cb){
+  var sz=SIZES[sizeIdx];
+  var stroke=mode==='dark'?'#FFFFFF':'#000000';
+  var bg='';
+  if(mode==='dark')bg='<rect width="24" height="24" fill="#1C1C1E"/>';
+  else if(mode==='light'||(mode==='clear'&&fmt==='jpeg'))bg='<rect width="24" height="24" fill="#FFFFFF"/>';
+  var svgDoc='<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+bg+inner+'</svg>';
+  var canvas=document.createElement('canvas');
+  canvas.width=sz;canvas.height=sz;
+  var ctx=canvas.getContext('2d');
+  var img=new Image();
+  var url=URL.createObjectURL(new Blob([svgDoc],{type:'image/svg+xml;charset=utf-8'}));
+  img.onload=function(){
+    ctx.drawImage(img,0,0,sz,sz);
+    URL.revokeObjectURL(url);
+    var mimeType=fmt==='jpeg'?'image/jpeg':'image/png';
+    canvas.toBlob(function(blob){cb(blob)},mimeType,fmt==='jpeg'?0.95:undefined);
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);cb(null)};
+  img.src=url;
+}
+
+/* ── Build Standalone SVG Document (for SVG format copy) ─────────── */
+function buildSvgDoc(inner){
+  var sz=SIZES[sizeIdx];
+  var stroke=mode==='dark'?'#FFFFFF':'#000000';
+  var bg='';
+  if(mode==='dark')bg='<rect width="24" height="24" fill="#1C1C1E"/>';
+  else if(mode==='light')bg='<rect width="24" height="24" fill="#FFFFFF"/>';
+  return'<svg xmlns="http://www.w3.org/2000/svg" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+bg+inner+'</svg>';
+}
+
+/* ── Copy Formatted (respects format/mode/size) ──────────────────── */
+function copyFormatted(inner,onDone,onErr){
+  if(fmt==='inline'){
+    _base.copyText(fullSvg(inner),onDone,onErr);return;
+  }
+  if(fmt==='svg'){
+    _base.copyText(buildSvgDoc(inner),onDone,onErr);return;
+  }
+  // PNG or JPEG → render to canvas, copy blob
+  renderToBlob(inner,function(blob){
+    if(!blob){if(onErr)onErr();return}
+    if(navigator.clipboard&&navigator.clipboard.write){
+      navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(onDone).catch(function(){
+        // Fallback: copy SVG text if image clipboard fails
+        _base.copyText(buildSvgDoc(inner),onDone,onErr);
+      });
+    }else{
+      _base.copyText(buildSvgDoc(inner),onDone,onErr);
+    }
+  });
+}
 
 /* ── IndexedDB (L2 cache for SVG content) ────────────────────────── */
 var idb=null;
@@ -318,7 +464,7 @@ function copyIcon(idx,rowEl){
   var name=filtered[idx][0];
   fetchSvg(name).then(function(inner){
     if(!inner){announce('Failed to Load Icon');return}
-    _base.copyText(fullSvg(inner),function(){
+    copyFormatted(inner,function(){
       if(rowEl){
         rowEl.classList.remove('ok');rowEl.offsetWidth;rowEl.classList.add('ok');
         if(copyTimers[idx])clearTimeout(copyTimers[idx]);
@@ -337,7 +483,7 @@ function doCopyTop(){
   var name=filtered[0][0];
   fetchSvg(name).then(function(inner){
     if(!inner){announce('Failed to Load Icon');return}
-    _base.copyText(fullSvg(inner),function(){
+    copyFormatted(inner,function(){
       if(cpTimer){clearTimeout(cpTimer);cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none';cpL.textContent='Copy Top Result'}
       cpI.style.display='none';cpCk.style.display='';cpL.textContent='Copied';
       cpBtn.classList.remove('ok');cpBtn.offsetWidth;cpBtn.classList.add('ok');
@@ -503,6 +649,8 @@ function onData(data){
     for(var i=0;i<prefetch;i++)fetchSvg(icons[i][0]);
   });
 }
+
+initSettings();
 
 // SWR: instant from localStorage on repeat visits, revalidate in background
 var getManifest=_swr.loader('manifest.json',onData);
