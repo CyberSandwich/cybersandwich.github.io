@@ -8,15 +8,11 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Countdown</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=24">
+<link rel="stylesheet" href="/shared/base.css?v=25">
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
-.search-wrap{display:none;margin-bottom:14px;--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
-html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
-html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
-.search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
-.search-wrap input:focus{border-color:var(--t4)}
+.search-wrap{display:none}
 .inp-row{display:flex;gap:10px;margin-bottom:14px}
 .inp-fields{flex:1;display:flex;flex-direction:column;border-radius:20px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
 .inp-fields .inp{border-radius:0;box-shadow:none;border:none;margin:0}
@@ -90,6 +86,7 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
   </div>
   <div class="search-wrap" id="search-wrap">
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Countdowns">
+    <button type="button" class="search-x" id="search-x" aria-label="Clear Search"></button>
   </div>
   <div class="items" id="items" style="display:none" role="list"></div>
 </div>
@@ -874,9 +871,15 @@ $('items').addEventListener('click',function(e){
 });
 
 /* ── Search ──────────────────────────────────────────────────────── */
+var searchX=$('search-x');
+function updateSearchX(){searchX.style.display=$('search').value?'flex':'none'}
 $('search').addEventListener('input',function(){
   clearTimeout(searchTimer);kbIdx=-1;
   searchTimer=setTimeout(function(){render()},80);
+  updateSearchX();
+});
+searchX.addEventListener('click',function(){
+  $('search').value='';updateSearchX();kbIdx=-1;render();$('search').focus();
 });
 
 /* ── Paste Button ───────────────────────────────────────────────── */
