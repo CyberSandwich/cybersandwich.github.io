@@ -419,11 +419,7 @@ function setIco(el,inner){
   el.textContent='';
   var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('viewBox','0 0 24 24');
-  svg.setAttribute('fill','none');
-  svg.setAttribute('stroke','currentColor');
-  svg.setAttribute('stroke-width',String(STROKES[strokeIdx]));
-  svg.setAttribute('stroke-linecap','round');
-  svg.setAttribute('stroke-linejoin','round');
+  svg.style.strokeWidth=STROKES[strokeIdx];
   svg.innerHTML=inner;
   el.appendChild(svg);
 }
