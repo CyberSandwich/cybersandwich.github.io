@@ -44,7 +44,6 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 #color-add{width:44px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s}
 #color-add:active{opacity:.7}
 #color-add svg{width:22px;height:22px;transition:color .15s}
-#count{padding:0 4px 10px;color:var(--t4);font:400 .8125rem/1 var(--font);text-align:center}
 #list-card{overflow:hidden}
 #list{position:relative;contain:layout style}
 .ii{position:absolute;left:0;right:0;height:52px;display:flex;align-items:center;padding:0 16px 0 20px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .2s,color .2s;user-select:none}
@@ -115,8 +114,8 @@ button:disabled,.seg:disabled{opacity:.35;cursor:default;pointer-events:none}
   </div>
   <div id="color-row">
     <div class="clr-fields">
-      <div class="inp"><input id="bg-input" type="text" placeholder="Background (#FFFFFF)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color"></div>
       <div class="inp"><input id="fg-input" type="text" placeholder="Foreground (#000000)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Foreground Color"></div>
+      <div class="inp"><input id="bg-input" type="text" placeholder="Background (#FFFFFF)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color"></div>
     </div>
     <button type="button" id="color-add" aria-label="Confirm Palette"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
@@ -168,7 +167,6 @@ button:disabled,.seg:disabled{opacity:.35;cursor:default;pointer-events:none}
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Icons">
     <button type="button" class="search-x" id="search-x" aria-label="Clear Search"></button>
   </div>
-  <div id="count" aria-live="polite"></div>
   <div class="card" id="list-card">
     <div id="list" role="list">
       <div class="skel" id="loading"><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div><div class="skel-row"><div class="skel-circ"></div><div class="skel-line"></div></div></div>
@@ -207,7 +205,7 @@ var MANIFEST_VER='1.7.0';
 
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
-var list=$('list'),listCard=$('list-card'),searchEl=$('search'),searchX=$('search-x'),statusEl=$('status'),countEl=$('count');
+var list=$('list'),listCard=$('list-card'),searchEl=$('search'),searchX=$('search-x'),statusEl=$('status');
 var fgInput=$('fg-input'),bgInput=$('bg-input'),colorRow=$('color-row'),colorAdd=$('color-add');
 var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
 var rsBtn=$('rs-btn'),rsL=$('rs-l');
@@ -255,9 +253,9 @@ function releaseRow(row){
 }
 
 // Format settings (persisted)
-var st=_base.load('iconic:settings',{action:'copy',fmt:'png',mode:'clear',customFg:'#000000',customBg:'#FFFFFF',sizeIdx:SIZE_DEF,strokeIdx:STROKE_DEF,marginIdx:MARGIN_DEF});
+var st=_base.load('iconic:settings',{action:'copy',fmt:'png',mode:'clear',customFg:'',customBg:'',sizeIdx:SIZE_DEF,strokeIdx:STROKE_DEF,marginIdx:MARGIN_DEF});
 var action=st.action||'copy',fmt=st.fmt,mode=st.mode,sizeIdx=st.sizeIdx;
-var customFg=st.customFg||'#000000',customBg=st.customBg||'#FFFFFF';
+var customFg=st.customFg||'',customBg=st.customBg||'';
 var strokeIdx=st.strokeIdx!=null?st.strokeIdx:STROKE_DEF;
 var marginIdx=st.marginIdx!=null?st.marginIdx:MARGIN_DEF;
 if(sizeIdx<0||sizeIdx>=SIZES.length)sizeIdx=SIZE_DEF;
@@ -308,8 +306,8 @@ function initSettings(){
   actionRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.action===action)});
   fmtRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.fmt===fmt)});
   modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
-  fgInput.value=customFg==='#000000'?'':customFg;
-  bgInput.value=customBg==='#FFFFFF'?'':customBg;
+  fgInput.value=customFg;
+  bgInput.value=customBg;
   fgInput.classList.remove('hex-err');
   bgInput.classList.remove('hex-err');
   applyFmtVisibility();
@@ -371,13 +369,17 @@ modeRow.addEventListener('click',function(e){
 });
 
 function updateColorPreview(){
-  var fg=customFg||'#000000',bg=customBg||'#FFFFFF';
-  colorAdd.style.background=bg;
-  colorAdd.querySelector('svg').style.color=fg;
+  if(customFg||customBg){
+    colorAdd.style.background=customBg||'#FFFFFF';
+    colorAdd.querySelector('svg').style.color=customFg||'#000000';
+  }else{
+    colorAdd.style.background='';
+    colorAdd.querySelector('svg').style.color='';
+  }
 }
 
-fgInput.addEventListener('input',function(){customFg=validateHex(fgInput,'#000000');saveSt();updateColorPreview()});
-bgInput.addEventListener('input',function(){customBg=validateHex(bgInput,'#FFFFFF');saveSt();updateColorPreview()});
+fgInput.addEventListener('input',function(){customFg=validateHex(fgInput,'');saveSt();updateColorPreview()});
+bgInput.addEventListener('input',function(){customBg=validateHex(bgInput,'');saveSt();updateColorPreview()});
 fgInput.addEventListener('blur',function(){var v=normalizeHex(fgInput.value);if(HEX_RE.test(v)&&v!==fgInput.value)fgInput.value=v});
 bgInput.addEventListener('blur',function(){var v=normalizeHex(bgInput.value);if(HEX_RE.test(v)&&v!==bgInput.value)bgInput.value=v});
 
@@ -612,12 +614,6 @@ function updateTitle(){
   var q=searchEl.value.trim();
   document.title=q&&filtered.length?'Iconic ('+filtered.length+')':'Iconic';
 }
-function updateCount(){
-  var q=searchEl.value.trim();
-  if(!q||!icons.length){countEl.textContent='';return}
-  countEl.textContent=filtered.length+(filtered.length===1?' Result':' Results');
-}
-
 /* ── Virtual Scroll Render (with DOM recycling) ──────────────────── */
 function renderVisible(){
   if(!filtered.length){
@@ -629,7 +625,6 @@ function renderVisible(){
       list.appendChild(nm);
     }
     lastStart=lastEnd=-1;
-    updateCount();
     return;
   }
 
@@ -690,7 +685,6 @@ function renderVisible(){
   }
 
   list.appendChild(frag);
-  updateCount();
 }
 
 /* ── Scroll Handler (rAF throttled) ──────────────────────────────── */
@@ -816,7 +810,7 @@ function doPaste(){
 
 /* ── Reset ────────────────────────────────────────────────────────── */
 function isDefault(){
-  return !searchEl.value&&action==='copy'&&fmt==='png'&&mode==='clear'&&customFg==='#000000'&&customBg==='#FFFFFF'&&strokeIdx===STROKE_DEF&&sizeIdx===SIZE_DEF&&marginIdx===MARGIN_DEF;
+  return !searchEl.value&&action==='copy'&&fmt==='png'&&mode==='clear'&&!customFg&&!customBg&&strokeIdx===STROKE_DEF&&sizeIdx===SIZE_DEF&&marginIdx===MARGIN_DEF;
 }
 var resetCtrl=_base.twoPress(rsBtn,{
   label:rsL,
@@ -824,7 +818,7 @@ var resetCtrl=_base.twoPress(rsBtn,{
   onConfirm:function(){
     searchEl.value='';updateSearchX();
     action='copy';fmt='png';mode='clear';
-    customFg='#000000';customBg='#FFFFFF';
+    customFg='';customBg='';
     strokeIdx=STROKE_DEF;sizeIdx=SIZE_DEF;marginIdx=MARGIN_DEF;
     saveSt();initSettings();
     kbIdx=-1;lastStart=lastEnd=-1;
@@ -1011,7 +1005,7 @@ function onData(data){
   icons=data;
   filtered=icons;
   var ld=$('loading');if(ld)ld.remove();
-  updateTitle();updateCount();
+  updateTitle();
   requestAnimationFrame(function(){
     renderVisible();
     // Check IDB version — if stale or missing, prefetch all in background
