@@ -36,12 +36,6 @@
     "category": "Image Tools"
   },
   {
-    "title": "Palit",
-    "subtitle": "Color Palette Generator",
-    "url": "/palit/",
-    "category": "Image Tools"
-  },
-  {
     "title": "CaseConverter",
     "subtitle": "Text Case Conversion Tool",
     "url": "/caseconverter/",
@@ -54,9 +48,9 @@
     "category": "Text Tools"
   },
   {
-    "title": "Parsely",
-    "subtitle": "Text Data Extractor",
-    "url": "/parsely/",
+    "title": "Lorip",
+    "subtitle": "Lorem Ipsum Generator",
+    "url": "/lorip/",
     "category": "Text Tools"
   },
   {
@@ -66,16 +60,28 @@
     "category": "Text Tools"
   },
   {
-    "title": "Lorip",
-    "subtitle": "Lorem Ipsum Generator",
-    "url": "/lorip/",
-    "category": "Text Tools"
-  },
-  {
     "title": "Wrighter",
     "subtitle": "Minimal Plain Text Editor",
     "url": "/wrighter/",
     "category": "Text Tools"
+  },
+  {
+    "title": "Clock",
+    "subtitle": "A Minimal 8KB Clock",
+    "url": "/time/",
+    "category": "Time Tools"
+  },
+  {
+    "title": "Countdown",
+    "subtitle": "Countdown Timer Manager",
+    "url": "/countdown/",
+    "category": "Time Tools"
+  },
+  {
+    "title": "ThymeZone",
+    "subtitle": "Compare Timezones Side by Side",
+    "url": "/thymezone/",
+    "category": "Time Tools"
   },
   {
     "title": "Arbit",
@@ -90,28 +96,22 @@
     "category": "Generators"
   },
   {
+    "title": "Palit",
+    "subtitle": "Color Palette Generator",
+    "url": "/palit/",
+    "category": "Generators"
+  },
+  {
+    "title": "Parsely",
+    "subtitle": "Text Data Extractor",
+    "url": "/parsely/",
+    "category": "Generators"
+  },
+  {
     "title": "PasswdGen",
     "subtitle": "Secure Password Generator",
     "url": "/passwdgen/",
     "category": "Generators"
-  },
-  {
-    "title": "Clock",
-    "subtitle": "A Minimal 8KB Clock",
-    "url": "/time/",
-    "category": "Utilities"
-  },
-  {
-    "title": "Countdown",
-    "subtitle": "Countdown Timer Manager",
-    "url": "/countdown/",
-    "category": "Utilities"
-  },
-  {
-    "title": "ThymeZone",
-    "subtitle": "Compare Timezones Side by Side",
-    "url": "/thymezone/",
-    "category": "Utilities"
   },
   {
     "title": "Miele Laundry Guide",

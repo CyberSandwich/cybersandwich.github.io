@@ -140,7 +140,7 @@ const getPosts=_swr.loader('/updates/posts.json',d=>{
   posts=d;return d;
 });
 
-const projectCategories=['Flagship Projects','Image Tools','Text Tools','Generators','Utilities','Miscellaneous','In Development'];
+const projectCategories=['Flagship Projects','Image Tools','Text Tools','Time Tools','Generators','Utilities','Miscellaneous','In Development'];
 const linkCategories=['Modules','Initiatives','Academic','Career','Community','Personal','Social Media','Miscellaneous'];
 
 // Chevron SVG for card arrows
