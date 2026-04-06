@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<title>Iconic</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Iconic">
+<meta name="description" content="Search and copy 1,700+ Lucide SVG icons.">
+<meta property="og:title" content="Iconic">
+<meta property="og:description" content="Search and copy 1,700+ Lucide SVG icons.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=24">
+<style>
+body{display:flex;align-items:flex-start;justify-content:center}
+.w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
+.search-wrap{margin-bottom:14px;--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="sepia"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")}
+.search-wrap input{width:100%;padding:12px 20px 12px 42px;border:1px solid var(--bdr2);border-radius:50px;font:400 .9375rem/1 var(--font);color:var(--t1);background:var(--card) var(--si) 14px center/18px no-repeat;box-shadow:var(--shadow);outline:none;transition:border-color .15s;box-sizing:border-box}
+.search-wrap input:focus{border-color:var(--t4)}
+.count{padding:0 4px 10px;font:400 .8125rem/1 var(--font);color:var(--t4);text-align:right}
+#list-card{overflow:hidden}
+#list{position:relative;contain:layout style}
+.ii{position:absolute;left:0;right:0;height:52px;display:flex;align-items:center;padding:0 16px 0 20px;border-bottom:1px solid var(--bdr2);cursor:pointer;transition:background .2s,color .2s;user-select:none}
+.ii:last-child{border-bottom:none}
+.ii .ico{width:24px;height:24px;flex-shrink:0;color:var(--t3)}
+.ii .ico svg{width:24px;height:24px;display:block}
+.ii .nm{flex:1;padding:0 12px;font:500 .9375rem/1 var(--font);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ii .tg{font:400 .75rem/1 var(--font);color:var(--t4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;text-align:right}
+.ii.ok{background:#DCFCE7;transition:background .25s,color .25s}
+.ii.ok .ico{color:#34D399}
+.ii.ok .nm{color:#16A34A}
+html[data-theme="dark"] .ii.ok{background:#1A3A2A}
+html[data-theme="dark"] .ii.ok .ico{color:#34D399}
+html[data-theme="dark"] .ii.ok .nm{color:#4ADE80}
+html[data-theme="sepia"] .ii.ok{background:#E8E0CE}
+html[data-theme="sepia"] .ii.ok .ico{color:#2D7D46}
+html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
+.ii.ok{animation:none}
+.ii.kb{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
+.ii:active{opacity:.85}
+.no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
+.loading{padding:32px 20px;text-align:center;color:var(--t4);font:400 .9375rem/1 var(--font)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.links>button{transition:background .25s,color .25s}
+.links>button.ok{animation:none}
+.links>button:active:not([disabled]){opacity:.7}
+@media(hover:hover){
+  .ii:hover{background:var(--bg2)}
+}
+@media(prefers-reduced-motion:reduce){
+  .ii,.links>button{transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="card links" id="actions">
+    <button type="button" id="pa-btn" aria-label="Paste"><svg aria-hidden="true" id="pa-i" width="18" height="18" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><svg aria-hidden="true" id="pa-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="pa-l">Paste</span></button>
+    <button type="button" id="cp-btn" aria-label="Copy Top Result"><svg aria-hidden="true" id="cp-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg aria-hidden="true" id="cp-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cp-l">Copy Top Result</span></button>
+    <button type="button" id="rs-btn" aria-label="Reset"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
+  </div>
+  <div class="search-wrap" id="search-wrap">
+    <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Icons">
+  </div>
+  <div class="count" id="count"></div>
+  <div class="card" id="list-card">
+    <div id="list" role="list">
+      <div class="loading" id="loading">Loading Icons...</div>
+    </div>
+  </div>
+</div>
+<div id="status" class="sr-only" aria-live="polite"></div>
+<nav aria-label="Primary">
+<div class="tabs">
+<a href="/">Home</a>
+<a class="active">Iconic</a>
+</div>
+<div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=24"></script>
+<script src="/shared/search.js?v=20"></script>
+<script>
+(function(){
+'use strict';
+
+/* ── Constants ───────────────────────────────────────────────────── */
+var ITEM_H=52,BUFFER=10;
+var SVG_PRE='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+var SVG_SUF='</svg>';
+/* ── DOM Cache ───────────────────────────────────────────────────── */
+var $=function(id){return document.getElementById(id)};
+var list=$('list'),listCard=$('list-card'),searchEl=$('search'),countEl=$('count'),statusEl=$('status');
+var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
+var cpBtn=$('cp-btn'),cpI=$('cp-i'),cpCk=$('cp-ck'),cpL=$('cp-l');
+var rsBtn=$('rs-btn'),rsL=$('rs-l');
+
+/* ── State ───────────────────────────────────────────────────────── */
+var icons=[];
+var filtered=[];
+var svgCache={};
+var pendingFetch={};
+var scrollRAF=0;
+var searchTimer=0;
+var kbIdx=-1;
+var lastStart=-1,lastEnd=-1;
+var copyTimers={};
+var norm=_search.norm,scoreWord=_search.scoreWord;
+
+/* ── Announce (a11y) ─────────────────────────────────────────────── */
+function announce(msg){statusEl.textContent='';requestAnimationFrame(function(){statusEl.textContent=msg})}
+
+/* ── Title Case ──────────────────────────────────────────────────── */
+function titleCase(s){return s.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()})}
+
+/* ── Fetch SVG (lazy, cached, deduped) ───────────────────────────── */
+function fetchSvg(name){
+  if(svgCache[name])return Promise.resolve(svgCache[name]);
+  if(pendingFetch[name])return pendingFetch[name];
+  pendingFetch[name]=fetch('icons/'+name+'.svg').then(function(r){return r.text()}).then(function(svg){
+    var m=svg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+    var inner=m?m[1].trim().replace(/\n\s*/g,''):'';
+    svgCache[name]=inner;
+    delete pendingFetch[name];
+    return inner;
+  }).catch(function(){delete pendingFetch[name];return''});
+  return pendingFetch[name];
+}
+
+/* ── Build Full SVG String (for clipboard) ───────────────────────── */
+function fullSvg(inner){return SVG_PRE+inner+SVG_SUF}
+
+/* ── Render Icon Into Element (trusted SVG from own files) ───────── */
+function setIco(el,inner){
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('fill','none');
+  svg.setAttribute('stroke','currentColor');
+  svg.setAttribute('stroke-width','2');
+  svg.setAttribute('stroke-linecap','round');
+  svg.setAttribute('stroke-linejoin','round');
+  var t=document.createElement('template');
+  t.innerHTML=inner;
+  while(t.content.firstChild)svg.appendChild(t.content.firstChild);
+  el.textContent='';
+  el.appendChild(svg);
+}
+
+/* ── Count Label ─────────────────────────────────────────────────── */
+function updateCount(){
+  var q=searchEl.value.trim();
+  if(!q)countEl.textContent=icons.length.toLocaleString()+' Icons';
+  else if(!filtered.length)countEl.textContent='';
+  else countEl.textContent=filtered.length.toLocaleString()+' Result'+(filtered.length===1?'':'s');
+}
+
+/* ── Title ───────────────────────────────────────────────────────── */
+function updateTitle(){
+  var q=searchEl.value.trim();
+  document.title=q&&filtered.length?'Iconic ('+filtered.length+')':'Iconic';
+}
+
+/* ── Virtual Scroll Render ───────────────────────────────────────── */
+function renderVisible(){
+  if(!filtered.length){
+    list.style.height='0';
+    var existing=list.querySelectorAll('.ii');
+    for(var x=existing.length-1;x>=0;x--)existing[x].remove();
+    if(!list.querySelector('.no-match')&&searchEl.value.trim()){
+      var nm=document.createElement('div');nm.className='no-match';nm.textContent='Nothing Found';
+      list.appendChild(nm);
+    }
+    lastStart=lastEnd=-1;
+    return;
+  }
+
+  // Clear no-match / loading
+  var nmEl=list.querySelector('.no-match');if(nmEl)nmEl.remove();
+  var ldEl=list.querySelector('.loading');if(ldEl)ldEl.remove();
+
+  var totalH=filtered.length*ITEM_H;
+  list.style.height=totalH+'px';
+
+  var rect=listCard.getBoundingClientRect();
+  var viewTop=Math.max(0,-rect.top);
+  var viewBot=viewTop+window.innerHeight;
+
+  var start=Math.max(0,Math.floor(viewTop/ITEM_H)-BUFFER);
+  var end=Math.min(filtered.length,Math.ceil(viewBot/ITEM_H)+BUFFER);
+
+  if(start===lastStart&&end===lastEnd)return;
+  lastStart=start;lastEnd=end;
+
+  // Remove out-of-range items
+  var existing=list.querySelectorAll('.ii');
+  for(var j=existing.length-1;j>=0;j--)existing[j].remove();
+
+  var frag=document.createDocumentFragment();
+  for(var i=start;i<end;i++){
+    var ic=filtered[i];
+    var name=ic[0],tags=ic[2];
+    var row=document.createElement('div');
+    row.className='ii'+(i===kbIdx?' kb':'');
+    row.setAttribute('role','listitem');
+    row.setAttribute('data-idx',i);
+    row.style.top=i*ITEM_H+'px';
+
+    var ico=document.createElement('div');
+    ico.className='ico';
+    ico.setAttribute('aria-hidden','true');
+
+    var nmSpan=document.createElement('span');
+    nmSpan.className='nm';
+    nmSpan.textContent=titleCase(name);
+
+    var tgSpan=document.createElement('span');
+    tgSpan.className='tg';
+    tgSpan.textContent=tags;
+
+    row.appendChild(ico);
+    row.appendChild(nmSpan);
+    row.appendChild(tgSpan);
+    frag.appendChild(row);
+
+    // Lazy-load SVG into icon element
+    (function(icoEl,n){
+      if(svgCache[n]){
+        setIco(icoEl,svgCache[n]);
+      }else{
+        fetchSvg(n).then(function(inner){
+          if(inner&&icoEl.parentNode)setIco(icoEl,inner);
+        });
+      }
+    })(ico,name);
+  }
+
+  list.appendChild(frag);
+}
+
+/* ── Scroll Handler (rAF throttled) ──────────────────────────────── */
+function onScroll(){
+  if(scrollRAF)return;
+  scrollRAF=requestAnimationFrame(function(){
+    scrollRAF=0;
+    renderVisible();
+  });
+}
+
+/* ── Search ──────────────────────────────────────────────────────── */
+function doSearch(){
+  _search.clearCache();
+  var q=norm(searchEl.value.trim().toLowerCase());
+  var words=q.split(/\s+/).filter(Boolean);
+  kbIdx=-1;lastStart=lastEnd=-1;
+
+  if(!words.length){
+    filtered=icons;
+    updateCount();updateTitle();renderVisible();
+    return;
+  }
+
+  var scored=[];
+  for(var i=0;i<icons.length;i++){
+    var ic=icons[i];
+    var total=0,ok=true;
+    var nameText=ic[0].replace(/-/g,' ');
+    var fullText=ic[1];
+    for(var w=0;w<words.length;w++){
+      var fs=scoreWord(words[w],fullText);
+      var ns=scoreWord(words[w],nameText)*1.5;
+      var s=Math.max(fs,ns);
+      if(s<=0){ok=false;break}
+      total+=s;
+    }
+    if(ok)scored.push({i:i,score:total});
+  }
+  scored.sort(function(a,b){return b.score-a.score||icons[a.i][0].localeCompare(icons[b.i][0])});
+  filtered=scored.map(function(s){return icons[s.i]});
+
+  updateCount();updateTitle();renderVisible();
+
+  if(!filtered.length)announce('Nothing Found');
+  else announce(filtered.length+' result'+(filtered.length===1?'':'s'));
+
+  // Pre-fetch top 5 for instant copy
+  for(var p=0;p<Math.min(5,filtered.length);p++)fetchSvg(filtered[p][0]);
+}
+
+/* ── Copy Icon ───────────────────────────────────────────────────── */
+function copyIcon(idx,rowEl){
+  if(idx<0||idx>=filtered.length)return;
+  var name=filtered[idx][0];
+  fetchSvg(name).then(function(inner){
+    if(!inner){announce('Failed to Load Icon');return}
+    _base.copyText(fullSvg(inner),function(){
+      if(rowEl){
+        rowEl.classList.remove('ok');rowEl.offsetWidth;rowEl.classList.add('ok');
+        if(copyTimers[idx])clearTimeout(copyTimers[idx]);
+        copyTimers[idx]=setTimeout(function(){if(rowEl.parentNode)rowEl.classList.remove('ok');delete copyTimers[idx]},800);
+      }
+      _base.notify('Copied',true);
+      announce('Copied '+titleCase(name));
+    });
+  });
+}
+
+/* ── Copy Top Result ─────────────────────────────────────────────── */
+var cpTimer=null;
+function doCopyTop(){
+  if(!filtered.length)return;
+  var name=filtered[0][0];
+  fetchSvg(name).then(function(inner){
+    if(!inner){announce('Failed to Load Icon');return}
+    _base.copyText(fullSvg(inner),function(){
+      if(cpTimer){clearTimeout(cpTimer);cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none';cpL.textContent='Copy Top Result'}
+      cpI.style.display='none';cpCk.style.display='';cpL.textContent='Copied';
+      cpBtn.classList.remove('ok');cpBtn.offsetWidth;cpBtn.classList.add('ok');
+      cpTimer=setTimeout(function(){cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none';cpL.textContent='Copy Top Result';cpTimer=null},800);
+      announce('Copied '+titleCase(name));
+    });
+  });
+}
+
+/* ── Paste ────────────────────────────────────────────────────────── */
+var paTimer=null;
+function doPaste(){
+  if(!navigator.clipboard||!navigator.clipboard.readText){announce('Clipboard Not Available');return}
+  navigator.clipboard.readText().then(function(text){
+    if(!text||!text.trim()){announce('Clipboard Empty');return}
+    searchEl.value=text.trim();
+    doSearch();
+    if(paTimer){clearTimeout(paTimer);paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none';paL.textContent='Paste'}
+    paI.style.display='none';paCk.style.display='';paL.textContent='Pasted';
+    paBtn.classList.remove('ok');paBtn.offsetWidth;paBtn.classList.add('ok');
+    paTimer=setTimeout(function(){paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none';paL.textContent='Paste';paTimer=null},800);
+  },function(){announce('Clipboard Access Denied')});
+}
+
+/* ── Reset ────────────────────────────────────────────────────────── */
+var resetCtrl=_base.twoPress(rsBtn,{
+  label:rsL,
+  guard:function(){return searchEl.value.length>0},
+  onConfirm:function(){
+    searchEl.value='';
+    kbIdx=-1;lastStart=lastEnd=-1;
+    filtered=icons;
+    updateCount();updateTitle();renderVisible();
+    window.scrollTo({top:0,behavior:'smooth'});
+    announce('Reset');
+  }
+});
+
+/* ── Keyboard Navigation ─────────────────────────────────────────── */
+function kbClear(){
+  kbIdx=-1;
+  var all=list.querySelectorAll('.ii.kb');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('kb');
+}
+function kbMove(dir){
+  if(!filtered.length)return;
+  kbIdx+=dir;
+  if(kbIdx<0)kbIdx=filtered.length-1;
+  if(kbIdx>=filtered.length)kbIdx=0;
+
+  var rows=list.querySelectorAll('.ii');
+  for(var i=0;i<rows.length;i++){
+    var ri=parseInt(rows[i].getAttribute('data-idx'),10);
+    rows[i].classList.toggle('kb',ri===kbIdx);
+  }
+
+  var itemTop=kbIdx*ITEM_H;
+  var cardRect=listCard.getBoundingClientRect();
+  var absTop=cardRect.top+window.scrollY+itemTop;
+  var viewTop=window.scrollY;
+  var viewBot=viewTop+window.innerHeight-100;
+  if(absTop<viewTop||absTop>viewBot){
+    window.scrollTo({top:absTop-window.innerHeight/3,behavior:'smooth'});
+  }
+
+  lastStart=lastEnd=-1;
+  renderVisible();
+}
+
+/* ── Click Delegation ────────────────────────────────────────────── */
+listCard.addEventListener('click',function(e){
+  var row=e.target.closest('.ii');
+  if(!row)return;
+  var idx=parseInt(row.getAttribute('data-idx'),10);
+  kbClear();
+  copyIcon(idx,row);
+});
+
+/* ── Event Listeners ─────────────────────────────────────────────── */
+searchEl.addEventListener('input',function(){
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(doSearch,80);
+});
+
+paBtn.addEventListener('click',doPaste);
+cpBtn.addEventListener('click',doCopyTop);
+rsBtn.addEventListener('click',function(e){e.preventDefault();resetCtrl.press()});
+
+window.addEventListener('scroll',onScroll,{passive:true});
+window.addEventListener('resize',function(){lastStart=lastEnd=-1;renderVisible()},{passive:true});
+
+document.addEventListener('paste',function(e){
+  var tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  var text=(e.clipboardData||window.clipboardData).getData('text');
+  if(text){
+    e.preventDefault();
+    searchEl.value=text.trim();
+    doSearch();
+  }
+});
+
+/* ── Keyboard Shortcuts ──────────────────────────────────────────── */
+_base.onKey({
+  '/':function(e){e.preventDefault();kbClear();searchEl.focus()},
+  's':function(e){e.preventDefault();kbClear();searchEl.focus()},
+  'p':function(){doPaste()},
+  'v':function(){doPaste()},
+  'c':function(){doCopyTop()},
+  'r':function(){resetCtrl.press()},
+  'j':function(e){e.preventDefault();kbMove(1)},
+  'k':function(e){e.preventDefault();kbMove(-1)},
+  'ArrowDown':function(e){e.preventDefault();kbMove(1)},
+  'ArrowUp':function(e){e.preventDefault();kbMove(-1)},
+  'Enter':function(e){
+    e.preventDefault();
+    if(kbIdx>=0){
+      var rows=list.querySelectorAll('.ii');
+      var target=null;
+      for(var i=0;i<rows.length;i++){if(parseInt(rows[i].getAttribute('data-idx'),10)===kbIdx){target=rows[i];break}}
+      copyIcon(kbIdx,target);
+    }else if(filtered.length){
+      doCopyTop();
+    }
+  },
+  'Escape':function(){
+    if(searchEl.value){
+      searchEl.value='';kbIdx=-1;lastStart=lastEnd=-1;
+      filtered=icons;updateCount();updateTitle();renderVisible();
+    }
+    kbClear();document.activeElement.blur();
+  }
+});
+
+document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear()},{passive:true});
+
+/* ── Visibility Cleanup ──────────────────────────────────────────── */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    cancelAnimationFrame(scrollRAF);scrollRAF=0;
+    clearTimeout(searchTimer);clearTimeout(cpTimer);clearTimeout(paTimer);
+    Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k])});
+  }
+  if(!document.hidden){
+    resetCtrl.clear();
+    cpBtn.classList.remove('ok');cpI.style.display='';cpCk.style.display='none';cpL.textContent='Copy Top Result';
+    paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none';paL.textContent='Paste';
+    copyTimers={};
+    lastStart=lastEnd=-1;
+    renderVisible();
+  }
+});
+
+/* ── Init ────────────────────────────────────────────────────────── */
+fetch('manifest.json').then(function(r){return r.json()}).then(function(data){
+  icons=data;
+  filtered=icons;
+  var ld=$('loading');if(ld)ld.remove();
+  updateCount();updateTitle();
+  renderVisible();
+  // Pre-fetch first viewport of icons
+  var prefetch=Math.min(20,icons.length);
+  for(var i=0;i<prefetch;i++)fetchSvg(icons[i][0]);
+}).catch(function(){
+  var ld=$('loading');
+  if(ld)ld.textContent='Failed to Load Icons';
+  announce('Failed to Load Icons');
+});
+
+})();
+</script>
+</body>
+</html>
