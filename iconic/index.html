@@ -33,11 +33,17 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .search-x::before,.search-x::after{content:'';position:absolute;width:10px;height:1.5px;background:currentColor;border-radius:1px}
 .search-x::before{transform:rotate(45deg)}
 .search-x::after{transform:rotate(-45deg)}
-#custom-colors{display:none;padding:8px 12px 12px;gap:8px}
-#custom-colors.show{display:flex}
-#custom-colors input{flex:1;padding:10px 16px;border:1px solid var(--bdr2);border-radius:var(--rr);font:400 .875rem/1 var(--font);color:var(--t1);background:var(--bg);outline:none;transition:border-color .15s;min-width:0}
-#custom-colors input:focus-visible{border-color:var(--t4)}
-#custom-colors input.hex-err{border-color:var(--hex-err)}
+#color-row{display:none;gap:10px;margin-bottom:14px}
+#color-row.show{display:flex}
+.clr-fields{flex:1;display:flex;flex-direction:column;border-radius:20px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.clr-fields .inp{border-radius:0;box-shadow:none;border:none;margin:0}
+.clr-fields .inp:first-child{border-bottom:1px solid var(--bdr2)}
+.clr-fields .inp input{border:none;box-shadow:none;background:transparent;width:100%;padding:12px 16px;font:400 .875rem/1 var(--font);color:var(--t1);outline:none}
+.clr-fields .inp input:focus-visible{background:var(--bg)}
+.clr-fields .inp input.hex-err{color:var(--hex-err)}
+#color-add{width:44px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s}
+#color-add:active{opacity:.7}
+#color-add svg{width:22px;height:22px;transition:color .15s}
 #count{padding:0 4px 10px;color:var(--t4);font:400 .8125rem/1 var(--font);text-align:center}
 #list-card{overflow:hidden}
 #list{position:relative;contain:layout style}
@@ -74,6 +80,7 @@ button:disabled,.seg:disabled{opacity:.35;cursor:default;pointer-events:none}
 @media(hover:hover){
   .ii:hover{background:var(--bg2)}
   .retry-wrap button:hover{background:var(--bg2)}
+  #color-add:hover{opacity:.85}
 }
 @media(prefers-reduced-motion:reduce){
   .ii,.links>button,.skel-circ,.skel-line{transition-duration:.01ms!important;animation-duration:.01ms!important}
@@ -105,10 +112,13 @@ button:disabled,.seg:disabled{opacity:.35;cursor:default;pointer-events:none}
       <button class="seg" data-mode="light">Light</button>
       <button class="seg active" data-mode="clear">Clear</button>
     </div>
-    <div id="custom-colors">
-      <input id="bg-input" type="text" placeholder="Background (#FFFFFF)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color">
-      <input id="fg-input" type="text" placeholder="Foreground (#000000)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Foreground Color">
+  </div>
+  <div id="color-row">
+    <div class="clr-fields">
+      <div class="inp"><input id="bg-input" type="text" placeholder="Background (#FFFFFF)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background Color"></div>
+      <div class="inp"><input id="fg-input" type="text" placeholder="Foreground (#000000)" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Foreground Color"></div>
     </div>
+    <button type="button" id="color-add" aria-label="Confirm Palette"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div class="card settings" id="size-card">
     <div class="srow" id="stroke-row">
@@ -198,7 +208,7 @@ var MANIFEST_VER='1.7.0';
 /* ── DOM Cache ───────────────────────────────────────────────────── */
 var $=function(id){return document.getElementById(id)};
 var list=$('list'),listCard=$('list-card'),searchEl=$('search'),searchX=$('search-x'),statusEl=$('status'),countEl=$('count');
-var fgInput=$('fg-input'),bgInput=$('bg-input'),customColors=$('custom-colors');
+var fgInput=$('fg-input'),bgInput=$('bg-input'),colorRow=$('color-row'),colorAdd=$('color-add');
 var paBtn=$('pa-btn'),paI=$('pa-i'),paCk=$('pa-ck'),paL=$('pa-l');
 var rsBtn=$('rs-btn'),rsL=$('rs-l');
 var settingsCard=$('settings'),actionRow=$('action-row'),fmtRow=$('fmt-row'),modeRow=$('mode-row'),sizeCard=$('size-card');
@@ -281,7 +291,7 @@ function applyFmtVisibility(){
   var isInline=fmt==='inline';
   var needsSize=fmt==='png'||fmt==='jpeg';
   modeRow.style.display=isInline?'none':'';
-  customColors.classList.toggle('show',!isInline&&mode==='custom');
+  colorRow.classList.toggle('show',!isInline&&mode==='custom');
   sizeCard.style.display=isInline?'none':'';
   sizeRow.style.display=needsSize?'':'none';
   var clearBtn=modeRow.querySelector('[data-mode="clear"]');
@@ -291,6 +301,7 @@ function applyFmtVisibility(){
     modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
     saveSt();
   }
+  updateColorPreview();
 }
 
 function initSettings(){
@@ -302,6 +313,7 @@ function initSettings(){
   fgInput.classList.remove('hex-err');
   bgInput.classList.remove('hex-err');
   applyFmtVisibility();
+  updateColorPreview();
   updateStrokeLabel();
   updateSizeLabel();
   updateMarginLabel();
@@ -352,15 +364,27 @@ modeRow.addEventListener('click',function(e){
   var b=e.target.closest('.seg');if(!b||b.disabled)return;
   mode=b.dataset.mode;
   modeRow.querySelectorAll('.seg').forEach(function(s){s.classList.toggle('active',s===b)});
-  customColors.classList.toggle('show',mode==='custom');
+  colorRow.classList.toggle('show',mode==='custom');
+  updateColorPreview();
   saveSt();
   announce(titleCase(mode)+' Mode');
 });
 
-fgInput.addEventListener('input',function(){customFg=validateHex(fgInput,'#000000');saveSt()});
-bgInput.addEventListener('input',function(){customBg=validateHex(bgInput,'#FFFFFF');saveSt()});
+function updateColorPreview(){
+  var fg=customFg||'#000000',bg=customBg||'#FFFFFF';
+  colorAdd.style.background=bg;
+  colorAdd.querySelector('svg').style.color=fg;
+}
+
+fgInput.addEventListener('input',function(){customFg=validateHex(fgInput,'#000000');saveSt();updateColorPreview()});
+bgInput.addEventListener('input',function(){customBg=validateHex(bgInput,'#FFFFFF');saveSt();updateColorPreview()});
 fgInput.addEventListener('blur',function(){var v=normalizeHex(fgInput.value);if(HEX_RE.test(v)&&v!==fgInput.value)fgInput.value=v});
 bgInput.addEventListener('blur',function(){var v=normalizeHex(bgInput.value);if(HEX_RE.test(v)&&v!==bgInput.value)bgInput.value=v});
+
+colorAdd.addEventListener('click',function(){
+  _base.notify('Palette Confirmed',true);
+  announce('Palette Confirmed');
+});
 
 function updateStrokeLabel(){
   var sw=STROKES[strokeIdx];
@@ -860,7 +884,8 @@ function cycleMode(){
   if(MODES[i]==='clear'&&fmt==='jpeg')i=(i+1)%MODES.length;
   mode=MODES[i];
   modeRow.querySelectorAll('.seg').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
-  customColors.classList.toggle('show',mode==='custom');
+  colorRow.classList.toggle('show',mode==='custom');
+  updateColorPreview();
   saveSt();
   announce(titleCase(mode)+' Mode');
 }
