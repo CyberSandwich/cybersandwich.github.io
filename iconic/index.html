@@ -645,15 +645,20 @@ function renderVisible(){
   if(start===lastStart&&end===lastEnd)return;
 
   // Recycle out-of-range nodes back to pool
+  // If lastStart was -1 (forced rebuild from search/reset), flush ALL nodes
+  var forceFlush=lastStart===-1;
   var existing=list.querySelectorAll('.ii');
   var keep={};
   for(var j=existing.length-1;j>=0;j--){
-    var eIdx=parseInt(existing[j].getAttribute('data-idx'),10);
-    if(eIdx>=start&&eIdx<end){
-      keep[eIdx]=existing[j];
+    if(forceFlush){
+      releaseRow(existing[j]);list.removeChild(existing[j]);
     }else{
-      releaseRow(existing[j]);
-      list.removeChild(existing[j]);
+      var eIdx=parseInt(existing[j].getAttribute('data-idx'),10);
+      if(eIdx>=start&&eIdx<end){
+        keep[eIdx]=existing[j];
+      }else{
+        releaseRow(existing[j]);list.removeChild(existing[j]);
+      }
     }
   }
 
