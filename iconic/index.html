@@ -614,12 +614,8 @@ function updateTitle(){
 }
 function updateCount(){
   var q=searchEl.value.trim();
-  if(!icons.length){countEl.textContent='';return}
-  if(q){
-    countEl.textContent=filtered.length+(filtered.length===1?' Result':' Results');
-  }else{
-    countEl.textContent=icons.length.toLocaleString()+' Icons';
-  }
+  if(!q||!icons.length){countEl.textContent='';return}
+  countEl.textContent=filtered.length+(filtered.length===1?' Result':' Results');
 }
 
 /* ── Virtual Scroll Render (with DOM recycling) ──────────────────── */
