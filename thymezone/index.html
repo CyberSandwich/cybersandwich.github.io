@@ -617,9 +617,11 @@ function renderSummary(){
   sumCard.style.display='';
 }
 
+function isWorkHour(h,m){var t=h*60+(m||0);return t>=540&&t<=1020}
+
 function cellCls(hour,min){
   var c=['tz-h'];
-  if(hour>=9&&hour<=17)c.push('tz-wk');
+  if(isWorkHour(hour,min))c.push('tz-wk');
   if(hour===12&&!min)c.push('tz-noon');
   if(hour===18&&!min)c.push('tz-dusk');
   return c.join(' ');
@@ -668,7 +670,7 @@ function renderGrid(){
     slots.push(r);
     if(r.dayOff>0)hasNextDay=true;
     if(r.dayOff<0)hasPrevDay=true;
-    if(h1>=9&&h1<=17&&r.h2>=9&&r.h2<=17){if(mtgStartSlot<0)mtgStartSlot=si;mtgEndSlot=si}
+    if(isWorkHour(h1,m1)&&isWorkHour(r.h2,r.m2)){if(mtgStartSlot<0)mtgStartSlot=si;mtgEndSlot=si}
   }
   var dayTag='';
   if(hasNextDay&&hasPrevDay)dayTag=' <span class="tz-day">-1/+1d</span>';
@@ -682,14 +684,14 @@ function renderGrid(){
   for(var si=0;si<totalSlots;si++){
     var r=slots[si],h1=r.h1,m1v=r.m1,h2=r.h2,min2=r.m2,dayOff=r.dayOff;
     // Working hours filter: skip rows where neither tz is in 9-17
-    if(rangeMode==='wk'&&!(h1>=9&&h1<=17)&&!(h2>=9&&h2<=17))continue;
+    if(rangeMode==='wk'&&!isWorkHour(h1,m1v)&&!isWorkHour(h2,min2))continue;
     var isNow=h1===now1.h&&(incMin>=60||now1Min>=r.slot&&now1Min<r.slot+incMin);
     var rowCls='tz-row';
     if(isNow)rowCls+=' tz-now';
     if(si===mtgStartSlot)rowCls+=' mtg-top';
     if(si===mtgEndSlot)rowCls+=' mtg-btm';
-    if(h1>=9&&h1<=17)rowCls+=' wk-l';
-    if(h2>=9&&h2<=17)rowCls+=' '+(dayOff!==0?'wk-r-off':'wk-r');
+    if(isWorkHour(h1,m1v))rowCls+=' wk-l';
+    if(isWorkHour(h2,min2))rowCls+=' '+(dayOff!==0?'wk-r-off':'wk-r');
     if(si>0&&prevH2>=0&&h2<prevH2)rowCls+=' tz-mid';
     prevH2=h2;
     var fm=incMin<60;
@@ -926,7 +928,7 @@ function renderDrop(drop,results){
   for(var i=0;i<results.length;i++){
     var z=results[i].z;
     var offset=fmtOffset(getOffsetMin(z.tz));
-    var abbrStr=getAbbr(z.tz);abbrStr=abbrStr?abbrStr+', ':'';
+    var abbrStr=getAbbr(z.tz);abbrStr=(abbrStr&&abbrStr!==offset)?abbrStr+', ':'';
     html+='<div class="tz-opt'+(i===dropIdx?' tz-active':'')+'" role="option" data-i="'+i+'">';
     html+='<span class="tz-city">'+z.city+', '+z.country+'</span>';
     html+='<span class="tz-meta">'+abbrStr+offset+'</span>';
