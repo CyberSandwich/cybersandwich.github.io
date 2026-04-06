@@ -86,7 +86,7 @@ html[data-theme="sepia"] .ii.ok .nm{color:#2D7D46}
   <div class="card settings" id="size-card">
     <div class="srow" id="stroke-row">
       <div class="slbl" id="stroke-lbl" tabindex="0" role="button">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-width="3"/></svg>
+        <svg aria-hidden="true" id="stroke-ico" viewBox="0 0 24 24"><path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
         <span id="stroke-val" style="font-variant-numeric:tabular-nums">2 px Stroke</span>
       </div>
       <div class="stepper">
@@ -273,9 +273,11 @@ modeRow.addEventListener('click',function(e){
 });
 
 function updateStrokeLabel(){
-  strokeVal.textContent=STROKES[strokeIdx]+' px Stroke';
+  var sw=STROKES[strokeIdx];
+  strokeVal.textContent=sw+' px Stroke';
   strokeDec.disabled=strokeIdx===0;
   strokeInc.disabled=strokeIdx===STROKES.length-1;
+  $('stroke-ico').style.strokeWidth=sw;
 }
 
 function forceRerender(){var e=list.querySelectorAll('.ii');for(var i=e.length-1;i>=0;i--)e[i].remove();lastStart=lastEnd=-1;renderVisible()}
