@@ -68,7 +68,7 @@ function route(){
     let wrap=$('#usearch');
     if(wrap)wrap=wrap.parentNode;
     if(slug){if(wrap)wrap.style.display='none';showPost(slug)}
-    else{const ul=$('#ulist');if(ul&&ul.querySelector('.pcontent'))ul.replaceChildren();if(wrap)wrap.style.display='block';showList()}
+    else{const st=$('#updates .stitle');if(st)st.textContent='Updates';const ul=$('#ulist');if(ul&&ul.querySelector('.pcontent'))ul.replaceChildren();if(wrap)wrap.style.display='block';showList()}
   }
 }
 
@@ -306,22 +306,46 @@ function showList(){showCards({el:'#ulist',data:posts,get:getPosts,si:'#usearch'
   href:x=>'/updates/'+x.file.replace('.md',''),title:x=>x.title,sub:x=>fmtDate(x.date),
   icon:x=>ICONS[x.icon]||ICONS['post'],q:x=>(x.title+' '+x.date).toLowerCase()})}
 
-// Render single post
-// Note: innerHTML used here to render parsed markdown from first-party .md
-// files committed by the site owner. Content is same-origin and trusted.
+// Render single post — splits on <hr> into multi-card layout
+// innerHTML usage: Safe — content is parsed from first-party .md files
+// committed by the site owner, not user input. Same-origin trusted content.
 function showPost(slug){
   const el=$('#ulist');
+  const stitle=$('#updates .stitle');
   const ver=++postVer;
   el.replaceChildren();
   function render(html){
     if(ver!==postVer)return;
-    const content=document.createElement('div');
-    content.className='pcontent';
-    // Safe: html is parsed from first-party .md files committed by site owner
-    content.innerHTML=html;
-    const h1=content.querySelector('h1');
-    if(h1)document.title='DS | '+h1.textContent;
-    el.appendChild(content);
+    // Extract h1 for section title (safe: first-party markdown)
+    const tmp=document.createElement('div');
+    tmp.innerHTML=html;
+    const h1=tmp.querySelector('h1');
+    if(h1){
+      document.title='DS | '+h1.textContent;
+      if(stitle)stitle.textContent=h1.textContent;
+      h1.remove();
+      html=tmp.innerHTML;
+    }
+    // Split on <hr> into separate cards; h2s become section headings
+    const parts=html.split('<hr>');
+    const frag=document.createDocumentFragment();
+    parts.forEach(function(part){
+      if(!part.trim())return;
+      var wrap=document.createElement('div');
+      wrap.innerHTML=part;
+      // Extract leading h2s as section headings above the card
+      while(wrap.firstChild&&wrap.firstChild.tagName==='H2'){
+        var sec=mkSection(wrap.firstChild.textContent,'link-sec');
+        frag.appendChild(sec);
+        wrap.removeChild(wrap.firstChild);
+      }
+      if(!wrap.innerHTML.trim())return;
+      var card=document.createElement('div');
+      card.className='pcontent';
+      card.innerHTML=wrap.innerHTML;
+      frag.appendChild(card);
+    });
+    el.appendChild(frag);
     window.scrollTo(0,0);
   }
   if(postCache[slug]){render(postCache[slug]);return}
