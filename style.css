@@ -1,6 +1,6 @@
 :root{
   color-scheme:light;
-  --acc:#3B82F6;--r-sm:6px;--r-md:12px;
+  --acc:#2A9D8F;--r-sm:6px;--r-md:12px;
   --ok-bg:#DCFCE7;--ok-c:#34D399;--ok-bdr:#A7F3D0;
   --vcf-bg:#48484A;--vcf-hover:#3A3A3C;--vcf-c:#fff;
   --search-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
