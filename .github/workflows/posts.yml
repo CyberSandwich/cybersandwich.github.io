@@ -115,6 +115,9 @@ jobs:
       - name: Validate JSON output
         run: python3 -c "import json; d=json.load(open('updates/posts.json')); assert isinstance(d, list), 'Expected array'" || { echo "::error::Generated invalid posts.json"; exit 1; }
 
+      - name: Build static post pages
+        run: node scripts/build-posts.js
+
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
