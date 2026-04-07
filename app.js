@@ -424,7 +424,7 @@ function parseMd(md,_depth){
       continue;
     }
     // Tables
-    if(line.charAt(0)==='|'||(/\|/.test(line)&&/^[^|]+\|/.test(line))){
+    if(line.charAt(0)==='|'){
       if(!tbl){
         cl();h+='<table><thead><tr>';
         line.split('|').filter(c=>c.trim()).forEach(c=>{h+='<th>'+il(c.trim())+'</th>'});
