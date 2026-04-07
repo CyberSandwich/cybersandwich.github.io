@@ -50,14 +50,14 @@ jobs:
           python3 << 'PYEOF'
           import json, os, re, glob
 
-          # Load existing custom fields to preserve them (icon, slug, etc.)
+          # Load existing custom fields to preserve them (icon, slug, featured, etc.)
+          # Preserves ALL non-generated fields so manual edits survive regeneration
+          GENERATED_KEYS = {'date', 'title', 'file', 'words'}
           existing_meta = {}
           if os.path.exists('updates/posts.json'):
               with open('updates/posts.json') as f:
                   for p in json.load(f):
-                      meta = {}
-                      if p.get('icon'): meta['icon'] = p['icon']
-                      if p.get('slug'): meta['slug'] = p['slug']
+                      meta = {k: v for k, v in p.items() if k not in GENERATED_KEYS}
                       if meta: existing_meta[p['file']] = meta
 
           posts = []
