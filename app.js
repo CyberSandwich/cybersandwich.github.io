@@ -7,7 +7,6 @@ const $$=function(s){return document.querySelectorAll(s)};
 let posts=null;
 let projects=null;
 let links=null;
-const postCache={};
 let postVer=0;
 const validPages=['home','projects','updates','links'];
 const titles={home:'Home',projects:'Projects',updates:'Updates',links:'Links'};
@@ -60,7 +59,6 @@ function route(){
 
 
 
-  if(page!=='updates'){for(const k in postCache)delete postCache[k]}
 
   if(page==='projects'){showProjects()}
   if(page==='links'){showLinks()}
@@ -367,16 +365,14 @@ function showPost(slug){
     el.appendChild(frag);
     window.scrollTo(0,0);
   }
-  if(postCache[slug]){render(postCache[slug]);return}
   // Resolve slug to filename: check posts for custom slug, fallback to slug.md
   var mdFile=slug+'.md';
   if(posts)posts.forEach(function(p){if(p.slug===slug||p.file.replace('.md','')===slug)mdFile=p.file});
   _swr('/updates/'+encodeURIComponent(mdFile),{
     parse:function(md){try{return parseMd(md)}catch(e){console.error('Parse error:',e);return'<p>Unable to render this post.</p>'}},
     key:'swr_post_'+slug,
-    onFresh:function(html){postCache[slug]=html;render(html)}
+    onFresh:function(html){render(html)}
   }).then(function(html){
-    postCache[slug]=html;
     render(html);
   }).catch(function(e){
     if(ver!==postVer)return;
