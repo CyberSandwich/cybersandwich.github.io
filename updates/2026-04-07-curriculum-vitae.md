@@ -6,7 +6,7 @@
 
 **Warwick Business School, University of Warwick**
 BSc (Hons) Management with Entrepreneurship (with Placement Year)
-Coventry, United Kingdom | Sep 2022 - Jul 2026
+*Coventry, United Kingdom | Sep 2022 - Jul 2026*
 
 - Highest course mark in Years 2 and 3 out of 280 students
 - Year 1: 79% (1st) | Year 2: 78% (1st) | Year 3: 86% (1st)
@@ -16,7 +16,7 @@ Coventry, United Kingdom | Sep 2022 - Jul 2026
 
 **Sekolah Global Indo-Asia Batam**
 International Baccalaureate Diploma Programme (IBDP)
-Batam, Indonesia | Jul 2020 - Jun 2022
+*Batam, Indonesia | Jul 2020 - Jun 2022*
 
 - Ranked 2nd in the cohort (top 8% globally)
 - 42/45 | Business Management HL (7/7) | Economics HL (7/7) | English A Language & Literature SL (7/7)
@@ -25,7 +25,7 @@ Batam, Indonesia | Jul 2020 - Jun 2022
 
 **Sekolah Global Indo-Asia Batam**
 IGCSE
-Batam, Indonesia | Jul 2018 - Jun 2020
+*Batam, Indonesia | Jul 2018 - Jun 2020*
 
 - Ranked 1st in the cohort
 - A*A*A*A*A*A*A | ICE Award with Distinction
@@ -38,7 +38,7 @@ Batam, Indonesia | Jul 2018 - Jun 2020
 
 **Microsoft**
 Enterprise Account Manager, Financial Services
-London, United Kingdom | Jul 2024 - Jun 2025
+*London, United Kingdom | Jul 2024 - Jun 2025*
 
 - Early in Career Award winner (from 200+ graduates/apprentices/interns)
 - Orchestrated innovation events and summits for Lloyds Bank and Aviva, creating £51m+ in net new recurring revenue
@@ -51,7 +51,7 @@ London, United Kingdom | Jul 2024 - Jun 2025
 
 **Warwick Finance Society**
 Head of Tour
-Coventry, United Kingdom | May 2023 - Apr 2024
+*Coventry, United Kingdom | May 2023 - Apr 2024*
 
 - Directed a 5-day participant-centric Portugal tour for Warwick's largest society with 100% positive feedback
 - Managed complex logistics by analyzing diverse requirements, developing data-driven plans for seamless execution
@@ -61,7 +61,7 @@ Coventry, United Kingdom | May 2023 - Apr 2024
 
 **Warwick Esports Society**
 Lead Data Analyst
-Coventry, United Kingdom | Apr 2023 - Apr 2024
+*Coventry, United Kingdom | Apr 2023 - Apr 2024*
 
 - Pioneered monthly analytical reports covering 4500 members across 3 key platforms, enabling 40 executive decisions
 - Optimized data reporting structures and implemented predictive models to deliver 80+ actionable suggestions
@@ -71,7 +71,7 @@ Coventry, United Kingdom | Apr 2023 - Apr 2024
 
 **IBM**
 Summer Intern, Project Lead & Communications Manager
-Winchester, United Kingdom | Jun 2023 - Jul 2023
+*Winchester, United Kingdom | Jun 2023 - Jul 2023*
 
 - Collaborated with a 5-person task force to analyze 1400+ IBM SkillsBuild courses to align with university courses
 - Applied Kaizen principles to optimize workflows, driving efficiencies in tailoring IBM offerings for 1000+ courses
@@ -85,7 +85,7 @@ Winchester, United Kingdom | Jun 2023 - Jul 2023
 
 **menuva**
 Founder
-Reading, United Kingdom | Jul 2025 - Present
+*Reading, United Kingdom | Jul 2025 - Present*
 
 - Built and launched an iOS menu platform across 7 on-campus venues, reaching 300+ active users within the first month
 - Secured a partnership with Warwick Food Group, capturing a majority of on-campus dining venues for the pilot
@@ -95,7 +95,7 @@ Reading, United Kingdom | Jul 2025 - Present
 
 **SGIA HMCA/MUN Debate Club**
 Debate Club Captain
-Batam, Indonesia | Sep 2020 - Jan 2021
+*Batam, Indonesia | Sep 2020 - Jan 2021*
 
 - 6 awards from 4 committees (top school record)
 - Led 15+ sessions to provide core lessons and organize mock debates, boosting procedural knowledge and confidence

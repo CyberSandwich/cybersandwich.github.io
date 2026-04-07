@@ -138,8 +138,10 @@ body{line-height:1.5}
 .pcard .arr{color:var(--t4);flex-shrink:0}
 .pcard .arr svg{width:18px;height:18px}
 
-/* Link Sections */
+/* Link / Post Sections */
 .link-sec{margin-bottom:clamp(20px,4vw,28px)}
+#ulist>.link-sec{margin-bottom:12px;margin-top:clamp(24px,5vw,36px)}
+#ulist>.link-sec:first-child{margin-top:0}
 .link-sec h3{
   font-size:.75rem;
   font-weight:600;
@@ -159,6 +161,7 @@ body{line-height:1.5}
 .pcontent h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
 .pcontent h2{font-size:1.125rem;font-weight:600;margin:20px 0 8px}
 .pcontent h3{font-size:1rem;font-weight:600;margin:16px 0 6px}
+.pcontent h4{font-size:.9375rem;font-weight:600;margin:14px 0 4px}
 .pcontent p{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:12px}
 .pcontent a{color:var(--acc);text-decoration:none}
 .pcontent a:hover{text-decoration:underline}
@@ -180,6 +183,7 @@ body{line-height:1.5}
 .pcontent ul,.pcontent ol{padding-left:20px;margin-bottom:12px}
 .pcontent li{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:4px}
 .pcontent strong{color:var(--t1);font-weight:600}
+.pcontent em{font-style:normal;font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.01em}
 .pcontent blockquote{
   border-left:3px solid var(--bdr);
   padding-left:16px;
@@ -191,6 +195,7 @@ body{line-height:1.5}
 .pcontent table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.875rem}
 .pcontent th{text-align:left;font-weight:600;color:var(--t1);padding:10px 12px;border-bottom:2px solid var(--bdr)}
 .pcontent td{color:var(--t2);padding:10px 12px;border-bottom:1px solid var(--bdr2)}
+.pcontent tr:last-child td{border-bottom:none}
 
 /* Search & Command Input (shared) */
 .search,.cmd-input{display:block;width:100%;border-radius:var(--rr);background:var(--card) var(--search-icon) 16px center/18px no-repeat;font:400 1rem/1 var(--font);color:var(--t1);outline:none}

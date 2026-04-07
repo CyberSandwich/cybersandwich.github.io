@@ -367,8 +367,11 @@ function showPost(slug){
 }
 
 // Markdown parser — processes first-party .md files only
-function parseMd(md){
-  md=md.replace(/^---[\s\S]*?---\n?/,'');
+// Gracefully handles malformed input: returns raw text wrapped in <p> on error
+function parseMd(md,_depth){
+  if(!md||typeof md!=='string')return '';
+  if(!_depth)md=md.replace(/^---[\s\S]*?---\n?/,'');
+  if((_depth||0)>4)return'<p>'+esc(md)+'</p>';
   let h='',code=false,ul=false,ol=false,tbl=false;
   const lines=md.split('\n');
   for(let i=0;i<lines.length;i++){
@@ -381,6 +384,7 @@ function parseMd(md){
     if(code){h+=esc(line)+'\n';continue}
     if(!line.trim()){cl();continue}
     if(/^[-*_]{3,}$/.test(line.trim())){cl();h+='<hr>';continue}
+    if(line.startsWith('#### ')){cl();h+='<h4>'+il(line.slice(5))+'</h4>';continue}
     if(line.startsWith('### ')){cl();h+='<h3>'+il(line.slice(4))+'</h3>';continue}
     if(line.startsWith('## ')){cl();h+='<h2>'+il(line.slice(3))+'</h2>';continue}
     if(line.startsWith('# ')){cl();h+='<h1>'+il(line.slice(2))+'</h1>';continue}
@@ -389,7 +393,7 @@ function parseMd(md){
       const bq=[];
       while(i<lines.length&&lines[i].startsWith('> ')){bq.push(lines[i].slice(2));i++}
       i--;
-      h+='<blockquote>'+parseMd(bq.join('\n'))+'</blockquote>';
+      h+='<blockquote>'+parseMd(bq.join('\n'),(_depth||0)+1)+'</blockquote>';
       continue;
     }
     if(line.charAt(0)==='|'){
@@ -427,6 +431,7 @@ function parseMd(md){
 }
 
 function il(t){
+  if(!t)return '';
   return esc(t)
     .replace(/`([^`]+)`/g,'<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
@@ -440,6 +445,7 @@ function il(t){
 }
 
 function esc(s){
+  if(!s)return '';
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
