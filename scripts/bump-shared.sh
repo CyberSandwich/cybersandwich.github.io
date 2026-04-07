@@ -13,7 +13,8 @@
 #   ./scripts/bump-shared.sh both         Bump all shared files
 #   ./scripts/bump-shared.sh main-css     Bump style.css in index.html
 #   ./scripts/bump-shared.sh main-js      Bump app.js in index.html
-#   ./scripts/bump-shared.sh main         Bump both main SPA files
+#   ./scripts/bump-shared.sh data-v       Bump DATA_V in app.js (JSON cache bust)
+#   ./scripts/bump-shared.sh main         Bump main SPA files + DATA_V
 #   ./scripts/bump-shared.sh codegen-js    Bump codegen/shared.js across codegen files
 #   ./scripts/bump-shared.sh codegen-css  Bump codegen/shared.css across codegen files
 #   ./scripts/bump-shared.sh codegen      Bump both codegen shared files
@@ -148,6 +149,22 @@ CODEGEN_HTMLS=("./codegen/index.html" "./codegen/barcode/index.html" "./codegen/
 # ImageOpt HTML files (consumers of imageopt/shared.js and imageopt/shared.css)
 IMAGEOPT_HTMLS=("./imageopt/index.html" "./imageopt/png/index.html")
 
+# ── DATA_V (JSON cache bust in app.js) ─────────────────────────────
+bump_data_v() {
+  local cur=$(grep -o 'DATA_V=[0-9]*' "app.js" 2>/dev/null | grep -o '[0-9]*')
+  if [[ -z "$cur" ]]; then
+    dim "  No DATA_V found in app.js — skipping."
+    return
+  fi
+  local new=$((cur + 1))
+  if $DRY_RUN; then
+    info "Would bump ${B}DATA_V${Z}: ${cur} -> ${new} in app.js"
+    return
+  fi
+  sed -i '' "s|DATA_V=${cur}|DATA_V=${new}|" "app.js"
+  ok "${B}DATA_V${Z}: ${cur} -> ${new} (app.js — JSON cache bust)"
+}
+
 # ── Commands ────────────────────────────────────────────────────────
 cmd_status() {
   printf "\n${B}Cache Buster Status${Z}\n"
@@ -199,6 +216,9 @@ cmd_status() {
     local rc=$(count_refs "$f" "$v" "$MAIN_HTML")
     printf "%-14s %-10s %-8s %-8s %s\n" "$f" "v=${v:-?}" "1" "$rc" "index.html"
   done
+
+  local dv=$(grep -o 'DATA_V=[0-9]*' "app.js" 2>/dev/null | grep -o '[0-9]*')
+  printf "%-14s %-10s %-8s %-8s %s\n" "DATA_V" "v=${dv:-?}" "1" "1" "app.js (JSON)"
 
   # Sync check
   local css_v=$(current_version "base.css" "${ALL_HTMLS[@]}")
@@ -358,7 +378,8 @@ case "$CMD" in
                bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}" ;;
   main-css)    bump "style.css" "$MAIN_HTML" ;;
   main-js)     bump "app.js" "$MAIN_HTML" ;;
-  main)        bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
+  data-v)      bump_data_v ;;
+  main)        bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v ;;
   codegen-js)  bump "shared.js" "${CODEGEN_HTMLS[@]}" ;;
   codegen-css) bump "shared.css" "${CODEGEN_HTMLS[@]}" ;;
   codegen)     bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}" ;;
@@ -369,7 +390,7 @@ case "$CMD" in
                bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}"
                bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}"
                bump "shared.js" "${IMAGEOPT_HTMLS[@]}"; bump "shared.css" "${IMAGEOPT_HTMLS[@]}"
-               bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML" ;;
+               bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v ;;
   set)
     V="${ARGS[2]:-}"
     if [[ -z "$V" ]] || ! [[ "$V" =~ ^[0-9]+$ ]]; then
@@ -394,7 +415,8 @@ case "$CMD" in
     printf "  ${C}both${Z}        Bump all shared files\n"
     printf "  ${C}main-css${Z}    Bump style.css in index.html\n"
     printf "  ${C}main-js${Z}     Bump app.js in index.html\n"
-    printf "  ${C}main${Z}        Bump both main SPA files\n"
+    printf "  ${C}data-v${Z}      Bump DATA_V in app.js (JSON cache bust)\n"
+    printf "  ${C}main${Z}        Bump main SPA files + DATA_V\n"
     printf "  ${C}codegen-js${Z}  Bump codegen/shared.js\n"
     printf "  ${C}codegen-css${Z} Bump codegen/shared.css\n"
     printf "  ${C}codegen${Z}     Bump both codegen shared files\n"
