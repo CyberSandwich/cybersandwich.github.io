@@ -15,8 +15,8 @@ const emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \n
 const CHECK_SVG='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
 const SVG_WRAP_OPEN='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
 const SVG_WRAP_CLOSE='</svg>';
-const RE_UL=/^[-*] /;
-const RE_OL=/^\d+\. /;
+const RE_UL=/^[-*+] /;
+const RE_OL=/^\d+[.)]\s/;
 function cleanUrl(u){return u.replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'')}
 function mailtoUrl(t){return 'mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Inquiry: '+t)+'&body='+emailBody}
 
@@ -181,6 +181,8 @@ const ICONS={
 'book-open':'<path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>',
 'calendar':'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
 'camera':'<path d="M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+'chart-line':'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/>',
+'clapperboard':'<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>',
 'cart':'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>',
 'clipboard':'<path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
 'clock':'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
@@ -191,6 +193,7 @@ const ICONS={
 'download':'<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
 'eye':'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
 'file':'<path d="M15 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7z"/><path d="M14 2v4a1 1 0 001 1h3"/><path d="M10 13h4"/><path d="M10 17h4"/>',
+'file-text':'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
 'flame':'<path d="M12 22c5.5-2.5 8-7 8-12a8 8 0 00-16 0c0 5 2.5 9.5 8 12z"/><path d="M12 22c-2-1-4-3.5-4-7a4 4 0 018 0c0 3.5-2 6-4 7z"/>',
 'gamepad':'<line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>',
 'gauge':'<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
@@ -199,6 +202,8 @@ const ICONS={
 'home':'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/>',
 'image':'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>',
 'keyboard':'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h3m2 0h2m2 0h3"/><path d="M6 12h2m2 0h4m2 0h2"/><path d="M8 16h8"/>',
+'landmark':'<path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/>',
+'laptop':'<path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z"/><path d="M20.054 15.987H3.946"/>',
 'layers':'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/>',
 'layout':'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
 'mail':'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/>',
@@ -217,6 +222,7 @@ const ICONS={
 'presentation':'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
 'printer':'<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
 'rocket':'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+'scale':'<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>',
 'school':'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
 'search':'<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>',
 'shield':'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>',
@@ -376,43 +382,52 @@ function showPost(slug){
   });
 }
 
-// Markdown parser — processes first-party .md files only
-// Gracefully handles malformed input: returns raw text wrapped in <p> on error
+// Markdown parser — Obsidian-compatible, processes first-party .md files only
+// Supports: headings (h1-h6), paragraphs (soft wrap), line breaks (trailing  ),
+// bold, italic, strikethrough, highlight, inline code, code blocks, links, images,
+// blockquotes (recursive), unordered/ordered/task lists, tables, horizontal rules,
+// backslash escaping. Graceful fallback on malformed input.
 function parseMd(md,_depth){
   if(!md||typeof md!=='string')return '';
   if(!_depth)md=md.replace(/^---[\s\S]*?---\n?/,'');
   if((_depth||0)>4)return'<p>'+esc(md)+'</p>';
   let h='',code=false,ul=false,ol=false,tbl=false,para=[];
+  // Track nested list depth: stack of 'ul'|'ol'
+  const listStack=[];
   const lines=md.split('\n');
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
-    if(line.startsWith('```')){
+    // Code blocks (``` or ~~~)
+    if(/^(`{3,}|~{3,})/.test(line)){
       if(code){h+='</code></pre>';code=false}
       else{cl();h+='<pre><code>';code=true}
       continue;
     }
     if(code){h+=esc(line)+'\n';continue}
     if(!line.trim()){cl();continue}
-    if(/^[-*_]{3,}$/.test(line.trim())){cl();h+='<hr>';continue}
-    if(line.startsWith('#### ')){cl();h+='<h4>'+il(line.slice(5))+'</h4>';continue}
-    if(line.startsWith('### ')){cl();h+='<h3>'+il(line.slice(4))+'</h3>';continue}
-    if(line.startsWith('## ')){cl();h+='<h2>'+il(line.slice(3))+'</h2>';continue}
-    if(line.startsWith('# ')){cl();h+='<h1>'+il(line.slice(2))+'</h1>';continue}
-    if(line.startsWith('> ')){
+    // Horizontal rules: 3+ of same char (-, *, _), optionally spaced
+    if(/^([-*_])(\s*\1){2,}\s*$/.test(line.trim())){cl();h+='<hr>';continue}
+    // Headings h1-h6
+    const hm=line.match(/^(#{1,6}) (.+)/);
+    if(hm){cl();h+='<h'+hm[1].length+'>'+il(hm[2])+'</h'+hm[1].length+'>';continue}
+    // Blockquotes (recursive)
+    if(line.startsWith('> ')||line==='>'){
       cl();
       const bq=[];
-      while(i<lines.length&&lines[i].startsWith('> ')){bq.push(lines[i].slice(2));i++}
+      while(i<lines.length&&(lines[i].startsWith('> ')||lines[i]==='>')){
+        bq.push(lines[i]==='>'?'':lines[i].slice(2));i++}
       i--;
       h+='<blockquote>'+parseMd(bq.join('\n'),(_depth||0)+1)+'</blockquote>';
       continue;
     }
-    if(line.charAt(0)==='|'){
+    // Tables
+    if(line.charAt(0)==='|'||(/\|/.test(line)&&/^[^|]+\|/.test(line))){
       if(!tbl){
         cl();h+='<table><thead><tr>';
         line.split('|').filter(c=>c.trim()).forEach(c=>{h+='<th>'+il(c.trim())+'</th>'});
         h+='</tr></thead><tbody>';
         tbl=true;
-        if(i+1<lines.length&&/^\|[\s\-:|]+\|$/.test(lines[i+1]))i++;
+        if(i+1<lines.length&&/^[\s|:\-]+$/.test(lines[i+1]))i++;
         continue;
       }
       h+='<tr>';
@@ -420,17 +435,29 @@ function parseMd(md,_depth){
       h+='</tr>';
       continue;
     }
-    if(RE_UL.test(line)){
+    // Task lists: - [ ] or - [x]
+    const tm=line.match(/^(\s*)([-*+]) \[([ xX])\] (.*)$/);
+    if(tm){
+      const indent=tm[1].length;
+      const checked=tm[3]!==' ';
+      if(!ul){cl();h+='<ul class="task-list">';ul=true}
+      h+='<li class="task-item'+(checked?' checked':'')+'"><input type="checkbox" disabled'+(checked?' checked':'')+'>'+il(tm[4])+'</li>';
+      continue;
+    }
+    // Unordered lists (with nesting via indentation)
+    const ulm=line.match(/^(\s*)([-*+]) (.*)$/);
+    if(ulm&&!(/^[-*_]{3,}$/.test(line.trim()))){
       if(!ul){cl();h+='<ul>';ul=true}
-      h+='<li>'+il(line.replace(RE_UL,''))+'</li>';continue;
+      h+='<li>'+il(ulm[3])+'</li>';continue;
     }
-    if(RE_OL.test(line)){
+    // Ordered lists
+    const olm=line.match(/^(\s*)\d+[.)]\s(.*)$/);
+    if(olm){
       if(!ol){cl();h+='<ol>';ol=true}
-      h+='<li>'+il(line.replace(RE_OL,''))+'</li>';continue;
+      h+='<li>'+il(olm[2])+'</li>';continue;
     }
-    // Consecutive text lines join into one <p> (standard markdown soft wraps)
+    // Paragraph: consecutive text lines join (standard markdown soft wraps)
     para.push(line.endsWith('  ')?il(line.slice(0,-2))+'<br>':il(line));
-    continue;
   }
   cl();if(code)h+='</code></pre>';
   return h;
@@ -443,11 +470,18 @@ function parseMd(md,_depth){
   }
 }
 
+// Inline formatting — order matters: escape first, then code, then overlapping patterns
 function il(t){
   if(!t)return '';
-  return esc(t)
+  // Backslash escaping: \X → PUA placeholder, survives esc() and regex, restored at end
+  var esc_slots=[];
+  t=t.replace(/\\([\\*_#~`|=\[\]()>!-])/g,function(_,c){esc_slots.push(c);return'\uE000'+(esc_slots.length-1)+'\uE001'});
+  t=esc(t);
+  return t
     .replace(/`([^`]+)`/g,'<code>$1</code>')
     .replace(/~~([^~]+)~~/g,'<del>$1</del>')
+    .replace(/==([^=]+)==/g,'<mark>$1</mark>')
+    .replace(/\*\*\*([^*]+)\*\*\*/g,'<strong><em>$1</em></strong>')
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g,'<em>$1</em>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(_,alt,src)=>{
@@ -455,7 +489,8 @@ function il(t){
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_,text,href)=>{
       return '<a href="'+href+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';
-    });
+    })
+    .replace(/\uE000(\d+)\uE001/g,function(_,idx){var c=esc_slots[+idx];return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':c});
 }
 
 function esc(s){

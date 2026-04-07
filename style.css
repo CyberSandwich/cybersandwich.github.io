@@ -185,6 +185,11 @@ body{line-height:1.5}
 .pcontent li{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:4px}
 .pcontent strong{color:var(--t1);font-weight:600}
 .pcontent em{font-style:normal;font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.01em}
+.pcontent del{color:var(--t4);text-decoration:line-through}
+.pcontent mark{background:rgba(255,208,0,.25);padding:1px 4px;border-radius:3px}
+.pcontent .task-list{list-style:none;padding-left:0}
+.pcontent .task-item{display:flex;align-items:baseline;gap:8px}
+.pcontent .task-item input{margin:0;flex-shrink:0;accent-color:var(--acc)}
 .pcontent blockquote{
   border-left:3px solid var(--bdr);
   padding-left:16px;
