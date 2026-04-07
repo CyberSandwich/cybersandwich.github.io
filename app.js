@@ -288,6 +288,12 @@ function renderCards(cfg,el,sw,items){
 function showCards(cfg){
   const el=$(cfg.el);
   const sw=$(cfg.si);
+  // Always register onFresh so SWR revalidation updates the UI on every visit
+  cfg.get.onFresh=function(d){
+    kbClear();
+    el.style.opacity='0';
+    setTimeout(function(){el._saved=null;renderCards(cfg,el,sw,d);el.style.opacity=''},150);
+  };
   if(cfg.data&&el.children.length){
     setSearchVis(sw,true);
     if(sw&&sw.value)filterList(sw,el);
@@ -298,12 +304,6 @@ function showCards(cfg){
   showSkel(el,3);
   cfg.get().then(items=>{
     renderCards(cfg,el,sw,items);
-    cfg.get.onFresh=function(d){
-      kbClear();
-      el.style.opacity='0';
-      cfg.get.onFresh=null;
-      setTimeout(function(){el._saved=null;renderCards(cfg,el,sw,d);el.style.opacity=''},150);
-    };
   });
 }
 
