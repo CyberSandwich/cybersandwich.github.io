@@ -350,7 +350,7 @@ var built = 0;
 var unchanged = 0;
 
 posts.forEach(function(post) {
-  var slug = post.file.replace(/\.md$/, '');
+  var slug = post.slug || post.file.replace(/\.md$/, '');
   var mdPath = path.join(UPDATES_DIR, post.file);
 
   if (!fs.existsSync(mdPath)) {
