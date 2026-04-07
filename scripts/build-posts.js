@@ -334,7 +334,9 @@ function generatePage(post, slug, layout) {
     '\n' +
     '<main class="wrap">\n' +
     '<h2 class="stitle">' + escAttr(pageTitle) + '</h2>\n' +
+    '<div id="ulist">\n' +
     layout.body +
+    '</div>\n' +
     '</main>\n' +
     '\n' +
     '<script src="/shared/base.js?v=' + V_BASE_JS + '"></script>\n' +
