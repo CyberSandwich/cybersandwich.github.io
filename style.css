@@ -160,7 +160,8 @@ body{line-height:1.5}
 .pcontent>:last-child{margin-bottom:0}
 .pcontent h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
 .pcontent h2{font-size:1.125rem;font-weight:600;margin:20px 0 8px}
-.pcontent h3{font-size:1rem;font-weight:600;margin:16px 0 6px}
+.pcontent h3{font-size:1rem;font-weight:600;margin:16px 0 4px}
+.pcontent>h3:first-child{margin-top:0}
 .pcontent h4{font-size:.9375rem;font-weight:600;margin:14px 0 4px}
 .pcontent p{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:12px}
 .pcontent a{color:var(--acc);text-decoration:none}

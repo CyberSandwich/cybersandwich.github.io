@@ -4,7 +4,7 @@
 
 ---
 
-**Warwick Business School, University of Warwick**
+### Warwick Business School, University of Warwick
 BSc (Hons) Management with Entrepreneurship (with Placement Year)
 *Coventry, United Kingdom | Sep 2022 - Jul 2026*
 
@@ -14,7 +14,7 @@ BSc (Hons) Management with Entrepreneurship (with Placement Year)
 
 ---
 
-**Sekolah Global Indo-Asia Batam**
+### Sekolah Global Indo-Asia Batam
 International Baccalaureate Diploma Programme (IBDP)
 *Batam, Indonesia | Jul 2020 - Jun 2022*
 
@@ -23,7 +23,7 @@ International Baccalaureate Diploma Programme (IBDP)
 
 ---
 
-**Sekolah Global Indo-Asia Batam**
+### Sekolah Global Indo-Asia Batam
 IGCSE
 *Batam, Indonesia | Jul 2018 - Jun 2020*
 
@@ -36,7 +36,7 @@ IGCSE
 
 ---
 
-**Microsoft**
+### Microsoft
 Enterprise Account Manager, Financial Services
 *London, United Kingdom | Jul 2024 - Jun 2025*
 
@@ -49,7 +49,7 @@ Enterprise Account Manager, Financial Services
 
 ---
 
-**Warwick Finance Society**
+### Warwick Finance Society
 Head of Tour
 *Coventry, United Kingdom | May 2023 - Apr 2024*
 
@@ -59,7 +59,7 @@ Head of Tour
 
 ---
 
-**Warwick Esports Society**
+### Warwick Esports Society
 Lead Data Analyst
 *Coventry, United Kingdom | Apr 2023 - Apr 2024*
 
@@ -69,7 +69,7 @@ Lead Data Analyst
 
 ---
 
-**IBM**
+### IBM
 Summer Intern, Project Lead & Communications Manager
 *Winchester, United Kingdom | Jun 2023 - Jul 2023*
 
@@ -83,7 +83,7 @@ Summer Intern, Project Lead & Communications Manager
 
 ---
 
-**menuva**
+### menuva
 Founder
 *Reading, United Kingdom | Jul 2025 - Present*
 
@@ -93,7 +93,7 @@ Founder
 
 ---
 
-**SGIA HMCA/MUN Debate Club**
+### SGIA HMCA/MUN Debate Club
 Debate Club Captain
 *Batam, Indonesia | Sep 2020 - Jan 2021*
 
