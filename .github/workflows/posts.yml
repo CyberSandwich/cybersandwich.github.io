@@ -126,7 +126,7 @@ jobs:
 
           # Remove all existing /updates/ post URLs (but keep /updates page itself)
           sitemap = re.sub(
-              r'\s*<url><loc>https://saputra\.co\.uk/updates/[^<]+</loc>[^<]*</url>',
+              r'\s*<url><loc>https://saputra\.co\.uk/updates/[^<]+</loc>.*?</url>',
               '', sitemap
           )
 
