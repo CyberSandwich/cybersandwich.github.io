@@ -128,9 +128,10 @@ document.addEventListener('click',e=>{
 });
 
 // Data loaders (SWR via shared/swr.js)
-const getProjects=_swr.loader('/projects/projects.json',d=>{projects=d;return d});
-const getLinks=_swr.loader('/links/links.json',d=>{links=d;return d});
-const getPosts=_swr.loader('/updates/posts.json',d=>{
+const DATA_V=2;
+const getProjects=_swr.loader('/projects/projects.json?v='+DATA_V,d=>{projects=d;return d});
+const getLinks=_swr.loader('/links/links.json?v='+DATA_V,d=>{links=d;return d});
+const getPosts=_swr.loader('/updates/posts.json?v='+DATA_V,d=>{
   d.sort((a,b)=>b.date>a.date?1:b.date<a.date?-1:a.title.localeCompare(b.title));
   posts=d;return d;
 });
