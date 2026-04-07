@@ -133,6 +133,8 @@ body{line-height:1.5}
 .pcard .pinf{flex:1;min-width:0}
 .pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pcard .pd{font-size:.8125rem;color:var(--t3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard.featured{background:#F0EAFF}
+.pcard.featured .picon{background:#E4D9F7}
 .picon{width:42px;height:42px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .picon svg{width:20px;height:20px;color:var(--t3)}
 .pcard .arr{color:var(--t4);flex-shrink:0}
@@ -273,6 +275,8 @@ html[data-theme="sepia"]{
   --vcf-bg:#6B5744;--vcf-hover:#5B4636;--vcf-c:#F5EDDA;
   --search-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AB9B85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
 }
+html[data-theme="sepia"] .pcard.featured{background:#EDE5D8}
+html[data-theme="sepia"] .pcard.featured .picon{background:#E0D5C4}
 html[data-theme="sepia"] ::-webkit-scrollbar-thumb{background:rgba(91,70,54,.15)}
 html[data-theme="sepia"] ::-webkit-scrollbar-thumb:hover{background:rgba(91,70,54,.25)}
 html[data-theme="sepia"] ::selection{background:rgba(166,123,91,.2)}
@@ -285,6 +289,8 @@ html[data-theme="dark"]{
   --vcf-bg:#48484A;--vcf-hover:#58585A;
   --search-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6E73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
 }
+html[data-theme="dark"] .pcard.featured{background:#2A2535}
+html[data-theme="dark"] .pcard.featured .picon{background:#3A3245}
 html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12)}
 html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
 html[data-theme="dark"] ::selection{background:rgba(100,181,246,.2)}

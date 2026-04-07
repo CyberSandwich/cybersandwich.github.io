@@ -3,7 +3,8 @@
     "title": "menuva",
     "subtitle": "The Digital Menu Platform",
     "url": "https://menuva.co.uk",
-    "category": "Flagship Projects"
+    "category": "Flagship Projects",
+    "featured": true
   },
   {
     "title": "ClearView",
@@ -15,13 +16,15 @@
     "title": "CodeGen",
     "subtitle": "QR, Barcode, & Aztec Code Tool",
     "url": "/codegen/",
-    "category": "Image Tools"
+    "category": "Image Tools",
+    "featured": true
   },
   {
     "title": "Iconic",
     "subtitle": "Search and Copy SVG Icons",
     "url": "/iconic/",
-    "category": "Image Tools"
+    "category": "Image Tools",
+    "featured": true
   },
   {
     "title": "ImageOpt",
@@ -33,7 +36,8 @@
     "title": "MockupGen",
     "subtitle": "iPhone Mockup Generator",
     "url": "/mockup/",
-    "category": "Image Tools"
+    "category": "Image Tools",
+    "featured": true
   },
   {
     "title": "CaseConverter",
@@ -81,7 +85,8 @@
     "title": "ThymeZone",
     "subtitle": "Compare Timezones Side by Side",
     "url": "/thymezone/",
-    "category": "Time Tools"
+    "category": "Time Tools",
+    "featured": true
   },
   {
     "title": "Arbit",

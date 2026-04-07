@@ -266,7 +266,7 @@ function renderCards(cfg,el,sw,items){
     if(!g.items.length)return;
     const sec=mkSection(g.label,'link-sec');
     g.items.forEach(x=>{
-      const a=document.createElement('a');a.className='pcard';
+      const a=document.createElement('a');a.className='pcard'+(x.featured?' featured':'');
       a.href=cfg.href(x);
       if(cfg.external&&cfg.external(x)){a.target='_blank';a.rel='noopener noreferrer'}
       a.setAttribute('data-q',normC(cfg.q(x)));
