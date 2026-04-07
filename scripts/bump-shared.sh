@@ -150,6 +150,17 @@ CODEGEN_HTMLS=("./codegen/index.html" "./codegen/barcode/index.html" "./codegen/
 IMAGEOPT_HTMLS=("./imageopt/index.html" "./imageopt/png/index.html")
 
 # ── DATA_V (JSON cache bust in app.js) ─────────────────────────────
+# ── Rebuild static post pages if versions drifted ─────────────────
+rebuild_posts() {
+  $DRY_RUN && return
+  local out
+  out=$(node scripts/build-posts.js 2>&1) || return
+  local built=$(echo "$out" | grep -o '[0-9]* built' | grep -o '[0-9]*')
+  if [[ -n "$built" ]] && (( built > 0 )); then
+    ok "Rebuilt ${built} static post page(s)"
+  fi
+}
+
 bump_data_v() {
   local cur=$(grep -o 'DATA_V=[0-9]*' "app.js" 2>/dev/null | grep -o '[0-9]*')
   if [[ -z "$cur" ]]; then
@@ -349,7 +360,9 @@ cmd_auto() {
     bumped=true
   fi
 
-  if ! $bumped; then
+  if $bumped; then
+    rebuild_posts
+  else
     dim "No CSS/JS changes detected. Nothing to bump."
     dim "Run with a target (css, js, both, main, all) or 'status'."
   fi
@@ -370,16 +383,16 @@ $DRY_RUN && info "Dry-run mode — no files will be modified."
 case "$CMD" in
   status|s)    cmd_status ;;
   verify|check) cmd_verify ;;
-  css)         bump "base.css" "${ALL_HTMLS[@]}" ;;
-  js)          bump "base.js" "${ALL_HTMLS[@]}" ;;
+  css)         bump "base.css" "${ALL_HTMLS[@]}"; rebuild_posts ;;
+  js)          bump "base.js" "${ALL_HTMLS[@]}"; rebuild_posts ;;
   search-js)   bump "search.js" "${ALL_HTMLS[@]}" ;;
   swr-js)      bump "swr.js" "${ALL_HTMLS[@]}" ;;
   both|shared) bump "base.css" "${ALL_HTMLS[@]}"; bump "base.js" "${ALL_HTMLS[@]}"
-               bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}" ;;
-  main-css)    bump "style.css" "$MAIN_HTML" ;;
-  main-js)     bump "app.js" "$MAIN_HTML" ;;
+               bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}"; rebuild_posts ;;
+  main-css)    bump "style.css" "$MAIN_HTML"; rebuild_posts ;;
+  main-js)     bump "app.js" "$MAIN_HTML"; rebuild_posts ;;
   data-v)      bump_data_v ;;
-  main)        bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v ;;
+  main)        bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v; rebuild_posts ;;
   codegen-js)  bump "shared.js" "${CODEGEN_HTMLS[@]}" ;;
   codegen-css) bump "shared.css" "${CODEGEN_HTMLS[@]}" ;;
   codegen)     bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}" ;;
@@ -390,7 +403,7 @@ case "$CMD" in
                bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}"
                bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}"
                bump "shared.js" "${IMAGEOPT_HTMLS[@]}"; bump "shared.css" "${IMAGEOPT_HTMLS[@]}"
-               bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v ;;
+               bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v; rebuild_posts ;;
   set)
     V="${ARGS[2]:-}"
     if [[ -z "$V" ]] || ! [[ "$V" =~ ^[0-9]+$ ]]; then
