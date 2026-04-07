@@ -371,7 +371,10 @@ function showPost(slug){
   _swr('/updates/'+encodeURIComponent(mdFile),{
     parse:function(md){try{return parseMd(md)}catch(e){console.error('Parse error:',e);return'<p>Unable to render this post.</p>'}},
     key:'swr_post_'+slug,
-    onFresh:function(html){render(html)}
+    onFresh:function(html){
+      el.style.opacity='0';
+      setTimeout(function(){el.replaceChildren();render(html);el.style.opacity=''},150);
+    }
   }).then(function(html){
     render(html);
   }).catch(function(e){
