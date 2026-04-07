@@ -17,10 +17,28 @@ var path = require('path');
 var ROOT = path.join(__dirname, '..');
 var POSTS_JSON = path.join(ROOT, 'updates', 'posts.json');
 var APP_JS = path.join(ROOT, 'app.js');
+var INDEX_HTML = path.join(ROOT, 'index.html');
 var UPDATES_DIR = path.join(ROOT, 'updates');
 
 // ---------------------------------------------------------------------------
-// 1. Extract parseMd from app.js (same pattern as tests/_helpers.js)
+// 1. Read CSS/JS cache-bust versions from index.html (stays in sync with
+//    bump-shared.sh instead of hardcoding version numbers)
+// ---------------------------------------------------------------------------
+
+var indexSrc = fs.readFileSync(INDEX_HTML, 'utf8');
+
+function extractVersion(pattern, label) {
+  var m = indexSrc.match(pattern);
+  if (!m) throw new Error('Cannot find ' + label + ' version in index.html');
+  return m[1];
+}
+
+var V_BASE_CSS = extractVersion(/\/shared\/base\.css\?v=(\d+)/, 'base.css');
+var V_STYLE_CSS = extractVersion(/style\.css\?v=(\d+)/, 'style.css');
+var V_BASE_JS = extractVersion(/\/shared\/base\.js\?v=(\d+)/, 'base.js');
+
+// ---------------------------------------------------------------------------
+// 2. Extract parseMd from app.js (same pattern as tests/_helpers.js)
 // ---------------------------------------------------------------------------
 
 var appSrc = fs.readFileSync(APP_JS, 'utf8');
@@ -41,13 +59,13 @@ fs.unlinkSync(tmp);
 var parseMd = parser.parseMd;
 
 // ---------------------------------------------------------------------------
-// 2. Read posts.json
+// 3. Read posts.json
 // ---------------------------------------------------------------------------
 
 var posts = JSON.parse(fs.readFileSync(POSTS_JSON, 'utf8'));
 
 // ---------------------------------------------------------------------------
-// 3. Multi-card layout builder (string-based, mirrors SPA render logic)
+// 4. Multi-card layout builder (string-based, mirrors SPA render logic)
 // ---------------------------------------------------------------------------
 
 /**
@@ -197,7 +215,7 @@ function findClosingTag(html, tagName) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Metadata helpers
+// 5. Metadata helpers
 // ---------------------------------------------------------------------------
 
 /**
@@ -236,7 +254,7 @@ function escAttr(s) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. HTML template
+// 6. HTML template
 // ---------------------------------------------------------------------------
 
 function generatePage(post, slug, layout) {
@@ -299,8 +317,8 @@ function generatePage(post, slug, layout) {
     '</script>\n' +
     '\n' +
     '<script>(function(){var t;try{t=localStorage.getItem(\'theme\')}catch(_){}if(t&&t!==\'light\')document.documentElement.setAttribute(\'data-theme\',t)})()</script>\n' +
-    '<link rel="stylesheet" href="/shared/base.css?v=25">\n' +
-    '<link rel="stylesheet" href="/style.css?v=121">\n' +
+    '<link rel="stylesheet" href="/shared/base.css?v=' + V_BASE_CSS + '">\n' +
+    '<link rel="stylesheet" href="/style.css?v=' + V_STYLE_CSS + '">\n' +
     '</head>\n' +
     '<body>\n' +
     '\n' +
@@ -323,13 +341,13 @@ function generatePage(post, slug, layout) {
     '</section>\n' +
     '</main>\n' +
     '\n' +
-    '<script src="/shared/base.js?v=25"></script>\n' +
+    '<script src="/shared/base.js?v=' + V_BASE_JS + '"></script>\n' +
     '</body>\n' +
     '</html>\n';
 }
 
 // ---------------------------------------------------------------------------
-// 6. Build loop
+// 7. Build loop
 // ---------------------------------------------------------------------------
 
 var built = 0;
