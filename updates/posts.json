@@ -4,7 +4,8 @@
     "title": "CV",
     "file": "2026-04-07-cv.md",
     "words": 684,
-    "icon": "award",
-    "slug": "cv"
+    "icon": "file-user",
+    "slug": "cv",
+    "featured": true
   }
 ]
