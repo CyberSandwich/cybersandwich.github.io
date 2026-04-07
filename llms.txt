@@ -32,6 +32,9 @@
 - [Countdown](https://saputra.co.uk/countdown/) — Countdown timer manager with natural language date parsing
 - [Miele Laundry Guide](https://saputra.co.uk/laundry/) — Vita Student Cannon Park laundry guide
 
+## Posts
+- [CV](https://saputra.co.uk/updates/cv) — 2026-04-07
+
 ## Contact
 - Email: duke@saputra.co.uk
 - LinkedIn: https://linkedin.com/in/dukedj
