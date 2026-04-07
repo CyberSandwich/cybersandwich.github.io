@@ -140,8 +140,8 @@ body{line-height:1.5}
 
 /* Link / Post Sections */
 .link-sec{margin-bottom:clamp(20px,4vw,28px)}
-#ulist>.link-sec{margin-bottom:0;margin-top:clamp(28px,5vw,40px)}
-#ulist>.link-sec:first-child{margin-top:0}
+#ulist>.link-sec{margin:0;padding-top:clamp(20px,4vw,28px)}
+#ulist>.link-sec:first-child{padding-top:0}
 .link-sec h3{
   font-size:.75rem;
   font-weight:600;
