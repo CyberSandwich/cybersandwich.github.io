@@ -44,7 +44,7 @@
   {
     "title": "CS50x 2026 Lectures",
     "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
-    "icon": "video",
+    "icon": "monitor-play",
     "category": "Initiatives"
   },
   {
@@ -62,6 +62,7 @@
   {
     "title": "Epidemic Sound",
     "url": "https://www.epidemicsound.com/music/themes/viral-trends-aesthetics/trending-on-youtube/",
+    "icon": "music",
     "category": "Initiatives"
   },
   {
@@ -121,7 +122,7 @@
   {
     "title": "Google Analytics",
     "url": "https://analytics.google.com/analytics/web/#/",
-    "icon": "trending",
+    "icon": "chart-line",
     "category": "Initiatives"
   },
   {
@@ -175,6 +176,7 @@
   {
     "title": "Myinstants Sound Effects",
     "url": "https://www.myinstants.com/en/index/us/",
+    "icon": "music",
     "category": "Initiatives"
   },
   {
@@ -186,7 +188,7 @@
   {
     "title": "Pixabay Sound Effects",
     "url": "https://pixabay.com/sound-effects/",
-    "icon": "mic",
+    "icon": "music",
     "category": "Initiatives"
   },
   {
@@ -234,7 +236,7 @@
   {
     "title": "GradIntelligence",
     "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
-    "icon": "trending",
+    "icon": "graduation",
     "category": "Academic"
   },
   {
@@ -270,7 +272,7 @@
   {
     "title": "QuillBot",
     "url": "https://quillbot.com/grammar-check",
-    "icon": "pen",
+    "icon": "spell-check",
     "category": "Academic"
   },
   {
@@ -354,85 +356,85 @@
   {
     "title": "WBS Academic Record",
     "url": "https://my.wbs.ac.uk/-/profile/me/academic-record",
-    "icon": "file",
+    "icon": "graduation",
     "category": "Academic"
   },
   {
     "title": "Bright Network Internships",
     "url": "https://www.brightnetwork.co.uk/internships",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "e4s",
     "url": "https://www.e4s.co.uk/search/internship-jobs",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "Glassdoor",
     "url": "https://www.glassdoor.co.in/Job/index.htm",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "GRADCRACKER",
     "url": "https://www.gradcracker.com/search/all-disciplines/engineering-work-placements-internships",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "HIGHERiN Internships",
     "url": "https://higherin.com/search-jobs/internships",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "Indeed",
     "url": "https://uk.indeed.com/",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "Internwise",
     "url": "https://www.internwise.co.uk/internship-search",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "milkround",
     "url": "https://www.milkround.com/",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "step",
     "url": "https://www.step.org.uk/opportunity-search",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "targetjobs Internships",
     "url": "https://targetjobs.co.uk/internships",
-    "icon": "search",
+    "icon": "briefcase",
     "category": "Career"
   },
   {
     "title": "Trackr UK Finance Summer Internships",
     "url": "https://app.the-trackr.com/uk-finance/summer-internships",
-    "icon": "trending",
+    "icon": "landmark",
     "category": "Career"
   },
   {
     "title": "Trackr UK Law Training Contracts",
     "url": "https://app.the-trackr.com/uk-law/training-contracts",
-    "icon": "trending",
+    "icon": "scale",
     "category": "Career"
   },
   {
     "title": "Trackr UK Technology Summer Internships",
     "url": "https://app.the-trackr.com/uk-technology/summer-internships",
-    "icon": "trending",
+    "icon": "laptop",
     "category": "Career"
   },
   {
@@ -492,25 +494,25 @@
   {
     "title": "camelcamelcamel",
     "url": "https://uk.camelcamelcamel.com",
-    "icon": "trending",
+    "icon": "chart-line",
     "category": "Personal"
   },
   {
     "title": "ChatGPT",
     "url": "https://chatgpt.com",
-    "icon": "message",
+    "icon": "sparkles",
     "category": "Personal"
   },
   {
     "title": "Claude",
     "url": "https://claude.ai/",
-    "icon": "message",
+    "icon": "sparkles",
     "category": "Personal"
   },
   {
     "title": "Claude Code (Web)",
     "url": "https://claude.ai/code",
-    "icon": "code",
+    "icon": "terminal",
     "category": "Personal"
   },
   {
@@ -522,7 +524,7 @@
   {
     "title": "Claude Usage",
     "url": "https://claude.ai/settings/usage",
-    "icon": "trending",
+    "icon": "gauge",
     "category": "Personal"
   },
   {
@@ -540,13 +542,13 @@
   {
     "title": "Codex (Web)",
     "url": "https://chatgpt.com/codex",
-    "icon": "code",
+    "icon": "sparkles",
     "category": "Personal"
   },
   {
     "title": "Defuddle",
     "url": "https://defuddle.md/",
-    "icon": "globe",
+    "icon": "file-text",
     "category": "Personal"
   },
   {
@@ -570,7 +572,7 @@
   {
     "title": "Gemini",
     "url": "https://gemini.google.com/app",
-    "icon": "message",
+    "icon": "sparkles",
     "category": "Personal"
   },
   {
@@ -582,7 +584,7 @@
   {
     "title": "Google AI Mode",
     "url": "https://www.google.com/search?udm=50&aep=46&source=25q2-US-SearchSites-Site-CTA",
-    "icon": "message",
+    "icon": "sparkles",
     "category": "Personal"
   },
   {
@@ -672,7 +674,7 @@
   {
     "title": "Minecraft Classic",
     "url": "https://classic.minecraft.net/",
-    "icon": "wand",
+    "icon": "gamepad",
     "category": "Personal"
   },
   {
@@ -696,7 +698,7 @@
   {
     "title": "Obsidian",
     "url": "https://obsidian.md/download",
-    "icon": "pen",
+    "icon": "notebook",
     "category": "Personal"
   },
   {
@@ -708,7 +710,7 @@
   {
     "title": "Perplexity",
     "url": "https://www.perplexity.ai",
-    "icon": "search",
+    "icon": "sparkles",
     "category": "Personal"
   },
   {
@@ -726,7 +728,7 @@
   {
     "title": "Pok\u00e9mon Showdown (Beta)",
     "url": "https://play.pokemonshowdown.com",
-    "icon": "wand",
+    "icon": "gamepad",
     "category": "Personal"
   },
   {
@@ -858,7 +860,7 @@
   {
     "title": "TikTok Studio",
     "url": "https://www.tiktok.com/tiktokstudio",
-    "icon": "video",
+    "icon": "clapperboard",
     "category": "Social Media"
   },
   {
@@ -882,7 +884,7 @@
   {
     "title": "YouTube Studio",
     "url": "https://studio.youtube.com/channel",
-    "icon": "video",
+    "icon": "clapperboard",
     "category": "Social Media"
   },
   {
@@ -894,25 +896,25 @@
   {
     "title": "EchoVideo - IB3960 Financial Statement Analysis & Security Valuation",
     "url": "https://echo360.org.uk/section/24b2d570-e52a-4bd5-803b-bccd8644d811/home",
-    "icon": "video",
+    "icon": "monitor-play",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3G40 Law for Entrepreneurs",
     "url": "https://echo360.org.uk/section/6d900cef-d4b4-4807-bb3d-cfffc1d9897d/home",
-    "icon": "video",
+    "icon": "monitor-play",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3N20 Decision Making in Entrepreneurship",
     "url": "https://echo360.org.uk/section/1cca2155-aa96-4387-a170-dc9acba06d55/home",
-    "icon": "video",
+    "icon": "monitor-play",
     "category": "Miscellaneous"
   },
   {
     "title": "EchoVideo - IB3N90 Managing People in a Complex World",
     "url": "https://echo360.org.uk/section/c8302b8e-e7d8-4531-be04-048d16a96dea/home",
-    "icon": "video",
+    "icon": "monitor-play",
     "category": "Miscellaneous"
   },
   {
