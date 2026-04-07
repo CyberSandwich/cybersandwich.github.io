@@ -7,11 +7,10 @@ const $$=function(s){return document.querySelectorAll(s)};
 let posts=null;
 let projects=null;
 let links=null;
-let cv=null;
 const postCache={};
 let postVer=0;
-const validPages=['home','projects','cv','updates','links'];
-const titles={home:'Home',projects:'Projects',cv:'CV',updates:'Updates',links:'Links'};
+const validPages=['home','projects','updates','links'];
+const titles={home:'Home',projects:'Projects',updates:'Updates',links:'Links'};
 const emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
 const CHECK_SVG='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
 const SVG_WRAP_OPEN='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
@@ -64,7 +63,6 @@ function route(){
   if(page!=='updates'){for(const k in postCache)delete postCache[k]}
 
   if(page==='projects'){showProjects()}
-  if(page==='cv'){showCV()}
   if(page==='links'){showLinks()}
   if(page==='updates'){
     let wrap=$('#usearch');
@@ -134,7 +132,6 @@ document.addEventListener('click',e=>{
 // Data loaders (SWR via shared/swr.js)
 const getProjects=_swr.loader('/projects/projects.json',d=>{projects=d;return d});
 const getLinks=_swr.loader('/links/links.json',d=>{links=d;return d});
-const getCV=_swr.loader('/cv/cv.json',d=>{cv=d;return d});
 const getPosts=_swr.loader('/updates/posts.json',d=>{
   d.sort((a,b)=>b.date>a.date?1:b.date<a.date?-1:a.title.localeCompare(b.title));
   posts=d;return d;
@@ -304,78 +301,6 @@ function showLinks(){showCards({el:'#llist',data:links,get:getLinks,si:'#lsearch
   groups:catGroups(linkCategories),href:x=>x.url,external:()=>true,
   title:x=>x.title,sub:x=>cleanUrl(x.url),icon:x=>ICONS[x.icon]||DEFAULT_LINK_ICON,q:x=>(x.title+' '+cleanUrl(x.url)+' '+x.category).toLowerCase()})}
 
-// Render CV
-function renderCV(el,data){
-  const sw=$('#csearch');
-  el.removeAttribute('aria-busy');
-  el.replaceChildren();
-  if(!data||!data.length){
-    setSearchVis(sw,false);
-    el.appendChild(mkEmpty(getCV.err?'Unable to load. Please check your connection.':'Coming Soon!'));return;
-  }
-  setSearchVis(sw,true);
-  const frag=document.createDocumentFragment();
-  data.forEach(section=>{
-    const sec=mkSection(section.section,'cv-sec');
-    section.entries.forEach(e=>{
-      const card=document.createElement('div');card.className='cve';
-      if(e.org){
-        const co=document.createElement('div');co.className='co';co.textContent=e.org;card.appendChild(co);
-        if(e.role){
-          const cr=document.createElement('div');cr.className='cr';cr.textContent=e.role;card.appendChild(cr);
-        }
-        if(e.location||e.dates){
-          const meta=document.createElement('div');meta.className='cmeta';
-          if(e.location){const loc=document.createElement('span');loc.textContent=e.location;meta.appendChild(loc)}
-          if(e.dates){const dates=document.createElement('span');dates.textContent=e.dates;meta.appendChild(dates)}
-          card.appendChild(meta);
-        }
-        if(e.text){
-          const cn=document.createElement('div');cn.className='cn';cn.textContent=e.text;card.appendChild(cn);
-        }
-        if(e.pills){
-          const pills=document.createElement('div');pills.className='pills';
-          pills.setAttribute('role','list');pills.setAttribute('aria-label','Skills');
-          e.pills.forEach(p=>{
-            const pill=document.createElement('span');pill.className='pill';pill.textContent=p;
-            pill.setAttribute('role','listitem');
-            pills.appendChild(pill);
-          });
-          card.appendChild(pills);
-        }
-        if(e.bullets){
-          const ul=document.createElement('ul');
-          e.bullets.forEach(b=>{
-            const li=document.createElement('li');li.textContent=b;ul.appendChild(li);
-          });
-          card.appendChild(ul);
-        }
-      }
-      card.setAttribute('data-q',normC(card.textContent.toLowerCase()));
-      if(e.org)card.setAttribute('data-title',normC(e.org.toLowerCase()));
-      sec.appendChild(card);
-    });
-    frag.appendChild(sec);
-  });
-  el.appendChild(frag);
-  if(sw&&sw.value){filterList(sw,el);setSearchX(sw.parentNode,true)}
-}
-function showCV(){
-  const el=$('#cvlist');
-  if(cv&&el.children.length)return;
-  el.replaceChildren();
-  showSkel(el,3);
-  getCV().then(data=>{
-    renderCV(el,data);
-    getCV.onFresh=function(d){
-      kbClear();
-      el.style.opacity='0';
-      getCV.onFresh=null;
-      setTimeout(function(){el._saved=null;renderCV(el,d);el.style.opacity=''},150);
-    };
-  });
-}
-
 function showList(){showCards({el:'#ulist',data:posts,get:getPosts,si:'#usearch',chevron:true,
   groups:function(items){const g=[];let cur='',s;items.forEach(function(x){const ym=x.date.slice(0,7);if(ym!==cur){cur=ym;s={label:fmtDate(x.date,{month:'long',year:'numeric'}),items:[]};g.push(s)}s.items.push(x)});return g},
   href:x=>'/updates/'+x.file.replace('.md',''),title:x=>x.title,sub:x=>fmtDate(x.date),
@@ -417,7 +342,7 @@ function showPost(slug){
 // Markdown parser — processes first-party .md files only
 function parseMd(md){
   md=md.replace(/^---[\s\S]*?---\n?/,'');
-  let h='',code=false,ul=false,ol=false;
+  let h='',code=false,ul=false,ol=false,tbl=false;
   const lines=md.split('\n');
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
@@ -428,10 +353,32 @@ function parseMd(md){
     }
     if(code){h+=esc(line)+'\n';continue}
     if(!line.trim()){cl();continue}
+    if(/^[-*_]{3,}$/.test(line.trim())){cl();h+='<hr>';continue}
     if(line.startsWith('### ')){cl();h+='<h3>'+il(line.slice(4))+'</h3>';continue}
     if(line.startsWith('## ')){cl();h+='<h2>'+il(line.slice(3))+'</h2>';continue}
     if(line.startsWith('# ')){cl();h+='<h1>'+il(line.slice(2))+'</h1>';continue}
-    if(line.startsWith('> ')){cl();h+='<blockquote><p>'+il(line.slice(2))+'</p></blockquote>';continue}
+    if(line.startsWith('> ')){
+      cl();
+      const bq=[];
+      while(i<lines.length&&lines[i].startsWith('> ')){bq.push(lines[i].slice(2));i++}
+      i--;
+      h+='<blockquote>'+parseMd(bq.join('\n'))+'</blockquote>';
+      continue;
+    }
+    if(line.charAt(0)==='|'){
+      if(!tbl){
+        cl();h+='<table><thead><tr>';
+        line.split('|').filter(c=>c.trim()).forEach(c=>{h+='<th>'+il(c.trim())+'</th>'});
+        h+='</tr></thead><tbody>';
+        tbl=true;
+        if(i+1<lines.length&&/^\|[\s\-:|]+\|$/.test(lines[i+1]))i++;
+        continue;
+      }
+      h+='<tr>';
+      line.split('|').filter(c=>c.trim()).forEach(c=>{h+='<td>'+il(c.trim())+'</td>'});
+      h+='</tr>';
+      continue;
+    }
     if(RE_UL.test(line)){
       if(!ul){cl();h+='<ul>';ul=true}
       h+='<li>'+il(line.replace(RE_UL,''))+'</li>';continue;
@@ -448,6 +395,7 @@ function parseMd(md){
   function cl(){
     if(ul){h+='</ul>';ul=false}
     if(ol){h+='</ol>';ol=false}
+    if(tbl){h+='</tbody></table>';tbl=false}
   }
 }
 
@@ -469,14 +417,14 @@ function esc(s){
 }
 
 const norm=_search.norm,normC=_search.normC,scoreWord=_search.scoreWord;
-function scoreItem(w,q,tl,isCV){let fs=scoreWord(w,q,isCV);if(tl){const ts=scoreWord(w,tl,isCV)*1.5;if(ts>fs)fs=ts}return fs}
+function scoreItem(w,q,tl){let fs=scoreWord(w,q);if(tl){const ts=scoreWord(w,tl)*1.5;if(ts>fs)fs=ts}return fs}
 
 // Generic list filter — scores, sorts, flattens results when searching
 function filterList(input,container){
   const q=norm(input.value.trim().toLowerCase());
   const words=q.split(/\s+/).filter(Boolean);
-  const secs=[].slice.call(container.querySelectorAll('.link-sec,.cv-sec'));
-  const cards=[].slice.call(container.querySelectorAll('.pcard,.cve'));
+  const secs=[].slice.call(container.querySelectorAll('.link-sec'));
+  const cards=[].slice.call(container.querySelectorAll('.pcard'));
 
   if(!container._saved&&cards.length){
     container._saved=cards.map(c=>({el:c,parent:c.parentNode}));
@@ -498,15 +446,14 @@ function filterList(input,container){
     return;
   }
 
-  // Score each card (title weighted 1.5x, CV fuzzy penalized 0.7x)
+  // Score each card (title weighted 1.5x)
   const scored=[];
   cards.forEach(c=>{
     const t=c.getAttribute('data-q')||normC(c.textContent.toLowerCase());
     const tl=c.getAttribute('data-title');
-    const isCV=c.classList.contains('cve');
     let total=0;
     const ok=words.every(w=>{
-      const fs=scoreItem(w,t,tl,isCV);
+      const fs=scoreItem(w,t,tl);
       total+=fs;return fs>0;
     });
     if(ok)scored.push({el:c,score:total});
@@ -563,7 +510,7 @@ function wireSearch(iid,cid){
   const x=i.parentNode.querySelector('.search-x');
   if(x)x.addEventListener('click',()=>{clearTimeout(timer);i.value='';run();i.focus()});
 }
-[['#psearch','#plist'],['#csearch','#cvlist'],['#usearch','#ulist'],['#lsearch','#llist']].forEach(function(p){wireSearch(p[0],p[1])});
+[['#psearch','#plist'],['#usearch','#ulist'],['#lsearch','#llist']].forEach(function(p){wireSearch(p[0],p[1])});
 
 // Theme toggle (delegates to _base for data-theme, theme-color, localStorage)
 const themeBtn=$('#theme-toggle');
@@ -699,19 +646,11 @@ function cmdBuildItems(){
       history.pushState(null,'','/updates/'+x.file.replace('.md',''));route();
     });
   });
-  if(cv)cv.forEach(sec=>{
-    sec.entries.forEach(e=>{
-      if(!e.org)return;
-      add(e.org,e.role||e.text||'','CV',()=>{
-        history.pushState(null,'','/cv');route();
-      });
-    });
-  });
   return items;
 }
 
-// Type priority: pages are primary nav, content items next, CV last
-const cmdTypePri={Page:4,Project:3,Link:3,Post:3,CV:2};
+// Type priority: pages first, content items next
+const cmdTypePri={Page:4,Project:3,Link:3,Post:3};
 
 function cmdSearch(q){
   const words=norm(q.trim().toLowerCase()).split(/\s+/).filter(Boolean);
@@ -720,9 +659,8 @@ function cmdSearch(q){
   const scored=[];
   items.forEach(it=>{
     let total=0;
-    const isCV=it.type==='CV';
     const ok=words.every(w=>{
-      const s=scoreItem(w,it.q,it.tl,isCV);
+      const s=scoreItem(w,it.q,it.tl);
       total+=s;return s>0;
     });
     if(ok)scored.push({item:it,score:total+(cmdTypePri[it.type]||0)*0.1});
@@ -787,7 +725,7 @@ let kbIdx=-1,kbCards=[],kbPrev=-1;
 function kbGetCards(){
   const active=$('.page.active');
   if(!active)return [];
-  return [].slice.call(active.querySelectorAll('.pcard,.cve'));
+  return [].slice.call(active.querySelectorAll('.pcard'));
 }
 
 function kbClear(remember){
@@ -825,7 +763,7 @@ let _kbTick=false;
 function kbAsync(dir){if(!_kbTick){_kbTick=true;requestAnimationFrame(function(){kbMove(dir);_kbTick=false})}}
 document.addEventListener('mousemove',()=>{if(kbIdx>=0)kbClear(true)},{passive:true});
 
-const tabPaths=['/','/projects','/cv','/updates','/links'];
+const tabPaths=['/','/projects','/updates','/links'];
 function isPost(){return location.pathname.startsWith('/updates/')&&location.pathname.split('/').length>2}
 
 document.addEventListener('keydown',e=>{
@@ -861,7 +799,7 @@ document.addEventListener('keydown',e=>{
 
   const key=e.key;
 
-  if(key>='1'&&key<='5'){
+  if(key>='1'&&key<='4'){
     const idx=+key-1;
     const path=tabPaths[idx];
     if(path!==location.pathname){history.pushState(null,'',path);route()}
@@ -915,6 +853,6 @@ route();
 
 // Prefetch all data during idle time so tab switches are instant
 const ric=window.requestIdleCallback||(cb=>{setTimeout(cb,200)});
-ric(()=>{getProjects();getCV();getPosts();getLinks()});
+ric(()=>{getProjects();getPosts();getLinks()});
 
 })();

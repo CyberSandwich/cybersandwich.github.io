@@ -1,0 +1,104 @@
+# Curriculum Vitae
+
+## Education
+
+**Warwick Business School, University of Warwick**
+BSc (Hons) Management with Entrepreneurship (with Placement Year)
+Coventry, United Kingdom | Sep 2022 - Jul 2026
+
+- Highest course mark in Years 2 and 3 out of 280 students
+- Year 1: 79% (1st) | Year 2: 78% (1st) | Year 3: 86% (1st)
+- Modules: Venture Capital, Financial Reporting 1 & 2, Financial Management, Data Analysis, Design Thinking, Strategy
+
+**Sekolah Global Indo-Asia Batam**
+International Baccalaureate Diploma Programme (IBDP)
+Batam, Indonesia | Jul 2020 - Jun 2022
+
+- Ranked 2nd in the cohort (top 8% globally)
+- 42/45 | Business Management HL (7/7) | Economics HL (7/7) | English A Language & Literature SL (7/7)
+
+**Sekolah Global Indo-Asia Batam**
+IGCSE
+Batam, Indonesia | Jul 2018 - Jun 2020
+
+- Ranked 1st in the cohort
+- A*A*A*A*A*A*A | ICE Award with Distinction
+
+---
+
+## Work & Leadership
+
+**Microsoft**
+Enterprise Account Manager, Financial Services
+London, United Kingdom | Jul 2024 - Jun 2025
+
+- Early in Career Award winner (from 200+ graduates/apprentices/interns)
+- Orchestrated innovation events and summits for Lloyds Bank and Aviva, creating £51m+ in net new recurring revenue
+- Spearheaded the UK subsidiary's largest end-user AI training, reaching 11,800 users with an NPS score of +80
+- Optimized divisional scrum calls, automating report preparation, and increasing pipeline closure velocity by 30%
+- Headed security AI and Purview at Lloyds Bank, driving +50% MoM adoption of Security Copilot while halving cases
+- Championed intern development by orchestrating learning sessions that enhanced role proficiency and career growth
+
+**Warwick Finance Society**
+Head of Tour
+Coventry, United Kingdom | May 2023 - Apr 2024
+
+- Directed a 5-day participant-centric Portugal tour for Warwick's largest society with 100% positive feedback
+- Managed complex logistics by analyzing diverse requirements, developing data-driven plans for seamless execution
+- Identified cost-saving opportunities, driving optimizations that reduced expenses and achieved £2000+ net profit
+
+**Warwick Esports Society**
+Lead Data Analyst
+Coventry, United Kingdom | Apr 2023 - Apr 2024
+
+- Pioneered monthly analytical reports covering 4500 members across 3 key platforms, enabling 40 executive decisions
+- Optimized data reporting structures and implemented predictive models to deliver 80+ actionable suggestions
+- Led an aggressive growth campaign, increasing membership by ~20% in 1 week and improving reach by 263%
+
+**IBM**
+Summer Intern, Project Lead & Communications Manager
+Winchester, United Kingdom | Jun 2023 - Jul 2023
+
+- Collaborated with a 5-person task force to analyze 1400+ IBM SkillsBuild courses to align with university courses
+- Applied Kaizen principles to optimize workflows, driving efficiencies in tailoring IBM offerings for 1000+ courses
+- Generated scrum reports to track progress with 20+ actionable insights, improving output by 45% above targets
+
+---
+
+## Extra-Curricular
+
+**menuva**
+Founder
+Reading, United Kingdom | Jul 2025 - Present
+
+- Built and launched an iOS menu platform across 7 on-campus venues, reaching 300+ active users within the first month
+- Secured a partnership with Warwick Food Group, capturing a majority of on-campus dining venues for the pilot
+- Designed a dietary-first experience supporting UK14 allergens, multi-language menus, and real-time currency conversion
+
+**SGIA HMCA/MUN Debate Club**
+Debate Club Captain
+Batam, Indonesia | Sep 2020 - Jan 2021
+
+- 6 awards from 4 committees (top school record)
+- Led 15+ sessions to provide core lessons and organize mock debates, boosting procedural knowledge and confidence
+- Coached participants by evaluating 40+ speeches, resulting in awards across multiple committees
+- Drove the club's expansion efforts, including logo design, talent scouting, and digital marketing, bringing 40% growth
+
+---
+
+## Skills
+
+| Category | Details |
+| --- | --- |
+| Languages | English (Native), Indonesian (Native) |
+| Technical | Final Cut Pro X (Advanced), Pixelmator Pro / Photoshop (Intermediate) |
+
+---
+
+## Certifications & Interests
+
+| Category | Details |
+| --- | --- |
+| Awards | Winner of the 2023 Warwick Boba Awards - "Most Likely to Turn Into a Tapioca Ball" |
+| Certifications | Prosci Change Management, IBM Enterprise Design Thinking, Microsoft AZ-900, Microsoft AI-900, Microsoft DP-900, Microsoft SC-900, Microsoft MS-900 |
+| Interests | Bubble Tea, Dogs, Drone Photography, Technological Innovation |

@@ -7,8 +7,7 @@
 ## Key Pages
 - [Home](https://saputra.co.uk/) — Contact links, social profiles, and vCard download
 - [Projects](https://saputra.co.uk/projects) — Portfolio of web tools and applications
-- [CV](https://saputra.co.uk/cv) — Curriculum vitae with experience, education, and skills
-- [Updates](https://saputra.co.uk/updates) — Blog posts and technical articles
+- [Updates](https://saputra.co.uk/updates) — Blog posts, technical articles, and CV
 - [Links](https://saputra.co.uk/links) — Curated collection of useful links
 
 ## Projects

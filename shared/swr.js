@@ -21,7 +21,7 @@ function swrText(url,parse,key,onFresh){
       if(text===raw)return cached;
       try{localStorage.setItem(key,text)}catch(e){}
       var d=parse(text);
-      if(cached!=null&&onFresh)onFresh(d);
+      if(cached!=null&&onFresh)onFresh(d,false);
       return d
     });
   if(cached!=null){fresh.catch(function(){});return Promise.resolve(cached)}

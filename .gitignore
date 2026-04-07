@@ -12,3 +12,5 @@ tasks/
 .claude/
 context/
 updates/archive/
+archive/
+tests/
