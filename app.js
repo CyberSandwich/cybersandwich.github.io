@@ -316,7 +316,7 @@ function showPost(slug){
   el.replaceChildren();
   function render(html){
     if(ver!==postVer)return;
-    // Extract h1 for section title (safe: first-party markdown)
+    // Parse into DOM and walk nodes (safe: first-party markdown)
     const tmp=document.createElement('div');
     tmp.innerHTML=html;
     const h1=tmp.querySelector('h1');
@@ -324,27 +324,30 @@ function showPost(slug){
       document.title='DS | '+h1.textContent;
       if(stitle)stitle.textContent=h1.textContent;
       h1.remove();
-      html=tmp.innerHTML;
     }
-    // Split on <hr> into separate cards; h2s become section headings
-    const parts=html.split('<hr>');
+    // Walk child nodes: h2→section heading, hr→card break, else→card content
     const frag=document.createDocumentFragment();
-    parts.forEach(function(part){
-      if(!part.trim())return;
-      var wrap=document.createElement('div');
-      wrap.innerHTML=part;
-      // Extract leading h2s as section headings above the card
-      while(wrap.firstChild&&wrap.firstChild.tagName==='H2'){
-        var sec=mkSection(wrap.firstChild.textContent,'link-sec');
-        frag.appendChild(sec);
-        wrap.removeChild(wrap.firstChild);
+    var card=null;
+    function flush(){if(card){frag.appendChild(card);card=null}}
+    var nodes=[].slice.call(tmp.childNodes);
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i];
+      if(n.nodeType===1&&n.tagName==='H1'){continue}
+      if(n.nodeType===1&&n.tagName==='H2'){
+        flush();
+        frag.appendChild(mkSection(n.textContent,'link-sec'));
+        continue;
       }
-      if(!wrap.innerHTML.trim())return;
-      var card=document.createElement('div');
-      card.className='pcontent';
-      card.innerHTML=wrap.innerHTML;
-      frag.appendChild(card);
-    });
+      if(n.nodeType===1&&n.tagName==='HR'){
+        flush();
+        continue;
+      }
+      // Skip whitespace-only text nodes between blocks
+      if(n.nodeType===3&&!n.textContent.trim())continue;
+      if(!card){card=document.createElement('div');card.className='pcontent'}
+      card.appendChild(n.cloneNode(true));
+    }
+    flush();
     el.appendChild(frag);
     window.scrollTo(0,0);
   }

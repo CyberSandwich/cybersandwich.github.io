@@ -30,6 +30,8 @@ Batam, Indonesia | Jul 2018 - Jun 2020
 - Ranked 1st in the cohort
 - A*A*A*A*A*A*A | ICE Award with Distinction
 
+---
+
 ## Work & Leadership
 
 ---
@@ -75,6 +77,8 @@ Winchester, United Kingdom | Jun 2023 - Jul 2023
 - Applied Kaizen principles to optimize workflows, driving efficiencies in tailoring IBM offerings for 1000+ courses
 - Generated scrum reports to track progress with 20+ actionable insights, improving output by 45% above targets
 
+---
+
 ## Extra-Curricular
 
 ---
@@ -97,6 +101,8 @@ Batam, Indonesia | Sep 2020 - Jan 2021
 - Led 15+ sessions to provide core lessons and organize mock debates, boosting procedural knowledge and confidence
 - Coached participants by evaluating 40+ speeches, resulting in awards across multiple committees
 - Drove the club's expansion efforts, including logo design, talent scouting, and digital marketing, bringing 40% growth
+
+---
 
 ## Skills & Certifications
 
