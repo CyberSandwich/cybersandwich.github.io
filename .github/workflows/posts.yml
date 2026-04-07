@@ -1,9 +1,10 @@
-name: Generate Posts Manifest
+name: Generate Posts Pipeline
 
 on:
   push:
     paths:
       - 'updates/*.md'
+      - 'updates/posts.json'
     branches:
       - main
 
@@ -11,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: generate-posts-manifest
+  group: generate-posts-pipeline
   cancel-in-progress: true
 
 jobs:
@@ -38,7 +39,7 @@ jobs:
                 continue
               fi
               mv "$f" "$new_name"
-              echo "Renamed: $basename_f → ${date_prefix}-${basename_f}"
+              echo "Renamed: $basename_f -> ${date_prefix}-${basename_f}"
               renamed=$((renamed + 1))
             fi
           done
@@ -49,45 +50,40 @@ jobs:
           python3 << 'PYEOF'
           import json, os, re, glob
 
-          # Load existing icons to preserve them
-          existing_icons = {}
+          # Load existing custom fields to preserve them (icon, slug, etc.)
+          existing_meta = {}
           if os.path.exists('updates/posts.json'):
               with open('updates/posts.json') as f:
                   for p in json.load(f):
-                      if p.get('icon'):
-                          existing_icons[p['file']] = p['icon']
+                      meta = {}
+                      if p.get('icon'): meta['icon'] = p['icon']
+                      if p.get('slug'): meta['slug'] = p['slug']
+                      if meta: existing_meta[p['file']] = meta
 
           posts = []
           for filepath in sorted(glob.glob('updates/*.md')):
               basename = os.path.basename(filepath)
 
-              # Extract date from filename (YYYY-MM-DD prefix)
               date_match = re.match(r'^(\d{4}-\d{2}-\d{2})-', basename)
               if not date_match:
                   print(f"::warning::Skipping file without date prefix: {basename}")
                   continue
               date_val = date_match.group(1)
 
-              # Extract title from markdown H1, stripping frontmatter
               title_val = None
               with open(filepath, 'r') as f:
                   content = f.read()
 
-              # Strip YAML frontmatter
               content_body = re.sub(r'^---.*?---\n?', '', content, count=1, flags=re.DOTALL)
 
-              # Find first H1
               h1_match = re.search(r'^# (.+)$', content_body, re.MULTILINE)
               if h1_match:
                   title_val = h1_match.group(1).strip()
 
-              # Fallback: derive title from slug
               if not title_val:
-                  slug = basename[11:]  # strip date + hyphen
-                  slug = slug.replace('.md', '')
+                  slug = basename[11:].replace('.md', '')
                   title_val = slug.replace('-', ' ')
 
-              # Word count (excluding frontmatter and headings)
               words = len(re.sub(r'^#+ .+$', '', content_body, flags=re.MULTILINE).split())
 
               entry = {
@@ -96,20 +92,19 @@ jobs:
                   'file': basename,
                   'words': words
               }
-              if basename in existing_icons:
-                  entry['icon'] = existing_icons[basename]
+              # Restore preserved custom fields
+              if basename in existing_meta:
+                  entry.update(existing_meta[basename])
+
               posts.append(entry)
 
-          # Sort: newest date first, then alphabetically by title within same date
           posts.sort(key=lambda x: (-int(x['date'].replace('-', '')), x['title']))
 
           with open('updates/posts.json', 'w') as f:
               json.dump(posts, f, indent=2)
               f.write('\n')
 
-          print(f"✓ Generated manifest with {len(posts)} post(s)")
-          total_words = sum(p['words'] for p in posts)
-          print(f"  Total words across all posts: {total_words}")
+          print(f"Generated manifest with {len(posts)} post(s)")
           PYEOF
 
       - name: Validate JSON output
@@ -118,13 +113,77 @@ jobs:
       - name: Build static post pages
         run: node scripts/build-posts.js
 
+      - name: Update sitemap with post URLs
+        run: |
+          python3 << 'PYEOF'
+          import json, re
+
+          with open('updates/posts.json') as f:
+              posts = json.load(f)
+
+          with open('sitemap.xml') as f:
+              sitemap = f.read()
+
+          # Remove all existing /updates/ post URLs (but keep /updates page itself)
+          sitemap = re.sub(
+              r'\s*<url><loc>https://saputra\.co\.uk/updates/[^<]+</loc>[^<]*</url>',
+              '', sitemap
+          )
+
+          # Build new post URL entries
+          post_entries = ''
+          for p in posts:
+              slug = p.get('slug') or p['file'].replace('.md', '')
+              post_entries += f'\n  <url><loc>https://saputra.co.uk/updates/{slug}</loc><lastmod>{p["date"]}</lastmod><priority>0.5</priority></url>'
+
+          # Insert before closing tag
+          sitemap = sitemap.replace(
+              '</urlset>',
+              post_entries + '\n</urlset>'
+          )
+
+          with open('sitemap.xml', 'w') as f:
+              f.write(sitemap)
+
+          print(f"Updated sitemap with {len(posts)} post URL(s)")
+          PYEOF
+
+      - name: Update llms.txt with post list
+        run: |
+          python3 << 'PYEOF'
+          import json, re
+
+          with open('updates/posts.json') as f:
+              posts = json.load(f)
+
+          with open('llms.txt') as f:
+              content = f.read()
+
+          # Remove existing post lines and marker if present
+          content = re.sub(r'\n## Posts\n(?:- \[.*\n)*', '', content)
+
+          # Build posts section
+          if posts:
+              post_section = '\n## Posts\n'
+              for p in posts:
+                  slug = p.get('slug') or p['file'].replace('.md', '')
+                  post_section += f'- [{p["title"]}](https://saputra.co.uk/updates/{slug}) — {p["date"]}\n'
+              # Insert before ## Contact
+              content = content.replace('\n## Contact', post_section + '\n## Contact')
+
+          with open('llms.txt', 'w') as f:
+              f.write(content)
+
+          print(f"Updated llms.txt with {len(posts)} post(s)")
+          PYEOF
+
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add updates/
+          git add updates/ sitemap.xml llms.txt
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
-          git commit -m "chore: update posts manifest"
+          git commit -m "chore: update posts pipeline (manifest, static pages, sitemap, llms.txt)"
           git push
 
       - name: Job summary
@@ -136,17 +195,19 @@ jobs:
               posts = json.load(f)
 
           lines = []
-          lines.append("## Posts Manifest Updated")
+          lines.append("## Posts Pipeline Updated")
           lines.append(f"**Total posts:** {len(posts)}")
           lines.append("")
-          lines.append("| Date | Title | Words |")
-          lines.append("|------|-------|-------|")
+          lines.append("| Date | Title | Slug | Words |")
+          lines.append("|------|-------|------|-------|")
           for p in posts:
-              words = p.get('words', '—')
-              lines.append(f"| {p['date']} | {p['title']} | {words} |")
+              slug = p.get('slug') or p['file'].replace('.md', '')
+              words = p.get('words', '-')
+              lines.append(f"| {p['date']} | {p['title']} | /{slug} | {words} |")
 
           total_words = sum(p.get('words', 0) for p in posts)
           lines.append(f"\n**Total words:** {total_words}")
+          lines.append("\n**Generated:** posts.json, static HTML, sitemap.xml, llms.txt")
 
           summary = '\n'.join(lines)
           summary_file = os.environ.get('GITHUB_STEP_SUMMARY', '')
