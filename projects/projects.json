@@ -23,8 +23,7 @@
     "title": "Iconic",
     "subtitle": "Search and Copy SVG Icons",
     "url": "/iconic/",
-    "category": "Image Tools",
-    "featured": true
+    "category": "Image Tools"
   },
   {
     "title": "ImageOpt",
@@ -110,7 +109,8 @@
     "title": "Parsely",
     "subtitle": "Text Data Extractor",
     "url": "/parsely/",
-    "category": "Text Tools"
+    "category": "Text Tools",
+    "featured": true
   },
   {
     "title": "PasswdGen",
