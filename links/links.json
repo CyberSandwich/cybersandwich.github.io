@@ -544,6 +544,12 @@
     "category": "Personal"
   },
   {
+    "title": "Defuddle",
+    "url": "https://defuddle.md/",
+    "icon": "globe",
+    "category": "Personal"
+  },
+  {
     "title": "Departures (Testflight)",
     "url": "https://departures.to/",
     "icon": "plane",
