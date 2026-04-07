@@ -102,6 +102,7 @@ Drop Image Here
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/swr.js?v=1"></script>
+<script>setTimeout(function(){var l=document.getElementById('loader');if(l&&!l.classList.contains('hidden')){l.classList.add('hidden');if(window._base)_base.notify('Loading Timed Out',false)}},20000)</script>
 <script type="module">
 import*as THREE from'three';
 import{OrbitControls}from'three/addons/controls/OrbitControls.js';
@@ -164,7 +165,7 @@ scene.environment=pmrem.fromEquirectangular(tex).texture;
 scene.environmentIntensity=0.3;
 scene.environmentRotation=new THREE.Euler(0,Math.PI*0.25,0);
 tex.dispose();pmrem.dispose();envReady=true;render()
-})});
+})}).catch(function(){});
 
 var controls=new OrbitControls(camera,renderer.domElement);
 controls.enableZoom=false;
@@ -285,7 +286,7 @@ scene.add(screenMesh);
 modelReady=true;$('loader').classList.add('hidden');
 updateScreen();render()
 },undefined,function(){$('loader').classList.add('hidden');_base.notify('Failed to Load Model',false)})
-})
+}).catch(function(){if(myId===loadId){$('loader').classList.add('hidden');_base.notify('Failed to Load Model',false)}})
 }
 var initDev=0;try{var sd=localStorage.getItem('mockup-dev');if(sd!=null&&DEVICES[+sd])initDev=+sd}catch(_){}
 loadModel(initDev);
