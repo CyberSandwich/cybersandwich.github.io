@@ -756,6 +756,12 @@
     "category": "Personal"
   },
   {
+    "title": "Subtitle Tool & Converter",
+    "url": "https://en.editingtools.io/subtitles/",
+    "icon": "file-text",
+    "category": "Personal"
+  },
+  {
     "title": "Tesco Clubcard",
     "url": "https://secure.tesco.com/clubcard/myvouchers",
     "icon": "tag",
