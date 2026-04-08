@@ -197,7 +197,7 @@ body{line-height:1.5}
   margin:12px 0;
   color:var(--t3)
 }
-.pcontent img{max-width:100%;height:auto;border-radius:var(--r-md);margin:12px 0;aspect-ratio:auto}
+.pcontent img{max-width:100%;height:auto;border-radius:14px;margin:16px 0;display:block;box-shadow:var(--shadow)}
 .pcontent hr{border:none;border-top:1px solid var(--bdr2);margin:20px 0}
 .pcontent table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:.875rem}
 .pcontent th{text-align:left;font-weight:600;color:var(--t1);padding:10px 12px;border-bottom:2px solid var(--bdr)}

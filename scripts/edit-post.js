@@ -18,7 +18,7 @@ var fs = require('fs');
 var path = require('path');
 
 var ROOT = path.join(__dirname, '..');
-var POSTS_JSON = path.join(ROOT, 'updates', 'posts.json');
+var POSTS_JSON = path.join(ROOT, 'posts', 'posts.json');
 var APP_JS = path.join(ROOT, 'app.js');
 
 // ---------------------------------------------------------------------------
@@ -144,7 +144,7 @@ function cmdValidate() {
     }
 
     if (p.file) {
-      var mdPath = path.join(ROOT, 'updates', p.file);
+      var mdPath = path.join(ROOT, 'posts', p.file);
       if (!fs.existsSync(mdPath)) { warn(label + ': .md file not found'); errors++; }
     }
 

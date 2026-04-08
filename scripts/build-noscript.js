@@ -17,7 +17,7 @@ var path = require('path');
 
 var ROOT = path.join(__dirname, '..');
 var PROJECTS_JSON = path.join(ROOT, 'projects', 'projects.json');
-var POSTS_JSON = path.join(ROOT, 'updates', 'posts.json');
+var POSTS_JSON = path.join(ROOT, 'posts', 'posts.json');
 var INDEX_HTML = path.join(ROOT, 'index.html');
 
 function escHtml(s) {
@@ -78,8 +78,8 @@ pLines.push(P_END);
 // 2. Build updates noscript
 // ---------------------------------------------------------------------------
 
-var U_START = '<!-- noscript:updates:start -->';
-var U_END   = '<!-- noscript:updates:end -->';
+var U_START = '<!-- noscript:posts:start -->';
+var U_END   = '<!-- noscript:posts:end -->';
 
 var posts = JSON.parse(fs.readFileSync(POSTS_JSON, 'utf8'));
 
@@ -87,7 +87,7 @@ var uLines = [U_START, '  <noscript>'];
 uLines.push('  <ul>');
 posts.forEach(function(p) {
   var slug = p.slug || p.file.replace(/\.md$/, '');
-  uLines.push('    <li><a href="/updates/' + escHtml(slug) + '">' + escHtml(p.title) + '</a> \u2014 ' + escHtml(p.date) + '</li>');
+  uLines.push('    <li><a href="/posts/' + escHtml(slug) + '">' + escHtml(p.title) + '</a> \u2014 ' + escHtml(p.date) + '</li>');
 });
 uLines.push('  </ul>');
 uLines.push('  </noscript>');

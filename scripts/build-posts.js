@@ -5,7 +5,7 @@
  * build-posts.js — Generate static HTML pages for blog posts (SEO)
  *
  * Zero dependencies. Extracts parseMd() from app.js using the same regex
- * pattern as tests/_helpers.js, then generates /updates/<slug>/index.html
+ * pattern as tests/_helpers.js, then generates /posts/<slug>/index.html
  * for each post in posts.json.
  *
  * Idempotent: only writes when content has changed.
@@ -15,10 +15,10 @@ var fs = require('fs');
 var path = require('path');
 
 var ROOT = path.join(__dirname, '..');
-var POSTS_JSON = path.join(ROOT, 'updates', 'posts.json');
+var POSTS_JSON = path.join(ROOT, 'posts', 'posts.json');
 var APP_JS = path.join(ROOT, 'app.js');
 var INDEX_HTML = path.join(ROOT, 'index.html');
-var UPDATES_DIR = path.join(ROOT, 'updates');
+var POSTS_DIR = path.join(ROOT, 'posts');
 
 // ---------------------------------------------------------------------------
 // 1. Read CSS/JS cache-bust versions from index.html (stays in sync with
@@ -258,7 +258,7 @@ function escAttr(s) {
 // ---------------------------------------------------------------------------
 
 function generatePage(post, slug, layout) {
-  var canonical = 'https://saputra.co.uk/updates/' + slug;
+  var canonical = 'https://saputra.co.uk/posts/' + slug;
   var pageTitle = layout.title || post.title;
   var desc = metaDescription(layout.body);
   var isoDate = post.date + 'T00:00:00+00:00';
@@ -327,7 +327,7 @@ function generatePage(post, slug, layout) {
     '  <div class="tabs">\n' +
     '    <a href="/">Home</a>\n' +
     '    <a href="/projects">Projects</a>\n' +
-    '    <a href="/updates" class="active">Updates</a>\n' +
+    '    <a href="/posts" class="active">Posts</a>\n' +
     '    <a href="/links">Links</a>\n' +
     '  </div>\n' +
     '</nav>\n' +
@@ -353,7 +353,7 @@ var unchanged = 0;
 
 posts.forEach(function(post) {
   var slug = post.slug || post.file.replace(/\.md$/, '');
-  var mdPath = path.join(UPDATES_DIR, post.file);
+  var mdPath = path.join(POSTS_DIR, post.file);
 
   if (!fs.existsSync(mdPath)) {
     console.error('SKIP: ' + post.file + ' not found');
@@ -365,7 +365,7 @@ posts.forEach(function(post) {
   var layout = buildLayout(html);
   var page = generatePage(post, slug, layout);
 
-  var outDir = path.join(UPDATES_DIR, slug);
+  var outDir = path.join(POSTS_DIR, slug);
   var outFile = path.join(outDir, 'index.html');
 
   // Idempotent: only write if content changed
@@ -383,7 +383,7 @@ posts.forEach(function(post) {
 
   fs.writeFileSync(outFile, page);
   built++;
-  console.log('BUILT: updates/' + slug + '/index.html');
+  console.log('BUILT: posts/' + slug + '/index.html');
 });
 
 console.log('\n' + built + ' built, ' + unchanged + ' unchanged');

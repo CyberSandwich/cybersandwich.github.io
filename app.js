@@ -8,8 +8,8 @@ let posts=null;
 let projects=null;
 let links=null;
 let postVer=0;
-const validPages=['home','projects','updates','links'];
-const titles={home:'Home',projects:'Projects',updates:'Updates',links:'Links'};
+const validPages=['home','projects','posts','links'];
+const titles={home:'Home',projects:'Projects',posts:'Posts',links:'Links'};
 const emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
 const CHECK_SVG='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>';
 const SVG_WRAP_OPEN='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
@@ -29,6 +29,12 @@ function route(){
   if(path!=='/'&&path.endsWith('/'))path=path.slice(0,-1);
   const parts=path.split('/').filter(Boolean);
   let page=parts[0]||'home';
+  // Redirect legacy /updates/ URLs to /posts/
+  if(page==='updates'){
+    const slug=parts.slice(1).join('/');
+    history.replaceState(null,'','/posts'+(slug?'/'+slug:''));
+    route();return;
+  }
   if(validPages.indexOf(page)===-1){
     history.replaceState(null,'','/');
     page='home';
@@ -62,11 +68,11 @@ function route(){
 
   if(page==='projects'){showProjects()}
   if(page==='links'){showLinks()}
-  if(page==='updates'){
+  if(page==='posts'){
     let wrap=$('#usearch');
     if(wrap)wrap=wrap.parentNode;
     if(slug){if(wrap)wrap.style.display='none';showPost(slug)}
-    else{const st=$('#updates .stitle');if(st)st.textContent='Updates';const ul=$('#ulist');if(ul&&ul.querySelector('.pcontent'))ul.replaceChildren();if(wrap)wrap.style.display='block';showList()}
+    else{const st=$('#posts .stitle');if(st)st.textContent='Posts';const ul=$('#ulist');if(ul&&ul.querySelector('.pcontent'))ul.replaceChildren();if(wrap)wrap.style.display='block';showList()}
   }
 }
 
@@ -119,7 +125,7 @@ document.addEventListener('click',e=>{
   if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download')||a.target==='_blank')return;
   const parts=href.split('/').filter(Boolean);
   const page=parts[0];
-  if(!page||validPages.indexOf(page)!==-1){
+  if(!page||validPages.indexOf(page)!==-1||page==='updates'){
     e.preventDefault();
     if(href===location.pathname&&(href==='/'||page==='home')){openCmd();return}
     if(href!==location.pathname)history.pushState(null,'',href);
@@ -128,10 +134,10 @@ document.addEventListener('click',e=>{
 });
 
 // Data loaders (SWR via shared/swr.js)
-const DATA_V=2;
+const DATA_V=3;
 const getProjects=_swr.loader('/projects/projects.json?v='+DATA_V,d=>{projects=d;return d});
 const getLinks=_swr.loader('/links/links.json?v='+DATA_V,d=>{links=d;return d});
-const getPosts=_swr.loader('/updates/posts.json?v='+DATA_V,d=>{
+const getPosts=_swr.loader('/posts/posts.json?v='+DATA_V,d=>{
   d.sort((a,b)=>b.date>a.date?1:b.date<a.date?-1:a.title.localeCompare(b.title));
   posts=d;return d;
 });
@@ -319,7 +325,7 @@ function showLinks(){showCards({el:'#llist',data:links,get:getLinks,si:'#lsearch
 
 function showList(){showCards({el:'#ulist',data:posts,get:getPosts,si:'#usearch',chevron:true,
   groups:function(items){const g=[];let cur='',s;items.forEach(function(x){const ym=x.date.slice(0,7);if(ym!==cur){cur=ym;s={label:fmtDate(x.date,{month:'long',year:'numeric'}),items:[]};g.push(s)}s.items.push(x)});return g},
-  href:x=>'/updates/'+(x.slug||x.file.replace('.md','')),title:x=>x.title,sub:x=>fmtDate(x.date),
+  href:x=>'/posts/'+(x.slug||x.file.replace('.md','')),title:x=>x.title,sub:x=>fmtDate(x.date),
   icon:x=>ICONS[x.icon]||ICONS['post'],q:x=>(x.title+' '+x.date).toLowerCase()})}
 
 // Render single post — splits on <hr> into multi-card layout
@@ -327,7 +333,7 @@ function showList(){showCards({el:'#ulist',data:posts,get:getPosts,si:'#usearch'
 // committed by the site owner, not user input. Same-origin trusted content.
 function showPost(slug){
   const el=$('#ulist');
-  const stitle=$('#updates .stitle');
+  const stitle=$('#posts .stitle');
   const ver=++postVer;
   el.replaceChildren();
   function render(html){
@@ -370,7 +376,7 @@ function showPost(slug){
   // Resolve slug to filename: check posts for custom slug, fallback to slug.md
   var mdFile=slug+'.md';
   if(posts)posts.forEach(function(p){if(p.slug===slug||p.file.replace('.md','')===slug)mdFile=p.file});
-  _swr('/updates/'+encodeURIComponent(mdFile),{
+  _swr('/posts/'+encodeURIComponent(mdFile),{
     parse:function(md){try{return parseMd(md)}catch(e){console.error('Parse error:',e);return'<p>Unable to render this post.</p>'}},
     key:'swr_post_'+slug,
     onFresh:function(html){
@@ -729,7 +735,7 @@ function cmdBuildItems(){
   });
   if(posts)posts.forEach(x=>{
     add(x.title,fmtDate(x.date),'Post',()=>{
-      history.pushState(null,'','/updates/'+(x.slug||x.file.replace('.md','')));route();
+      history.pushState(null,'','/posts/'+(x.slug||x.file.replace('.md','')));route();
     });
   });
   return items;
@@ -849,8 +855,8 @@ let _kbTick=false;
 function kbAsync(dir){if(!_kbTick){_kbTick=true;requestAnimationFrame(function(){kbMove(dir);_kbTick=false})}}
 document.addEventListener('mousemove',()=>{if(kbIdx>=0)kbClear(true)},{passive:true});
 
-const tabPaths=['/','/projects','/updates','/links'];
-function isPost(){return location.pathname.startsWith('/updates/')&&location.pathname.split('/').length>2}
+const tabPaths=['/','/projects','/posts','/links'];
+function isPost(){return location.pathname.startsWith('/posts/')&&location.pathname.split('/').length>2}
 
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){
@@ -925,11 +931,11 @@ document.addEventListener('keydown',e=>{
 
   if(key==='Escape'){
     if(kbIdx>=0){kbClear();return}
-    if(isPost()){history.pushState(null,'','/updates');route();return}
+    if(isPost()){history.pushState(null,'','/posts');route();return}
   }
 
   if(key==='Backspace'){
-    if(isPost()){history.pushState(null,'','/updates');route();return}
+    if(isPost()){history.pushState(null,'','/posts');route();return}
   }
 });
 
