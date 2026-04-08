@@ -62,14 +62,14 @@ jobs:
               print("::error::Title must contain at least one alphanumeric character")
               sys.exit(1)
 
-          filename = f"updates/{date}-{slug}.md"
+          filename = f"posts/{date}-{slug}.md"
 
           # Check for slug collision
           if os.path.exists(filename):
               print(f"::error::A post with this slug already exists today: {filename}")
               sys.exit(1)
 
-          os.makedirs('updates', exist_ok=True)
+          os.makedirs('posts', exist_ok=True)
 
           with open(filename, 'w') as f:
               f.write(f"# {title}\n\n{body}\n")
@@ -78,7 +78,7 @@ jobs:
           print(f"✓ Created {filename} ({word_count} words)")
 
           # Update posts.json
-          manifest_path = 'updates/posts.json'
+          manifest_path = 'posts/posts.json'
           if os.path.exists(manifest_path):
               with open(manifest_path) as f:
                   manifest = json.load(f)
@@ -105,7 +105,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add updates/
+          git add posts/
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "Add post: $TITLE"
           git push
@@ -117,7 +117,7 @@ jobs:
           ACTOR: ${{ github.actor }}
         run: |
           WORD_COUNT=$(echo "$BODY" | wc -w | tr -d ' ')
-          POST_COUNT=$(find updates/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+          POST_COUNT=$(find posts/ -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
           DATE=$(date +%Y-%m-%d)
           SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//')
           cat >> "$GITHUB_STEP_SUMMARY" << EOF
@@ -125,7 +125,7 @@ jobs:
           | Field | Value |
           |-------|-------|
           | **Title** | $TITLE |
-          | **File** | updates/${DATE}-${SLUG}.md |
+          | **File** | posts/${DATE}-${SLUG}.md |
           | **Word count** | $WORD_COUNT |
           | **Triggered by** | @$ACTOR |
           | **Total posts** | $POST_COUNT |
