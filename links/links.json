@@ -42,6 +42,18 @@
     "category": "Initiatives"
   },
   {
+    "title": "Cohere Transcribe (03-2026)",
+    "url": "https://huggingface.co/CohereLabs/cohere-transcribe-03-2026",
+    "icon": "mic",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Cohere Transcribe (WebGPU)",
+    "url": "https://huggingface.co/spaces/CohereLabs/Cohere-Transcribe-WebGPU",
+    "icon": "mic",
+    "category": "Initiatives"
+  },
+  {
     "title": "CS50x 2026 Lectures",
     "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
     "icon": "monitor-play",
@@ -117,6 +129,12 @@
     "title": "Google Analytics",
     "url": "https://analytics.google.com/analytics/web/#/",
     "icon": "chart-line",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Hugging Face Models",
+    "url": "https://huggingface.co/models",
+    "icon": "layers",
     "category": "Initiatives"
   },
   {
@@ -213,6 +231,12 @@
     "title": "Warwick Together Instagram Promotion Request",
     "url": "https://forms.office.com/pages/responsepage.aspx?id=vc-6Ce9HZUSSZTVG8ur2vMnmO2qvuk9Pr-SnqVfN7JhUMVFMRDFCUzFYWkswRDlOUzVJTjQxUUQzRS4u",
     "icon": "clipboard",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Whisper Large V3",
+    "url": "https://huggingface.co/openai/whisper-large-v3",
+    "icon": "mic",
     "category": "Initiatives"
   },
   {
