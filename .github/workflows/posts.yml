@@ -3,8 +3,8 @@ name: Generate Posts Pipeline
 on:
   push:
     paths:
-      - 'updates/*.md'
-      - 'updates/posts.json'
+      - 'posts/*.md'
+      - 'posts/posts.json'
     branches:
       - main
 
@@ -28,12 +28,12 @@ jobs:
       - name: Auto-rename files without date prefix
         run: |
           renamed=0
-          for f in updates/*.md; do
+          for f in posts/*.md; do
             [ -f "$f" ] || continue
             basename_f=$(basename "$f")
             if ! echo "$basename_f" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}-'; then
               date_prefix=$(date +%Y-%m-%d)
-              new_name="updates/${date_prefix}-${basename_f}"
+              new_name="posts/${date_prefix}-${basename_f}"
               if [ -f "$new_name" ]; then
                 echo "::warning::Skipping rename, target already exists: $new_name"
                 continue
@@ -54,14 +54,14 @@ jobs:
           # Preserves ALL non-generated fields so manual edits survive regeneration
           GENERATED_KEYS = {'date', 'title', 'file', 'words'}
           existing_meta = {}
-          if os.path.exists('updates/posts.json'):
-              with open('updates/posts.json') as f:
+          if os.path.exists('posts/posts.json'):
+              with open('posts/posts.json') as f:
                   for p in json.load(f):
                       meta = {k: v for k, v in p.items() if k not in GENERATED_KEYS}
                       if meta: existing_meta[p['file']] = meta
 
           posts = []
-          for filepath in sorted(glob.glob('updates/*.md')):
+          for filepath in sorted(glob.glob('posts/*.md')):
               basename = os.path.basename(filepath)
 
               date_match = re.match(r'^(\d{4}-\d{2}-\d{2})-', basename)
@@ -100,7 +100,7 @@ jobs:
 
           posts.sort(key=lambda x: (-int(x['date'].replace('-', '')), x['title']))
 
-          with open('updates/posts.json', 'w') as f:
+          with open('posts/posts.json', 'w') as f:
               json.dump(posts, f, indent=2)
               f.write('\n')
 
@@ -108,7 +108,7 @@ jobs:
           PYEOF
 
       - name: Validate JSON output
-        run: python3 -c "import json; d=json.load(open('updates/posts.json')); assert isinstance(d, list), 'Expected array'" || { echo "::error::Generated invalid posts.json"; exit 1; }
+        run: python3 -c "import json; d=json.load(open('posts/posts.json')); assert isinstance(d, list), 'Expected array'" || { echo "::error::Generated invalid posts.json"; exit 1; }
 
       - name: Build static post pages
         run: node scripts/build-posts.js
@@ -118,15 +118,15 @@ jobs:
           python3 << 'PYEOF'
           import json, re
 
-          with open('updates/posts.json') as f:
+          with open('posts/posts.json') as f:
               posts = json.load(f)
 
           with open('sitemap.xml') as f:
               sitemap = f.read()
 
-          # Remove all existing /updates/ post URLs (but keep /updates page itself)
+          # Remove all existing /posts/ post URLs (but keep /posts page itself)
           sitemap = re.sub(
-              r'\s*<url><loc>https://saputra\.co\.uk/updates/[^<]+</loc>.*?</url>',
+              r'\s*<url><loc>https://saputra\.co\.uk/posts/[^<]+</loc>.*?</url>',
               '', sitemap
           )
 
@@ -134,7 +134,7 @@ jobs:
           post_entries = ''
           for p in posts:
               slug = p.get('slug') or p['file'].replace('.md', '')
-              post_entries += f'\n  <url><loc>https://saputra.co.uk/updates/{slug}</loc><lastmod>{p["date"]}</lastmod><priority>0.5</priority></url>'
+              post_entries += f'\n  <url><loc>https://saputra.co.uk/posts/{slug}</loc><lastmod>{p["date"]}</lastmod><priority>0.5</priority></url>'
 
           # Insert before closing tag
           sitemap = sitemap.replace(
@@ -153,7 +153,7 @@ jobs:
           python3 << 'PYEOF'
           import json, re
 
-          with open('updates/posts.json') as f:
+          with open('posts/posts.json') as f:
               posts = json.load(f)
 
           with open('llms.txt') as f:
@@ -167,7 +167,7 @@ jobs:
               post_section = '\n## Posts\n'
               for p in posts:
                   slug = p.get('slug') or p['file'].replace('.md', '')
-                  post_section += f'- [{p["title"]}](https://saputra.co.uk/updates/{slug}) — {p["date"]}\n'
+                  post_section += f'- [{p["title"]}](https://saputra.co.uk/posts/{slug}) — {p["date"]}\n'
               # Insert before ## Contact
               content = content.replace('\n## Contact', post_section + '\n## Contact')
 
@@ -181,7 +181,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add updates/ sitemap.xml llms.txt
+          git add posts/ sitemap.xml llms.txt
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update posts pipeline (manifest, static pages, sitemap, llms.txt)"
           git push
@@ -191,7 +191,7 @@ jobs:
           python3 << 'PYEOF'
           import json, os
 
-          with open('updates/posts.json') as f:
+          with open('posts/posts.json') as f:
               posts = json.load(f)
 
           lines = []
