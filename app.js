@@ -142,7 +142,7 @@ const getPosts=_swr.loader('/posts/posts.json?v='+DATA_V,d=>{
   posts=d;return d;
 });
 
-const projectCategories=['Flagship Projects','Image Tools','Text Tools','Time Tools','Generators','Utilities','Miscellaneous','In Development'];
+const projectCategories=['Flagship Projects','Image Tools','Video Tools','Text Tools','Time Tools','Generators','Utilities','Miscellaneous','In Development'];
 const linkCategories=['Modules','Initiatives','Academic','Career','Community','Personal','Social Media','Miscellaneous'];
 
 // Chevron SVG for card arrows
@@ -151,6 +151,7 @@ const CHEVRON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 // Project icons — hardcoded SVGs keyed by title, safe for innerHTML
 const PROJECT_ICONS={
 'menuva':'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3"/><path d="M18 15v7"/>',
+'Caption':'<rect width="18" height="14" x="3" y="5" rx="2" ry="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>',
 'CaseConverter':'<path d="m15 16 2.536-7.328a1.02 1.02 1 0 1 1.928 0L22 16"/><path d="M15.697 14h5.606"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/>',
 'ClearView':'<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
 'Clip':'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
