@@ -42,7 +42,8 @@
     "title": "Caption",
     "subtitle": "Offline Video Subtitle Generator",
     "url": "https://github.com/DukeSaputra/caption",
-    "category": "Video Tools"
+    "category": "Video Tools",
+    "featured": true
   },
   {
     "title": "CaseConverter",
