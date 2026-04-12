@@ -195,6 +195,14 @@ function nextPrecomputed(table,offsetDays){
   return null;
 }
 
+function autoAmPm(h,min){
+  var now=new Date(),curH=now.getHours(),curM=now.getMinutes();
+  var amH=h===12?0:h,pmH=h===12?12:h+12;
+  if(amH>curH||(amH===curH&&min>curM))return amH;
+  if(pmH>curH||(pmH===curH&&min>curM))return pmH;
+  return amH;
+}
+
 function parseTime(text){
   var t=text.trim(),h,min,m;
 
@@ -218,21 +226,69 @@ function parseTime(text){
   m=t.match(/\b(\d{1,2})\s*o['']?clock\b/i);
   if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:0,raw:m[0]}}
 
+  // Space-separated: H MM am/pm (10 25 am, 10 25a)
+  m=t.match(/[\s,]+(\d{1,2})\s+(\d{2})\s*(am?|pm?)\s*$/i);
+  if(!m)m=t.match(/^(\d{1,2})\s+(\d{2})\s*(am?|pm?)[\s,]+/i);
+  if(!m)m=t.match(/^(\d{1,2})\s+(\d{2})\s*(am?|pm?)$/i);
+  if(m){
+    h=parseInt(m[1],10);min=parseInt(m[2],10);
+    var ap=m[3].toLowerCase().charAt(0);
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;
+    if(h>23||min>59)return null;
+    return{h:h,m:min,raw:m[0]};
+  }
+
   // Standard: Xam/Xpm/Xa/Xp with optional minutes — try end then start
   m=t.match(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i)||t.match(/[\s,]+(\d{1,2}):(\d{2})\s*$/i);
   if(!m){
     m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||t.match(/^(\d{1,2}):(\d{2})[\s,]+/i);
   }
-  // Also try standalone (entire string is just a time)
   if(!m){
     m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)$/i)||t.match(/^(\d{1,2}):(\d{2})$/i);
   }
-  if(!m)return null;
-  h=parseInt(m[1],10);min=m[2]?parseInt(m[2],10):0;
-  var ap=m[3]?m[3].toLowerCase():null;
-  if(ap){ap=ap.charAt(0);if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0}
-  if(h>23||min>59)return null;
-  return{h:h,m:min,raw:m[0]};
+  if(m){
+    h=parseInt(m[1],10);min=m[2]?parseInt(m[2],10):0;
+    var ap=m[3]?m[3].toLowerCase():null;
+    if(ap){ap=ap.charAt(0);if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0}
+    if(h>23||min>59)return null;
+    return{h:h,m:min,raw:m[0]};
+  }
+
+  // Compact: 3-4 digits with am/pm (boundaries + standalone)
+  m=t.match(/[\s,]+(\d{3,4})\s*(am?|pm?)\s*$/i);
+  if(!m)m=t.match(/^(\d{3,4})\s*(am?|pm?)[\s,]+/i);
+  if(!m)m=t.match(/^(\d{3,4})\s*(am?|pm?)$/i);
+  if(m){
+    var dg=m[1];h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);min=parseInt(dg.slice(-2),10);
+    var ap=m[2].toLowerCase().charAt(0);
+    if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0;
+    if(h>23||min>59)return null;
+    return{h:h,m:min,raw:m[0]};
+  }
+
+  // Compact: 3-4 digits without am/pm (boundary h<=12, standalone any)
+  m=t.match(/^(\d{3,4})$/);
+  if(!m){
+    var bm=t.match(/[\s,]+(\d{3,4})\s*$/)||t.match(/^(\d{3,4})[\s,]+/);
+    if(bm){var dg=bm[1],th=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);if(th<=12)m=bm}
+  }
+  if(m){
+    var dg=m[1];h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);min=parseInt(dg.slice(-2),10);
+    if(min>59||h>23)return null;
+    if(h>=1&&h<=12)h=autoAmPm(h,min);
+    return{h:h,m:min,raw:m[0]};
+  }
+
+  // Bare hour: 1-2 digits without am/pm (standalone only)
+  m=t.match(/^(\d{1,2})$/);
+  if(m){
+    h=parseInt(m[1],10);
+    if(h>23)return null;
+    if(h>=1&&h<=12)h=autoAmPm(h,0);
+    return{h:h,m:0,raw:m[0]};
+  }
+
+  return null;
 }
 
 function stripTime(text){
@@ -243,10 +299,22 @@ function stripTime(text){
   s=s.replace(/\bhalf\s+\d{1,2}\b/gi,'');
   s=s.replace(/\bquarter\s+(?:past|to)\s+\d{1,2}\b/gi,'');
   s=s.replace(/\b\d{1,2}\s*o['']?clock\b/gi,'');
+  // Strip space-separated time (H MM am/pm) from end/start
+  s=s.replace(/[\s,]+\d{1,2}\s+\d{2}\s*(?:am?|pm?)\s*$/i,'');
+  s=s.replace(/^\d{1,2}\s+\d{2}\s*(?:am?|pm?)[\s,]+/i,'');
   // Strip standard time from end
   s=s.replace(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i,'').replace(/[\s,]+(\d{1,2}):(\d{2})\s*$/i,'');
   // Strip standard time from start
   s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})[\s,]+/i,'');
+  // Strip standalone compact time or bare hour (before boundary to avoid partial strips)
+  s=s.replace(/^\d{3,4}\s*(?:am?|pm?)?\s*$/i,'');
+  s=s.replace(/^\d{1,2}$/,'');
+  // Strip compact time (3-4 digits + am/pm) from end/start
+  s=s.replace(/[\s,]+\d{3,4}\s*(?:am?|pm?)\s*$/i,'');
+  s=s.replace(/^\d{3,4}\s*(?:am?|pm?)[\s,]+/i,'');
+  // Strip compact time without am/pm at boundary (h<=12 only, avoids stripping years)
+  s=s.replace(/[\s,]+(\d{3,4})\s*$/,function(_,dg){var h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);return h<=12?'':_});
+  s=s.replace(/^(\d{3,4})([\s,]+)/,function(_,dg){var h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);return h<=12?'':_});
   // Strip connecting words left behind (at, for, etc.)
   s=s.replace(/\s+at\s*$/i,'').replace(/^\s*at\s+/i,'');
   return s.trim();
