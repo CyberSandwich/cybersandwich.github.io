@@ -37,12 +37,10 @@ body{line-height:1.5}
   display:block;
   width:100%;
   margin:0 auto 24px;
-  padding:18px 14px;
-  background:var(--card);
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  cursor:pointer;
+  padding:0;
+  background:none;
   border:none;
+  cursor:pointer;
   -webkit-appearance:none;
   appearance:none;
   text-align:center;
