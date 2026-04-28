@@ -50,9 +50,9 @@ body{line-height:1.5}
 .ds-mono{
   display:inline-block;
   margin:0;
-  font:clamp(5px,1.65vw,12px)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
+  font:700 clamp(5px,1.65vw,12px)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
   letter-spacing:0;
-  color:var(--t2);
+  color:var(--t1);
   white-space:pre;
   user-select:none;
   -webkit-user-select:none;
