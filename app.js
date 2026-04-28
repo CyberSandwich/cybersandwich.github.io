@@ -697,26 +697,121 @@ qrOverlay.setAttribute('aria-label','QR Code');
 qrOverlay.setAttribute('aria-hidden','true');
 const qrCard=document.createElement('div');qrCard.className='qr-card';
 const qrImg=document.createElement('img');qrImg.alt='QR code to saputra.co.uk';qrImg.width=23;qrImg.height=23;
-const qrClose=document.createElement('button');qrClose.className='qr-close';qrClose.setAttribute('aria-label','Close');
-const qrSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');qrSvg.setAttribute('viewBox','0 0 24 24');qrSvg.setAttribute('fill','none');qrSvg.setAttribute('stroke','currentColor');qrSvg.setAttribute('stroke-width','2');qrSvg.setAttribute('stroke-linecap','round');
-const qrL1=document.createElementNS('http://www.w3.org/2000/svg','line');qrL1.setAttribute('x1','6');qrL1.setAttribute('y1','6');qrL1.setAttribute('x2','18');qrL1.setAttribute('y2','18');
-const qrL2=document.createElementNS('http://www.w3.org/2000/svg','line');qrL2.setAttribute('x1','18');qrL2.setAttribute('y1','6');qrL2.setAttribute('x2','6');qrL2.setAttribute('y2','18');
-qrSvg.appendChild(qrL1);qrSvg.appendChild(qrL2);qrClose.appendChild(qrSvg);
-qrClose.addEventListener('click',function(){closeQR()});
-qrCard.appendChild(qrClose);qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
+qrCard.appendChild(qrImg);qrOverlay.appendChild(qrCard);document.body.appendChild(qrOverlay);
 
 const qrModal=mkModal(qrOverlay);
 function openQR(){
   if(qrModal.isOpen)return;
   if(cmdModal.isOpen)closeCmd();
   if(!qrImg.src)qrImg.src='/qr-homepage.png';
-  qrModal.open(qrClose);
+  qrModal.open(qrOverlay);
 }
 function closeQR(){qrModal.close()}
 const nameCard=$('.name-card');
+const dsMono=nameCard&&nameCard.querySelector('.ds-mono');
 if(nameCard){
-  nameCard.addEventListener('click',e=>{e.preventDefault();openQR()});
   nameCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openQR()}});
+}
+if(dsMono){
+  const W=88,H=32,K1x=80,K1y=48,K2=5,STEPS=22;
+  const charset='.,-~:;=!*#$@';
+  const lx=0,ly=0.7071,lz=-0.7071;
+  const buf=new Array(W*H),zb=new Float32Array(W*H);
+  const aCos=new Float32Array(STEPS),aSin=new Float32Array(STEPS);
+  for(let i=0;i<STEPS;i++){const a=(2*Math.PI*i)/STEPS;aCos[i]=Math.cos(a);aSin[i]=Math.sin(a)}
+  const B_TARGET=0.22,tubeR=0.25,spinSpeed=0.003;
+  let A=0,B=B_TARGET,Av=0,Bv=0;
+  function plot(px,py,pz,nx,ny,nz,cA,sA,cB,sB){
+    const p1x=cA*px+sA*pz,p1z=-sA*px+cA*pz;
+    const p2y=cB*py-sB*p1z,p2z=sB*py+cB*p1z;
+    const z=p2z+K2;if(z<0.5)return;
+    const ooz=1/z;
+    const xp=(W>>1)+Math.floor(K1x*ooz*p1x);
+    const yp=(H>>1)-Math.floor(K1y*ooz*p2y);
+    if(xp<0||xp>=W||yp<0||yp>=H)return;
+    const n1x=cA*nx+sA*nz,n1z=-sA*nx+cA*nz;
+    const n2y=cB*ny-sB*n1z,n2z=sB*ny+cB*n1z;
+    const L=n1x*lx+n2y*ly+n2z*lz;if(L<=0)return;
+    const idx=yp*W+xp;
+    if(ooz>zb[idx]){zb[idx]=ooz;let ci=(L*11)|0;if(ci>11)ci=11;buf[idx]=charset[ci]}
+  }
+  function tube(px,py,tx,ty,r,cA,sA,cB,sB){
+    const nxx=-ty,nxy=tx;
+    for(let i=0;i<STEPS;i++){const ca=aCos[i],sa=aSin[i];
+      plot(px+r*ca*nxx,py+r*ca*nxy,r*sa,ca*nxx,ca*nxy,sa,cA,sA,cB,sB)}
+  }
+  let dragging=false,lastX=0,lastY=0,lastMoveTime=0,totalDrag=0,rafId=0;
+  const homeSection=$('#home');
+  function render(){
+    if(!dragging){
+      Av+=(-spinSpeed-Av)*0.025;
+      Bv+=(B_TARGET-B)*0.006;
+      Bv*=0.94;
+      A+=Av;
+      let nB=B+Bv;
+      if(nB>1.4){nB=1.4;Bv=-Math.abs(Bv)*0.55}
+      if(nB<-1.4){nB=-1.4;Bv=Math.abs(Bv)*0.55}
+      B=nB;
+    }
+    const cA=Math.cos(A),sA=Math.sin(A),cB=Math.cos(B),sB=Math.sin(B);
+    for(let i=0;i<W*H;i++){buf[i]=' ';zb[i]=0}
+    const cxD=-1.3,bxD=0.4,hD=1.4,rxD=1.7,ryD=1.4,r=tubeR;
+    for(let yy=-hD;yy<=hD;yy+=0.05)tube(cxD-bxD,yy,0,1,r,cA,sA,cB,sB);
+    for(let phi=-Math.PI/2;phi<=Math.PI/2+0.001;phi+=0.04){
+      const cp=Math.cos(phi),sp=Math.sin(phi);
+      const px=cxD-bxD+rxD*cp,py=ryD*sp;
+      let tx=-rxD*sp,ty=ryD*cp;
+      const tl=1/Math.sqrt(tx*tx+ty*ty);
+      tube(px,py,tx*tl,ty*tl,r,cA,sA,cB,sB);
+    }
+    const cxS=1.2,rs=0.7;
+    for(let phi=0;phi<=3*Math.PI/2+0.001;phi+=0.04){
+      const cp=Math.cos(phi),sp=Math.sin(phi);
+      tube(cxS+rs*cp,rs+rs*sp,-sp,cp,r,cA,sA,cB,sB);
+    }
+    for(let phi=-Math.PI;phi<=Math.PI/2+0.001;phi+=0.04){
+      const cp=Math.cos(phi),sp=Math.sin(phi);
+      tube(cxS+rs*cp,-rs+rs*sp,-sp,cp,r,cA,sA,cB,sB);
+    }
+    let s='';
+    for(let j=0;j<H;j++)s+=buf.slice(j*W,(j+1)*W).join('')+'\n';
+    dsMono.textContent=s;
+  }
+  function loop(){
+    rafId=0;
+    if(!document.hidden&&homeSection&&homeSection.classList.contains('active'))render();
+    schedule();
+  }
+  function schedule(){if(!rafId)rafId=requestAnimationFrame(loop)}
+  render();
+  schedule();
+  document.addEventListener('visibilitychange',schedule);
+  dsMono.addEventListener('pointerdown',e=>{
+    dragging=true;totalDrag=0;
+    lastX=e.clientX;lastY=e.clientY;lastMoveTime=performance.now();
+    Av=0;Bv=0;
+    dsMono.classList.add('ds-grabbing');
+    try{dsMono.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  dsMono.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const now=performance.now();
+    const dt=Math.max(8,now-lastMoveTime);
+    const dx=e.clientX-lastX,dy=e.clientY-lastY;
+    totalDrag+=Math.abs(dx)+Math.abs(dy);
+    const sens=0.01;
+    A-=dx*sens;
+    let nB=B-dy*sens;
+    if(nB>1.4)nB=1.4;if(nB<-1.4)nB=-1.4;B=nB;
+    Av=-(dx*sens)*(16/dt);
+    Bv=-(dy*sens)*(16/dt);
+    lastX=e.clientX;lastY=e.clientY;lastMoveTime=now;
+  });
+  function endDrag(){dragging=false;dsMono.classList.remove('ds-grabbing')}
+  dsMono.addEventListener('pointerup',endDrag);
+  dsMono.addEventListener('pointercancel',endDrag);
+  dsMono.addEventListener('click',e=>{if(totalDrag>=6){e.stopPropagation();e.preventDefault()}});
+  nameCard.addEventListener('click',e=>{e.preventDefault();openQR()});
 }
 
 function cmdBuildItems(){
@@ -880,7 +975,7 @@ document.addEventListener('keydown',e=>{
     return;
   }
 
-  if(qrModal.isOpen){if(e.key==='Tab'){e.preventDefault();qrClose.focus();return}if(e.key==='Escape')closeQR();return}
+  if(qrModal.isOpen){if(e.key==='Tab'){e.preventDefault();qrOverlay.focus();return}if(e.key==='Escape')closeQR();return}
 
   const tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='INPUT'||tag==='TEXTAREA'){
