@@ -38,11 +38,11 @@ body{line-height:1.5}
   width:100%;
   margin:0 auto 24px;
   padding:18px 14px;
-  background:#000;
+  background:var(--card);
   border-radius:20px;
-  border:0.5px solid var(--t4);
   box-shadow:var(--shadow);
   cursor:pointer;
+  border:none;
   -webkit-appearance:none;
   appearance:none;
   text-align:center
@@ -52,8 +52,7 @@ body{line-height:1.5}
   margin:0;
   font:clamp(5px,1.65vw,12px)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
   letter-spacing:0;
-  color:#5cf07a;
-  text-shadow:0 0 6px rgba(92,240,122,.45);
+  color:var(--t2);
   white-space:pre;
   user-select:none;
   -webkit-user-select:none;
