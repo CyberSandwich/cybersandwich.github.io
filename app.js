@@ -756,7 +756,7 @@ if(dsMono){
     const cA=Math.cos(A),sA=Math.sin(A),cB=Math.cos(B),sB=Math.sin(B);
     for(let i=0;i<W*H;i++){buf[i]=' ';zb[i]=0}
     const cxD=-1.3,bxD=0.4,hD=1.4,rxD=1.7,ryD=1.4,r=tubeR;
-    for(let yy=-hD;yy<=hD;yy+=0.05)tube(cxD-bxD,yy,0,1,r,cA,sA,cB,sB);
+    for(let yy=-hD-r;yy<=hD+r;yy+=0.05)tube(cxD-bxD,yy,0,1,r,cA,sA,cB,sB);
     for(let phi=-Math.PI/2;phi<=Math.PI/2+0.001;phi+=0.04){
       const cp=Math.cos(phi),sp=Math.sin(phi);
       const px=cxD-bxD+rxD*cp,py=ryD*sp;

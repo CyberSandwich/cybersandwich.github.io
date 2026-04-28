@@ -45,11 +45,13 @@ body{line-height:1.5}
   border:none;
   -webkit-appearance:none;
   appearance:none;
-  text-align:center
+  text-align:center;
+  overflow:visible
 }
 .ds-mono{
   display:inline-block;
   margin:0;
+  padding:.4em 0;
   font:700 clamp(5px,1.65vw,12px)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
   letter-spacing:0;
   color:var(--t1);
