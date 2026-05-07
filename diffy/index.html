@@ -157,7 +157,7 @@ function calcDiff(startMs,endMs,g){
   }
   if(g==='d'){
     var days=Math.floor(diffMs/86400000);
-    var hrs=Math.floor((diffMs%86400000)/3600000);
+    var hrs=Math.floor((diffMs%86400000)/360000)/10;
     return[
       {v:days,l:days===1?'Day':'Days'},
       {v:hrs,l:hrs===1?'Hour':'Hours'}
@@ -169,7 +169,7 @@ function calcDiff(startMs,endMs,g){
     if(pivot>b){months--;pivot=new Date(a);pivot.setMonth(a.getMonth()+months)}
     var rem=b.getTime()-pivot.getTime();
     var days=Math.floor(rem/86400000);
-    var hrs=Math.floor((rem%86400000)/3600000);
+    var hrs=Math.floor((rem%86400000)/360000)/10;
     return[
       {v:months,l:months===1?'Month':'Months'},
       {v:days,l:days===1?'Day':'Days'},
@@ -185,7 +185,7 @@ function calcDiff(startMs,endMs,g){
   if(pivot2>b){months--;pivot2=new Date(pivot);pivot2.setMonth(pivot.getMonth()+months)}
   var rem=b.getTime()-pivot2.getTime();
   var days=Math.floor(rem/86400000);
-  var hrs=Math.floor((rem%86400000)/3600000);
+  var hrs=Math.floor((rem%86400000)/360000)/10;
   return[
     {v:years,l:years===1?'Year':'Years'},
     {v:months,l:months===1?'Month':'Months'},
