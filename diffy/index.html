@@ -152,15 +152,15 @@ function calcDiff(startMs,endMs,g){
   var b=new Date(Math.max(startMs,endMs));
   var diffMs=b.getTime()-a.getTime();
   if(g==='h'){
-    var hrs=Math.floor(diffMs/3600000);
-    return[{v:hrs,l:hrs===1?'Hr':'Hrs'}];
+    var hrs=Math.round(diffMs/360000)/10;
+    return[{v:hrs,l:hrs===1?'Hour':'Hours'}];
   }
   if(g==='d'){
     var days=Math.floor(diffMs/86400000);
     var hrs=Math.floor((diffMs%86400000)/3600000);
     return[
       {v:days,l:days===1?'Day':'Days'},
-      {v:hrs,l:hrs===1?'Hr':'Hrs'}
+      {v:hrs,l:hrs===1?'Hour':'Hours'}
     ];
   }
   if(g==='mo'){
@@ -173,7 +173,7 @@ function calcDiff(startMs,endMs,g){
     return[
       {v:months,l:months===1?'Month':'Months'},
       {v:days,l:days===1?'Day':'Days'},
-      {v:hrs,l:hrs===1?'Hr':'Hrs'}
+      {v:hrs,l:hrs===1?'Hour':'Hours'}
     ];
   }
   // 'y' calendar-aware: years, then months, days, hours
@@ -190,7 +190,7 @@ function calcDiff(startMs,endMs,g){
     {v:years,l:years===1?'Year':'Years'},
     {v:months,l:months===1?'Month':'Months'},
     {v:days,l:days===1?'Day':'Days'},
-    {v:hrs,l:hrs===1?'Hr':'Hrs'}
+    {v:hrs,l:hrs===1?'Hour':'Hours'}
   ];
 }
 

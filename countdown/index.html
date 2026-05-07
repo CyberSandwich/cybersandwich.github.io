@@ -159,20 +159,20 @@ function calcCountdown(targetMs){
   var diff=targetMs-Date.now();
   if(diff<=0)return null;
   var s=Math.floor(diff/1000);
-  if(gran==='sec')return[{v:s,l:s===1?'Sec':'Secs'}];
+  if(gran==='sec')return[{v:s,l:s===1?'Sec':'Seconds'}];
   if(gran==='min'){
     var m=Math.floor(s/60);s%=60;
-    return[{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Secs'}];
+    return[{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Seconds'}];
   }
   if(gran==='h'){
     var h=Math.floor(s/3600);s%=3600;
     var m=Math.floor(s/60);s%=60;
-    return[{v:h,l:h===1?'Hour':'Hours'},{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Secs'}];
+    return[{v:h,l:h===1?'Hour':'Hours'},{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Seconds'}];
   }
   var d=Math.floor(s/86400);s%=86400;
   var h=Math.floor(s/3600);s%=3600;
   var m=Math.floor(s/60);s%=60;
-  return[{v:d,l:d===1?'Day':'Days'},{v:h,l:h===1?'Hour':'Hours'},{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Secs'}];
+  return[{v:d,l:d===1?'Day':'Days'},{v:h,l:h===1?'Hour':'Hours'},{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Seconds'}];
 }
 
 function buildCdWrap(units,done){
