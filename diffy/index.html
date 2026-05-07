@@ -130,7 +130,14 @@ function announce(msg){var el=$('status');el.textContent='';requestAnimationFram
 /* ── Date Helpers ────────────────────────────────────────────────── */
 function sameYMD(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
 function sameYear(a,b){return a.getFullYear()===b.getFullYear()}
+function fmtDateOnly(d){return d.getDate()+' '+MONTH_NAMES[d.getMonth()]+' '+d.getFullYear()}
 function formatRange(start,end){
+  var bothMidnight=start.getHours()===0&&start.getMinutes()===0&&end.getHours()===0&&end.getMinutes()===0;
+  if(bothMidnight){
+    if(sameYMD(start,end))return fmtDateOnly(start);
+    if(sameYear(start,end))return fmtDateOnly(start)+' → '+end.getDate()+' '+MONTH_NAMES[end.getMonth()];
+    return fmtDateOnly(start)+' → '+fmtDateOnly(end);
+  }
   var sStr=formatLabel(start);
   if(sameYMD(start,end))
     return sStr+' → '+fmtTime12(end.getHours(),end.getMinutes());
@@ -175,7 +182,7 @@ function calcDiff(startMs,endMs,g){
   var hrs=Math.floor((rem%86400000)/3600000);
   var mins=Math.floor((rem%3600000)/60000);
   return[
-    {v:months,l:months===1?'Mo':'Mos'},
+    {v:months,l:months===1?'Month':'Months'},
     {v:days,l:days===1?'Day':'Days'},
     {v:hrs,l:hrs===1?'Hr':'Hrs'},
     {v:mins,l:mins===1?'Min':'Mins'}
@@ -275,8 +282,15 @@ function isDupeExact(title,startMs,endMs,extra){
 }
 
 /* ── Add Item ────────────────────────────────────────────────────── */
-var autoIdx=0;
-function nextAutoTitle(){autoIdx++;return'Comparison '+autoIdx}
+function nextAutoTitle(claimed){
+  var used=claimed||{};
+  for(var i=0;i<items.length;i++){
+    var m=items[i].title.match(/^Comparison\s+(\d+)$/);
+    if(m)used[parseInt(m[1],10)]=1;
+  }
+  var n=1;while(used[n])n++;used[n]=1;
+  return'Comparison '+n;
+}
 function addItem(){
   var title=$('inp-title').value.trim();
   var startText=$('inp-start').value.trim();
@@ -303,7 +317,6 @@ function addItem(){
   $('inp-title').value='';$('inp-start').value='';$('inp-end').value='';
   $('inp-start').focus();
   if(startNow)_base.notify('Current Time Used as Start','warn');
-  else if(pStart.hint==='time'&&pEnd.hint==='time')_base.notify('Current Time Used','warn');
   else announce('Added');
 }
 
@@ -465,7 +478,8 @@ function tryBulkPaste(text){
       recs.push({title:t||null,startMs:sMs,endMs:eMs});
     }
     if(ok&&(recs.length||invalid)){
-      for(var j=0;j<recs.length;j++)recs[j].title=recs[j].title||nextAutoTitle();
+      var claimed={};
+      for(var j=0;j<recs.length;j++)recs[j].title=recs[j].title||nextAutoTitle(claimed);
       addBulkRecords(recs,invalid);return true;
     }
   }
@@ -481,7 +495,8 @@ function tryBulkPaste(text){
       recs.push({title:null,startMs:sMs,endMs:eMs});
     }
     if(ok&&(recs.length||invalid)){
-      for(var j=0;j<recs.length;j++)recs[j].title=recs[j].title||nextAutoTitle();
+      var claimed={};
+      for(var j=0;j<recs.length;j++)recs[j].title=recs[j].title||nextAutoTitle(claimed);
       addBulkRecords(recs,invalid);return true;
     }
   }
@@ -508,10 +523,14 @@ function tryBulkPaste(text){
       if(!sP||!eP)return false;
       var sMs=sP.date.getTime(),eMs=eP.date.getTime();
       if(Math.floor(sMs/60000)===Math.floor(eMs/60000))return false;
-      recs.push({title:nextAutoTitle(),startMs:sMs,endMs:eMs});
+      recs.push({title:null,startMs:sMs,endMs:eMs});
     }
   }
-  if(recs.length){addBulkRecords(recs);return true}
+  if(recs.length){
+    var claimed={};
+    for(var j=0;j<recs.length;j++)recs[j].title=recs[j].title||nextAutoTitle(claimed);
+    addBulkRecords(recs);return true;
+  }
 
   return false;
 }
@@ -642,7 +661,6 @@ document.addEventListener('visibilitychange',function(){
 
 /* ── Init ────────────────────────────────────────────────────────── */
 load();
-items.forEach(function(it){var m=it.title.match(/^Comparison\s+(\d+)$/);if(m){var n=parseInt(m[1],10);if(n>autoIdx)autoIdx=n}});
 updateGranUI();render();
 })();
 </script>

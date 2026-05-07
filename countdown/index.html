@@ -337,8 +337,15 @@ function hasDupeTitle(title){
 }
 
 /* ── Add Item ────────────────────────────────────────────────────── */
-var autoIdx=0;
-function nextAutoTitle(){autoIdx++;return'Countdown '+autoIdx}
+function nextAutoTitle(claimed){
+  var used=claimed||{};
+  for(var i=0;i<items.length;i++){
+    var m=items[i].title.match(/^Countdown\s+(\d+)$/);
+    if(m)used[parseInt(m[1],10)]=1;
+  }
+  var n=1;while(used[n])n++;used[n]=1;
+  return'Countdown '+n;
+}
 function addItem(){
   var title=$('inp-title').value.trim();
   var dateText=$('inp-date').value.trim();
@@ -643,8 +650,6 @@ document.addEventListener('click',function(){initAudio()},{once:true});
 
 /* ── Init ────────────────────────────────────────────────────────── */
 load();
-// Set autoIdx from existing Countdown N titles
-items.forEach(function(it){var m=it.title.match(/^Countdown\s+(\d+)$/);if(m){var n=parseInt(m[1],10);if(n>autoIdx)autoIdx=n}});
 render();tick();startTick();
 })();
 </script>
