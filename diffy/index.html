@@ -92,7 +92,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/dateparser.js?v=6"></script>
+<script src="/shared/dateparser.js?v=7"></script>
 <script>
 (function(){'use strict';
 function $(id){return document.getElementById(id)}
@@ -300,11 +300,12 @@ function addItem(){
   var title=$('inp-title').value.trim();
   var startText=$('inp-start').value.trim();
   var endText=$('inp-end').value.trim();
-  if(!endText){_base.notify('Enter an End Date',false);return}
-  var startNow=!startText;
-  var pStart=startNow?{date:new Date(),label:formatLabel(new Date()),hint:null}:parseDate(startText);
+  if(!startText&&!endText){_base.notify('Enter a Start or End Date',false);return}
+  var startNow=!startText,endNow=!endText;
+  var nowSnap=new Date();
+  var pStart=startNow?{date:nowSnap,label:formatLabel(nowSnap),hint:null}:parseDate(startText);
   if(!pStart){_base.notify('Could Not Parse Start',false);return}
-  var pEnd=parseDate(endText);
+  var pEnd=endNow?{date:nowSnap,label:formatLabel(nowSnap),hint:null}:parseDate(endText);
   if(!pEnd){_base.notify('Could Not Parse End',false);return}
   var sMs=pStart.date.getTime(),eMs=pEnd.date.getTime();
   if(Math.floor(sMs/60000)===Math.floor(eMs/60000)){_base.notify('Start and End Are Identical',false);return}
@@ -321,7 +322,9 @@ function addItem(){
   save();kbIdx=-1;render();
   $('inp-title').value='';$('inp-start').value='';$('inp-end').value='';
   $('inp-start').focus();
-  if(startNow)_base.notify('Current Time Used as Start','warn');
+  if(startNow&&endNow)_base.notify('Both Sides Set to Now','warn');
+  else if(startNow)_base.notify('Current Time Used as Start','warn');
+  else if(endNow)_base.notify('Current Time Used as End','warn');
   else announce('Added');
 }
 

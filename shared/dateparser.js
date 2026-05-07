@@ -65,6 +65,7 @@ function fuzzyLookup(token,keys,cap){
 var CORRECTION_DICT=(function(){
   var d={},k,i,arr=[
     'today','tomorrow','tmr','tmrw','tmw','yesterday','ytd',
+    'now','rn','atm','tm','tomo','tom','yest','yda','yes','current','currently','moment','right','time',
     'next','last','this','in','on','at','from','until','by','for','ago','before','after','of',
     'noon','midday','midnight','half','past','quarter','to','am','pm','oclock','clock',
     'tonight','evening','morning','afternoon','weekend','weekday','weekdays',
@@ -361,9 +362,9 @@ function tryMatch(s,now,today){
 
   /* 1a. Compound relative phrases (must come before single-keyword block).
      "tomorrow"/"yesterday" optional: bare "day after" implies +2, "day before" implies -2. */
-  if(/^day\s+after(?:\s+(?:tomorrow|tmr|tmrw|tmw))?$/.test(s)){
+  if(/^day\s+after(?:\s+(?:tomorrow|tmr|tmrw|tmw|tm|tomo|2mrw|tom))?$/.test(s)){
     result=new Date(today);result.setDate(result.getDate()+2);
-  }else if(/^day\s+before(?:\s+(?:yesterday|ytd))?$/.test(s)){
+  }else if(/^day\s+before(?:\s+(?:yesterday|ytd|yest|yda|yes))?$/.test(s)){
     result=new Date(today);result.setDate(result.getDate()-2);
   }else if(s==='tonight'){
     result=new Date(today);
@@ -402,11 +403,14 @@ function tryMatch(s,now,today){
 
   /* 1b. Single-keyword relative */
   if(!result){
-    if(s==='today'){
+    if(s==='now'||s==='rn'||s==='right now'||s==='current'||s==='currently'||s==='current time'||s==='this moment'||s==='atm'||s==='today now'){
+      result=new Date(now);
+      result.__dpTime={h:now.getHours(),m:now.getMinutes()};
+    }else if(s==='today'){
       result=new Date(today);
-    }else if(s==='tomorrow'||s==='tmr'||s==='tmrw'||s==='tmw'){
+    }else if(s==='tomorrow'||s==='tmr'||s==='tmrw'||s==='tmw'||s==='tm'||s==='tomo'||s==='2mrw'||s==='tom'){
       result=new Date(today);result.setDate(result.getDate()+1);
-    }else if(s==='yesterday'||s==='ytd'){
+    }else if(s==='yesterday'||s==='ytd'||s==='yest'||s==='yda'||s==='yes'){
       result=new Date(today);result.setDate(result.getDate()-1);
     }else if(s==='next week'){
       result=new Date(today);
