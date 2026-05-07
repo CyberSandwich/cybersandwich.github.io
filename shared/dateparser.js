@@ -687,9 +687,10 @@ function parseDateFormats(s){
     }
   }
 
-  m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)(?:\s+(\d{4}))?$/);
+  m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?[\s\-]+([a-z]+)(?:[\s\-]+(\d{4}|\d{2}))?$/);
   if(m){
     day=parseInt(m[1],10);mon=MONTHS[m[2]];year=m[3]?parseInt(m[3],10):null;
+    if(year!==null&&m[3].length===2)year=year<70?2000+year:1900+year;
     if(mon!==undefined&&day>=1&&day<=31){
       if(!year){
         dt=new Date(now.getFullYear(),mon,day);
@@ -699,9 +700,10 @@ function parseDateFormats(s){
     }
   }
 
-  m=s.match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?$/);
+  m=s.match(/^([a-z]+)[\s\-]+(\d{1,2})(?:st|nd|rd|th)?(?:[\s\-]+(\d{4}|\d{2}))?$/);
   if(m){
     mon=MONTHS[m[1]];day=parseInt(m[2],10);year=m[3]?parseInt(m[3],10):null;
+    if(year!==null&&m[3].length===2)year=year<70?2000+year:1900+year;
     if(mon!==undefined&&day>=1&&day<=31){
       if(!year){
         dt=new Date(now.getFullYear(),mon,day);
