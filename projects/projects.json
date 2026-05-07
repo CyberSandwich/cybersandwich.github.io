@@ -88,6 +88,12 @@
     "category": "Time Tools"
   },
   {
+    "title": "Diffy",
+    "subtitle": "Date Difference Calculator",
+    "url": "/diffy/",
+    "category": "Time Tools"
+  },
+  {
     "title": "ThymeZone",
     "subtitle": "Compare Timezones Side by Side",
     "url": "/thymezone/",
