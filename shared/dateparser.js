@@ -67,7 +67,8 @@ var CORRECTION_DICT=(function(){
     'today','tomorrow','tmr','tmrw','tmw','yesterday','ytd',
     'next','last','this','in','on','at','from','until','by','for','ago','before','after','of',
     'noon','midday','midnight','half','past','quarter','to','am','pm','oclock','clock',
-    'tonight','evening','morning','afternoon','weekend',
+    'tonight','evening','morning','afternoon','weekend','weekday','weekdays',
+    'working','business','work',
     'end','start','week','weeks','month','months','year','years',
     'day','days','fortnight','fortnights','hour','hours','minute','minutes','min','mins','second','seconds','sec','secs',
     'christmas','xmas','easter','thanksgiving','halloween','ny','nye','valentine','valentines','paddy','patrick','st','fool','fools','bonfire','fawkes','veterans','armistice','remembrance','boxing','burns','australia','groundhog','mlk','presidents','mother','father','labor','labour','columbus','indigenous','memorial','spring','summer','bank','holiday','independence','bastille','hallows','guy','turkey','chinese','lunar','cny','good','martin','luther','king','jr','peoples','eve'
@@ -115,6 +116,20 @@ function expandDecimalTime(text){
 }
 
 /* ---------- helpers (unchanged) ---------- */
+
+/* Add n working days (Mon-Fri) to a date, skipping weekends. Negative n walks
+   backwards. Used by "5 working days", "3 business days ago", etc. */
+function addWorkingDays(date,n){
+  var d=new Date(date);
+  var step=n>=0?1:-1;
+  var remaining=Math.abs(Math.round(n));
+  while(remaining>0){
+    d.setDate(d.getDate()+step);
+    var dow=d.getDay();
+    if(dow!==0&&dow!==6)remaining--;
+  }
+  return d;
+}
 
 function nextOccurrence(m,d){
   var now=new Date(),y=now.getFullYear();
@@ -401,6 +416,18 @@ function tryMatch(s,now,today){
       result=new Date(today.getFullYear(),today.getMonth()+1,1);
     }else if(s==='next year'){
       result=new Date(today.getFullYear()+1,0,1);
+    }
+  }
+
+  /* 1b2. N working/business days. Must precede the generic day matcher because
+     it spans multiple words ("5 working days", "3 business days ago"). */
+  if(!result){
+    var wdAgo=s.match(/(?:^|\s)(\d+(?:\.\d+)?)\s+(?:(?:working|business|work)\s+days?|weekdays?)\s+(?:ago|before)\b/);
+    if(wdAgo){
+      result=addWorkingDays(today,-parseFloat(wdAgo[1]));
+    }else{
+      var wd=s.match(/(?:^|\s)(?:in\s+|for\s+)?(\d+(?:\.\d+)?)\s+(?:(?:working|business|work)\s+days?|weekdays?)\b/);
+      if(wd)result=addWorkingDays(today,parseFloat(wd[1]));
     }
   }
 
