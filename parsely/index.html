@@ -80,6 +80,7 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/search.js?v=20"></script>
+<script src="/shared/dateparser.js?v=4"></script>
 <script>
 function $(id){return document.getElementById(id)}
 
@@ -894,7 +895,12 @@ function parseText(text,html){
     for(var i=0;i<em.length;i++)items.push({text:em[i],type:'email'});
     var ph=extractPhones(text);
     for(var i=0;i<ph.length;i++)items.push({text:ph[i],type:'phone'});
-    var dt=extractDates(text);
+    /* Pre-pass through shared normalize+autoCorrect so accented (Septembre,
+       Décembre) and typo'd (Wedensday, Decembr) dates get caught by the
+       English-only extractor regexes below. Only the date extractor sees
+       the rewritten text; emails/URLs/etc. keep original casing. */
+    var dateText=(typeof _dp!=='undefined')?_dp.autoCorrect(_dp.normalize(text)):text;
+    var dt=extractDates(dateText);
     for(var i=0;i<dt.length;i++)items.push({text:dt[i].text,type:'date',sort:dt[i].sort});
     var mo=extractMoney(text);
     for(var i=0;i<mo.length;i++)items.push({text:mo[i],type:'money'});

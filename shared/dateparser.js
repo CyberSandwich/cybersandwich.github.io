@@ -100,6 +100,20 @@ function stripPunct(text){
   }).join('').trim();
 }
 
+/* Rewrite decimal-hour notation as colon time: "5.5pm" -> "5:30pm",
+   "17.5" -> "17:30", "12.5am" -> "12:30am", "5.25pm" -> "5:15pm".
+   Skipped if hour > 23, if minutes round to 60+, or if a duration unit
+   word (week/month/year/day/fortnight/hour/min/sec) follows, so "10.5 weeks"
+   stays intact for the relative-quantity matcher. */
+function expandDecimalTime(text){
+  return String(text).replace(/\b(\d{1,2})\.(\d+)(\s*(?:am?|pm?))?\b(?!\s*(?:weeks?|months?|years?|days?|fortnights?|hours?|hrs?|minutes?|mins?|seconds?|secs?))/gi,function(whole,h,dec,suf){
+    var hh=parseInt(h,10);
+    var min=Math.round(parseFloat('0.'+dec)*60);
+    if(hh>23||min<0||min>=60)return whole;
+    return hh+':'+(min<10?'0':'')+min+(suf||'');
+  });
+}
+
 /* ---------- helpers (unchanged) ---------- */
 
 function nextOccurrence(m,d){
@@ -248,6 +262,9 @@ function stripTime(text){
   s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})[\s,]+/i,'');
   s=s.replace(/^\d{3,4}\s*(?:am?|pm?)?\s*$/i,'');
   s=s.replace(/^\d{1,2}$/,'');
+  /* Standalone bare time-only inputs: "5pm", "5p", "5:30", "5:30pm", "17:30" */
+  s=s.replace(/^(\d{1,2}):(\d{2})\s*(?:am?|pm?)?$/i,'');
+  s=s.replace(/^(\d{1,2})\s*(?:am?|pm?)$/i,'');
   s=s.replace(/[\s,]+\d{3,4}\s*(?:am?|pm?)\s*$/i,'');
   s=s.replace(/^\d{3,4}\s*(?:am?|pm?)[\s,]+/i,'');
   s=s.replace(/[\s,]+(\d{3,4})\s*$/,function(_,dg){var h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);return h<=12?'':_});
@@ -327,10 +344,11 @@ function stripNoise(s){
 function tryMatch(s,now,today){
   var result=null;
 
-  /* 1a. Compound relative phrases (must come before single-keyword block) */
-  if(/^day\s+after\s+(?:tomorrow|tmr|tmrw|tmw)$/.test(s)){
+  /* 1a. Compound relative phrases (must come before single-keyword block).
+     "tomorrow"/"yesterday" optional: bare "day after" implies +2, "day before" implies -2. */
+  if(/^day\s+after(?:\s+(?:tomorrow|tmr|tmrw|tmw))?$/.test(s)){
     result=new Date(today);result.setDate(result.getDate()+2);
-  }else if(/^day\s+before\s+(?:yesterday|ytd)$/.test(s)){
+  }else if(/^day\s+before(?:\s+(?:yesterday|ytd))?$/.test(s)){
     result=new Date(today);result.setDate(result.getDate()-2);
   }else if(s==='tonight'){
     result=new Date(today);
@@ -342,7 +360,7 @@ function tryMatch(s,now,today){
     result=new Date(today);result.__dpTime={h:9,m:0};
   }else if(s==='this afternoon'){
     result=new Date(today);result.__dpTime={h:14,m:0};
-  }else if(s==='this weekend'){
+  }else if(s==='this weekend'||s==='weekend'){
     result=new Date(today);
     var dow=result.getDay();
     if(dow!==6){var diff=(6-dow+7)%7;result.setDate(result.getDate()+diff);}
@@ -477,8 +495,10 @@ function parseDate(text){
   var dur=parseDuration(raw);
   if(dur){dur.hint=null;return dur}
 
-  /* 2. Normalize, strip incidental punctuation, autoCorrect typos */
-  var prepared=autoCorrect(stripPunct(normalize(raw)));
+  /* 2. Normalize, strip incidental punctuation, autoCorrect typos,
+        rewrite decimal-hour notation (5.5pm → 5:30pm) so parseTime/findTimeMid
+        can pick it up via existing colon patterns. */
+  var prepared=expandDecimalTime(autoCorrect(stripPunct(normalize(raw))));
 
   /* 3. Retry duration on prepared text (catches typos like "0.5 howr") */
   var dur2=parseDuration(prepared);
@@ -743,7 +763,7 @@ function extractDate(text){
   var p=parseDate(text);
   if(p)return p;
 
-  var preparedFull=autoCorrect(stripPunct(normalize(text)));
+  var preparedFull=expandDecimalTime(autoCorrect(stripPunct(normalize(text))));
   var midTime=findTimeMid(preparedFull);
   var workingText=text;
   if(midTime){
