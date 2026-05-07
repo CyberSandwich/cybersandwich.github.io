@@ -281,9 +281,9 @@ function addItem(){
   var title=$('inp-title').value.trim();
   var startText=$('inp-start').value.trim();
   var endText=$('inp-end').value.trim();
-  if(!startText){_base.notify('Enter a Start Date',false);return}
   if(!endText){_base.notify('Enter an End Date',false);return}
-  var pStart=parseDate(startText);
+  var startNow=!startText;
+  var pStart=startNow?{date:new Date(),label:formatLabel(new Date()),hint:null}:parseDate(startText);
   if(!pStart){_base.notify('Could Not Parse Start',false);return}
   var pEnd=parseDate(endText);
   if(!pEnd){_base.notify('Could Not Parse End',false);return}
@@ -302,7 +302,8 @@ function addItem(){
   save();kbIdx=-1;render();
   $('inp-title').value='';$('inp-start').value='';$('inp-end').value='';
   $('inp-start').focus();
-  if(pStart.hint==='time'&&pEnd.hint==='time')_base.notify('Current Time Used','warn');
+  if(startNow)_base.notify('Current Time Used as Start','warn');
+  else if(pStart.hint==='time'&&pEnd.hint==='time')_base.notify('Current Time Used','warn');
   else announce('Added');
 }
 
