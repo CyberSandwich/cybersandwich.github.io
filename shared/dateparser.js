@@ -722,6 +722,25 @@ function parseDateFormats(s){
     if(mon>=0&&mon<=11&&day>=1&&day<=daysInMonth(year,mon))return new Date(year,mon,day);
   }
 
+  /* 2-digit year. Cascade: DD/MM/YY → MM/DD/YY → YY/MM/DD. Returns first valid. */
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+  if(m){
+    var a=parseInt(m[1],10),b=parseInt(m[2],10),c=parseInt(m[3],10);
+    var expandYY=function(yy){return yy<70?2000+yy:1900+yy};
+    if(a>=1&&a<=31&&b>=1&&b<=12){
+      year=expandYY(c);mon=b-1;day=a;
+      if(day<=daysInMonth(year,mon))return new Date(year,mon,day);
+    }
+    if(a>=1&&a<=12&&b>=1&&b<=31){
+      year=expandYY(c);mon=a-1;day=b;
+      if(day<=daysInMonth(year,mon))return new Date(year,mon,day);
+    }
+    if(b>=1&&b<=12&&c>=1&&c<=31){
+      year=expandYY(a);mon=b-1;day=c;
+      if(day<=daysInMonth(year,mon))return new Date(year,mon,day);
+    }
+  }
+
   m=s.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
   if(m){
     day=parseInt(m[1],10);mon=parseInt(m[2],10)-1;

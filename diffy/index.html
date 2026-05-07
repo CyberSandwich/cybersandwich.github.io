@@ -56,10 +56,10 @@ body{display:flex;align-items:flex-start;justify-content:center}
   </div>
   <div class="card" id="gran-card">
     <div class="seg-row c4">
-      <button class="seg active" type="button" data-gran="mo">Months</button>
+      <button class="seg active" type="button" data-gran="y">Years</button>
+      <button class="seg" type="button" data-gran="mo">Months</button>
       <button class="seg" type="button" data-gran="d">Days</button>
       <button class="seg" type="button" data-gran="h">Hours</button>
-      <button class="seg" type="button" data-gran="min">Minutes</button>
     </div>
   </div>
   <div class="inp-row">
@@ -92,14 +92,14 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/dateparser.js?v=5"></script>
+<script src="/shared/dateparser.js?v=6"></script>
 <script>
 (function(){'use strict';
 function $(id){return document.getElementById(id)}
 var parseDate=_dp.parseDate,splitTitleDate=_dp.splitTitleDate,extractDate=_dp.extractDate,formatLabel=_dp.formatLabel,fmtTime12=_dp.fmtTime12,MONTH_NAMES=_dp.MONTH_NAMES;
 var items=[],searchTimer=null;
 var kbIdx=-1;
-var gran='mo';
+var gran='y';
 var mkX=_base.mkX;
 var norm=_search.norm,scoreWord=_search.scoreWord;
 
@@ -113,7 +113,7 @@ function load(){
     return e;
   });
   var g;try{g=localStorage.getItem('diffy:gran')}catch(_){}
-  if(g==='mo'||g==='d'||g==='h'||g==='min')gran=g;
+  if(g==='y'||g==='mo'||g==='d'||g==='h')gran=g;
 }
 function save(){
   try{localStorage.setItem('diffy:items',JSON.stringify(items))}
@@ -151,41 +151,46 @@ function calcDiff(startMs,endMs,g){
   var a=new Date(Math.min(startMs,endMs));
   var b=new Date(Math.max(startMs,endMs));
   var diffMs=b.getTime()-a.getTime();
-  if(g==='min'){
-    var mins=Math.floor(diffMs/60000);
-    return[{v:mins,l:mins===1?'Min':'Mins'}];
-  }
   if(g==='h'){
     var hrs=Math.floor(diffMs/3600000);
-    var mins=Math.floor((diffMs%3600000)/60000);
-    return[
-      {v:hrs,l:hrs===1?'Hr':'Hrs'},
-      {v:mins,l:mins===1?'Min':'Mins'}
-    ];
+    return[{v:hrs,l:hrs===1?'Hr':'Hrs'}];
   }
   if(g==='d'){
     var days=Math.floor(diffMs/86400000);
     var hrs=Math.floor((diffMs%86400000)/3600000);
-    var mins=Math.floor((diffMs%3600000)/60000);
     return[
       {v:days,l:days===1?'Day':'Days'},
-      {v:hrs,l:hrs===1?'Hr':'Hrs'},
-      {v:mins,l:mins===1?'Min':'Mins'}
+      {v:hrs,l:hrs===1?'Hr':'Hrs'}
     ];
   }
-  // 'mo' calendar-aware
-  var months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
-  var pivot=new Date(a);pivot.setMonth(a.getMonth()+months);
-  if(pivot>b){months--;pivot=new Date(a);pivot.setMonth(a.getMonth()+months)}
-  var rem=b.getTime()-pivot.getTime();
+  if(g==='mo'){
+    var months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
+    var pivot=new Date(a);pivot.setMonth(a.getMonth()+months);
+    if(pivot>b){months--;pivot=new Date(a);pivot.setMonth(a.getMonth()+months)}
+    var rem=b.getTime()-pivot.getTime();
+    var days=Math.floor(rem/86400000);
+    var hrs=Math.floor((rem%86400000)/3600000);
+    return[
+      {v:months,l:months===1?'Month':'Months'},
+      {v:days,l:days===1?'Day':'Days'},
+      {v:hrs,l:hrs===1?'Hr':'Hrs'}
+    ];
+  }
+  // 'y' calendar-aware: years, then months, days, hours
+  var years=b.getFullYear()-a.getFullYear();
+  var pivot=new Date(a);pivot.setFullYear(a.getFullYear()+years);
+  if(pivot>b){years--;pivot=new Date(a);pivot.setFullYear(a.getFullYear()+years)}
+  var months=(b.getFullYear()-pivot.getFullYear())*12+(b.getMonth()-pivot.getMonth());
+  var pivot2=new Date(pivot);pivot2.setMonth(pivot.getMonth()+months);
+  if(pivot2>b){months--;pivot2=new Date(pivot);pivot2.setMonth(pivot.getMonth()+months)}
+  var rem=b.getTime()-pivot2.getTime();
   var days=Math.floor(rem/86400000);
   var hrs=Math.floor((rem%86400000)/3600000);
-  var mins=Math.floor((rem%3600000)/60000);
   return[
+    {v:years,l:years===1?'Year':'Years'},
     {v:months,l:months===1?'Month':'Months'},
     {v:days,l:days===1?'Day':'Days'},
-    {v:hrs,l:hrs===1?'Hr':'Hrs'},
-    {v:mins,l:mins===1?'Min':'Mins'}
+    {v:hrs,l:hrs===1?'Hr':'Hrs'}
   ];
 }
 
@@ -332,10 +337,10 @@ function removeItem(id){
 /* ── Reset (two-press) ───────────────────────────────────────────── */
 var resetCtrl=_base.twoPress($('rs-btn'),{
   label:$('rs-l'),
-  guard:function(){return $('inp-title').value||$('inp-start').value||$('inp-end').value||gran!=='mo'},
+  guard:function(){return $('inp-title').value||$('inp-start').value||$('inp-end').value||gran!=='y'},
   onConfirm:function(){
     $('inp-title').value='';$('inp-start').value='';$('inp-end').value='';
-    if(gran!=='mo'){gran='mo';saveGran();updateGranUI();render()}
+    if(gran!=='y'){gran='y';saveGran();updateGranUI();render()}
     $('inp-title').focus();
     announce('Reset');
   }
