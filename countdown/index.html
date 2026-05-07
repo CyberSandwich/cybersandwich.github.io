@@ -73,6 +73,14 @@ body{display:flex;align-items:flex-start;justify-content:center}
     <button type="button" id="ca-btn" disabled aria-label="Copy All"><svg aria-hidden="true" id="ca-i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg aria-hidden="true" id="ca-ck" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="ca-l">Copy All</span></button>
     <button type="button" id="rs-btn" aria-label="Reset"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rs-l">Reset</span></button>
   </div>
+  <div class="card" id="gran-card">
+    <div class="seg-row c4">
+      <button class="seg active" type="button" data-gran="d">Days</button>
+      <button class="seg" type="button" data-gran="h">Hours</button>
+      <button class="seg" type="button" data-gran="min">Mins</button>
+      <button class="seg" type="button" data-gran="sec">Secs</button>
+    </div>
+  </div>
   <div class="inp-row">
     <div class="inp-fields">
       <div class="inp">
@@ -112,16 +120,17 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/dateparser.js?v=1"></script>
+<script src="/shared/dateparser.js?v=2"></script>
 <script>
 (function(){'use strict';
 function $(id){return document.getElementById(id)}
-var parseDate=_dp.parseDate,parseTime=_dp.parseTime,splitTitleDate=_dp.splitTitleDate,formatLabel=_dp.formatLabel,fmtTime12=_dp.fmtTime12,MONTH_NAMES=_dp.MONTH_NAMES;
+var parseDate=_dp.parseDate,parseTime=_dp.parseTime,splitTitleDate=_dp.splitTitleDate,extractDate=_dp.extractDate,formatLabel=_dp.formatLabel,fmtTime12=_dp.fmtTime12,MONTH_NAMES=_dp.MONTH_NAMES;
 var items=[],searchTimer=null,tickTimer=null;
 var kbIdx=-1;
 var audioCtx,sndInt,wakeLock=null;
 var mkX=_base.mkX;
 var norm=_search.norm,scoreWord=_search.scoreWord;
+var gran='d';
 
 /* ── Storage ─────────────────────────────────────────────────────── */
 function load(){
@@ -130,11 +139,14 @@ function load(){
     // Regenerate label to include time (migrates old items without time in label)
     e.dateLabel=formatLabel(new Date(e.target));return e;
   });
+  var g;try{g=localStorage.getItem('countdown:gran')}catch(_){}
+  if(g==='d'||g==='h'||g==='min'||g==='sec')gran=g;
 }
 function save(){
   try{localStorage.setItem('countdown-items',JSON.stringify(items))}
   catch(e){if(e.name==='QuotaExceededError')announce('Storage Full')}
 }
+function saveGran(){try{localStorage.setItem('countdown:gran',gran)}catch(_){}}
 
 /* ── Unique ID ───────────────────────────────────────────────────── */
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -147,20 +159,20 @@ function calcCountdown(targetMs){
   var diff=targetMs-Date.now();
   if(diff<=0)return null;
   var s=Math.floor(diff/1000);
+  if(gran==='sec')return[{v:s,l:s===1?'Sec':'Secs'}];
+  if(gran==='min'){
+    var m=Math.floor(s/60);s%=60;
+    return[{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Secs'}];
+  }
+  if(gran==='h'){
+    var h=Math.floor(s/3600);s%=3600;
+    var m=Math.floor(s/60);s%=60;
+    return[{v:h,l:h===1?'Hour':'Hours'},{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Secs'}];
+  }
   var d=Math.floor(s/86400);s%=86400;
   var h=Math.floor(s/3600);s%=3600;
   var m=Math.floor(s/60);s%=60;
-  return{d:d,h:h,m:m,s:s};
-}
-
-function fmtCountdown(c){
-  if(!c)return null;
-  return[
-    {v:c.d,l:c.d===1?'Day':'Days'},
-    {v:c.h,l:c.h===1?'Hour':'Hours'},
-    {v:c.m,l:c.m===1?'Min':'Mins'},
-    {v:c.s,l:c.s===1?'Sec':'Secs'}
-  ];
+  return[{v:d,l:d===1?'Day':'Days'},{v:h,l:h===1?'Hour':'Hours'},{v:m,l:m===1?'Min':'Mins'},{v:s,l:s===1?'Sec':'Secs'}];
 }
 
 function buildCdWrap(units,done){
@@ -300,7 +312,7 @@ function render(){
     btn.appendChild(mkX());
     header.appendChild(info);header.appendChild(btn);
 
-    var units=it.done?null:fmtCountdown(calcCountdown(it.target));
+    var units=it.done?null:calcCountdown(it.target);
     var cdWrap=buildCdWrap(units,it.done);
     cdWrap.setAttribute('data-id',it.id);
 
@@ -379,14 +391,28 @@ function removeItem(id){
 /* ── Reset (two-press) ───────────────────────────────────────────── */
 var resetCtrl=_base.twoPress($('rs-btn'),{
   label:$('rs-l'),
-  guard:function(){return $('inp-title').value||$('inp-date').value},
+  guard:function(){return $('inp-title').value||$('inp-date').value||gran!=='d'},
   onConfirm:function(){
     $('inp-title').value='';$('inp-date').value='';
+    if(gran!=='d'){gran='d';saveGran();updateGranUI();render()}
     $('inp-title').focus();
     announce('Reset');
   }
 });
 function doReset(){resetCtrl.press()}
+
+/* ── Granularity Switching ───────────────────────────────────────── */
+function updateGranUI(){
+  var btns=$('gran-card').querySelectorAll('.seg');
+  for(var i=0;i<btns.length;i++)
+    btns[i].classList.toggle('active',btns[i].getAttribute('data-gran')===gran);
+}
+$('gran-card').addEventListener('click',function(e){
+  var btn=e.target.closest('.seg');if(!btn)return;
+  var g=btn.getAttribute('data-gran');
+  if(!g||g===gran)return;
+  gran=g;saveGran();updateGranUI();render();
+});
 
 /* ── Tick (live updates) ─────────────────────────────────────────── */
 function tick(){
@@ -397,24 +423,21 @@ function tick(){
     var item=null;
     for(var j=0;j<items.length;j++){if(items[j].id===id){item=items[j];break}}
     if(!item||item.done)continue;
-    var calc=calcCountdown(item.target);
-    if(!calc){
+    var units=calcCountdown(item.target);
+    if(!units){
       if(!firedItem)fireItem(item);
       render();
       return;
     }
     var unitEls=els[i].querySelectorAll('.item-cd-unit');
-    if(unitEls.length===4){
-      var units=[calc.d,calc.h,calc.m,calc.s];
-      var labels=[calc.d===1?'Day':'Days',calc.h===1?'Hour':'Hours',calc.m===1?'Min':'Mins',calc.s===1?'Sec':'Secs'];
-      for(var k=0;k<4;k++){
-        var valEl=unitEls[k].querySelector('.item-cd-val');
-        var lblEl=unitEls[k].querySelector('.item-cd-lbl');
-        var nv=''+units[k];
-        if(valEl&&valEl.textContent!==nv)valEl.textContent=nv;
-        if(lblEl&&lblEl.textContent!==labels[k])lblEl.textContent=labels[k];
-        unitEls[k].classList.toggle('zero',units[k]===0);
-      }
+    if(unitEls.length!==units.length){render();return}
+    for(var k=0;k<units.length;k++){
+      var valEl=unitEls[k].querySelector('.item-cd-val');
+      var lblEl=unitEls[k].querySelector('.item-cd-lbl');
+      var nv=''+units[k].v;
+      if(valEl&&valEl.textContent!==nv)valEl.textContent=nv;
+      if(lblEl&&lblEl.textContent!==units[k].l)lblEl.textContent=units[k].l;
+      unitEls[k].classList.toggle('zero',units[k].v===0);
     }
   }
 }
@@ -543,21 +566,26 @@ $('pa-btn').addEventListener('click',function(){
 function handlePastedText(t){
   // Try bulk paste first
   if(t.indexOf('\n')!==-1&&tryBulkPaste(t)){paFeedback();return}
-  // Single item: smart split
+  // Single item: try smart split (single-line "title — date") first
   var titleEl=$('inp-title'),dateEl=$('inp-date');
-  if(!titleEl.value&&!dateEl.value){
-    var split=splitTitleDate(t);
-    if(split){
-      if(split.title)titleEl.value=split.title;
-      var dt=split.parsed.date;
-      dateEl.value=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear()+', '+fmtTime12(dt.getHours(),dt.getMinutes());
-      if(split.title)dateEl.focus();else titleEl.focus();
-    }else{
-      titleEl.value=t;dateEl.focus();
-    }
-  }else if(!dateEl.value){dateEl.value=t}
-  else if(!titleEl.value){titleEl.value=t}
-  else{dateEl.value=t}
+  var split=t.indexOf('\n')===-1?splitTitleDate(t):null;
+  if(split&&!titleEl.value&&!dateEl.value){
+    if(split.title)titleEl.value=split.title;
+    var dt=split.parsed.date;
+    dateEl.value=formatLabel(dt);
+    if(split.title)dateEl.focus();else titleEl.focus();
+    paFeedback();return;
+  }
+  // Try extracting an embedded date from prose
+  var ext=extractDate(t);
+  if(ext){
+    dateEl.value=formatLabel(ext.date);
+    if(!titleEl.value)titleEl.focus();else dateEl.focus();
+    paFeedback();return;
+  }
+  // No date anywhere — paste goes to title
+  if(!titleEl.value){titleEl.value=t;dateEl.focus()}
+  else if(!dateEl.value){dateEl.focus()}
   paFeedback();
 }
 document.addEventListener('paste',function(e){
@@ -627,8 +655,8 @@ $('fireOv').addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDe
 
 /* ── Cross-Tab Sync ──────────────────────────────────────────────── */
 window.addEventListener('storage',function(e){
-  if(e.key==='countdown-items'){
-    kbIdx=-1;load();render();
+  if(e.key==='countdown-items'||e.key==='countdown:gran'){
+    kbIdx=-1;load();updateGranUI();render();
   }
 });
 
@@ -637,7 +665,7 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden){
     stopTick();clearTimeout(searchTimer);clearTimeout(paTimer);
   }else{
-    load();render();tick();startTick();
+    load();updateGranUI();render();tick();startTick();
     // Reset paste button state
     var pb=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
     pb.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';
@@ -650,7 +678,7 @@ document.addEventListener('click',function(){initAudio()},{once:true});
 
 /* ── Init ────────────────────────────────────────────────────────── */
 load();
-render();tick();startTick();
+updateGranUI();render();tick();startTick();
 })();
 </script>
 </body>

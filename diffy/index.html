@@ -92,11 +92,11 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/dateparser.js?v=1"></script>
+<script src="/shared/dateparser.js?v=2"></script>
 <script>
 (function(){'use strict';
 function $(id){return document.getElementById(id)}
-var parseDate=_dp.parseDate,splitTitleDate=_dp.splitTitleDate,formatLabel=_dp.formatLabel,fmtTime12=_dp.fmtTime12,MONTH_NAMES=_dp.MONTH_NAMES;
+var parseDate=_dp.parseDate,splitTitleDate=_dp.splitTitleDate,extractDate=_dp.extractDate,formatLabel=_dp.formatLabel,fmtTime12=_dp.fmtTime12,MONTH_NAMES=_dp.MONTH_NAMES;
 var items=[],searchTimer=null;
 var kbIdx=-1;
 var gran='mo';
@@ -538,40 +538,32 @@ function tryBulkPaste(text){
 function handlePastedText(t){
   // Multi-line bulk first
   if(t.indexOf('\n')!==-1&&tryBulkPaste(t)){paFeedback();return}
-  // Single line: try to split into start/end
-  var rng=splitRange(t);
   var titleEl=$('inp-title'),startEl=$('inp-start'),endEl=$('inp-end');
+  // Single-line "start → end" range
+  var rng=t.indexOf('\n')===-1?splitRange(t):null;
   if(rng){
-    // Maybe left contains "title : date"
     var leftSplit=splitTitleDate(rng.left);
     if(leftSplit&&leftSplit.title){
       if(!titleEl.value)titleEl.value=leftSplit.title;
-      var sd=leftSplit.parsed.date;
-      startEl.value=sd.getDate()+' '+MONTH_NAMES[sd.getMonth()]+' '+sd.getFullYear()+', '+fmtTime12(sd.getHours(),sd.getMinutes());
+      startEl.value=formatLabel(leftSplit.parsed.date);
     }else{
       var sP=parseDate(rng.left);
-      if(sP){
-        var sd=sP.date;
-        startEl.value=sd.getDate()+' '+MONTH_NAMES[sd.getMonth()]+' '+sd.getFullYear()+', '+fmtTime12(sd.getHours(),sd.getMinutes());
-      }else{
-        startEl.value=rng.left;
-      }
+      startEl.value=sP?formatLabel(sP.date):rng.left;
     }
     var eP=parseDate(rng.right);
-    if(eP){
-      var ed=eP.date;
-      endEl.value=ed.getDate()+' '+MONTH_NAMES[ed.getMonth()]+' '+ed.getFullYear()+', '+fmtTime12(ed.getHours(),ed.getMinutes());
-    }else{
-      endEl.value=rng.right;
-    }
+    endEl.value=eP?formatLabel(eP.date):rng.right;
     endEl.focus();
-  }else{
-    // Fallback: drop into first empty field
-    if(!titleEl.value){titleEl.value=t;startEl.focus()}
-    else if(!startEl.value){startEl.value=t;endEl.focus()}
-    else if(!endEl.value){endEl.value=t}
-    else{endEl.value=t}
+    paFeedback();return;
   }
+  // Try extracting an embedded date from prose; fill End (Start can default to now)
+  var ext=extractDate(t);
+  if(ext){
+    endEl.value=formatLabel(ext.date);
+    if(!titleEl.value)titleEl.focus();else endEl.focus();
+    paFeedback();return;
+  }
+  // No date anywhere — paste goes to title
+  if(!titleEl.value){titleEl.value=t;startEl.focus()}
   paFeedback();
 }
 

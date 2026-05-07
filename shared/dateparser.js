@@ -489,5 +489,29 @@ function splitTitleDate(text){
   return null;
 }
 
-window._dp={parseDate:parseDate,parseTime:parseTime,parseDuration:parseDuration,splitTitleDate:splitTitleDate,formatLabel:formatLabel,fmtTime12:fmtTime12,MONTH_NAMES:MONTH_NAMES,MONTHS:MONTHS,DAYS:DAYS};
+/* Extract first parseable date from arbitrary prose (multi-line, sentences).
+   Splits on sentence/clause delimiters and unicode dashes; keeps ASCII hyphen,
+   slash, and colon intact so 2026-01-15 / 15/01/2026 / 14:30 stay whole.
+   Per-chunk splitTitleDate handles "title — date" inside one chunk; calling
+   splitTitleDate on the whole text would over-match because its word-shrink
+   fallback retains trailing punctuation glued to words. */
+function extractDate(text){
+  if(!text||!text.trim())return null;
+  var p=parseDate(text);
+  if(p)return p;
+  var chunks=text.split(/[\n.?!,;–—|()<>{}\[\]"]+/);
+  for(var i=0;i<chunks.length;i++){
+    var c=chunks[i].trim().replace(/^[^\w]+|[^\w]+$/g,'').trim();
+    if(!c)continue;
+    var pp=parseDate(c);
+    if(pp)return pp;
+    if(c.indexOf(' ')!==-1){
+      var ss=splitTitleDate(c);
+      if(ss)return ss.parsed;
+    }
+  }
+  return null;
+}
+
+window._dp={parseDate:parseDate,parseTime:parseTime,parseDuration:parseDuration,splitTitleDate:splitTitleDate,extractDate:extractDate,formatLabel:formatLabel,fmtTime12:fmtTime12,MONTH_NAMES:MONTH_NAMES,MONTHS:MONTHS,DAYS:DAYS};
 })();
