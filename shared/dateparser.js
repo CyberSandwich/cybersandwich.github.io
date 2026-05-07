@@ -1,13 +1,106 @@
 (function(){
 'use strict';
 
-/* Date Parser - lifted verbatim from countdown/index.html */
+/* Date Parser — robust two-pass: normalize+autoCorrect, then match cascade */
 var MONTHS={jan:0,january:0,feb:1,february:1,mar:2,march:2,apr:3,april:3,may:4,jun:5,june:5,jul:6,july:6,aug:7,august:7,sep:8,sept:8,september:8,oct:9,october:9,nov:10,november:10,dec:11,december:11};
 var MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var DAYS={sun:0,sunday:0,mon:1,monday:1,tue:2,tuesday:2,wed:3,wednesday:3,thu:4,thursday:4,fri:5,friday:5,sat:6,saturday:6};
 
 var EASTER={2025:[3,20],2026:[4,5],2027:[3,28],2028:[4,16],2029:[4,1],2030:[4,21],2031:[4,13],2032:[3,28],2033:[4,17],2034:[4,9],2035:[3,25],2036:[4,13],2037:[4,5],2038:[4,25],2039:[4,10],2040:[4,1]};
 var CNY={2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8],2036:[1,28],2037:[2,15],2038:[2,4],2039:[1,24],2040:[2,12]};
+
+/* ---------- normalize / damerau / fuzzy / autoCorrect ---------- */
+
+function normalize(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+}
+
+function damerau(a,b,cap){
+  var la=a.length,lb=b.length;
+  if(Math.abs(la-lb)>cap)return cap+1;
+  if(la===0)return lb;
+  if(lb===0)return la;
+  var prev2=new Array(lb+1),prev1=new Array(lb+1),curr=new Array(lb+1);
+  for(var j=0;j<=lb;j++)prev1[j]=j;
+  for(var i=1;i<=la;i++){
+    curr[0]=i;
+    var rowMin=i;
+    for(var j=1;j<=lb;j++){
+      var cost=a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1;
+      var v=curr[j-1]+1;
+      var w=prev1[j]+1;if(w<v)v=w;
+      var x=prev1[j-1]+cost;if(x<v)v=x;
+      if(i>1&&j>1&&a.charCodeAt(i-1)===b.charCodeAt(j-2)&&a.charCodeAt(i-2)===b.charCodeAt(j-1)){
+        var t=prev2[j-2]+1;if(t<v)v=t;
+      }
+      curr[j]=v;
+      if(v<rowMin)rowMin=v;
+    }
+    if(rowMin>cap)return cap+1;
+    var tmp=prev2;prev2=prev1;prev1=curr;curr=tmp;
+  }
+  return prev1[lb];
+}
+
+function getThreshold(len){
+  if(len<=3)return 0;
+  if(len<=5)return 1;
+  return 2;
+}
+
+function fuzzyLookup(token,keys,cap){
+  var best=null,bestDist=cap+1;
+  for(var i=0;i<keys.length;i++){
+    var k=keys[i];
+    var d=damerau(token,k,bestDist);
+    if(d<bestDist){best=k;bestDist=d;}
+    else if(d===bestDist&&best){
+      var dt=Math.abs(k.length-token.length),db=Math.abs(best.length-token.length);
+      if(dt<db){best=k;}
+    }
+  }
+  return bestDist<=cap?best:null;
+}
+
+var CORRECTION_DICT=(function(){
+  var d={},k,i,arr=[
+    'today','tomorrow','tmr','tmrw','tmw','yesterday','ytd',
+    'next','last','this','in','on','at','from','until','by','for','ago','before','after','of',
+    'noon','midday','midnight','half','past','quarter','to','am','pm','oclock','clock',
+    'tonight','evening','morning','afternoon','weekend',
+    'end','start','week','weeks','month','months','year','years',
+    'day','days','fortnight','fortnights','hour','hours','minute','minutes','min','mins','second','seconds','sec','secs',
+    'christmas','xmas','easter','thanksgiving','halloween','ny','nye','valentine','valentines','paddy','patrick','st','fool','fools','bonfire','fawkes','veterans','armistice','remembrance','boxing','burns','australia','groundhog','mlk','presidents','mother','father','labor','labour','columbus','indigenous','memorial','spring','summer','bank','holiday','independence','bastille','hallows','guy','turkey','chinese','lunar','cny','good','martin','luther','king','jr','peoples','eve'
+  ];
+  for(k in MONTHS)d[k]=true;
+  for(k in DAYS)d[k]=true;
+  for(i=0;i<arr.length;i++)d[arr[i]]=true;
+  return d;
+})();
+var CORRECTION_KEYS=Object.keys(CORRECTION_DICT);
+
+function autoCorrect(text){
+  return String(text).replace(/[A-Za-z]+/g,function(token){
+    var lower=token.toLowerCase();
+    if(CORRECTION_DICT[lower])return token;
+    var thr=getThreshold(lower.length);
+    if(thr===0)return token;
+    var hit=fuzzyLookup(lower,CORRECTION_KEYS,thr);
+    if(!hit)return token;
+    if(token===token.toUpperCase())return hit.toUpperCase();
+    if(token.charAt(0)===token.charAt(0).toUpperCase())return hit.charAt(0).toUpperCase()+hit.slice(1);
+    return hit;
+  });
+}
+
+function stripPunct(text){
+  return String(text).split(/(\s+)/).map(function(part){
+    if(/^\s+$/.test(part))return part;
+    return part.replace(/^[^\w]+|[^\w]+$/g,'');
+  }).join('').trim();
+}
+
+/* ---------- helpers (unchanged) ---------- */
 
 function nextOccurrence(m,d){
   var now=new Date(),y=now.getFullYear();
@@ -67,27 +160,21 @@ function autoAmPm(h,min){
 function parseTime(text){
   var t=text.trim(),h,min,m;
 
-  // noon / midday / midnight - anywhere in string
   if(/\bnoon\b/i.test(t)||/\bmidday\b/i.test(t))return{h:12,m:0,raw:t.match(/\b(?:noon|midday)\b/i)[0]};
   if(/\bmidnight\b/i.test(t))return{h:0,m:0,raw:t.match(/\bmidnight\b/i)[0]};
 
-  // half past X, half X to X:30
   m=t.match(/\bhalf\s+past\s+(\d{1,2})\b/i)||t.match(/\bhalf\s+(\d{1,2})\b/i);
   if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:30,raw:m[0]}}
 
-  // quarter past X to X:15
   m=t.match(/\bquarter\s+past\s+(\d{1,2})\b/i);
   if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:15,raw:m[0]}}
 
-  // quarter to X
   m=t.match(/\bquarter\s+to\s+(\d{1,2})\b/i);
   if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:(h===1?12:h-1),m:45,raw:m[0]}}
 
-  // X o'clock / X oclock
   m=t.match(/\b(\d{1,2})\s*o['']?clock\b/i);
   if(m){h=parseInt(m[1],10);if(h>=1&&h<=12)return{h:h,m:0,raw:m[0]}}
 
-  // Space-separated: H MM am/pm (10 25 am, 10 25a)
   m=t.match(/[\s,]+(\d{1,2})\s+(\d{2})\s*(am?|pm?)\s*$/i);
   if(!m)m=t.match(/^(\d{1,2})\s+(\d{2})\s*(am?|pm?)[\s,]+/i);
   if(!m)m=t.match(/^(\d{1,2})\s+(\d{2})\s*(am?|pm?)$/i);
@@ -99,7 +186,6 @@ function parseTime(text){
     return{h:h,m:min,raw:m[0]};
   }
 
-  // Standard: Xam/Xpm/Xa/Xp with optional minutes - try end then start
   m=t.match(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i)||t.match(/[\s,]+(\d{1,2}):(\d{2})\s*$/i);
   if(!m){
     m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||t.match(/^(\d{1,2}):(\d{2})[\s,]+/i);
@@ -115,7 +201,6 @@ function parseTime(text){
     return{h:h,m:min,raw:m[0]};
   }
 
-  // Compact: 3-4 digits with am/pm (boundaries + standalone)
   m=t.match(/[\s,]+(\d{3,4})\s*(am?|pm?)\s*$/i);
   if(!m)m=t.match(/^(\d{3,4})\s*(am?|pm?)[\s,]+/i);
   if(!m)m=t.match(/^(\d{3,4})\s*(am?|pm?)$/i);
@@ -127,7 +212,6 @@ function parseTime(text){
     return{h:h,m:min,raw:m[0]};
   }
 
-  // Compact: 3-4 digits without am/pm (boundary h<=12, standalone any)
   m=t.match(/^(\d{3,4})$/);
   if(!m){
     var bm=t.match(/[\s,]+(\d{3,4})\s*$/)||t.match(/^(\d{3,4})[\s,]+/);
@@ -140,7 +224,6 @@ function parseTime(text){
     return{h:h,m:min,raw:m[0]};
   }
 
-  // Bare hour: 1-2 digits without am/pm (standalone only)
   m=t.match(/^(\d{1,2})$/);
   if(m){
     h=parseInt(m[1],10);
@@ -154,31 +237,69 @@ function parseTime(text){
 
 function stripTime(text){
   var s=text;
-  // Strip word-based time expressions
   s=s.replace(/\b(?:noon|midday|midnight)\b/gi,'');
   s=s.replace(/\bhalf\s+past\s+\d{1,2}\b/gi,'');
   s=s.replace(/\bhalf\s+\d{1,2}\b/gi,'');
   s=s.replace(/\bquarter\s+(?:past|to)\s+\d{1,2}\b/gi,'');
   s=s.replace(/\b\d{1,2}\s*o['']?clock\b/gi,'');
-  // Strip space-separated time (H MM am/pm) from end/start
   s=s.replace(/[\s,]+\d{1,2}\s+\d{2}\s*(?:am?|pm?)\s*$/i,'');
   s=s.replace(/^\d{1,2}\s+\d{2}\s*(?:am?|pm?)[\s,]+/i,'');
-  // Strip standard time from end
   s=s.replace(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i,'').replace(/[\s,]+(\d{1,2}):(\d{2})\s*$/i,'');
-  // Strip standard time from start
   s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})[\s,]+/i,'');
-  // Strip standalone compact time or bare hour (before boundary to avoid partial strips)
   s=s.replace(/^\d{3,4}\s*(?:am?|pm?)?\s*$/i,'');
   s=s.replace(/^\d{1,2}$/,'');
-  // Strip compact time (3-4 digits + am/pm) from end/start
   s=s.replace(/[\s,]+\d{3,4}\s*(?:am?|pm?)\s*$/i,'');
   s=s.replace(/^\d{3,4}\s*(?:am?|pm?)[\s,]+/i,'');
-  // Strip compact time without am/pm at boundary (h<=12 only, avoids stripping years)
   s=s.replace(/[\s,]+(\d{3,4})\s*$/,function(_,dg){var h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);return h<=12?'':_});
   s=s.replace(/^(\d{3,4})([\s,]+)/,function(_,dg){var h=parseInt(dg.length===3?dg[0]:dg.slice(0,2),10);return h<=12?'':_});
-  // Strip connecting words left behind (at, for, etc.)
   s=s.replace(/\s+at\s*$/i,'').replace(/^\s*at\s+/i,'');
   return s.trim();
+}
+
+/* Mid-prose time extractor: returns {h,m,raw,span:[a,b]} or null.
+   Only matches explicit time forms (with am/pm, colon, or named); never bare digits. */
+function findTimeMid(text){
+  var m;
+  m=text.match(/\b(noon|midday|midnight)\b/i);
+  if(m)return{h:m[1].toLowerCase()==='midnight'?0:12,m:0,raw:m[0],span:[m.index,m.index+m[0].length]};
+
+  m=text.match(/\b(half|quarter)\s+(past|to)\s+(\d{1,2})\b/i);
+  if(m){
+    var hh=parseInt(m[3],10);
+    if(hh>=1&&hh<=12){
+      var min,h2=hh,word=m[1].toLowerCase(),dir=m[2].toLowerCase();
+      if(word==='half'){min=30;}
+      else if(dir==='past'){min=15;}
+      else{min=45;h2=hh===1?12:hh-1;}
+      return{h:h2,m:min,raw:m[0],span:[m.index,m.index+m[0].length]};
+    }
+  }
+  m=text.match(/\bhalf\s+(\d{1,2})\b/i);
+  if(m){var hh=parseInt(m[1],10);if(hh>=1&&hh<=12)return{h:hh,m:30,raw:m[0],span:[m.index,m.index+m[0].length]};}
+
+  m=text.match(/\b(\d{1,2})\s*o['']?clock\b/i);
+  if(m){var hh=parseInt(m[1],10);if(hh>=1&&hh<=12)return{h:hh,m:0,raw:m[0],span:[m.index,m.index+m[0].length]};}
+
+  m=text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\b/i);
+  if(m){
+    var h=parseInt(m[1],10),min=m[2]?parseInt(m[2],10):0,ap=m[3].toLowerCase().charAt(0);
+    if(h<=23&&min<=59){
+      if(ap==='p'&&h<12)h+=12;
+      if(ap==='a'&&h===12)h=0;
+      return{h:h,m:min,raw:m[0],span:[m.index,m.index+m[0].length]};
+    }
+  }
+
+  m=text.match(/\b(\d{1,2}):(\d{2})\b/);
+  if(m){
+    var h=parseInt(m[1],10),min=parseInt(m[2],10);
+    if(h<=23&&min<=59){
+      if(h<=12)h=autoAmPm(h,min);
+      return{h:h,m:min,raw:m[0],span:[m.index,m.index+m[0].length]};
+    }
+  }
+
+  return null;
 }
 
 function applyTime(date,time){
@@ -198,39 +319,107 @@ function formatLabel(date){
 }
 
 function stripNoise(s){
-  // Remove common noise words/prepositions to expose the date pattern
-  // Strip "at" separately since it's also handled in stripTime
   return s.replace(/\b(?:on|at|the|for|by|until|from|to|my|our|with|and|is|a|an)\b/gi,' ').replace(/\s{2,}/g,' ').trim();
 }
+
+/* ---------- match cascade ---------- */
 
 function tryMatch(s,now,today){
   var result=null;
 
-  /* 1. Relative keywords */
-  if(s==='today'){
+  /* 1a. Compound relative phrases (must come before single-keyword block) */
+  if(/^day\s+after\s+(?:tomorrow|tmr|tmrw|tmw)$/.test(s)){
+    result=new Date(today);result.setDate(result.getDate()+2);
+  }else if(/^day\s+before\s+(?:yesterday|ytd)$/.test(s)){
+    result=new Date(today);result.setDate(result.getDate()-2);
+  }else if(s==='tonight'){
     result=new Date(today);
-  }else if(s==='tomorrow'||s==='tmr'||s==='tmrw'||s==='tmw'){
-    result=new Date(today);result.setDate(result.getDate()+1);
-  }else if(s==='yesterday'||s==='ytd'){
-    result=new Date(today);result.setDate(result.getDate()-1);
-  }else if(s==='next week'){
+    if(now.getHours()>=18){result.__dpTime={h:Math.min(now.getHours()+2,23),m:0};}
+    else{result.__dpTime={h:20,m:0};}
+  }else if(s==='this evening'){
+    result=new Date(today);result.__dpTime={h:18,m:0};
+  }else if(s==='this morning'){
+    result=new Date(today);result.__dpTime={h:9,m:0};
+  }else if(s==='this afternoon'){
+    result=new Date(today);result.__dpTime={h:14,m:0};
+  }else if(s==='this weekend'){
     result=new Date(today);
-    var dw=(1-result.getDay()+7)%7;
-    result.setDate(result.getDate()+(dw===0?7:dw));
-  }else if(s==='next month'){
+    var dow=result.getDay();
+    if(dow!==6){var diff=(6-dow+7)%7;result.setDate(result.getDate()+diff);}
+  }else if(s==='next weekend'){
+    result=new Date(today);
+    var dow=result.getDay(),diff=(6-dow+7)%7;
+    if(diff===0)diff=7;
+    result.setDate(result.getDate()+diff+7);
+  }else if(s==='end of week'){
+    result=new Date(today);
+    var diff=(0-result.getDay()+7)%7;if(diff===0)diff=7;
+    result.setDate(result.getDate()+diff);
+  }else if(s==='end of month'){
+    result=new Date(today.getFullYear(),today.getMonth()+1,0);
+  }else if(s==='end of year'){
+    result=new Date(today.getFullYear(),11,31);
+  }else if(s==='start of week'||s==='start of next week'){
+    result=new Date(today);
+    var diff=(1-result.getDay()+7)%7;if(diff===0)diff=7;
+    result.setDate(result.getDate()+diff);
+  }else if(s==='start of next month'||s==='start of month'){
     result=new Date(today.getFullYear(),today.getMonth()+1,1);
-  }else if(s==='next year'){
-    result=new Date(today.getFullYear()+1,0,1);
   }
+
+  /* 1b. Single-keyword relative */
   if(!result){
-    var rm=s.match(/(?:^|\s)in\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)(?:\s|$)/);
-    if(rm){
-      var n=parseInt(rm[1],10),u=rm[2].replace(/s$/,'');
+    if(s==='today'){
       result=new Date(today);
-      if(u==='day')result.setDate(result.getDate()+n);
-      else if(u==='week')result.setDate(result.getDate()+n*7);
-      else if(u==='month')result.setMonth(result.getMonth()+n);
-      else if(u==='year')result.setFullYear(result.getFullYear()+n);
+    }else if(s==='tomorrow'||s==='tmr'||s==='tmrw'||s==='tmw'){
+      result=new Date(today);result.setDate(result.getDate()+1);
+    }else if(s==='yesterday'||s==='ytd'){
+      result=new Date(today);result.setDate(result.getDate()-1);
+    }else if(s==='next week'){
+      result=new Date(today);
+      var dw=(1-result.getDay()+7)%7;
+      result.setDate(result.getDate()+(dw===0?7:dw));
+    }else if(s==='next month'){
+      result=new Date(today.getFullYear(),today.getMonth()+1,1);
+    }else if(s==='next year'){
+      result=new Date(today.getFullYear()+1,0,1);
+    }
+  }
+
+  /* 1c. N units ago/before (negative offset) */
+  if(!result){
+    var rmA=s.match(/(?:^|\s)(\d+(?:\.\d+)?)\s*(day|days|week|weeks|month|months|year|years|fortnight|fortnights)\s+(?:ago|before)\b/);
+    if(rmA){
+      var n=parseFloat(rmA[1]),u=rmA[2].replace(/s$/,'');
+      result=new Date(today);
+      if(u==='day')result.setDate(result.getDate()-Math.round(n));
+      else if(u==='week')result.setDate(result.getDate()-Math.round(n*7));
+      else if(u==='fortnight')result.setDate(result.getDate()-Math.round(n*14));
+      else if(u==='month')result.setMonth(result.getMonth()-Math.round(n));
+      else if(u==='year')result.setFullYear(result.getFullYear()-Math.round(n));
+    }
+  }
+
+  /* 1d. (in/for) N units (positive offset) */
+  if(!result){
+    var rm=s.match(/(?:^|\s)(?:in\s+|for\s+)?(\d+(?:\.\d+)?)\s*(day|days|week|weeks|month|months|year|years|fortnight|fortnights|hour|hours|minute|minutes|min|mins|second|seconds|sec|secs)\b/);
+    if(rm){
+      var n=parseFloat(rm[1]),u=rm[2].replace(/s$/,'');
+      if(u==='hour'||u==='minute'||u==='min'||u==='second'||u==='sec'){
+        var ms=0;
+        if(u==='hour')ms=n*3600000;
+        else if(u==='minute'||u==='min')ms=n*60000;
+        else ms=n*1000;
+        result=new Date(Date.now()+Math.round(ms));
+        result.__dpTime={h:result.getHours(),m:result.getMinutes()};
+      }else{
+        result=new Date(today);
+        if(u==='day')result.setDate(result.getDate()+Math.round(n));
+        else if(u==='week')result.setDate(result.getDate()+Math.round(n*7));
+        else if(u==='fortnight')result.setDate(result.getDate()+Math.round(n*14));
+        else if(u==='month')result.setMonth(result.getMonth()+Math.round(n));
+        else if(u==='year')result.setFullYear(result.getFullYear()+Math.round(n));
+      }
     }
   }
 
@@ -262,15 +451,19 @@ function tryMatch(s,now,today){
 }
 
 function parseDuration(s){
+  /* Pure h/m/s duration (now-relative). Bails if no h/m/s units present;
+     day/week/month/year/fortnight all route through tryMatch (today-relative). */
+  if(!/\d/.test(s))return null;
+  if(!/(?:^|[^a-z])(\d+(?:\.\d+)?\s*(?:h|hr|hrs|hours?|m|min|mins|minutes?|s|sec|secs|seconds?))\b/i.test(s))return null;
   var totalSec=0,found=false;
-  var r=/(\d+(?:\.\d+)?)\s*(?:(h|hr|hrs|hours?)|(m|min|mins|minutes?)|(s|sec|secs|seconds?))\b/gi;
-  var m;
-  while((m=r.exec(s))!==null){
-    var v=parseFloat(m[1]);
-    if(m[2]){totalSec+=v*3600;found=true}
-    else if(m[3]){totalSec+=v*60;found=true}
-    else if(m[4]){totalSec+=v;found=true}
-  }
+  s.replace(/(\d+(?:\.\d+)?)\s*(h|hr|hrs|hours?|m|min|mins|minutes?|s|sec|secs|seconds?)\b/gi,function(_,n,u){
+    var v=parseFloat(n);
+    u=u.toLowerCase();
+    if(u==='h'||u==='hr'||u==='hrs'||u==='hour'||u==='hours'){totalSec+=v*3600;found=true;}
+    else if(u==='m'||u==='min'||u==='mins'||u==='minute'||u==='minutes'){totalSec+=v*60;found=true;}
+    else if(u==='s'||u==='sec'||u==='secs'||u==='second'||u==='seconds'){totalSec+=v;found=true;}
+    return '';
+  });
   if(!found)return null;
   var dt=new Date(Date.now()+Math.round(totalSec*1000));
   return{date:dt,label:formatLabel(dt)};
@@ -280,19 +473,39 @@ function parseDate(text){
   if(!text||!text.trim())return null;
   var raw=text.trim();
 
+  /* 1. Pure duration on raw input (h/m/s only) */
   var dur=parseDuration(raw);
   if(dur){dur.hint=null;return dur}
 
-  var time=parseTime(raw);
-  var s=stripTime(raw).toLowerCase();
+  /* 2. Normalize, strip incidental punctuation, autoCorrect typos */
+  var prepared=autoCorrect(stripPunct(normalize(raw)));
+
+  /* 3. Retry duration on prepared text (catches typos like "0.5 howr") */
+  var dur2=parseDuration(prepared);
+  if(dur2){dur2.hint=null;return dur2}
+
+  /* 4. Time extraction: anchor-based fast path, then mid-prose fallback */
+  var time=parseTime(prepared);
+  var s;
+  if(time){
+    s=stripTime(prepared).toLowerCase();
+  }else{
+    var mid=findTimeMid(prepared);
+    if(mid){
+      time=mid;
+      s=(prepared.slice(0,mid.span[0])+' '+prepared.slice(mid.span[1])).replace(/\s+/g,' ').trim().toLowerCase();
+    }else{
+      s=prepared.toLowerCase();
+    }
+  }
+
   if(!s&&time){
-    // Time only - use today (or tomorrow if time already passed)
     var td=new Date();
     td.setHours(time.h,time.m,0,0);
     if(td<=new Date())td.setDate(td.getDate()+1);
     return{date:td,label:formatLabel(td),hint:'date'};
   }
-  if(!s)s=raw.toLowerCase();
+  if(!s)s=prepared.toLowerCase();
   var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 
   var result=tryMatch(s,now,today);
@@ -302,6 +515,7 @@ function parseDate(text){
   }
   if(!result){
     var words=s.split(/\s+/);
+    /* Drop from start: "8am next monday" → "next monday" → "monday" */
     for(var i=1;i<words.length&&!result;i++){
       var sub=words.slice(i).join(' ');
       result=tryMatch(sub,now,today);
@@ -310,16 +524,39 @@ function parseDate(text){
         if(subClean&&subClean!==sub)result=tryMatch(subClean,now,today);
       }
     }
+    /* Drop from end: "next monday call" → "next monday" → "next" */
+    for(var j=words.length-1;j>=1&&!result;j--){
+      var sub2=words.slice(0,j).join(' ');
+      result=tryMatch(sub2,now,today);
+      if(!result){
+        var sub2Clean=stripNoise(sub2);
+        if(sub2Clean&&sub2Clean!==sub2)result=tryMatch(sub2Clean,now,today);
+      }
+    }
   }
 
   if(!result)return null;
 
-  applyTime(result,time);
-  return{date:result,label:formatLabel(result),hint:time?null:'time'};
+  /* 5. Time application: ISO-with-time keeps its own; else explicit > implicit > none */
+  var hasIsoTime=result.__dpIsoTime;
+  var implicitTime=result.__dpTime;
+  try{delete result.__dpIsoTime;}catch(e){}
+  try{delete result.__dpTime;}catch(e){}
+
+  if(hasIsoTime){
+    /* leave time as-is */
+  }else if(time){
+    applyTime(result,time);
+  }else if(implicitTime){
+    applyTime(result,implicitTime);
+  }else{
+    applyTime(result,null);
+  }
+
+  return{date:result,label:formatLabel(result),hint:(time||implicitTime||hasIsoTime)?null:'time'};
 }
 
 function parseHoliday(s){
-  // Fixed-date holidays
   var fixed=[
     [/^(?:ny|new\s*year(?:'?s)?(?:\s*day)?|nyd)$/,0,1,'New Year\'s Day'],
     [/^(?:nye|new\s*year(?:'?s)?\s*eve)$/,11,31,'New Year\'s Eve'],
@@ -343,32 +580,28 @@ function parseHoliday(s){
     if(fixed[i][0].test(s))return nextOccurrence(fixed[i][1],fixed[i][2]);
   }
 
-  // Nth-weekday holidays
   var nth=[
-    [/^(?:mlk(?:\s*day)?|martin\s*luther\s*king(?:\s*(?:jr\.?)?(?:\s*day)?)?)$/,0,1,3],  // 3rd Mon Jan
-    [/^(?:presidents?\s*day)$/,1,1,3],  // 3rd Mon Feb
-    [/^(?:mother(?:'?s)?\s*day)$/,4,0,2],  // 2nd Sun May
-    [/^(?:father(?:'?s)?\s*day)$/,5,0,3],  // 3rd Sun Jun
-    [/^(?:labor\s*day|labour\s*day)$/,8,1,1],  // 1st Mon Sep
-    [/^(?:columbus\s*day|indigenous\s*peoples?\s*day)$/,9,1,2],  // 2nd Mon Oct
-    [/^(?:thanksgiving|turkey\s*day)$/,10,4,4],  // 4th Thu Nov
-    [/^(?:early\s*may\s*bank\s*holiday|may\s*day)$/,4,1,1],  // 1st Mon May
+    [/^(?:mlk(?:\s*day)?|martin\s*luther\s*king(?:\s*(?:jr\.?)?(?:\s*day)?)?)$/,0,1,3],
+    [/^(?:presidents?\s*day)$/,1,1,3],
+    [/^(?:mother(?:'?s)?\s*day)$/,4,0,2],
+    [/^(?:father(?:'?s)?\s*day)$/,5,0,3],
+    [/^(?:labor\s*day|labour\s*day)$/,8,1,1],
+    [/^(?:columbus\s*day|indigenous\s*peoples?\s*day)$/,9,1,2],
+    [/^(?:thanksgiving|turkey\s*day)$/,10,4,4],
+    [/^(?:early\s*may\s*bank\s*holiday|may\s*day)$/,4,1,1]
   ];
   for(var i=0;i<nth.length;i++){
     if(nth[i][0].test(s))return nextNthWeekday(nth[i][1],nth[i][2],nth[i][3]);
   }
 
-  // Last-weekday holidays
   if(/^(?:memorial\s*day)$/.test(s))return nextLastWeekday(4,1);
   if(/^(?:spring\s*bank\s*holiday)$/.test(s))return nextLastWeekday(4,1);
   if(/^(?:summer\s*bank\s*holiday|august\s*bank\s*holiday)$/.test(s))return nextLastWeekday(7,1);
 
-  // Easter-based
   if(/^(?:easter(?:\s*sunday)?)$/.test(s))return nextPrecomputed(EASTER,0);
   if(/^(?:good\s*friday)$/.test(s))return nextPrecomputed(EASTER,-2);
   if(/^(?:easter\s*monday)$/.test(s))return nextPrecomputed(EASTER,1);
 
-  // Chinese New Year
   if(/^(?:chinese\s*new\s*year|lunar\s*new\s*year|cny)$/.test(s))return nextPrecomputed(CNY,0);
 
   return null;
@@ -378,7 +611,31 @@ function parseDateFormats(s){
   var now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   var m,day,mon,year,dt;
 
-  // DA: 25 December 2025, 25th Dec, 1st Jan 2026
+  /* ISO with time: 2026-01-15T14:30, 2026-01-15 14:30, ...:00Z, ...+00:00 */
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[t\s](\d{1,2}):(\d{2})(?::(\d{2}))?(z|[+-]\d{2}:?\d{2})?$/);
+  if(m){
+    var y=parseInt(m[1],10),mo=parseInt(m[2],10)-1,d=parseInt(m[3],10);
+    var h=parseInt(m[4],10),mi=parseInt(m[5],10),sec=m[6]?parseInt(m[6],10):0;
+    var tz=m[7];
+    if(mo>=0&&mo<=11&&d>=1&&d<=daysInMonth(y,mo)&&h<=23&&mi<=59&&sec<=59){
+      var dtIso;
+      if(tz==='z'){
+        dtIso=new Date(Date.UTC(y,mo,d,h,mi,sec));
+      }else if(tz){
+        var sign=tz.charAt(0)==='+'?1:-1;
+        var tzCl=tz.replace(':','');
+        var tzH=parseInt(tzCl.substr(1,2),10);
+        var tzM=parseInt(tzCl.substr(3,2),10);
+        var off=sign*(tzH*60+tzM);
+        dtIso=new Date(Date.UTC(y,mo,d,h,mi,sec)-off*60000);
+      }else{
+        dtIso=new Date(y,mo,d,h,mi,sec);
+      }
+      dtIso.__dpIsoTime=true;
+      return dtIso;
+    }
+  }
+
   m=s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)(?:\s+(\d{4}))?$/);
   if(m){
     day=parseInt(m[1],10);mon=MONTHS[m[2]];year=m[3]?parseInt(m[3],10):null;
@@ -391,7 +648,6 @@ function parseDateFormats(s){
     }
   }
 
-  // DB: December 25 2025, Dec 25, June 5
   m=s.match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?$/);
   if(m){
     mon=MONTHS[m[1]];day=parseInt(m[2],10);year=m[3]?parseInt(m[3],10):null;
@@ -404,32 +660,26 @@ function parseDateFormats(s){
     }
   }
 
-  // DC: 2025-12-25
   m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if(m){
     year=parseInt(m[1],10);mon=parseInt(m[2],10)-1;day=parseInt(m[3],10);
     if(mon>=0&&mon<=11&&day>=1&&day<=daysInMonth(year,mon))return new Date(year,mon,day);
   }
 
-  // DC: 25/12/2025 (UK day/month/year)
   m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if(m){
     var a=parseInt(m[1],10),b=parseInt(m[2],10);year=parseInt(m[3],10);
-    // If first > 12, must be day
     if(a>12){day=a;mon=b-1}
     else if(b>12){day=b;mon=a-1}
-    else{day=a;mon=b-1}  // UK-first: day/month
+    else{day=a;mon=b-1}
     if(mon>=0&&mon<=11&&day>=1&&day<=daysInMonth(year,mon))return new Date(year,mon,day);
   }
 
-  // DD: 15/03 (day/month, UK-first)
   m=s.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
   if(m){
     day=parseInt(m[1],10);mon=parseInt(m[2],10)-1;
-    // If first number > 12, it's definitely day. If second > 12, swap.
     if(m[1]>12){day=parseInt(m[1],10);mon=parseInt(m[2],10)-1}
     else if(m[2]>12){mon=parseInt(m[1],10)-1;day=parseInt(m[2],10)}
-    // else UK-first: day/month (already set)
     if(mon>=0&&mon<=11&&day>=1&&day<=31){
       dt=new Date(now.getFullYear(),mon,day);
       if(dt<today)dt.setFullYear(dt.getFullYear()+1);
@@ -440,27 +690,23 @@ function parseDateFormats(s){
   return null;
 }
 
-/* Smart Split (title + date from one string) */
 function splitTitleDate(text){
-  // Whole string is a date?
-  var full=parseDate(text);
-  if(full)return{title:null,date:text,parsed:full};
-
-  // Try splitting on em dash, en dash, pipe, or spaced hyphen first
+  /* Delim splits first so a title doesn't get swallowed when the parser's
+     word-shrink fallback can find the date inside the full string. */
   var delims=[/\s*—\s*/,/\s*–\s*/,/\s*\|\s*/,/\s+[-]\s+/];
   for(var di=0;di<delims.length;di++){
     var parts=text.split(delims[di]);
     if(parts.length===2){
-      // Try right as date
       var p=parseDate(parts[1].trim());
       if(p&&!parseDate(parts[0].trim()))return{title:parts[0].trim(),date:parts[1].trim(),parsed:p};
-      // Try left as date
       p=parseDate(parts[0].trim());
       if(p&&!parseDate(parts[1].trim()))return{title:parts[1].trim(),date:parts[0].trim(),parsed:p};
     }
   }
 
-  // Word-by-word splitting
+  var full=parseDate(text);
+  if(full)return{title:null,date:text,parsed:full};
+
   var words=text.split(/\s+/);
   var bestRight=null,bestRightIdx=-1;
   for(var i=1;i<words.length;i++){
@@ -489,29 +735,50 @@ function splitTitleDate(text){
   return null;
 }
 
-/* Extract first parseable date from arbitrary prose (multi-line, sentences).
-   Splits on sentence/clause delimiters and unicode dashes; keeps ASCII hyphen,
-   slash, and colon intact so 2026-01-15 / 15/01/2026 / 14:30 stay whole.
-   Per-chunk splitTitleDate handles "title — date" inside one chunk; calling
-   splitTitleDate on the whole text would over-match because its word-shrink
-   fallback retains trailing punctuation glued to words. */
+/* Extract first parseable date from arbitrary prose. Pre-passes a global
+   mid-prose time so a chunk like "tomorrow" can pick up "5:30 PM" elsewhere
+   in the same paragraph. */
 function extractDate(text){
   if(!text||!text.trim())return null;
   var p=parseDate(text);
   if(p)return p;
-  var chunks=text.split(/[\n.?!,;–—|()<>{}\[\]"]+/);
+
+  var preparedFull=autoCorrect(stripPunct(normalize(text)));
+  var midTime=findTimeMid(preparedFull);
+  var workingText=text;
+  if(midTime){
+    workingText=text.replace(midTime.raw,' ').replace(/\s+/g,' ');
+  }
+
+  var chunks=workingText.split(/[\n.?!,;–—|()<>{}\[\]"]+/);
   for(var i=0;i<chunks.length;i++){
     var c=chunks[i].trim().replace(/^[^\w]+|[^\w]+$/g,'').trim();
     if(!c)continue;
     var pp=parseDate(c);
-    if(pp)return pp;
+    if(pp){
+      if(midTime&&pp.hint==='time'){
+        pp.date.setHours(midTime.h,midTime.m,0,0);
+        pp.label=formatLabel(pp.date);
+        pp.hint=null;
+      }
+      return pp;
+    }
     if(c.indexOf(' ')!==-1){
       var ss=splitTitleDate(c);
-      if(ss)return ss.parsed;
+      if(ss){
+        if(midTime&&ss.parsed.hint==='time'){
+          ss.parsed.date.setHours(midTime.h,midTime.m,0,0);
+          ss.parsed.label=formatLabel(ss.parsed.date);
+          ss.parsed.hint=null;
+        }
+        return ss.parsed;
+      }
     }
   }
   return null;
 }
 
-window._dp={parseDate:parseDate,parseTime:parseTime,parseDuration:parseDuration,splitTitleDate:splitTitleDate,extractDate:extractDate,formatLabel:formatLabel,fmtTime12:fmtTime12,MONTH_NAMES:MONTH_NAMES,MONTHS:MONTHS,DAYS:DAYS};
+var _dpExports={parseDate:parseDate,parseTime:parseTime,parseDuration:parseDuration,splitTitleDate:splitTitleDate,extractDate:extractDate,formatLabel:formatLabel,fmtTime12:fmtTime12,MONTH_NAMES:MONTH_NAMES,MONTHS:MONTHS,DAYS:DAYS,normalize:normalize,autoCorrect:autoCorrect};
+if(typeof window!=='undefined')window._dp=_dpExports;
+if(typeof globalThis!=='undefined')globalThis._dp=_dpExports;
 })();
