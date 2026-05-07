@@ -316,12 +316,18 @@ function removeItem(id){
   setTimeout(function(){render();announce('Removed')},100);
 }
 
-/* ── Reset ───────────────────────────────────────────────────────── */
-function doReset(){
-  $('inp-title').value='';$('inp-start').value='';$('inp-end').value='';
-  if(gran!=='mo'){gran='mo';saveGran();updateGranUI();render()}
-  $('inp-title').focus();
-}
+/* ── Reset (two-press) ───────────────────────────────────────────── */
+var resetCtrl=_base.twoPress($('rs-btn'),{
+  label:$('rs-l'),
+  guard:function(){return $('inp-title').value||$('inp-start').value||$('inp-end').value||gran!=='mo'},
+  onConfirm:function(){
+    $('inp-title').value='';$('inp-start').value='';$('inp-end').value='';
+    if(gran!=='mo'){gran='mo';saveGran();updateGranUI();render()}
+    $('inp-title').focus();
+    announce('Reset');
+  }
+});
+function doReset(){resetCtrl.press()}
 
 /* ── Granularity Switching ───────────────────────────────────────── */
 function updateGranUI(){

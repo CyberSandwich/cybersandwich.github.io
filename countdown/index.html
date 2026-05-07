@@ -370,10 +370,16 @@ function removeItem(id){
 }
 
 /* ── Reset (two-press) ───────────────────────────────────────────── */
-function doReset(){
-  $('inp-title').value='';$('inp-date').value='';
-  $('inp-title').focus();
-}
+var resetCtrl=_base.twoPress($('rs-btn'),{
+  label:$('rs-l'),
+  guard:function(){return $('inp-title').value||$('inp-date').value},
+  onConfirm:function(){
+    $('inp-title').value='';$('inp-date').value='';
+    $('inp-title').focus();
+    announce('Reset');
+  }
+});
+function doReset(){resetCtrl.press()}
 
 /* ── Tick (live updates) ─────────────────────────────────────────── */
 function tick(){
