@@ -77,13 +77,13 @@ html[data-theme="sepia"] .item[data-phase="long"]{--p-c:#7C5BAD;--p-bg:rgba(124,
 <body>
 <div class="w">
   <div class="inp">
-    <input id="inp-title" type="text" autocomplete="off" placeholder="Title (Optional)" spellcheck="false" aria-label="Title">
+    <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
   </div>
   <div class="preset-card" id="presets">
-    <button type="button" class="preset" data-fill="25/5/4/15"><span class="p-name">Classic</span><span class="p-spec">25 · 5 · 4 · 15</span></button>
-    <button type="button" class="preset" data-fill="50/10/2/15"><span class="p-name">Deep Work</span><span class="p-spec">50 · 10 · 2 · 15</span></button>
-    <button type="button" class="preset" data-fill="90/15/1"><span class="p-name">Sprint</span><span class="p-spec">90 · 15 · 1</span></button>
-    <button type="button" class="preset" data-fill="15/3/4/15"><span class="p-name">Short</span><span class="p-spec">15 · 3 · 4 · 15</span></button>
+    <button type="button" class="preset" data-fill="25/5/4/15"><span class="p-name">Classic</span><span class="p-spec"></span></button>
+    <button type="button" class="preset" data-fill="50/10/2/15"><span class="p-name">Deep Work</span><span class="p-spec"></span></button>
+    <button type="button" class="preset" data-fill="90/0/1/15"><span class="p-name">Sprint</span><span class="p-spec"></span></button>
+    <button type="button" class="preset" data-fill="15/3/4/15"><span class="p-name">Short</span><span class="p-spec"></span></button>
   </div>
   <div class="items" id="items" role="list"></div>
 </div>
@@ -748,7 +748,6 @@ function addFromPreset(spec){
   $('inp-title').value='';
 }
 $('inp-title').addEventListener('keydown',function(e){
-  // Enter on title = add Classic by default
   if(e.key==='Enter'){e.preventDefault();addFromPreset('25/5/4/15')}
 });
 $('presets').addEventListener('click',function(e){
@@ -756,6 +755,29 @@ $('presets').addEventListener('click',function(e){
   initAudio();
   addFromPreset(p.getAttribute('data-fill'));
 });
+
+/* Fill .p-spec text from each preset's data-fill so the spec format
+   stays consistent with whatever parsePomo produces. */
+function fmtPresetSpec(cfg){
+  var focusMin=Math.round(cfg.focus/60),
+      brkMin=Math.round(cfg.brk/60),
+      longMin=Math.round(cfg.long/60),
+      cycles=cfg.cycles;
+  var parts=[focusMin+'m'];
+  if(cycles>1&&brkMin>0&&longMin>0)parts.push(brkMin+'/'+longMin+'m');
+  else if(longMin>0)parts.push(longMin+'m');
+  else if(brkMin>0)parts.push(brkMin+'m');
+  parts.push(cycles+(cycles===1?' round':' rounds'));
+  return parts.join(' | ');
+}
+(function(){
+  var nodes=document.querySelectorAll('#presets .preset');
+  for(var i=0;i<nodes.length;i++){
+    var fill=nodes[i].getAttribute('data-fill');
+    var spec=nodes[i].querySelector('.p-spec');
+    if(fill&&spec)spec.textContent=fmtPresetSpec(parsePomo(fill));
+  }
+})();
 $('items').addEventListener('click',function(e){
   var row=e.target.closest('.item');if(!row)return;
   var id=row.getAttribute('data-id'),s=null;
