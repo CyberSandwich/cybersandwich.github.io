@@ -12,9 +12,7 @@
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
-.inp button:active{opacity:.7}
-@media(hover:hover){.inp button:hover{color:var(--t1);background:var(--bg2)}}
-.preset-card{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.preset-card{display:grid;grid-template-columns:1fr 1fr}
 .preset{padding:16px 14px;background:none;border:none;border-right:1px solid var(--bdr2);border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:4px;transition:background .15s}
 .preset:nth-child(2n){border-right:none}
 .preset:nth-last-child(-n+2){border-bottom:none}
@@ -23,7 +21,8 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .p-name{font:600 .9375rem/1 var(--font);color:var(--t1)}
 .p-spec{font:400 .8125rem/1 var(--font);color:var(--t3);font-variant-numeric:tabular-nums}
 .items{display:flex;flex-direction:column;gap:14px}
-.item{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:0;overflow:hidden;transition:opacity .2s ease,box-shadow .2s ease;
+.items .item{margin-bottom:0}
+.item{transition:opacity .2s ease,box-shadow .2s ease;
   --p-c:#3B82F6;--p-bg:rgba(59,130,246,.12)}
 .item[data-phase="break"]{--p-c:#10B981;--p-bg:rgba(16,185,129,.12)}
 .item[data-phase="long"]{--p-c:#A855F7;--p-bg:rgba(168,85,247,.12)}
@@ -79,7 +78,7 @@ html[data-theme="sepia"] .item[data-phase="long"]{--p-c:#7C5BAD;--p-bg:rgba(124,
   <div class="inp">
     <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
   </div>
-  <div class="preset-card" id="presets">
+  <div class="card preset-card" id="presets">
     <button type="button" class="preset" data-fill="25/5/4/15"><span class="p-name">Classic</span><span class="p-spec"></span></button>
     <button type="button" class="preset" data-fill="50/10/2/15"><span class="p-name">Deep Work</span><span class="p-spec"></span></button>
     <button type="button" class="preset" data-fill="90/0/1/15"><span class="p-name">Sprint</span><span class="p-spec"></span></button>
@@ -437,7 +436,7 @@ function buildDots(s){
 }
 function buildItem(s,now){
   var row=document.createElement('div');
-  row.className='item';row.setAttribute('role','listitem');
+  row.className='card item';row.setAttribute('role','listitem');
   row.setAttribute('data-id',s.id);row.setAttribute('data-phase',s.phase);
 
   // Head: title + delete
