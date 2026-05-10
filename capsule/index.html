@@ -25,9 +25,8 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .bg-auto .pv-wrap{background:var(--cap-bg-auto)}
 .bg-warm .pv-wrap{background:linear-gradient(135deg,#ffecd2,#fcb69f)}
 .bg-cool .pv-wrap{background:linear-gradient(135deg,#e0c3fc,#8ec5fc)}
-.ed-card{padding:14px 20px}
-#txt{display:block;width:100%;padding:0;border:none;background:none;color:var(--t1);font:500 1rem/1.5 var(--font);outline:none;resize:none;min-height:24px;max-height:192px;overflow-y:auto}
-#txt::placeholder{color:var(--t4)}
+.inp{margin-bottom:14px}
+.inp input:focus{border-color:var(--t4)}
 .actions button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 20px;font:500 .9375rem/1 var(--font);color:var(--t2);background:none;border:none;border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;transition:background .25s}
 .actions button:last-child{border-bottom:none}
 .actions button:active{opacity:.7}
@@ -44,8 +43,8 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 </div>
 </div>
 </div>
-<div id="ed" class="card ed-card">
-<textarea id="txt" maxlength="4000" placeholder="Type Anything…" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+<div class="inp">
+<input id="txt" type="text" maxlength="4000" placeholder="Type Anything…" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Capsule Text">
 </div>
 <div id="acts" class="card">
 <div class="actions">
@@ -143,7 +142,7 @@ var BG_CLS=['bg-clear','bg-light','bg-dark','bg-warm','bg-cool','bg-auto'];
 var FMT_MIME=['image/png','image/jpeg','image/webp'];
 var FMT_QUAL=[undefined,0.92,0.92];
 var FMT_EXT=['png','jpg','webp'];
-var MAX_TEXT_LEN=4000,MAX_LINES=64,MAX_DIM=8192,LH_MULT=1.35;
+var MAX_TEXT_LEN=4000,MAX_DIM=8192,LH_MULT=1.35;
 var DEFAULTS={fontFamIdx:0,fontIdx:6,padIdx:5,radIdx:9,shdIdx:5,bgMode:0,fmtIdx:0};
 var KEY_S='capsule:settings:v1',KEY_T='capsule:text:v1';
 var SVG_NS='http://www.w3.org/2000/svg';
@@ -158,7 +157,7 @@ var psBtn=$('psBtn'),cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),rsBtn=$('rsBtn');
 var ov=$('drop-ov');
 var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
 
-var rafId=0,renderToken=0,truncNotified=false,lastHash=null,lastBlob=null,idleId=0;
+var rafId=0,renderToken=0,lastHash=null,lastBlob=null,idleId=0;
 var measureCtx=null;
 function getMeasureCtx(){
   if(measureCtx)return measureCtx;
@@ -167,7 +166,7 @@ function getMeasureCtx(){
 }
 
 function fnv1a(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0}return h.toString(36)}
-function sanitise(t){return t?t.normalize('NFC').replace(/\r\n/g,'\n').replace(/[\x00-\x08\x0B-\x1F\x7F]/g,''):''}
+function sanitise(t){return t?t.normalize('NFC').replace(/[\x00-\x1F\x7F]/g,''):''}
 
 function rrPath(c,x,y,w,h,r){
   r=Math.min(r,w/2,h/2);
@@ -201,25 +200,15 @@ function showEmpty(){cv.style.display='none';emptyEl.style.display='';lastBlob=n
 function render(sn){
   var raw=sanitise(sn.text);
   if(!raw){showEmpty();return}
-  var lines=raw.split('\n');
-  if(lines.length>MAX_LINES){
-    lines=lines.slice(0,MAX_LINES);
-    if(!truncNotified){truncNotified=true;_base.notify('Truncated to '+MAX_LINES+' Lines',false)}
-  }else{truncNotified=false}
   var fontPx=FONT_SIZES[sn.fontIdx];
   var padX=PAD_STOPS[sn.padIdx],padY=Math.round(padX*0.55);
   var lh=Math.round(fontPx*LH_MULT);
   var fontStr='500 '+fontPx+'px '+FONT_STACKS[sn.fontFamIdx];
   var mctx=getMeasureCtx();mctx.font=fontStr;
-  var widest=0;
-  for(var i=0;i<lines.length;i++){
-    var ww=mctx.measureText(lines[i]||' ').width;
-    if(ww>widest)widest=ww
-  }
-  widest=Math.ceil(widest);
-  var capW=widest+2*padX,capH=lines.length*lh+2*padY;
+  var widest=Math.ceil(mctx.measureText(raw).width);
+  var capW=widest+2*padX,capH=lh+2*padY;
   var rad;
-  if(RAD_STOPS[sn.radIdx]===-1){rad=lines.length===1?capH/2:Math.min(24,capH/2)}
+  if(RAD_STOPS[sn.radIdx]===-1)rad=capH/2;
   else rad=Math.min(RAD_STOPS[sn.radIdx],capW/2,capH/2);
   var shd=SHD_STOPS[sn.shdIdx];
   var margin=Math.max(8,Math.ceil(shd*4.5));
@@ -227,7 +216,7 @@ function render(sn){
   var dpr=sn.dpr,pxW=ow*dpr,pxH=oh*dpr;
   if(pxW>MAX_DIM||pxH>MAX_DIM){var sf=Math.min(MAX_DIM/pxW,MAX_DIM/pxH);dpr*=sf}
 
-  var hash=fnv1a(JSON.stringify(sn)+'|'+lines.join('\n')+'|'+capW+'|'+capH+'|'+rad);
+  var hash=fnv1a(JSON.stringify(sn)+'|'+raw+'|'+capW+'|'+capH+'|'+rad);
   if(hash===lastHash)return;
   lastHash=hash;
   if(idleId){clearTimeout(idleId);idleId=0}
@@ -243,12 +232,12 @@ function render(sn){
 
   if(shd>0){
     ctx.save();
-    ctx.shadowColor=dk?'rgba(255,255,255,0.32)':'rgba(0,0,0,0.30)';
+    ctx.shadowColor=dk?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.16)';
     ctx.shadowBlur=shd*3.5;ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.7);
     rrPath(ctx,margin,margin,capW,capH,rad);ctx.fillStyle=capColor;ctx.fill();
     ctx.restore();
     ctx.save();
-    ctx.shadowColor=dk?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.14)';
+    ctx.shadowColor=dk?'rgba(255,255,255,0.10)':'rgba(0,0,0,0.07)';
     ctx.shadowBlur=Math.round(shd*1.2);ctx.shadowOffsetX=0;ctx.shadowOffsetY=dk?0:Math.round(shd*0.25);
     rrPath(ctx,margin,margin,capW,capH,rad);ctx.fillStyle=capColor;ctx.fill();
     ctx.restore()
@@ -262,10 +251,7 @@ function render(sn){
   ctx.fillStyle=dk?'#fff':'#1a1a1a';
   ctx.font=fontStr;ctx.textAlign='center';ctx.textBaseline='middle';
   if('textRendering' in ctx)ctx.textRendering='geometricPrecision';
-  var cx=margin+capW/2;
-  for(var j=0;j<lines.length;j++){
-    ctx.fillText(lines[j],cx,margin+padY+(j+0.5)*lh)
-  }
+  ctx.fillText(raw,margin+capW/2,margin+padY+lh/2);
 
   cv.style.display='block';emptyEl.style.display='none';
   scheduleIdleBlob()
@@ -307,7 +293,7 @@ function saveSettings(){_base.save(KEY_S,{fontFamIdx:st.fontFamIdx,fontIdx:st.fo
 function saveTextDeb(){clearTimeout(saveT);saveT=setTimeout(function(){_base.save(KEY_T,txt.value)},250)}
 
 txt.value=savedText;
-updFnt();updPad();updRad();updShd();updFf();updBg();updFmt();autoGrow();schedule();
+updFnt();updPad();updRad();updShd();updFf();updBg();updFmt();schedule();
 
 function bindStep(decId,incId,key,arr,upd){
   $(decId).addEventListener('click',function(){if(st[key]>0){st[key]--;upd();schedule();saveSettings()}});
@@ -365,8 +351,7 @@ function setFmt(i){
 }
 for(var f=0;f<3;f++)(function(f){$('fmt-'+f).addEventListener('click',function(){setFmt(f)})})(f);
 
-function autoGrow(){txt.style.height='auto';var max=192;var h=Math.min(txt.scrollHeight,max);txt.style.height=h+'px'}
-txt.addEventListener('input',function(){autoGrow();schedule();saveTextDeb()});
+txt.addEventListener('input',function(){schedule();saveTextDeb()});
 
 txt.addEventListener('paste',function(e){
   var data=(e.clipboardData||window.clipboardData).getData('text');
@@ -386,7 +371,7 @@ function pasteClip(){
     var s0=txt.selectionStart,e0=txt.selectionEnd;
     var ok=false;try{ok=document.execCommand('insertText',false,clean)}catch(_){}
     if(!ok){txt.value=txt.value.slice(0,s0)+clean+txt.value.slice(e0);txt.selectionStart=txt.selectionEnd=s0+clean.length}
-    autoGrow();schedule();saveTextDeb();
+    schedule();saveTextDeb();
     _base.feedback(psBtn,'ps-fb','Pasted')
   },function(){_base.notify('Clipboard Not Available',false)})
 }
@@ -452,7 +437,7 @@ var resetCtrl=_base.twoPress(rsBtn,{
     txt.value='';
     for(var k in DEFAULTS)st[k]=DEFAULTS[k];
     try{localStorage.removeItem(KEY_S);localStorage.removeItem(KEY_T)}catch(_){}
-    updFnt();updPad();updRad();updShd();updFf();updBg();updFmt();autoGrow();schedule();
+    updFnt();updPad();updRad();updShd();updFf();updBg();updFmt();schedule();
     groups.forEach(function(g){if(g._ft)clearTimeout(g._ft)});
     groups.forEach(function(g){animateReset(g)})
   }
@@ -479,7 +464,7 @@ window.addEventListener('storage',function(e){
     if(ns&&typeof ns==='object'){for(var k in DEFAULTS)if(k in ns&&typeof ns[k]==='number')st[k]=ns[k];
       updFnt();updPad();updRad();updShd();updFf();updBg();updFmt();schedule()}
   }else if(e.key===KEY_T){
-    var nt=_base.load(KEY_T);if(typeof nt==='string'){txt.value=nt;autoGrow();schedule()}
+    var nt=_base.load(KEY_T);if(typeof nt==='string'){txt.value=nt;schedule()}
   }
 });
 
