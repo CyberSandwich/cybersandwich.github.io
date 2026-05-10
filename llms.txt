@@ -32,7 +32,6 @@
 - [Countdown](https://saputra.co.uk/countdown/) — Countdown timer manager with natural language date parsing
 - [Diffy](https://saputra.co.uk/diffy/), date difference calculator with natural-language input
 - [Pomo](https://saputra.co.uk/pomo/), Pomodoro timer with multiple concurrent sessions
-- [Train](https://saputra.co.uk/train/), real-time UK train departures, arrivals, and journey calling patterns
 - [Miele Laundry Guide](https://saputra.co.uk/laundry/) — Vita Student Cannon Park laundry guide
 - [Capsule](https://saputra.co.uk/capsule/), text-to-capsule image generator
 - [Caption](https://github.com/DukeSaputra/caption), offline video subtitle generator

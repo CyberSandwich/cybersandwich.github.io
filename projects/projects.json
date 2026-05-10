@@ -106,12 +106,6 @@
     "category": "Time Tools"
   },
   {
-    "title": "Train",
-    "subtitle": "Real-Time UK Train Boards",
-    "url": "/train/",
-    "category": "Time Tools"
-  },
-  {
     "title": "ThymeZone",
     "subtitle": "Compare Timezones Side by Side",
     "url": "/thymezone/",
