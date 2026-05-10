@@ -129,6 +129,9 @@ var RESET_TIMEOUT=2000;
 var REMOVE_ANIM=150;
 var BOUNDARY_ANIM=600;
 var BC_NAME='pomo';
+var SCHEMA_VERSION=1;
+var SAVE_DEBOUNCE=250;
+var BG_MIN_TIMEOUT=1000;
 
 /* ── State ───────────────────────────────────────────────────────── */
 var items=[],settings={sound:true,vibrate:true};
@@ -141,27 +144,51 @@ var titleLast=0,titleLastText='';
 var ioObserver=null,visibleIds=Object.create(null);
 
 /* ── Storage ─────────────────────────────────────────────────────── */
+function migrate(raw){
+  // v0 (legacy): bare array of sessions
+  // v1: {v:1, items:[...]}
+  if(Array.isArray(raw))return raw;
+  if(raw&&typeof raw==='object'&&Array.isArray(raw.items))return raw.items;
+  return [];
+}
+function integrityCheck(arr){
+  var validPhases={focus:1,'break':1,'long':1,done:1};
+  var issues=0;
+  var clean=arr.filter(function(s){
+    if(!s||!s.id||!validPhases[s.phase])return(issues++,false);
+    if(typeof s.focus!=='number'||typeof s.brk!=='number'||typeof s.long!=='number'||typeof s.cycles!=='number')return(issues++,false);
+    if(s.cycleIdx>s.cycles+1||s.cycleIdx<0)return(issues++,false);
+    if(s.endsAt!=null&&s.startedAt!=null&&s.endsAt<s.startedAt-1000)return(issues++,false);
+    return true;
+  });
+  if(issues)console.warn('[Pomo] Dropped '+issues+' corrupt session(s) on load');
+  return clean;
+}
 function load(){
-  var raw=_base.load(STORAGE_KEY,[]);
-  if(Array.isArray(raw)){
-    items=raw.filter(function(s){return s&&s.id&&s.phase&&typeof s.focus==='number'});
-  }else items=[];
+  var raw=_base.load(STORAGE_KEY,null);
+  items=integrityCheck(migrate(raw));
   var st=_base.load(SETTINGS_KEY,null);
   if(st&&typeof st==='object'){
     if(typeof st.sound==='boolean')settings.sound=st.sound;
     if(typeof st.vibrate==='boolean')settings.vibrate=st.vibrate;
   }
 }
-function save(){
+var saveTimer=null;
+function saveNow(){
+  saveTimer=null;
   try{
-    // Strip ephemeral DOM refs before serializing (avoids JSON cycle errors)
     var snap=items.map(function(s){
       var c={};for(var k in s)if(k.charAt(0)!=='_')c[k]=s[k];return c;
     });
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({v:SCHEMA_VERSION,items:snap}));
     bcNotify();
   }catch(err){if(err.name==='QuotaExceededError')_base.notify('Storage Full',false)}
 }
+function save(){
+  if(saveTimer)return;
+  saveTimer=setTimeout(saveNow,SAVE_DEBOUNCE);
+}
+function flushSave(){if(saveTimer){clearTimeout(saveTimer);saveNow()}}
 
 /* ── Utils ───────────────────────────────────────────────────────── */
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -304,6 +331,14 @@ function splitTitlePrefix(raw){
   }
   return null;
 }
+function splitTrailingSlash(raw){
+  // "Deep Work 50/10/2/15" → title "Deep Work", rest "50/10/2/15"
+  var m=raw.match(/^(.*?)\s+(\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?){1,3})\s*$/);
+  if(!m)return null;
+  var left=m[1].trim();
+  if(!left||/\d/.test(left))return null;
+  return{title:left,rest:m[2]};
+}
 function parseSlash(s){
   var slashes=(s.match(/\//g)||[]).length;
   if(slashes>3)return null;
@@ -378,7 +413,7 @@ function parsePomo(raw){
 function parsePomoInner(input){
   var corrected=pomoAutocorrect(input);
   var title='';
-  var pre=splitTitlePrefix(corrected);
+  var pre=splitTitlePrefix(corrected)||splitTrailingSlash(corrected);
   if(pre){title=pre.title;corrected=pre.rest}
   var cfg;
   if(/^[\s\d\/.]+$/.test(corrected)){
@@ -550,6 +585,7 @@ function render(){
 /* ── RAF Loop ────────────────────────────────────────────────────── */
 function tick(){
   rafId=null;
+  checkClockDrift();
   var now=Date.now(),anyBoundary=false,anyDone=false;
   for(var i=0;i<items.length;i++){
     var s=items[i];
@@ -571,7 +607,7 @@ function tick(){
     }
     paintCard(s,now);
   }
-  if(anyBoundary){save();onPhaseBoundary(anyDone)}
+  if(anyBoundary){save();onPhaseBoundary(anyDone);maybeNotify(anyDone)}
   updateTitleAndBadge(false);
   if(anyRunning())rafId=requestAnimationFrame(tick);
   updateWake();
@@ -817,11 +853,77 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('mousemove',function(){if(kbIdx>=0)kbClear()},{passive:true});
 
+/* ── Drift Detection ─────────────────────────────────────────────── */
+var clockBaseWall=Date.now(),clockBasePerf=(typeof performance!=='undefined'&&performance.now)?performance.now():null;
+function checkClockDrift(){
+  if(clockBasePerf==null)return;
+  var nowWall=Date.now(),nowPerf=performance.now();
+  var expectedWall=clockBaseWall+(nowPerf-clockBasePerf);
+  var drift=nowWall-expectedWall;
+  // Backwards jump > 2s indicates clock change/NTP/sleep — rebase reference
+  if(Math.abs(drift)>2000){
+    console.warn('[Pomo] Clock drift detected: '+Math.round(drift)+'ms — rebasing');
+    clockBaseWall=nowWall;clockBasePerf=nowPerf;
+  }
+}
+
+/* ── Background Timer ────────────────────────────────────────────── */
+var bgTimer=null;
+function scheduleBgWake(){
+  if(bgTimer){clearTimeout(bgTimer);bgTimer=null}
+  if(!document.hidden)return;
+  var now=Date.now(),next=Infinity;
+  for(var i=0;i<items.length;i++){
+    var s=items[i];
+    if(s.phase==='done'||s.pausedAt!=null)continue;
+    if(s.endsAt<next)next=s.endsAt;
+  }
+  if(!isFinite(next))return;
+  var ms=Math.max(BG_MIN_TIMEOUT,next-now);
+  bgTimer=setTimeout(function(){
+    bgTimer=null;
+    // Run a tick-equivalent catch-up while hidden (subject to browser throttling)
+    var t=Date.now(),anyBoundary=false,anyDone=false;
+    for(var j=0;j<items.length;j++){
+      var ss=items[j];
+      if(ss.phase==='done'||ss.pausedAt!=null)continue;
+      if(ss.endsAt<=t){
+        var cu=catchUp(ss,t);
+        if(cu.boundaries){anyBoundary=true;if(cu.done)anyDone=true}
+      }
+    }
+    if(anyBoundary){save();onPhaseBoundary(anyDone);maybeNotify(anyDone)}
+    scheduleBgWake();
+  },ms);
+}
+
+/* ── Notifications (opt-in via ?notify=1) ────────────────────────── */
+var NOTIFY_ENABLED=/[?&]notify=1\b/.test(location.search);
+function maybeNotify(anyDone){
+  if(!NOTIFY_ENABLED)return;
+  if(typeof Notification==='undefined')return;
+  if(Notification.permission!=='granted')return;
+  try{
+    new Notification(anyDone?'Pomodoro Complete':'Phase Done',{
+      body:anyDone?'All cycles finished.':'Switching phase.',
+      tag:'pomo-boundary',silent:true
+    });
+  }catch(err){}
+}
+if(NOTIFY_ENABLED&&typeof Notification!=='undefined'&&Notification.permission==='default'){
+  document.addEventListener('click',function ask(){
+    Notification.requestPermission&&Notification.requestPermission();
+    document.removeEventListener('click',ask);
+  });
+}
+
 /* ── Visibility & Reload Catch-up ────────────────────────────────── */
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){
+    flushSave();
     stopLoop();
     if(wakeLock){try{wakeLock.release()}catch(err){}wakeLock=null}
+    scheduleBgWake();
   }else{
     var now=Date.now(),anyBoundary=false,anyDone=false;
     for(var i=0;i<items.length;i++){
@@ -831,10 +933,20 @@ document.addEventListener('visibilitychange',function(){
       if(cu.boundaries){anyBoundary=true;if(cu.done)anyDone=true}
     }
     if(anyBoundary){save();onPhaseBoundary(anyDone)}
+    if(bgTimer){clearTimeout(bgTimer);bgTimer=null}
     render();startLoop();
     // Browsers drop wake locks when tab hides — re-acquire if needed
     wakeLock=null;updateWake();
   }
+});
+
+/* ── pagehide: flush + cleanup ───────────────────────────────────── */
+window.addEventListener('pagehide',function(){
+  flushSave();
+  if(wakeLock){try{wakeLock.release()}catch(err){}wakeLock=null}
+  if(audioCtx&&audioCtx.state!=='closed'){try{audioCtx.close()}catch(err){}audioCtx=null}
+  if(bc){try{bc.close()}catch(err){}bc=null}
+  if(bgTimer){clearTimeout(bgTimer);bgTimer=null}
 });
 
 /* ── Cross-tab Sync ──────────────────────────────────────────────── */
@@ -863,7 +975,7 @@ load();
     if(s.phase==='done'||s.pausedAt!=null)continue;
     catchUp(s,now);
   }
-  save();
+  save();flushSave();
 })();
 render();
 startLoop();
