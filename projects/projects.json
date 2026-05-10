@@ -52,6 +52,12 @@
     "category": "Text Tools"
   },
   {
+    "title": "Capsule",
+    "subtitle": "Text-to-Capsule Generator",
+    "url": "/capsule/",
+    "category": "Text Tools"
+  },
+  {
     "title": "Clip",
     "subtitle": "Clipboard Text Manager",
     "url": "/clip/",

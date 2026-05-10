@@ -33,6 +33,7 @@
 - [Diffy](https://saputra.co.uk/diffy/), date difference calculator with natural-language input
 - [Pomo](https://saputra.co.uk/pomo/), Pomodoro timer with multiple concurrent sessions
 - [Miele Laundry Guide](https://saputra.co.uk/laundry/) — Vita Student Cannon Park laundry guide
+- [Capsule](https://saputra.co.uk/capsule/), text-to-capsule image generator
 - [Caption](https://github.com/DukeSaputra/caption), offline video subtitle generator
 
 ## Posts
