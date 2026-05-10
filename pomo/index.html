@@ -12,14 +12,8 @@
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
-.inp-row{display:flex;gap:10px;margin-bottom:14px}
-.inp-fields{flex:1;display:flex;flex-direction:column;border-radius:20px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
-.inp-fields .inp{border-radius:0;box-shadow:none;border:none;margin:0}
-.inp-fields .inp:first-child{border-bottom:1px solid var(--bdr2)}
-.inp-fields .inp input{border:none;box-shadow:none;background:transparent}
-.add-tall{width:44px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s}
-.add-tall:active{opacity:.7}
-@media(hover:hover){.add-tall:hover{color:var(--t1);background:var(--bg2)}}
+.inp button:active{opacity:.7}
+@media(hover:hover){.inp button:hover{color:var(--t1);background:var(--bg2)}}
 .preset-card{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .preset{padding:16px 14px;background:none;border:none;border-right:1px solid var(--bdr2);border-bottom:1px solid var(--bdr2);cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:4px;transition:background .15s}
 .preset:nth-child(2n){border-right:none}
@@ -42,10 +36,9 @@ html[data-theme="sepia"] .item[data-phase="break"]{--p-c:#3F6212;--p-bg:rgba(63,
 html[data-theme="sepia"] .item[data-phase="long"]{--p-c:#7C5BAD;--p-bg:rgba(124,91,173,.14)}
 .item.kb-focus{outline:2px solid var(--acc);outline-offset:2px}
 .item.removing{opacity:0;transition:opacity .15s ease}
-.item-head{display:flex;align-items:flex-start;padding:14px 16px 6px 20px;gap:12px}
-.item-info{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.item-head{display:flex;align-items:center;padding:14px 16px 4px 20px;gap:12px}
+.item-info{flex:1;min-width:0}
 .item-title{font:600 1rem/1.3 var(--font);color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item-phase{display:inline-flex;align-self:flex-start;align-items:center;padding:3px 10px;border-radius:50px;background:var(--p-bg);color:var(--p-c);font:600 .75rem/1 var(--font);letter-spacing:.02em}
 .del{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s,border-color .15s;padding:0}
 .del svg{width:13px;height:13px;pointer-events:none}
 .del:active{opacity:.7}
@@ -54,12 +47,12 @@ html[data-theme="sepia"] .item[data-phase="long"]{--p-c:#7C5BAD;--p-bg:rgba(124,
 .ring-zone:active .ring-time{opacity:.7}
 .ring-zone .ring{display:block;width:200px;height:200px;transform:rotate(-90deg)}
 .ring-track{stroke:var(--bdr);stroke-width:5;fill:none}
-.ring-arc{stroke:var(--p-c);stroke-width:5;fill:none;stroke-linecap:round;stroke-dasharray:1000;stroke-dashoffset:0}
-.item[data-phase="done"] .ring-arc{stroke-dashoffset:1000}
-.ring-center{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
-.ring-time{font:600 clamp(2rem,8vw,2.75rem)/1 var(--font);color:var(--t1);font-variant-numeric:tabular-nums;letter-spacing:-.02em;transition:opacity .15s}
+.ring-arc{stroke:var(--p-c);stroke-width:5;fill:none;stroke-linecap:round;stroke-dasharray:1000 1000;transition:stroke .25s ease}
+.item[data-paused="1"] .ring-arc,.item[data-paused="1"] .ring-time{color:var(--t3);stroke:var(--t3)}
+.item[data-paused="1"] .dots .d.on{background:var(--t3)}
+.ring-center{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.ring-time{font:600 clamp(2rem,8vw,2.75rem)/1 var(--font);color:var(--t1);font-variant-numeric:tabular-nums;letter-spacing:-.02em;transition:opacity .15s,color .25s ease}
 .item[data-phase="done"] .ring-time{font-size:1.25rem;color:var(--t3)}
-.ring-state{font:500 .75rem/1 var(--font);color:var(--t3);text-transform:uppercase;letter-spacing:.06em;min-height:.75rem}
 .item-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 14px;gap:12px}
 .dots{display:flex;gap:5px;align-items:center}
 .dots .d{width:7px;height:7px;border-radius:50%;background:var(--bdr);transition:background .25s ease}
@@ -83,22 +76,14 @@ html[data-theme="sepia"] .item[data-phase="long"]{--p-c:#7C5BAD;--p-bg:rgba(124,
 </head>
 <body>
 <div class="w">
-  <div class="inp-row">
-    <div class="inp-fields">
-      <div class="inp">
-        <input id="inp-title" type="text" autocomplete="off" placeholder="Title" spellcheck="false" aria-label="Title">
-      </div>
-      <div class="inp">
-        <input id="inp-dur" type="text" autocomplete="off" placeholder="25/5/4/15" spellcheck="false" aria-label="Duration">
-      </div>
-    </div>
-    <button type="button" id="add-btn" class="add-tall" aria-label="Add Pomodoro"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <div class="inp">
+    <input id="inp-title" type="text" autocomplete="off" placeholder="Title (Optional)" spellcheck="false" aria-label="Title">
   </div>
   <div class="preset-card" id="presets">
-    <button type="button" class="preset" data-fill="25/5/4/15"><span class="p-name">Classic</span><span class="p-spec">25 / 5 / 4 / 15</span></button>
-    <button type="button" class="preset" data-fill="50/10/2/15"><span class="p-name">Deep Work</span><span class="p-spec">50 / 10 / 2 / 15</span></button>
-    <button type="button" class="preset" data-fill="90/15/1"><span class="p-name">Sprint</span><span class="p-spec">90 / 15 / 1</span></button>
-    <button type="button" class="preset" data-fill="15/3/4/15"><span class="p-name">Short</span><span class="p-spec">15 / 3 / 4 / 15</span></button>
+    <button type="button" class="preset" data-fill="25/5/4/15"><span class="p-name">Classic</span><span class="p-spec">25 · 5 · 4 · 15</span></button>
+    <button type="button" class="preset" data-fill="50/10/2/15"><span class="p-name">Deep Work</span><span class="p-spec">50 · 10 · 2 · 15</span></button>
+    <button type="button" class="preset" data-fill="90/15/1"><span class="p-name">Sprint</span><span class="p-spec">90 · 15 · 1</span></button>
+    <button type="button" class="preset" data-fill="15/3/4/15"><span class="p-name">Short</span><span class="p-spec">15 · 3 · 4 · 15</span></button>
   </div>
   <div class="items" id="items" role="list"></div>
 </div>
@@ -462,12 +447,11 @@ function buildItem(s,now){
   row.className='item';row.setAttribute('role','listitem');
   row.setAttribute('data-id',s.id);row.setAttribute('data-phase',s.phase);
 
-  // Head: title + phase pill + delete
+  // Head: title + delete
   var head=document.createElement('div');head.className='item-head';
   var info=document.createElement('div');info.className='item-info';
   var title=document.createElement('div');title.className='item-title';title.textContent=s.title||'Pomodoro';
-  var pill=document.createElement('div');pill.className='item-phase';pill.textContent=phaseLabel(s);
-  info.appendChild(title);info.appendChild(pill);
+  info.appendChild(title);
   var del=document.createElement('button');del.type='button';del.className='del';del.setAttribute('aria-label','Delete');
   del.appendChild(_base.mkX());
   head.appendChild(info);head.appendChild(del);
@@ -486,8 +470,7 @@ function buildItem(s,now){
   svg.appendChild(track);svg.appendChild(arc);
   var center=document.createElement('div');center.className='ring-center';
   var time=document.createElement('div');time.className='ring-time';
-  var state=document.createElement('div');state.className='ring-state';
-  center.appendChild(time);center.appendChild(state);
+  center.appendChild(time);
   zone.appendChild(svg);zone.appendChild(center);
 
   // Foot: dots + skip
@@ -503,8 +486,8 @@ function buildItem(s,now){
   row.appendChild(head);row.appendChild(zone);row.appendChild(foot);
 
   // Cache refs
-  s._el=row;s._arc=arc;s._time=time;s._state=state;
-  s._lastTime='';s._lastOffset=-1;s._lastFrame=0;
+  s._el=row;s._arc=arc;s._time=time;
+  s._lastTime='';s._lastOffset=-1;s._lastFrame=0;s._lastPaused=null;
   if(s.phase!=='done'&&s.pausedAt==null)arc.style.willChange='stroke-dashoffset';
   else arc.style.willChange='';
 
@@ -518,11 +501,12 @@ function paintCard(s,now){
   s._lastFrame=now;
   var newText=s.phase==='done'?'Done':fmtTime(liveRemaining(s,now));
   if(s._lastTime!==newText){s._time.textContent=newText;s._lastTime=newText}
-  var newState=s.phase==='done'?'':s.pausedAt!=null?'Paused':'';
-  if(s._state.textContent!==newState)s._state.textContent=newState;
+  var paused=s.pausedAt!=null?'1':'0';
+  if(s._lastPaused!==paused){s._el.setAttribute('data-paused',paused);s._lastPaused=paused}
   var prog=liveProgress(s,now);
+  // Inline style bypasses any CSS-rule precedence on stroke-dashoffset
   var off=(RING_TOTAL*prog).toFixed(2);
-  if(s._lastOffset!==off){s._arc.setAttribute('stroke-dashoffset',off);s._lastOffset=off}
+  if(s._lastOffset!==off){s._arc.style.strokeDashoffset=off;s._lastOffset=off}
 }
 function ensureObserver(){
   if(ioObserver||typeof IntersectionObserver==='undefined')return;
