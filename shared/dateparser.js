@@ -850,7 +850,7 @@ function extractDate(text){
   return null;
 }
 
-var _dpExports={parseDate:parseDate,parseTime:parseTime,parseDuration:parseDuration,splitTitleDate:splitTitleDate,extractDate:extractDate,formatLabel:formatLabel,fmtTime12:fmtTime12,MONTH_NAMES:MONTH_NAMES,MONTHS:MONTHS,DAYS:DAYS,normalize:normalize,autoCorrect:autoCorrect};
+var _dpExports={parseDate:parseDate,parseTime:parseTime,parseDuration:parseDuration,splitTitleDate:splitTitleDate,extractDate:extractDate,formatLabel:formatLabel,fmtTime12:fmtTime12,MONTH_NAMES:MONTH_NAMES,MONTHS:MONTHS,DAYS:DAYS,normalize:normalize,autoCorrect:autoCorrect,damerau:damerau,fuzzyLookup:fuzzyLookup,getThreshold:getThreshold};
 if(typeof window!=='undefined')window._dp=_dpExports;
 if(typeof globalThis!=='undefined')globalThis._dp=_dpExports;
 })();

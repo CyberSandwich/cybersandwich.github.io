@@ -94,6 +94,12 @@
     "category": "Time Tools"
   },
   {
+    "title": "Pomo",
+    "subtitle": "Pomodoro Timer With Concurrent Sessions",
+    "url": "/pomo/",
+    "category": "Time Tools"
+  },
+  {
     "title": "ThymeZone",
     "subtitle": "Compare Timezones Side by Side",
     "url": "/thymezone/",
