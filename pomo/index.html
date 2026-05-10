@@ -420,13 +420,6 @@ function parsePomoInner(input){
 }
 
 /* ── Render ──────────────────────────────────────────────────────── */
-function phaseLabel(s){
-  if(s.phase==='focus')return s.cycles>DOT_THRESHOLD?'Focus '+(s.cycleIdx+1)+'/'+s.cycles:'Focus '+(s.cycleIdx+1)+' of '+s.cycles;
-  if(s.phase==='break')return 'Break';
-  if(s.phase==='long')return 'Long Break';
-  if(s.phase==='done')return 'Completed';
-  return '';
-}
 function buildDots(s){
   var n=s.cycles,filled=Math.min(s.cycleIdx,n);
   var wrap=document.createElement('div');
@@ -519,7 +512,7 @@ function ensureObserver(){
 }
 function render(){
   var c=$('items');
-  for(var x=0;x<items.length;x++){items[x]._el=null;items[x]._arc=null;items[x]._time=null;items[x]._state=null}
+  for(var x=0;x<items.length;x++){items[x]._el=null;items[x]._arc=null;items[x]._time=null}
   if(ioObserver)ioObserver.disconnect();
   visibleIds=Object.create(null);
   c.textContent='';
@@ -749,21 +742,19 @@ function kbCurrent(){
 }
 
 /* ── Input / Click Handlers ──────────────────────────────────────── */
-function submitInput(){
-  var t=$('inp-title').value.trim(),d=$('inp-dur').value.trim();
-  if(!t&&!d){addSession('','');clearInputs();return}
-  addSession(t,d);
-  clearInputs();
+function addFromPreset(spec){
+  var t=$('inp-title').value.trim();
+  addSession(t,spec);
+  $('inp-title').value='';
 }
-function clearInputs(){$('inp-title').value='';$('inp-dur').value='';$('inp-title').focus()}
-$('add-btn').addEventListener('click',submitInput);
-$('inp-title').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('inp-dur').focus()}});
-$('inp-dur').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();submitInput()}});
+$('inp-title').addEventListener('keydown',function(e){
+  // Enter on title = add Classic by default
+  if(e.key==='Enter'){e.preventDefault();addFromPreset('25/5/4/15')}
+});
 $('presets').addEventListener('click',function(e){
   var p=e.target.closest('.preset');if(!p)return;
-  var fill=p.getAttribute('data-fill');
-  $('inp-dur').value=fill;
-  submitInput();
+  initAudio();
+  addFromPreset(p.getAttribute('data-fill'));
 });
 $('items').addEventListener('click',function(e){
   var row=e.target.closest('.item');if(!row)return;
@@ -795,7 +786,7 @@ _base.onKey({
 });
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
-    if(document.activeElement===$('inp-title')||document.activeElement===$('inp-dur'))document.activeElement.blur();
+    if(document.activeElement===$('inp-title'))document.activeElement.blur();
     kbClear();
   }
 });
