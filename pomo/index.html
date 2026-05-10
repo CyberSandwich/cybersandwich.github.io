@@ -123,12 +123,22 @@ var DEFAULTS={focus:1500,brk:300,long:900,cycles:4};
 var LIMITS={focusMin:60,focusMax:14400,brkMin:0,brkMax:3600,longMin:0,longMax:10800,cyclesMin:1,cyclesMax:12};
 var DOT_THRESHOLD=8;
 var RING_TOTAL=1000;
+var FRAME_QUANTUM=16;
+var TITLE_THROTTLE=1000;
+var RESET_TIMEOUT=2000;
+var REMOVE_ANIM=150;
+var BOUNDARY_ANIM=600;
+var BC_NAME='pomo';
 
 /* ── State ───────────────────────────────────────────────────────── */
 var items=[],settings={sound:true,vibrate:true};
 var rafId=null,wakeLock=null,audioCtx=null;
 var kbIdx=-1;
 var resetState={};
+var parseCache=new Map();
+var bc=null;
+var titleLast=0,titleLastText='';
+var ioObserver=null,visibleIds=Object.create(null);
 
 /* ── Storage ─────────────────────────────────────────────────────── */
 function load(){
@@ -143,8 +153,14 @@ function load(){
   }
 }
 function save(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items))}
-  catch(err){if(err.name==='QuotaExceededError')_base.notify('Storage Full',false)}
+  try{
+    // Strip ephemeral DOM refs before serializing (avoids JSON cycle errors)
+    var snap=items.map(function(s){
+      var c={};for(var k in s)if(k.charAt(0)!=='_')c[k]=s[k];return c;
+    });
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(snap));
+    bcNotify();
+  }catch(err){if(err.name==='QuotaExceededError')_base.notify('Storage Full',false)}
 }
 
 /* ── Utils ───────────────────────────────────────────────────────── */
@@ -350,6 +366,16 @@ function stripLabelWords(text,used){
 function parsePomo(raw){
   var input=String(raw||'').trim();
   if(!input)return defaults();
+  if(parseCache.has(input)){
+    var cached=parseCache.get(input);
+    return Object.assign({},cached);
+  }
+  var result=parsePomoInner(input);
+  if(parseCache.size>64)parseCache.clear();
+  parseCache.set(input,Object.assign({},result));
+  return result;
+}
+function parsePomoInner(input){
   var corrected=pomoAutocorrect(input);
   var title='';
   var pre=splitTitlePrefix(corrected);
@@ -458,23 +484,46 @@ function buildItem(s,now){
 
   row.appendChild(head);row.appendChild(actions);
 
+  // Cache per-session DOM refs (zero querySelector in hot path)
+  s._el=row;s._arc=arc;s._time=time;s._pill=pill;s._dots=dots;s._meta=meta;
+  s._lastTime='';s._lastOffset=-1;s._lastFrame=0;
+  if(s.phase!=='done'&&s.pausedAt==null)arc.style.willChange='stroke-dashoffset';
+  else arc.style.willChange='';
+
   var prog=liveProgress(s,now);
-  arc.setAttribute('stroke-dashoffset',(RING_TOTAL*prog).toFixed(2));
-  time.textContent=s.phase==='done'?'Done':fmtTime(liveRemaining(s,now));
+  var off=(RING_TOTAL*prog).toFixed(2);
+  arc.setAttribute('stroke-dashoffset',off);s._lastOffset=off;
+  var initText=s.phase==='done'?'Done':fmtTime(liveRemaining(s,now));
+  time.textContent=initText;s._lastTime=initText;
 
   return row;
 }
-function paintCard(row,s,now){
-  var time=row.querySelector('.ring-time');
-  var arc=row.querySelector('.ring-arc');
-  if(!time||!arc)return;
+function paintCard(s,now){
+  if(!s._el)return;
+  if(visibleIds[s.id]===false)return;
+  if(now-s._lastFrame<FRAME_QUANTUM)return;
+  s._lastFrame=now;
   var newText=s.phase==='done'?'Done':fmtTime(liveRemaining(s,now));
-  if(time.textContent!==newText)time.textContent=newText;
+  if(s._lastTime!==newText){s._time.textContent=newText;s._lastTime=newText}
   var prog=liveProgress(s,now);
-  arc.setAttribute('stroke-dashoffset',(RING_TOTAL*prog).toFixed(2));
+  var off=(RING_TOTAL*prog).toFixed(2);
+  if(s._lastOffset!==off){s._arc.setAttribute('stroke-dashoffset',off);s._lastOffset=off}
+}
+function ensureObserver(){
+  if(ioObserver||typeof IntersectionObserver==='undefined')return;
+  ioObserver=new IntersectionObserver(function(entries){
+    for(var i=0;i<entries.length;i++){
+      var id=entries[i].target.getAttribute('data-id');
+      if(id)visibleIds[id]=entries[i].isIntersecting;
+    }
+  },{rootMargin:'120px'});
 }
 function render(){
   var c=$('items'),emp=$('empty');
+  // Detach cached refs from sessions (we're rebuilding)
+  for(var x=0;x<items.length;x++){items[x]._el=null;items[x]._arc=null;items[x]._time=null}
+  if(ioObserver)ioObserver.disconnect();
+  visibleIds=Object.create(null);
   c.textContent='';
   if(!items.length){c.style.display='none';emp.style.display='';return}
   emp.style.display='none';c.style.display='';
@@ -490,36 +539,40 @@ function render(){
     frag.appendChild(row);
   }
   c.appendChild(frag);
+  ensureObserver();
+  if(ioObserver)for(var k=0;k<sorted.length;k++){
+    visibleIds[sorted[k].id]=true;ioObserver.observe(sorted[k]._el);
+  }
   if(kbIdx>=sorted.length)kbIdx=sorted.length-1;
+  updateTitleAndBadge(true);
 }
 
 /* ── RAF Loop ────────────────────────────────────────────────────── */
 function tick(){
   rafId=null;
-  var now=Date.now(),anyBoundary=false,anyDone=false,boundaryIds={};
+  var now=Date.now(),anyBoundary=false,anyDone=false;
   for(var i=0;i<items.length;i++){
     var s=items[i];
     if(s.phase==='done'||s.pausedAt!=null)continue;
     if(s.endsAt<=now){
       var cu=catchUp(s,now);
-      if(cu.boundaries){anyBoundary=true;boundaryIds[s.id]=cu;if(cu.done)anyDone=true}
+      if(cu.boundaries){
+        anyBoundary=true;if(cu.done)anyDone=true;
+        // Phase changed: rebuild this card in place
+        if(s._el&&s._el.parentNode){
+          var oldEl=s._el,newRow=buildItem(s,now);
+          oldEl.replaceWith(newRow);
+          if(ioObserver){ioObserver.unobserve(oldEl);ioObserver.observe(newRow)}
+          newRow.classList.add('boundary');
+          (function(r){setTimeout(function(){r.classList.remove('boundary')},BOUNDARY_ANIM)})(newRow);
+        }
+        continue;
+      }
     }
-  }
-  var cards=document.querySelectorAll('.item[data-id]');
-  for(var k=0;k<cards.length;k++){
-    var id=cards[k].getAttribute('data-id'),sess=null;
-    for(var j=0;j<items.length;j++){if(items[j].id===id){sess=items[j];break}}
-    if(!sess)continue;
-    if(boundaryIds[id]){
-      var newRow=buildItem(sess,now);
-      cards[k].replaceWith(newRow);
-      newRow.classList.add('boundary');
-      (function(r){setTimeout(function(){r.classList.remove('boundary')},600)})(newRow);
-    }else{
-      paintCard(cards[k],sess,now);
-    }
+    paintCard(s,now);
   }
   if(anyBoundary){save();onPhaseBoundary(anyDone)}
+  updateTitleAndBadge(false);
   if(anyRunning())rafId=requestAnimationFrame(tick);
   updateWake();
 }
@@ -588,6 +641,28 @@ function updateWake(){
     }
   }else{
     if(wakeLock){try{wakeLock.release()}catch(err){}wakeLock=null}
+  }
+}
+
+/* ── Title + Badge ───────────────────────────────────────────────── */
+function updateTitleAndBadge(force){
+  var now=Date.now();
+  if(!force&&now-titleLast<TITLE_THROTTLE)return;
+  titleLast=now;
+  var minRem=Infinity,activeCount=0;
+  for(var i=0;i<items.length;i++){
+    var s=items[i];
+    if(s.phase==='done')continue;
+    activeCount++;
+    if(s.pausedAt!=null)continue;
+    var rem=Math.max(0,(s.endsAt-now)/1000);
+    if(rem<minRem)minRem=rem;
+  }
+  var newTitle=isFinite(minRem)?fmtTime(minRem)+', Pomo':'Pomo';
+  if(newTitle!==titleLastText){document.title=newTitle;titleLastText=newTitle}
+  if(navigator.setAppBadge){
+    if(activeCount>0)navigator.setAppBadge(activeCount).catch(function(){});
+    else if(navigator.clearAppBadge)navigator.clearAppBadge().catch(function(){});
   }
 }
 
@@ -756,14 +831,24 @@ document.addEventListener('visibilitychange',function(){
       if(cu.boundaries){anyBoundary=true;if(cu.done)anyDone=true}
     }
     if(anyBoundary){save();onPhaseBoundary(anyDone)}
-    render();startLoop();updateWake();
+    render();startLoop();
+    // Browsers drop wake locks when tab hides — re-acquire if needed
+    wakeLock=null;updateWake();
   }
 });
 
 /* ── Cross-tab Sync ──────────────────────────────────────────────── */
+function syncFromOther(){load();render();startLoop();updateWake()}
 window.addEventListener('storage',function(e){
-  if(e.key===STORAGE_KEY){load();render();startLoop()}
+  if(e.key===STORAGE_KEY)syncFromOther();
 });
+if(typeof BroadcastChannel!=='undefined'){
+  try{
+    bc=new BroadcastChannel(BC_NAME);
+    bc.addEventListener('message',function(e){if(e.data==='changed')syncFromOther()});
+  }catch(err){}
+}
+function bcNotify(){if(bc){try{bc.postMessage('changed')}catch(err){}}}
 
 /* ── Init Audio on first interaction ─────────────────────────────── */
 document.addEventListener('click',function(){initAudio()},{once:true});
