@@ -127,6 +127,8 @@ var MAX_DIM=8192;
 
 var canvas=$('cv'),ctx=canvas.getContext('2d'),emptyEl=$('empty');
 var pv=$('pv'),ov=$('drop-ov');
+var fileIn=document.createElement('input');fileIn.type='file';fileIn.accept='image/*,video/*';fileIn.style.display='none';document.body.appendChild(fileIn);
+fileIn.addEventListener('change',function(){var f=fileIn.files&&fileIn.files[0];if(!f){return}if(f.type.startsWith('image/'))loadImg(f);else if(f.type.startsWith('video/'))loadVid(f);else _base.notify('Unsupported File',false);fileIn.value=''});
 var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),psBtn=$('psBtn'),rsBtn=$('rsBtn');
 var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
 
@@ -405,8 +407,8 @@ function(){_base.notify('Copy Failed',false)})
 }
 
 pv.addEventListener('click',function(e){
-if(!active()||e.target.closest('button'))return;
-copyToClipboard()
+if(e.target.closest('button'))return;
+fileIn.click()
 });
 
 cpBtn.addEventListener('click',function(){
