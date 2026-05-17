@@ -102,18 +102,37 @@ function stripPunct(text){
   }).join('').trim();
 }
 
-/* Rewrite decimal-hour notation as colon time: "5.5pm" -> "5:30pm",
-   "17.5" -> "17:30", "12.5am" -> "12:30am", "5.25pm" -> "5:15pm".
-   Skipped if hour > 23, if minutes round to 60+, or if a duration unit
-   word (week/month/year/day/fortnight/hour/min/sec) follows, so "10.5 weeks"
-   stays intact for the relative-quantity matcher. */
+/* Dot-as-colon time, routed by whether the post-dot digits can be a valid
+   minute count:
+     2-digit MM, 00..59  -> literal minutes ("1.50am" -> "1:50am")
+     2-digit MM, 60..99  -> decimal fraction ("1.60" -> "1:36"; invalid as min)
+     1-digit decimal     -> decimal fraction  ("5.5pm" -> "5:30pm";
+                                              literal would need a leading 0)
+   Skipped when followed by a duration unit so "1.5 hours" / "1.5h" stays for
+   parseDuration. Hours validated per context (1-12 with am/pm, 0-23 bare). */
 function expandDecimalTime(text){
-  return String(text).replace(/\b(\d{1,2})\.(\d+)(\s*(?:am?|pm?))?\b(?!\s*(?:weeks?|months?|years?|days?|fortnights?|hours?|hrs?|minutes?|mins?|seconds?|secs?))/gi,function(whole,h,dec,suf){
-    var hh=parseInt(h,10);
-    var min=Math.round(parseFloat('0.'+dec)*60);
-    if(hh>23||min<0||min>=60)return whole;
-    return hh+':'+(min<10?'0':'')+min+(suf||'');
+  return String(text).replace(/\b(\d{1,2})\.(\d{1,2})(\s*(?:am?|pm?))?\b(?!\s*(?:days?|weeks?|months?|years?|fortnights?|hours?|hrs?|minutes?|mins?|seconds?|secs?|h|hr|hrs|m|min|mins|s|sec|secs|d|w|y|mo)\b)/gi,function(whole,h,dec,suf){
+    var hh=parseInt(h,10),raw=parseInt(dec,10),min;
+    if(dec.length===2&&raw<60)min=raw;
+    else min=Math.round(parseFloat('0.'+dec)*60);
+    if(min<0||min>=60)return whole;
+    if(suf){
+      if(hh<0||hh>12)return whole;
+      return hh+':'+(min<10?'0':'')+min+suf;
+    }
+    if(hh>23)return whole;
+    return hh+':'+(min<10?'0':'')+min;
   });
+}
+
+/* Split digit-letter junctions where the letter portion is a known unit or
+   month abbreviation: "30d" -> "30 d", "21jun" -> "21 jun", "15june" ->
+   "15 june". Scoped so ISO timestamps ("2026-01-15T14:30") and arbitrary
+   tokens ("21junior", "15thjun") are left untouched. Runs after autoCorrect
+   so typos in the letter portion are already normalized. */
+var SPLIT_NUM_WORD_RE=/(\d+(?:\.\d+)?)(days?|weeks?|fortnights?|months?|years?|hours?|hrs?|minutes?|mins?|seconds?|secs?|mo|d|w|y|h|jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|sept|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/gi;
+function splitNumWord(text){
+  return String(text).replace(SPLIT_NUM_WORD_RE,'$1 $2');
 }
 
 /* ---------- helpers (unchanged) ---------- */
@@ -218,7 +237,9 @@ function parseTime(text){
 
   m=t.match(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i)||t.match(/[\s,]+(\d{1,2}):(\d{2})\s*$/i);
   if(!m){
-    m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||t.match(/^(\d{1,2}):(\d{2})[\s,]+/i);
+    /* Lookahead on the no-am alt prevents it from swallowing "1:50 am" as
+       just "1:50 " and leaving "am" stranded for stripTime. */
+    m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i)||t.match(/^(\d{1,2}):(\d{2})(?!\s*(?:am?|pm?)\b)[\s,]+/i);
   }
   if(!m){
     m=t.match(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)$/i)||t.match(/^(\d{1,2}):(\d{2})$/i);
@@ -275,7 +296,7 @@ function stripTime(text){
   s=s.replace(/[\s,]+\d{1,2}\s+\d{2}\s*(?:am?|pm?)\s*$/i,'');
   s=s.replace(/^\d{1,2}\s+\d{2}\s*(?:am?|pm?)[\s,]+/i,'');
   s=s.replace(/[\s,]+(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)\s*$/i,'').replace(/[\s,]+(\d{1,2}):(\d{2})\s*$/i,'');
-  s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})[\s,]+/i,'');
+  s=s.replace(/^(\d{1,2})(?::(\d{2}))?\s*(am?|pm?)[\s,]+/i,'').replace(/^(\d{1,2}):(\d{2})(?!\s*(?:am?|pm?)\b)[\s,]+/i,'');
   s=s.replace(/^\d{3,4}\s*(?:am?|pm?)?\s*$/i,'');
   s=s.replace(/^\d{1,2}$/,'');
   /* Standalone bare time-only inputs: "5pm", "5p", "5:30", "5:30pm", "17:30" */
@@ -518,20 +539,61 @@ function parseDuration(s){
   return{date:dt,label:formatLabel(dt)};
 }
 
+/* "N units before/after <anchor>", e.g. "30 days before 21 june",
+   "5 hours after 5p at 30 june", "30d bef 21jun". The anchor portion is
+   re-parsed through parseDate so it can carry its own time. Single-letter
+   unit `m` resolves to minute (matches the existing rm pattern); use `mo`
+   or `months` for month. */
+var ANCHOR_OFFSET_RE=/^(\d+(?:\.\d+)?)\s*(days?|weeks?|fortnights?|months?|years?|hours?|hrs?|minutes?|mins?|seconds?|secs?|mo|d|w|y|h|m|s)\s+(before|bef|b4|after|aft)\s+(.+)$/i;
+function tryAnchorOffset(prepared){
+  var m=prepared.match(ANCHOR_OFFSET_RE);
+  if(!m)return null;
+  var n=parseFloat(m[1]),u=m[2].toLowerCase(),dirWord=m[3].toLowerCase();
+  var dir=(dirWord==='before'||dirWord==='bef'||dirWord==='b4')?-1:1;
+  var anchor=parseDate(m[4]);
+  if(!anchor)return null;
+  var canon;
+  if(u==='d'||u==='day'||u==='days')canon='day';
+  else if(u==='w'||u==='week'||u==='weeks')canon='week';
+  else if(u==='fortnight'||u==='fortnights')canon='fortnight';
+  else if(u==='mo'||u==='month'||u==='months')canon='month';
+  else if(u==='y'||u==='year'||u==='years')canon='year';
+  else if(u==='h'||u==='hr'||u==='hrs'||u==='hour'||u==='hours')canon='hour';
+  else if(u==='m'||u==='min'||u==='mins'||u==='minute'||u==='minutes')canon='minute';
+  else if(u==='s'||u==='sec'||u==='secs'||u==='second'||u==='seconds')canon='second';
+  else return null;
+  var base=new Date(anchor.date),offset=n*dir;
+  if(canon==='day')base.setDate(base.getDate()+Math.round(offset));
+  else if(canon==='week')base.setDate(base.getDate()+Math.round(offset*7));
+  else if(canon==='fortnight')base.setDate(base.getDate()+Math.round(offset*14));
+  else if(canon==='month')base.setMonth(base.getMonth()+Math.round(offset));
+  else if(canon==='year')base.setFullYear(base.getFullYear()+Math.round(offset));
+  else if(canon==='hour')base.setTime(base.getTime()+Math.round(offset*3600000));
+  else if(canon==='minute')base.setTime(base.getTime()+Math.round(offset*60000));
+  else if(canon==='second')base.setTime(base.getTime()+Math.round(offset*1000));
+  return base;
+}
+
 function parseDate(text){
   if(!text||!text.trim())return null;
   var raw=text.trim();
 
-  /* 1. Pure duration on raw input (h/m/s only) */
+  /* 1. Normalize, strip incidental punctuation, autoCorrect typos, split
+        digit-letter junctions ("30d"→"30 d", "21jun"→"21 jun"), then
+        rewrite dot-as-colon time ("1.50am"→"1:50am"). */
+  var prepared=expandDecimalTime(splitNumWord(autoCorrect(stripPunct(normalize(raw)))));
+
+  /* 2. Anchor offset ("N units before/after <date>") runs before parseDuration
+        so "5 hours after 5p at 30 june" isn't intercepted as a bare duration.
+        Recursive: the anchor portion goes back through parseDate, so it can
+        carry its own time. */
+  var anchorRes=tryAnchorOffset(prepared);
+  if(anchorRes)return{date:anchorRes,label:formatLabel(anchorRes),hint:null};
+
+  /* 3. Pure duration (h/m/s only). Tried on both raw and prepared so typos
+        like "0.5 howr" are caught after autoCorrect. */
   var dur=parseDuration(raw);
   if(dur){dur.hint=null;return dur}
-
-  /* 2. Normalize, strip incidental punctuation, autoCorrect typos,
-        rewrite decimal-hour notation (5.5pm → 5:30pm) so parseTime/findTimeMid
-        can pick it up via existing colon patterns. */
-  var prepared=expandDecimalTime(autoCorrect(stripPunct(normalize(raw))));
-
-  /* 3. Retry duration on prepared text (catches typos like "0.5 howr") */
   var dur2=parseDuration(prepared);
   if(dur2){dur2.hint=null;return dur2}
 
