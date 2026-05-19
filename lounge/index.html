@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<title>Lounge</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lounge">
+<meta name="description" content="Browse and copy LoungeKey airport lounges, grouped by airport and searchable across name, city, code, continent, and icon.">
+<meta property="og:title" content="Lounge">
+<meta property="og:description" content="Browse and copy LoungeKey airport lounges.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=27">
+<style>
+main{max-width:560px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
+@media(min-width:768px){main{padding:32px 32px calc(100px + env(safe-area-inset-bottom,0px))}}
+
+/* Page header, matches main SPA .stitle */
+.stitle{
+  font-size:clamp(1.5rem,4vw,2rem);
+  font-weight:700;
+  letter-spacing:-.03em;
+  margin:12px 0 clamp(16px,3vw,20px);
+  color:var(--t1);
+  text-align:center
+}
+
+/* Card + section rules copied verbatim from main SPA style.css (pcard / picon / link-sec) */
+.pcard{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:24px;
+  text-decoration:none;
+  color:var(--t1);
+  background:var(--card);
+  box-shadow:var(--shadow);
+  border-radius:20px;
+  margin-bottom:14px;
+  border:none;
+  width:100%;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:box-shadow .15s,transform .1s,background .2s,color .2s,border-color .2s
+}
+.pcard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
+.pcard:active{transform:translateY(-1px) scale(.985)}
+@media(hover:hover){.pcard:hover{will-change:transform}}
+.pcard .pinf{flex:1;min-width:0}
+.pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcard .pd{font-size:.8125rem;color:var(--t3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picon{width:42px;height:42px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.picon svg{width:20px;height:20px;color:var(--t3);stroke-width:2}
+html[data-theme="dark"] .picon{background:#3A3A3C}
+
+.search-wrap{margin-bottom:20px}
+.link-sec{margin-bottom:clamp(20px,4vw,28px)}
+.link-sec h3{
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin-bottom:12px
+}
+
+.empty{text-align:center;padding:48px 20px;color:var(--t3);font-size:.875rem;background:none;box-shadow:none}
+
+/* Copied-feedback tokens, light theme defaults (sage-green, low saturation) */
+:root{--lg-ok-bg:#DCFCE7;--lg-ok-c:#15803D;--lg-ok-bdr:#A7F3D0}
+html[data-theme="dark"]{--lg-ok-bg:#1A3A2A;--lg-ok-c:#34D399;--lg-ok-bdr:#2D5A3E}
+html[data-theme="sepia"]{--lg-ok-bg:#E8E0CE;--lg-ok-c:#2D7D46;--lg-ok-bdr:#DDD4C0}
+
+.pcard.copied{
+  background:var(--lg-ok-bg);
+  color:var(--lg-ok-c);
+  box-shadow:0 0 0 1.5px var(--lg-ok-bdr),var(--shadow);
+  animation:lgPop .35s ease
+}
+.pcard.copied .pt{color:var(--lg-ok-c)}
+.pcard.copied .pd{color:var(--lg-ok-c);opacity:.8}
+.pcard.copied .picon{background:var(--lg-ok-bdr)}
+.pcard.copied .picon svg{color:var(--lg-ok-c)}
+@keyframes lgPop{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.02)}
+  100%{transform:scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  .pcard.copied{animation:none}
+  .pcard:hover{transform:none}
+}
+</style>
+</head>
+<body>
+
+<main>
+  <h2 class="stitle">LoungeKey Lounges</h2>
+  <div class="search-wrap">
+    <input type="text" id="lounge-search" class="search" placeholder="Search Lounges" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-label="Search Lounges" aria-controls="lounge-list" maxlength="100">
+    <button class="search-x" aria-label="Clear search"></button>
+  </div>
+  <div id="lounge-list"></div>
+</main>
+
+<nav aria-label="Primary">
+  <div class="tabs">
+    <a href="/">Home</a>
+    <a class="active">Lounge</a>
+  </div>
+  <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+
+<script src="/shared/base.js?v=25"></script>
+<script src="/shared/search.js?v=20"></script>
+<script>
+(function(){
+  'use strict';
+
+  const SVG_OPEN = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  const SVG_CLOSE = '</svg>';
+
+  // Lucide inner-path strings, extracted from /iconic/icons. Stroke is applied by SVG_OPEN.
+  const LOUNGE_ICONS = {
+    plane: "<path d=\"M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z\"/>",
+    planeTakeoff: "<path d=\"M2 22h20\"/><path d=\"M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z\"/>",
+    planeLanding: "<path d=\"M2 22h20\"/><path d=\"M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.42.22.78.55 1.01.96l.6 1.03c.49.88-.06 1.98-1.06 2.1l-1.18.15c-.47.06-.95-.02-1.37-.24L4.29 11.15a2 2 0 0 1-.52-.38Z\"/>",
+    ticketsPlane: "<path d=\"M10.5 17h1.227a2 2 0 0 0 1.345-.52L18 12\"/><path d=\"m12 13.5 3.794.506\"/><path d=\"m3.173 8.18 11-5a2 2 0 0 1 2.647.993L18.56 8\"/><path d=\"M6 10V8\"/><path d=\"M6 14v1\"/><path d=\"M6 19v2\"/><rect x=\"2\" y=\"8\" width=\"20\" height=\"13\" rx=\"2\"/>",
+    towerControl: "<path d=\"M18.2 12.27 20 6H4l1.8 6.27a1 1 0 0 0 .95.73h10.5a1 1 0 0 0 .96-.73Z\"/><path d=\"M8 13v9\"/><path d=\"M16 22v-9\"/><path d=\"m9 6 1 7\"/><path d=\"m15 6-1 7\"/><path d=\"M12 6V2\"/><path d=\"M13 2h-2\"/>",
+    radioTower: "<path d=\"M4.9 16.1C1 12.2 1 5.8 4.9 1.9\"/><path d=\"M7.8 4.7a6.14 6.14 0 0 0-.8 7.5\"/><circle cx=\"12\" cy=\"9\" r=\"2\"/><path d=\"M16.2 4.8c2 2 2.26 5.11.8 7.47\"/><path d=\"M19.1 1.9a9.96 9.96 0 0 1 0 14.1\"/><path d=\"M9.5 18h5\"/><path d=\"m8 22 4-11 4 11\"/>",
+    terminal: "<path d=\"M12 19h8\"/><path d=\"m4 17 6-6-6-6\"/>",
+    landmark: "<path d=\"M10 18v-7\"/><path d=\"M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z\"/><path d=\"M14 18v-7\"/><path d=\"M18 18v-7\"/><path d=\"M3 22h18\"/><path d=\"M6 18v-7\"/>",
+    castle: "<path d=\"M10 5V3\"/><path d=\"M14 5V3\"/><path d=\"M15 21v-3a3 3 0 0 0-6 0v3\"/><path d=\"M18 3v8\"/><path d=\"M18 5H6\"/><path d=\"M22 11H2\"/><path d=\"M22 9v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9\"/><path d=\"M6 3v8\"/>",
+    church: "<path d=\"M10 9h4\"/><path d=\"M12 7v5\"/><path d=\"M14 21v-3a2 2 0 0 0-4 0v3\"/><path d=\"m18 9 3.52 2.147a1 1 0 0 1 .48.854V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6.999a1 1 0 0 1 .48-.854L6 9\"/><path d=\"M6 21V7a1 1 0 0 1 .376-.782l5-3.999a1 1 0 0 1 1.249.001l5 4A1 1 0 0 1 18 7v14\"/>",
+    crown: "<path d=\"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z\"/><path d=\"M5 21h14\"/>",
+    gem: "<path d=\"M10.5 3 8 9l4 13 4-13-2.5-6\"/><path d=\"M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z\"/><path d=\"M2 9h20\"/>",
+    sparkles: "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"/><path d=\"M20 2v4\"/><path d=\"M22 4h-4\"/><circle cx=\"4\" cy=\"20\" r=\"2\"/>",
+    mountain: "<path d=\"m8 3 4 8 5-5 5 15H2L8 3z\"/>",
+    mountainSnow: "<path d=\"m8 3 4 8 5-5 5 15H2L8 3z\"/><path d=\"M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19\"/>",
+    treePalm: "<path d=\"M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4\"/><path d=\"M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3\"/><path d=\"M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35\"/><path d=\"M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14\"/>",
+    treePine: "<path d=\"m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z\"/><path d=\"M12 22v-3\"/>",
+    treeDeciduous: "<path d=\"M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z\"/><path d=\"M12 19v3\"/>",
+    trees: "<path d=\"M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z\"/><path d=\"M7 16v6\"/><path d=\"M13 19v3\"/><path d=\"M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5\"/>",
+    leaf: "<path d=\"M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z\"/><path d=\"M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12\"/>",
+    tentTree: "<circle cx=\"4\" cy=\"4\" r=\"2\"/><path d=\"m14 5 3-3 3 3\"/><path d=\"m14 10 3-3 3 3\"/><path d=\"M17 14V2\"/><path d=\"M17 14H7l-5 8h20Z\"/><path d=\"M8 14v8\"/><path d=\"m9 14 5 8\"/>",
+    sun: "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/>",
+    sunrise: "<path d=\"M12 2v8\"/><path d=\"m4.93 10.93 1.41 1.41\"/><path d=\"M2 18h2\"/><path d=\"M20 18h2\"/><path d=\"m19.07 10.93-1.41 1.41\"/><path d=\"M22 22H2\"/><path d=\"m8 6 4-4 4 4\"/><path d=\"M16 18a4 4 0 0 0-8 0\"/>",
+    sunset: "<path d=\"M12 10V2\"/><path d=\"m4.93 10.93 1.41 1.41\"/><path d=\"M2 18h2\"/><path d=\"M20 18h2\"/><path d=\"m19.07 10.93-1.41 1.41\"/><path d=\"M22 22H2\"/><path d=\"m16 6-4 4-4-4\"/><path d=\"M16 18a4 4 0 0 0-8 0\"/>",
+    snowflake: "<path d=\"m10 20-1.25-2.5L6 18\"/><path d=\"M10 4 8.75 6.5 6 6\"/><path d=\"m14 20 1.25-2.5L18 18\"/><path d=\"m14 4 1.25 2.5L18 6\"/><path d=\"m17 21-3-6h-4\"/><path d=\"m17 3-3 6 1.5 3\"/><path d=\"M2 12h6.5L10 9\"/><path d=\"m20 10-1.5 2 1.5 2\"/><path d=\"M22 12h-6.5L14 15\"/><path d=\"m4 10 1.5 2L4 14\"/><path d=\"m7 21 3-6-1.5-3\"/><path d=\"m7 3 3 6h4\"/>",
+    waves: "<path d=\"M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/><path d=\"M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/><path d=\"M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/>",
+    sailboat: "<path d=\"M10 2v15\"/><path d=\"M7 22a4 4 0 0 1-4-4 1 1 0 0 1 1-1h16a1 1 0 0 1 1 1 4 4 0 0 1-4 4z\"/><path d=\"M9.159 2.46a1 1 0 0 1 1.521-.193l9.977 8.98A1 1 0 0 1 20 13H4a1 1 0 0 1-.824-1.567z\"/>",
+    ship: "<path d=\"M12 10.189V14\"/><path d=\"M12 2v3\"/><path d=\"M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6\"/><path d=\"M19.38 20A11.6 11.6 0 0 0 21 14l-8.188-3.639a2 2 0 0 0-1.624 0L3 14a11.6 11.6 0 0 0 2.81 7.76\"/><path d=\"M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1\"/>",
+    fish: "<path d=\"M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z\"/><path d=\"M18 12v.5\"/><path d=\"M16 17.93a9.77 9.77 0 0 1 0-11.86\"/><path d=\"M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33\"/><path d=\"M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4\"/><path d=\"m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98\"/>",
+    bird: "<path d=\"M16 7h.01\"/><path d=\"M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20\"/><path d=\"m20 7 2 .5-2 .5\"/><path d=\"M10 18v3\"/><path d=\"M14 17.75V21\"/><path d=\"M7 18a6 6 0 0 0 3.84-10.61\"/>",
+    flag: "<path d=\"M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528\"/>",
+    globe: "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\"/><path d=\"M2 12h20\"/>",
+    mapPinned: "<path d=\"M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712\"/>",
+    ferrisWheel: "<circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M12 2v4\"/><path d=\"m6.8 15-3.5 2\"/><path d=\"m20.7 7-3.5 2\"/><path d=\"M6.8 9 3.3 7\"/><path d=\"m20.7 17-3.5-2\"/><path d=\"m9 22 3-8 3 8\"/><path d=\"M8 22h8\"/><path d=\"M18 18.7a9 9 0 1 0-12 0\"/>",
+    tramFront: "<rect width=\"16\" height=\"16\" x=\"4\" y=\"3\" rx=\"2\"/><path d=\"M4 11h16\"/><path d=\"M12 3v8\"/><path d=\"m8 19-2 3\"/><path d=\"m18 22-2-3\"/><path d=\"M8 15h.01\"/><path d=\"M16 15h.01\"/>",
+    trainFront: "<path d=\"M8 3.1V7a4 4 0 0 0 8 0V3.1\"/><path d=\"m9 15-1-1\"/><path d=\"m15 15 1-1\"/><path d=\"M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z\"/><path d=\"m8 19-2 3\"/><path d=\"m16 19 2 3\"/>",
+    building: "<path d=\"M12 10h.01\"/><path d=\"M12 14h.01\"/><path d=\"M12 6h.01\"/><path d=\"M16 10h.01\"/><path d=\"M16 14h.01\"/><path d=\"M16 6h.01\"/><path d=\"M8 10h.01\"/><path d=\"M8 14h.01\"/><path d=\"M8 6h.01\"/><path d=\"M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3\"/><rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\"/>",
+    building2: "<path d=\"M10 12h4\"/><path d=\"M10 8h4\"/><path d=\"M14 21v-3a2 2 0 0 0-4 0v3\"/><path d=\"M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2\"/><path d=\"M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16\"/>",
+    moonStar: "<path d=\"M18 5h4\"/><path d=\"M20 3v4\"/><path d=\"M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401\"/>",
+    star: "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\"/>"
+  };
+
+  function buildIcon(name){
+    const div=document.createElement('div');
+    div.className='picon';
+    div.insertAdjacentHTML('afterbegin',SVG_OPEN+(LOUNGE_ICONS[name]||LOUNGE_ICONS.plane)+SVG_CLOSE);
+    return div;
+  }
+
+  const list=document.getElementById('lounge-list');
+  const input=document.getElementById('lounge-search');
+  const clearBtn=document.querySelector('.search-x');
+
+  let lounges=[];
+  let renderTimer=0;
+
+  function searchTokens(l){
+    return (l.name+' '+l.city+' '+l.airport+' '+l.airportCode+' '+l.country+' '+l.continent+' '+l.icon).toLowerCase();
+  }
+
+  function scoreLounge(l,q){
+    const words=q.split(/\s+/).filter(Boolean);
+    if(!words.length)return 1;
+    let total=0;
+    const all=searchTokens(l);
+    const nameLower=l.name.toLowerCase();
+    for(let i=0;i<words.length;i++){
+      const w=words[i];
+      const nameScore=_search.scoreWord(w,nameLower,false)*1.5;
+      const otherScore=_search.scoreWord(w,all,false);
+      const best=Math.max(nameScore,otherScore);
+      if(best<=0)return 0;
+      total+=best;
+    }
+    return total;
+  }
+
+  function copyCard(card,l){
+    const payload=l.name+'\n'+l.airport+' ('+l.airportCode+')';
+    _base.copyText(payload,
+      function(){
+        card.classList.remove('copied');void card.offsetWidth;card.classList.add('copied');
+        clearTimeout(card._cpT);
+        card._cpT=setTimeout(function(){card.classList.remove('copied')},800);
+      },
+      function(){_base.notify('Copy Failed',false)}
+    );
+  }
+
+  function buildCard(l){
+    const card=document.createElement('button');
+    card.type='button';
+    card.className='pcard';
+    card.appendChild(buildIcon(l.icon));
+    const info=document.createElement('div');info.className='pinf';
+    const title=document.createElement('div');title.className='pt';title.textContent=l.name;
+    const sub=document.createElement('div');sub.className='pd';
+    sub.textContent=l.airport+' ('+l.airportCode+'), '+l.city;
+    info.appendChild(title);info.appendChild(sub);
+    card.appendChild(info);
+    card.addEventListener('click',function(){copyCard(card,l)});
+    return card;
+  }
+
+  function setClearVisible(v){clearBtn.style.display=v?'flex':'none'}
+
+  function render(query){
+    const q=(query||'').trim().toLowerCase();
+    list.replaceChildren();
+    if(!q){
+      // Default view: group by country (JSON sort order: continent, country, city, airport, name).
+      let curCountry=null,curSection=null;
+      const frag=document.createDocumentFragment();
+      for(let i=0;i<lounges.length;i++){
+        const l=lounges[i];
+        const key=l.country||'Other';
+        if(key!==curCountry){
+          curCountry=key;
+          curSection=document.createElement('div');curSection.className='link-sec';
+          const h=document.createElement('h3');h.textContent=key;
+          curSection.appendChild(h);
+          frag.appendChild(curSection);
+        }
+        curSection.appendChild(buildCard(l));
+      }
+      list.appendChild(frag);
+      return;
+    }
+    const scored=[];
+    for(let i=0;i<lounges.length;i++){
+      const s=scoreLounge(lounges[i],q);
+      if(s>0)scored.push({l:lounges[i],s:s});
+    }
+    scored.sort(function(a,b){return b.s-a.s||a.l.name.localeCompare(b.l.name)});
+    if(!scored.length){
+      const empty=document.createElement('div');empty.className='empty';empty.textContent='No Matches';
+      list.appendChild(empty);
+      return;
+    }
+    const frag=document.createDocumentFragment();
+    for(let i=0;i<scored.length;i++)frag.appendChild(buildCard(scored[i].l));
+    list.appendChild(frag);
+  }
+
+  function scheduleRender(){
+    clearTimeout(renderTimer);
+    setClearVisible(!!input.value);
+    renderTimer=setTimeout(function(){render(input.value)},80);
+  }
+
+  input.addEventListener('input',scheduleRender);
+  input.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){clearTimeout(renderTimer);input.value='';setClearVisible(false);render('');input.blur()}
+  });
+  clearBtn.addEventListener('click',function(){
+    clearTimeout(renderTimer);input.value='';setClearVisible(false);render('');input.focus();
+  });
+
+  _base.onKey({
+    '/':function(e){e.preventDefault();input.focus()}
+  });
+
+  fetch('/lounge/lounges.json')
+    .then(function(r){return r.json()})
+    .then(function(data){
+      lounges=data||[];
+      render('');
+    })
+    .catch(function(){
+      const empty=document.createElement('div');empty.className='empty';
+      empty.textContent='Unable to load. Please check your connection.';
+      list.replaceChildren(empty);
+    });
+
+  setClearVisible(false);
+})();
+</script>
+</body>
+</html>
