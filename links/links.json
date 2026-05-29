@@ -1,29 +1,5 @@
 [
   {
-    "title": "IB3960 Financial Statement Analysis & Security Valuation",
-    "url": "https://my.wbs.ac.uk/-/academic/361094/resources/in/1919647",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3G40 Law for Entrepreneurs",
-    "url": "https://my.wbs.ac.uk/-/academic/361111/resources/in/1913514",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://my.wbs.ac.uk/-/academic/361178/resources/in/1916840",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
-    "title": "IB3N90 Managing People in a Complex World",
-    "url": "https://my.wbs.ac.uk/-/academic/361185/resources/in/1923894",
-    "icon": "book-open",
-    "category": "Modules"
-  },
-  {
     "title": "App Store Connect",
     "url": "https://appstoreconnect.apple.com/",
     "icon": "phone",
@@ -153,6 +129,12 @@
     "title": "iTerm2",
     "url": "https://iterm2.com/index.html",
     "icon": "terminal",
+    "category": "Initiatives"
+  },
+  {
+    "title": "Lord Rootes Memorial Fund Awardees",
+    "url": "https://warwick.ac.uk/fac/cross_fac/enterprise/launch/lord-rootes-fund/awardees/",
+    "icon": "award",
     "category": "Initiatives"
   },
   {
