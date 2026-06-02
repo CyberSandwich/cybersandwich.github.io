@@ -4,7 +4,7 @@
    precache stays warm. The fetch handler is version-agnostic; it caches any
    /train/ or /shared/ GET it sees. */
 'use strict';
-const CACHE='train-v1';
+const CACHE='train-v2';
 const SHELL=[
   '/train/',
   '/train/index.html',
@@ -13,7 +13,7 @@ const SHELL=[
   '/shared/base.js?v=25',
   '/shared/swr.js?v=2',
   '/shared/search.js?v=20',
-  '/shared/dateparser.js?v=9',
+  '/shared/dateparser.js?v=10',
   '/favicon.png'
 ];
 const HUXLEY='huxley2.azurewebsites.net';

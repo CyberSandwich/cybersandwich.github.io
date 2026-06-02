@@ -49,6 +49,7 @@ main{max-width:480px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-
 .tr-sg-crs{font:600 .75rem/1 var(--font);color:var(--t3);letter-spacing:.04em;flex-shrink:0;font-variant-numeric:tabular-nums}
 
 .tr-quick{display:flex;gap:6px;padding:10px 14px;flex-wrap:wrap;border-bottom:1px solid var(--bdr2);align-items:center}
+.tr-quick[hidden]{display:none}
 .tr-pin{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--rr);border:1.5px solid var(--bdr);background:none;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap;max-width:100%}
 .tr-pin:active{transform:scale(.95)}
 @media(hover:hover){.tr-pin:hover{background:var(--bg2);color:var(--t1)}}
@@ -64,13 +65,9 @@ main{max-width:480px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-
 .tr-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;animation:pulse 2s ease-in-out infinite}
 .tr-status.stale .tr-dot{animation:none;opacity:.5}
 .tr-status.err .tr-dot{animation:none}
-.tr-status .gen{color:var(--t4);margin-left:auto;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
-.gen-act{color:var(--t3);cursor:pointer;background:none;border:none;padding:4px 8px;border-radius:var(--rr);font:500 .75rem/1 var(--font);transition:color .15s,background .15s}
-.gen-act:active{opacity:.7}
-@media(hover:hover){.gen-act:hover{color:var(--t1);background:var(--bg2)}}
 
 .tr-board{contain:layout style}
-.tr-svc{display:grid;grid-template-columns:auto 1fr auto;gap:14px;padding:12px 16px;border-bottom:1px solid var(--bdr2);cursor:pointer;align-items:center;background:var(--card);transition:background .15s;contain:layout paint;content-visibility:auto;contain-intrinsic-size:0 70px}
+.tr-svc{display:grid;grid-template-columns:auto 1fr auto;gap:14px;padding:12px 16px;border-bottom:1px solid var(--bdr2);cursor:pointer;align-items:start;background:var(--card);transition:background .15s;contain:layout paint;content-visibility:auto;contain-intrinsic-size:0 70px}
 .tr-svc:last-child{border-bottom:none}
 .tr-svc:active{opacity:.85}
 @media(hover:hover){.tr-svc:hover{background:var(--bg2)}}
@@ -81,7 +78,7 @@ main{max-width:480px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-
 .tr-svc-etd.early{color:var(--t3)}
 .tr-svc-etd.canc{color:var(--tr-cancel)}
 .tr-svc-mid{min-width:0}
-.tr-svc-dest{font:500 .9375rem/1.2 var(--font);color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.tr-svc-dest{font:500 .9375rem/1.2 var(--font);color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
 .tr-svc-meta{font:400 .75rem/1.25 var(--font);color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tr-svc-meta b{color:var(--t2);font-weight:500}
 .tr-svc-end{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-variant-numeric:tabular-nums;color:var(--t3)}
@@ -91,8 +88,6 @@ main{max-width:480px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-
 .tr-svc-tick.gone{color:var(--t4)}
 .tr-svc-tick.now{color:var(--acc)}
 
-.tr-svc-reason{grid-column:1 / -1;font:500 .75rem/1.4 var(--font);padding:8px 0 2px;color:var(--tr-late);border-top:1px dashed var(--bdr2);margin-top:6px}
-.tr-svc.canc .tr-svc-reason{color:var(--tr-cancel)}
 .tr-svc.canc .tr-svc-std{text-decoration:line-through;color:var(--t3)}
 
 .tr-empty{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1.4 var(--font)}
@@ -120,7 +115,7 @@ main{max-width:480px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-
 .tr-detail-head button svg{width:15px;height:15px}
 .tr-detail-head button:active{opacity:.7}
 @media(hover:hover){.tr-detail-head button:hover{color:var(--t1)}}
-.tr-detail-body{overflow:auto;padding:8px 0 14px;-webkit-overflow-scrolling:touch}
+.tr-detail-body{position:relative;overflow:auto;padding:8px 0 14px;-webkit-overflow-scrolling:touch}
 
 .tr-cp{display:grid;grid-template-columns:54px 16px 1fr auto;gap:0;padding:8px 18px;align-items:center;font-variant-numeric:tabular-nums;position:relative}
 .tr-cp-time{font:500 .8125rem/1.2 var(--font);color:var(--t1);display:flex;flex-direction:column;gap:2px}
@@ -131,13 +126,14 @@ main{max-width:480px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-
 .tr-cp-rail::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--bdr);transform:translateX(-50%)}
 .tr-cp-rail .dot{width:10px;height:10px;border-radius:50%;background:var(--bdr);position:relative;z-index:1;transition:background .2s,box-shadow .2s}
 .tr-cp.past .tr-cp-rail .dot{background:var(--t4)}
-.tr-cp.here .tr-cp-rail .dot{background:var(--acc);box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--acc)}
+.tr-cp.here,.tr-cp.dest{background:var(--bg2)}
+.tr-cp.here .tr-cp-rail .dot,.tr-cp.dest .tr-cp-rail .dot{background:var(--acc);box-shadow:0 0 0 3px var(--bg2),0 0 0 5px var(--acc)}
 .tr-cp.canc .tr-cp-rail .dot{background:var(--tr-cancel)}
 .tr-cp:first-child .tr-cp-rail::before{top:50%}
 .tr-cp:last-child .tr-cp-rail::before{bottom:50%}
 .tr-cp-name{padding:0 12px;font:500 .875rem/1.25 var(--font);color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .tr-cp.past .tr-cp-name{color:var(--t3)}
-.tr-cp.here .tr-cp-name{color:var(--t1);font-weight:600}
+.tr-cp.here .tr-cp-name,.tr-cp.dest .tr-cp-name{color:var(--t1);font-weight:600}
 .tr-cp.canc .tr-cp-name{text-decoration:line-through;color:var(--tr-cancel)}
 .tr-cp-plat{font:600 .6875rem/1 var(--font);color:var(--t3);padding:3px 7px;background:var(--bg2);border-radius:var(--rr);min-width:28px;text-align:center}
 .tr-cp-plat.empty{background:transparent;color:transparent;user-select:none}
@@ -199,7 +195,7 @@ html[data-theme="sepia"] .tr-offline{background:#EDE5C8;color:#92400E}
     <div class="tr-quick" id="quick" hidden></div>
     <div class="tr-row" data-leg="from">
       <span class="tr-leg" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></span>
-      <input id="from" class="tr-inp" type="text" placeholder="From — Station, CRS, Or KGX&gt;EDB" autocomplete="off" spellcheck="false" autocapitalize="characters" aria-label="From station">
+      <input id="from" class="tr-inp" type="text" placeholder="From" autocomplete="off" spellcheck="false" autocapitalize="characters" aria-label="From station">
       <span class="tr-side">
         <button class="tr-act" id="from-fav" type="button" aria-label="Toggle Favorite" hidden>
           <svg viewBox="0 0 24 24"><path d="M12 2 15 8.5 22 9.27 17 14.14 18.18 21 12 17.77 5.82 21 7 14.14 2 9.27 9 8.5z"/></svg>
@@ -212,7 +208,7 @@ html[data-theme="sepia"] .tr-offline{background:#EDE5C8;color:#92400E}
     </div>
     <div class="tr-row" data-leg="to">
       <span class="tr-leg" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-      <input id="to" class="tr-inp" type="text" placeholder="To — Optional" autocomplete="off" spellcheck="false" autocapitalize="characters" aria-label="To station">
+      <input id="to" class="tr-inp" type="text" placeholder="To" autocomplete="off" spellcheck="false" autocapitalize="characters" aria-label="To station">
       <span class="tr-side">
         <button class="tr-act" id="swap" type="button" aria-label="Swap From And To">
           <svg viewBox="0 0 24 24"><path d="M7 16h13M7 16l4-4M7 16l4 4"/><path d="M17 8H4M17 8l-4-4M17 8l-4 4"/></svg>
@@ -225,7 +221,7 @@ html[data-theme="sepia"] .tr-offline{background:#EDE5C8;color:#92400E}
     </div>
     <div class="tr-row" data-leg="time">
       <span class="tr-leg" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-      <input id="time" class="tr-time-input" type="text" placeholder="Depart Now — Or, e.g., Tomorrow 18:30" autocomplete="off" spellcheck="false" aria-label="Depart time">
+      <input id="time" class="tr-time-input" type="text" placeholder="Departure" autocomplete="off" spellcheck="false" aria-label="Depart time">
       <span class="tr-side">
         <button class="tr-act" id="time-clear" type="button" aria-label="Depart Now" hidden>
           <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.78.93 6.5 2.5L21 8"/><path d="M21 3v5h-5"/></svg>
@@ -242,12 +238,11 @@ html[data-theme="sepia"] .tr-offline{background:#EDE5C8;color:#92400E}
     <div class="tr-status" id="status">
       <span class="tr-dot"></span>
       <span class="lbl">Idle</span>
-      <span class="gen" id="gen-at"></span>
     </div>
     <div class="tr-board" id="board" aria-live="polite"></div>
   </div>
 
-  <div class="card tr-inc" id="inc-card" aria-live="polite">
+  <div class="card tr-inc" id="inc-card" aria-live="polite" hidden>
     <div class="tr-inc-head" id="inc-head">
       <span class="lbl"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 1 21h22z"/><path d="M12 9v4M12 17h.01"/></svg>Incidents</span>
       <span class="count" id="inc-count" hidden>0</span>
@@ -272,7 +267,7 @@ html[data-theme="sepia"] .tr-offline{background:#EDE5C8;color:#92400E}
     </div>
     <div class="tr-detail-body" id="detail-body"></div>
     <div class="tr-detail-actions">
-      <button class="tr-detail-act" id="detail-link" type="button">
+      <button class="tr-detail-act" id="detail-link" type="button" data-l="Copy Link">
         <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         <span>Copy Link</span>
       </button>
@@ -381,10 +376,9 @@ const dom={
   fromSg:$('from-sg'),toSg:$('to-sg'),
   fromClear:$('from-clear'),toClear:$('to-clear'),timeClear:$('time-clear'),
   fromFav:$('from-fav'),swap:$('swap'),
-  quick:$('quick'),modeSeg:$('mode-seg'),
+  quick:$('quick'),modeSeg:$('mode-seg'),boardCard:$('board-card'),
   board:$('board'),status:$('status'),
   statusLbl:$('status').querySelector('.lbl'),
-  genAt:$('gen-at'),
   detail:$('detail'),detailBody:$('detail-body'),detailTitle:$('detail-title'),detailSub:$('detail-sub'),
   detailClose:$('detail-close'),detailLink:$('detail-link'),detailRev:$('detail-rev'),
   inc:$('inc-card'),incHead:$('inc-head'),incBody:$('inc-body'),incCount:$('inc-count'),
@@ -396,6 +390,15 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 
 /* Setting a destination is a departures-only concept, so it forces dep mode. */
 function effectiveMode(){return state.to?'dep':state.mode}
+
+/* Reject a promise if it has not settled in `ms` so a stalled fetch surfaces
+   an error instead of hanging the detail sheet on its loading state forever. */
+function withTimeout(p,ms){
+  return new Promise((resolve,reject)=>{
+    const t=setTimeout(()=>reject(new Error('timeout')),ms);
+    p.then(v=>{clearTimeout(t);resolve(v)},e=>{clearTimeout(t);reject(e)});
+  });
+}
 
 /* ── Stations ───────────────────────────────────────────────────── */
 function loadStations(){
@@ -510,6 +513,9 @@ function syncHash(){
 }
 function applyHash(){
   let h=location.hash.replace(/^#/,'');
+  /* browsers percent-encode ">" in the fragment, so a route deep-link comes
+     back as KGX%3EYRK — normalise it before parsing the from>to separator */
+  h=h.replace(/%3E/gi,'>');
   if(!h){
     state.from='';state.to='';state.time=null;state.mode='dep';
     closeDetail(true);renderInputs();renderBoard();renderIncidents();
@@ -732,7 +738,7 @@ function loadBoard(){
   const off=timeOffsetFrom(state.time);
   const path=effectiveMode()==='arr'
     ?('/arrivals/'+state.from+'/'+MAX_BOARD)
-    :(state.to?('/departures/'+state.from+'/to/'+state.to+'/'+MAX_BOARD):('/all/'+state.from+'/'+MAX_BOARD));
+    :(state.to?('/departures/'+state.from+'/to/'+state.to+'/'+MAX_BOARD):('/departures/'+state.from+'/'+MAX_BOARD));
   const params={expand:'true'};
   if(off)params.timeOffset=off;
   apiCall(path,params)
@@ -774,29 +780,10 @@ function loadBoard(){
 
 function setStatus(mode){
   dom.status.classList.remove('live','stale','err');
-  while(dom.genAt.firstChild)dom.genAt.removeChild(dom.genAt.firstChild);
   if(mode==='loading'){dom.statusLbl.textContent='Loading…';return}
   if(mode==='live'){dom.status.classList.add('live');dom.statusLbl.textContent='Live'}
   else if(mode==='cached'){dom.status.classList.add('stale');dom.statusLbl.textContent='Cached'}
   else if(mode==='err'){dom.status.classList.add('err');dom.statusLbl.textContent='Could Not Load'}
-  const t=document.createTextNode(mode==='err'?'':fmtGen());
-  dom.genAt.appendChild(t);
-  const sp=document.createTextNode(' ');dom.genAt.appendChild(sp);
-  const btn=document.createElement('button');
-  btn.className='gen-act';btn.type='button';
-  btn.textContent=mode==='err'?'Retry':'Refresh';
-  btn.addEventListener('click',()=>loadBoard());
-  dom.genAt.appendChild(btn);
-}
-
-function fmtGen(){
-  if(!state.generatedAt)return '';
-  const d=new Date(state.generatedAt);
-  if(isNaN(d.getTime()))return '';
-  const ago=Math.max(0,Math.round((Date.now()-d.getTime())/1000));
-  if(ago<60)return ago+'s ago';
-  if(ago<3600)return Math.round(ago/60)+'m ago';
-  return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 }
 
 function cacheBoard(key,d){
@@ -820,15 +807,11 @@ function loadCachedBoard(key){
 function renderBoard(){
   if(!state.from){
     dom.board.replaceChildren();
-    const d=document.createElement('div');d.className='tr-empty';
-    d.textContent='Pick A Station To Get Started';
-    const sub=document.createElement('div');sub.className='tr-empty-sub';
-    sub.textContent='Type A Name, CRS Code, Or "KGX>EDB" To Set A Route';
-    d.appendChild(sub);
-    dom.board.appendChild(d);
+    dom.boardCard.hidden=true;
     dom.offline.classList.remove('show');
     return;
   }
+  dom.boardCard.hidden=false;
   if(state.fetching&&!state.services.length){
     const tmpl=document.createElement('template');
     tmpl.innerHTML='<div class="tr-load"><span class="ld-dot"></span><span class="ld-dot"></span><span class="ld-dot"></span></div>';
@@ -866,6 +849,14 @@ function renderBoardError(){
   d.appendChild(sub);dom.board.appendChild(d);
 }
 
+function hhmm(t){const m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1]*60+ +m[2]):null}
+function durMin(dep,arr){const a=hhmm(dep),b=hhmm(arr);if(a==null||b==null)return null;let d=b-a;if(d<0)d+=1440;return d}
+function fmtDur(mins){if(mins==null)return '';const h=Math.floor(mins/60),mm=mins%60;return h?(mm?(h+'h '+mm+'m'):(h+'h')):(mm+'m')}
+function destArrival(cps){
+  if(!state.to)return null;
+  for(const c of cps){if(c.crs===state.to)return c.st||c.et||c.at||null}
+  return null;
+}
 function svcHtml(s){
   const std=s.std||s.sta||'—';
   const eta=s.eta||s.etd||'';
@@ -879,14 +870,19 @@ function svcHtml(s){
     :((s.destination&&s.destination[0]&&s.destination[0].locationName)||(s.currentDestinations&&s.currentDestinations[0]&&s.currentDestinations[0].locationName)||'—');
   const cps=(s.subsequentCallingPoints&&s.subsequentCallingPoints[0]&&s.subsequentCallingPoints[0].callingPoint)||[];
   const calling=cps.length?(cps.slice(0,4).map(c=>c.locationName).join(' · ')+(cps.length>4?' · …':'')):'';
-  const plat=s.platform?('<div class="tr-svc-plat">Pl '+esc(s.platform)+'</div>'):'<div class="tr-svc-plat tba">TBA</div>';
-  const reason=s.cancelReason||s.delayReason;
-  const reasonHtml=reason?('<div class="tr-svc-reason">'+esc(reason)+'</div>'):'';
+  let meta=calling;
+  if(state.to&&!arr){
+    const at=destArrival(cps);
+    if(at){const d=fmtDur(durMin(std,at));meta='Arr '+at+(d?(' · '+d):'')}
+  }
+  const plat=s.platform?('<div class="tr-svc-plat">Plat. '+esc(s.platform)+'</div>'):'<div class="tr-svc-plat tba">TBA</div>';
+  /* count down to the expected time when delayed, never for cancelled */
+  const tickTime=s.isCancelled?'':((etdCls==='late'&&/^\d{1,2}:\d{2}$/.test(eta))?eta:std);
   return '<div class="tr-svc'+(s.isCancelled?' canc':'')+'" data-id="'+esc(s.serviceIdUrlSafe||'')+'">'+
     '<div class="tr-svc-time"><div class="tr-svc-std">'+esc(std)+'</div>'+(etdTxt?'<div class="tr-svc-etd '+etdCls+'">'+esc(etdTxt)+'</div>':'')+'</div>'+
-    '<div class="tr-svc-mid"><div class="tr-svc-dest">'+esc(dest)+'</div><div class="tr-svc-meta">'+(calling?esc(calling):'')+'</div></div>'+
-    '<div class="tr-svc-end">'+plat+'<div class="tr-svc-tick" data-tick="'+esc(std)+'"></div></div>'+
-    reasonHtml+'</div>';
+    '<div class="tr-svc-mid"><div class="tr-svc-dest">'+esc(dest)+'</div><div class="tr-svc-meta">'+(meta?esc(meta):'')+'</div></div>'+
+    '<div class="tr-svc-end">'+plat+'<div class="tr-svc-tick" data-tick="'+esc(tickTime)+'"></div></div>'+
+    '</div>';
 }
 
 /* ── Live ticker ────────────────────────────────────────────────── */
@@ -914,12 +910,6 @@ function refreshTicker(){
       if(cls)el.classList.add(cls);
       if(el.textContent!==txt)el.textContent=txt;
     });
-    /* refresh "X m ago" generated stamp text node only */
-    const t=dom.genAt.firstChild;
-    if(t&&t.nodeType===Node.TEXT_NODE){
-      const ng=fmtGen();
-      if(ng&&t.nodeValue!==ng)t.nodeValue=ng;
-    }
   };
   tick();
   tickerTimer=setInterval(tick,1000);
@@ -945,17 +935,20 @@ document.addEventListener('visibilitychange',()=>{
 function openService(svc){
   if(!svc)return;
   state.detail={id:svc.serviceIdUrlSafe,svc:svc,full:null};
+  /* render the shell synchronously. If it sits inside withVT, a deferred
+     view-transition callback can run it after renderDetailFull has already
+     painted, overwriting the timeline back to loading dots permanently. */
+  renderDetailShell(svc);
   withVT(()=>{
     dom.detail.classList.add('open');
     dom.detail.setAttribute('aria-hidden','false');
-    renderDetailShell(svc);
   });
   syncHash();
   const id=svc.serviceIdUrlSafe;
   const pre=PREFETCH.get(id);
   const p=pre||fetchServiceDetail(id);
   if(pre)PREFETCH.delete(id);
-  p.then(d=>{
+  withTimeout(p,12000).then(d=>{
     if(state.detail&&state.detail.id===svc.serviceIdUrlSafe){
       state.detail.full=d;renderDetailFull(d);
     }
@@ -995,7 +988,7 @@ function renderDetailFull(d){
   const reason=d.cancelReason||d.delayReason||'';
   dom.detailSub.textContent=(d.operator||'')+(reason?(' · '+reason):'');
   const prev=collectCalling(d.previousCallingPoints).map(c=>Object.assign({},c,{_past:true}));
-  const subs=collectCalling(d.subsequentCallingPoints);
+  const subs=collectCalling(d.subsequentCallingPoints).map(c=>(state.to&&c.crs===state.to)?Object.assign({},c,{_dest:true}):c);
   const hereRow={
     locationName:d.locationName||stationName(here),crs:here,
     st:std,et:d.etd||d.eta||'',at:d.atd||d.ata||'',isCancelled:d.isCancelled,
@@ -1011,6 +1004,9 @@ function renderDetailFull(d){
   const tmpl=document.createElement('template');
   tmpl.innerHTML=all.map(cpRowHtml).join('');
   dom.detailBody.replaceChildren(tmpl.content);
+  /* open scrolled to the selected station; earlier stops remain above */
+  const hereEl=dom.detailBody.querySelector('.tr-cp.here');
+  if(hereEl)dom.detailBody.scrollTop=Math.max(0,hereEl.offsetTop-8);
 }
 function collectCalling(arr){
   if(!arr||!arr.length)return [];
@@ -1020,11 +1016,11 @@ function cpRowHtml(c){
   const time=c.st||c.at||c.et||'—';
   let est='',estCls='';
   if(c.isCancelled){est='Cancelled';estCls='canc'}
-  else if(c.at){est='Arr '+c.at}
-  else if(c.et&&c.et!=='On time'&&c.et!==c.st){est=c.et;estCls='late'}
-  else if(c.et==='On time'){est='On Time'}
-  const cls=(c._past?'past ':'')+(c._here?'here ':'')+(c.isCancelled?'canc ':'');
-  const plat=c.platform?('<div class="tr-cp-plat">Pl '+esc(c.platform)+'</div>'):'<div class="tr-cp-plat empty">·</div>';
+  else if(c.at){if(c.at!==c.st){est='Arr '+c.at;estCls='late'}}
+  else if(c.et&&c.et!=='On time'&&c.et!==c.st){est=/^\d{1,2}:\d{2}$/.test(c.et)?('Exp '+c.et):c.et;estCls='late'}
+  /* on time → scheduled time only, no est line */
+  const cls=(c._past?'past ':'')+(c._here?'here ':'')+(c._dest?'dest ':'')+(c.isCancelled?'canc ':'');
+  const plat=c.platform?('<div class="tr-cp-plat">Plat. '+esc(c.platform)+'</div>'):'<div class="tr-cp-plat empty">·</div>';
   return '<div class="tr-cp '+cls.trim()+'">'+
     '<div class="tr-cp-time">'+esc(time)+(est?('<span class="est '+estCls+'">'+esc(est)+'</span>'):'')+'</div>'+
     '<div class="tr-cp-rail"><span class="dot"></span></div>'+
@@ -1033,10 +1029,10 @@ function cpRowHtml(c){
 }
 function closeDetail(silent){
   if(!dom.detail.classList.contains('open')&&!state.detail)return;
+  state.detail=null;
   withVT(()=>{
     dom.detail.classList.remove('open');
     dom.detail.setAttribute('aria-hidden','true');
-    state.detail=null;
   });
   if(!silent)syncHash();
 }
@@ -1045,7 +1041,7 @@ dom.detail.addEventListener('click',e=>{if(e.target===dom.detail)closeDetail()})
 dom.detailLink.addEventListener('click',()=>{
   if(!state.detail)return;
   const url=location.origin+'/train/#service/'+encodeURIComponent(state.detail.id);
-  _base.copyText(url,()=>_base.notify('Link Copied',true),()=>_base.notify('Could Not Copy',false));
+  _base.copyText(url,()=>_base.feedback(dom.detailLink,'ok','Copied'),()=>_base.notify('Could Not Copy',false));
 });
 dom.detailRev.addEventListener('click',()=>{
   if(!state.from)return;
@@ -1072,12 +1068,11 @@ function renderIncidents(){
   }
   for(const r of reasons)items.push({src:'Service Notes',text:r});
   if(!items.length){
-    dom.inc.classList.add('no-data');
+    dom.inc.hidden=true;
     dom.incBody.replaceChildren();
-    dom.incBody.textContent='No Active Incidents For This Board';
     dom.incCount.hidden=true;
   }else{
-    dom.inc.classList.remove('no-data');
+    dom.inc.hidden=false;
     dom.incCount.hidden=false;dom.incCount.textContent=String(items.length);
     const groups={};const order=[];
     for(const it of items){if(!groups[it.src]){groups[it.src]=[];order.push(it.src)}groups[it.src].push(it)}
