@@ -539,38 +539,145 @@ function parseDuration(s){
   return{date:dt,label:formatLabel(dt)};
 }
 
-/* "N units before/after <anchor>", e.g. "30 days before 21 june",
-   "5 hours after 5p at 30 june", "30d bef 21jun". The anchor portion is
-   re-parsed through parseDate so it can carry its own time. Single-letter
-   unit `m` resolves to minute (matches the existing rm pattern); use `mo`
-   or `months` for month. */
-var ANCHOR_OFFSET_RE=/^(\d+(?:\.\d+)?)\s*(days?|weeks?|fortnights?|months?|years?|hours?|hrs?|minutes?|mins?|seconds?|secs?|mo|d|w|y|h|m|s)\s+(before|bef|b4|after|aft)\s+(.+)$/i;
-function tryAnchorOffset(prepared){
-  var m=prepared.match(ANCHOR_OFFSET_RE);
-  if(!m)return null;
-  var n=parseFloat(m[1]),u=m[2].toLowerCase(),dirWord=m[3].toLowerCase();
-  var dir=(dirWord==='before'||dirWord==='bef'||dirWord==='b4')?-1:1;
-  var anchor=parseDate(m[4]);
-  if(!anchor)return null;
-  var canon;
-  if(u==='d'||u==='day'||u==='days')canon='day';
-  else if(u==='w'||u==='week'||u==='weeks')canon='week';
-  else if(u==='fortnight'||u==='fortnights')canon='fortnight';
-  else if(u==='mo'||u==='month'||u==='months')canon='month';
-  else if(u==='y'||u==='year'||u==='years')canon='year';
-  else if(u==='h'||u==='hr'||u==='hrs'||u==='hour'||u==='hours')canon='hour';
-  else if(u==='m'||u==='min'||u==='mins'||u==='minute'||u==='minutes')canon='minute';
-  else if(u==='s'||u==='sec'||u==='secs'||u==='second'||u==='seconds')canon='second';
-  else return null;
-  var base=new Date(anchor.date),offset=n*dir;
-  if(canon==='day')base.setDate(base.getDate()+Math.round(offset));
-  else if(canon==='week')base.setDate(base.getDate()+Math.round(offset*7));
-  else if(canon==='fortnight')base.setDate(base.getDate()+Math.round(offset*14));
-  else if(canon==='month')base.setMonth(base.getMonth()+Math.round(offset));
-  else if(canon==='year')base.setFullYear(base.getFullYear()+Math.round(offset));
-  else if(canon==='hour')base.setTime(base.getTime()+Math.round(offset*3600000));
-  else if(canon==='minute')base.setTime(base.getTime()+Math.round(offset*60000));
-  else if(canon==='second')base.setTime(base.getTime()+Math.round(offset*1000));
+/* Generalized relative offset. Handles an optional quantity list (one or more
+   "<number> <unit>" terms joined by and / , / & / whitespace) plus an optional
+   direction + anchor, e.g.:
+     "30 days before 21 june", "5 hours after 5p at 30 june", "30d bef 21jun",
+     "30 days and 50 minutes from now", "15 days from tomorrow",
+     "30.2 weeks from yesterday", "2 weeks from monday".
+   The anchor portion is re-parsed through parseDate so it can carry its own
+   time. Bare single terms ("30 days", "in 2 weeks", "30 days ago") and
+   non-quantity inputs return null and defer to parseDuration / tryMatch, so
+   the existing single-unit paths are unchanged. Single-letter unit `m`
+   resolves to minute and `mo` to month, matching the rest of the parser. */
+var QTERM_RE=/(\d+(?:\.\d+)?)\s*(days?|weeks?|fortnights?|months?|years?|hours?|hrs?|minutes?|mins?|seconds?|secs?|mo|d|w|y|h|m|s)\b/gi;
+var UNIT_ORDER={year:0,month:1,fortnight:2,week:3,day:4,hour:5,minute:6,second:7};
+
+function canonUnit(u){
+  u=u.toLowerCase();
+  if(u==='d'||u==='day'||u==='days')return'day';
+  if(u==='w'||u==='week'||u==='weeks')return'week';
+  if(u==='fortnight'||u==='fortnights')return'fortnight';
+  if(u==='mo'||u==='month'||u==='months')return'month';
+  if(u==='y'||u==='year'||u==='years')return'year';
+  if(u==='h'||u==='hr'||u==='hrs'||u==='hour'||u==='hours')return'hour';
+  if(u==='m'||u==='min'||u==='mins'||u==='minute'||u==='minutes')return'minute';
+  if(u==='s'||u==='sec'||u==='secs'||u==='second'||u==='seconds')return'second';
+  return null;
+}
+
+/* Validate a pure quantity list: every token must be a "<number> <unit>" term,
+   joined only by connectors (and / , / &). Returns an array of {n,unit} terms,
+   or null if any non-connector token remains (so "5 working days", "2 days call
+   me", etc. defer). */
+function parseQList(text){
+  var t=String(text).trim();
+  if(!t)return null;
+  var terms=[];
+  var rest=t.replace(QTERM_RE,function(_,n,u){
+    var canon=canonUnit(u);
+    if(canon)terms.push({n:parseFloat(n),unit:canon});
+    return ' ';
+  });
+  if(!terms.length)return null;
+  rest=rest.replace(/\band\b/gi,' ').replace(/[,&]/g,' ').replace(/\s+/g,' ').trim();
+  if(rest)return null;
+  return terms;
+}
+
+function calStep(d,unit,k){
+  if(unit==='day')d.setDate(d.getDate()+k);
+  else if(unit==='week')d.setDate(d.getDate()+k*7);
+  else if(unit==='fortnight')d.setDate(d.getDate()+k*14);
+  else if(unit==='month')d.setMonth(d.getMonth()+k);
+  else if(unit==='year')d.setFullYear(d.getFullYear()+k);
+}
+
+/* Apply one signed term to base in place. h/m/s shift the clock directly.
+   Calendar units apply their integer part via calendar math (DST/month-end
+   safe), then carry any fraction by probing the real length of one further
+   unit in the travel direction (so "1.5 months" = 1 month + half the following
+   month, "30.2 weeks" carries 0.4 day ~ 9h36m). Returns true if it introduced
+   a clock component (any h/m/s, or a non-zero calendar fraction). */
+function applyUnit(base,unit,signedN){
+  if(unit==='hour'){base.setTime(base.getTime()+Math.round(signedN*3600000));return true;}
+  if(unit==='minute'){base.setTime(base.getTime()+Math.round(signedN*60000));return true;}
+  if(unit==='second'){base.setTime(base.getTime()+Math.round(signedN*1000));return true;}
+  var dir=signedN<0?-1:1,mag=Math.abs(signedN),intMag=Math.floor(mag),frac=mag-intMag;
+  if(intMag)calStep(base,unit,dir*intMag);
+  if(frac>1e-9){
+    var probe=new Date(base.getTime());
+    calStep(probe,unit,dir);
+    base.setTime(base.getTime()+Math.round(frac*(probe.getTime()-base.getTime())));
+    return true;
+  }
+  return false;
+}
+
+function tryRelativeOffset(prepared){
+  var t=String(prepared).trim().replace(/^(?:in|for)\s+/i,'');
+  if(!/\d/.test(t))return null;
+
+  var dir=1,anchorText=null,hasAnchor=false,qtext=null,m;
+
+  if((m=t.match(/^(.*\S)\s+(?:ago|earlier)$/i))){
+    dir=-1;qtext=m[1];
+  }else if((m=t.match(/^(.*\S)\s+(?:from\s+now|hence|later)$/i))){
+    dir=1;qtext=m[1];anchorText='now';hasAnchor=true;
+  }else{
+    /* Scan connectors in priority order; split at the first whose left side
+       validates as a quantity list (so the "after" in "day after tomorrow"
+       rejects itself). bef/b4/aft preserve the old abbreviation support. */
+    var connectors=[
+      {re:/\bbefore\b/i,dir:-1},
+      {re:/\bbef\b/i,dir:-1},
+      {re:/\bb4\b/i,dir:-1},
+      {re:/\bprior\s+to\b/i,dir:-1},
+      {re:/\bafter\b/i,dir:1},
+      {re:/\baft\b/i,dir:1},
+      {re:/\bfrom\b/i,dir:1}
+    ],split=null;
+    for(var ci=0;ci<connectors.length;ci++){
+      var cm=t.match(connectors[ci].re);
+      if(!cm)continue;
+      var left=t.slice(0,cm.index).trim();
+      if(parseQList(left)){
+        split={dir:connectors[ci].dir,left:left,right:t.slice(cm.index+cm[0].length).trim()};
+        break;
+      }
+    }
+    if(split){dir=split.dir;qtext=split.left;anchorText=split.right;hasAnchor=true;}
+    else{qtext=t;}
+  }
+
+  var terms=parseQList(qtext);
+  if(!terms)return null;
+  /* Bare single term with no explicit anchor defers to the existing paths,
+     preserving their hint semantics (zero regression). */
+  if(!hasAnchor&&terms.length<2)return null;
+
+  /* Resolve the base and whether it carries a real clock time. */
+  var base,anchorHasTime;
+  if(anchorText===null){
+    var hasTimeTerm=terms.some(function(x){return x.unit==='hour'||x.unit==='minute'||x.unit==='second';});
+    if(hasTimeTerm){base=new Date();anchorHasTime=true;}
+    else{var n0=new Date();base=new Date(n0.getFullYear(),n0.getMonth(),n0.getDate());anchorHasTime=false;}
+  }else if(anchorText==='now'){
+    base=new Date();anchorHasTime=true;
+  }else{
+    var a=parseDate(anchorText);
+    if(!a)return null;
+    base=new Date(a.date);anchorHasTime=(a.hint!=='time');
+  }
+
+  terms.sort(function(x,y){return UNIT_ORDER[x.unit]-UNIT_ORDER[y.unit];});
+  var hasClock=false;
+  for(var ti=0;ti<terms.length;ti++){
+    if(applyUnit(base,terms[ti].unit,terms[ti].n*dir))hasClock=true;
+  }
+
+  /* When no time was specified anywhere, the base is a pure date at midnight. */
+  if(!(anchorHasTime||hasClock))base.setHours(0,0,0,0);
   return base;
 }
 
@@ -583,12 +690,13 @@ function parseDate(text){
         rewrite dot-as-colon time ("1.50am"→"1:50am"). */
   var prepared=expandDecimalTime(splitNumWord(autoCorrect(stripPunct(normalize(raw)))));
 
-  /* 2. Anchor offset ("N units before/after <date>") runs before parseDuration
-        so "5 hours after 5p at 30 june" isn't intercepted as a bare duration.
-        Recursive: the anchor portion goes back through parseDate, so it can
-        carry its own time. */
-  var anchorRes=tryAnchorOffset(prepared);
-  if(anchorRes)return{date:anchorRes,label:formatLabel(anchorRes),hint:null};
+  /* 2. Relative offset ("N units [and M units] [before/after/from <anchor>]",
+        "... ago", "... from now") runs before parseDuration so compound and
+        anchored forms aren't intercepted as bare durations. The anchor portion
+        is re-parsed through parseDate, so it can carry its own time. Bare single
+        terms defer to the handlers below. */
+  var relRes=tryRelativeOffset(prepared);
+  if(relRes)return{date:relRes,label:formatLabel(relRes),hint:null};
 
   /* 3. Pure duration (h/m/s only). Tried on both raw and prepared so typos
         like "0.5 howr" are caught after autoCorrect. */
