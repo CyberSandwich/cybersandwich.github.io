@@ -158,12 +158,12 @@ function buildGeometry(FONT, text, thickness) {
 }
 
 // Max projection scales guaranteeing no crop for a unit sphere at distance K2.
-// Worst case: point at nearest z (K2 - 1) with full lateral extent 1.
-// |proj| = k * 1 / (K2 - 1) must be <= half-extent - margin.
+// Worst case: tangent ray from the sphere, max |x|/(z+K2) = 1/sqrt(K2*K2-1).
+// Extra -1 cell absorbs Math.floor's negative-side rounding in renderFrame.
 function safeK(W, H, K2, margin, aspect) {
   if (aspect === undefined) aspect = 0.6;
-  const kx = (W / 2 - margin) * (K2 - 1);
-  const ky = (H / 2 - margin) * (K2 - 1);
+  const kx = (W / 2 - margin - 1) * Math.sqrt(K2 * K2 - 1);
+  const ky = (H / 2 - margin - 1) * Math.sqrt(K2 * K2 - 1);
   // Preserve char-cell aspect: k1y = aspect * k1x (cell ~1:1.667). Bind on both.
   const k1x = Math.min(kx, ky / aspect);
   return { k1x, k1y: aspect * k1x };
