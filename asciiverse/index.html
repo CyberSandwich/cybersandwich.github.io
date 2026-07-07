@@ -384,6 +384,7 @@ out.addEventListener('pointermove', e => {
 function endDrag() { if (!dragging) return; dragging = false; out.classList.remove('grabbing'); wake(); }
 out.addEventListener('pointerup', endDrag);
 out.addEventListener('pointercancel', endDrag);
+out.addEventListener('dragstart', e => e.preventDefault());
 
 /* ── Text input (filter, truncate, geometry rebuild) ──────────────────────── */
 let warnUnsupported = false, warnTrunc = false, warnTimer = 0;
@@ -430,6 +431,13 @@ document.addEventListener('paste', e => {
   if (!text) { _base.notify('Unsupported Content', 'warn'); return; }
   e.preventDefault();
   insertText(text);
+});
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  const dt = e.dataTransfer; if (!dt) return;
+  const text = dt.getData('text');
+  if (text) insertText(text);
 });
 
 /* ── Actions ──────────────────────────────────────────────────────────────── */
@@ -490,6 +498,9 @@ function assembleDoc(engineSrc, fontJson, cfgJson) {
     "o.addEventListener('pointermove',function(e){if(!dragging)return;var now=performance.now();var dt=Math.max(8,now-lastMoveTime);var dx=e.clientX-lastX,dy=e.clientY-lastY,sens=0.01;A-=dx*sens;var nB=B-dy*sens;if(nB>1.4)nB=1.4;if(nB<-1.4)nB=-1.4;B=nB;Av=-(dx*sens)*(16/dt);Bv=-(dy*sens)*(16/dt);lastX=e.clientX;lastY=e.clientY;lastMoveTime=now;wake();});",
     "function endDrag(){if(!dragging)return;dragging=false;o.style.cursor='grab';wake();}",
     "o.addEventListener('pointerup',endDrag);o.addEventListener('pointercancel',endDrag);",
+    "o.addEventListener('dragstart',function(e){e.preventDefault();});",
+    "document.addEventListener('dragover',function(e){e.preventDefault();});",
+    "document.addEventListener('drop',function(e){e.preventDefault();});",
     "var resizeRaf=0;window.addEventListener('resize',function(){if(resizeRaf)return;resizeRaf=requestAnimationFrame(function(){resizeRaf=0;fit();wake();});});",
     "measure();fit();draw();schedule();"
   ].join('\n');
