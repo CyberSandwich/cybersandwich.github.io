@@ -62,6 +62,13 @@
       <button class="step-btn" id="size-inc" aria-label="Increase Size"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     </div>
   </div>
+  <div class="srow" id="sr-detail">
+    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg><span id="detail-val">Detail: 1x</span></label>
+    <div class="stepper">
+      <button class="step-btn" id="detail-dec" aria-label="Decrease Detail"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="step-btn" id="detail-inc" aria-label="Increase Detail"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+  </div>
   <div class="srow" id="sr-thick">
     <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg><span id="thick-val">Thickness: 0.25</span></label>
     <div class="stepper">
@@ -219,10 +226,12 @@ let W = 96, H = 34;                // adaptive grid; applyGrid() sizes it from r
 const K2 = 5, B_TARGET = 0.22;
 const RAMPS = ['.,-~:;=!*#$@', '░▒▓█', '.:oO@'];
 const SIZE_MIN = 40, SIZE_MAX = 100, SIZE_STEP = 10;
+const DETAIL_MIN = 1, DETAIL_MAX = 3, DETAIL_STEP = 1;
 const THICK_MIN = 0.15, THICK_MAX = 0.40, THICK_STEP = 0.05;
 const SPEED_MIN = 1, SPEED_MAX = 6;
+const GEO_POINT_CAP = 220000;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const DEFAULTS = { text: 'Hello', fmt: 0, size: 100, thick: 0.25, speed: 3, spin: reduceMotion ? 1 : 0, copyAs: 0 };
+const DEFAULTS = { text: 'Hello', fmt: 0, size: 100, detail: 1, thick: 0.25, speed: 3, spin: reduceMotion ? 1 : 0, copyAs: 0 };
 
 const $ = id => document.getElementById(id);
 const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
@@ -235,6 +244,7 @@ function loadState() {
     if (typeof s.text === 'string') st.text = s.text;
     if (typeof s.fmt === 'number') st.fmt = clamp(s.fmt | 0, 0, RAMPS.length - 1);
     if (typeof s.size === 'number') st.size = clamp(Math.round(s.size / SIZE_STEP) * SIZE_STEP, SIZE_MIN, SIZE_MAX);
+    if (typeof s.detail === 'number') st.detail = clamp(Math.round(s.detail), DETAIL_MIN, DETAIL_MAX);
     if (typeof s.thick === 'number') st.thick = clamp(roundThick(s.thick), THICK_MIN, THICK_MAX);
     if (typeof s.speed === 'number') st.speed = clamp(s.speed | 0, SPEED_MIN, SPEED_MAX);
     if (s.spin === 0 || s.spin === 1) st.spin = s.spin;
@@ -249,7 +259,7 @@ const saveState = () => _base.save('asciiverse:state', st);
 const viewer = $('viewer'), out = $('out'), txt = $('txt');
 const pasteBtn = $('pasteBtn'), copyBtn = $('copyBtn'), dlBtn = $('dlBtn'), resetBtn = $('resetBtn');
 const fmtRow = $('fmt'), spinRow = $('spin'), copyAsRow = $('copyAs');
-const sizeVal = $('size-val'), thickVal = $('thick-val'), speedVal = $('speed-val');
+const sizeVal = $('size-val'), detailVal = $('detail-val'), thickVal = $('thick-val'), speedVal = $('speed-val');
 const dlA = document.createElement('a'); dlA.style.display = 'none'; document.body.appendChild(dlA);
 
 /* ── Font measurement + fit (exact, no CSS crop) ──────────────────────────── */
@@ -290,7 +300,8 @@ function applySize() {
 // enough cells; on-screen size is unchanged (fit() rescales the font).
 // Order on change: grid -> alloc -> fit -> k -> geometry (in rebuildNow).
 function applyGrid() {
-  const w = 2 * Math.round(Math.min(240, Math.max(96, renderText.length * 24)) / 2);
+  const base = Math.min(240, Math.max(96, renderText.length * 24));
+  const w = 2 * Math.round(Math.min(480, base * st.detail) / 2);
   if (w === W) return;
   W = w; H = Math.round(w * 34 / 96);
   buf = new Array(W * H); zb = new Float32Array(W * H);
@@ -302,8 +313,15 @@ function applyGrid() {
 // Sampling step keyed to the 100%-size projection (safe.k1x) so every Size
 // setting stays hole-free on the current grid.
 const geoStep = () => 0.75 * (K2 - 1) / safe.k1x;
+// Silent ceiling: some short, descender-heavy strings at high Detail can
+// still overshoot GEO_POINT_CAP points; rebuild once at a coarser step.
+function buildGeoCapped(text, thick, step) {
+  let g = buildGeometry(FONT, text, thick, step);
+  if (g.n > GEO_POINT_CAP) g = buildGeometry(FONT, text, thick, step * Math.sqrt(g.n / GEO_POINT_CAP));
+  return g;
+}
 let geoRaf = 0;
-function rebuildNow() { geoRaf = 0; applyGrid(); geo = buildGeometry(FONT, renderText, st.thick, geoStep()); wake(); }
+function rebuildNow() { geoRaf = 0; applyGrid(); geo = buildGeoCapped(renderText, st.thick, geoStep()); wake(); }
 function scheduleRebuild() { if (!geoRaf) geoRaf = requestAnimationFrame(rebuildNow); }
 
 /* ── Physics + idle-stopping rAF loop (home DS constants) ─────────────────── */
@@ -459,8 +477,8 @@ dlBtn.addEventListener('click', doDownload);
 
 function isDefault() {
   return st.text === DEFAULTS.text && st.fmt === DEFAULTS.fmt && st.size === DEFAULTS.size &&
-    st.thick === DEFAULTS.thick && st.speed === DEFAULTS.speed && st.spin === DEFAULTS.spin &&
-    st.copyAs === DEFAULTS.copyAs;
+    st.detail === DEFAULTS.detail && st.thick === DEFAULTS.thick && st.speed === DEFAULTS.speed &&
+    st.spin === DEFAULTS.spin && st.copyAs === DEFAULTS.copyAs;
 }
 const resetCtrl = _base.twoPress(resetBtn, {
   text: 'Reset',
@@ -497,13 +515,17 @@ copyAsRow.addEventListener('click', e => { const b = e.target.closest('.chip'); 
 /* ── Steppers (Size, Thickness, Speed) + tap-label-to-reset ───────────────── */
 const RESET_IC = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
 function updateSize() { sizeVal.textContent = 'Size: ' + st.size + '%'; $('size-dec').disabled = st.size <= SIZE_MIN; $('size-inc').disabled = st.size >= SIZE_MAX; }
+function updateDetail() { detailVal.textContent = 'Detail: ' + st.detail + 'x'; $('detail-dec').disabled = st.detail <= DETAIL_MIN; $('detail-inc').disabled = st.detail >= DETAIL_MAX; }
 function updateThick() { thickVal.textContent = 'Thickness: ' + st.thick.toFixed(2); $('thick-dec').disabled = st.thick <= THICK_MIN + 1e-9; $('thick-inc').disabled = st.thick >= THICK_MAX - 1e-9; }
 function updateSpeed() { speedVal.textContent = 'Speed: ' + st.speed; $('speed-dec').disabled = st.speed <= SPEED_MIN; $('speed-inc').disabled = st.speed >= SPEED_MAX; }
 function setSize(v) { v = clamp(v, SIZE_MIN, SIZE_MAX); if (v === st.size) return; st.size = v; applySize(); updateSize(); saveState(); wake(); }
+function setDetail(v) { v = clamp(Math.round(v), DETAIL_MIN, DETAIL_MAX); if (v === st.detail) return; st.detail = v; updateDetail(); saveState(); scheduleRebuild(); }
 function setThick(v) { v = clamp(roundThick(v), THICK_MIN, THICK_MAX); if (Math.abs(v - st.thick) < 1e-9) return; st.thick = v; updateThick(); saveState(); scheduleRebuild(); }
 function setSpeed(v) { v = clamp(v, SPEED_MIN, SPEED_MAX); if (v === st.speed) return; st.speed = v; spinSpeed = 0.001 * v; updateSpeed(); saveState(); wake(); }
 $('size-dec').addEventListener('click', () => setSize(st.size - SIZE_STEP));
 $('size-inc').addEventListener('click', () => setSize(st.size + SIZE_STEP));
+$('detail-dec').addEventListener('click', () => setDetail(st.detail - DETAIL_STEP));
+$('detail-inc').addEventListener('click', () => setDetail(st.detail + DETAIL_STEP));
 $('thick-dec').addEventListener('click', () => setThick(st.thick - THICK_STEP));
 $('thick-inc').addEventListener('click', () => setThick(st.thick + THICK_STEP));
 $('speed-dec').addEventListener('click', () => setSpeed(st.speed - 1));
@@ -511,6 +533,7 @@ $('speed-inc').addEventListener('click', () => setSpeed(st.speed + 1));
 
 const groups = [
   { row: $('sr-size'), reset: () => setSize(DEFAULTS.size) },
+  { row: $('sr-detail'), reset: () => setDetail(DEFAULTS.detail) },
   { row: $('sr-thick'), reset: () => setThick(DEFAULTS.thick) },
   { row: $('sr-speed'), reset: () => setSpeed(DEFAULTS.speed) }
 ];
@@ -534,6 +557,8 @@ _base.onKey({
   '=': () => setSize(st.size + SIZE_STEP),
   '+': () => setSize(st.size + SIZE_STEP),
   '-': () => setSize(st.size - SIZE_STEP),
+  ',': () => setDetail(st.detail - DETAIL_STEP),
+  '.': () => setDetail(st.detail + DETAIL_STEP),
   '[': () => setThick(st.thick - THICK_STEP),
   ']': () => setThick(st.thick + THICK_STEP),
   ';': () => setSpeed(st.speed - 1),
@@ -549,7 +574,7 @@ function syncControls() {
   syncSeg(fmtRow, st.fmt);
   syncSeg(spinRow, st.spin);
   syncSeg(copyAsRow, st.copyAs, '.chip');
-  updateSize(); updateThick(); updateSpeed();
+  updateSize(); updateDetail(); updateThick(); updateSpeed();
 }
 
 txt.value = st.text;
@@ -559,7 +584,7 @@ syncControls();
 grow();
 updateRenderText();               // sets renderText; schedules first geometry build
 applyGrid();                      // size the grid to renderText before the first frame
-geo = buildGeometry(FONT, renderText, st.thick, geoStep());   // build synchronously for first frame
+geo = buildGeoCapped(renderText, st.thick, geoStep());   // build synchronously for first frame
 if (geoRaf) { cancelAnimationFrame(geoRaf); geoRaf = 0; }
 draw();
 schedule();
