@@ -337,12 +337,11 @@ out.addEventListener('pointercancel', endDrag);
 let warnUnsupported = false, warnTrunc = false, warnTimer = 0;
 function armWarnReset() { clearTimeout(warnTimer); warnTimer = setTimeout(() => { warnUnsupported = false; warnTrunc = false; }, 1200); }
 function updateRenderText() {
-  let t = st.text;
+  let t = st.text.trim();
   if (t.length > 16) {
     t = t.slice(0, 16);
     if (!warnTrunc) { _base.notify('Showing First 16 Characters', 'warn'); warnTrunc = true; }
   }
-  t = t.trim();
   if (!t) t = 'Hello';
   if (t !== renderText) { renderText = t; scheduleRebuild(); }
 }
@@ -375,15 +374,18 @@ function insertText(str) {
 }
 document.addEventListener('paste', e => {
   const cd = e.clipboardData; if (!cd) return;
+  const text = cd.getData('text');
+  if (!text) { _base.notify('Unsupported Content', 'warn'); return; }
   e.preventDefault();
-  insertText(cd.getData('text'));
+  insertText(text);
 });
 
 /* ── Actions ──────────────────────────────────────────────────────────────── */
 function doPaste() {
   if (navigator.clipboard && navigator.clipboard.readText) {
     navigator.clipboard.readText().then(t => {
-      txt.focus(); insertText(t); _base.feedback(pasteBtn, 'ps-fb', 'Pasted');
+      txt.focus(); insertText(t);
+      if (t.replace(/[^\x20-\x7E]/g, '')) _base.feedback(pasteBtn, 'ps-fb', 'Pasted');
     }).catch(() => _base.notify('Clipboard Not Available', false));
   } else _base.notify('Clipboard Not Available', false);
 }
@@ -478,7 +480,7 @@ _base.onKey({
   ';': () => setSpeed(st.speed - 1),
   "'": () => setSpeed(st.speed + 1),
   ctrl: {
-    c: e => { if (!getSelection().toString()) { e.preventDefault(); doCopy(); } },
+    c: e => { if (getSelection().toString()) return; if (document.activeElement === txt && txt.selectionStart !== txt.selectionEnd) return; e.preventDefault(); doCopy(); },
     s: e => { e.preventDefault(); doDownload(); }
   }
 });
