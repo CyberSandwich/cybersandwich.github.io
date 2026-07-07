@@ -457,7 +457,7 @@ function doPaste() {
 }
 function assembleDoc(engineSrc, fontJson, cfgJson) {
   const lines = [
-    "var K2=5,B_TARGET=0.22,SPIN_SPEED=0.003;",
+    "var K2=5,B_TARGET=0.22;",
     "var o=document.getElementById('o');",
     "var W=CFG.W,Hh=CFG.H;",
     "var buf=new Array(W*Hh),zb=new Float32Array(W*Hh);",
@@ -473,7 +473,7 @@ function assembleDoc(engineSrc, fontJson, cfgJson) {
     "function frame(){rafId=0;if(document.hidden)return;",
     "if(!dragging){",
     "if(CFG.spin===0){",
-    "var tgt=-SPIN_SPEED;Av+=(tgt-Av)*0.025;Bv+=(B_TARGET-B)*0.006;Bv*=0.94;A+=Av;",
+    "var tgt=-CFG.spinSpeed;Av+=(tgt-Av)*0.025;Bv+=(B_TARGET-B)*0.006;Bv*=0.94;A+=Av;",
     "var nB=B+Bv;if(nB>1.4){nB=1.4;Bv=-Math.abs(Bv)*0.55;}if(nB<-1.4){nB=-1.4;Bv=Math.abs(Bv)*0.55;}B=nB;",
     "}else{",
     "A=Math.atan2(Math.sin(A),Math.cos(A));A+=(0-A)*0.08;B+=(0-B)*0.08;Av*=0.8;Bv*=0.8;",
@@ -518,7 +518,7 @@ function assembleDoc(engineSrc, fontJson, cfgJson) {
   ].join('\n');
 }
 function buildInteractiveDoc() {
-  const cfg = { text: renderText, ramp: RAMPS[st.fmt], thick: st.thick, step: geoStep(), W, H, sizePct: st.size, spin: st.spin };
+  const cfg = { text: renderText, ramp: RAMPS[st.fmt], thick: st.thick, step: geoStep(), W, H, sizePct: st.size, spin: st.spin, spinSpeed };
   const engineSrc = buildGeometry.toString() + '\n' + safeK.toString() + '\n' + renderFrame.toString();
   return assembleDoc(engineSrc, JSON.stringify(FONT), JSON.stringify(cfg));
 }
