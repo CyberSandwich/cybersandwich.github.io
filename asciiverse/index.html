@@ -27,7 +27,6 @@
 .in textarea.scroll{overflow-y:auto}
 .in textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)}
 .slbl span{cursor:pointer}
-.chips{display:flex;gap:8px}
 </style>
 </head>
 <body>
@@ -41,17 +40,15 @@
   <button id="resetBtn" data-l="Reset"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset</span></button>
 </div></div>
 <div class="card">
-  <div class="srow" id="sr-copyas">
-    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy As</span></label>
-    <div class="chips" id="copyAs" role="radiogroup" aria-label="Copy As">
-      <button class="chip active" role="radio" aria-checked="true">Text</button>
-      <button class="chip" role="radio" aria-checked="false">Code</button>
-    </div>
-  </div>
   <div class="seg-row" id="fmt" role="radiogroup" aria-label="Character Set">
     <button class="seg active" role="radio" aria-checked="true">Classic</button>
     <button class="seg" role="radio" aria-checked="false">Blocks</button>
     <button class="seg" role="radio" aria-checked="false">Dots</button>
+  </div>
+  <div class="seg-row" id="outmode" role="radiogroup" aria-label="Output Format">
+    <button class="seg active" role="radio" aria-checked="true">Text</button>
+    <button class="seg" role="radio" aria-checked="false">Code</button>
+    <button class="seg" role="radio" aria-checked="false">HTML</button>
   </div>
 </div>
 <div class="card">
@@ -63,7 +60,7 @@
     </div>
   </div>
   <div class="srow" id="sr-detail">
-    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg><span id="detail-val">Detail: 1x</span></label>
+    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg><span id="detail-val">Detail: 2x</span></label>
     <div class="stepper">
       <button class="step-btn" id="detail-dec" aria-label="Decrease Detail"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       <button class="step-btn" id="detail-inc" aria-label="Increase Detail"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -230,8 +227,7 @@ const DETAIL_MIN = 1, DETAIL_MAX = 3, DETAIL_STEP = 1;
 const THICK_MIN = 0.15, THICK_MAX = 0.40, THICK_STEP = 0.05;
 const SPEED_MIN = 1, SPEED_MAX = 6;
 const GEO_POINT_CAP = 220000;
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const DEFAULTS = { text: 'Hello', fmt: 0, size: 100, detail: 1, thick: 0.25, speed: 3, spin: reduceMotion ? 1 : 0, copyAs: 0 };
+const DEFAULTS = { text: 'Hello', fmt: 0, size: 100, detail: 2, thick: 0.25, speed: 3, spin: 1, out: 0 };
 
 const $ = id => document.getElementById(id);
 const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
@@ -248,7 +244,7 @@ function loadState() {
     if (typeof s.thick === 'number') st.thick = clamp(roundThick(s.thick), THICK_MIN, THICK_MAX);
     if (typeof s.speed === 'number') st.speed = clamp(s.speed | 0, SPEED_MIN, SPEED_MAX);
     if (s.spin === 0 || s.spin === 1) st.spin = s.spin;
-    if (s.copyAs === 0 || s.copyAs === 1) st.copyAs = s.copyAs;
+    if (typeof s.out === 'number') st.out = clamp(s.out | 0, 0, 2);
   }
   return st;
 }
@@ -258,7 +254,7 @@ const saveState = () => _base.save('asciiverse:state', st);
 /* ── Element refs ─────────────────────────────────────────────────────────── */
 const viewer = $('viewer'), out = $('out'), txt = $('txt');
 const pasteBtn = $('pasteBtn'), copyBtn = $('copyBtn'), dlBtn = $('dlBtn'), resetBtn = $('resetBtn');
-const fmtRow = $('fmt'), spinRow = $('spin'), copyAsRow = $('copyAs');
+const fmtRow = $('fmt'), spinRow = $('spin'), outRow = $('outmode');
 const sizeVal = $('size-val'), detailVal = $('detail-val'), thickVal = $('thick-val'), speedVal = $('speed-val');
 const dlA = document.createElement('a'); dlA.style.display = 'none'; document.body.appendChild(dlA);
 
@@ -459,15 +455,23 @@ function doPaste() {
     }).catch(() => _base.notify('Clipboard Not Available', false));
   } else _base.notify('Clipboard Not Available', false);
 }
+function outContent(cropped) {
+  if (st.out === 1) return '<pre style="font-family:monospace;line-height:1;letter-spacing:0">\n' + cropped + '\n</pre>';
+  if (st.out === 2) return '<!DOCTYPE html>\n<html lang="en">\n<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ASCIIverse</title></head>\n<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#FFF">\n<pre style="font-family:monospace;line-height:1;letter-spacing:0;color:#111">\n' + cropped + '\n</pre>\n</body>\n</html>';
+  return cropped;
+}
+function outFilename() {
+  return st.out === 1 ? 'asciiverse-embed.html' : st.out === 2 ? 'index.html' : 'asciiverse.txt';
+}
 function doCopy() {
-  const cropped = crop(lastFrame);
-  const text = st.copyAs === 1 ? '<pre style="font-family:monospace;line-height:1;letter-spacing:0">\n' + cropped + '\n</pre>' : cropped;
+  const text = outContent(crop(lastFrame));
   _base.copyText(text, () => _base.feedback(copyBtn, 'ok', 'Copied'), () => _base.notify('Copy Failed', false));
 }
 function doDownload() {
-  const blob = new Blob([crop(lastFrame)], { type: 'text/plain' });
+  const text = outContent(crop(lastFrame));
+  const blob = new Blob([text], { type: st.out === 0 ? 'text/plain' : 'text/html' });
   const u = URL.createObjectURL(blob);
-  dlA.download = 'asciiverse.txt'; dlA.href = u; dlA.click();
+  dlA.download = outFilename(); dlA.href = u; dlA.click();
   setTimeout(() => URL.revokeObjectURL(u), 1e4);
   _base.feedback(dlBtn, 'dl-fb', 'Downloaded');
 }
@@ -478,7 +482,7 @@ dlBtn.addEventListener('click', doDownload);
 function isDefault() {
   return st.text === DEFAULTS.text && st.fmt === DEFAULTS.fmt && st.size === DEFAULTS.size &&
     st.detail === DEFAULTS.detail && st.thick === DEFAULTS.thick && st.speed === DEFAULTS.speed &&
-    st.spin === DEFAULTS.spin && st.copyAs === DEFAULTS.copyAs;
+    st.spin === DEFAULTS.spin && st.out === DEFAULTS.out;
 }
 const resetCtrl = _base.twoPress(resetBtn, {
   text: 'Reset',
@@ -507,10 +511,10 @@ function syncSeg(row, idx, sel = '.seg') {
 }
 function setFmt(i) { st.fmt = i; opts.ramp = RAMPS[i]; syncSeg(fmtRow, i); saveState(); wake(); }
 function setSpin(i) { st.spin = i; syncSeg(spinRow, i); saveState(); wake(); }
-function setCopyAs(i) { st.copyAs = i; syncSeg(copyAsRow, i, '.chip'); saveState(); }
+function setOut(i) { st.out = i; syncSeg(outRow, i); saveState(); }
 fmtRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setFmt([...fmtRow.children].indexOf(b)); });
 spinRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setSpin([...spinRow.children].indexOf(b)); });
-copyAsRow.addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) setCopyAs([...copyAsRow.children].indexOf(b)); });
+outRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setOut([...outRow.children].indexOf(b)); });
 
 /* ── Steppers (Size, Thickness, Speed) + tap-label-to-reset ───────────────── */
 const RESET_IC = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
@@ -573,7 +577,7 @@ _base.onKey({
 function syncControls() {
   syncSeg(fmtRow, st.fmt);
   syncSeg(spinRow, st.spin);
-  syncSeg(copyAsRow, st.copyAs, '.chip');
+  syncSeg(outRow, st.out);
   updateSize(); updateDetail(); updateThick(); updateSpeed();
 }
 
