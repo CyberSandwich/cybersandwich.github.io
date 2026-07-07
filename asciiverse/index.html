@@ -97,7 +97,8 @@ const FONT = {32:{w:16,s:[]},33:{w:10,s:[[5,21,5,7],[5,2,4,1,5,0,6,1,5,2]]},34:{
 /* ── Engine (Task 2 artifact, pasted verbatim) ────────────────────────────── */
 // Layout: place glyphs by advance width (space = advance only), center at
 // origin, scale to unit sphere including tube radius.
-function buildGeometry(FONT, text, thickness) {
+// step: world-unit sampling interval along strokes (default 0.022).
+function buildGeometry(FONT, text, thickness, step = 0.022) {
   const chars = [...text].map(ch => FONT[ch.charCodeAt(0)] || FONT[63]); // '?' fallback
   let x = 0; const placed = [];
   for (const gl of chars) { placed.push({ gl, x }); x += gl.w; }
@@ -115,11 +116,10 @@ function buildGeometry(FONT, text, thickness) {
   const scale = 1 / (maxR + rG);         // centerline extent + tube fits the unit sphere
   const tubeR = rG * scale;
   // Sampling density: adjacent samples < ~0.75 projected cells apart at the
-  // nearest z (K2 - 1) under the max safe projection (see safeK). Computed
-  // for the caller-agnostic worst case: k1x_max ~ (H/2-1)*(K2-1... ) -- keep
-  // it simple and conservative:
-  const STEP = 0.022;                      // world units; ~0.6 cells at k1x≈110
-  const RING = Math.max(22, Math.ceil((2 * Math.PI * tubeR) / STEP));
+  // nearest z (K2 - 1) under the max safe projection (see safeK). Callers
+  // pass step = 0.75 * (K2 - 1) / k1x for their grid; the 0.022 default
+  // matches the legacy 96x34 grid (~0.6 cells at k1x≈110):
+  const RING = Math.max(22, Math.ceil((2 * Math.PI * tubeR) / step));
   const pts = [], nrm = [];
   for (const { gl, x: gx } of placed) {
     for (const st of gl.s) {
@@ -129,7 +129,7 @@ function buildGeometry(FONT, text, thickness) {
         const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1e-9;
         const tx = dx / len, ty = dy / len;      // tangent
         const nxx = -ty, nxy = tx;               // in-plane normal
-        const steps = Math.max(1, Math.ceil(len / STEP));
+        const steps = Math.max(1, Math.ceil(len / step));
         for (let s2 = 0; s2 <= steps; s2++) {
           const px = x0 + dx * (s2 / steps), py = y0 + dy * (s2 / steps);
           for (let r2 = 0; r2 < RING; r2++) {
@@ -206,7 +206,8 @@ function renderFrame(pts, nrm, n, A, B, o) {
 }
 
 /* ── Config + state ────────────────────────────────────────────────────────── */
-const W = 96, H = 34, K2 = 5, B_TARGET = 0.22;
+let W = 96, H = 34;                // adaptive grid; applyGrid() sizes it from renderText
+const K2 = 5, B_TARGET = 0.22;
 const RAMPS = ['.,-~:;=!*#$@', '░▒▓█', '.:oO@', '.-+#'];
 const SIZE_MIN = 40, SIZE_MAX = 100, SIZE_STEP = 10;
 const THICK_MIN = 0.15, THICK_MAX = 0.40, THICK_STEP = 0.05;
@@ -263,20 +264,36 @@ function measure() {
 function fit() {
   const cw = viewer.clientWidth;
   if (!cw) return;
-  const fs = Math.floor((cw / W) / advanceEm * 100) / 100;   // 96 cols fit exactly
+  const fs = Math.floor((cw / W) / advanceEm * 100) / 100;   // live W cols fit exactly
   out.style.setProperty('--fs', fs + 'px');
 }
 
 /* ── Geometry + render options ────────────────────────────────────────────── */
-const buf = new Array(W * H), zb = new Float32Array(W * H);
+let buf = new Array(W * H), zb = new Float32Array(W * H);
 const opts = { W, H, k1x: 0, k1y: 0, K2, ramp: RAMPS[st.fmt], buf, zb };
 let geo = null, renderText = 'Hello', lastFrame = '';
 function applySize() {
   opts.k1x = safe.k1x * st.size / 100;
   opts.k1y = safe.k1y * st.size / 100;
 }
+// Adaptive grid: resolution scales with text length so each glyph keeps
+// enough cells; on-screen size is unchanged (fit() rescales the font).
+// Order on change: grid -> alloc -> fit -> k -> geometry (in rebuildNow).
+function applyGrid() {
+  const w = 2 * Math.round(Math.min(240, Math.max(96, renderText.length * 24)) / 2);
+  if (w === W) return;
+  W = w; H = Math.round(w * 34 / 96);
+  buf = new Array(W * H); zb = new Float32Array(W * H);
+  opts.W = W; opts.H = H; opts.buf = buf; opts.zb = zb;
+  fit();
+  safe = safeK(W, H, K2, 1, advanceEm);
+  applySize();
+}
+// Sampling step keyed to the 100%-size projection (safe.k1x) so every Size
+// setting stays hole-free on the current grid.
+const geoStep = () => 0.75 * (K2 - 1) / safe.k1x;
 let geoRaf = 0;
-function rebuildNow() { geoRaf = 0; geo = buildGeometry(FONT, renderText, st.thick); wake(); }
+function rebuildNow() { geoRaf = 0; applyGrid(); geo = buildGeometry(FONT, renderText, st.thick, geoStep()); wake(); }
 function scheduleRebuild() { if (!geoRaf) geoRaf = requestAnimationFrame(rebuildNow); }
 
 /* ── Physics + idle-stopping rAF loop (home DS constants) ─────────────────── */
@@ -509,7 +526,8 @@ fit();
 syncControls();
 grow();
 updateRenderText();               // sets renderText; schedules first geometry build
-geo = buildGeometry(FONT, renderText, st.thick);   // build synchronously for first frame
+applyGrid();                      // size the grid to renderText before the first frame
+geo = buildGeometry(FONT, renderText, st.thick, geoStep());   // build synchronously for first frame
 if (geoRaf) { cancelAnimationFrame(geoRaf); geoRaf = 0; }
 draw();
 schedule();
