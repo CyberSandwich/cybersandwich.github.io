@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<title>ASCIIverse</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ASCIIverse">
+<meta name="description" content="Interactive 3D ASCII Text Generator">
+<meta property="og:title" content="ASCIIverse">
+<meta property="og:description" content="Interactive 3D ASCII Text Generator">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=27">
+<style>
+.w{max-width:440px;width:100%;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
+#viewer{padding:14px 0;text-align:center}
+#out{display:inline-block;margin:0;text-align:left;white-space:pre;line-height:1;font:700 var(--fs,6px)/1 ui-monospace,'SF Mono',Menlo,Monaco,Consolas,monospace;color:var(--t1);user-select:none;-webkit-user-select:none;touch-action:none;cursor:grab;contain:content}
+#out.grabbing{cursor:grabbing}
+.in{margin-bottom:14px}
+.in textarea{width:100%;padding:14px 20px;border:1px solid var(--bdr2);border-radius:16px;font:400 1rem/1.5 var(--font);color:var(--t1);background:var(--card);outline:none;transition:border-color .15s,box-shadow .15s;resize:none;display:block;overflow:hidden;max-height:140px}
+.in textarea.scroll{overflow-y:auto}
+.in textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)}
+.slbl span{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="w">
+<div class="card" id="viewer"><pre id="out" aria-live="off"></pre></div>
+<div class="in"><textarea id="txt" rows="1" placeholder="Text" spellcheck="false" aria-label="Text To Render"></textarea></div>
+<div class="card"><div class="links" id="acts">
+  <button id="pasteBtn" data-l="Paste"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg><span>Paste</span></button>
+  <button id="copyBtn" data-l="Copy"><svg class="id" aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
+  <button id="dlBtn" data-l="Download"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg><span>Download</span></button>
+  <button id="resetBtn" data-l="Reset"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset</span></button>
+</div></div>
+<div class="card"><div class="seg-row c4" id="fmt" role="radiogroup" aria-label="Character Set">
+  <button class="seg active" role="radio" aria-checked="true">Classic</button>
+  <button class="seg" role="radio" aria-checked="false">Blocks</button>
+  <button class="seg" role="radio" aria-checked="false">Dots</button>
+  <button class="seg" role="radio" aria-checked="false">Minimal</button>
+</div></div>
+<div class="card">
+  <div class="srow" id="sr-size">
+    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg><span id="size-val">Size: 80%</span></label>
+    <div class="stepper">
+      <button class="step-btn" id="size-dec" aria-label="Decrease Size"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="step-btn" id="size-inc" aria-label="Increase Size"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+  </div>
+  <div class="srow" id="sr-thick">
+    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg><span id="thick-val">Thickness: 0.25</span></label>
+    <div class="stepper">
+      <button class="step-btn" id="thick-dec" aria-label="Decrease Thickness"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="step-btn" id="thick-inc" aria-label="Increase Thickness"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+  </div>
+  <div class="srow" id="sr-speed">
+    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg><span id="speed-val">Speed: 3</span></label>
+    <div class="stepper">
+      <button class="step-btn" id="speed-dec" aria-label="Decrease Speed"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="step-btn" id="speed-inc" aria-label="Increase Speed"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+  </div>
+  <div class="seg-row c2" id="spin" role="radiogroup" aria-label="Spin"><button class="seg active" role="radio" aria-checked="true">Auto</button><button class="seg" role="radio" aria-checked="false">Off</button></div>
+</div>
+</div>
+<nav aria-label="Primary">
+  <div class="tabs">
+    <a href="/">Home</a>
+    <a class="active">ASCIIverse</a>
+  </div>
+  <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
+</nav>
+<script src="/shared/base.js?v=25"></script>
+<script>
+(()=>{
+'use strict';
+
+/* ── Vendored font ─────────────────────────────────────────────────────────
+   Hershey Roman Simplex single-stroke vector font, ASCII 32-126.
+   Source: futural.jhf (Hershey Sans 1-stroke) from
+   https://github.com/kamalmostafa/hershey-fonts (raw: hershey-fonts/futural.jhf),
+   the classic Hershey/USL distribution; same data as Paul Bourke's simplex set
+   (https://paulbourke.net/dataformats/hershey/). Public domain / free for any use
+   (USL: acknowledge Dr. A. V. Hershey, U.S. National Bureau of Standards).
+   Conventions: map charCode -> {w: advance width, s: [[x0,y0,x1,y1,...],...]}.
+   Baseline at y=0, y increases UP, cap height = 21, x-height = 14,
+   descenders negative (to y=-7). x starts at 0 (left margin removed). */
+const FONT = {32:{w:16,s:[]},33:{w:10,s:[[5,21,5,7],[5,2,4,1,5,0,6,1,5,2]]},34:{w:16,s:[[4,21,4,14],[12,21,12,14]]},35:{w:21,s:[[11,25,4,-7],[17,25,10,-7],[4,12,18,12],[3,6,17,6]]},36:{w:20,s:[[8,25,8,-4],[12,25,12,-4],[17,18,15,20,12,21,8,21,5,20,3,18,3,16,4,14,5,13,7,12,13,10,15,9,16,8,17,6,17,3,15,1,12,0,8,0,5,1,3,3]]},37:{w:24,s:[[21,21,3,0],[8,21,10,19,10,17,9,15,7,14,5,14,3,16,3,18,4,20,6,21,8,21,10,20,13,19,16,19,19,20,21,21],[17,7,15,6,14,4,14,2,16,0,18,0,20,1,21,3,21,5,19,7,17,7]]},38:{w:26,s:[[23,12,23,13,22,14,21,14,20,13,19,11,17,6,15,3,13,1,11,0,7,0,5,1,4,2,3,4,3,6,4,8,5,9,12,13,13,14,14,16,14,18,13,20,11,21,9,20,8,18,8,16,9,13,11,10,16,3,18,1,20,0,22,0,23,1,23,2]]},39:{w:10,s:[[5,19,4,20,5,21,6,20,6,18,5,16,4,15]]},40:{w:14,s:[[11,25,9,23,7,20,5,16,4,11,4,7,5,2,7,-2,9,-5,11,-7]]},41:{w:14,s:[[3,25,5,23,7,20,9,16,10,11,10,7,9,2,7,-2,5,-5,3,-7]]},42:{w:16,s:[[8,15,8,3],[3,12,13,6],[13,12,3,6]]},43:{w:26,s:[[13,18,13,0],[4,9,22,9]]},44:{w:8,s:[[5,4,4,3,3,4,4,5,5,4,5,2,3,0]]},45:{w:26,s:[[4,9,22,9]]},46:{w:8,s:[[4,5,3,4,4,3,5,4,4,5]]},47:{w:22,s:[[20,25,2,-7]]},48:{w:20,s:[[9,21,6,20,4,17,3,12,3,9,4,4,6,1,9,0,11,0,14,1,16,4,17,9,17,12,16,17,14,20,11,21,9,21]]},49:{w:20,s:[[6,17,8,18,11,21,11,0]]},50:{w:20,s:[[4,16,4,17,5,19,6,20,8,21,12,21,14,20,15,19,16,17,16,15,15,13,13,10,3,0,17,0]]},51:{w:20,s:[[5,21,16,21,10,13,13,13,15,12,16,11,17,8,17,6,16,3,14,1,11,0,8,0,5,1,4,2,3,4]]},52:{w:20,s:[[13,21,3,7,18,7],[13,21,13,0]]},53:{w:20,s:[[15,21,5,21,4,12,5,13,8,14,11,14,14,13,16,11,17,8,17,6,16,3,14,1,11,0,8,0,5,1,4,2,3,4]]},54:{w:20,s:[[16,18,15,20,12,21,10,21,7,20,5,17,4,12,4,7,5,3,7,1,10,0,11,0,14,1,16,3,17,6,17,7,16,10,14,12,11,13,10,13,7,12,5,10,4,7]]},55:{w:20,s:[[17,21,7,0],[3,21,17,21]]},56:{w:20,s:[[8,21,5,20,4,18,4,16,5,14,7,13,11,12,14,11,16,9,17,7,17,4,16,2,15,1,12,0,8,0,5,1,4,2,3,4,3,7,4,9,6,11,9,12,13,13,15,14,16,16,16,18,15,20,12,21,8,21]]},57:{w:20,s:[[16,14,15,11,13,9,10,8,9,8,6,9,4,11,3,14,3,15,4,18,6,20,9,21,10,21,13,20,15,18,16,14,16,9,15,4,13,1,10,0,8,0,5,1,4,3]]},58:{w:8,s:[[4,12,3,11,4,10,5,11,4,12],[4,5,3,4,4,3,5,4,4,5]]},59:{w:8,s:[[4,12,3,11,4,10,5,11,4,12],[5,4,4,3,3,4,4,5,5,4,5,2,3,0]]},60:{w:24,s:[[20,18,4,9,20,0]]},61:{w:26,s:[[4,12,22,12],[4,6,22,6]]},62:{w:24,s:[[4,18,20,9,4,0]]},63:{w:18,s:[[3,16,3,17,4,19,5,20,7,21,11,21,13,20,14,19,15,17,15,15,14,13,13,12,9,10,9,7],[9,2,8,1,9,0,10,1,9,2]]},64:{w:27,s:[[18,13,17,15,15,16,12,16,10,15,9,14,8,11,8,8,9,6,11,5,14,5,16,6,17,8],[12,16,10,14,9,11,9,8,10,6,11,5],[18,16,17,8,17,6,19,5,21,5,23,7,24,10,24,12,23,15,22,17,20,19,18,20,15,21,12,21,9,20,7,19,5,17,4,15,3,12,3,9,4,6,5,4,7,2,9,1,12,0,15,0,18,1,20,2,21,3],[19,16,18,8,18,6,19,5]]},65:{w:18,s:[[9,21,1,0],[9,21,17,0],[4,7,14,7]]},66:{w:21,s:[[4,21,4,0],[4,21,13,21,16,20,17,19,18,17,18,15,17,13,16,12,13,11],[4,11,13,11,16,10,17,9,18,7,18,4,17,2,16,1,13,0,4,0]]},67:{w:21,s:[[18,16,17,18,15,20,13,21,9,21,7,20,5,18,4,16,3,13,3,8,4,5,5,3,7,1,9,0,13,0,15,1,17,3,18,5]]},68:{w:21,s:[[4,21,4,0],[4,21,11,21,14,20,16,18,17,16,18,13,18,8,17,5,16,3,14,1,11,0,4,0]]},69:{w:19,s:[[4,21,4,0],[4,21,17,21],[4,11,12,11],[4,0,17,0]]},70:{w:18,s:[[4,21,4,0],[4,21,17,21],[4,11,12,11]]},71:{w:21,s:[[18,16,17,18,15,20,13,21,9,21,7,20,5,18,4,16,3,13,3,8,4,5,5,3,7,1,9,0,13,0,15,1,17,3,18,5,18,8],[13,8,18,8]]},72:{w:22,s:[[4,21,4,0],[18,21,18,0],[4,11,18,11]]},73:{w:8,s:[[4,21,4,0]]},74:{w:16,s:[[12,21,12,5,11,2,10,1,8,0,6,0,4,1,3,2,2,5,2,7]]},75:{w:21,s:[[4,21,4,0],[18,21,4,7],[9,12,18,0]]},76:{w:17,s:[[4,21,4,0],[4,0,16,0]]},77:{w:24,s:[[4,21,4,0],[4,21,12,0],[20,21,12,0],[20,21,20,0]]},78:{w:22,s:[[4,21,4,0],[4,21,18,0],[18,21,18,0]]},79:{w:22,s:[[9,21,7,20,5,18,4,16,3,13,3,8,4,5,5,3,7,1,9,0,13,0,15,1,17,3,18,5,19,8,19,13,18,16,17,18,15,20,13,21,9,21]]},80:{w:21,s:[[4,21,4,0],[4,21,13,21,16,20,17,19,18,17,18,14,17,12,16,11,13,10,4,10]]},81:{w:22,s:[[9,21,7,20,5,18,4,16,3,13,3,8,4,5,5,3,7,1,9,0,13,0,15,1,17,3,18,5,19,8,19,13,18,16,17,18,15,20,13,21,9,21],[12,4,18,-2]]},82:{w:21,s:[[4,21,4,0],[4,21,13,21,16,20,17,19,18,17,18,15,17,13,16,12,13,11,4,11],[11,11,18,0]]},83:{w:20,s:[[17,18,15,20,12,21,8,21,5,20,3,18,3,16,4,14,5,13,7,12,13,10,15,9,16,8,17,6,17,3,15,1,12,0,8,0,5,1,3,3]]},84:{w:16,s:[[8,21,8,0],[1,21,15,21]]},85:{w:22,s:[[4,21,4,6,5,3,7,1,10,0,12,0,15,1,17,3,18,6,18,21]]},86:{w:18,s:[[1,21,9,0],[17,21,9,0]]},87:{w:24,s:[[2,21,7,0],[12,21,7,0],[12,21,17,0],[22,21,17,0]]},88:{w:20,s:[[3,21,17,0],[17,21,3,0]]},89:{w:18,s:[[1,21,9,11,9,0],[17,21,9,11]]},90:{w:20,s:[[17,21,3,0],[3,21,17,21],[3,0,17,0]]},91:{w:14,s:[[4,25,4,-7],[5,25,5,-7],[4,25,11,25],[4,-7,11,-7]]},92:{w:14,s:[[0,21,14,-3]]},93:{w:14,s:[[9,25,9,-7],[10,25,10,-7],[3,25,10,25],[3,-7,10,-7]]},94:{w:16,s:[[8,23,0,9],[8,23,16,9]]},95:{w:18,s:[[0,-7,18,-7]]},96:{w:8,s:[[5,16,3,14,3,12,4,11,5,12,4,13,3,12]]},97:{w:19,s:[[15,14,15,0],[15,11,13,13,11,14,8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3]]},98:{w:19,s:[[4,21,4,0],[4,11,6,13,8,14,11,14,13,13,15,11,16,8,16,6,15,3,13,1,11,0,8,0,6,1,4,3]]},99:{w:18,s:[[15,11,13,13,11,14,8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3]]},100:{w:19,s:[[15,21,15,0],[15,11,13,13,11,14,8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3]]},101:{w:18,s:[[3,8,15,8,15,10,14,12,13,13,11,14,8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3]]},102:{w:12,s:[[10,21,8,21,6,20,5,17,5,0],[2,14,9,14]]},103:{w:19,s:[[15,14,15,-2,14,-5,13,-6,11,-7,8,-7,6,-6],[15,11,13,13,11,14,8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3]]},104:{w:19,s:[[4,21,4,0],[4,10,7,13,9,14,12,14,14,13,15,10,15,0]]},105:{w:8,s:[[3,21,4,20,5,21,4,22,3,21],[4,14,4,0]]},106:{w:10,s:[[5,21,6,20,7,21,6,22,5,21],[6,14,6,-3,5,-6,3,-7,1,-7]]},107:{w:17,s:[[4,21,4,0],[14,14,4,4],[8,8,15,0]]},108:{w:8,s:[[4,21,4,0]]},109:{w:30,s:[[4,14,4,0],[4,10,7,13,9,14,12,14,14,13,15,10,15,0],[15,10,18,13,20,14,23,14,25,13,26,10,26,0]]},110:{w:19,s:[[4,14,4,0],[4,10,7,13,9,14,12,14,14,13,15,10,15,0]]},111:{w:19,s:[[8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3,16,6,16,8,15,11,13,13,11,14,8,14]]},112:{w:19,s:[[4,14,4,-7],[4,11,6,13,8,14,11,14,13,13,15,11,16,8,16,6,15,3,13,1,11,0,8,0,6,1,4,3]]},113:{w:19,s:[[15,14,15,-7],[15,11,13,13,11,14,8,14,6,13,4,11,3,8,3,6,4,3,6,1,8,0,11,0,13,1,15,3]]},114:{w:13,s:[[4,14,4,0],[4,8,5,11,7,13,9,14,12,14]]},115:{w:17,s:[[14,11,13,13,10,14,7,14,4,13,3,11,4,9,6,8,11,7,13,6,14,4,14,3,13,1,10,0,7,0,4,1,3,3]]},116:{w:12,s:[[5,21,5,4,6,1,8,0,10,0],[2,14,9,14]]},117:{w:19,s:[[4,14,4,4,5,1,7,0,10,0,12,1,15,4],[15,14,15,0]]},118:{w:16,s:[[2,14,8,0],[14,14,8,0]]},119:{w:22,s:[[3,14,7,0],[11,14,7,0],[11,14,15,0],[19,14,15,0]]},120:{w:17,s:[[3,14,14,0],[14,14,3,0]]},121:{w:16,s:[[2,14,8,0],[14,14,8,0,6,-4,4,-6,2,-7,1,-7]]},122:{w:17,s:[[14,14,3,0],[3,14,14,14],[3,0,14,0]]},123:{w:14,s:[[9,25,7,24,6,23,5,21,5,19,6,17,7,16,8,14,8,12,6,10],[7,24,6,22,6,20,7,18,8,17,9,15,9,13,8,11,4,9,8,7,9,5,9,3,8,1,7,0,6,-2,6,-4,7,-6],[6,8,8,6,8,4,7,2,6,1,5,-1,5,-3,6,-5,7,-6,9,-7]]},124:{w:8,s:[[4,25,4,-7]]},125:{w:14,s:[[5,25,7,24,8,23,9,21,9,19,8,17,7,16,6,14,6,12,8,10],[7,24,8,22,8,20,7,18,6,17,5,15,5,13,6,11,10,9,6,7,5,5,5,3,6,1,7,0,8,-2,8,-4,7,-6],[8,8,6,6,6,4,7,2,8,1,9,-1,9,-3,8,-5,7,-6,5,-7]]},126:{w:24,s:[[3,6,3,8,4,11,6,12,8,12,10,11,14,8,16,7,18,7,20,8,21,10],[3,8,4,10,6,11,8,11,10,10,14,7,16,6,18,6,20,7,21,10,21,12]]}};
+
+/* ── Engine (Task 2 artifact, pasted verbatim) ────────────────────────────── */
+// Layout: place glyphs by advance width (space = advance only), center at
+// origin, scale to unit sphere including tube radius.
+function buildGeometry(FONT, text, thickness) {
+  const chars = [...text].map(ch => FONT[ch.charCodeAt(0)] || FONT[63]); // '?' fallback
+  let x = 0; const placed = [];
+  for (const gl of chars) { placed.push({ gl, x }); x += gl.w; }
+  const totalW = x, CAP = 21;
+  const cx = totalW / 2, cy = CAP / 2 - 2; // optical vertical center
+  // Pre-scale so raw glyph units -> world units where final R (incl tube) ~= 1.
+  // First pass: find max centerline radius in glyph units.
+  let maxR = 0;
+  for (const { gl, x: gx } of placed)
+    for (const st of gl.s)
+      for (let i = 0; i < st.length; i += 2)
+        maxR = Math.max(maxR, Math.hypot(gx + st[i] - cx, st[i+1] - cy));
+  if (maxR === 0) maxR = 1;
+  const tubeR = thickness;                 // thickness given in world units
+  const scale = (1 - tubeR) / maxR;        // centerline fits in radius 1 - tubeR
+  // Sampling density: adjacent samples < ~0.75 projected cells apart at the
+  // nearest z (K2 - 1) under the max safe projection (see safeK). Computed
+  // for the caller-agnostic worst case: k1x_max ~ (H/2-1)*(K2-1... ) -- keep
+  // it simple and conservative:
+  const STEP = 0.022;                      // world units; ~0.6 cells at k1x≈110
+  const RING = Math.max(22, Math.ceil((2 * Math.PI * tubeR) / STEP));
+  const pts = [], nrm = [];
+  for (const { gl, x: gx } of placed) {
+    for (const st of gl.s) {
+      for (let i = 0; i + 3 < st.length; i += 2) {
+        const x0 = (gx + st[i] - cx) * scale, y0 = (st[i+1] - cy) * scale;
+        const x1 = (gx + st[i+2] - cx) * scale, y1 = (st[i+3] - cy) * scale;
+        const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1e-9;
+        const tx = dx / len, ty = dy / len;      // tangent
+        const nxx = -ty, nxy = tx;               // in-plane normal
+        const steps = Math.max(1, Math.ceil(len / STEP));
+        for (let s2 = 0; s2 <= steps; s2++) {
+          const px = x0 + dx * (s2 / steps), py = y0 + dy * (s2 / steps);
+          for (let r2 = 0; r2 < RING; r2++) {
+            const a = (2 * Math.PI * r2) / RING, ca = Math.cos(a), sa = Math.sin(a);
+            pts.push(px + tubeR * ca * nxx, py + tubeR * ca * nxy, tubeR * sa);
+            nrm.push(ca * nxx, ca * nxy, sa);
+          }
+        }
+      }
+    }
+  }
+  // Exact normalization: the pre-scale pass above only accounts for the
+  // centerline radius plus a flat tube allowance, but tube offsets are
+  // rarely radial at the point that achieves the centerline's max radius,
+  // so the true max |p| across all emitted points can land noticeably
+  // below 1. Measure it directly and rescale positions by 1/maxTrueR so
+  // max(|p|) === 1 exactly (unit bounding sphere including tube radius).
+  // Normals are unit directions already; uniform position scaling doesn't
+  // change them, so nrm is left untouched.
+  let maxTrueR = 0;
+  for (let i = 0; i < pts.length; i += 3)
+    maxTrueR = Math.max(maxTrueR, Math.hypot(pts[i], pts[i+1], pts[i+2]));
+  if (maxTrueR === 0) maxTrueR = 1;
+  const fix = 1 / maxTrueR;
+  for (let i = 0; i < pts.length; i++) pts[i] *= fix;
+  return { pts: new Float32Array(pts), nrm: new Float32Array(nrm), n: pts.length / 3 };
+}
+
+// Max projection scales guaranteeing no crop for a unit sphere at distance K2.
+// Worst case: point at nearest z (K2 - 1) with full lateral extent 1.
+// |proj| = k * 1 / (K2 - 1) must be <= half-extent - margin.
+function safeK(W, H, K2, margin, aspect) {
+  if (aspect === undefined) aspect = 0.6;
+  const kx = (W / 2 - margin) * (K2 - 1);
+  const ky = (H / 2 - margin) * (K2 - 1);
+  // Preserve char-cell aspect: k1y = aspect * k1x (cell ~1:1.667). Bind on both.
+  const k1x = Math.min(kx, ky / aspect);
+  return { k1x, k1y: aspect * k1x };
+}
+
+// One frame. Lambert floor: L <= 0 -> ramp[0] (never dropped).
+function renderFrame(pts, nrm, n, A, B, o) {
+  const { W, H, k1x, k1y, K2, ramp, buf, zb } = o;
+  const cA = Math.cos(A), sA = Math.sin(A), cB = Math.cos(B), sB = Math.sin(B);
+  const lx = 0, ly = 0.7071, lz = -0.7071, top = ramp.length - 1;
+  buf.fill(' '); zb.fill(0);
+  for (let i = 0; i < n; i++) {
+    const px = pts[i*3], py = pts[i*3+1], pz = pts[i*3+2];
+    const p1x = cA*px + sA*pz, p1z = -sA*px + cA*pz;
+    const p2y = cB*py - sB*p1z, p2z = sB*py + cB*p1z;
+    const z = p2z + K2; if (z < 0.5) continue;
+    const ooz = 1 / z;
+    const xp = (W >> 1) + Math.floor(k1x * ooz * p1x);
+    const yp = (H >> 1) - Math.floor(k1y * ooz * p2y);
+    if (xp < 0 || xp >= W || yp < 0 || yp >= H) continue;
+    const idx = yp * W + xp;
+    if (ooz <= zb[idx]) continue;
+    zb[idx] = ooz;
+    const nx = nrm[i*3], ny = nrm[i*3+1], nz = nrm[i*3+2];
+    const n1x = cA*nx + sA*nz, n1z = -sA*nx + cA*nz;
+    const n2y = cB*ny - sB*n1z, n2z = sB*ny + cB*n1z;
+    const L = n1x*lx + n2y*ly + n2z*lz;
+    let ci = L <= 0 ? 0 : (L * top) | 0;
+    if (ci > top) ci = top;
+    buf[idx] = ramp[ci];
+  }
+  const rows = [];
+  for (let j = 0; j < H; j++) {
+    let row = '';
+    for (let i = 0; i < W; i++) row += buf[j * W + i];
+    rows.push(row.replace(/ +$/, ''));
+  }
+  return rows.join('\n');
+}
+
+/* ── Config + state ────────────────────────────────────────────────────────── */
+const W = 96, H = 34, K2 = 5, B_TARGET = 0.22;
+const RAMPS = ['.,-~:;=!*#$@', '░▒▓█', '.:oO@', '.-+#'];
+const SIZE_MIN = 40, SIZE_MAX = 100, SIZE_STEP = 10;
+const THICK_MIN = 0.15, THICK_MAX = 0.40, THICK_STEP = 0.05;
+const SPEED_MIN = 1, SPEED_MAX = 6;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DEFAULTS = { text: 'Hello', fmt: 0, size: 80, thick: 0.25, speed: 3, spin: reduceMotion ? 1 : 0 };
+
+const $ = id => document.getElementById(id);
+const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
+const roundThick = t => Math.round(t / THICK_STEP) * THICK_STEP;
+
+function loadState() {
+  const s = _base.load('asciiverse:state', null);
+  const st = Object.assign({}, DEFAULTS);
+  if (s && typeof s === 'object') {
+    if (typeof s.text === 'string') st.text = s.text;
+    if (typeof s.fmt === 'number') st.fmt = clamp(s.fmt | 0, 0, RAMPS.length - 1);
+    if (typeof s.size === 'number') st.size = clamp(Math.round(s.size / SIZE_STEP) * SIZE_STEP, SIZE_MIN, SIZE_MAX);
+    if (typeof s.thick === 'number') st.thick = clamp(roundThick(s.thick), THICK_MIN, THICK_MAX);
+    if (typeof s.speed === 'number') st.speed = clamp(s.speed | 0, SPEED_MIN, SPEED_MAX);
+    if (s.spin === 0 || s.spin === 1) st.spin = s.spin;
+  }
+  return st;
+}
+const st = loadState();
+const saveState = () => _base.save('asciiverse:state', st);
+
+/* ── Element refs ─────────────────────────────────────────────────────────── */
+const viewer = $('viewer'), out = $('out'), txt = $('txt');
+const pasteBtn = $('pasteBtn'), copyBtn = $('copyBtn'), dlBtn = $('dlBtn'), resetBtn = $('resetBtn');
+const fmtRow = $('fmt'), spinRow = $('spin');
+const sizeVal = $('size-val'), thickVal = $('thick-val'), speedVal = $('speed-val');
+const dlA = document.createElement('a'); dlA.style.display = 'none'; document.body.appendChild(dlA);
+
+/* ── Font measurement + fit (exact, no CSS crop) ──────────────────────────── */
+const MONO = "700 100px ui-monospace,'SF Mono',Menlo,Monaco,Consolas,monospace";
+let measureCtx = null;
+function getMeasureCtx() {
+  if (measureCtx) return measureCtx;
+  try { measureCtx = new OffscreenCanvas(1, 1).getContext('2d'); return measureCtx; } catch (_) {}
+  const c = document.createElement('canvas'); c.width = 1; c.height = 1; measureCtx = c.getContext('2d'); return measureCtx;
+}
+let advanceEm = 0.6, safe = safeK(W, H, K2, 1, advanceEm);
+function measure() {
+  const ctx = getMeasureCtx();
+  ctx.font = MONO;
+  const adv = ctx.measureText('MMMMMMMMMM').width / 10;   // px per char at 100px
+  // advanceEm = physical cell width per 1px font-size; clamp to a sane mono
+  // range so a pathological fallback font can never break the no-crop envelope.
+  advanceEm = adv > 0 ? clamp(adv / 100, 0.4, 0.9) : 0.6;
+  safe = safeK(W, H, K2, 1, advanceEm);   // aspect from measured advance ratio
+  applySize();
+}
+function fit() {
+  const cw = viewer.clientWidth;
+  if (!cw) return;
+  const fs = Math.floor((cw / W) / advanceEm * 100) / 100;   // 96 cols fit exactly
+  out.style.setProperty('--fs', fs + 'px');
+}
+
+/* ── Geometry + render options ────────────────────────────────────────────── */
+const buf = new Array(W * H), zb = new Float32Array(W * H);
+const opts = { W, H, k1x: 0, k1y: 0, K2, ramp: RAMPS[st.fmt], buf, zb };
+let geo = null, renderText = 'Hello', lastFrame = '';
+function applySize() {
+  opts.k1x = safe.k1x * st.size / 100;
+  opts.k1y = safe.k1y * st.size / 100;
+}
+let geoRaf = 0;
+function rebuildNow() { geoRaf = 0; geo = buildGeometry(FONT, renderText, st.thick); wake(); }
+function scheduleRebuild() { if (!geoRaf) geoRaf = requestAnimationFrame(rebuildNow); }
+
+/* ── Physics + idle-stopping rAF loop (home DS constants) ─────────────────── */
+let A = 0, B = B_TARGET, Av = 0, Bv = 0;
+let spinSpeed = 0.001 * st.speed;
+let dragging = false, rafId = 0, dirty = true;
+let lastX = 0, lastY = 0, lastMoveTime = 0;
+
+function draw() { lastFrame = renderFrame(geo.pts, geo.nrm, geo.n, A, B, opts); out.textContent = lastFrame; }
+function frame() {
+  rafId = 0;
+  if (document.hidden) return;   // visibilitychange re-primes on return
+  if (!dragging) {
+    const tgt = st.spin === 0 ? -spinSpeed : 0;   // Auto idles toward spin; Off decays to rest
+    Av += (tgt - Av) * 0.025;
+    Bv += (B_TARGET - B) * 0.006;
+    Bv *= 0.94;
+    A += Av;
+    let nB = B + Bv;
+    if (nB > 1.4) { nB = 1.4; Bv = -Math.abs(Bv) * 0.55; }
+    if (nB < -1.4) { nB = -1.4; Bv = Math.abs(Bv) * 0.55; }
+    B = nB;
+  }
+  draw();
+  const active = dragging || st.spin === 0 || (Math.abs(Av) + Math.abs(Bv) >= 1e-4);
+  if (active || dirty) { dirty = false; schedule(); }
+}
+function schedule() { if (!rafId) rafId = requestAnimationFrame(frame); }
+function wake() { dirty = true; schedule(); }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+
+out.addEventListener('pointerdown', e => {
+  dragging = true;
+  lastX = e.clientX; lastY = e.clientY; lastMoveTime = performance.now();
+  Av = 0; Bv = 0;
+  out.classList.add('grabbing');
+  try { out.setPointerCapture(e.pointerId); } catch (_) {}
+  wake();
+});
+out.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const now = performance.now();
+  const dt = Math.max(8, now - lastMoveTime);
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  const sens = 0.01;
+  A -= dx * sens;
+  let nB = B - dy * sens;
+  if (nB > 1.4) nB = 1.4; if (nB < -1.4) nB = -1.4; B = nB;
+  Av = -(dx * sens) * (16 / dt);
+  Bv = -(dy * sens) * (16 / dt);
+  lastX = e.clientX; lastY = e.clientY; lastMoveTime = now;
+  wake();
+});
+function endDrag() { if (!dragging) return; dragging = false; out.classList.remove('grabbing'); wake(); }
+out.addEventListener('pointerup', endDrag);
+out.addEventListener('pointercancel', endDrag);
+
+/* ── Text input (filter, truncate, geometry rebuild) ──────────────────────── */
+let warnUnsupported = false, warnTrunc = false, warnTimer = 0;
+function armWarnReset() { clearTimeout(warnTimer); warnTimer = setTimeout(() => { warnUnsupported = false; warnTrunc = false; }, 1200); }
+function updateRenderText() {
+  let t = st.text;
+  if (t.length > 16) {
+    t = t.slice(0, 16);
+    if (!warnTrunc) { _base.notify('Showing First 16 Characters', 'warn'); warnTrunc = true; }
+  }
+  t = t.trim();
+  if (!t) t = 'Hello';
+  if (t !== renderText) { renderText = t; scheduleRebuild(); }
+}
+function grow() {
+  txt.style.height = 'auto';
+  txt.style.height = Math.min(txt.scrollHeight, 140) + 'px';
+  txt.classList.toggle('scroll', txt.scrollHeight > 140);
+}
+function onInput() {
+  const raw = txt.value;
+  const filtered = raw.replace(/[^\x20-\x7E]/g, '');
+  if (filtered !== raw) {
+    if (!warnUnsupported) { _base.notify('Unsupported Characters Removed', 'warn'); warnUnsupported = true; }
+    txt.value = filtered;
+  }
+  armWarnReset();
+  st.text = filtered; saveState();
+  updateRenderText();
+  grow();
+}
+txt.addEventListener('input', onInput);
+
+function insertText(str) {
+  if (str == null) return;
+  const s = txt.selectionStart, e = txt.selectionEnd;
+  txt.value = txt.value.slice(0, s) + str + txt.value.slice(e);
+  const pos = s + str.length;
+  try { txt.setSelectionRange(pos, pos); } catch (_) {}
+  onInput();
+}
+document.addEventListener('paste', e => {
+  const cd = e.clipboardData; if (!cd) return;
+  e.preventDefault();
+  insertText(cd.getData('text'));
+});
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+function doPaste() {
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    navigator.clipboard.readText().then(t => {
+      txt.focus(); insertText(t); _base.feedback(pasteBtn, 'ps-fb', 'Pasted');
+    }).catch(() => _base.notify('Clipboard Not Available', false));
+  } else _base.notify('Clipboard Not Available', false);
+}
+function doCopy() { _base.copyText(lastFrame, () => _base.feedback(copyBtn, 'ok', 'Copied'), () => _base.notify('Copy Failed', false)); }
+function doDownload() {
+  const blob = new Blob([lastFrame], { type: 'text/plain' });
+  const u = URL.createObjectURL(blob);
+  dlA.download = 'asciiverse.txt'; dlA.href = u; dlA.click();
+  setTimeout(() => URL.revokeObjectURL(u), 1e4);
+  _base.feedback(dlBtn, 'dl-fb', 'Downloaded');
+}
+pasteBtn.addEventListener('click', doPaste);
+copyBtn.addEventListener('click', doCopy);
+dlBtn.addEventListener('click', doDownload);
+
+function isDefault() {
+  return st.text === DEFAULTS.text && st.fmt === DEFAULTS.fmt && st.size === DEFAULTS.size &&
+    st.thick === DEFAULTS.thick && st.speed === DEFAULTS.speed && st.spin === DEFAULTS.spin;
+}
+const resetCtrl = _base.twoPress(resetBtn, {
+  text: 'Reset',
+  guard: () => !isDefault(),
+  onConfirm: () => {
+    Object.assign(st, DEFAULTS);
+    txt.value = st.text;
+    spinSpeed = 0.001 * st.speed;
+    opts.ramp = RAMPS[st.fmt];
+    applySize();
+    syncControls();
+    A = 0; B = B_TARGET; Av = 0; Bv = 0;
+    updateRenderText();
+    scheduleRebuild();   // thickness may have changed even when text did not
+    grow();
+    saveState();
+    wake();
+  }
+});
+resetBtn.addEventListener('click', e => { e.preventDefault(); resetCtrl.press(); });
+
+/* ── Segmented controls (Format, Spin) ────────────────────────────────────── */
+function syncSeg(row, idx) {
+  const btns = row.querySelectorAll('.seg');
+  btns.forEach((b, i) => { b.classList.toggle('active', i === idx); b.setAttribute('aria-checked', i === idx ? 'true' : 'false'); });
+}
+function setFmt(i) { st.fmt = i; opts.ramp = RAMPS[i]; syncSeg(fmtRow, i); saveState(); wake(); }
+function setSpin(i) { st.spin = i; syncSeg(spinRow, i); saveState(); wake(); }
+fmtRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setFmt([...fmtRow.children].indexOf(b)); });
+spinRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setSpin([...spinRow.children].indexOf(b)); });
+
+/* ── Steppers (Size, Thickness, Speed) + tap-label-to-reset ───────────────── */
+const RESET_IC = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
+function updateSize() { sizeVal.textContent = 'Size: ' + st.size + '%'; $('size-dec').disabled = st.size <= SIZE_MIN; $('size-inc').disabled = st.size >= SIZE_MAX; }
+function updateThick() { thickVal.textContent = 'Thickness: ' + st.thick.toFixed(2); $('thick-dec').disabled = st.thick <= THICK_MIN + 1e-9; $('thick-inc').disabled = st.thick >= THICK_MAX - 1e-9; }
+function updateSpeed() { speedVal.textContent = 'Speed: ' + st.speed; $('speed-dec').disabled = st.speed <= SPEED_MIN; $('speed-inc').disabled = st.speed >= SPEED_MAX; }
+function setSize(v) { v = clamp(v, SIZE_MIN, SIZE_MAX); if (v === st.size) return; st.size = v; applySize(); updateSize(); saveState(); wake(); }
+function setThick(v) { v = clamp(roundThick(v), THICK_MIN, THICK_MAX); if (Math.abs(v - st.thick) < 1e-9) return; st.thick = v; updateThick(); saveState(); scheduleRebuild(); }
+function setSpeed(v) { v = clamp(v, SPEED_MIN, SPEED_MAX); if (v === st.speed) return; st.speed = v; spinSpeed = 0.001 * v; updateSpeed(); saveState(); wake(); }
+$('size-dec').addEventListener('click', () => setSize(st.size - SIZE_STEP));
+$('size-inc').addEventListener('click', () => setSize(st.size + SIZE_STEP));
+$('thick-dec').addEventListener('click', () => setThick(st.thick - THICK_STEP));
+$('thick-inc').addEventListener('click', () => setThick(st.thick + THICK_STEP));
+$('speed-dec').addEventListener('click', () => setSpeed(st.speed - 1));
+$('speed-inc').addEventListener('click', () => setSpeed(st.speed + 1));
+
+const groups = [
+  { row: $('sr-size'), reset: () => setSize(DEFAULTS.size) },
+  { row: $('sr-thick'), reset: () => setThick(DEFAULTS.thick) },
+  { row: $('sr-speed'), reset: () => setSpeed(DEFAULTS.speed) }
+];
+function animateReset(g) {
+  const lbl = g.row.querySelector('.slbl'), ic = lbl.querySelector('svg'), orig = ic.outerHTML;
+  ic.outerHTML = RESET_IC;
+  g.row.classList.remove('rs-fb'); void g.row.offsetWidth; g.row.classList.add('rs-fb');
+  clearTimeout(g._ft);
+  g._ft = setTimeout(() => { g.row.classList.remove('rs-fb'); lbl.querySelector('svg').outerHTML = orig; }, 600);
+}
+groups.forEach(g => g.row.addEventListener('click', e => { if (!e.target.closest('button')) { g.reset(); animateReset(g); } }));
+
+/* ── Keyboard ─────────────────────────────────────────────────────────────── */
+_base.onKey({
+  c: doCopy,
+  v: doPaste,
+  p: doPaste,
+  r: () => resetCtrl.press(),
+  s: () => setSpin(st.spin === 0 ? 1 : 0),
+  f: () => setFmt((st.fmt + 1) % RAMPS.length),
+  '=': () => setSize(st.size + SIZE_STEP),
+  '+': () => setSize(st.size + SIZE_STEP),
+  '-': () => setSize(st.size - SIZE_STEP),
+  '[': () => setThick(st.thick - THICK_STEP),
+  ']': () => setThick(st.thick + THICK_STEP),
+  ';': () => setSpeed(st.speed - 1),
+  "'": () => setSpeed(st.speed + 1),
+  ctrl: {
+    c: e => { if (!getSelection().toString()) { e.preventDefault(); doCopy(); } },
+    s: e => { e.preventDefault(); doDownload(); }
+  }
+});
+
+/* ── Control sync + init ──────────────────────────────────────────────────── */
+function syncControls() {
+  syncSeg(fmtRow, st.fmt);
+  syncSeg(spinRow, st.spin);
+  updateSize(); updateThick(); updateSpeed();
+}
+
+txt.value = st.text;
+measure();
+fit();
+syncControls();
+grow();
+updateRenderText();               // sets renderText; schedules first geometry build
+geo = buildGeometry(FONT, renderText, st.thick);   // build synchronously for first frame
+if (geoRaf) { cancelAnimationFrame(geoRaf); geoRaf = 0; }
+draw();
+schedule();
+
+let resizeRaf = 0;
+new ResizeObserver(() => {
+  if (resizeRaf) return;
+  resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; fit(); wake(); });
+}).observe(viewer);
+})();
+</script>
+</body>
+</html>
