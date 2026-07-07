@@ -111,8 +111,9 @@ function buildGeometry(FONT, text, thickness) {
       for (let i = 0; i < st.length; i += 2)
         maxR = Math.max(maxR, Math.hypot(gx + st[i] - cx, st[i+1] - cy));
   if (maxR === 0) maxR = 1;
-  const tubeR = thickness;                 // thickness given in world units
-  const scale = (1 - tubeR) / maxR;        // centerline fits in radius 1 - tubeR
+  const rG = thickness * 8;              // tube radius in glyph units (cap height = 21)
+  const scale = 1 / (maxR + rG);         // centerline extent + tube fits the unit sphere
+  const tubeR = rG * scale;
   // Sampling density: adjacent samples < ~0.75 projected cells apart at the
   // nearest z (K2 - 1) under the max safe projection (see safeK). Computed
   // for the caller-agnostic worst case: k1x_max ~ (H/2-1)*(K2-1... ) -- keep
