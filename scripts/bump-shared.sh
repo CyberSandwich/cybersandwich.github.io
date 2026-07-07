@@ -35,7 +35,7 @@ cd "${0:A:h}/.."
 B='\033[1m' D='\033[2m' G='\033[32m' Y='\033[33m'
 R='\033[31m' C='\033[36m' Z='\033[0m'
 ok()   { printf "${G}[ok]${Z}    %b\n" "$*"; }
-warn() { printf "${Y}[warn]${Z}  %b\n" "$*"; }
+warn() { printf "${Y}[warn]${Z}  %b\n" "$*" >&2; }
 err()  { printf "${R}[err]${Z}   %b\n" "$*" >&2; }
 info() { printf "${C}[info]${Z}  %b\n" "$*"; }
 dim()  { printf "${D}%s${Z}\n" "$*"; }
@@ -79,7 +79,7 @@ count_files() {
   local targets=("$@")
   local c=0
   for t in "${targets[@]}"; do
-    grep -q "${file}?v=${ver}" "$t" 2>/dev/null && (( c++ ))
+    grep -q "${file}?v=${ver}" "$t" 2>/dev/null && c=$((c + 1))
   done
   echo "$c"
 }
@@ -91,7 +91,7 @@ count_refs() {
   local c=0
   for t in "${targets[@]}"; do
     local n=$(grep -c "${file}?v=${ver}" "$t" 2>/dev/null || true)
-    (( c += n ))
+    c=$((c + n))
   done
   echo "$c"
 }
@@ -116,7 +116,7 @@ bump() {
   fi
 
   for t in "${targets[@]}"; do
-    sed -i '' "s|${file}?v=${cur}|${file}?v=${new}|g" "$t" 2>/dev/null || true
+    sed -i '' "s|${file}?v=[0-9]*|${file}?v=${new}|g" "$t" 2>/dev/null || true
   done
 
   local updated=$(count_files "$file" "$new" "${targets[@]}")

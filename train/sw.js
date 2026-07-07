@@ -4,14 +4,14 @@
    precache stays warm. The fetch handler is version-agnostic; it caches any
    /train/ or /shared/ GET it sees. */
 'use strict';
-const CACHE='train-v2';
+const CACHE='train-v3';
 const SHELL=[
   '/train/',
   '/train/index.html',
   '/train/stations.json',
   '/shared/base.css?v=27',
   '/shared/base.js?v=25',
-  '/shared/swr.js?v=2',
+  '/shared/swr.js?v=3',
   '/shared/search.js?v=20',
   '/shared/dateparser.js?v=10',
   '/favicon.png'
