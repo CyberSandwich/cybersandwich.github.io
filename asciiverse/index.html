@@ -67,7 +67,7 @@
       <button class="step-btn" id="speed-inc" aria-label="Increase Speed"><svg aria-hidden="true" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     </div>
   </div>
-  <div class="seg-row c2" id="spin" role="radiogroup" aria-label="Spin"><button class="seg active" role="radio" aria-checked="true">Auto</button><button class="seg" role="radio" aria-checked="false">Off</button></div>
+  <div class="seg-row c2" id="spin" role="radiogroup" aria-label="Spin"><button class="seg active" role="radio" aria-checked="true">Spin</button><button class="seg" role="radio" aria-checked="false">Face On</button></div>
 </div>
 </div>
 <nav aria-label="Primary">
@@ -289,18 +289,28 @@ function frame() {
   rafId = 0;
   if (document.hidden) return;   // visibilitychange re-primes on return
   if (!dragging) {
-    const tgt = st.spin === 0 ? -spinSpeed : 0;   // Auto idles toward spin; Off decays to rest
-    Av += (tgt - Av) * 0.025;
-    Bv += (B_TARGET - B) * 0.006;
-    Bv *= 0.94;
-    A += Av;
-    let nB = B + Bv;
-    if (nB > 1.4) { nB = 1.4; Bv = -Math.abs(Bv) * 0.55; }
-    if (nB < -1.4) { nB = -1.4; Bv = Math.abs(Bv) * 0.55; }
-    B = nB;
+    if (st.spin === 0) {
+      const tgt = -spinSpeed;
+      Av += (tgt - Av) * 0.025;
+      Bv += (B_TARGET - B) * 0.006;
+      Bv *= 0.94;
+      A += Av;
+      let nB = B + Bv;
+      if (nB > 1.4) { nB = 1.4; Bv = -Math.abs(Bv) * 0.55; }
+      if (nB < -1.4) { nB = -1.4; Bv = Math.abs(Bv) * 0.55; }
+      B = nB;
+    } else {
+      A = Math.atan2(Math.sin(A), Math.cos(A));
+      A += (0 - A) * 0.08;
+      B += (0 - B) * 0.08;
+      Av *= 0.8; Bv *= 0.8;
+    }
   }
+  const faceOnSettled = st.spin === 1 && Math.abs(Av) + Math.abs(Bv) < 1e-4 &&
+    Math.abs(Math.atan2(Math.sin(A), Math.cos(A))) < 0.001 && Math.abs(B) < 0.001;
+  if (faceOnSettled) { A = 0; B = 0; }
   draw();
-  const active = dragging || st.spin === 0 || (Math.abs(Av) + Math.abs(Bv) >= 1e-4);
+  const active = dragging || st.spin === 0 || !faceOnSettled;
   if (active || dirty) { dirty = false; schedule(); }
 }
 function schedule() { if (!rafId) rafId = requestAnimationFrame(frame); }
