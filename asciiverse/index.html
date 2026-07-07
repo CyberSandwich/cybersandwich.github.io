@@ -27,6 +27,7 @@
 .in textarea.scroll{overflow-y:auto}
 .in textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(72,72,74,.08)}
 .slbl span{cursor:pointer}
+.chips{display:flex;gap:8px}
 </style>
 </head>
 <body>
@@ -39,12 +40,20 @@
   <button id="dlBtn" data-l="Download"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg><span>Download</span></button>
   <button id="resetBtn" data-l="Reset"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset</span></button>
 </div></div>
-<div class="card"><div class="seg-row c4" id="fmt" role="radiogroup" aria-label="Character Set">
-  <button class="seg active" role="radio" aria-checked="true">Classic</button>
-  <button class="seg" role="radio" aria-checked="false">Blocks</button>
-  <button class="seg" role="radio" aria-checked="false">Dots</button>
-  <button class="seg" role="radio" aria-checked="false">Minimal</button>
-</div></div>
+<div class="card">
+  <div class="srow" id="sr-copyas">
+    <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy As</span></label>
+    <div class="chips" id="copyAs" role="radiogroup" aria-label="Copy As">
+      <button class="chip active" role="radio" aria-checked="true">Text</button>
+      <button class="chip" role="radio" aria-checked="false">Code</button>
+    </div>
+  </div>
+  <div class="seg-row" id="fmt" role="radiogroup" aria-label="Character Set">
+    <button class="seg active" role="radio" aria-checked="true">Classic</button>
+    <button class="seg" role="radio" aria-checked="false">Blocks</button>
+    <button class="seg" role="radio" aria-checked="false">Dots</button>
+  </div>
+</div>
 <div class="card">
   <div class="srow" id="sr-size">
     <label class="slbl"><svg aria-hidden="true" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg><span id="size-val">Size: 100%</span></label>
@@ -208,12 +217,12 @@ function renderFrame(pts, nrm, n, A, B, o) {
 /* ── Config + state ────────────────────────────────────────────────────────── */
 let W = 96, H = 34;                // adaptive grid; applyGrid() sizes it from renderText
 const K2 = 5, B_TARGET = 0.22;
-const RAMPS = ['.,-~:;=!*#$@', '░▒▓█', '.:oO@', '.-+#'];
+const RAMPS = ['.,-~:;=!*#$@', '░▒▓█', '.:oO@'];
 const SIZE_MIN = 40, SIZE_MAX = 100, SIZE_STEP = 10;
 const THICK_MIN = 0.15, THICK_MAX = 0.40, THICK_STEP = 0.05;
 const SPEED_MIN = 1, SPEED_MAX = 6;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const DEFAULTS = { text: 'Hello', fmt: 0, size: 100, thick: 0.25, speed: 3, spin: reduceMotion ? 1 : 0 };
+const DEFAULTS = { text: 'Hello', fmt: 0, size: 100, thick: 0.25, speed: 3, spin: reduceMotion ? 1 : 0, copyAs: 0 };
 
 const $ = id => document.getElementById(id);
 const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
@@ -229,6 +238,7 @@ function loadState() {
     if (typeof s.thick === 'number') st.thick = clamp(roundThick(s.thick), THICK_MIN, THICK_MAX);
     if (typeof s.speed === 'number') st.speed = clamp(s.speed | 0, SPEED_MIN, SPEED_MAX);
     if (s.spin === 0 || s.spin === 1) st.spin = s.spin;
+    if (s.copyAs === 0 || s.copyAs === 1) st.copyAs = s.copyAs;
   }
   return st;
 }
@@ -238,7 +248,7 @@ const saveState = () => _base.save('asciiverse:state', st);
 /* ── Element refs ─────────────────────────────────────────────────────────── */
 const viewer = $('viewer'), out = $('out'), txt = $('txt');
 const pasteBtn = $('pasteBtn'), copyBtn = $('copyBtn'), dlBtn = $('dlBtn'), resetBtn = $('resetBtn');
-const fmtRow = $('fmt'), spinRow = $('spin');
+const fmtRow = $('fmt'), spinRow = $('spin'), copyAsRow = $('copyAs');
 const sizeVal = $('size-val'), thickVal = $('thick-val'), speedVal = $('speed-val');
 const dlA = document.createElement('a'); dlA.style.display = 'none'; document.body.appendChild(dlA);
 
@@ -409,6 +419,20 @@ document.addEventListener('paste', e => {
 });
 
 /* ── Actions ──────────────────────────────────────────────────────────────── */
+// Drop leading/trailing all-blank lines, then strip the common leading-space
+// count from every remaining line (interior blank lines stay empty). Trailing
+// spaces are already stripped by renderFrame.
+function crop(frame) {
+  const lines = frame.split('\n');
+  let start = 0, end = lines.length - 1;
+  while (start <= end && lines[start] === '') start++;
+  while (end >= start && lines[end] === '') end--;
+  const kept = lines.slice(start, end + 1);
+  let indent = Infinity;
+  for (const line of kept) if (line !== '') indent = Math.min(indent, line.length - line.trimStart().length);
+  if (!isFinite(indent)) indent = 0;
+  return kept.map(line => line === '' ? '' : line.slice(indent)).join('\n');
+}
 function doPaste() {
   if (navigator.clipboard && navigator.clipboard.readText) {
     navigator.clipboard.readText().then(t => {
@@ -417,9 +441,13 @@ function doPaste() {
     }).catch(() => _base.notify('Clipboard Not Available', false));
   } else _base.notify('Clipboard Not Available', false);
 }
-function doCopy() { _base.copyText(lastFrame, () => _base.feedback(copyBtn, 'ok', 'Copied'), () => _base.notify('Copy Failed', false)); }
+function doCopy() {
+  const cropped = crop(lastFrame);
+  const text = st.copyAs === 1 ? '<pre style="font-family:monospace;line-height:1;letter-spacing:0">\n' + cropped + '\n</pre>' : cropped;
+  _base.copyText(text, () => _base.feedback(copyBtn, 'ok', 'Copied'), () => _base.notify('Copy Failed', false));
+}
 function doDownload() {
-  const blob = new Blob([lastFrame], { type: 'text/plain' });
+  const blob = new Blob([crop(lastFrame)], { type: 'text/plain' });
   const u = URL.createObjectURL(blob);
   dlA.download = 'asciiverse.txt'; dlA.href = u; dlA.click();
   setTimeout(() => URL.revokeObjectURL(u), 1e4);
@@ -431,7 +459,8 @@ dlBtn.addEventListener('click', doDownload);
 
 function isDefault() {
   return st.text === DEFAULTS.text && st.fmt === DEFAULTS.fmt && st.size === DEFAULTS.size &&
-    st.thick === DEFAULTS.thick && st.speed === DEFAULTS.speed && st.spin === DEFAULTS.spin;
+    st.thick === DEFAULTS.thick && st.speed === DEFAULTS.speed && st.spin === DEFAULTS.spin &&
+    st.copyAs === DEFAULTS.copyAs;
 }
 const resetCtrl = _base.twoPress(resetBtn, {
   text: 'Reset',
@@ -453,15 +482,17 @@ const resetCtrl = _base.twoPress(resetBtn, {
 });
 resetBtn.addEventListener('click', e => { e.preventDefault(); resetCtrl.press(); });
 
-/* ── Segmented controls (Format, Spin) ────────────────────────────────────── */
-function syncSeg(row, idx) {
-  const btns = row.querySelectorAll('.seg');
+/* ── Segmented controls (Format, Spin, Copy As) ───────────────────────────── */
+function syncSeg(row, idx, sel = '.seg') {
+  const btns = row.querySelectorAll(sel);
   btns.forEach((b, i) => { b.classList.toggle('active', i === idx); b.setAttribute('aria-checked', i === idx ? 'true' : 'false'); });
 }
 function setFmt(i) { st.fmt = i; opts.ramp = RAMPS[i]; syncSeg(fmtRow, i); saveState(); wake(); }
 function setSpin(i) { st.spin = i; syncSeg(spinRow, i); saveState(); wake(); }
+function setCopyAs(i) { st.copyAs = i; syncSeg(copyAsRow, i, '.chip'); saveState(); }
 fmtRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setFmt([...fmtRow.children].indexOf(b)); });
 spinRow.addEventListener('click', e => { const b = e.target.closest('.seg'); if (b) setSpin([...spinRow.children].indexOf(b)); });
+copyAsRow.addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) setCopyAs([...copyAsRow.children].indexOf(b)); });
 
 /* ── Steppers (Size, Thickness, Speed) + tap-label-to-reset ───────────────── */
 const RESET_IC = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg>';
@@ -517,6 +548,7 @@ _base.onKey({
 function syncControls() {
   syncSeg(fmtRow, st.fmt);
   syncSeg(spinRow, st.spin);
+  syncSeg(copyAsRow, st.copyAs, '.chip');
   updateSize(); updateThick(); updateSpeed();
 }
 
