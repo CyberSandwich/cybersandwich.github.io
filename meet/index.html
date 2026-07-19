@@ -21,12 +21,23 @@
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
 @media(min-width:768px){.w{max-width:640px;padding:32px 48px calc(100px + env(safe-area-inset-bottom,0px))}}
+@media(min-width:1024px){
+  .w{max-width:960px}
+  #v-create,#v-error{max-width:544px;margin:0 auto}
+  #v-event.active{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;align-items:start;grid-auto-flow:row dense}
+  #v-event>*{grid-column:1/-1;min-width:0}
+  #v-event>#e-id,#v-event>#e-bt-card{grid-column:1}
+  #v-event>#e-tools,#v-event>#e-pp-card{grid-column:2}
+  .mg{--cw:clamp(52px,calc((min(100vw,960px) - 200px)/var(--cols)),140px)}
+  .mg.many{--cw:64px}
+}
 
 :root{
   --mt-line:#F0F0F0;--mt-line-strong:#E2E2E2;
+  --mt-stripe:rgba(0,0,0,.02);
   --mt-heat:42,157,143;
   --mt-av:#34D399;--mt-av-f:rgba(52,211,153,.34);
-  --mt-bs:#F87171;--mt-bs-f:rgba(248,113,113,.30);
+  --mt-bs:#F87171;--mt-bs-f:rgba(248,113,113,.30);--mt-bs-w:rgba(248,113,113,.10);
   --mt-av-seg:#DCFCE7;--mt-av-seg-c:#16A34A;
   --mt-bs-seg:#FEE2E2;--mt-bs-seg-c:#C41E3A;
   --mt-win:#2A9D8F;--mt-win-f:rgba(42,157,143,.16);
@@ -35,9 +46,10 @@ body{display:flex;align-items:flex-start;justify-content:center}
 }
 html[data-theme="dark"]{
   --mt-line:#333336;--mt-line-strong:#48484A;
+  --mt-stripe:rgba(255,255,255,.02);
   --mt-heat:94,196,182;
   --mt-av:#34D399;--mt-av-f:rgba(52,211,153,.34);
-  --mt-bs:#F87171;--mt-bs-f:rgba(248,113,113,.30);
+  --mt-bs:#F87171;--mt-bs-f:rgba(248,113,113,.30);--mt-bs-w:rgba(248,113,113,.13);
   --mt-av-seg:#1A3A2A;--mt-av-seg-c:#34D399;
   --mt-bs-seg:#3A2020;--mt-bs-seg-c:#F87171;
   --mt-win:#5EC4B6;--mt-win-f:rgba(94,196,182,.18);
@@ -46,9 +58,10 @@ html[data-theme="dark"]{
 }
 html[data-theme="sepia"]{
   --mt-line:#E8E0CE;--mt-line-strong:#DDD4C0;
+  --mt-stripe:rgba(91,70,54,.03);
   --mt-heat:166,123,91;
-  --mt-av:#5C7037;--mt-av-f:rgba(92,112,55,.28);
-  --mt-bs:#A6552B;--mt-bs-f:rgba(166,85,43,.26);
+  --mt-av:#7A9B5C;--mt-av-f:rgba(160,190,130,.32);
+  --mt-bs:#BC6A4F;--mt-bs-f:rgba(210,140,110,.28);--mt-bs-w:rgba(188,106,79,.12);
   --mt-av-seg:#D5E0C8;--mt-av-seg-c:#3F6212;
   --mt-bs-seg:#E8D5C8;--mt-bs-seg-c:#9A3412;
   --mt-win:#A67B5B;--mt-win-f:rgba(166,123,91,.16);
@@ -73,6 +86,7 @@ html[data-theme="sepia"]{
 .cal-nav svg{width:18px;height:18px}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
 .cal-dow{text-align:center;font:600 .6875rem/1 var(--font);color:var(--t4);padding:6px 0;user-select:none}
+.cal-dow.we{color:var(--t2)}
 .cal-d{height:38px;display:flex;align-items:center;justify-content:center;font:500 .875rem/1 var(--font);color:var(--t2);border-radius:10px;cursor:pointer;position:relative;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-x pan-y}
 .cal-d.out{opacity:0;pointer-events:none}
 .cal-d.off{color:var(--t4);opacity:.35;pointer-events:none}
@@ -149,6 +163,9 @@ html[data-theme="sepia"] .hero .links>button{border-bottom-color:rgba(91,70,54,.
 .mt-l i{font-style:normal;font-size:.5625rem;color:var(--t4);vertical-align:super;margin-left:1px}
 .mc{border-bottom:1px solid var(--mt-line);border-right:1px solid var(--mt-line);touch-action:pan-x pan-y;background-clip:padding-box}
 .mc.hb{border-bottom-color:var(--mt-line-strong)}
+.mc.oh{background-color:var(--mt-stripe)}
+.mt-l.oh{background-image:linear-gradient(var(--mt-stripe),var(--mt-stripe))}
+.mh.we{background:var(--bg2)}
 .mc.h1{background-color:rgba(var(--mt-heat),.14)}
 .mc.h2{background-color:rgba(var(--mt-heat),.23)}
 .mc.h3{background-color:rgba(var(--mt-heat),.33)}
@@ -158,10 +175,9 @@ html[data-theme="sepia"] .hero .links>button{border-bottom-color:rgba(91,70,54,.
 .mc.h7{background-color:rgba(var(--mt-heat),.71)}
 .mc.h8{background-color:rgba(var(--mt-heat),.8)}
 .mc.me-a{background-image:linear-gradient(var(--mt-av-f),var(--mt-av-f));box-shadow:inset 0 0 0 2px var(--mt-av)}
-.mc.me-b{background-image:linear-gradient(var(--mt-bs-f),var(--mt-bs-f));box-shadow:inset 0 0 0 2px var(--mt-bs)}
+.mc.me-b{background-image:linear-gradient(var(--mt-bs-w),var(--mt-bs-w))}
 .mc.pv{outline:2px dashed var(--mt-av);outline-offset:-2px;z-index:1}
 .mc.pv.pv-b{outline-color:var(--mt-bs)}
-.mc.pv.pv-e{outline-color:var(--t3)}
 .mc.win{box-shadow:inset 0 0 0 2px var(--mt-win);background-image:linear-gradient(var(--mt-win-f),var(--mt-win-f))}
 .mc.kc{outline:2px solid var(--mt-kc);outline-offset:-2px;z-index:1}
 .mc.fl{animation:mcfl .6s ease}
@@ -1024,7 +1040,7 @@ function buildGrid(){
   const axis=gridP.uniform?cols[0]:null;
   let html='<div class="mh mh0"></div>';
   cols.forEach((c,di)=>{
-    html+='<div class="mh" data-d="'+di+'"><b>'+DOWS[c.dow]+'</b>'+(gridP.noDates?'':'<span>'+c.d+' '+MONS[c.mo-1]+'</span>')+'</div>';
+    html+='<div class="mh'+(c.dow>=5?' we':'')+'" data-d="'+di+'"><b>'+DOWS[c.dow]+'</b>'+(gridP.noDates?'':'<span>'+c.d+' '+MONS[c.mo-1]+'</span>')+'</div>';
   });
   for(let s=0;s<S;s++){
     const evMin=ev.startUnit*15+s*ev.gran;
@@ -1033,9 +1049,11 @@ function buildGrid(){
       const m=axis?axis.labelMin[s]:evMin;
       lbl=fmtMin(m)+(axis&&axis.dayShift[s]?'<i>'+(axis.dayShift[s]>0?'+1':'-1')+'</i>':'');
     }
-    html+='<div class="mt-l">'+lbl+'</div>';
+    /* ThymeZone rhythm: odd hours carry a faint stripe band */
+    const oh=Math.floor(evMin/60)%2?' oh':'';
+    html+='<div class="mt-l'+oh+'">'+lbl+'</div>';
     const hb=(evMin+ev.gran)%60===0?' hb':'';
-    for(let d=0;d<D;d++)html+='<div class="mc'+hb+'" data-i="'+(d*S+s)+'"></div>';
+    for(let d=0;d<D;d++)html+='<div class="mc'+hb+oh+'" data-i="'+(d*S+s)+'"></div>';
   }
   mg.innerHTML=html;
   hideDcm();
@@ -1076,9 +1094,7 @@ function updateCells(){
       cellEls[i].className=baseCls[i]+cls;
       if(pvMap.has(i)){
         cellEls[i].classList.add('pv');
-        const c=pvMap.get(i);
-        if(c==='b')cellEls[i].classList.add('pv-b');
-        else if(c==='e')cellEls[i].classList.add('pv-e');
+        if(pvMap.get(i)==='b')cellEls[i].classList.add('pv-b');
       }
     }
   }
@@ -1115,13 +1131,12 @@ const clampY=y=>Math.min(Math.max(y,geo.rect.top+geo.hh+1),geo.rect.bottom-1);
 let pvMap=new Map();
 function pvApply(next){
   for(const[i,c]of pvMap)
-    if(next.get(i)!==c)cellEls[i].classList.remove('pv','pv-b','pv-e');
+    if(next.get(i)!==c)cellEls[i].classList.remove('pv','pv-b');
   for(const[i,c]of next){
     if(pvMap.get(i)===c)continue;
     const el=cellEls[i];
     el.classList.add('pv');
     if(c==='b')el.classList.add('pv-b');
-    else if(c==='e')el.classList.add('pv-e');
   }
   pvMap=next;
 }
@@ -1780,7 +1795,7 @@ function calRender(){
   const dim=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
   const today=todayNum();
   let html='';
-  for(const d of DOWS)html+='<div class="cal-dow">'+d[0]+'</div>';
+  DOWS.forEach((d,i)=>{html+='<div class="cal-dow'+(i>=5?' we':'')+'">'+d[0]+'</div>'});
   for(let i=0;i<first;i++)html+='<div class="cal-d out"></div>';
   for(let d=1;d<=dim;d++){
     const dn=tzmod.ymdToDay(base.getFullYear(),base.getMonth()+1,d);
