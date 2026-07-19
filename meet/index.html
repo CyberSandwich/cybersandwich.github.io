@@ -1010,13 +1010,14 @@ function buildGrid(){
   });
   for(let s=0;s<S;s++){
     const evMin=ev.startUnit*15+s*ev.gran;
+    /* Labels and the stripe band read the SAME axis, so bands track the
+       printed hours in viewer view (incl. half-hour-offset timezones) */
+    const lm=axis?axis.labelMin[s]:evMin;
     let lbl='';
-    if(evMin%60===0){
-      const m=axis?axis.labelMin[s]:evMin;
-      lbl=fmtMin(m)+(axis&&axis.dayShift[s]?'<i>'+(axis.dayShift[s]>0?'+1':'-1')+'</i>':'');
-    }
+    if(evMin%60===0)
+      lbl=fmtMin(lm)+(axis&&axis.dayShift[s]?'<i>'+(axis.dayShift[s]>0?'+1':'-1')+'</i>':'');
     /* ThymeZone rhythm: odd hours carry a faint stripe band */
-    const oh=Math.floor(evMin/60)%2?' oh':'';
+    const oh=Math.floor(lm/60)%2?' oh':'';
     html+='<div class="mt-l'+oh+'">'+lbl+'</div>';
     const hb=(evMin+ev.gran)%60===0?' hb':'';
     for(let d=0;d<D;d++)html+='<div class="mc'+hb+oh+'" data-i="'+(d*S+s)+'"></div>';
@@ -1333,7 +1334,8 @@ function renderHero(){
 function axisMinAt(d,s){return gridP.uniform?gridP.cols[d].labelMin[s]:ev.startUnit*15+s*ev.gran}
 function renderBest(){
   const card=$('e-bt-card');
-  const list=ev.parts.length>=2?model.bestTimes(ev,3,hiddenIdx()):[];
+  const hid=hiddenIdx(),visible=ev.parts.length-hid.size;
+  const list=ev.parts.length>=2?model.bestTimes(ev,3,hid):[];
   if(!list.length){card.style.display='none';return}
   card.style.display='';
   const wrap=$('e-bt');
@@ -1344,7 +1346,7 @@ function renderBest(){
     const b=document.createElement('button');
     b.type='button';
     b.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>'+
-      DOWS[col.dow]+(gridP.noDates?'':' '+col.d)+' · '+fmtRange(a,a+r.len*ev.gran)+'</span><span class="bt-badge">'+r.count+' Of '+ev.parts.length+'</span>';
+      DOWS[col.dow]+(gridP.noDates?'':' '+col.d)+' · '+fmtRange(a,a+r.len*ev.gran)+'</span><span class="bt-badge">'+r.count+' Of '+visible+'</span>';
     b.addEventListener('click',()=>{
       if(picking){pickSel={day:r.day,slot:r.slot,len:r.len};renderPickBar();return}
       const el=cellEls[r.day*S+r.slot];

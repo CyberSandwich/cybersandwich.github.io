@@ -439,10 +439,8 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)requ
 if(location.hash.length>1){
   var initPayload=location.hash.slice(1);
   try{initPayload=decodeURIComponent(initPayload)}catch(_){}
-  qrIn.value=initPayload;
-  _cg.autoGrow(qrIn);
-}
-genQR();
+  setInput(initPayload);
+}else genQR();
 </script>
 </body>
 </html>
