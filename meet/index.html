@@ -121,10 +121,8 @@ html[data-theme="sepia"] .hero .links>button{border-bottom-color:rgba(91,70,54,.
 /* -- Identity row -- */
 .id-row{display:flex;gap:8px;margin-bottom:14px;align-items:center}
 .id-row .inp{flex:1;margin-bottom:0;min-width:0}
-.pill-seg{display:flex;background:var(--card);border-radius:50px;box-shadow:var(--shadow);padding:4px;gap:2px;flex-shrink:0}
-.pill-seg button{border:none;background:none;border-radius:50px;padding:0 13px;font:500 .8125rem/1 var(--font);color:var(--t3);cursor:pointer;min-height:36px;transition:background .2s,color .2s}
-.pill-seg button.active[data-m="a"]{background:var(--mt-av-seg);color:var(--mt-av-seg-c)}
-.pill-seg button.active[data-m="b"]{background:var(--mt-bs-seg);color:var(--mt-bs-seg-c)}
+#e-tools .seg-row:last-child{border-bottom:none}
+.mg-card #e-view{border-bottom:1px solid var(--mt-line)}
 .rnd-btn{width:44px;height:44px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:color .15s,opacity .15s}
 .rnd-btn:disabled{opacity:.35;cursor:default}
 .rnd-btn svg{width:18px;height:18px}
@@ -303,10 +301,6 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
   </div>
   <div class="id-row dim">
     <div class="inp"><input id="e-name" type="text" placeholder="Your Name" maxlength="32" autocomplete="off" spellcheck="false" aria-label="Your Name"></div>
-    <div class="pill-seg" role="group" aria-label="Paint Mode">
-      <button type="button" data-m="a" class="active">Available</button>
-      <button type="button" data-m="b">Busy</button>
-    </div>
     <button type="button" class="rnd-btn" id="e-undo" aria-label="Undo" disabled><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
     <button type="button" class="rnd-btn" id="e-redo" aria-label="Redo" disabled><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"/></svg></button>
   </div>
@@ -314,11 +308,26 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
     <button type="button" class="pick-ok" id="e-clash-y">Edit Theirs</button>
     <button type="button" class="pick-no" id="e-clash-n">Keep Mine</button>
   </div></div>
+  <div class="card dim" id="e-tools">
+    <div class="seg-row" id="e-tool" role="group" aria-label="Paint Tool">
+      <button type="button" class="seg active" data-t="t">Toggle</button>
+      <button type="button" class="seg" data-t="a">Add</button>
+      <button type="button" class="seg" data-t="r">Remove</button>
+    </div>
+    <div class="seg-row c2" id="e-bulk">
+      <button type="button" class="seg" id="e-fill-a">All Available</button>
+      <button type="button" class="seg" id="e-fill-b">All Busy</button>
+    </div>
+  </div>
   <div class="pick-bar" id="e-pick"><span class="pick-lbl" id="e-pick-t"></span><div class="pick-btns">
     <button type="button" class="pick-ok" id="e-pick-y">Confirm</button>
     <button type="button" class="pick-no" id="e-pick-n">Cancel</button>
   </div></div>
   <div class="card mg-card">
+    <div class="seg-row c2" id="e-view" role="group" aria-label="Grid View">
+      <button type="button" class="seg active" data-v="me">My Paint</button>
+      <button type="button" class="seg" data-v="all">Everyone</button>
+    </div>
     <div class="mg-scroll" id="e-mgs"><div class="mg" id="e-mg"></div></div>
   </div>
   <div class="card" id="e-bt-card" style="display:none">
@@ -337,7 +346,6 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
     <button type="button" id="e-qr" aria-label="QR Code"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg><span>QR Code</span></button>
     <button type="button" id="e-merge" aria-label="Merge Link"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg><span>Merge Link</span></button>
     <button type="button" id="e-fin" aria-label="Finalize"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Finalize</span></button>
-    <button type="button" id="e-clear" aria-label="Clear My Paint"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/></svg><span>Clear My Paint</span></button>
   </div>
 </section>
 
@@ -753,15 +761,18 @@ function mergeEvents(mine,theirs){
   }
   return{merged,conflicts};
 }
-function heatmap(ev){
+function heatmap(ev,skip){
   const h=new Uint8Array(codec.dayCount(ev)*codec.slotsPerDay(ev));
-  for(const p of ev.parts)for(let i=0;i<h.length;i++)if(codec.bitGet(p.avail,i))h[i]++;
+  ev.parts.forEach((p,pi)=>{
+    if(skip&&skip.has(pi))return;
+    for(let i=0;i<h.length;i++)if(codec.bitGet(p.avail,i))h[i]++;
+  });
   return h;
 }
 /* Maximal constant-count runs with count>=2, ranked count desc, length desc,
    earliest. Runs within a day cannot overlap by construction. */
-function bestTimes(ev,k){
-  const D=codec.dayCount(ev),S=codec.slotsPerDay(ev),h=heatmap(ev);
+function bestTimes(ev,k,skip){
+  const D=codec.dayCount(ev),S=codec.slotsPerDay(ev),h=heatmap(ev,skip);
   const runs=[];
   for(let d=0;d<D;d++){
     let s=0;
@@ -858,11 +869,13 @@ const todayNum=()=>{const t=new Date();return tzmod.ymdToDay(t.getFullYear(),t.g
 /* -- store -- */
 let ev=null,meIdx=-1,gridP=null,heat=null,Nmax=1,S=0,D=0,gridKey='';
 let picking=false,pickSel=null,tzBroken=false,confState=null,kcIdx=-1,guestWarned=false;
-const prefs=_base.load('meet:prefs',{busy:false,evView:false});
-let busyMode=!!prefs.busy,evViewPref=!!prefs.evView;
+const prefs=_base.load('meet:prefs',{tool:'t',evView:false,showAll:false});
+let tool=prefs.tool==='a'||prefs.tool==='r'?prefs.tool:'t';
+let evViewPref=!!prefs.evView,showAll=!!prefs.showAll;
+const hiddenParts=new Set();
 const ring=model.makeRing(100);
 let lastCode=null,syncT=0,encTok=0;
-const savePrefs=()=>_base.save('meet:prefs',{busy:busyMode,evView:evViewPref});
+const savePrefs=()=>_base.save('meet:prefs',{tool,evView:evViewPref,showAll});
 const myName=()=>$('e-name').value.trim();
 const findPart=nm=>{const k=nm.trim().toLowerCase();return ev.parts.findIndex(p=>p.name.trim().toLowerCase()===k)};
 function hasPaint(i){
@@ -973,12 +986,12 @@ function buildGrid(){
 }
 function cellCls(i){
   let cls='';
-  const n=heat[i];
-  if(n)cls+=' h'+Math.max(1,Math.min(8,1+Math.round(7*n/Nmax)));
-  if(meIdx>=0){
-    if(codec.bitGet(ev.parts[meIdx].avail,i))cls+=' me-a';
-    else if(busyMode)cls+=' me-b';
+  /* Heat shows in Everyone view, and always for visitors with no own layer */
+  if(showAll||meIdx<0){
+    const n=heat[i];
+    if(n)cls+=' h'+Math.max(1,Math.min(8,1+Math.round(7*n/Nmax)));
   }
+  if(meIdx>=0)cls+=codec.bitGet(ev.parts[meIdx].avail,i)?' me-a':' me-b';
   if(ev.final){
     const f=ev.final,d=Math.floor(i/S),s=i%S;
     const a=(f.start-ev.startUnit)*15/ev.gran;
@@ -988,7 +1001,7 @@ function cellCls(i){
   return cls;
 }
 function updateCells(){
-  heat=model.heatmap(ev);
+  heat=model.heatmap(ev,hiddenParts);
   Nmax=1;
   for(let i=0;i<heat.length;i++)if(heat[i]>Nmax)Nmax=heat[i];
   for(let i=0;i<D*S;i++){
@@ -1050,7 +1063,7 @@ function pvApply(next){
 function showPreview(list,add){
   const next=new Map();
   if(list){
-    const c=add?(busyMode?'b':'a'):'e';
+    const c=add?'a':'b';
     for(const i of list)next.set(i,c);
   }
   pvApply(next);
@@ -1079,7 +1092,7 @@ function dragPaint(sc,o){
   }
   function beginPaint(){
     st=PAINT;
-    add=!o.isOn(anchor);
+    add=o.resolveAdd?o.resolveAdd(!o.isOn(anchor)):!o.isOn(anchor);
     try{sc.setPointerCapture(pid)}catch(_){}
     cur=anchor;
     o.onPreview(o.rect(anchor,cur),add);
@@ -1143,14 +1156,10 @@ function dragPaint(sc,o){
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
   return{active:()=>st!==IDLE,abort:stop};
 }
-const modeOn=i=>{
-  const b=meIdx>=0?codec.bitGet(ev.parts[meIdx].avail,i):0;
-  return busyMode?!b:!!b;
-};
+const modeOn=i=>meIdx>=0&&!!codec.bitGet(ev.parts[meIdx].avail,i);
 function tapToggle(i){
   if(picking){pickAt(i);return}
-  const on=!modeOn(i);
-  paintCells([i],busyMode?!on:on);
+  paintCells([i],tool==='a'?1:tool==='r'?0:modeOn(i)?0:1);
   showPop(i);
 }
 const gridDrag=dragPaint($('e-mgs'),{
@@ -1159,12 +1168,13 @@ const gridDrag=dragPaint($('e-mgs'),{
   cellAt,
   clamp:(x,y)=>[clampX(x),clampY(y)],
   isOn:modeOn,
+  resolveAdd:flip=>tool==='a'?true:tool==='r'?false:flip,
   rect:rectCells,
   onPreview:showPreview,
   onTap:tapToggle,
   onCommit:(list,add)=>{
     if(picking)return;
-    paintCells(list,busyMode?!add:add);
+    paintCells(list,add);
     showPop(list[list.length-1]);
   },
   scrollEl:$('e-mgs')
@@ -1374,25 +1384,40 @@ function renderEvent(){
   $('e-undo').disabled=!ring.canUndo();
   $('e-redo').disabled=!ring.canRedo();
   $('e-fin').querySelector('span').textContent=ev.final?'Change Slot':'Finalize';
-  document.querySelectorAll('.pill-seg button').forEach(b=>b.classList.toggle('active',(b.dataset.m==='b')===busyMode));
+  syncTools();
 }
 
-/* -- identity -- */
-function setBusyMode(b){
-  if(b===busyMode||!ev)return;
-  busyMode=b;
+/* -- paint tools -- */
+function setTool(t){
+  if(t===tool||!ev)return;
+  tool=t;
   savePrefs();
-  if(b&&ensureMe()&&!hasPaint(meIdx)){
-    /* busy canvas: everything is available except what you now mark busy */
-    mutate(()=>{
-      const a=ev.parts[meIdx].avail;
-      for(let i=0;i<D*S;i++)codec.bitSet(a,i,1);
-    });
-    return;
-  }
-  renderEvent();
+  syncTools();
 }
-document.querySelectorAll('.pill-seg button').forEach(b=>b.addEventListener('click',()=>setBusyMode(b.dataset.m==='b')));
+function syncTools(){
+  document.querySelectorAll('#e-tool .seg').forEach(b=>b.classList.toggle('active',b.dataset.t===tool));
+  document.querySelectorAll('#e-view .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='all')===showAll));
+}
+document.querySelectorAll('#e-tool .seg').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.t)));
+function setShowAll(b){
+  if(b===showAll||!ev)return;
+  showAll=b;
+  savePrefs();
+  syncTools();
+  updateCells();
+}
+document.querySelectorAll('#e-view .seg').forEach(b=>b.addEventListener('click',()=>setShowAll(b.dataset.v==='all')));
+function fillAll(on){
+  if(!ev||!ensureMe())return;
+  mutate(()=>{
+    const a=ev.parts[meIdx].avail;
+    for(let i=0;i<D*S;i++)codec.bitSet(a,i,on);
+  });
+}
+$('e-fill-a').addEventListener('click',()=>fillAll(1));
+$('e-fill-b').addEventListener('click',()=>fillAll(0));
+
+/* -- identity -- */
 function commitName(){
   const nm=myName();
   _base.save('meet:name',nm);
@@ -1535,12 +1560,6 @@ document.addEventListener('paste',e=>{
 });
 
 /* -- clear my paint -- */
-const clearCtrl=_base.twoPress($('e-clear'),{
-  text:'Clear My Paint',
-  guard:()=>!!ev&&hasPaint(meIdx),
-  onConfirm:()=>mutate(()=>{ev.parts[meIdx].avail.fill(0)})
-});
-$('e-clear').addEventListener('click',()=>clearCtrl.press());
 
 /* -- keyboard -- */
 function kcMove(dd,ds,sweep,e){
@@ -1555,7 +1574,7 @@ function kcMove(dd,ds,sweep,e){
     const s=Math.max(0,Math.min(S-1,kcIdx%S+ds));
     kcIdx=d*S+s;
   }
-  if(sweep)paintCells([kcIdx],busyMode?0:1);
+  if(sweep)paintCells([kcIdx],tool==='r'?0:1);
   else updateCells();
   cellEls[kcIdx].scrollIntoView({block:'nearest',inline:'nearest'});
 }
@@ -1564,10 +1583,8 @@ _base.onKey({
   'c':()=>{if(ev)copyLink($('e-copy'))},
   'v':()=>{if(ev)$('e-merge').click()},
   'p':()=>{if(ev)$('e-merge').click()},
-  'm':()=>{if(ev)setBusyMode(!busyMode)},
   'q':()=>{if(ev)$('e-qr').click()},
   'f':()=>{if(ev&&!picking)startPick()},
-  'r':()=>{if(ev)clearCtrl.press()},
   ' ':e=>{if(!ev||kcIdx<0)return;e.preventDefault();tapToggle(kcIdx)},
   'Enter':()=>{if(ev&&picking&&pickSel)confirmPick()},
   'Escape':()=>{
