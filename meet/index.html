@@ -180,6 +180,12 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
 .pick-no{background:var(--bg);color:var(--t2)}
 
 /* -- Popover -- */
+#dcm{position:fixed;z-index:40;display:none;background:var(--card);border:1px solid var(--bdr2);border-radius:var(--r);box-shadow:var(--shadow2);min-width:180px;max-height:50vh;overflow-y:auto;padding:4px 0}
+#dcm.on{display:block}
+#dcm .dcm-h{font:600 .6875rem/1 var(--font);color:var(--t4);text-transform:uppercase;letter-spacing:.04em;padding:9px 16px 5px}
+#dcm button{display:block;width:100%;border:none;background:none;font:500 .875rem/1.3 var(--font);color:var(--t1);padding:9px 16px;cursor:pointer;text-align:left;transition:background .1s}
+@media(hover:hover){#dcm button:hover{background:var(--bg2)}}
+.mh[data-d]{cursor:pointer}
 #pop{position:fixed;z-index:30;pointer-events:none;background:var(--card);border:1px solid var(--bdr2);border-radius:var(--r);box-shadow:var(--shadow2);padding:10px 12px;max-width:240px;opacity:0;transition:opacity .15s;--caret-x:50%}
 #pop.on{opacity:1}
 #pop::after{content:'';position:absolute;left:var(--caret-x);bottom:-5px;width:8px;height:8px;background:var(--card);border-right:1px solid var(--bdr2);border-bottom:1px solid var(--bdr2);transform:translateX(-50%) rotate(45deg)}
@@ -361,6 +367,7 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
 </main>
 
 <div id="pop" role="tooltip"></div>
+<div id="dcm" role="menu" aria-label="Copy Day"></div>
 <dialog id="qrm" aria-label="QR Code"><canvas id="qrc" width="512" height="512"></canvas><button type="button" class="qrm-x" id="qrm-x" aria-label="Close"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></dialog>
 
 <nav aria-label="Primary">
@@ -793,6 +800,15 @@ function whoAt(ev,idx){
   ev.parts.forEach((p,i)=>{(codec.bitGet(p.avail,idx)?av:un).push(i)});
   return{av,un};
 }
+/* Copy one day-column's S bits onto each target column; returns a new array */
+function copyDayBits(avail,S,src,targets){
+  const out=avail.slice();
+  for(const t of targets){
+    if(t===src)continue;
+    for(let s=0;s<S;s++)codec.bitSet(out,t*S+s,codec.bitGet(avail,src*S+s));
+  }
+  return out;
+}
 /* Undo ring: structuredClone snapshots, redo cleared on new mutation */
 function makeRing(cap){
   let past=[],future=[];
@@ -805,7 +821,7 @@ function makeRing(cap){
     clear(){past=[];future=[]}
   };
 }
-return{remapAvailability,mergeEvents,heatmap,bestTimes,whoAt,makeRing};
+return{remapAvailability,mergeEvents,heatmap,bestTimes,whoAt,copyDayBits,makeRing};
 })();
 /* -- end meet:model -- */
 
@@ -895,7 +911,7 @@ function ensureMe(){
   return true;
 }
 function mutate(fn){
-  ring.push(structuredClone(ev));
+  ring.push({ev:structuredClone(ev),me:meIdx});
   fn();
   afterMutate();
 }
@@ -925,19 +941,20 @@ function paintCells(cells,on){
     for(const c of cells)codec.bitSet(a,c,on?1:0);
   });
 }
-function undo(){
-  const prev=ring.undo(structuredClone(ev));
-  if(!prev)return;
-  ev=prev;
-  meIdx=findPart(myName());
+/* Snapshots are {ev,me} pairs so undo across the auto-Guest rename cannot
+   strand meIdx on a name mismatch; the pair is consistent by construction. */
+function restore(snap){
+  ev=snap.ev;
+  meIdx=snap.me>=0&&snap.me<ev.parts.length?snap.me:-1;
   scheduleSync();renderEvent();
 }
+function undo(){
+  const prev=ring.undo({ev:structuredClone(ev),me:meIdx});
+  if(prev)restore(prev);
+}
 function redo(){
-  const nxt=ring.redo(structuredClone(ev));
-  if(!nxt)return;
-  ev=nxt;
-  meIdx=findPart(myName());
-  scheduleSync();renderEvent();
+  const nxt=ring.redo({ev:structuredClone(ev),me:meIdx});
+  if(nxt)restore(nxt);
 }
 
 /* -- grid render -- */
@@ -960,8 +977,9 @@ function buildGrid(){
   mg.className='mg g'+ev.gran+(D>7?' many':'');
   const axis=gridP.uniform?cols[0]:null;
   let html='<div class="mh mh0"></div>';
-  for(const c of cols)
-    html+='<div class="mh"><b>'+DOWS[c.dow]+'</b>'+(gridP.noDates?'':'<span>'+c.d+' '+MONS[c.mo-1]+'</span>')+'</div>';
+  cols.forEach((c,di)=>{
+    html+='<div class="mh" data-d="'+di+'"><b>'+DOWS[c.dow]+'</b>'+(gridP.noDates?'':'<span>'+c.d+' '+MONS[c.mo-1]+'</span>')+'</div>';
+  });
   for(let s=0;s<S;s++){
     const evMin=ev.startUnit*15+s*ev.gran;
     let lbl='';
@@ -974,6 +992,7 @@ function buildGrid(){
     for(let d=0;d<D;d++)html+='<div class="mc'+hb+'" data-i="'+(d*S+s)+'"></div>';
   }
   mg.innerHTML=html;
+  hideDcm();
   cellEls=new Array(D*S);baseCls=new Array(D*S);
   mg.querySelectorAll('.mc').forEach(el=>{
     const i=+el.dataset.i;
@@ -1417,6 +1436,44 @@ function fillAll(on){
 $('e-fill-a').addEventListener('click',()=>fillAll(1));
 $('e-fill-b').addEventListener('click',()=>fillAll(0));
 
+/* -- day copy (tap a day header) -- */
+function hideDcm(){$('dcm').classList.remove('on')}
+function showDcm(src,anchor){
+  const cols=gridP.cols;
+  if(cols.length<2)return;
+  const name=i=>DOWS[cols[i].dow]+(gridP.noDates?'':' '+cols[i].d);
+  const wd=[],we=[],all=[];
+  cols.forEach((c,i)=>{if(i!==src){all.push(i);(c.dow>=5?we:wd).push(i)}});
+  let html='<div class="dcm-h">Copy '+esc(name(src))+' To</div>';
+  for(const i of all)html+='<button type="button" data-tg="'+i+'">'+esc(name(i))+'</button>';
+  if(wd.length>1)html+='<button type="button" data-tg="'+wd.join(',')+'">All Weekdays</button>';
+  if(we.length>1)html+='<button type="button" data-tg="'+we.join(',')+'">Weekend</button>';
+  if(all.length>1)html+='<button type="button" data-tg="'+all.join(',')+'">All Days</button>';
+  const m=$('dcm');
+  m.innerHTML=html;
+  m.dataset.src=src;
+  m.classList.add('on');
+  const r=anchor.getBoundingClientRect(),mw=m.offsetWidth,mh2=m.offsetHeight;
+  m.style.left=Math.min(Math.max(r.left+r.width/2-mw/2,8),innerWidth-mw-8)+'px';
+  m.style.top=Math.min(r.bottom+6,innerHeight-mh2-8)+'px';
+}
+$('e-mg').addEventListener('click',e=>{
+  const h=e.target.closest('.mh[data-d]');
+  if(!h||!ev||picking)return;
+  showDcm(+h.dataset.d,h);
+});
+$('dcm').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-tg]');
+  if(!b)return;
+  const src=+$('dcm').dataset.src,targets=b.dataset.tg.split(',').map(Number);
+  hideDcm();
+  if(!ensureMe())return;
+  mutate(()=>{ev.parts[meIdx].avail=model.copyDayBits(ev.parts[meIdx].avail,S,src,targets)});
+});
+document.addEventListener('pointerdown',e=>{
+  if($('dcm').classList.contains('on')&&!e.target.closest('#dcm')&&!e.target.closest('.mh[data-d]'))hideDcm();
+});
+
 /* -- identity -- */
 function commitName(){
   const nm=myName();
@@ -1529,7 +1586,7 @@ async function mergeFrom(text){
   try{theirs=await codec.decodeEvent(code)}catch(_){_base.notify('That Link Is Damaged',false);return}
   const res=model.mergeEvents(ev,theirs);
   if(!res){_base.notify('Different Event. Only Matching Links Merge',false);return}
-  ring.push(structuredClone(ev));
+  ring.push({ev:structuredClone(ev),me:meIdx});
   ev=res.merged;
   meIdx=findPart(myName());
   if(res.conflicts.length){
@@ -1589,7 +1646,8 @@ _base.onKey({
   'Enter':()=>{if(ev&&picking&&pickSel)confirmPick()},
   'Escape':()=>{
     if(!ev)return;
-    if(picking)exitPick();
+    if($('dcm').classList.contains('on'))hideDcm();
+    else if(picking)exitPick();
     else if(kcIdx>=0){kcIdx=-1;updateCells()}
     else hidePop();
   },
