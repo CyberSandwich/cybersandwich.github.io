@@ -132,12 +132,6 @@ html[data-theme="sepia"] .hero .links>button{border-bottom-color:rgba(91,70,54,.
 @media(hover:hover){.rnd-btn:hover:not(:disabled){color:var(--t1)}}
 @media(max-width:480px){.id-row{flex-wrap:wrap}.id-row .inp{flex-basis:100%}}
 
-/* -- Quick fill -- */
-.qf-wrap{position:relative;margin-bottom:14px}
-.qf-wrap .inp{margin-bottom:0}
-.qf-wrap .inp input.flash{border-color:var(--mt-bs);transition:border-color .3s}
-@keyframes qfflash{0%,100%{border-color:var(--bdr2)}50%{border-color:var(--mt-bs)}}
-
 /* -- Grid -- */
 .mg-card{contain:content}
 .mg-scroll{overflow:auto;overscroll-behavior:contain;max-height:min(560px,calc(100dvh - 300px))}
@@ -320,10 +314,6 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
     <button type="button" class="pick-ok" id="e-clash-y">Edit Theirs</button>
     <button type="button" class="pick-no" id="e-clash-n">Keep Mine</button>
   </div></div>
-  <div class="qf-wrap dim"><div class="inp">
-    <input id="e-qf" type="text" placeholder="Quick Fill" autocomplete="off" spellcheck="false" aria-label="Quick Fill">
-    <button type="button" id="e-qf-go" aria-label="Apply Quick Fill"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg></button>
-  </div></div>
   <div class="pick-bar" id="e-pick"><span class="pick-lbl" id="e-pick-t"></span><div class="pick-btns">
     <button type="button" class="pick-ok" id="e-pick-y">Confirm</button>
     <button type="button" class="pick-no" id="e-pick-n">Cancel</button>
@@ -374,7 +364,6 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
 </nav>
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/dateparser.js?v=11"></script>
 <script>
 /* qr-creator v0.14.0 - https://larsjung.de/jquery-qrcode/ - MIT */
 'use strict';let G=null;class H{}H.render=function(w,B){G(w,B)};self.QrCreator=H;
@@ -703,186 +692,6 @@ function rawGrid(ev){
 return{tzOffsetMin,wallParts,wallToUtc,tzValid,dayToYmd,ymdToDay,dowRefDates,eventDayDates,slotUtc,projectGrid,rawGrid};
 })();
 /* -- end meet:tz -- */
-
-/* -- meet:quickfill -- */
-/* Natural-language paint. Reuses window._dp (parseTime/parseDuration/
-   parseDate/DAYS/autoCorrect) and layers a clause grammar on top:
-   clause = [neg] [dayset] [timespan], clauses split on , ; and.
-   Times resolve against the grid's visible axis (labelMin), so what you type
-   matches what you see in either viewer or event view. */
-const quickfill=(()=>{
-const NAMED={morning:[540,720],afternoon:[720,1020],evening:[1020,1260],night:[1260,1440]};
-const T_SRC='(?:noon|midday|midnight|half\\s+past\\s+\\d{1,2}|quarter\\s+(?:past|to)\\s+\\d{1,2}|\\d{1,2}:[0-5]\\d\\s*(?:am|pm|a|p)?|\\d{3,4}\\s*(?:am|pm|a|p)?|\\d{1,2}\\s*(?:am|pm|a|p)?)';
-const RE_RANGE=new RegExp('\\b('+T_SRC+')\\s*(?:-|to|until|till)\\s*('+T_SRC+')\\b');
-const RE_FOR=new RegExp('\\b(?:from\\s+)?('+T_SRC+')\\s+for\\s+(.+)$');
-const RE_LONE=new RegExp('\\b('+T_SRC+')\\s*$');
-const RE_MONTH=/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/;
-const cap=s=>s.replace(/\b[a-z]/g,c=>c.toUpperCase());
-function timeTok(s){
-  s=s.trim();
-  /* Bare digits stay deterministic here; _dp.parseTime would am/pm-infer
-     them against the current clock. inferRange owns that logic instead. */
-  let m=s.match(/^(\d{1,2})$/);
-  if(m)return +m[1]<=23?{min:+m[1]*60,exp:false}:null;
-  m=s.match(/^(\d{3,4})$/);
-  if(m){
-    const h=+m[1].slice(0,-2),mm=+m[1].slice(-2);
-    return h<24&&mm<60?{min:h*60+mm,exp:true}:null;
-  }
-  const r=_dp.parseTime(s);
-  if(r)return{min:r.h*60+r.m,exp:/\d\s*(?:am|pm|a|p)\b/.test(s)||/noon|midday|midnight|:/.test(s)};
-  return null;
-}
-function durMin(s){
-  s=s.trim().toLowerCase()
-    .replace(/\bhalf\s+an?\s+hour\b/,'30 minutes')
-    .replace(/\ban?\s+(hour|hr|minute|min)\b/,'1 $1');
-  const r=_dp.parseDuration(s);
-  if(r)return Math.max(1,Math.round((r.date.getTime()-Date.now())/60000));
-  const m=s.match(/^(\d+(?:\.\d+)?)$/);
-  return m?Math.max(1,Math.round(+m[1])):null;
-}
-/* am/pm inference for bare hours: "9-5" -> 9:00-17:00, "2-4pm" -> 14:00-16:00 */
-function inferRange(a,b){
-  let s=a.min,e=b.min;
-  if(!a.exp&&b.exp&&s+720<e)s+=720;
-  if(!b.exp&&e<=s&&e+720<=1440)e+=720;
-  return[s,e];
-}
-function dayBit(tok){
-  if(_dp.DAYS[tok]!==undefined)return(_dp.DAYS[tok]+6)%7;
-  if(tok.length>=3)for(const k in _dp.DAYS)if(k.length>3&&k.startsWith(tok))return(_dp.DAYS[k]+6)%7;
-  return -1;
-}
-/* Pure day-of-week list/range parser; null when any token is not dow-like */
-function dowBits(text){
-  const toks=text.split(' ').filter(Boolean);
-  const bits=new Set();
-  for(let i=0;i<toks.length;i++){
-    const t=toks[i];
-    if(t==='weekdays'){for(let b=0;b<5;b++)bits.add(b);continue}
-    if(t==='weekends'||t==='weekend'){bits.add(5);bits.add(6);continue}
-    const rm=t.match(/^([a-z]+)-([a-z]+)$/);
-    if(rm){
-      const a=dayBit(rm[1]),b=dayBit(rm[2]);
-      if(a<0||b<0)return null;
-      for(let x=a;;x=(x+1)%7){bits.add(x);if(x===b)break}
-      continue;
-    }
-    if(t==='to'&&i>0&&i<toks.length-1&&dayBit(toks[i-1])>=0&&dayBit(toks[i+1])>=0){
-      const a=dayBit(toks[i-1]),b=dayBit(toks[i+1]);
-      for(let x=a;;x=(x+1)%7){bits.add(x);if(x===b)break}
-      i++;continue;
-    }
-    const b=dayBit(t);
-    if(b<0)return null;
-    bits.add(b);
-  }
-  return bits.size?bits:null;
-}
-const maskBits=codec.maskBits;
-function daysFromBits(ev,bits,warnings){
-  const out=[];
-  if(ev.mode){
-    const active=maskBits(ev.dowMask);
-    for(const b of bits){
-      const i=active.indexOf(b);
-      if(i>=0)out.push(i);
-      else warnings.push('No '+['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][b]+' In This Event');
-    }
-  }else{
-    let hit=false;
-    ev.days.forEach((dn,di)=>{if(bits.has(tzmod.dayToYmd(dn).dow)){out.push(di);hit=true}});
-    if(!hit)warnings.push('None Of Those Days Are In This Event');
-  }
-  return out;
-}
-function parseQuickFill(text,ev,nowUtc){
-  const ops=[],warnings=[];
-  const D=codec.dayCount(ev);
-  const clauses=String(text||'').split(/[,;]+|\s+and\s+/i);
-  for(const rawClause of clauses){
-    let c=rawClause.trim().toLowerCase();
-    if(!c)continue;
-    c=_dp.autoCorrect(c);
-    let add=true;
-    const neg=c.match(/^(?:not|no|except|excl|skip)\b\s*/);
-    if(neg){add=false;c=c.slice(neg[0].length).trim()}
-    if(!c){warnings.push('Empty Clause');continue}
-    let span,m;
-    if(/\ball\s?day\b/.test(c)){span=null;c=c.replace(/\ball\s?day\b/,' ')}
-    else if(m=c.match(/\b(mornings?|afternoons?|evenings?|nights?)\b/)){span=NAMED[m[1].replace(/s$/,'')].slice();c=c.replace(m[0],' ')}
-    else if(m=c.match(RE_RANGE)){
-      const a=timeTok(m[1]),b=timeTok(m[2]);
-      if(!a||!b){warnings.push('Could Not Read "'+cap(m[0])+'"');continue}
-      span=inferRange(a,b);
-      if(span[0]===span[1]){warnings.push('Empty Time Range "'+cap(m[0])+'"');continue}
-      c=c.replace(m[0],' ');
-    }
-    else if(m=c.match(RE_FOR)){
-      const t=timeTok(m[1]),dur=durMin(m[2]);
-      if(!t||!dur){warnings.push('Could Not Read "'+cap(m[0])+'"');continue}
-      span=[t.min,Math.min(t.min+dur,1440)];
-      c=c.replace(m[0],' ');
-    }
-    else if((m=c.match(RE_LONE))&&((timeTok(m[1])||{}).exp===true||!RE_MONTH.test(c))){
-      const t=timeTok(m[1]);
-      if(t){span=[t.min,Math.min(t.min+60,1440)];c=c.replace(m[0],' ')}
-      else span=null;
-    }
-    else span=null;
-    const rest0=c.replace(/\s+/g,' ').trim();
-    const rest=rest0.replace(/\b(?:on|every|of|at|the)\b/g,' ').replace(/\s+/g,' ').trim();
-    let days=null;
-    if(!rest||/^(?:every ?day|daily|all ?days?)$/.test(rest0))days=Array.from({length:D},(_,i)=>i);
-    else{
-      const bits=dowBits(rest);
-      if(bits)days=daysFromBits(ev,bits,warnings);
-      else{
-        const pd=_dp.parseDate(rest);
-        if(pd){
-          const dn=tzmod.ymdToDay(pd.date.getFullYear(),pd.date.getMonth()+1,pd.date.getDate());
-          if(ev.mode){
-            const i=maskBits(ev.dowMask).indexOf(tzmod.dayToYmd(dn).dow);
-            days=i>=0?[i]:[];
-          }else{
-            const i=ev.days.indexOf(dn);
-            days=i>=0?[i]:[];
-          }
-          if(!days.length)warnings.push('"'+cap(rest)+'" Is Not One Of The Event Days');
-        }else warnings.push('Could Not Read "'+cap(rest)+'"');
-      }
-    }
-    if(days&&days.length)ops.push({days,span,add});
-  }
-  return{ops,warnings};
-}
-/* Map ops to cell indices via the grid's visible axis; span may wrap midnight */
-function resolveOps(ops,grid){
-  const S=grid.S,steps=[];
-  let clipped=0;
-  for(const op of ops){
-    const cells=[];
-    for(const d of op.days){
-      const col=grid.cols[d];
-      if(!col)continue;
-      for(let s=0;s<S;s++){
-        if(op.span){
-          const lm=col.labelMin[s],[a,b]=op.span;
-          if(!(a<b?lm>=a&&lm<b:lm>=a||lm<b))continue;
-        }
-        cells.push(d*S+s);
-      }
-    }
-    if(!cells.length&&op.span){clipped++;continue}
-    steps.push({cells,add:op.add});
-  }
-  return{steps,clipped};
-}
-return{parseQuickFill,resolveOps,timeTok,durMin,dowBits};
-})();
-/* -- end meet:quickfill -- */
-
 /* -- meet:model -- */
 /* Pure state helpers; the store around them lives in the UI section */
 const model=(()=>{
@@ -1621,43 +1430,6 @@ $('e-clash-n').addEventListener('click',()=>{
 $('e-undo').addEventListener('click',undo);
 $('e-redo').addEventListener('click',redo);
 
-/* -- quick fill -- */
-let qfT=0;
-function qfPreview(){
-  const t=$('e-qf').value.trim();
-  if(!t){pvApply(new Map());return}
-  const r=quickfill.parseQuickFill(t,ev,Date.now());
-  const res=quickfill.resolveOps(r.ops,gridP);
-  const next=new Map();
-  for(const st of res.steps)for(const c of st.cells)next.set(c,st.add?'a':'b');
-  pvApply(next);
-}
-$('e-qf').addEventListener('input',()=>{clearTimeout(qfT);qfT=setTimeout(qfPreview,120)});
-$('e-qf').addEventListener('blur',()=>{if(!$('e-qf').value.trim())pvApply(new Map())});
-function qfCommit(){
-  const inp=$('e-qf'),t=inp.value.trim();
-  if(!t)return;
-  const r=quickfill.parseQuickFill(t,ev,Date.now());
-  const res=quickfill.resolveOps(r.ops,gridP);
-  if(!res.steps.length){
-    inp.classList.remove('flash');void inp.offsetWidth;inp.classList.add('flash');
-    setTimeout(()=>inp.classList.remove('flash'),300);
-    _base.notify(r.warnings[0]||'Nothing To Paint',false);
-    return;
-  }
-  if(!ensureMe())return;
-  ring.push(structuredClone(ev));
-  const a=ev.parts[meIdx].avail;
-  for(const st of res.steps)for(const c of st.cells)codec.bitSet(a,c,st.add?1:0);
-  pvApply(new Map());
-  inp.value='';
-  afterMutate();
-  const warn=r.warnings[0]||(res.clipped?'Some Times Were Outside The Window':null);
-  if(warn)_base.notify(warn,'warn');
-}
-$('e-qf').addEventListener('keydown',e=>{if(e.key==='Enter')qfCommit()});
-$('e-qf-go').addEventListener('click',qfCommit);
-
 /* -- finalize -- */
 function pickAt(i){pickSel={day:Math.floor(i/S),slot:i%S,len:1};renderPickBar()}
 function startPick(){picking=true;pickSel=null;hidePop();renderPickBar()}
@@ -1788,8 +1560,6 @@ function kcMove(dd,ds,sweep,e){
   cellEls[kcIdx].scrollIntoView({block:'nearest',inline:'nearest'});
 }
 _base.onKey({
-  '/':e=>{if(!ev)return;e.preventDefault();$('e-qf').focus()},
-  's':e=>{if(!ev)return;e.preventDefault();$('e-qf').focus()},
   'n':e=>{if(!ev)return;e.preventDefault();$('e-name').focus();$('e-name').select()},
   'c':()=>{if(ev)copyLink($('e-copy'))},
   'v':()=>{if(ev)$('e-merge').click()},
@@ -1803,7 +1573,6 @@ _base.onKey({
   'Escape':()=>{
     if(!ev)return;
     if(picking)exitPick();
-    else if(pvMap.size){pvApply(new Map());$('e-qf').value=''}
     else if(kcIdx>=0){kcIdx=-1;updateCells()}
     else hidePop();
   },
@@ -1812,8 +1581,7 @@ _base.onKey({
   'ArrowLeft':e=>kcMove(-1,0,e.shiftKey,e),
   'ArrowRight':e=>kcMove(1,0,e.shiftKey,e),
   ctrl:{
-    'z':e=>{if(!ev)return;e.preventDefault();undo()},
-    'k':e=>{if(!ev)return;e.preventDefault();$('e-qf').focus()}
+    'z':e=>{if(!ev)return;e.preventDefault();undo()}
   }
 });
 /* redo: onKey's ctrl branch excludes shift, so one raw listener */

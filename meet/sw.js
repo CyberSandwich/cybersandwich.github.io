@@ -4,14 +4,13 @@
    precache stays warm. The fetch handler is version-agnostic; it caches any
    /meet/ or /shared/ GET it sees, so stale SHELL pins are warmth only. */
 'use strict';
-const CACHE='meet-v1';
+const CACHE='meet-v2';
 const SHELL=[
   '/meet/',
   '/meet/index.html',
   '/shared/base.css?v=27',
   '/shared/base.js?v=25',
   '/shared/search.js?v=20',
-  '/shared/dateparser.js?v=11',
   '/favicon.png'
 ];
 
