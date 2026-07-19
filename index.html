@@ -26,7 +26,7 @@
 <script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||t==='sepia'){document.documentElement.setAttribute('data-theme',t);var c=t==='dark'?'#1C1C1E':'#F5EDDA';document.querySelector('meta[name="theme-color"]').content=c;if(t==='dark')document.querySelector('meta[name="color-scheme"]').content='dark';var l=document.getElementById('theme-label');if(l)l.textContent='Theme: '+t[0].toUpperCase()+t.slice(1)}})()</script>
 <link rel="stylesheet" href="/shared/base.css?v=27">
 <link rel="stylesheet" href="style.css?v=138" fetchpriority="high">
-<link rel="preload" href="app.js?v=148" as="script">
+<link rel="preload" href="app.js?v=149" as="script">
 <link rel="dns-prefetch" href="https://wa.me">
 <link rel="dns-prefetch" href="https://linkedin.com">
 <link rel="dns-prefetch" href="https://github.com">
@@ -109,6 +109,7 @@
   <h3>Text Tools</h3>
   <ul>
     <li><a href="/caseconverter/">CaseConverter</a> — Text Case Conversion Tool</li>
+    <li><a href="/capsule/">Capsule</a> — Text-to-Capsule Generator</li>
     <li><a href="/clip/">Clip</a> — Clipboard Text Manager</li>
     <li><a href="/lorip/">Lorip</a> — Lorem Ipsum Generator</li>
     <li><a href="/resolve/">ReSolve</a> — Word Unscrambler &amp; Anagram Solver</li>
@@ -119,11 +120,15 @@
   <ul>
     <li><a href="/time/">Clock</a> — A Minimal 8KB Clock</li>
     <li><a href="/countdown/">Countdown</a> — Countdown Timer Manager</li>
+    <li><a href="/diffy/">Diffy</a> — Date Difference Calculator</li>
+    <li><a href="/meet/">Meet</a> — Group Availability Scheduler</li>
+    <li><a href="/pomo/">Pomo</a> — Pomodoro Timer With Concurrent Sessions</li>
     <li><a href="/thymezone/">ThymeZone</a> — Compare Timezones Side by Side</li>
   </ul>
   <h3>Generators</h3>
   <ul>
     <li><a href="/arbit/">Arbit</a> — Random Picker Tool</li>
+    <li><a href="/asciiverse/">ASCIIverse</a> — Spinnable 3D ASCII Text</li>
     <li><a href="/numgen/">NumGen</a> — Generate Valid UK Phone Numbers</li>
     <li><a href="/palit/">Palit</a> — Color Palette Generator</li>
     <li><a href="/passwdgen/">PasswdGen</a> — Secure Password Generator</li>
@@ -174,6 +179,6 @@
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/swr.js?v=3"></script>
 <script src="/shared/search.js?v=20" defer></script>
-<script src="app.js?v=148" defer></script>
+<script src="app.js?v=149" defer></script>
 </body>
 </html>

@@ -21,7 +21,9 @@ function mailtoUrl(t){return 'mailto:ventures@saputra.co.uk?cc=duke%40saputra.co
 
 // Handle 404.html redirect (validate path is relative to prevent cross-origin crash)
 const redir=new URLSearchParams(location.search).get('p');
-if(redir){try{if(redir.startsWith('/')&&!redir.startsWith('//'))history.replaceState(null,'',redir);else history.replaceState(null,'','/')}catch(e){history.replaceState(null,'','/')}}
+const meetRedir=redir&&redir.match(/^\/meet\/([^?#]+)/);
+if(meetRedir){location.replace('/meet/#'+meetRedir[1].replace(/\/+$/,''))}
+else if(redir){try{if(redir.startsWith('/')&&!redir.startsWith('//'))history.replaceState(null,'',redir);else history.replaceState(null,'','/')}catch(e){history.replaceState(null,'','/')}}
 
 // Router
 function route(){
@@ -134,7 +136,7 @@ document.addEventListener('click',e=>{
 });
 
 // Data loaders (SWR via shared/swr.js)
-const DATA_V=6;
+const DATA_V=7;
 const getProjects=_swr.loader('/projects/projects.json?v='+DATA_V,d=>{projects=d;return d});
 const getLinks=_swr.loader('/links/links.json?v='+DATA_V,d=>{links=d;return d});
 const getPosts=_swr.loader('/posts/posts.json?v='+DATA_V,d=>{
@@ -166,6 +168,7 @@ const PROJECT_ICONS={
 'MockupGen':'<path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"/><path d="M10 19v-3.96 3.15"/><path d="M7 19h5"/><rect width="6" height="10" x="16" y="12" rx="2"/>',
 'ImageOpt':'<path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19 3 3v-5.5"/><path d="m17 22 3-3"/><circle cx="9" cy="9" r="2"/>',
 'Lorip':'<path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13"/>',
+'Meet':'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
 'Miele Laundry Guide':'<path d="M3 6h3"/><path d="M17 6h.01"/><rect width="18" height="20" x="3" y="2" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M12 18a2.5 2.5 0 0 0 0-5 2.5 2.5 0 0 1 0-5"/>',
 'NumGen':'<line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/>',
 'PasswdGen':'<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',

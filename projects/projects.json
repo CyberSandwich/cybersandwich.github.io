@@ -100,6 +100,12 @@
     "category": "Time Tools"
   },
   {
+    "title": "Meet",
+    "subtitle": "Group Availability Scheduler",
+    "url": "/meet/",
+    "category": "Time Tools"
+  },
+  {
     "title": "Pomo",
     "subtitle": "Pomodoro Timer With Concurrent Sessions",
     "url": "/pomo/",
