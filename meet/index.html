@@ -122,16 +122,14 @@ html[data-theme="dark"] .hero .links>button{border-bottom-color:rgba(255,255,255
 html[data-theme="sepia"] .hero .links>button{border-bottom-color:rgba(91,70,54,.08)}
 
 /* -- Identity row -- */
-.id-row{display:flex;gap:8px;margin-bottom:14px;align-items:center}
-.id-row .inp{flex:1;margin-bottom:0;min-width:0}
+#e-id .srow{cursor:auto}
+#e-id .srow:active{opacity:1}
+#e-id .slbl{flex-shrink:0}
+.id-inp{flex:1;min-width:0;border:none;background:none;font:500 .9375rem/1.3 var(--font);color:var(--t1);text-align:right;padding:8px 0;outline:none}
+.id-inp::placeholder{color:var(--t4)}
+#e-tools .seg:disabled{opacity:.35;cursor:default}
 #e-tools .seg-row:last-child{border-bottom:none}
 .mg-card #e-view{border-bottom:1px solid var(--mt-line)}
-.rnd-btn{width:44px;height:44px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:color .15s,opacity .15s}
-.rnd-btn:disabled{opacity:.35;cursor:default}
-.rnd-btn svg{width:18px;height:18px}
-.rnd-btn:active:not(:disabled){transform:scale(.92)}
-@media(hover:hover){.rnd-btn:hover:not(:disabled){color:var(--t1)}}
-@media(max-width:480px){.id-row{flex-wrap:wrap}.id-row .inp{flex-basis:100%}}
 
 /* -- Grid -- */
 .mg-card{contain:content}
@@ -207,8 +205,9 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
 
 /* -- Participants -- */
 .pp-row{display:flex;gap:8px;flex-wrap:wrap;padding:14px 20px}
-.pp-row .chip{cursor:default;max-width:16ch;overflow:hidden;text-overflow:ellipsis}
-.pp-row .chip.me{background:var(--mt-win-f);color:var(--mt-win);border-color:var(--mt-win)}
+.pp-row .chip{cursor:pointer;max-width:16ch;overflow:hidden;text-overflow:ellipsis;transition:opacity .15s,background .15s}
+.pp-row .chip.me{cursor:default;background:var(--mt-win-f);color:var(--mt-win);border-color:var(--mt-win)}
+.pp-row .chip.off{opacity:.35}
 
 /* -- Merge conflicts -- */
 .cf-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;border-bottom:1px solid var(--bdr2)}
@@ -316,10 +315,11 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
       <button type="button" id="e-hero-cp"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span>Copy Link</span></button>
     </div>
   </div>
-  <div class="id-row dim">
-    <div class="inp"><input id="e-name" type="text" placeholder="Your Name" maxlength="32" autocomplete="off" spellcheck="false" aria-label="Your Name"></div>
-    <button type="button" class="rnd-btn" id="e-undo" aria-label="Undo" disabled><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
-    <button type="button" class="rnd-btn" id="e-redo" aria-label="Redo" disabled><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"/></svg></button>
+  <div class="card dim" id="e-id">
+    <div class="srow">
+      <label class="slbl" for="e-name"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Your Name</span></label>
+      <input id="e-name" class="id-inp" type="text" placeholder="Add Name" maxlength="32" autocomplete="off" spellcheck="false" aria-label="Your Name">
+    </div>
   </div>
   <div class="nb" id="e-clash"><span id="e-clash-t"></span><div class="pick-btns">
     <button type="button" class="pick-ok" id="e-clash-y">Edit Theirs</button>
@@ -334,6 +334,10 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
     <div class="seg-row c2" id="e-bulk">
       <button type="button" class="seg" id="e-fill-a">All Available</button>
       <button type="button" class="seg" id="e-fill-b">All Busy</button>
+    </div>
+    <div class="seg-row c2">
+      <button type="button" class="seg" id="e-undo" disabled>Undo</button>
+      <button type="button" class="seg" id="e-redo" disabled>Redo</button>
     </div>
   </div>
   <div class="pick-bar" id="e-pick"><span class="pick-lbl" id="e-pick-t"></span><div class="pick-btns">
@@ -756,28 +760,53 @@ function remapAvailability(ev,cfg){
   }
   return{ev:ne,lost};
 }
-/* Merge gate: configFingerprint equality, else null (hard refusal).
+/* Merge gate: mode/gran/window/tz must match exactly ({error:reason} names
+   what differs); day lists may overlap partially. Their availability is
+   remapped onto my day columns; days only they have are dropped and days
+   only I have stay empty for them (partial:true so the UI can warn).
    Union by casefolded trimmed name; identical (tz,avail) dedupes silently;
    differing pairs default to theirs (pasted link presumed fresher) and are
    reported so the UI can offer per-conflict Mine/Theirs. */
 function mergeEvents(mine,theirs){
-  if(codec.configFingerprint(mine)!==codec.configFingerprint(theirs))return null;
+  if(mine.mode!==theirs.mode)return{error:'mode'};
+  if(mine.gran!==theirs.gran)return{error:'gran'};
+  if(mine.startUnit!==theirs.startUnit||mine.endUnit!==theirs.endUnit)return{error:'window'};
+  if(mine.tz!==theirs.tz)return{error:'tz'};
+  const mDays=mine.mode?maskBits(mine.dowMask):mine.days;
+  const tDays=theirs.mode?maskBits(theirs.dowMask):theirs.days;
+  const map=mDays.map(d=>tDays.indexOf(d));
+  if(!map.some(i=>i>=0))return{error:'days'};
+  const partial=map.some(i=>i<0)||tDays.some(d=>mDays.indexOf(d)<0);
+  const S=codec.slotsPerDay(mine);
+  const remap=av=>{
+    const out=new Uint8Array(codec.availBytes(mine));
+    for(let d=0;d<mDays.length;d++){
+      const td=map[d];
+      if(td<0)continue;
+      for(let s=0;s<S;s++)codec.bitSet(out,d*S+s,codec.bitGet(av,td*S+s));
+    }
+    return out;
+  };
   const merged=structuredClone(mine);
   if(!merged.title&&theirs.title)merged.title=theirs.title;
-  if(theirs.final)merged.final={...theirs.final};
+  if(theirs.final){
+    const fd=mDays.indexOf(tDays[theirs.final.day]);
+    if(fd>=0)merged.final={...theirs.final,day:fd};
+  }
   const conflicts=[];
   const key=n=>n.trim().toLowerCase();
   for(const tp of theirs.parts){
     if(merged.parts.length>=100)break;
+    const ta=remap(tp.avail);
     const i=merged.parts.findIndex(p=>key(p.name)===key(tp.name));
-    if(i<0){merged.parts.push(structuredClone(tp));continue}
+    if(i<0){merged.parts.push({...structuredClone(tp),avail:ta});continue}
     const mp=merged.parts[i];
-    if(mp.tz===tp.tz&&mp.avail.every((x,j)=>x===tp.avail[j]))continue;
-    conflicts.push({name:mp.name,idx:i,mine:{tz:mp.tz,avail:mp.avail.slice()},theirs:{tz:tp.tz,avail:tp.avail.slice()}});
+    if(mp.tz===tp.tz&&mp.avail.every((x,j)=>x===ta[j]))continue;
+    conflicts.push({name:mp.name,idx:i,mine:{tz:mp.tz,avail:mp.avail.slice()},theirs:{tz:tp.tz,avail:ta.slice()}});
     mp.tz=tp.tz;
-    mp.avail=tp.avail.slice();
+    mp.avail=ta.slice();
   }
-  return{merged,conflicts};
+  return{merged,conflicts,partial};
 }
 function heatmap(ev,skip){
   const h=new Uint8Array(codec.dayCount(ev)*codec.slotsPerDay(ev));
@@ -899,7 +928,13 @@ let picking=false,pickSel=null,tzBroken=false,confState=null,kcIdx=-1,guestWarne
 const prefs=_base.load('meet:prefs',{tool:'t',evView:false,showAll:false});
 let tool=prefs.tool==='a'||prefs.tool==='r'?prefs.tool:'t';
 let evViewPref=!!prefs.evView,showAll=!!prefs.showAll;
-const hiddenParts=new Set();
+const hiddenParts=new Set();/* casefolded names hidden from the heatmap (view-only) */
+const pkey=p=>p.name.trim().toLowerCase();
+const hiddenIdx=()=>{
+  const s=new Set();
+  ev.parts.forEach((p,i)=>{if(i!==meIdx&&hiddenParts.has(pkey(p)))s.add(i)});
+  return s;
+};
 const ring=model.makeRing(100);
 let lastCode=null,syncT=0,encTok=0;
 const savePrefs=()=>_base.save('meet:prefs',{tool,evView:evViewPref,showAll});
@@ -1031,7 +1066,7 @@ function cellCls(i){
   return cls;
 }
 function updateCells(){
-  heat=model.heatmap(ev,hiddenParts);
+  heat=model.heatmap(ev,hiddenIdx());
   Nmax=1;
   for(let i=0;i<heat.length;i++)if(heat[i]>Nmax)Nmax=heat[i];
   for(let i=0;i<D*S;i++){
@@ -1219,7 +1254,10 @@ function showPop(i,sticky){
   const d=Math.floor(i/S),s=i%S;
   const col=gridP.cols[d];
   const a=gridP.uniform?col.labelMin[s]:ev.startUnit*15+s*ev.gran;
+  const hid=hiddenIdx();
   const w=model.whoAt(ev,i);
+  w.av=w.av.filter(pi=>!hid.has(pi));
+  w.un=w.un.filter(pi=>!hid.has(pi));
   const their=p=>{
     try{return fmtMin(tzmod.wallParts(p.tz||ev.tz,tzmod.slotUtc(ev,d,s,Date.now())).min)}
     catch(_){return fmtMin(ev.startUnit*15+s*ev.gran)}
@@ -1314,7 +1352,7 @@ function renderHero(){
 function axisMinAt(d,s){return gridP.uniform?gridP.cols[d].labelMin[s]:ev.startUnit*15+s*ev.gran}
 function renderBest(){
   const card=$('e-bt-card');
-  const list=ev.parts.length>=2?model.bestTimes(ev,3):[];
+  const list=ev.parts.length>=2?model.bestTimes(ev,3,hiddenIdx()):[];
   if(!list.length){card.style.display='none';return}
   card.style.display='';
   const wrap=$('e-bt');
@@ -1345,10 +1383,19 @@ function renderParts(){
   const row=$('e-pp');
   row.replaceChildren();
   ev.parts.forEach((p,i)=>{
-    const c=document.createElement('span');
-    c.className='chip'+(i===meIdx?' me':'');
-    c.textContent=p.name||'Guest';
-    c.title=p.name||'Guest';
+    const nm=p.name||'Guest',me=i===meIdx;
+    const c=document.createElement(me?'span':'button');
+    c.className='chip'+(me?' me':hiddenParts.has(pkey(p))?' off':'');
+    c.textContent=me?nm+' · You':nm;
+    c.title=nm;
+    if(!me){
+      c.type='button';
+      c.addEventListener('click',()=>{
+        const k=pkey(p);
+        if(hiddenParts.has(k))hiddenParts.delete(k);else hiddenParts.add(k);
+        renderParts();updateCells();renderBest();
+      });
+    }
     row.appendChild(c);
   });
 }
@@ -1596,7 +1643,10 @@ async function mergeFrom(text){
   let theirs;
   try{theirs=await codec.decodeEvent(code)}catch(_){_base.notify('That Link Is Damaged',false);return}
   const res=model.mergeEvents(ev,theirs);
-  if(!res){_base.notify('Different Event. Only Matching Links Merge',false);return}
+  if(res.error){
+    _base.notify({mode:'Different Event Type',gran:'Different Granularity',window:'Different Time Window',tz:'Different Timezone',days:'No Matching Dates'}[res.error],false);
+    return;
+  }
   ring.push({ev:structuredClone(ev),me:meIdx});
   ev=res.merged;
   meIdx=findPart(myName());
@@ -1605,7 +1655,7 @@ async function mergeFrom(text){
     _base.notify(res.conflicts.length+(res.conflicts.length===1?' Conflict, Kept Theirs':' Conflicts, Kept Theirs'),'warn');
   }else{
     confState=null;
-    _base.notify('Merged',true);
+    _base.notify(res.partial?'Only Matching Dates Merged':'Merged',res.partial?'warn':true);
   }
   scheduleSync();
   renderEvent();
@@ -1959,6 +2009,7 @@ function openEvent(e,code){
   clearTimeout(syncT);
   ev=e;lastCode=code;
   ring.clear();
+  hiddenParts.clear();
   confState=null;pickSel=null;picking=false;kcIdx=-1;tzBroken=false;guestWarned=false;gridKey='';
   const saved=_base.load('meet:name','');
   $('e-name').value=saved;
