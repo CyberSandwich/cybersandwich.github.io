@@ -434,7 +434,14 @@ if(window.ResizeObserver){
 document.addEventListener('visibilitychange',function(){if(!document.hidden)requestAnimationFrame(reGen)});
 (function watchDPR(){var mq=matchMedia('(resolution:'+devicePixelRatio+'dppx)');mq.addEventListener('change',function(){reGen(true);watchDPR()},{once:true})})();
 
-/* Init */
+/* Init: a #payload in the URL pre-fills the QR data (Meet's QR Code button
+   and the /codegen/<text> 404-chain forward both land here) */
+if(location.hash.length>1){
+  var initPayload=location.hash.slice(1);
+  try{initPayload=decodeURIComponent(initPayload)}catch(_){}
+  qrIn.value=initPayload;
+  _cg.autoGrow(qrIn);
+}
 genQR();
 </script>
 </body>

@@ -22,7 +22,9 @@ function mailtoUrl(t){return 'mailto:ventures@saputra.co.uk?cc=duke%40saputra.co
 // Handle 404.html redirect (validate path is relative to prevent cross-origin crash)
 const redir=new URLSearchParams(location.search).get('p');
 const meetRedir=redir&&redir.match(/^\/meet\/([^?#]+)/);
+const cgRedir=redir&&redir.match(/^\/codegen\/([^?#]+)/);
 if(meetRedir){location.replace('/meet/#'+meetRedir[1].replace(/\/+$/,''))}
+else if(cgRedir){location.replace('/codegen/#'+encodeURIComponent(cgRedir[1].replace(/\/+$/,'')))}
 else if(redir){try{if(redir.startsWith('/')&&!redir.startsWith('//'))history.replaceState(null,'',redir);else history.replaceState(null,'','/')}catch(e){history.replaceState(null,'','/')}}
 
 // Router
