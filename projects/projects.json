@@ -26,12 +26,6 @@
     "category": "Image Tools"
   },
   {
-    "title": "ImageOpt",
-    "subtitle": "JPEG & PNG Image Optimizer",
-    "url": "/imageopt/",
-    "category": "Image Tools"
-  },
-  {
     "title": "MockupGen",
     "subtitle": "iPhone Mockup Generator",
     "url": "/mockup/",
@@ -46,28 +40,17 @@
     "featured": true
   },
   {
-    "title": "CaseConverter",
-    "subtitle": "Text Case Conversion Tool",
-    "url": "/caseconverter/",
-    "category": "Text Tools"
-  },
-  {
-    "title": "Capsule",
-    "subtitle": "Text-to-Capsule Generator",
-    "url": "/capsule/",
-    "category": "Text Tools"
-  },
-  {
     "title": "Clip",
     "subtitle": "Clipboard Text Manager",
     "url": "/clip/",
     "category": "Text Tools"
   },
   {
-    "title": "Lorip",
-    "subtitle": "Lorem Ipsum Generator",
-    "url": "/lorip/",
-    "category": "Text Tools"
+    "title": "Parsely",
+    "subtitle": "Text Data Extractor",
+    "url": "/parsely/",
+    "category": "Text Tools",
+    "featured": true
   },
   {
     "title": "ReSolve",
@@ -100,35 +83,11 @@
     "category": "Time Tools"
   },
   {
-    "title": "Meet",
-    "subtitle": "Group Availability Scheduler",
-    "url": "/meet/",
-    "category": "Time Tools"
-  },
-  {
-    "title": "Pomo",
-    "subtitle": "Pomodoro Timer With Concurrent Sessions",
-    "url": "/pomo/",
-    "category": "Time Tools"
-  },
-  {
     "title": "ThymeZone",
     "subtitle": "Compare Timezones Side by Side",
     "url": "/thymezone/",
     "category": "Time Tools",
     "featured": true
-  },
-  {
-    "title": "Arbit",
-    "subtitle": "Random Picker Tool",
-    "url": "/arbit/",
-    "category": "Generators"
-  },
-  {
-    "title": "ASCIIverse",
-    "subtitle": "Spinnable 3D ASCII Text",
-    "url": "/asciiverse/",
-    "category": "Generators"
   },
   {
     "title": "NumGen",
@@ -140,19 +99,6 @@
     "title": "Palit",
     "subtitle": "Color Palette Generator",
     "url": "/palit/",
-    "category": "Generators"
-  },
-  {
-    "title": "Parsely",
-    "subtitle": "Text Data Extractor",
-    "url": "/parsely/",
-    "category": "Text Tools",
-    "featured": true
-  },
-  {
-    "title": "PasswdGen",
-    "subtitle": "Secure Password Generator",
-    "url": "/passwdgen/",
     "category": "Generators"
   },
   {
@@ -174,9 +120,63 @@
     "category": "Miscellaneous"
   },
   {
+    "title": "Meet",
+    "subtitle": "Group Availability Scheduler",
+    "url": "/meet/",
+    "category": "In Development"
+  },
+  {
     "title": "Whisp",
     "subtitle": "Offline Audio Transcription With Whisper Models",
     "url": "#",
     "category": "In Development"
+  },
+  {
+    "title": "Arbit",
+    "subtitle": "Random Picker Tool",
+    "url": "/arbit/",
+    "category": "Archive"
+  },
+  {
+    "title": "ASCIIverse",
+    "subtitle": "Spinnable 3D ASCII Text",
+    "url": "/asciiverse/",
+    "category": "Archive"
+  },
+  {
+    "title": "Capsule",
+    "subtitle": "Text-to-Capsule Generator",
+    "url": "/capsule/",
+    "category": "Archive"
+  },
+  {
+    "title": "CaseConverter",
+    "subtitle": "Text Case Conversion Tool",
+    "url": "/caseconverter/",
+    "category": "Archive"
+  },
+  {
+    "title": "ImageOpt",
+    "subtitle": "JPEG & PNG Image Optimizer",
+    "url": "/imageopt/",
+    "category": "Archive"
+  },
+  {
+    "title": "Lorip",
+    "subtitle": "Lorem Ipsum Generator",
+    "url": "/lorip/",
+    "category": "Archive"
+  },
+  {
+    "title": "PasswdGen",
+    "subtitle": "Secure Password Generator",
+    "url": "/passwdgen/",
+    "category": "Archive"
+  },
+  {
+    "title": "Pomo",
+    "subtitle": "Pomodoro Timer With Concurrent Sessions",
+    "url": "/pomo/",
+    "category": "Archive"
   }
 ]

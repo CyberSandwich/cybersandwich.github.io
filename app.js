@@ -138,7 +138,7 @@ document.addEventListener('click',e=>{
 });
 
 // Data loaders (SWR via shared/swr.js)
-const DATA_V=7;
+const DATA_V=8;
 const getProjects=_swr.loader('/projects/projects.json?v='+DATA_V,d=>{projects=d;return d});
 const getLinks=_swr.loader('/links/links.json?v='+DATA_V,d=>{links=d;return d});
 const getPosts=_swr.loader('/posts/posts.json?v='+DATA_V,d=>{
@@ -146,7 +146,7 @@ const getPosts=_swr.loader('/posts/posts.json?v='+DATA_V,d=>{
   posts=d;return d;
 });
 
-const projectCategories=['Flagship Projects','Image Tools','Video Tools','Text Tools','Time Tools','Generators','Utilities','Miscellaneous','In Development'];
+const projectCategories=['Flagship Projects','Image Tools','Video Tools','Text Tools','Time Tools','Generators','Utilities','Miscellaneous','In Development','Archive'];
 const linkCategories=['Modules','Initiatives','Academic','Career','Community','Personal','Social Media','Miscellaneous'];
 
 // Chevron SVG for card arrows

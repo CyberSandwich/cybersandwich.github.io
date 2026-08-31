@@ -26,7 +26,7 @@
 <script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||t==='sepia'){document.documentElement.setAttribute('data-theme',t);var c=t==='dark'?'#1C1C1E':'#F5EDDA';document.querySelector('meta[name="theme-color"]').content=c;if(t==='dark')document.querySelector('meta[name="color-scheme"]').content='dark';var l=document.getElementById('theme-label');if(l)l.textContent='Theme: '+t[0].toUpperCase()+t.slice(1)}})()</script>
 <link rel="stylesheet" href="/shared/base.css?v=27">
 <link rel="stylesheet" href="style.css?v=138" fetchpriority="high">
-<link rel="preload" href="app.js?v=151" as="script">
+<link rel="preload" href="app.js?v=153" as="script">
 <link rel="dns-prefetch" href="https://wa.me">
 <link rel="dns-prefetch" href="https://linkedin.com">
 <link rel="dns-prefetch" href="https://github.com">
@@ -75,7 +75,7 @@
 
   <div class="links">
     <a href="https://fantastical.app/DukeSaputra/gm" target="_blank" rel="noopener noreferrer" title="Book a meeting"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>Book Time</a>
-    <a href="https://www.wework.com/en-GB/buildings/8-devonshire-square--london" target="_blank" rel="noopener noreferrer" title="View location"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>London</a>
+    <a href="https://www.wework.com/en-GB/buildings/8-devonshire-square--london" target="_blank" rel="noopener noreferrer" title="View location"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>8 Devonshire Square, London EC2M 4YJ</a>
     <a href="#" id="theme-toggle" role="button" aria-label="Cycle theme"><svg class="icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg><svg class="icon-sunset" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg><svg class="icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg><span id="theme-label">Theme: Light</span></a>
   </div>
 
@@ -97,7 +97,6 @@
     <li><a href="/clearview/">ClearView</a> — Screenshot Prettifier</li>
     <li><a href="/codegen/">CodeGen</a> — QR, Barcode, &amp; Aztec Code Tool</li>
     <li><a href="/iconic/">Iconic</a> — Search and Copy SVG Icons</li>
-    <li><a href="/imageopt/">ImageOpt</a> — JPEG &amp; PNG Image Optimizer</li>
     <li><a href="/mockup/">MockupGen</a> — iPhone Mockup Generator</li>
   </ul>
   <h3>Video Tools</h3>
@@ -106,34 +105,41 @@
   </ul>
   <h3>Text Tools</h3>
   <ul>
-    <li><a href="/caseconverter/">CaseConverter</a> — Text Case Conversion Tool</li>
-    <li><a href="/capsule/">Capsule</a> — Text-to-Capsule Generator</li>
     <li><a href="/clip/">Clip</a> — Clipboard Text Manager</li>
-    <li><a href="/lorip/">Lorip</a> — Lorem Ipsum Generator</li>
+    <li><a href="/parsely/">Parsely</a> — Text Data Extractor</li>
     <li><a href="/resolve/">ReSolve</a> — Word Unscrambler &amp; Anagram Solver</li>
     <li><a href="/wrighter/">Wrighter</a> — Minimal Plain Text Editor</li>
-    <li><a href="/parsely/">Parsely</a> — Text Data Extractor</li>
   </ul>
   <h3>Time Tools</h3>
   <ul>
     <li><a href="/time/">Clock</a> — A Minimal 8KB Clock</li>
     <li><a href="/countdown/">Countdown</a> — Countdown Timer Manager</li>
     <li><a href="/diffy/">Diffy</a> — Date Difference Calculator</li>
-    <li><a href="/meet/">Meet</a> — Group Availability Scheduler</li>
-    <li><a href="/pomo/">Pomo</a> — Pomodoro Timer With Concurrent Sessions</li>
     <li><a href="/thymezone/">ThymeZone</a> — Compare Timezones Side by Side</li>
   </ul>
   <h3>Generators</h3>
   <ul>
-    <li><a href="/arbit/">Arbit</a> — Random Picker Tool</li>
-    <li><a href="/asciiverse/">ASCIIverse</a> — Spinnable 3D ASCII Text</li>
     <li><a href="/numgen/">NumGen</a> — Generate Valid UK Phone Numbers</li>
     <li><a href="/palit/">Palit</a> — Color Palette Generator</li>
-    <li><a href="/passwdgen/">PasswdGen</a> — Secure Password Generator</li>
   </ul>
   <h3>Miscellaneous</h3>
   <ul>
     <li><a href="/laundry/">Miele Laundry Guide</a> — Vita Student Cannon Park Laundry Guide</li>
+  </ul>
+  <h3>In Development</h3>
+  <ul>
+    <li><a href="/meet/">Meet</a> — Group Availability Scheduler</li>
+  </ul>
+  <h3>Archive</h3>
+  <ul>
+    <li><a href="/arbit/">Arbit</a> — Random Picker Tool</li>
+    <li><a href="/asciiverse/">ASCIIverse</a> — Spinnable 3D ASCII Text</li>
+    <li><a href="/capsule/">Capsule</a> — Text-to-Capsule Generator</li>
+    <li><a href="/caseconverter/">CaseConverter</a> — Text Case Conversion Tool</li>
+    <li><a href="/imageopt/">ImageOpt</a> — JPEG &amp; PNG Image Optimizer</li>
+    <li><a href="/lorip/">Lorip</a> — Lorem Ipsum Generator</li>
+    <li><a href="/passwdgen/">PasswdGen</a> — Secure Password Generator</li>
+    <li><a href="/pomo/">Pomo</a> — Pomodoro Timer With Concurrent Sessions</li>
   </ul>
   </noscript>
 <!-- noscript:projects:end -->
@@ -148,7 +154,6 @@
   <!-- noscript:posts:start -->
   <noscript>
   <ul>
-    <li><a href="/posts/cv">CV</a> — 2026-04-07</li>
   </ul>
   </noscript>
 <!-- noscript:posts:end -->
@@ -177,6 +182,6 @@
 <script src="/shared/base.js?v=25"></script>
 <script src="/shared/swr.js?v=3"></script>
 <script src="/shared/search.js?v=20" defer></script>
-<script src="app.js?v=151" defer></script>
+<script src="app.js?v=153" defer></script>
 </body>
 </html>
