@@ -17,7 +17,7 @@ const SVG_WRAP_CLOSE='</svg>';
 const RE_UL=/^[-*+] /;
 const RE_OL=/^\d+[.)]\s/;
 function cleanUrl(u){return u.replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'')}
-function mailtoUrl(t){return 'mailto:ventures@saputra.co.uk?cc=duke%40saputra.co.uk&subject='+encodeURIComponent('Inquiry: '+t)+'&body='+emailBody}
+function mailtoUrl(t){return 'mailto:duke@saputra.co.uk?subject='+encodeURIComponent('Inquiry: '+t)+'&body='+emailBody}
 
 // Handle 404.html redirect (validate path is relative to prevent cross-origin crash)
 const redir=new URLSearchParams(location.search).get('p');

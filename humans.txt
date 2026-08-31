@@ -3,7 +3,7 @@ Name: Duke Saputra
 Role: Owner, Developer, Designer
 Site: https://saputra.co.uk
 Contact: duke [at] saputra.co.uk
-Location: Warwick, UK
+Location: London, UK
 
 /* SITE */
 Standards: HTML5, CSS3, ES6

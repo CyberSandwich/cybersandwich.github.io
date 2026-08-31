@@ -16,31 +16,25 @@ item1.TEL;type=pref:+44 7985 667166
 item1.X-ABLabel:Mobile
 item2.EMAIL;type=INTERNET;type=pref:duke@saputra.co.uk
 item2.X-ABLabel:A1
-item3.EMAIL;type=INTERNET:ventures@saputra.co.uk
-item3.X-ABLabel:A2
-item4.EMAIL;type=INTERNET:duke.saputra@warwick.ac.uk
-item4.X-ABLabel:C
-item5.URL:https://wa.me/qr/EYDEYNUZSEK4B1
-item5.X-ABLabel:WhatsApp
-item6.URL:https://www.linkedin.com/in/dukedj
-item6.X-ABLabel:LinkedIn
-item7.URL:https://instagram.com/probablyduke
-item7.X-ABLabel:Instagram
-item8.URL:https://youtube.com/@DukeSaputra
-item8.X-ABLabel:YouTube
-item9.URL:https://x.com/probablyduke
-item9.X-ABLabel:X (Twitter)
-item10.URL:https://tiktok.com/@isthisduke
-item10.X-ABLabel:TikTok
-item11.URL:https://fantastical.app/DukeSaputra/gm
-item11.X-ABLabel:Book Time
-item12.URL;type=pref:https://saputra.co.uk
-item12.X-ABLabel:Homepage
-item13.ADR;type=WORK;type=pref:;;Warwick Business School\nGibbet Hill Road;Coventry;England;CV4 7AL;United Kingdom
-item13.X-ABADR:gb
-item13.X-APPLE-SUBLOCALITY:Wainbody Ward
-item13.X-APPLE-SUBADMINISTRATIVEAREA:West Midlands
-GEO:52.38131;-1.56447
+item3.URL:https://wa.me/qr/EYDEYNUZSEK4B1
+item3.X-ABLabel:WhatsApp
+item4.URL:https://www.linkedin.com/in/dukedj
+item4.X-ABLabel:LinkedIn
+item5.URL:https://instagram.com/probablyduke
+item5.X-ABLabel:Instagram
+item6.URL:https://youtube.com/@DukeSaputra
+item6.X-ABLabel:YouTube
+item7.URL:https://x.com/probablyduke
+item7.X-ABLabel:X (Twitter)
+item8.URL:https://tiktok.com/@isthisduke
+item8.X-ABLabel:TikTok
+item9.URL:https://fantastical.app/DukeSaputra/gm
+item9.X-ABLabel:Book Time
+item10.URL;type=pref:https://saputra.co.uk
+item10.X-ABLabel:Homepage
+item11.ADR;type=WORK;type=pref:;;8 Devonshire Square;London;England;EC2M 4YJ;United Kingdom
+item11.X-ABADR:gb
+GEO:51.51637;-0.07873
 TZ:Europe/London
-REV:2026-03-27T00:00:00Z
+REV:2026-08-31T00:00:00Z
 END:VCARD
