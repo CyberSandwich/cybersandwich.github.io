@@ -18,12 +18,6 @@
     "category": "Development"
   },
   {
-    "title": "CS50x 2026 Lectures",
-    "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
-    "icon": "monitor-play",
-    "category": "Development"
-  },
-  {
     "title": "Develop in Swift",
     "url": "https://developer.apple.com/tutorials/develop-in-swift",
     "icon": "code",
@@ -240,18 +234,6 @@
     "category": "Media & Tools"
   },
   {
-    "title": "Claude",
-    "url": "https://claude.ai/",
-    "icon": "sparkles",
-    "category": "AI"
-  },
-  {
-    "title": "Claude Code (Web)",
-    "url": "https://claude.ai/code",
-    "icon": "terminal",
-    "category": "AI"
-  },
-  {
     "title": "Claude Status",
     "url": "https://status.claude.com",
     "icon": "activity",
@@ -261,12 +243,6 @@
     "title": "Claude Usage",
     "url": "https://claude.ai/settings/usage",
     "icon": "gauge",
-    "category": "AI"
-  },
-  {
-    "title": "Codex (Web)",
-    "url": "https://chatgpt.com/codex",
-    "icon": "sparkles",
     "category": "AI"
   },
   {
@@ -360,18 +336,6 @@
     "category": "Productivity"
   },
   {
-    "title": "Financial Times",
-    "url": "https://www.ft.com",
-    "icon": "newspaper",
-    "category": "Reference"
-  },
-  {
-    "title": "Lord Rootes Fund Awardees",
-    "url": "https://warwick.ac.uk/fac/cross_fac/enterprise/launch/lord-rootes-fund/awardees/",
-    "icon": "award",
-    "category": "Reference"
-  },
-  {
     "title": "TIME.IS",
     "url": "https://time.is",
     "icon": "clock",
@@ -398,6 +362,12 @@
   {
     "title": "Early Notify (Apple Updates)",
     "url": "https://earlynotify.com/",
+    "category": "Everyday"
+  },
+  {
+    "title": "Financial Times",
+    "url": "https://www.ft.com",
+    "icon": "newspaper",
     "category": "Everyday"
   },
   {
