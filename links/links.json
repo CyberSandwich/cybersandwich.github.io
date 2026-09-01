@@ -3,473 +3,473 @@
     "title": "App Store Connect",
     "url": "https://appstoreconnect.apple.com/",
     "icon": "phone",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "Apple Certificates, Identifiers & Profiles",
     "url": "https://developer.apple.com/account/resources/identifiers/list",
     "icon": "shield",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "Apple Developer - Expedited Review",
     "url": "https://developer.apple.com/contact/app-store/?topic=expedite",
     "icon": "rocket",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "CS50x 2026 Lectures",
     "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
     "icon": "monitor-play",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "Develop in Swift",
     "url": "https://developer.apple.com/tutorials/develop-in-swift",
     "icon": "code",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Epidemic Sound",
-    "url": "https://www.epidemicsound.com/music/themes/viral-trends-aesthetics/trending-on-youtube/",
-    "icon": "music",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Firebase Console",
-    "url": "https://console.firebase.google.com",
-    "icon": "flame",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Friendly Captcha",
-    "url": "https://friendlycaptcha.com/",
-    "icon": "shield",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console",
-    "url": "https://console.cloud.google.com/welcome",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (Credentials)",
-    "url": "https://console.cloud.google.com/apis/credentials",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (IAM)",
-    "url": "https://console.cloud.google.com/iam-admin/iam",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (reCAPTCHA)",
-    "url": "https://console.cloud.google.com/security/recaptcha",
-    "icon": "cloud",
-    "category": "Initiatives"
-  },
-  {
-    "title": "GCP Console (Storage Buckets)",
-    "url": "https://console.cloud.google.com/storage",
-    "icon": "cloud",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "Ghostty",
     "url": "https://ghostty.org/",
     "icon": "terminal",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "GitHub",
     "url": "https://github.com",
     "icon": "code",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Google Analytics",
-    "url": "https://analytics.google.com/analytics/web/#/",
-    "icon": "chart-line",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Hugging Face Models",
-    "url": "https://huggingface.co/models",
-    "icon": "layers",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "Human Interface Guidelines",
     "url": "https://developer.apple.com/design/human-interface-guidelines",
     "icon": "layout",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "iTerm2",
     "url": "https://iterm2.com/index.html",
     "icon": "terminal",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Lord Rootes Fund Awardees",
-    "url": "https://warwick.ac.uk/fac/cross_fac/enterprise/launch/lord-rootes-fund/awardees/",
-    "icon": "award",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Lucide Icons",
-    "url": "https://lucide.dev/icons/",
-    "icon": "image",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Myinstants Sound Effects",
-    "url": "https://www.myinstants.com/en/index/us/",
-    "icon": "music",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "Neovim",
     "url": "https://neovim.io",
     "icon": "code",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Pixabay Sound Effects",
-    "url": "https://pixabay.com/sound-effects/",
-    "icon": "music",
-    "category": "Initiatives"
-  },
-  {
-    "title": "reCAPTCHA Registration",
-    "url": "https://www.google.com/recaptcha/admin/create",
-    "icon": "shield",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "SF Symbols",
     "url": "https://developer.apple.com/sf-symbols",
     "icon": "layout",
-    "category": "Initiatives"
+    "category": "Development"
   },
   {
     "title": "tmux",
     "url": "https://github.com/tmux/tmux/wiki",
     "icon": "terminal",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Apple Captive Portal",
-    "url": "http://captive.apple.com",
-    "icon": "wifi",
-    "category": "Personal"
-  },
-  {
-    "title": "Apple Maps",
-    "url": "https://maps.apple.com",
-    "icon": "map",
-    "category": "Personal"
-  },
-  {
-    "title": "Apple Security Releases",
-    "url": "https://support.apple.com/en-us/100100",
-    "icon": "shield",
-    "category": "Personal"
-  },
-  {
-    "title": "Claude",
-    "url": "https://claude.ai/",
-    "icon": "sparkles",
-    "category": "Personal"
-  },
-  {
-    "title": "Claude Code (Web)",
-    "url": "https://claude.ai/code",
-    "icon": "terminal",
-    "category": "Personal"
-  },
-  {
-    "title": "Claude Status",
-    "url": "https://status.claude.com",
-    "icon": "activity",
-    "category": "Personal"
-  },
-  {
-    "title": "Claude Usage",
-    "url": "https://claude.ai/settings/usage",
-    "icon": "gauge",
-    "category": "Personal"
+    "category": "Development"
   },
   {
     "title": "Cloudflare Registrar",
     "url": "https://www.cloudflare.com/en-gb/products/registrar",
     "icon": "cloud",
-    "category": "Personal"
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Cobalt",
-    "url": "https://cobalt.tools/",
-    "icon": "download",
-    "category": "Personal"
+    "title": "Firebase Console",
+    "url": "https://console.firebase.google.com",
+    "icon": "flame",
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Codex (Web)",
-    "url": "https://chatgpt.com/codex",
-    "icon": "sparkles",
-    "category": "Personal"
+    "title": "Friendly Captcha",
+    "url": "https://friendlycaptcha.com/",
+    "icon": "shield",
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Defuddle",
-    "url": "https://defuddle.md/",
-    "icon": "file-text",
-    "category": "Personal"
+    "title": "GCP Console",
+    "url": "https://console.cloud.google.com/welcome",
+    "icon": "cloud",
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Early Notify (Apple Updates)",
-    "url": "https://earlynotify.com/",
-    "category": "Personal"
+    "title": "GCP Console (Credentials)",
+    "url": "https://console.cloud.google.com/apis/credentials",
+    "icon": "cloud",
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Financial Times",
-    "url": "https://www.ft.com",
-    "icon": "newspaper",
-    "category": "Personal"
+    "title": "GCP Console (IAM)",
+    "url": "https://console.cloud.google.com/iam-admin/iam",
+    "icon": "cloud",
+    "category": "Cloud & Domains"
+  },
+  {
+    "title": "GCP Console (reCAPTCHA)",
+    "url": "https://console.cloud.google.com/security/recaptcha",
+    "icon": "cloud",
+    "category": "Cloud & Domains"
+  },
+  {
+    "title": "GCP Console (Storage Buckets)",
+    "url": "https://console.cloud.google.com/storage",
+    "icon": "cloud",
+    "category": "Cloud & Domains"
   },
   {
     "title": "GoDaddy",
     "url": "https://www.godaddy.com",
     "icon": "globe",
-    "category": "Personal"
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Google AI Mode",
-    "url": "https://www.google.com/search?udm=50&aep=46&source=25q2-US-SearchSites-Site-CTA",
-    "icon": "sparkles",
-    "category": "Personal"
+    "title": "Google Analytics",
+    "url": "https://analytics.google.com/analytics/web/#/",
+    "icon": "chart-line",
+    "category": "Cloud & Domains"
   },
   {
-    "title": "Google Docs",
-    "url": "https://docs.google.com/document",
-    "icon": "doc",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Forms",
-    "url": "https://docs.google.com/forms",
-    "icon": "clipboard",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Maps",
-    "url": "https://www.google.com/maps",
-    "icon": "map",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Sheets",
-    "url": "https://docs.google.com/spreadsheets",
-    "icon": "table",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Slides",
-    "url": "https://docs.google.com/presentation",
-    "icon": "presentation",
-    "category": "Personal"
-  },
-  {
-    "title": "Google Vids",
-    "url": "https://docs.google.com/videos",
-    "icon": "video",
-    "category": "Personal"
-  },
-  {
-    "title": "Have I Been Pwned",
-    "url": "https://haveibeenpwned.com",
+    "title": "reCAPTCHA Registration",
+    "url": "https://www.google.com/recaptcha/admin/create",
     "icon": "shield",
-    "category": "Personal"
-  },
-  {
-    "title": "iCloud",
-    "url": "https://www.icloud.com",
-    "icon": "cloud",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Excel",
-    "url": "https://excel.cloud.microsoft",
-    "icon": "table",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Forms",
-    "url": "https://forms.cloud.microsoft/Pages/DesignPageV2.aspx?origin=Marketing&culture=en-us&country=us",
-    "icon": "clipboard",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Outlook",
-    "url": "https://outlook.office.com/mail",
-    "icon": "mail",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft PowerPoint",
-    "url": "https://powerpoint.cloud.microsoft",
-    "icon": "presentation",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Teams",
-    "url": "https://teams.microsoft.com/v2",
-    "icon": "users",
-    "category": "Personal"
-  },
-  {
-    "title": "Microsoft Word",
-    "url": "https://word.cloud.microsoft",
-    "icon": "doc",
-    "category": "Personal"
-  },
-  {
-    "title": "Minecraft Classic",
-    "url": "https://classic.minecraft.net/",
-    "icon": "gamepad",
-    "category": "Personal"
-  },
-  {
-    "title": "Monkeytype",
-    "url": "https://monkeytype.com/",
-    "icon": "keyboard",
-    "category": "Personal"
-  },
-  {
-    "title": "Neal Fun",
-    "url": "https://neal.fun",
-    "icon": "wand",
-    "category": "Personal"
-  },
-  {
-    "title": "NeverSSL",
-    "url": "http://neverssl.com",
-    "icon": "wifi",
-    "category": "Personal"
-  },
-  {
-    "title": "Obsidian",
-    "url": "https://obsidian.md/download",
-    "icon": "notebook",
-    "category": "Personal"
-  },
-  {
-    "title": "OpenAI Whisper",
-    "url": "https://github.com/openai/whisper",
-    "icon": "mic",
-    "category": "Personal"
-  },
-  {
-    "title": "Pexels",
-    "url": "https://www.pexels.com",
-    "icon": "camera",
-    "category": "Personal"
-  },
-  {
-    "title": "Photopea",
-    "url": "https://www.photopea.com/",
-    "icon": "image",
-    "category": "Personal"
-  },
-  {
-    "title": "Pok\u00e9mon Showdown (Beta)",
-    "url": "https://play.pokemonshowdown.com",
-    "icon": "gamepad",
-    "category": "Personal"
-  },
-  {
-    "title": "Smallpdf",
-    "url": "https://smallpdf.com/pdf-tools",
-    "icon": "file",
-    "category": "Personal"
+    "category": "Cloud & Domains"
   },
   {
     "title": "Squarespace Domains",
     "url": "https://account.squarespace.com/domains",
     "icon": "globe",
-    "category": "Personal"
+    "category": "Cloud & Domains"
   },
   {
-    "title": "StudentBeans",
-    "url": "https://www.studentbeans.com/uk",
-    "icon": "tag",
-    "category": "Personal"
+    "title": "Apple Captive Portal",
+    "url": "http://captive.apple.com",
+    "icon": "wifi",
+    "category": "Security & Network"
   },
   {
-    "title": "Tesco Clubcard",
-    "url": "https://secure.tesco.com/clubcard/myvouchers",
-    "icon": "tag",
-    "category": "Personal"
+    "title": "Apple Security Releases",
+    "url": "https://support.apple.com/en-us/100100",
+    "icon": "shield",
+    "category": "Security & Network"
   },
   {
-    "title": "TFL Tube Map",
-    "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
-    "icon": "map",
-    "category": "Personal"
+    "title": "Have I Been Pwned",
+    "url": "https://haveibeenpwned.com",
+    "icon": "shield",
+    "category": "Security & Network"
   },
   {
-    "title": "The True Size (Country Comparison)",
-    "url": "https://thetruesize.com/",
-    "category": "Personal"
-  },
-  {
-    "title": "TIME.IS",
-    "url": "https://time.is",
-    "icon": "clock",
-    "category": "Personal"
-  },
-  {
-    "title": "TinyWow",
-    "url": "https://tinywow.com",
-    "icon": "wand",
-    "category": "Personal"
-  },
-  {
-    "title": "UK E-Visa",
-    "url": "https://view-immigration-status.service.gov.uk/status",
-    "icon": "globe",
-    "category": "Personal"
-  },
-  {
-    "title": "UNiDAYS",
-    "url": "https://www.myunidays.com/GB/en-GB",
-    "icon": "tag",
-    "category": "Personal"
+    "title": "NeverSSL",
+    "url": "http://neverssl.com",
+    "icon": "wifi",
+    "category": "Security & Network"
   },
   {
     "title": "VirusTotal",
     "url": "https://www.virustotal.com/gui/home/upload",
     "icon": "shield",
-    "category": "Personal"
-  },
-  {
-    "title": "Wayback Machine",
-    "url": "https://archive.org",
-    "icon": "archive",
-    "category": "Personal"
-  },
-  {
-    "title": "Webpage Archive",
-    "url": "https://archive.ph",
-    "icon": "archive",
-    "category": "Personal"
+    "category": "Security & Network"
   },
   {
     "title": "What is my IP Address",
     "url": "https://whatismyipaddress.com",
     "icon": "globe",
-    "category": "Personal"
+    "category": "Security & Network"
+  },
+  {
+    "title": "Cobalt",
+    "url": "https://cobalt.tools/",
+    "icon": "download",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Defuddle",
+    "url": "https://defuddle.md/",
+    "icon": "file-text",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Epidemic Sound",
+    "url": "https://www.epidemicsound.com/music/themes/viral-trends-aesthetics/trending-on-youtube/",
+    "icon": "music",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Lucide Icons",
+    "url": "https://lucide.dev/icons/",
+    "icon": "image",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Myinstants Sound Effects",
+    "url": "https://www.myinstants.com/en/index/us/",
+    "icon": "music",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Pexels",
+    "url": "https://www.pexels.com",
+    "icon": "camera",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Photopea",
+    "url": "https://www.photopea.com/",
+    "icon": "image",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Pixabay Sound Effects",
+    "url": "https://pixabay.com/sound-effects/",
+    "icon": "music",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Smallpdf",
+    "url": "https://smallpdf.com/pdf-tools",
+    "icon": "file",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "TinyWow",
+    "url": "https://tinywow.com",
+    "icon": "wand",
+    "category": "Media & Tools"
+  },
+  {
+    "title": "Claude",
+    "url": "https://claude.ai/",
+    "icon": "sparkles",
+    "category": "AI"
+  },
+  {
+    "title": "Claude Code (Web)",
+    "url": "https://claude.ai/code",
+    "icon": "terminal",
+    "category": "AI"
+  },
+  {
+    "title": "Claude Status",
+    "url": "https://status.claude.com",
+    "icon": "activity",
+    "category": "AI"
+  },
+  {
+    "title": "Claude Usage",
+    "url": "https://claude.ai/settings/usage",
+    "icon": "gauge",
+    "category": "AI"
+  },
+  {
+    "title": "Codex (Web)",
+    "url": "https://chatgpt.com/codex",
+    "icon": "sparkles",
+    "category": "AI"
+  },
+  {
+    "title": "Google AI Mode",
+    "url": "https://www.google.com/search?udm=50&aep=46&source=25q2-US-SearchSites-Site-CTA",
+    "icon": "sparkles",
+    "category": "AI"
+  },
+  {
+    "title": "Hugging Face Models",
+    "url": "https://huggingface.co/models",
+    "icon": "layers",
+    "category": "AI"
+  },
+  {
+    "title": "OpenAI Whisper",
+    "url": "https://github.com/openai/whisper",
+    "icon": "mic",
+    "category": "AI"
+  },
+  {
+    "title": "Google Docs",
+    "url": "https://docs.google.com/document",
+    "icon": "doc",
+    "category": "Productivity"
+  },
+  {
+    "title": "Google Forms",
+    "url": "https://docs.google.com/forms",
+    "icon": "clipboard",
+    "category": "Productivity"
+  },
+  {
+    "title": "Google Sheets",
+    "url": "https://docs.google.com/spreadsheets",
+    "icon": "table",
+    "category": "Productivity"
+  },
+  {
+    "title": "Google Slides",
+    "url": "https://docs.google.com/presentation",
+    "icon": "presentation",
+    "category": "Productivity"
+  },
+  {
+    "title": "Google Vids",
+    "url": "https://docs.google.com/videos",
+    "icon": "video",
+    "category": "Productivity"
+  },
+  {
+    "title": "Microsoft Excel",
+    "url": "https://excel.cloud.microsoft",
+    "icon": "table",
+    "category": "Productivity"
+  },
+  {
+    "title": "Microsoft Forms",
+    "url": "https://forms.cloud.microsoft/Pages/DesignPageV2.aspx?origin=Marketing&culture=en-us&country=us",
+    "icon": "clipboard",
+    "category": "Productivity"
+  },
+  {
+    "title": "Microsoft Outlook",
+    "url": "https://outlook.office.com/mail",
+    "icon": "mail",
+    "category": "Productivity"
+  },
+  {
+    "title": "Microsoft PowerPoint",
+    "url": "https://powerpoint.cloud.microsoft",
+    "icon": "presentation",
+    "category": "Productivity"
+  },
+  {
+    "title": "Microsoft Teams",
+    "url": "https://teams.microsoft.com/v2",
+    "icon": "users",
+    "category": "Productivity"
+  },
+  {
+    "title": "Microsoft Word",
+    "url": "https://word.cloud.microsoft",
+    "icon": "doc",
+    "category": "Productivity"
+  },
+  {
+    "title": "Obsidian",
+    "url": "https://obsidian.md/download",
+    "icon": "notebook",
+    "category": "Productivity"
+  },
+  {
+    "title": "Financial Times",
+    "url": "https://www.ft.com",
+    "icon": "newspaper",
+    "category": "Reference"
+  },
+  {
+    "title": "Lord Rootes Fund Awardees",
+    "url": "https://warwick.ac.uk/fac/cross_fac/enterprise/launch/lord-rootes-fund/awardees/",
+    "icon": "award",
+    "category": "Reference"
+  },
+  {
+    "title": "TIME.IS",
+    "url": "https://time.is",
+    "icon": "clock",
+    "category": "Reference"
+  },
+  {
+    "title": "Wayback Machine",
+    "url": "https://archive.org",
+    "icon": "archive",
+    "category": "Reference"
+  },
+  {
+    "title": "Webpage Archive",
+    "url": "https://archive.ph",
+    "icon": "archive",
+    "category": "Reference"
+  },
+  {
+    "title": "Apple Maps",
+    "url": "https://maps.apple.com",
+    "icon": "map",
+    "category": "Everyday"
+  },
+  {
+    "title": "Early Notify (Apple Updates)",
+    "url": "https://earlynotify.com/",
+    "category": "Everyday"
+  },
+  {
+    "title": "Google Maps",
+    "url": "https://www.google.com/maps",
+    "icon": "map",
+    "category": "Everyday"
+  },
+  {
+    "title": "iCloud",
+    "url": "https://www.icloud.com",
+    "icon": "cloud",
+    "category": "Everyday"
+  },
+  {
+    "title": "StudentBeans",
+    "url": "https://www.studentbeans.com/uk",
+    "icon": "tag",
+    "category": "Everyday"
+  },
+  {
+    "title": "Tesco Clubcard",
+    "url": "https://secure.tesco.com/clubcard/myvouchers",
+    "icon": "tag",
+    "category": "Everyday"
+  },
+  {
+    "title": "TFL Tube Map",
+    "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
+    "icon": "map",
+    "category": "Everyday"
+  },
+  {
+    "title": "UK E-Visa",
+    "url": "https://view-immigration-status.service.gov.uk/status",
+    "icon": "globe",
+    "category": "Everyday"
+  },
+  {
+    "title": "UNiDAYS",
+    "url": "https://www.myunidays.com/GB/en-GB",
+    "icon": "tag",
+    "category": "Everyday"
+  },
+  {
+    "title": "Minecraft Classic",
+    "url": "https://classic.minecraft.net/",
+    "icon": "gamepad",
+    "category": "Games & Fun"
+  },
+  {
+    "title": "Monkeytype",
+    "url": "https://monkeytype.com/",
+    "icon": "keyboard",
+    "category": "Games & Fun"
+  },
+  {
+    "title": "Neal Fun",
+    "url": "https://neal.fun",
+    "icon": "wand",
+    "category": "Games & Fun"
+  },
+  {
+    "title": "Pok\u00e9mon Showdown (Beta)",
+    "url": "https://play.pokemonshowdown.com",
+    "icon": "gamepad",
+    "category": "Games & Fun"
+  },
+  {
+    "title": "The True Size (Country Comparison)",
+    "url": "https://thetruesize.com/",
+    "category": "Games & Fun"
   },
   {
     "title": "Facebook",
