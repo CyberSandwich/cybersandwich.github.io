@@ -1,10 +1,9 @@
 [
   {
-    "title": "menuva",
+    "title": "menuva (Retired)",
     "subtitle": "The Digital Menu Platform",
     "url": "https://menuva.co.uk",
-    "category": "Flagship Projects",
-    "featured": true
+    "category": "Flagship Projects"
   },
   {
     "title": "ClearView",
@@ -36,8 +35,7 @@
     "title": "Caption",
     "subtitle": "Offline Video Subtitle Generator",
     "url": "https://github.com/DukeSaputra/caption",
-    "category": "Video Tools",
-    "featured": true
+    "category": "Video Tools"
   },
   {
     "title": "Clip",
@@ -49,8 +47,7 @@
     "title": "Parsely",
     "subtitle": "Text Data Extractor",
     "url": "/parsely/",
-    "category": "Text Tools",
-    "featured": true
+    "category": "Text Tools"
   },
   {
     "title": "ReSolve",
@@ -86,8 +83,7 @@
     "title": "ThymeZone",
     "subtitle": "Compare Timezones Side by Side",
     "url": "/thymezone/",
-    "category": "Time Tools",
-    "featured": true
+    "category": "Time Tools"
   },
   {
     "title": "NumGen",
