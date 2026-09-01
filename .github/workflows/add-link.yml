@@ -13,15 +13,20 @@ on:
         description: 'Category'
         required: true
         type: choice
+        # Must mirror linkCategories in app.js. GitHub requires a static list
+        # here, so this is the one copy that cannot read from app.js; the job
+        # validates the choice against app.js and fails loudly if they drift.
         options:
-          - Modules
-          - Initiatives
-          - Academic
-          - Career
-          - Community
-          - Personal
+          - Development
+          - Cloud & Domains
+          - Security & Network
+          - Media & Tools
+          - AI
+          - Productivity
+          - Reference
+          - Everyday
+          - Games & Fun
           - Social Media
-          - Miscellaneous
       icon:
         description: 'Icon name from ICONS map (optional)'
         required: false
@@ -65,7 +70,7 @@ jobs:
           ICON: ${{ github.event.inputs.icon }}
         run: |
           python3 << 'PYEOF'
-          import json, os, sys
+          import json, os, re, sys
 
           title = os.environ['TITLE'].strip()
           url = os.environ['URL'].strip()
@@ -74,6 +79,20 @@ jobs:
 
           with open('links/links.json') as f:
               data = json.load(f)
+
+          # Category order lives in app.js linkCategories, the single source of
+          # truth that clean-links.sh and add-link.sh also read. The dropdown
+          # above is a static mirror, so verify the two still agree.
+          with open('app.js') as f:
+              m = re.search(r"^const linkCategories=\[(.*?)\];$", f.read(), re.M)
+          if not m:
+              print("::error::Could not find linkCategories in app.js")
+              sys.exit(1)
+          categories = re.findall(r"'([^']+)'", m.group(1))
+          if category not in categories:
+              print(f"::error::Category '{category}' is not in app.js linkCategories. "
+                    f"The workflow dropdown has drifted; app.js allows: {', '.join(categories)}")
+              sys.exit(1)
 
           # Check for duplicate URLs
           for entry in data:
@@ -94,7 +113,6 @@ jobs:
           data.append(entry)
 
           # Sort alphabetically by title within each category, preserving category order
-          categories = ['Modules', 'Initiatives', 'Academic', 'Career', 'Community', 'Personal', 'Social Media', 'Miscellaneous']
           cat_order = {c: i for i, c in enumerate(categories)}
           data.sort(key=lambda x: (cat_order.get(x['category'], 999), x['title'].lower()))
 
