@@ -162,48 +162,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "Whisper Large V3",
-    "url": "https://huggingface.co/openai/whisper-large-v3",
-    "icon": "mic",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Academic Phrasebank",
-    "url": "https://www.phrasebank.manchester.ac.uk/",
-    "icon": "book",
-    "category": "Academic"
-  },
-  {
-    "title": "GradIntelligence",
-    "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
-    "icon": "graduation",
-    "category": "Academic"
-  },
-  {
-    "title": "Lettuce Meet",
-    "url": "https://lettucemeet.com",
-    "icon": "calendar",
-    "category": "Academic"
-  },
-  {
-    "title": "QuillBot",
-    "url": "https://quillbot.com/grammar-check",
-    "icon": "spell-check",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Interactive Map",
-    "url": "https://use.mazemap.com/#v=1&config=Warwick&campusid=2188&zlevel=1&center=-1.562515,52.382145&zoom=14.7",
-    "icon": "map",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Term Dates",
-    "url": "https://warwick.ac.uk/study/termdates",
-    "icon": "calendar",
-    "category": "Academic"
-  },
-  {
     "title": "Bright Network Internships",
     "url": "https://www.brightnetwork.co.uk/internships",
     "icon": "briefcase",
@@ -264,22 +222,10 @@
     "category": "Career"
   },
   {
-    "title": "Trackr UK Finance Summer Internships",
-    "url": "https://app.the-trackr.com/uk-finance/summer-internships",
-    "icon": "landmark",
-    "category": "Career"
-  },
-  {
     "title": "Trackr UK Technology Summer Internships",
     "url": "https://app.the-trackr.com/uk-technology/summer-internships",
     "icon": "laptop",
     "category": "Career"
-  },
-  {
-    "title": "1.1.1.1",
-    "url": "http://1.1.1.1",
-    "icon": "wifi",
-    "category": "Personal"
   },
   {
     "title": "Apple Captive Portal",
@@ -297,18 +243,6 @@
     "title": "Apple Security Releases",
     "url": "https://support.apple.com/en-us/100100",
     "icon": "shield",
-    "category": "Personal"
-  },
-  {
-    "title": "Berkeley myHome",
-    "url": "https://www.berkeleygroup.co.uk/my-home/dashboard",
-    "icon": "home",
-    "category": "Personal"
-  },
-  {
-    "title": "ChatGPT",
-    "url": "https://chatgpt.com",
-    "icon": "sparkles",
     "category": "Personal"
   },
   {
@@ -367,12 +301,6 @@
   {
     "title": "Financial Times",
     "url": "https://www.ft.com",
-    "icon": "newspaper",
-    "category": "Personal"
-  },
-  {
-    "title": "Financial Times (Lex)",
-    "url": "https://www.ft.com/lex",
     "icon": "newspaper",
     "category": "Personal"
   },
