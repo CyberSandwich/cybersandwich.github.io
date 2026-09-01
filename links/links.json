@@ -354,6 +354,24 @@
     "category": "Reference"
   },
   {
+    "title": "Innovator International",
+    "url": "https://www.innovatorinternational.com/innovator-founder-visa-uk-endorsing-body/innovator",
+    "icon": "stamp",
+    "category": "Visa"
+  },
+  {
+    "title": "UK E-Visa",
+    "url": "https://view-immigration-status.service.gov.uk/status",
+    "icon": "id-card",
+    "category": "Visa"
+  },
+  {
+    "title": "UK Innovator",
+    "url": "https://ukinnovator.co.uk/",
+    "icon": "file-user",
+    "category": "Visa"
+  },
+  {
     "title": "Apple Maps",
     "url": "https://maps.apple.com",
     "icon": "map",
@@ -398,12 +416,6 @@
     "title": "TFL Tube Map",
     "url": "https://content.tfl.gov.uk/standard-tube-map.pdf",
     "icon": "map",
-    "category": "Everyday"
-  },
-  {
-    "title": "UK E-Visa",
-    "url": "https://view-immigration-status.service.gov.uk/status",
-    "icon": "globe",
     "category": "Everyday"
   },
   {
