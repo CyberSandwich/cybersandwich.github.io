@@ -11,8 +11,8 @@
 #
 # Examples:
 #   ./scripts/add-link.sh "Google" "https://google.com"
-#   ./scripts/add-link.sh "Google" "https://google.com" Personal search
-#   ./scripts/add-link.sh -n "Test" "https://test.com" Personal
+#   ./scripts/add-link.sh "Google" "https://google.com" Everyday search
+#   ./scripts/add-link.sh -n "Test" "https://test.com" Everyday
 
 set -euo pipefail
 cd "${0:A:h}/.."
@@ -91,7 +91,7 @@ print(f'  {\"Total\":<20s} {total}')
       printf "Arguments:\n"
       printf "  ${C}title${Z}       Link title (required)\n"
       printf "  ${C}url${Z}         Full URL (required)\n"
-      printf "  ${C}category${Z}    Category (default: Personal)\n"
+      printf "  ${C}category${Z}    Category (default: Everyday)\n"
       printf "  ${C}icon${Z}        Icon name from ICONS map (optional)\n\n"
       printf "Flags:\n"
       printf "  ${C}-n, --dry-run${Z}        Preview without writing\n"
@@ -134,7 +134,7 @@ done
 
 TITLE="${ARGS[1]:-}"
 URL="${ARGS[2]:-}"
-CATEGORY="${ARGS[3]:-Personal}"
+CATEGORY="${ARGS[3]:-Everyday}"
 ICON="${ARGS[4]:-}"
 
 # ── Validate inputs ───────────────────────────────────────────────
