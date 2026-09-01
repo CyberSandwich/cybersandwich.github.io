@@ -18,18 +18,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "Cohere Transcribe (03-2026)",
-    "url": "https://huggingface.co/CohereLabs/cohere-transcribe-03-2026",
-    "icon": "mic",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Cohere Transcribe (WebGPU)",
-    "url": "https://huggingface.co/spaces/CohereLabs/Cohere-Transcribe-WebGPU",
-    "icon": "mic",
-    "category": "Initiatives"
-  },
-  {
     "title": "CS50x 2026 Lectures",
     "url": "https://www.youtube.com/playlist?list=PLhQjrBD2T380hlTqAU8HfvVepCcjCqTg6",
     "icon": "monitor-play",
@@ -90,12 +78,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "Gemma 4 (E4B)",
-    "url": "https://huggingface.co/google/gemma-4-E4B-it",
-    "icon": "sparkles",
-    "category": "Initiatives"
-  },
-  {
     "title": "Ghostty",
     "url": "https://ghostty.org/",
     "icon": "terminal",
@@ -144,36 +126,6 @@
     "category": "Initiatives"
   },
   {
-    "title": "Menuva Admin Portal",
-    "url": "https://admin.menuva.co.uk",
-    "icon": "utensils",
-    "category": "Initiatives"
-  },
-  {
-    "title": "menuva my.wbs Feature",
-    "url": "https://my.wbs.ac.uk/-/academic/20778/item/id/1927732/#/",
-    "icon": "newspaper",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Menuva Staging",
-    "url": "https://staging.menuva.co.uk/",
-    "icon": "utensils",
-    "category": "Initiatives"
-  },
-  {
-    "title": "menuva University of Warwick Feature",
-    "url": "https://warwick.ac.uk/services/foodgroup/news/menuva-app",
-    "icon": "newspaper",
-    "category": "Initiatives"
-  },
-  {
-    "title": "menuva WBS Feature",
-    "url": "https://www.wbs.ac.uk/blogs/student/undergraduate/creating-real-impact-menuvas-launch-at-warwick",
-    "icon": "newspaper",
-    "category": "Initiatives"
-  },
-  {
     "title": "Myinstants Sound Effects",
     "url": "https://www.myinstants.com/en/index/us/",
     "icon": "music",
@@ -204,21 +156,9 @@
     "category": "Initiatives"
   },
   {
-    "title": "Startium",
-    "url": "https://warwick.startium.co.uk/community",
-    "icon": "rocket",
-    "category": "Initiatives"
-  },
-  {
     "title": "tmux",
     "url": "https://github.com/tmux/tmux/wiki",
     "icon": "terminal",
-    "category": "Initiatives"
-  },
-  {
-    "title": "Warwick Together Instagram Promotion Request",
-    "url": "https://forms.office.com/pages/responsepage.aspx?id=vc-6Ce9HZUSSZTVG8ur2vMnmO2qvuk9Pr-SnqVfN7JhUMVFMRDFCUzFYWkswRDlOUzVJTjQxUUQzRS4u",
-    "icon": "clipboard",
     "category": "Initiatives"
   },
   {
@@ -234,12 +174,6 @@
     "category": "Academic"
   },
   {
-    "title": "Exeter Term Dates",
-    "url": "https://www.exeter.ac.uk/about/term-dates",
-    "icon": "calendar",
-    "category": "Academic"
-  },
-  {
     "title": "GradIntelligence",
     "url": "https://gradintel.com/index.php/en/my-future?_route=attainment.dashboard-custom&id=4",
     "icon": "graduation",
@@ -252,69 +186,9 @@
     "category": "Academic"
   },
   {
-    "title": "mini.my.wbs",
-    "url": "https://mini-my.wbs.ac.uk",
-    "icon": "school",
-    "category": "Academic"
-  },
-  {
-    "title": "my.wbs",
-    "url": "https://my.wbs.ac.uk/-/academic/homepage",
-    "icon": "school",
-    "category": "Academic"
-  },
-  {
-    "title": "MyBib",
-    "url": "https://www.mybib.com/#/projects/",
-    "icon": "book",
-    "category": "Academic"
-  },
-  {
-    "title": "Questionmark Exam Portal",
-    "url": "https://ondemand.questionmark.eu/home/610141/assessments",
-    "icon": "clipboard",
-    "category": "Academic"
-  },
-  {
     "title": "QuillBot",
     "url": "https://quillbot.com/grammar-check",
     "icon": "spell-check",
-    "category": "Academic"
-  },
-  {
-    "title": "Scopus",
-    "url": "https://www.scopus.com/search/form.uri?display=basic#basic",
-    "icon": "search",
-    "category": "Academic"
-  },
-  {
-    "title": "Tabula",
-    "url": "https://tabula.warwick.ac.uk/",
-    "icon": "doc",
-    "category": "Academic"
-  },
-  {
-    "title": "University of Warwick Past Papers",
-    "url": "https://warwick.ac.uk/services/exampapers",
-    "icon": "doc",
-    "category": "Academic"
-  },
-  {
-    "title": "University of Warwick Room Booking",
-    "url": "https://abs.warwick.ac.uk/wrb2526/default.aspx",
-    "icon": "door",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Alternative Exam Portal",
-    "url": "https://altexams.warwick.ac.uk/assessments",
-    "icon": "clipboard",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick e:Vision",
-    "url": "https://warwick.ac.uk/evision",
-    "icon": "eye",
     "category": "Academic"
   },
   {
@@ -324,45 +198,9 @@
     "category": "Academic"
   },
   {
-    "title": "Warwick Module Search",
-    "url": "https://courses.warwick.ac.uk/",
-    "icon": "search",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Print",
-    "url": "https://mobileprint.warwick.ac.uk/",
-    "icon": "printer",
-    "category": "Academic"
-  },
-  {
-    "title": "Warwick Printer Credits",
-    "url": "https://printercredits.warwick.ac.uk/",
-    "icon": "printer",
-    "category": "Academic"
-  },
-  {
     "title": "Warwick Term Dates",
     "url": "https://warwick.ac.uk/study/termdates",
     "icon": "calendar",
-    "category": "Academic"
-  },
-  {
-    "title": "WBS 0.002d Room Booking",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002d/?start=05082024&view=week&selectedResource=8a17841a5ec3d40a015ec3fa2bb2027e",
-    "icon": "door",
-    "category": "Academic"
-  },
-  {
-    "title": "WBS 0.002e Room Booking",
-    "url": "https://warwick.ac.uk/fac/soc/wbs/undergrad/welcome/students/roombookingform/0002e/?start=03112025&view=week&selectedResource=8a17841a5ec3d40a015ec3fc596002a1",
-    "icon": "door",
-    "category": "Academic"
-  },
-  {
-    "title": "WBS Academic Record",
-    "url": "https://my.wbs.ac.uk/-/profile/me/academic-record",
-    "icon": "graduation",
     "category": "Academic"
   },
   {
@@ -432,12 +270,6 @@
     "category": "Career"
   },
   {
-    "title": "Trackr UK Law Training Contracts",
-    "url": "https://app.the-trackr.com/uk-law/training-contracts",
-    "icon": "scale",
-    "category": "Career"
-  },
-  {
     "title": "Trackr UK Technology Summer Internships",
     "url": "https://app.the-trackr.com/uk-technology/summer-internships",
     "icon": "laptop",
@@ -447,24 +279,6 @@
     "title": "1.1.1.1",
     "url": "http://1.1.1.1",
     "icon": "wifi",
-    "category": "Personal"
-  },
-  {
-    "title": "Amazon UK",
-    "url": "https://www.amazon.co.uk",
-    "icon": "cart",
-    "category": "Personal"
-  },
-  {
-    "title": "Amazon UK (Gift Card)",
-    "url": "https://www.amazon.co.uk/gc/redeem",
-    "icon": "cart",
-    "category": "Personal"
-  },
-  {
-    "title": "Amazon UK - Contact Support",
-    "url": "https://www.amazon.co.uk/hz/contact-us/foresight/hubgateway",
-    "icon": "cart",
     "category": "Personal"
   },
   {
@@ -486,21 +300,9 @@
     "category": "Personal"
   },
   {
-    "title": "ASK4 Device Management",
-    "url": "https://myaccount.ask4.com/broadband.php",
-    "icon": "globe",
-    "category": "Personal"
-  },
-  {
     "title": "Berkeley myHome",
     "url": "https://www.berkeleygroup.co.uk/my-home/dashboard",
     "icon": "home",
-    "category": "Personal"
-  },
-  {
-    "title": "camelcamelcamel",
-    "url": "https://uk.camelcamelcamel.com",
-    "icon": "chart-line",
     "category": "Personal"
   },
   {
@@ -558,12 +360,6 @@
     "category": "Personal"
   },
   {
-    "title": "Departures (Testflight)",
-    "url": "https://departures.to/",
-    "icon": "plane",
-    "category": "Personal"
-  },
-  {
     "title": "Early Notify (Apple Updates)",
     "url": "https://earlynotify.com/",
     "category": "Personal"
@@ -578,12 +374,6 @@
     "title": "Financial Times (Lex)",
     "url": "https://www.ft.com/lex",
     "icon": "newspaper",
-    "category": "Personal"
-  },
-  {
-    "title": "Gemini",
-    "url": "https://gemini.google.com/app",
-    "icon": "sparkles",
     "category": "Personal"
   },
   {
@@ -719,12 +509,6 @@
     "category": "Personal"
   },
   {
-    "title": "Perplexity",
-    "url": "https://www.perplexity.ai",
-    "icon": "sparkles",
-    "category": "Personal"
-  },
-  {
     "title": "Pexels",
     "url": "https://www.pexels.com",
     "icon": "camera",
@@ -755,21 +539,9 @@
     "category": "Personal"
   },
   {
-    "title": "Starry Mart",
-    "url": "https://starrymart.co.uk",
-    "icon": "cart",
-    "category": "Personal"
-  },
-  {
     "title": "StudentBeans",
     "url": "https://www.studentbeans.com/uk",
     "icon": "tag",
-    "category": "Personal"
-  },
-  {
-    "title": "Subtitle Tool & Converter",
-    "url": "https://en.editingtools.io/subtitles/",
-    "icon": "file-text",
     "category": "Personal"
   },
   {
@@ -908,53 +680,5 @@
     "url": "https://studio.youtube.com/channel",
     "icon": "clapperboard",
     "category": "Social Media"
-  },
-  {
-    "title": "Curiositea Allergens",
-    "url": "https://allergymenu.app/menu/WSU741",
-    "icon": "alert",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "EchoVideo - IB3960 Financial Statement Analysis & Security Valuation",
-    "url": "https://echo360.org.uk/section/24b2d570-e52a-4bd5-803b-bccd8644d811/home",
-    "icon": "monitor-play",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "EchoVideo - IB3G40 Law for Entrepreneurs",
-    "url": "https://echo360.org.uk/section/6d900cef-d4b4-4807-bb3d-cfffc1d9897d/home",
-    "icon": "monitor-play",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "EchoVideo - IB3N20 Decision Making in Entrepreneurship",
-    "url": "https://echo360.org.uk/section/1cca2155-aa96-4387-a170-dc9acba06d55/home",
-    "icon": "monitor-play",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "EchoVideo - IB3N90 Managing People in a Complex World",
-    "url": "https://echo360.org.uk/section/c8302b8e-e7d8-4531-be04-048d16a96dea/home",
-    "icon": "monitor-play",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "The Dirty Duck Allergens",
-    "url": "https://allergymenu.app/menu/WSU051",
-    "icon": "alert",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "The Food Station Allergens",
-    "url": "https://allergymenu.app/menu/WSU137",
-    "icon": "alert",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "Warwick Residence Hubs",
-    "url": "https://warwick.ac.uk/services/accommodation/students/usefulinfo/campuscurrent/residencehubs",
-    "icon": "home",
-    "category": "Miscellaneous"
   }
 ]
