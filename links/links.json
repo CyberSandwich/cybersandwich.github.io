@@ -187,19 +187,19 @@
   },
   {
     "title": "Epidemic Sound",
-    "url": "https://www.epidemicsound.com/music/themes/viral-trends-aesthetics/trending-on-youtube/",
+    "url": "https://www.epidemicsound.com/music/themes/viral-trends-aesthetics/trending-on-youtube",
     "icon": "music",
     "category": "Media & Tools"
   },
   {
     "title": "Lucide Icons",
-    "url": "https://lucide.dev/icons/",
+    "url": "https://lucide.dev/icons",
     "icon": "image",
     "category": "Media & Tools"
   },
   {
     "title": "Myinstants Sound Effects",
-    "url": "https://www.myinstants.com/en/index/us/",
+    "url": "https://www.myinstants.com/en/index/us",
     "icon": "music",
     "category": "Media & Tools"
   },
@@ -217,7 +217,7 @@
   },
   {
     "title": "Pixabay Sound Effects",
-    "url": "https://pixabay.com/sound-effects/",
+    "url": "https://pixabay.com/sound-effects",
     "icon": "music",
     "category": "Media & Tools"
   },
