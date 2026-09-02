@@ -354,9 +354,51 @@
     "category": "Reference"
   },
   {
+    "title": "Building Your Business in Britain (Facebook Group)",
+    "url": "https://www.facebook.com/groups/buildingyourbusinessinbritain",
+    "icon": "users",
+    "category": "Visa"
+  },
+  {
+    "title": "Innovation. Innovation. Innovation",
+    "url": "https://www.innovatorpulse.com/innovation-innovation-innovation",
+    "icon": "book-open",
+    "category": "Visa"
+  },
+  {
     "title": "Innovator International",
+    "url": "https://www.innovatorinternational.com",
+    "icon": "stamp",
+    "category": "Visa"
+  },
+  {
+    "title": "Innovator International (Application Process)",
+    "url": "https://www.innovatorinternational.com/application-process",
+    "icon": "clipboard",
+    "category": "Visa"
+  },
+  {
+    "title": "Innovator International (Innovator Founder)",
     "url": "https://www.innovatorinternational.com/innovator-founder-visa-uk-endorsing-body/innovator",
     "icon": "stamp",
+    "category": "Visa"
+  },
+  {
+    "title": "Innovator Pulse",
+    "url": "https://www.innovatorpulse.com",
+    "icon": "newspaper",
+    "category": "Visa"
+  },
+  {
+    "title": "Innovator Pulse (Upcoming Events)",
+    "url": "https://www.innovatorpulse.com/tag/upcoming-events",
+    "icon": "clock",
+    "category": "Visa"
+  },
+  {
+    "title": "Think Innovation Means AI and Robots? Think Again",
+    "url": "https://www.innovatorpulse.com/think-innovation-means-ai-and-robots-think-again",
+    "icon": "book-open",
     "category": "Visa"
   },
   {
@@ -369,6 +411,12 @@
     "title": "UK Innovator",
     "url": "https://ukinnovator.co.uk/",
     "icon": "file-user",
+    "category": "Visa"
+  },
+  {
+    "title": "What IS Innovation?",
+    "url": "https://www.innovatorpulse.com/what-is-innovation",
+    "icon": "book-open",
     "category": "Visa"
   },
   {
