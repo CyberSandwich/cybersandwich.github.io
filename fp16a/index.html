@@ -536,6 +536,13 @@ const setCells=(xml,cells)=>{
   if(todo.size)throw new Fp16aError('cell-missing',[...todo.keys()].join(' '));
   return out;
 };
+// Rewrites ht on existing rows (every template row carries ht + customHeight).
+const setHeights=(xml,hs)=>{
+  const todo=new Map(hs);
+  const out=xml.replace(/<row\s[^>]*>/g,t=>{const r=+/\br="(\d+)"/.exec(t)[1];if(!todo.has(r))return t;const h=todo.get(r);todo.delete(r);return t.replace(/\sht="[^"]*"/,` ht="${h}"`)});
+  if(todo.size)throw new Fp16aError('cell-missing','row '+[...todo.keys()].join(' '));
+  return out;
+};
 // Formula cells only; a clone's shared child has no <v> yet, so one is inserted.
 const setCached=(xml,vals)=>{
   const todo=new Map(vals);
@@ -576,6 +583,9 @@ const LAYOUT={
       codes:{first:85,cap:4,cols:{gl:'A',cc:'M',amt:'AJ',purpose:'AO'},spans:'A:L M:AI AJ:AN AO:BW',head:'A84',foot:'A89'}
     },
     grand:'BR61',
+    // Additional Comments merge A74:BW77 has fixed rows that clip wrapped text; about 185 capitals fit a line and a line takes 13pt
+    // (Helvetica 10, Excel for Mac). cpl and pt leave margin for word wrap; the rows above the 9pt spacer grow when needed.
+    box:{ref:'A74:BW77',rows:[[74,15.5],[75,15.5],[76,15.5],[77,9]],cpl:150,pt:13.5},
     formulas:{BJ31:'<f>Q31*AA31</f>',BJ32:'<f t="shared" ref="BJ32:BJ34" si="0">Q32*AA32</f>',BJ33:'<f t="shared" si="0"/>',BJ34:'<f t="shared" si="0"/>',
       BR35:'<f>SUM(BR31:BV34)</f>',BR53:'<f>SUM(BR41:BV52)</f>',BR61:'<f>SUM(BR53,BR35,BR58)</f>'},
     // Label prefixes in row order: import finds each and places every cell by the nearest one above it.
@@ -643,6 +653,7 @@ const verifyTemplate=(kind,p)=>{
     ok(same(merges.filter(m=>{const[a,b]=m.split(':').map(x=>splitRef(x)[1]);return a===clone&&b===clone}).sort(),spans.map(sp=>sp.replace(':',clone+':')+clone).sort()),k+' clone row merges');
     ok(splitRef(t.foot)[1]===last+1&&t.head in L.marks&&t.foot in L.marks,k+' head/foot marks');
   }
+  if(L.box){ok(mset.has(L.box.ref),'comment box merge');for(const[r,h]of L.box.rows)ok(new RegExp(`^<row\\s[^>]*\\sht="${h}" customHeight="1"`).test(rows.find(([n])=>n===r)?.[1]||''),'comment box row '+r)}
   if(L.links)ok(same(list(sh,/<hyperlink ref="([^"]+)"/g),L.links),'hyperlinks');
   if(L.dv)ok(same(list(sh,/<dataValidation\b[^>]*\bsqref="([^"]+)"/g),L.dv),'validations');
   if(L.breaks)ok(sh.includes(`<colBreaks count="2" manualBreakCount="2">${L.breaks}</colBreaks>`),'colBreaks');
@@ -651,11 +662,11 @@ const verifyTemplate=(kind,p)=>{
 };
 const PARTS=[WB,SH,DR,SS];
 const loadParts=async z=>Object.fromEntries(await Promise.all(PARTS.map(async n=>[n,await zip.readText(z,n)])));
-// spec: {inserts, cells: Map(ref→value), cached: Map(ref→number)} in post-insert coordinates.
+// spec: {inserts, cells: Map(ref→value), cached: Map(ref→number), heights: Map(row→pt)} in post-insert coordinates.
 const fill=async(u8,kind,spec)=>{
   const z=zip.readZip(u8),p=await loadParts(z),own=LAYOUT[kind].sheet,ins=spec.inserts||[],F=rowShifter(ins);
   verifyTemplate(kind,p);
-  const ch={[SH]:setCached(setCells(insertRows(p[SH],ins,own),spec.cells||new Map()),spec.cached||new Map())};
+  const ch={[SH]:setHeights(setCached(setCells(insertRows(p[SH],ins,own),spec.cells||new Map()),spec.cached||new Map()),spec.heights||new Map())};
   if(ins.length){ch[WB]=shiftWorkbook(p[WB],F,own);ch[DR]=shiftDrawing(p[DR],F)}
   return zip.rewriteZip(z,ch);
 };
@@ -694,7 +705,7 @@ const open=async u8=>{
       return out;
     }};
 };
-return{LAYOUT,colNum,rowShifter,shiftFormula,copyFormula,insertRows,shiftWorkbook,shiftDrawing,xmlText,xmlDecode,setCells,setCached,isoToSerial,serialToIso,parseSst,readCells,planInserts,verifyTemplate,loadParts,fill,open};
+return{LAYOUT,colNum,rowShifter,shiftFormula,copyFormula,insertRows,shiftWorkbook,shiftDrawing,xmlText,xmlDecode,setCells,setCached,setHeights,isoToSerial,serialToIso,parseSst,readCells,planInserts,verifyTemplate,loadParts,fill,open};
 })();
 /* -- end fp16a:sheet -- */
 /* -- fp16a:data -- */
@@ -1112,7 +1123,6 @@ const checks=(s,D)=>{
     w(k,m.dist>1000,'Over 1000 Miles');
     w(k,m.repaid==null,'To Be Repaid Unknown');
   }
-  w('comments',D.comments.length>400,'Too Long');
   w('ref',s.ref.length>16,'Max 16 Characters');
   return out;
 };
@@ -1125,14 +1135,14 @@ const fxText=D=>D.fxList.filter(c=>D.fx[c].rate!=null).map(c=>`1 ${c} = ${fmtRat
 const txt=n=>n==null?'':n.toFixed(2);
 const splitRef=ref=>{const m=/^([A-Z]+)(\d+)$/.exec(ref);return[m[1],+m[2]]};
 const filename=(kind,s,D)=>[kind==='fp16a'?'fp16a':'foreign-payments',D.sigDate,slug(s.last)].filter(Boolean).join('-')+'.xlsx';
-// State → cell writes for both templates. Strings uppercase (emails lowercase); hidden-by-condition values are left out.
+// State → cell writes for both templates. Strings uppercase, emails included (owner); hidden-by-condition values are left out.
 const toCells=(s,D)=>{
   const L=LAYOUT.fp16a,T=L.tables,counts={miles:D.miles.length,exps:D.exps.length,codes:D.codes.length};
-  const inserts=planInserts('fp16a',counts),F=rowShifter(inserts),cells=new Map(),cached=new Map();
+  const inserts=planInserts('fp16a',counts),F=rowShifter(inserts),cells=new Map(),cached=new Map(),heights=new Map();
   const at=ref=>{const[c,r]=splitRef(ref);return c+F(r)},set=(k,v)=>cells.set(at(L.cells[k][0]),up(v)),serial=iso=>iso?isoToSerial(iso):'';
   set('vendor',/^[1-9]\d{0,14}$/.test(s.vendor.trim())?+s.vendor.trim():s.vendor.trim());
   set('name',D.name);set('dept',s.dept.trim());set('job',D.job.trim());set('ref',s.ref.trim());
-  cells.set(at(L.cells.email[0]),s.email.trim().toLowerCase());
+  set('email',s.email.trim());
   if(s.crit){set('emp',s.crit==='emp'?{yes:'Yes',unitemps:'Yes (Unitemps)',stp:'Yes (STP)'}[s.empType]:'No');set('stu',s.crit==='stu'?'Yes':'No');set('vis',s.crit==='vis'?'Yes':'No')}
   if(!D.foreign){set('bankName',D.bankName.trim());set('acct',s.acct.replace(/\s/g,''));set('sort',normSort(s.sort));set('holder',D.holder)}
   D.miles.forEach((m,i)=>{
@@ -1154,6 +1164,9 @@ const toCells=(s,D)=>{
   }
   set('fx',fxText(D));if(D.fxList.length)set('fxSrc',s.fxSrc.trim());
   set('comments',D.comments);
+  const B=L.box,text=up(D.comments),lines=text?text.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(l.length/B.cpl)),0):0;
+  const grow=B.rows.slice(0,-1),spacer=B.rows.at(-1)[1],need=lines*B.pt;
+  if(need>B.rows.reduce((t,[,h])=>t+h,0))for(const[r]of grow)heights.set(F(r),Math.ceil((need-spacer)/grow.length*4)/4);
   if(s.declared){set('sig',D.sig.trim());cells.set(at(L.cells.sigDate[0]),serial(D.sigDate))}
   D.codes.forEach((x,i)=>{
     const row=F(T.codes.first)+i,c=T.codes.cols;
@@ -1163,14 +1176,14 @@ const toCells=(s,D)=>{
   set('deptSig',a.deptSig.trim());cells.set(at(L.cells.deptDate[0]),serial(a.deptDate));set('deptPrint',a.deptPrint.trim());
   set('uniSig',a.uniSig.trim());cells.set(at(L.cells.uniDate[0]),serial(a.uniDate));set('uniPrint',a.uniPrint.trim());
   set('expTeam',a.expTeam.trim());set('docNo',a.docNo.trim());
-  const out={fp16a:{inserts,cells,cached},foreign:null};
+  const out={fp16a:{inserts,cells,cached,heights},foreign:null};
   if(D.foreign)out.foreign={cells:foreignCells(s,D)};
   return out;
 };
 const foreignCells=(s,D)=>{
   const L=LAYOUT.foreign.cells,f=s.fp,cells=new Map(),set=(k,v)=>cells.set(L[k][0],up(typeof v==='string'?v.trim():v));
   if(s.declared){set('sig',D.sig);set('date',isoToSerial(D.sigDate))}
-  set('name',D.name);set('phone',f.phone);cells.set(L.email[0],s.email.trim().toLowerCase());
+  set('name',D.name);set('phone',f.phone);set('email',s.email);
   set('street',f.street);set('city',f.city);set('prov',f.prov);set('post',f.post);set('country',f.countryName);
   set('bank',D.bankName);set('branch',f.branch);set('bStreet',f.bStreet);set('bCity',f.bCity);set('bProv',f.bProv);set('bPost',f.bPost);set('bCountry',COUNTRIES[D.country]||D.country);
   if(D.ccy)set('ccy',CCY_NAMES[D.ccy]?`${D.ccy} - ${CCY_NAMES[D.ccy]}`:D.ccy);
@@ -1310,19 +1323,19 @@ const table=(head,rows,right)=>{
   const w=head.map((h,i)=>Math.max(h.length,...rows.map(r=>r[i].length))),line=r=>r.map((c,i)=>right.includes(i)?c.padStart(w[i]):c.padEnd(w[i])).join(' | ').trimEnd();
   return[line(head),...rows.map(line)].join('\n');
 };
-// Plain-text claim: form labels, CAPITAL answers (emails lowercase), DD/MM/YYYY, empty optionals left out, missing required shown as a dash.
+// Plain-text claim: form labels, CAPITAL answers, DD/MM/YYYY, empty optionals left out, missing required shown as a dash.
 const toText=(s,D)=>{
   const miss=new Set(missing(s,D)),out=[],sec=(title,lines)=>{const l=lines.filter(Boolean);if(l.length)out.push(title.toUpperCase()+'\n'+l.join('\n'))};
   const f=(lab,v,key)=>{v=typeof v==='string'?v.trim():v;return v===''||v==null?(key&&miss.has(key)?`${lab}: —`:''):`${lab}: ${v}`};
   const U=v=>up(typeof v==='string'?v.trim():v);
   out.push(`FP16A TRAVEL & SUBSISTENCE CLAIM${D.name?' - '+U(D.name):''} - ${fmtDay(D.sigDate)}`);
   const crit=s.crit==='emp'?'UNIVERSITY OF WARWICK EMPLOYEE'+{yes:'',unitemps:' (UNITEMPS)',stp:' (STP)'}[s.empType]:s.crit==='stu'?'UNIVERSITY OF WARWICK STUDENT':s.crit==='vis'?'VISITOR':'';
-  sec('Claimant',[f('Full Name',U(D.name),'first'),f('Claimant Criteria',crit,'crit'),f('Job Title',U(D.job),'job'),f('Department',U(s.dept),'dept'),f('Email (For Remittance)',s.email.trim().toLowerCase(),'email'),f('Dept/Payment Ref',U(s.ref))]);
+  sec('Claimant',[f('Full Name',U(D.name),'first'),f('Claimant Criteria',crit,'crit'),f('Job Title',U(D.job),'job'),f('Department',U(s.dept),'dept'),f('Email (For Remittance)',U(s.email),'email'),f('Dept/Payment Ref',U(s.ref))]);
   if(!D.foreign)sec('Bank Details',[f('Bank/Building Society Name',U(D.bankName),'bankName'),f('Sort Code',normSort(s.sort),'sort'),f('Bank Account Number',s.acct.replace(/\s/g,''),'acct'),f("Bank Account Holder's Name",U(D.holder))]);
   else{
     const x=s.fp;
     out.push('FOREIGN ACCOUNT');
-    sec('Beneficiary',[f('Beneficiary Name',U(D.name),'first'),f('Beneficiary Telephone',x.phone,'fp-phone'),f('Beneficiary Email',s.email.trim().toLowerCase(),'email'),
+    sec('Beneficiary',[f('Beneficiary Name',U(D.name),'first'),f('Beneficiary Telephone',x.phone,'fp-phone'),f('Beneficiary Email',U(s.email),'email'),
       f('Address',U([x.street,x.city,x.prov,x.post,x.countryName].map(v=>v.trim()).filter(Boolean).join(', ')),'fp-street')]);
     sec('Bank',[f('Name Of Bank',U(D.bankName),'bankName'),f('Branch',U(x.branch)),f('Bank Address',U([x.bStreet,x.bCity,x.bProv,x.bPost].map(v=>v.trim()).filter(Boolean).join(', ')),'fp-bCity'),f('Bank Country',U(COUNTRIES[D.country]||D.country),'fp-country')]);
     sec('Account',[f('Currency Of This Account',D.ccy,'fp-ccy'),D.ibanShown?f('IBAN',(cleanIban(x.iban).match(/.{1,4}/g)||[]).join(' '),'fp-iban'):'',f('Account No',x.acctNo.replace(/\s/g,''),'fp-acctNo'),f('BIC/SWIFT Code',cleanCode(x.bic),'fp-bic'),
