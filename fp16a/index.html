@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<meta name="robots" content="noindex">
+<title>FP16a</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FP16a">
+<meta name="description" content="Fill Warwick's FP16a travel and subsistence claim in the fewest steps and download the original form, filled.">
+<meta property="og:title" content="FP16a">
+<meta property="og:description" content="Fill Warwick's FP16a travel and subsistence claim and download the original form, filled.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=27">
+<style>
+:root{color-scheme:light;--fp-warn:#A16207;--fp-warn-bg:#FEF9C3}
+html[data-theme="dark"]{color-scheme:dark;--fp-warn:#FBBF24;--fp-warn-bg:#3A3520}
+html[data-theme="sepia"]{color-scheme:light;--fp-warn:#92400E;--fp-warn-bg:#EDE5C8}
+[hidden]{display:none!important}
+main{max-width:440px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
+main[data-tier=m] [data-t=o],main:not([data-tier=a]) [data-t=d]{display:none}
+.sec,.tier-card{margin-bottom:clamp(20px,4vw,28px)}
+.sec>h3{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:0 0 12px 4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2>*{min-width:0}
+.f,.g{position:relative;display:block;padding:9px 18px 9px 48px;cursor:text}
+.f{margin-bottom:10px;min-height:56px;background:var(--card);border:1px solid var(--bdr2);border-radius:20px;box-shadow:var(--shadow);transition:border-color .15s}
+.row2 .f+.f{padding-left:20px}
+.f:focus-within{border-color:var(--t4)}
+.f>svg,.g>svg{position:absolute;left:17px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--t4)}
+.fl{display:flex;gap:4px;font:500 .6875rem/1.3 var(--font);color:var(--t3);white-space:nowrap;overflow:hidden}
+.fl i,.star{font-style:normal;display:none}
+.req .fl i,.req .star{display:inline}
+.w{color:var(--fp-warn)}
+.fl b.w{font-weight:500;overflow:hidden;text-overflow:ellipsis}
+.slbl b.w{font-weight:500;font-size:.8125rem}
+.fl b.w::before,.slbl b.w::before{content:'· '}
+.f input,.f textarea,.g input{display:block;width:100%;min-width:0;padding:0;margin:0;border:0;border-radius:0;background:none;outline:none;font:400 1rem/1.35 var(--font);color:var(--t2);-webkit-appearance:none;appearance:none}
+.f textarea{resize:none;overflow:hidden;min-height:1.35em}
+.up input:not(:placeholder-shown){text-transform:uppercase}
+input::placeholder,textarea::placeholder{color:var(--t4);opacity:1}
+input.auto{color:var(--t4)}
+input[type=date]{min-height:1.35em}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+input[type=date]::-webkit-datetime-edit{padding:0;color:inherit}
+[type=date]::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:auto;height:auto;opacity:0;cursor:pointer}
+input[list]::-webkit-calendar-picker-indicator{display:none!important}
+.f input:is(:-webkit-autofill,:autofill),.g input:is(:-webkit-autofill,:autofill){-webkit-text-fill-color:var(--t2);box-shadow:0 0 0 100px var(--card) inset}
+.aux{position:absolute;right:18px;top:50%;transform:translateY(-50%);font:500 .8125rem/1 var(--font);color:var(--t3);font-variant-numeric:tabular-nums;pointer-events:none}
+.aux-in{margin-left:auto;font-variant-numeric:tabular-nums}
+.auto-lines{display:block;margin:2px 0 6px;font:400 .8125rem/1.45 var(--font);color:var(--t3);white-space:pre-wrap}
+.it2 .w{color:var(--fp-warn)}
+.item.editing .it2 .w{color:inherit}
+.rv{animation:fi .25s ease}
+.inp-row{display:flex;gap:10px;margin-bottom:14px}
+.inp-fields{flex:1;min-width:0;display:flex;flex-direction:column;border-radius:20px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.g{min-height:52px;border-bottom:1px solid var(--bdr2)}
+.inp-fields>:last-child{border-bottom:0}
+.g2{display:grid;grid-template-columns:1fr 104px;border-bottom:1px solid var(--bdr2)}
+.g2.even{grid-template-columns:1fr 1fr}
+.g2>.g{border-bottom:0}
+.g2>.g+.g{border-left:1px solid var(--bdr2);padding-left:18px}
+.g.tools{padding-right:150px}
+.tb{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;gap:6px}
+.tb .chip{display:inline-flex;align-items:center;min-height:30px;text-decoration:none}
+.tb .chip svg{width:14px;height:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;border-bottom:1px solid var(--bdr2)}
+.chips .chip{display:inline-flex;align-items:center;gap:5px;min-height:30px}
+.chips .chip svg{width:14px;height:14px}
+.inp-fields .srow{cursor:default}
+/* Add/Save is a real button styled like a selected segment, beside the shared bin/plus stepper. */
+.slbl.go{min-width:0;width:100%;border:0;background:var(--tab-active);color:var(--tab-active-c);cursor:pointer;text-align:left;transition:opacity .15s}
+.slbl.go svg{color:inherit;opacity:.8}
+.slbl.go>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slbl.go:active{opacity:.7}
+.calc{padding:10px 18px;border-bottom:1px solid var(--bdr2);font:500 .8125rem/1.2 var(--font);color:var(--t2);font-variant-numeric:tabular-nums;text-align:right}
+.calc:empty{display:none}
+.add-tall{width:44px;flex-shrink:0;border:none;border-radius:20px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s}
+.add-tall svg{width:20px;height:20px}
+.add-tall:active{opacity:.7}
+.items{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.items:empty{display:none}
+.item{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 18px;background:var(--card);border:1px solid transparent;border-radius:20px;box-shadow:var(--shadow);cursor:pointer;transition:opacity .2s ease,border-color .15s}
+/* The row being edited inverts like a selected segment. */
+.item.editing{background:var(--tab-active)}
+.item.editing .it1,.item.editing .it2,.item.editing .amt{color:var(--tab-active-c)}
+.item.editing .it2{opacity:.75}
+.item.editing .del{background:none;border-color:currentColor;color:var(--tab-active-c);opacity:.6}
+.item.removing{opacity:0;transition:opacity .1s ease}
+.item:active{opacity:.85}
+.it{flex:1;min-width:0}
+.it1{font:500 .9375rem/1.35 var(--font);color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.amt{flex-shrink:0;font:500 .9375rem/1 var(--font);color:var(--t2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.it2{font:400 .75rem/1.4 var(--font);color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .del{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg2);cursor:pointer;color:var(--t4);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,background .15s,border-color .15s}
+.item .del svg{width:14px;height:14px;pointer-events:none}
+.item .del:active{opacity:.7}
+.note{padding:14px 20px;font:400 .8125rem/1.5 var(--font);color:var(--t2)}
+.note+.note{padding-top:0}
+/* A row under a paragraph gets the usual row divider and the paragraph's size. */
+.note~.srow{border-top:1px solid var(--bdr2)}
+.note~.srow .slbl{font-size:.8125rem}
+.tot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--bdr2);font:500 .9375rem/1.2 var(--font);color:var(--t2)}
+.tot:last-child{border-bottom:0}
+.tot b{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tot.grand,.tot.grand b{font-weight:600}
+.ok{animation:none}
+.links>button:active:not([disabled]){opacity:.7}
+.drop-overlay svg{width:40px;height:40px}
+@media(hover:hover){
+  .add-tall:hover{color:var(--t1);background:var(--bg2)}
+  .item:hover{box-shadow:var(--shadow2)}
+  .item .del:hover{color:var(--t1);border-color:var(--t4)}
+  .tb .chip:hover{color:var(--t2)}
+}
+@media(max-width:380px){.g.tools{padding-right:130px}}
+</style>
+</head>
+<body>
+<main data-tier="m" id="main">
+<div class="card tier-card">
+  <div class="seg-row" role="radiogroup" aria-label="Fields Shown" id="tier">
+    <button type="button" class="seg" role="radio" data-tier="m">Mandatory</button>
+    <button type="button" class="seg" role="radio" data-tier="o">Optional</button>
+    <button type="button" class="seg" role="radio" data-tier="a">All</button>
+  </div>
+</div>
+<form id="f" autocomplete="on" novalidate>
+
+<section class="sec"><h3>You</h3>
+  <div class="card">
+    <div class="seg-row" role="radiogroup" aria-label="I Am A" id="crit" data-k="crit" tabindex="-1">
+      <button type="button" class="seg" role="radio" data-v="emp">Staff</button>
+      <button type="button" class="seg" role="radio" data-v="stu">Student</button>
+      <button type="button" class="seg" role="radio" data-v="vis">Visitor</button>
+    </div>
+    <div class="seg-row" role="radiogroup" aria-label="Contract" id="empType" data-k="empType" data-show="emp" hidden>
+      <button type="button" class="seg" role="radio" data-v="yes">Standard</button>
+      <button type="button" class="seg" role="radio" data-v="unitemps">Unitemps</button>
+      <button type="button" class="seg" role="radio" data-v="stp">STP</button>
+    </div>
+  </div>
+  <div class="row2">
+    <label class="f"><svg data-i="user"></svg><span class="fl">First Name<i>*</i></span><input id="first" data-k="first" autocomplete="given-name" autocapitalize="words" enterkeyhint="next"></label>
+    <label class="f"><span class="fl">Last Name<i>*</i></span><input id="last" data-k="last" autocomplete="family-name" autocapitalize="words" enterkeyhint="next"></label>
+  </div>
+  <label class="f"><svg data-i="mail"></svg><span class="fl">Email (For Remittance)<i>*</i></span><input id="email" data-k="email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"></label>
+  <label class="f"><svg data-i="building2"></svg><span class="fl">Department<i>*</i></span><input id="dept" data-k="dept" list="dl-dept" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+  <label class="f"><svg data-i="briefcase"></svg><span class="fl">Job Title<i>*</i></span><input id="job" data-k="job" autocomplete="organization-title" autocapitalize="words" enterkeyhint="next"></label>
+  <label class="f" data-t="o"><svg data-i="tag"></svg><span class="fl">Dept/Payment Ref</span><input id="ref" data-k="ref" maxlength="16" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"><span class="aux" id="ref-n"></span></label>
+</section>
+
+<section class="sec"><h3>Payment</h3>
+  <div class="card">
+    <div class="seg-row c2" role="radiogroup" aria-label="Bank Account" id="bank" data-k="bank">
+      <button type="button" class="seg" role="radio" data-v="uk">UK Account</button>
+      <button type="button" class="seg" role="radio" data-v="foreign">Foreign Account</button>
+    </div>
+  </div>
+  <div data-show="uk">
+    <div class="row2">
+      <label class="f"><svg data-i="hash"></svg><span class="fl">Sort Code<i>*</i></span><input id="sort" data-k="sort" data-f="sort" inputmode="numeric" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="next" placeholder="00-00-00"></label>
+      <label class="f"><span class="fl">Account Number<i>*</i></span><input id="acct" data-k="acct" data-f="digits" inputmode="numeric" maxlength="10" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+    </div>
+    <div id="slot-uk"><label class="f" id="w-bankName"><svg data-i="landmark"></svg><span class="fl" id="l-bankName">Bank/Building Society Name<i>*</i></span><input id="bankName" data-k="bankName" list="dl-banks" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label></div>
+    <label class="f" data-t="o"><svg data-i="userCheck"></svg><span class="fl">Account Holder's Name</span><input id="holder" data-k="holder" data-f="over" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+  </div>
+  <div data-show="foreign" hidden>
+    <label class="f up" data-show="iban"><svg data-i="creditCard"></svg><span class="fl">IBAN<i>*</i></span><input id="fp-iban" data-k="fp.iban" data-f="iban" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+    <div class="row2">
+      <label class="f"><svg data-i="globe"></svg><span class="fl">Bank Country<i>*</i></span><input id="fp-country" data-k="fp.country" data-f="country" list="dl-countries" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f up"><span class="fl">Account Currency<i>*</i></span><input id="fp-ccy" data-k="fp.ccy" data-f="ccy" list="dl-ccy" maxlength="3" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+    </div>
+    <label class="f up"><svg data-i="hash"></svg><span class="fl">BIC/SWIFT Code<i>*</i></span><input id="fp-bic" data-k="fp.bic" data-f="upper" maxlength="14" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+    <div id="slot-foreign"></div>
+    <label class="f"><svg data-i="hash"></svg><span class="fl">Account No<i>*</i></span><input id="fp-acctNo" data-k="fp.acctNo" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+    <label class="f up" id="w-fp-clearing"><svg data-i="route"></svg><span class="fl"><span id="l-fp-clearing">Clearing Code</span><i>*</i></span><input id="fp-clearing" data-k="fp.clearing" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+    <label class="f" id="w-fp-clearingExtra" data-t="o"><svg data-i="fileText"></svg><span class="fl" id="l-fp-clearingExtra">Additional Clearing Information</span><input id="fp-clearingExtra" data-k="fp.clearingExtra" maxlength="150" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f" data-t="o"><svg data-i="landmark"></svg><span class="fl">Branch Name Or Number</span><input id="fp-branch" data-k="fp.branch" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f" data-t="o"><svg data-i="mapPin"></svg><span class="fl">Bank Street</span><input id="fp-bStreet" data-k="fp.bStreet" autocomplete="off" enterkeyhint="next"></label>
+    <div class="row2">
+      <label class="f"><svg data-i="mapPin"></svg><span class="fl">Bank City<i>*</i></span><input id="fp-bCity" data-k="fp.bCity" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f" data-t="o"><span class="fl">Bank Post Code</span><input id="fp-bPost" data-k="fp.bPost" autocomplete="off" enterkeyhint="next"></label>
+    </div>
+    <label class="f" data-t="o"><svg data-i="mapPin"></svg><span class="fl">Bank Province/State</span><input id="fp-bProv" data-k="fp.bProv" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f"><svg data-i="phone"></svg><span class="fl">Your Telephone<i>*</i></span><input id="fp-phone" data-k="fp.phone" type="tel" maxlength="30" autocomplete="tel" enterkeyhint="next"></label>
+    <label class="f"><svg data-i="house"></svg><span class="fl">Your Street And Number<i>*</i></span><input id="fp-street" data-k="fp.street" autocomplete="address-line1" enterkeyhint="next"></label>
+    <div class="row2">
+      <label class="f"><svg data-i="mapPin"></svg><span class="fl">City<i>*</i></span><input id="fp-city" data-k="fp.city" autocomplete="address-level2" enterkeyhint="next"></label>
+      <label class="f"><span class="fl">Post/Zip Code<i>*</i></span><input id="fp-post" data-k="fp.post" maxlength="20" autocomplete="postal-code" enterkeyhint="next"></label>
+    </div>
+    <div class="row2">
+      <label class="f" data-t="o"><svg data-i="mapPin"></svg><span class="fl">Province/State</span><input id="fp-prov" data-k="fp.prov" autocomplete="address-level1" enterkeyhint="next"></label>
+      <label class="f"><span class="fl">Country<i>*</i></span><input id="fp-countryName" data-k="fp.countryName" autocomplete="country-name" enterkeyhint="next"></label>
+    </div>
+    <div class="card" data-t="o">
+      <div class="seg-row" role="radiogroup" aria-label="Routing" id="fp-route" data-k="fp.route">
+        <button type="button" class="seg" role="radio" data-v="direct">Direct</button>
+        <button type="button" class="seg" role="radio" data-v="inter">Intermediary</button>
+        <button type="button" class="seg" role="radio" data-v="further">Further Credit</button>
+      </div>
+    </div>
+    <div data-show="inter" hidden>
+      <label class="f"><svg data-i="landmark"></svg><span class="fl">Intermediary Bank Name<i>*</i></span><input id="fp-inter-name" data-k="fp.inter.name" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="hash"></svg><span class="fl">Intermediary Account Number</span><input id="fp-inter-acct" data-k="fp.inter.acct" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      <div class="row2">
+        <label class="f up"><svg data-i="hash"></svg><span class="fl">Intermediary SWIFT<i>*</i></span><input id="fp-inter-swift" data-k="fp.inter.swift" data-f="upper" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+        <label class="f"><span class="fl">Intermediary Routing</span><input id="fp-inter-routing" data-k="fp.inter.routing" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      </div>
+    </div>
+    <div data-show="further" hidden>
+      <label class="f"><svg data-i="landmark"></svg><span class="fl">Recipient Name (Your Bank)<i>*</i></span><input id="fp-further-recipient" data-k="fp.further.recipient" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="landmark"></svg><span class="fl">Name Of The Recipient Bank<i>*</i></span><input id="fp-further-bank" data-k="fp.further.bank" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="hash"></svg><span class="fl">Recipient Bank Account Number</span><input id="fp-further-acct" data-k="fp.further.acct" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      <div class="row2">
+        <label class="f up"><svg data-i="hash"></svg><span class="fl">Recipient BIC/SWIFT</span><input id="fp-further-bic" data-k="fp.further.bic" data-f="upper" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+        <label class="f"><span class="fl">Recipient Routing/ABA</span><input id="fp-further-aba" data-k="fp.further.aba" inputmode="numeric" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      </div>
+      <label class="f"><svg data-i="hash"></svg><span class="fl">Final Credit Account Number<i>*</i></span><input id="fp-further-finalAcct" data-k="fp.further.finalAcct" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="user"></svg><span class="fl">Final Credit Account Name<i>*</i></span><input id="fp-further-finalName" data-k="fp.further.finalName" autocomplete="off" enterkeyhint="next"></label>
+    </div>
+    <label class="f" data-t="o"><svg data-i="fileText"></svg><span class="fl">Additional Information</span><input id="fp-info" data-k="fp.info" maxlength="150" autocomplete="off" enterkeyhint="next"></label>
+  </div>
+</section>
+
+<section class="sec"><h3>Expenses</h3>
+  <div class="inp-row" id="e-card">
+    <div class="inp-fields">
+      <div class="chips" id="e-chips"></div>
+      <label class="g"><svg data-i="receipt"></svg><span class="fl">Type</span><input id="draft-e-type" data-k="draft.e.type" list="dl-types" maxlength="29" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+      <div class="g2">
+        <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-e-amt" data-k="draft.e.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0.00"></label>
+        <label class="g up"><span class="fl">Currency</span><input id="draft-e-ccy" data-k="draft.e.ccy" list="dl-ccy" maxlength="3" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+      </div>
+      <label class="g"><svg data-i="calendar"></svg><span class="fl">Expense Date</span><input id="draft-e-date" data-k="draft.e.date" type="date" enterkeyhint="next"></label>
+      <label class="g"><svg data-i="mapPinned"></svg><span class="fl">Business Location</span><input id="draft-e-place" data-k="draft.e.place" placeholder="e.g. London" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+      <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Business Purpose</span><input id="draft-e-purpose" data-k="draft.e.purpose" placeholder="e.g. ABC Conference" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
+      <label class="g" data-show="e-fx" hidden><svg data-i="handCoins"></svg><span class="fl"><span>To Be Repaid (<span id="e-bank-ccy">GBP</span>)</span></span><input id="draft-e-repaid" data-k="draft.e.repaid" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+      <label class="g" data-show="e-taxi" hidden><svg data-i="carTaxiFront"></svg><span class="fl">Reason For Taxi</span><input id="draft-e-taxiWhy" data-k="draft.e.taxiWhy" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
+      <label class="g" data-show="e-ent" hidden><svg data-i="user"></svg><span class="fl">Guests &amp; Organisation</span><input id="draft-e-guests" data-k="draft.e.guests" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+      <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+      <label class="g" data-t="o"><svg data-i="receiptText"></svg><span class="fl">Receipt Ref</span><input id="draft-e-ref" data-k="draft.e.ref" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
+      <div class="srow" id="e-bar"><button type="button" class="slbl go" id="e-go"><svg data-i="receipt"></svg><span id="e-sum">Add Expense</span></button><div class="stepper"><button type="button" class="step-btn" id="e-bin" aria-label="Discard"><svg data-i="trash2"></svg></button><button type="button" class="step-btn" id="e-add" data-n="Expense"></button></div></div>
+    </div>
+  </div>
+  <div class="items" id="e-list"></div>
+</section>
+
+<section class="sec"><h3>Mileage</h3>
+  <div class="card links" data-show="m-closed"><button type="button" id="m-open"><svg data-i="car"></svg><span>Add Journey</span></button></div>
+  <div class="inp-row" id="m-card" data-show="m-card" hidden>
+    <div class="inp-fields">
+      <div class="seg-row" role="radiogroup" aria-label="Vehicle" id="draft-m-veh" data-k="draft.m.veh">
+        <button type="button" class="seg" role="radio" data-v="car">Car</button>
+        <button type="button" class="seg" role="radio" data-v="moto">Motorcycle</button>
+        <button type="button" class="seg" role="radio" data-v="bike">Bicycle</button>
+      </div>
+      <div class="seg-row c4" role="radiogroup" aria-label="Rate" id="draft-m-rateType" data-k="draft.m.rateType" data-t="o">
+        <button type="button" class="seg" role="radio" data-v="std">Standard</button>
+        <button type="button" class="seg" role="radio" data-v="over">10,000+ Mi</button>
+        <button type="button" class="seg" role="radio" data-v="school">School</button>
+        <button type="button" class="seg" role="radio" data-v="interview">Interview</button>
+      </div>
+      <label class="g" data-t="o"><svg data-i="percent"></svg><span class="fl">Rate (£ Per Mile)</span><input id="draft-m-rate" data-k="draft.m.rate" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+      <label class="g"><svg data-i="calendar"></svg><span class="fl">Journey Date</span><input id="draft-m-date" data-k="draft.m.date" type="date" enterkeyhint="next"></label>
+      <div class="g2 even">
+        <label class="g up"><svg data-i="mapPin"></svg><span class="fl">From Postcode</span><input id="draft-m-from" data-k="draft.m.from" maxlength="8" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+        <label class="g up"><span class="fl">To Postcode</span><input id="draft-m-to" data-k="draft.m.to" maxlength="8" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+      </div>
+      <label class="g tools"><svg data-i="gauge"></svg><span class="fl">Miles</span><input id="draft-m-mi" data-k="draft.m.mi" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0">
+        <span class="tb"><button type="button" class="chip" id="m-ret" aria-pressed="false">Return</button><a class="chip" id="m-map" target="_blank" rel="noopener" aria-label="Directions" hidden><svg data-i="externalLink"></svg></a></span></label>
+      <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Details</span><input id="draft-m-why" data-k="draft.m.why" maxlength="60" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
+      <label class="g" data-show="m-fx" hidden><svg data-i="handCoins"></svg><span class="fl"><span>To Be Repaid (<span id="m-bank-ccy">GBP</span>)</span></span><input id="draft-m-repaid" data-k="draft.m.repaid" inputmode="decimal" autocomplete="off" enterkeyhint="done"></label>
+      <div class="calc" id="m-calc"></div>
+      <div class="srow" id="m-bar"><button type="button" class="slbl go" id="m-go"><svg data-i="car"></svg><span id="m-sum">Add Journey</span></button><div class="stepper"><button type="button" class="step-btn" id="m-bin" aria-label="Discard"><svg data-i="trash2"></svg></button><button type="button" class="step-btn" id="m-add" data-n="Journey"></button></div></div>
+    </div>
+  </div>
+  <div class="items" id="m-list"></div>
+</section>
+
+<section class="sec" data-show="fx" hidden><h3>Exchange</h3>
+  <div id="fx-rows"></div>
+  <label class="f"><svg data-i="fileCheck"></svg><span class="fl">Obtained From (Include Proof)<i>*</i></span><input id="fxSrc" data-k="fxSrc" list="dl-src" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+</section>
+
+<section class="sec" data-t="o"><h3>Cap</h3>
+  <div class="card"><div class="srow" id="cap-on" data-k="cap.on" role="checkbox" tabindex="0"><span class="slbl"><svg data-i="scale"></svg><span>A Cap Applies</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div></div>
+  <div data-show="cap" hidden>
+    <div class="row2">
+      <label class="f"><svg data-i="scale"></svg><span class="fl">Cap Amount<i>*</i></span><input id="cap-amt" data-k="cap.amt" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f up"><span class="fl">Cap Currency</span><input id="cap-ccy" data-k="cap.ccy" data-f="ccy" list="dl-ccy" maxlength="3" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
+    </div>
+    <label class="f" data-show="cap-conv" hidden><svg data-i="arrowRightLeft"></svg><span class="fl"><span>Cap Converted (<span id="cap-bank-ccy">GBP</span>)</span></span><input id="cap-conv" data-k="cap.conv" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f"><svg data-i="circleMinus"></svg><span class="fl">Claim To Be Reduced By</span><input id="cap-reduce" data-k="cap.reduce" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+  </div>
+</section>
+
+<section class="sec" data-t="o"><h3>Additional Comments</h3>
+  <label class="f ta"><svg data-i="messageSquareText"></svg><span class="fl">Comments<span class="aux-in" id="comments-n"></span></span><span class="auto-lines" id="auto-comments" hidden></span><textarea id="comments" data-k="comments" rows="1" maxlength="400" autocapitalize="sentences"></textarea></label>
+</section>
+
+<section class="sec"><h3>Declaration</h3>
+  <div class="card">
+    <p class="note">I request reimbursement of the expenses, specified above, incurred necessarily on University business. I confirm that I have personally incurred the expenditure and have not reclaimed it by any other method.</p>
+    <p class="note" data-show="miles" hidden>In claiming business mileage for the use of my private vehicle, I confirm that I have valid &amp; appropriate vehicle insurance for business use, my vehicle has a valid road fund licence &amp; MOT certificate &amp; my vehicle is serviced &amp; maintained in a safe &amp; roadworthy condition. (The University of Warwick reserves the right to check documents &amp; inspect private vehicles at any time).</p>
+    <div class="srow" id="declared" data-k="declared" role="checkbox" tabindex="0"><span class="slbl"><svg data-i="badgeCheck"></svg><span>I Confirm<i class="star">*</i></span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
+  </div>
+  <label class="f" data-t="o"><svg data-i="penLine"></svg><span class="fl">Signature</span><input id="sigName" data-k="sigName" data-f="over" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+  <label class="f"><svg data-i="calendar"></svg><span class="fl">Date</span><input id="sigDate" data-k="sigDate" type="date" enterkeyhint="next"></label>
+</section>
+
+<section class="sec" data-t="d"><h3>For Departmental Use</h3>
+  <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Vendor Number</span><input id="vendor" data-k="vendor" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+  <div class="inp-row" id="c-card">
+    <div class="inp-fields">
+      <div class="g2 even">
+        <label class="g up"><svg data-i="folderKanban"></svg><span class="fl">GL Code</span><input id="draft-c-gl" data-k="draft.c.gl" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+        <label class="g up"><span class="fl">Cost Centre / Project</span><input id="draft-c-cc" data-k="draft.c.cc" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      </div>
+      <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-c-amt" data-k="draft.c.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+      <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Business Purpose</span><input id="draft-c-purpose" data-k="draft.c.purpose" autocomplete="off" autocapitalize="sentences" enterkeyhint="done"></label>
+    </div>
+    <button type="button" class="add-tall" id="c-add" data-n="Code"></button>
+  </div>
+  <div class="items" id="c-list"></div>
+  <label class="f"><svg data-i="stamp"></svg><span class="fl">Department Signature</span><input id="auth-deptSig" data-k="auth.deptSig" autocomplete="off" enterkeyhint="next"></label>
+  <div class="row2">
+    <label class="f"><svg data-i="calendar"></svg><span class="fl">Date</span><input id="auth-deptDate" data-k="auth.deptDate" type="date" enterkeyhint="next"></label>
+    <label class="f"><span class="fl">Print Name And Title</span><input id="auth-deptPrint" data-k="auth.deptPrint" autocomplete="off" enterkeyhint="next"></label>
+  </div>
+  <label class="f"><svg data-i="stamp"></svg><span class="fl">University Level Authorisation</span><input id="auth-uniSig" data-k="auth.uniSig" autocomplete="off" enterkeyhint="next"></label>
+  <div class="row2">
+    <label class="f"><svg data-i="calendar"></svg><span class="fl">Date</span><input id="auth-uniDate" data-k="auth.uniDate" type="date" enterkeyhint="next"></label>
+    <label class="f"><span class="fl">Print Name And Title</span><input id="auth-uniPrint" data-k="auth.uniPrint" autocomplete="off" enterkeyhint="next"></label>
+  </div>
+  <label class="f"><svg data-i="userPen"></svg><span class="fl">Expense Team Approval</span><input id="auth-expTeam" data-k="auth.expTeam" autocomplete="off" enterkeyhint="next"></label>
+  <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Document Number</span><input id="auth-docNo" data-k="auth.docNo" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
+</section>
+
+</form>
+
+<section class="sec"><h3>Totals</h3>
+  <div class="card tots" aria-live="polite">
+    <div class="tot"><span>Mileage Total</span><b id="t-m"></b></div>
+    <div class="tot"><span>Travel &amp; Subsistence Total</span><b id="t-e"></b></div>
+    <div class="tot" data-show="cap" hidden><span>Claim Reduced By</span><b id="t-c"></b></div>
+    <div class="tot grand"><span>Grand Total</span><b id="t-g"></b></div>
+  </div>
+</section>
+
+<div class="card links" id="actions">
+  <button type="button" id="a-imp" data-l="Import"><svg class="id" data-i="fileUp"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Import</span></button>
+  <button type="button" id="a-copy" data-l="Copy"><svg class="id" data-i="copy"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
+  <button type="button" id="a-dl" data-l="Download"><svg class="id" data-i="download"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
+  <button type="button" id="a-dlf" data-l="Download Foreign Payments Form" data-show="foreign" hidden><svg class="id" data-i="download"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download Foreign Payments Form</span></button>
+  <button type="button" id="a-new"><svg class="id" data-i="filePlus"></svg><span>New Claim</span></button>
+  <button type="button" id="a-reset"><svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset All</span></button>
+</div>
+<input type="file" id="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
+<datalist id="dl-dept"></datalist><datalist id="dl-banks"></datalist><datalist id="dl-ccy"></datalist><datalist id="dl-countries"></datalist><datalist id="dl-types"></datalist><datalist id="dl-src"></datalist>
+</main>
+<div class="drop-overlay" id="drop"><svg data-i="fileUp"></svg>Drop FP16a Here</div>
+<nav aria-label="Primary"><div class="tabs"><a href="/">Home</a><a class="active">FP16A</a></div><div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div></nav>
+<script src="/shared/base.js?v=25"></script>
+<script>
+/* -- fp16a:zip -- */
+class Fp16aError extends Error{constructor(reason,detail){super(reason+(detail?': '+detail:''));this.name='Fp16aError';this.reason=reason;this.detail=detail}}
+const zip=(()=>{
+  const E=(r,d)=>new Fp16aError(r,d),M32=0xFFFFFFFF,te=new TextEncoder(),td=new TextDecoder();
+  const T=new Uint32Array(256);
+  for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;T[n]=c}
+  const crc32=u8=>{let c=~0;for(let i=0;i<u8.length;i++)c=T[(c^u8[i])&255]^(c>>>8);return ~c>>>0};
+
+  const pump=async(u8,ts)=>new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(ts)).arrayBuffer());
+  const deflateRaw=u8=>pump(u8,new CompressionStream('deflate-raw'));
+  const inflateRaw=async(u8,expectLen)=>{
+    let out;
+    try{out=await pump(u8,new DecompressionStream('deflate-raw'))}catch{throw E('inflate')}
+    // the length check also catches truncated streams that some runtimes end without an error
+    if(out.length!==expectLen)throw E('inflate');
+    return out;
+  };
+
+  const readZip=u8=>{
+    const n=u8.length,dv=new DataView(u8.buffer,u8.byteOffset,n),u16=p=>dv.getUint16(p,true),u32=p=>dv.getUint32(p,true);
+    if([0xD0,0xCF,0x11,0xE0].every((b,i)=>u8[i]===b))throw E('cfb');
+    let eo=-1;
+    for(let p=n-22;p>=Math.max(0,n-65557);p--)if(u32(p)===0x06054b50&&p+22+u16(p+20)===n){eo=p;break}
+    if(eo<0)throw E('not-zip');
+    const cnt=u16(eo+10),cs=u32(eo+12),co=u32(eo+16),cend=co+cs;
+    if(cnt===0xFFFF||cs===M32||co===M32)throw E('zip64');
+    if(cnt>1000)throw E('too-many');
+    if(cend>eo)throw E('corrupt');
+    const fit=(p,k,end)=>{if(p+k>end)throw E('corrupt')};
+    const entries=[],seen=new Set();
+    let p=co,total=0;
+    for(let i=0;i<cnt;i++){
+      fit(p,46,cend);
+      if(u32(p)!==0x02014b50)throw E('corrupt');
+      const nl=u16(p+28),len=46+nl+u16(p+30)+u16(p+32),lo=u32(p+42);
+      fit(p,len,cend);
+      const e={name:td.decode(u8.subarray(p+46,p+46+nl)),flags:u16(p+8),method:u16(p+10),time:u16(p+12),date:u16(p+14),
+        crc:u32(p+16),csize:u32(p+20),usize:u32(p+24),vneed:u16(p+6),iattr:u16(p+36),eattr:u32(p+38)};
+      if(e.flags&1)throw E('encrypted',e.name);
+      if(e.csize===M32||e.usize===M32||lo===M32)throw E('zip64',e.name);
+      if(e.method!==0&&e.method!==8)throw E('method',e.name);
+      if(seen.has(e.name))throw E('duplicate',e.name);
+      if(e.usize>16<<20||(total+=e.usize)>64<<20)throw E('too-large',e.name);
+      if(!e.method&&e.csize!==e.usize)throw E('corrupt',e.name);
+      fit(lo,30,n);
+      if(u32(lo)!==0x04034b50)throw E('corrupt',e.name);
+      // local extra length may differ from the central one (Excel pads locals), so offsets come from the local header
+      const d=lo+30+u16(lo+26)+u16(lo+28);
+      fit(d,e.csize,n);
+      e.data=u8.subarray(d,d+e.csize);
+      seen.add(e.name);entries.push(e);p+=len;
+    }
+    return {u8,entries};
+  };
+
+  const readBytes=async(z,name)=>{
+    const e=z.entries.find(e=>e.name===name);
+    if(!e)throw E('missing',name);
+    const out=e.method?await inflateRaw(e.data,e.usize):e.data.slice();
+    if(crc32(out)!==e.crc)throw E('crc',name);
+    return out;
+  };
+  // TextDecoder drops a leading BOM by default
+  const readText=async(z,name)=>td.decode(await readBytes(z,name));
+
+  const rewriteZip=async(z,changes)=>{
+    for(const k of Object.keys(changes))if(!z.entries.some(e=>e.name===k))throw E('missing',k);
+    const items=(await Promise.all(z.entries.map(async e=>{
+      // hasOwn: an entry named e.g. "constructor" must not pick up Object.prototype members
+      if(!Object.hasOwn(changes,e.name))return e;
+      const c=changes[e.name];
+      if(c===null)return null;
+      if(typeof c!=='string')throw new TypeError('rewriteZip: change for '+e.name+' must be a string or null');
+      const b=te.encode(c),crc=crc32(b);
+      if(crc===e.crc&&b.length===e.usize)return e;
+      const data=await deflateRaw(b);
+      return {...e,method:8,crc,csize:data.length,usize:b.length,vneed:Math.max(e.vneed,20),data};
+    }))).filter(Boolean);
+    const names=items.map(e=>te.encode(e.name));
+    const lsize=items.reduce((s,e,i)=>s+30+names[i].length+e.csize,0),csize=names.reduce((s,b)=>s+46+b.length,0);
+    const out=new Uint8Array(lsize+csize+22),dv=new DataView(out.buffer);
+    let o=0;
+    const u16=v=>{dv.setUint16(o,v,true);o+=2},u32=v=>{dv.setUint32(o,v,true);o+=4},put=b=>{out.set(b,o);o+=b.length};
+    // vneed..extraLen is the same 26-byte run in local (at +4) and central (at +6) headers; extras are never written
+    const shared=(e,nb)=>{u16(e.vneed);u16(e.flags&~8);u16(e.method);u16(e.time);u16(e.date);u32(e.crc);u32(e.csize);u32(e.usize);u16(nb.length);u16(0)};
+    const offs=items.map((e,i)=>{const lo=o;u32(0x04034b50);shared(e,names[i]);put(names[i]);put(e.data);return lo});
+    items.forEach((e,i)=>{u32(0x02014b50);u16(0x2D);shared(e,names[i]);u16(0);u16(0);u16(e.iattr);u32(e.eattr);u32(offs[i]);put(names[i])});
+    u32(0x06054b50);u16(0);u16(0);u16(items.length);u16(items.length);u32(csize);u32(lsize);u16(0);
+    return out;
+  };
+
+  return {crc32,inflateRaw,deflateRaw,readZip,readText,readBytes,rewriteZip};
+})();
+/* -- end fp16a:zip -- */
+/* -- fp16a:sheet -- */
+const sheet=(()=>{
+const SH='xl/worksheets/sheet1.xml',WB='xl/workbook.xml',DR='xl/drawings/drawing1.xml',SS='xl/sharedStrings.xml';
+const colNum=s=>[...s].reduce((n,ch)=>n*26+ch.charCodeAt(0)-64,0);
+const splitRef=ref=>{const m=/^([A-Z]{1,3})(\d+)$/.exec(ref);return[m[1],+m[2]]};
+// Excel insert-before semantics: every row at or below an insertion point moves down by its count.
+const rowShifter=ins=>r=>ins.reduce((x,i)=>x+(i.at<=r?i.count:0),r);
+// Skips "literals", function names (ref followed by "("), refs glued to a name, and other-sheet refs incl. the far end of their ranges.
+const TOK=/"(?:[^"]|"")*"|(?<![\w.$'!])((?:'(?:[^']|'')+'|[A-Za-z_][\w.]*)!)?(\$?[A-Z]{1,3})(\$?)(\d+)(?![\w(!])/g;
+const mapRefs=(text,own,fn)=>{let skip=-1;return text.replace(TOK,(m,q,c,abs,r,off)=>{
+  if(c===undefined)return m;
+  if(off===skip||q&&q.slice(0,-1).replace(/^'([\s\S]*)'$/,'$1').replace(/''/g,"'")!==own){if(text[off+m.length]===':')skip=off+m.length+1;return m}
+  return(q||'')+c+abs+fn(+r,abs==='$');
+})};
+const shiftFormula=(text,F,own)=>mapRefs(text,own,r=>F(r));
+const copyFormula=(text,d,own)=>mapRefs(text,own,(r,abs)=>abs?r:r+d);
+const ROW=/<row\s[^>]*?(?:\/>|>[\s\S]*?<\/row>)/g,CELL=/<c r="([A-Z]{1,3}\d+)"((?:\s+[\w:]+="[^"]*")*)\s*(?:\/>|>([\s\S]*?)<\/c>)/g;
+const rowNum=x=>+/^<row\s[^>]*?\br="(\d+)"/.exec(x)[1];
+const renum=(x,to)=>x.replace(/^(<row\s[^>]*?\br=")\d+"/,(m,p)=>p+to+'"').replace(/(<c r="[A-Z]{1,3})\d+"/g,(m,p)=>p+to+'"');
+const mapF=(x,fn)=>x.replace(/<f(?=[\s>])([^>]*?)(\/>|>([^<]*)<\/f>)/g,(m,a,e,t)=>{a=a.replace(/(\sref=")([^"]*)"/,(mm,p,v)=>p+fn(v)+'"');return t===undefined?`<f${a}/>`:`<f${a}>${fn(t)}</f>`});
+const drift=msg=>new Fp16aError('template-drift',msg);
+// Clones carry styles and shared-formula children only: values, inline strings and types are dropped.
+const cloneRow=(x,to,d,F,own)=>{
+  if(/<f(?=[\s>])[^>]*\sref="/.test(x))throw drift('clone row holds a shared formula master');
+  x=renum(x,to).replace(/<(v|is)>[\s\S]*?<\/\1>/g,'').replace(/(<c\s[^>]*?)\st="\w+"/g,'$1');
+  return mapF(x,t=>copyFormula(shiftFormula(t,F,own),d,own)).replace(/(<c\s[^>]*?)><\/c>/g,'$1/>');
+};
+const shiftAttrs=(x,F,own)=>x.replace(/(\s(?:ref|sqref|activeCell|topLeftCell)=")([^"]*)"/g,(m,p,v)=>p+shiftFormula(v,F,own)+'"');
+const insertRows=(xml,ins,own)=>{
+  if(!ins.length)return xml;
+  const F=rowShifter(ins),a=xml.indexOf('<sheetData>')+11,b=xml.indexOf('</sheetData>'),data=xml.slice(a,b);
+  const rows=data.match(ROW)||[],byNum=new Map(rows.map(x=>[rowNum(x),x]));
+  if(rows.join('')!==data)throw drift('sheetData holds more than rows');
+  for(const i of ins)if(!byNum.has(i.at)||!byNum.has(i.clone))throw drift('insert row '+i.at);
+  let body='';
+  for(const x of rows){
+    const r=rowNum(x);
+    for(const i of ins)if(i.at===r)for(let k=0,to=F(r)-i.count;k<i.count;k++,to++)body+=cloneRow(byNum.get(i.clone),to,to-F(i.clone),F,own);
+    body+=mapF(renum(x,F(r)),t=>shiftFormula(t,F,own));
+  }
+  const add=[];
+  for(const i of ins)for(const m of xml.matchAll(/<mergeCell ref="([A-Z]{1,3})(\d+):([A-Z]{1,3})(\d+)"\/>/g))
+    if(+m[2]===i.clone&&+m[4]===i.clone)for(let k=0,to=F(i.at)-i.count;k<i.count;k++,to++)add.push(`<mergeCell ref="${m[1]}${to}:${m[3]}${to}"/>`);
+  const tail=shiftAttrs(xml.slice(b),F,own)
+    .replace(/<mergeCells count="(\d+)">([\s\S]*?)<\/mergeCells>/,(m,n,inner)=>`<mergeCells count="${+n+add.length}">${inner}${add.join('')}</mergeCells>`)
+    .replace(/<colBreaks\b[\s\S]*?<\/colBreaks>/,x=>x.replace(/(\smax=")(\d+)"/g,(m,p,v)=>p+(+v>=1048575?v:F(+v+1)-1)+'"'));
+  return shiftAttrs(xml.slice(0,a),F,own)+body+tail;
+};
+const shiftWorkbook=(xml,F,own)=>xml.replace(/(<definedName\b[^>]*>)([^<]*)(<\/definedName>)/g,(m,a,t,b)=>a+shiftFormula(t,F,own)+b);
+// Anchor rows are 0-based.
+const shiftDrawing=(xml,F)=>xml.replace(/<xdr:row>(\d+)<\/xdr:row>/g,(m,n)=>`<xdr:row>${F(+n+1)-1}</xdr:row>`);
+const ESC={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'},ENT={lt:'<',gt:'>',amp:'&',quot:'"',apos:"'"};
+// Excel caps a cell at 32,767 chars and reads a literal _xHHHH_ as an escape unless its underscore is escaped.
+const xmlText=s=>{
+  s=String(s).replace(/\r\n?/g,'\n').replace(/[^\t\n\x20-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu,'');
+  if(s.length>32767)s=s.slice(0,s.charCodeAt(32766)>>10===0x36?32766:32767);
+  return s.replace(/_(x[0-9A-Fa-f]{4}_)/g,'_x005F_$1').replace(/[&<>"]/g,c=>ESC[c]);
+};
+const xmlDecode=s=>s.replace(/&(?:#x([0-9a-f]+)|#(\d+)|(\w+));/gi,(m,h,d,n)=>h?String.fromCodePoint(parseInt(h,16)):d?String.fromCodePoint(+d):ENT[n]??m)
+  .replace(/_x([0-9A-Fa-f]{4})_/g,(m,h)=>String.fromCharCode(parseInt(h,16)));
+const setCells=(xml,cells)=>{
+  const todo=new Map([...cells].filter(([,v])=>v!==''&&v!=null));
+  const out=xml.replace(/<c r="([A-Z]{1,3}\d+)"((?: s="\d+")?)\/>/g,(m,ref,s)=>{
+    if(!todo.has(ref))return m;
+    const v=todo.get(ref);todo.delete(ref);
+    if(typeof v!=='number')return`<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xmlText(v)}</t></is></c>`;
+    if(!Number.isFinite(v))throw new Fp16aError('number',ref);
+    return`<c r="${ref}"${s}><v>${v}</v></c>`;
+  });
+  if(todo.size)throw new Fp16aError('cell-missing',[...todo.keys()].join(' '));
+  return out;
+};
+// Formula cells only; a clone's shared child has no <v> yet, so one is inserted.
+const setCached=(xml,vals)=>{
+  const todo=new Map(vals);
+  const out=xml.replace(/<c r="([A-Z]{1,3}\d+)"((?: s="\d+")?)>(<f(?=[\s>])[^>]*?(?:\/>|>[^<]*<\/f>))(?:<v>[^<]*<\/v>)?<\/c>/g,(m,ref,s,f)=>{
+    if(!todo.has(ref))return m;
+    const v=todo.get(ref);todo.delete(ref);
+    if(!Number.isFinite(v))throw new Fp16aError('number',ref);
+    return`<c r="${ref}"${s}>${f}<v>${v}</v></c>`;
+  });
+  if(todo.size)throw new Fp16aError('cell-missing',[...todo.keys()].join(' '));
+  return out;
+};
+const isoToSerial=iso=>Date.UTC(+iso.slice(0,4),+iso.slice(5,7)-1,+iso.slice(8,10))/864e5+25569;
+const serialToIso=n=>new Date((Math.floor(n)-25569)*864e5).toISOString().slice(0,10);
+const runs=x=>{let s='';for(const m of x.replace(/<rPh\b[\s\S]*?<\/rPh>/g,'').matchAll(/<t(?:\s[^>]*)?>([^<]*)<\/t>/g))s+=m[1];return xmlDecode(s)};
+const parseSst=xml=>[...xml.matchAll(/<si>([\s\S]*?)<\/si>|<si\/>/g)].map(m=>runs(m[1]||''));
+const readCells=(xml,sst)=>{
+  const out=new Map();
+  for(const[,ref,a,body]of xml.matchAll(CELL)){
+    if(!body)continue;
+    const t=/\st="(\w+)"/.exec(a)?.[1],v=/<v>([^<]*)<\/v>/.exec(body)?.[1];
+    const val=t==='inlineStr'?runs(/<is>([\s\S]*?)<\/is>/.exec(body)?.[1]||''):v===undefined||t==='e'||t==='b'?'':t==='s'?sst[+v]??'':t==='str'||t==='d'?xmlDecode(v):v===''?'':+v;
+    if(val!=='')out.set(ref,val);
+  }
+  return out;
+};
+const LAYOUT={
+  fp16a:{
+    sheet:'Sheet1',dim:'A1:BW99',rows:99,merges:264,names:['Sheet1!$A$1:$BW$99'],
+    cells:{vendor:['BB9',52],name:['F10',136],dept:['AR10',50],job:['F11',136],email:['AR11',136],ref:['Q12',208],emp:['Y14',61],stu:['Y15',67],vis:['Y16',67],
+      bankName:['J18',136],acct:['J19',39],sort:['AR19',39],holder:['S20',44],capAmt:['A58',171],capCcy:['T58',171],capConv:['AJ58',171],capConvCcy:['BJ58',171],
+      capReduce:['BR58',189],capReduceCcy:['BW58',19],fx:['Q60',124],fxSrc:['Q61',124],grandCcy:['AW61',111],comments:['A74',96],sig:['P81',124],sigDate:['BA81',157],
+      deptSig:['P91',124],deptDate:['BA91',157],deptPrint:['P92',167],uniSig:['P93',124],uniDate:['BA93',157],uniPrint:['P94',167],expTeam:['P95',151],docNo:['AO96',136]},
+    // Rows are inserted at the table's last row (cloning the one above it) so its bottom border stays last.
+    tables:{
+      miles:{first:31,cap:4,cols:{date:'A',from:'F',to:'M',mi:'Q',rate:'AA',why:'AF',repaid:'BR'},gbp:'BJ',ccy:'BW',total:'BR35',spans:'A:E F:L M:P Q:Z AA:AE AF:BI BJ:BQ BR:BV',head:'Q29',foot:'AW35'},
+      exps:{first:41,cap:12,cols:{ref:'A',date:'C',type:'F',purpose:'R',amt:'BJ',ccy:'BO',repaid:'BR'},ccy:'BW',total:'BR53',spans:'A:B C:E F:Q R:BI BJ:BN BO:BQ BR:BV',head:'A39',foot:'AT53'},
+      codes:{first:85,cap:4,cols:{gl:'A',cc:'M',amt:'AJ',purpose:'AO'},spans:'A:L M:AI AJ:AN AO:BW',head:'A84',foot:'A89'}
+    },
+    grand:'BR61',
+    formulas:{BJ31:'<f>Q31*AA31</f>',BJ32:'<f t="shared" ref="BJ32:BJ34" si="0">Q32*AA32</f>',BJ33:'<f t="shared" si="0"/>',BJ34:'<f t="shared" si="0"/>',
+      BR35:'<f>SUM(BR31:BV34)</f>',BR53:'<f>SUM(BR41:BV52)</f>',BR61:'<f>SUM(BR53,BR35,BR58)</f>'},
+    // Label prefixes in row order: import finds each and places every cell by the nearest one above it.
+    marks:{BW1:'Form FP16a',AI9:'Vendor Number',A10:'Full Name',A11:'Job Title',A12:'Dept/Payment Ref',A13:'Claimant Criteria',A14:'University of Warwick Employee',
+      A15:'University of Warwick Student',A16:'Visitor',A17:'UK Bank/Building Society details',A18:'Bank/Building Society Name',A19:'Bank Account Number',
+      A20:'Bank Account Holder',Q29:'No of Miles',AW35:'Mileage Total',A39:'Receipt Ref',AT53:'Travel & Subsistence Total',A56:'Cap being enforced',
+      A60:'Exchange Rate used',A61:'Exchange Rate obtained from',A73:'Additional Comments',A79:'I request reimbursement',A81:'Signature of Claimant',
+      A84:'GENERAL LEDGER CODE',A89:'*Please ensure the Business Purpose',A91:'Department Signature',A93:'University Level Authorisation',A95:'Expense Team Approval'},
+    stamp:['A99',45839],
+    links:['A21:BW21','A63:P63','A62:AA62','A97:BW98','A84:L84','AW7:BG7','AN7:AU7','A38:BW38'],
+    dv:['Y15:AU16','Y14:AU14'],
+    breaks:'<brk id="74" max="39" man="1"/><brk id="77" max="1048575" man="1"/>',
+    drawing:[[65,72],[60,61],[14,14],[0,8]]
+  },
+  foreign:{
+    sheet:'Sheet1',dim:'B1:J77',merges:62,names:['Sheet1!$B$77'],
+    cells:{sig:['C24',27],date:['I26',51],name:['C28',43],phone:['C29',56],email:['C30',53],street:['C33',43],city:['C34',43],prov:['C35',43],post:['C36',43],country:['C37',43],
+      bank:['C39',43],branch:['C40',43],bStreet:['C41',43],bCity:['C42',43],bProv:['C43',43],bPost:['C44',43],bCountry:['C45',43],ccy:['C46',102],
+      iban0:['C48',105],iban1:['D48',106],iban2:['E48',106],iban3:['F48',106],iban4:['G48',106],iban5:['H48',106],iban6:['I48',106],iban7:['J48',106],
+      acctNo:['C49',69],bic:['C50',81],clearing:['C52',67],clearingExtra:['C54',72],iName:['D58',34],iAcct:['D59',34],iSwift:['D60',34],iRouting:['D61',66],
+      fRecipient:['D64',34],fBank:['D65',34],fAcct:['D66',34],fBic:['D67',34],fAba:['D68',34],fFinalAcct:['D69',34],fFinalName:['D70',34],info:['F72',93]},
+    tables:{},formulas:{},
+    marks:{B1:'Foreign Payments Form',B23:'I certify',B26:'Signature:',B28:'BENEFICIARY NAME',B29:'BENEFICIARY TELEPHONE',B30:'BENEFICIARY e-mail',
+      B31:'BENEFICIARY ADDRESS',B38:'BANK INFORMATION',B39:'NAME OF BANK',B46:'CURRENCY OF THIS ACCOUNT',B48:'IBAN',B49:'ACCOUNT NO',B50:'BIC/SWIFT CODE',
+      B52:'CLEARING CODE',B54:'ADDITIONAL CLEARING INFORMATION',B58:'INTERMEDIARY BANK NAME',B59:'INTERMEDIARY ACCOUNT NUMBER',B60:'INTERMEDIARY SWIFT CODE',
+      B61:'INTERMEDIARY ROUTING CODE',B64:'RECIPIENT NAME (YOUR BANK)',B65:'NAME OF THE RECIPIENT BANK',B66:'RECIPIENT BANK ACCOUNT NUMBER',
+      B67:'RECIPIENT BIC/SWIFT CODE',B68:'RECIPIENT ROUTING/ABA CODE',B69:'FINAL CREDIT ACCOUNT NUMBER',B70:'FINAL CREDIT ACCOUNT NAME',B71:'MESSAGE TO BENEFICIARY',
+      B72:'Warwick University Expenses'},
+    links:['B77'],
+    drawing:[[0,5]]
+  }
+};
+const tableRows=t=>({at:t.first+t.cap-1,clone:t.first+t.cap-2});
+const planInserts=(kind,counts)=>Object.entries(LAYOUT[kind].tables).filter(([k,t])=>counts[k]>t.cap).map(([k,t])=>({...tableRows(t),count:counts[k]-t.cap}));
+// Asserts the layout facts insertRows, setCells and import rely on; runs on every export and import.
+const verifyTemplate=(kind,p)=>{
+  const L=LAYOUT[kind],bad=[],ok=(c,msg)=>{if(!c)bad.push(msg)};
+  const wb=p[WB],sh=p[SH],dr=p[DR],sst=parseSst(p[SS]),vals=readCells(sh,sst);
+  const raw=new Map([...sh.matchAll(CELL)].map(m=>[m[1],m[0]])),empty=(ref,s)=>raw.get(ref)===`<c r="${ref}"${s===undefined?'':` s="${s}"`}/>`;
+  const list=(x,re)=>[...x.matchAll(re)].map(m=>m[1]),same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+  ok((wb.match(/<sheet\s/g)||[]).length===1&&wb.includes(`<sheet name="${L.sheet}"`),'sheets');
+  ok(same(list(wb,/<definedName\b[^>]*>([^<]*)</g),L.names),'definedNames');
+  ok(!wb.includes('absPath'),'absPath');
+  if(Object.keys(L.formulas).length)ok(wb.includes('fullCalcOnLoad="1"'),'fullCalcOnLoad');
+  ok(sh.includes(`<dimension ref="${L.dim}"/>`),'dimension');
+  for(const t of['<rowBreaks','<conditionalFormatting','<pane','<tableParts','<legacyDrawing','<autoFilter','<sheetProtection'])ok(!sh.includes(t),t);
+  const rows=(sh.match(ROW)||[]).map(x=>[rowNum(x),x]);
+  ok(rows.every(([r,x],i)=>(!i||r>rows[i-1][0])&&[...x.matchAll(/<c r="[A-Z]{1,3}(\d+)"/g)].every(m=>+m[1]===r)),'row order/cell refs');
+  if(L.rows)ok(rows.length===L.rows&&rows.every(([r],i)=>r===i+1),'rows 1..'+L.rows);
+  for(const[k,[ref,s]]of Object.entries(L.cells))ok(empty(ref,s),'anchor '+k+' '+ref);
+  const fs={};for(const[ref,x]of raw){const f=/<f(?=[\s>])[^>]*?(?:\/>|>[^<]*<\/f>)/.exec(x);if(f)fs[ref]=f[0]}
+  ok(same(fs,L.formulas),'formulas');
+  for(const[ref,v]of Object.entries(L.marks))ok(String(vals.get(ref)).trim().startsWith(v),'label '+ref);
+  if(L.stamp)ok(vals.get(L.stamp[0])===L.stamp[1],'version stamp');
+  const merges=list(sh,/<mergeCell ref="([^"]+)"\/>/g),mset=new Set(merges);
+  ok(merges.length===L.merges&&sh.includes(`<mergeCells count="${L.merges}">`),'merge count');
+  for(const[k,t]of Object.entries(L.tables)){
+    const{at,clone}=tableRows(t),spans=t.spans.split(' '),last=t.first+t.cap-1;
+    for(let r=t.first;r<=last;r++){
+      for(const sp of spans)ok(mset.has(sp.replace(':',r+':')+r),`${k} merge ${sp} row ${r}`);
+      for(const c of Object.values(t.cols))ok(empty(c+r,(/ s="(\d+)"/.exec(raw.get(c+r)||'')||[])[1]),`${k} cell ${c}${r}`);
+    }
+    const cm=t.ccy?[`${t.ccy}${t.first}:${t.ccy}${last}`]:[],inside=merges.filter(m=>{const[a,b]=m.split(':').map(x=>splitRef(x)[1]);return a<at&&at<=b});
+    ok(same(inside,cm),k+' merges spanning the insert row');
+    ok(same(merges.filter(m=>{const[a,b]=m.split(':').map(x=>splitRef(x)[1]);return a===clone&&b===clone}).sort(),spans.map(sp=>sp.replace(':',clone+':')+clone).sort()),k+' clone row merges');
+    ok(splitRef(t.foot)[1]===last+1&&t.head in L.marks&&t.foot in L.marks,k+' head/foot marks');
+  }
+  if(L.links)ok(same(list(sh,/<hyperlink ref="([^"]+)"/g),L.links),'hyperlinks');
+  if(L.dv)ok(same(list(sh,/<dataValidation\b[^>]*\bsqref="([^"]+)"/g),L.dv),'validations');
+  if(L.breaks)ok(sh.includes(`<colBreaks count="2" manualBreakCount="2">${L.breaks}</colBreaks>`),'colBreaks');
+  ok(same([...dr.matchAll(/<xdr:from>[\s\S]*?<xdr:row>(\d+)<\/xdr:row>[\s\S]*?<xdr:to>[\s\S]*?<xdr:row>(\d+)<\/xdr:row>/g)].map(m=>[+m[1],+m[2]]),L.drawing),'drawing anchors');
+  if(bad.length)throw drift(bad.join('; '));
+};
+const PARTS=[WB,SH,DR,SS];
+const loadParts=async z=>Object.fromEntries(await Promise.all(PARTS.map(async n=>[n,await zip.readText(z,n)])));
+// spec: {inserts, cells: Map(ref→value), cached: Map(ref→number)} in post-insert coordinates.
+const fill=async(u8,kind,spec)=>{
+  const z=zip.readZip(u8),p=await loadParts(z),own=LAYOUT[kind].sheet,ins=spec.inserts||[],F=rowShifter(ins);
+  verifyTemplate(kind,p);
+  const ch={[SH]:setCached(setCells(insertRows(p[SH],ins,own),spec.cells||new Map()),spec.cached||new Map())};
+  if(ins.length){ch[WB]=shiftWorkbook(p[WB],F,own);ch[DR]=shiftDrawing(p[DR],F)}
+  return zip.rewriteZip(z,ch);
+};
+const attrs=t=>Object.fromEntries([...t.matchAll(/([\w:]+)="([^"]*)"/g)].map(m=>[m[1],m[2]]));
+const target=t=>t.startsWith('/')?t.slice(1):'xl/'+t.replace(/^\.\//,'');
+// Finds each label at or below the previous one, so rows added or removed anywhere in Excel still line up.
+const scan=(cells,kind)=>{
+  const byCol={},at={},shift=[];let last=0;
+  for(const[ref,v]of cells)if(typeof v==='string'){const[c,r]=splitRef(ref);(byCol[c]||=[]).push([r,v.trim()])}
+  for(const a of Object.values(byCol))a.sort((x,y)=>x[0]-y[0]);
+  for(const[ref,text]of Object.entries(LAYOUT[kind].marks)){
+    const[c,r]=splitRef(ref),hit=(byCol[c]||[]).find(([rr,v])=>rr>last&&v.startsWith(text));
+    if(hit){at[ref]=last=hit[0];shift.push([r,hit[0]-r])}
+  }
+  return{at,shift};
+};
+// Import of any Excel save of either form: picks the sheet and form with the most labels found.
+// get() and rows() read each field and table independently; rows() is null when its labels are missing.
+const open=async u8=>{
+  const z=zip.readZip(u8),wb=await zip.readText(z,WB),rels=[...(await zip.readText(z,'xl/_rels/workbook.xml.rels')).matchAll(/<Relationship\s[^>]*>/g)].map(m=>attrs(m[0]));
+  const sstRel=rels.find(r=>/\/sharedStrings$/.test(r.Type)),sst=sstRel?parseSst(await zip.readText(z,target(sstRel.Target)).catch(()=>'')):[];
+  let best=null;
+  for(const m of wb.matchAll(/<sheet\s[^>]*>/g)){
+    const rel=rels.find(r=>r.Id===attrs(m[0])['r:id']);if(!rel)continue;
+    const cells=readCells(await zip.readText(z,target(rel.Target)).catch(()=>''),sst);
+    for(const kind of Object.keys(LAYOUT)){const sc=scan(cells,kind),n=Object.keys(sc.at).length;if(!best||n>best.n)best={kind,cells,n,...sc}}
+  }
+  if(!best||best.n<3)throw new Fp16aError('not-fp16a');
+  const{kind,cells,at,shift}=best,L=LAYOUT[kind],rowOf=r=>shift.reduce((x,[o,d])=>o<=r?r+d:x,r);
+  return{kind,
+    get:k=>{const[c,r]=splitRef(L.cells[k][0]);return cells.get(c+rowOf(r))},
+    rows:k=>{
+      const t=L.tables[k],h=at[t.head],f=at[t.foot];if(!h||!f)return null;
+      const out=[];
+      for(let r=h+t.first-splitRef(t.head)[1];r<f;r++){const o={};for(const[fk,c]of Object.entries(t.cols))if(cells.has(c+r))o[fk]=cells.get(c+r);if(Object.keys(o).length)out.push(o)}
+      return out;
+    }};
+};
+return{LAYOUT,colNum,rowShifter,shiftFormula,copyFormula,insertRows,shiftWorkbook,shiftDrawing,xmlText,xmlDecode,setCells,setCached,isoToSerial,serialToIso,parseSst,readCells,planInserts,verifyTemplate,loadParts,fill,open};
+})();
+/* -- end fp16a:sheet -- */
+/* -- fp16a:data -- */
+const data=(()=>{
+// Datasets fetched 2026-09-18; sources and exclusions in context/fp16a.md.
+const DEPTS=[
+'Academic Development Centre','Applied Linguistics','CAPITAL Centre','Central Timetabling Office',
+'Centre for Cultural and Media Policy Studies','Centre for Discrete Mathematics and its Applications','Centre for Interdisciplinary Methodologies','Centre for Lifelong Learning',
+'Centre for Teacher Education','Centre for the Study of the Renaissance','Chaplaincy','Chemistry',
+'Children\'s Services','Classics and Ancient History','Community Safety','Computer Science',
+'Conduct and Resolution','Design Studies','Doctoral College','Economics',
+'Education Group','Education Studies','Engineering','English and Comparative Literary Studies',
+'Estates Office','Faculty of Arts','Faculty of Science, Engineering and Medicine','Faculty of Social Sciences',
+'Film and Television Studies','Finance Office','Global People','Global Sustainable Development',
+'Governance','Governance, Assurance and Risk Group','Health & Safety Services','History',
+'History of Art','Information & Digital Group','Institute for Advanced Teaching and Learning','Institute for Employment Research',
+'Institute for Global Sustainable Development','Institute of Advanced Study','International Strategy and Relations','IT Services',
+'Language Centre','Legal and Compliance Services','Liberal Arts','Library',
+'Life Sciences','Marketing, Communications and Insights and Student Recruitment','Mathematics Institute','Modern Records Centre',
+'Music Centre','Occupational Health','People Team','Philosophy',
+'Physics','Politics and International Studies','Procurement Services','Psychology',
+'Q-Step Centre','Research & Impact Services','School for Cross-faculty Studies','School of Creative Arts, Performance and Visual Cultures',
+'School of Law','School of Modern Languages and Cultures','Social Inclusion','Sociology',
+'Space Management','Statistics','Strategy Group','Student Administrative Services',
+'Student Experience Division','Student Immigration and Compliance Service','Student Information Centre','Student Mobility',
+'Student Opportunity','Student Recruitment, Outreach and Admissions Service','Talent and Development','Team Warwick',
+'Theatre and Performance Studies','University Executive Office','Warwick Accommodation','Warwick Arts Centre',
+'Warwick Business School','Warwick Conferences','Warwick Enterprise','Warwick Food Group',
+'Warwick Global Academy','Warwick Innovations','Warwick International Higher Education Academy','Warwick Medical School',
+'Warwick Writing Programme','Wellbeing and Student Support Services','WMG'
+];
+const SORT_EXACT={
+'230580':'Metro Bank','231470':'Wise','608312':'Atom bank','608313':'Atom bank','608371':'Starling Bank',
+'608400':'Zopa','608407':'Chase','040004':'Monzo','040075':'Revolut (Modulr)','086064':'Virgin Money'
+};
+// Bank → space-separated sort code prefixes; '' marks agency ranges inside a big bank's block (no name shown).
+const SORT_GROUPS=[
+['First Direct','404758 404759 404780 404781 404782 404783 404784 404785 404786 404787 40476 40477'],
+['','0860 0861 4064 6083 6084'],
+['Lloyds / TSB','7740 7741 7742 7743 7744 770 771 772 773 30 31 32 33 34 35 36 37 38 39'],
+['Nationwide','070 071 072 073 074'],
+['Citibank','083'],
+['Santander','090 091 890 891 892 72'],
+['NatWest','01 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66'],
+['Virgin Money (Nationwide)','05 82'],
+['Co-operative Bank','08'],
+['Halifax','11'],
+['Barclays','13 14 20'],
+['RBS','15 16 17 83 84 86'],
+['Coutts','18'],
+['HSBC UK','40 41 42 43 44 45 46 47 48 49'],
+['Bank of Scotland','80 81'],
+['TSB','87'],
+['Bank of Ireland','90 94'],
+['Danske Bank','91 95'],
+['AIB','93'],
+['Ulster Bank','98']
+];
+const SORT_PREFIX=SORT_GROUPS.flatMap(([n,ps])=>ps.split(' ').map(p=>[p,n])).sort((a,b)=>b[0].length-a[0].length);
+const UK_BANKS=[...new Set([...SORT_GROUPS.map(([n])=>n),...Object.values(SORT_EXACT)].flatMap(n=>n.split(' / ')).map(n=>n.replace(/\s*\(.*\)$/,'')).filter(Boolean))].sort();
+const IBAN_LEN={
+AD:24,AE:23,AL:28,AT:20,AZ:28,BA:20,BE:16,BG:22,BH:22,BI:27,BR:29,BY:28,
+CH:21,CR:22,CY:28,CZ:24,DE:22,DJ:27,DK:18,DO:28,EE:20,EG:29,ES:24,FI:18,
+FK:18,FO:18,FR:27,GB:22,GE:22,GI:23,GL:18,GR:27,GT:28,HN:28,HR:21,HU:28,
+IE:22,IL:23,IQ:23,IS:26,IT:27,JO:30,KW:30,KZ:20,LB:28,LC:32,LI:21,LT:20,
+LU:20,LV:21,LY:25,MC:27,MD:24,ME:22,MK:19,MN:20,MR:27,MT:31,MU:30,NI:28,
+NL:18,NO:15,OM:23,PK:24,PL:28,PS:29,PT:25,QA:29,RO:24,RS:22,RU:33,SA:24,
+SC:31,SD:18,SE:24,SI:19,SK:24,SM:27,SO:23,ST:25,SV:28,TL:23,TN:24,TR:26,
+UA:29,VA:22,VG:24,XK:20,YE:30
+};
+const CCY_BY_COUNTRY={
+AD:'EUR',AE:'AED',AL:'ALL',AR:'ARS',AT:'EUR',AU:'AUD',AZ:'AZN',BA:'BAM',BE:'EUR',BG:'EUR',
+BH:'BHD',BI:'BIF',BR:'BRL',BY:'BYN',CA:'CAD',CH:'CHF',CL:'CLP',CN:'CNY',CO:'COP',CR:'CRC',
+CY:'EUR',CZ:'CZK',DE:'EUR',DJ:'DJF',DK:'DKK',DO:'DOP',EE:'EUR',EG:'EGP',ES:'EUR',FI:'EUR',
+FK:'FKP',FO:'DKK',FR:'EUR',GB:'GBP',GE:'GEL',GH:'GHS',GI:'GIP',GL:'DKK',GR:'EUR',GT:'GTQ',
+HK:'HKD',HN:'HNL',HR:'EUR',HU:'HUF',ID:'IDR',IE:'EUR',IL:'ILS',IN:'INR',IQ:'IQD',IS:'ISK',
+IT:'EUR',JO:'JOD',JP:'JPY',KE:'KES',KR:'KRW',KW:'KWD',KZ:'KZT',LB:'LBP',LC:'XCD',LI:'CHF',
+LT:'EUR',LU:'EUR',LV:'EUR',LY:'LYD',MC:'EUR',MD:'MDL',ME:'EUR',MK:'MKD',MN:'MNT',MR:'MRU',
+MT:'EUR',MU:'MUR',MX:'MXN',MY:'MYR',NG:'NGN',NI:'NIO',NL:'EUR',NO:'NOK',NZ:'NZD',OM:'OMR',
+PE:'PEN',PH:'PHP',PK:'PKR',PL:'PLN',PT:'EUR',QA:'QAR',RO:'RON',RS:'RSD',RU:'RUB',SA:'SAR',
+SC:'SCR',SD:'SDG',SE:'SEK',SG:'SGD',SI:'EUR',SK:'EUR',SM:'EUR',SO:'SOS',ST:'STN',SV:'USD',
+TH:'THB',TL:'USD',TN:'TND',TR:'TRY',TW:'TWD',UA:'UAH',US:'USD',VA:'EUR',VG:'USD',XK:'EUR',
+YE:'YER',ZA:'ZAR'
+};
+const CCY_NAMES={
+AED:'UAE Dirham',ALL:'Lek',ARS:'Argentine Peso',AUD:'Australian Dollar',AZN:'Azerbaijan Manat',
+BAM:'Convertible Mark',BHD:'Bahraini Dinar',BIF:'Burundi Franc',BRL:'Brazilian Real',BYN:'Belarusian Ruble',
+CAD:'Canadian Dollar',CHF:'Swiss Franc',CLP:'Chilean Peso',CNY:'Yuan Renminbi',COP:'Colombian Peso',
+CRC:'Costa Rican Colon',CZK:'Czech Koruna',DJF:'Djibouti Franc',DKK:'Danish Krone',DOP:'Dominican Peso',
+EGP:'Egyptian Pound',EUR:'Euro',FKP:'Falkland Islands Pound',GBP:'Pound Sterling',GEL:'Lari',
+GHS:'Ghana Cedi',GIP:'Gibraltar Pound',GTQ:'Quetzal',HKD:'Hong Kong Dollar',HNL:'Lempira',
+HUF:'Forint',IDR:'Rupiah',ILS:'New Israeli Sheqel',INR:'Indian Rupee',IQD:'Iraqi Dinar',
+ISK:'Iceland Krona',JOD:'Jordanian Dinar',JPY:'Yen',KES:'Kenyan Shilling',KRW:'Won',
+KWD:'Kuwaiti Dinar',KZT:'Tenge',LBP:'Lebanese Pound',LYD:'Libyan Dinar',MDL:'Moldovan Leu',
+MKD:'Denar',MNT:'Tugrik',MRU:'Ouguiya',MUR:'Mauritius Rupee',MXN:'Mexican Peso',
+MYR:'Malaysian Ringgit',NGN:'Naira',NIO:'Cordoba Oro',NOK:'Norwegian Krone',NZD:'New Zealand Dollar',
+OMR:'Rial Omani',PEN:'Sol',PHP:'Philippine Peso',PKR:'Pakistan Rupee',PLN:'Zloty',
+QAR:'Qatari Rial',RON:'Romanian Leu',RSD:'Serbian Dinar',RUB:'Russian Ruble',SAR:'Saudi Riyal',
+SCR:'Seychelles Rupee',SDG:'Sudanese Pound',SEK:'Swedish Krona',SGD:'Singapore Dollar',SOS:'Somali Shilling',
+STN:'Dobra',THB:'Baht',TND:'Tunisian Dinar',TRY:'Turkish Lira',TWD:'New Taiwan Dollar',
+UAH:'Hryvnia',USD:'US Dollar',XCD:'East Caribbean Dollar',YER:'Yemeni Rial',ZAR:'Rand'
+};
+const COUNTRIES={
+AD:'Andorra',AE:'United Arab Emirates',AF:'Afghanistan',AG:'Antigua and Barbuda',AI:'Anguilla',
+AL:'Albania',AM:'Armenia',AO:'Angola',AQ:'Antarctica',AR:'Argentina',
+AS:'American Samoa',AT:'Austria',AU:'Australia',AW:'Aruba',AX:'Åland Islands',
+AZ:'Azerbaijan',BA:'Bosnia and Herzegovina',BB:'Barbados',BD:'Bangladesh',BE:'Belgium',
+BF:'Burkina Faso',BG:'Bulgaria',BH:'Bahrain',BI:'Burundi',BJ:'Benin',
+BL:'Saint Barthélemy',BM:'Bermuda',BN:'Brunei Darussalam',BO:'Bolivia',BQ:'Bonaire, Sint Eustatius and Saba',
+BR:'Brazil',BS:'Bahamas',BT:'Bhutan',BV:'Bouvet Island',BW:'Botswana',
+BY:'Belarus',BZ:'Belize',CA:'Canada',CC:'Cocos (Keeling) Islands',CD:'Congo, The Democratic Republic of the',
+CF:'Central African Republic',CG:'Congo',CH:'Switzerland',CI:'Côte d\'Ivoire',CK:'Cook Islands',
+CL:'Chile',CM:'Cameroon',CN:'China',CO:'Colombia',CR:'Costa Rica',
+CU:'Cuba',CV:'Cabo Verde',CW:'Curaçao',CX:'Christmas Island',CY:'Cyprus',
+CZ:'Czechia',DE:'Germany',DJ:'Djibouti',DK:'Denmark',DM:'Dominica',
+DO:'Dominican Republic',DZ:'Algeria',EC:'Ecuador',EE:'Estonia',EG:'Egypt',
+EH:'Western Sahara',ER:'Eritrea',ES:'Spain',ET:'Ethiopia',FI:'Finland',
+FJ:'Fiji',FK:'Falkland Islands (Malvinas)',FM:'Micronesia, Federated States of',FO:'Faroe Islands',FR:'France',
+GA:'Gabon',GB:'United Kingdom',GD:'Grenada',GE:'Georgia',GF:'French Guiana',
+GG:'Guernsey',GH:'Ghana',GI:'Gibraltar',GL:'Greenland',GM:'Gambia',
+GN:'Guinea',GP:'Guadeloupe',GQ:'Equatorial Guinea',GR:'Greece',GS:'South Georgia and the South Sandwich Islands',
+GT:'Guatemala',GU:'Guam',GW:'Guinea-Bissau',GY:'Guyana',HK:'Hong Kong',
+HM:'Heard Island and McDonald Islands',HN:'Honduras',HR:'Croatia',HT:'Haiti',HU:'Hungary',
+ID:'Indonesia',IE:'Ireland',IL:'Israel',IM:'Isle of Man',IN:'India',
+IO:'British Indian Ocean Territory',IQ:'Iraq',IR:'Iran',IS:'Iceland',IT:'Italy',
+JE:'Jersey',JM:'Jamaica',JO:'Jordan',JP:'Japan',KE:'Kenya',
+KG:'Kyrgyzstan',KH:'Cambodia',KI:'Kiribati',KM:'Comoros',KN:'Saint Kitts and Nevis',
+KP:'North Korea',KR:'South Korea',KW:'Kuwait',KY:'Cayman Islands',KZ:'Kazakhstan',
+LA:'Laos',LB:'Lebanon',LC:'Saint Lucia',LI:'Liechtenstein',LK:'Sri Lanka',
+LR:'Liberia',LS:'Lesotho',LT:'Lithuania',LU:'Luxembourg',LV:'Latvia',
+LY:'Libya',MA:'Morocco',MC:'Monaco',MD:'Moldova',ME:'Montenegro',
+MF:'Saint Martin (French part)',MG:'Madagascar',MH:'Marshall Islands',MK:'North Macedonia',ML:'Mali',
+MM:'Myanmar',MN:'Mongolia',MO:'Macao',MP:'Northern Mariana Islands',MQ:'Martinique',
+MR:'Mauritania',MS:'Montserrat',MT:'Malta',MU:'Mauritius',MV:'Maldives',
+MW:'Malawi',MX:'Mexico',MY:'Malaysia',MZ:'Mozambique',NA:'Namibia',
+NC:'New Caledonia',NE:'Niger',NF:'Norfolk Island',NG:'Nigeria',NI:'Nicaragua',
+NL:'Netherlands',NO:'Norway',NP:'Nepal',NR:'Nauru',NU:'Niue',
+NZ:'New Zealand',OM:'Oman',PA:'Panama',PE:'Peru',PF:'French Polynesia',
+PG:'Papua New Guinea',PH:'Philippines',PK:'Pakistan',PL:'Poland',PM:'Saint Pierre and Miquelon',
+PN:'Pitcairn',PR:'Puerto Rico',PS:'Palestine, State of',PT:'Portugal',PW:'Palau',
+PY:'Paraguay',QA:'Qatar',RE:'Réunion',RO:'Romania',RS:'Serbia',
+RU:'Russian Federation',RW:'Rwanda',SA:'Saudi Arabia',SB:'Solomon Islands',SC:'Seychelles',
+SD:'Sudan',SE:'Sweden',SG:'Singapore',SH:'Saint Helena, Ascension and Tristan da Cunha',SI:'Slovenia',
+SJ:'Svalbard and Jan Mayen',SK:'Slovakia',SL:'Sierra Leone',SM:'San Marino',SN:'Senegal',
+SO:'Somalia',SR:'Suriname',SS:'South Sudan',ST:'Sao Tome and Principe',SV:'El Salvador',
+SX:'Sint Maarten (Dutch part)',SY:'Syria',SZ:'Eswatini',TC:'Turks and Caicos Islands',TD:'Chad',
+TF:'French Southern Territories',TG:'Togo',TH:'Thailand',TJ:'Tajikistan',TK:'Tokelau',
+TL:'Timor-Leste',TM:'Turkmenistan',TN:'Tunisia',TO:'Tonga',TR:'Türkiye',
+TT:'Trinidad and Tobago',TV:'Tuvalu',TW:'Taiwan',TZ:'Tanzania',UA:'Ukraine',
+UG:'Uganda',UM:'United States Minor Outlying Islands',US:'United States',UY:'Uruguay',UZ:'Uzbekistan',
+VA:'Holy See (Vatican City State)',VC:'Saint Vincent and the Grenadines',VE:'Venezuela',VG:'Virgin Islands, British',VI:'Virgin Islands, U.S.',
+VN:'Vietnam',VU:'Vanuatu',WF:'Wallis and Futuna',WS:'Samoa',XK:'Kosovo',
+YE:'Yemen',YT:'Mayotte',ZA:'South Africa',ZM:'Zambia',ZW:'Zimbabwe'
+};
+// Warwick Foreign Payments notes; regexes run on the value with spaces, dots and dashes stripped, uppercased.
+const CLEARING={
+AU:{label:'BSB Number',re:/^\d{6}$/,hint:'062-000'},
+NZ:{label:'Bank And Branch Number',re:/^\d{6}$/,hint:'12-3140'},
+BR:{label:'CPF Number',re:/^\d{11}$/,hint:'123.456.789-09'},
+CA:{label:'Transit And Institution Number',re:/^0?\d{8}$/,hint:'12345-003'},
+IN:{label:'IFSC Code',re:/^[A-Z]{4}0[A-Z0-9]{6}$/,hint:'HDFC0001234'},
+JP:{label:'Zengin Code',re:/^\d{7}$/,hint:'0005-123',extra:'Account Type And Branch Name'},
+KE:{label:'Routing Code'},
+MX:{label:'CLABE',re:/^(\d{18}|\d{11})$/,hint:'18 Digits'},
+ZA:{label:'Branch Code',re:/^\d{6}$/,hint:'250655'},
+US:{label:'Routing Number (ABA)',re:/^\d{9}$/,hint:'026009593'}
+};
+return{DEPTS,UK_BANKS,SORT_EXACT,SORT_PREFIX,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING};
+})();
+/* -- end fp16a:data -- */
+/* -- fp16a:model -- */
+const model=(()=>{
+const{LAYOUT,isoToSerial,serialToIso,planInserts,rowShifter}=sheet;
+const{IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING,SORT_EXACT,SORT_PREFIX}=data;
+
+// ---- normalizers
+const round2=x=>Math.sign(x)*Math.round((Math.abs(x)+Number.EPSILON)*100)/100;
+const up=v=>typeof v==='string'?v.toUpperCase():v;
+const SYM=[['NZ$','NZD'],['HK$','HKD'],['US$','USD'],['A$','AUD'],['C$','CAD'],['S$','SGD'],['R$','BRL'],['€','EUR'],['£','GBP'],['$','USD'],['¥','JPY'],['₹','INR'],['₩','KRW'],['₺','TRY'],['₪','ILS'],['฿','THB'],['₱','PHP'],['₦','NGN'],['zł','PLN']];
+const WORDS={euro:'EUR',euros:'EUR',dollar:'USD',dollars:'USD',pound:'GBP',pounds:'GBP',quid:'GBP',sterling:'GBP',yen:'JPY',rupee:'INR',rupees:'INR',franc:'CHF',francs:'CHF'};
+// Currency from a code, symbol or word anywhere in the text ('' when none).
+const normCcy=s=>{
+  s=String(s??'').trim();
+  const code=/(?:^|[^A-Za-z])([A-Za-z]{3})(?![A-Za-z])/.exec(s)?.[1].toUpperCase();
+  if(code&&(CCY_NAMES[code]||/^[A-Z]{3}$/.test(s)))return code;
+  for(const[k,v]of SYM)if(s.includes(k))return v;
+  return WORDS[/[a-z]+/i.exec(s)?.[0].toLowerCase()]||'';
+};
+// Amounts as typed: £1,234.50 · 12,50 · 1.234,50 · €32 · -5. A lone comma is decimal unless 3 digits follow it.
+const num=s=>{
+  if(typeof s==='number')return Number.isFinite(s)?s:null;
+  let t=String(s??'').replace(/[^\d.,-]/g,'');
+  if(!/\d/.test(t))return null;
+  const neg=/^-/.test(t);t=t.replace(/-/g,'');
+  const dot=t.lastIndexOf('.'),com=t.lastIndexOf(',');
+  if(dot>=0&&com>=0)t=dot>com?t.replace(/,/g,''):t.replace(/\./g,'').replace(',','.');
+  else if(com>=0)t=(t.match(/,/g).length===1&&t.length-com-1!==3)?t.replace(',','.'):t.replace(/,/g,'');
+  else if((t.match(/\./g)||[]).length>1)t=t.replace(/\./g,'');
+  const n=parseFloat(t);
+  return Number.isFinite(n)?(neg?-n:n):null;
+};
+const validDay=(y,m,d)=>{const dt=new Date(Date.UTC(y,m-1,d));return y>=1900&&dt.getUTCMonth()===m-1&&dt.getUTCDate()===d?dt.toISOString().slice(0,10):''};
+// Excel serial, dd/mm/yy(yy) (also . or -) or ISO → ISO date, '' when unreadable.
+const parseDay=v=>{
+  if(typeof v==='number')return v>=1?serialToIso(v):'';
+  const s=String(v??'').trim();let m;
+  if((m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s)))return validDay(+m[1],+m[2],+m[3]);
+  if((m=/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/.exec(s)))return validDay(m[3].length===2?2000+ +m[3]:+m[3],+m[2],+m[1]);
+  if(/^\d{5}(\.\d+)?$/.test(s))return serialToIso(+s);
+  return '';
+};
+const fmtDay=(iso,short)=>iso?`${iso.slice(8,10)}/${iso.slice(5,7)}/${short?iso.slice(2,4):iso.slice(0,4)}`:'';
+const addMonths=(iso,n)=>{const[y,m,d]=iso.split('-').map(Number),t=new Date(Date.UTC(y,m-1+n,1)),last=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0)).getUTCDate();t.setUTCDate(Math.min(d,last));return t.toISOString().slice(0,10)};
+const normPostcode=s=>{const raw=String(s??'').trim().toUpperCase(),t=raw.replace(/[^A-Z0-9]/g,'');return/^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(t)?t.slice(0,-3)+' '+t.slice(-3):raw};
+const UK_POSTCODE=/^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$/;
+const normSort=s=>{const d=String(s??'').replace(/\D/g,'');return d.length===6?d.replace(/(\d\d)(\d\d)(\d\d)/,'$1-$2-$3'):d};
+const bankFromSort=s=>{const d=String(s??'').replace(/\D/g,'');if(d.length!==6)return'';if(SORT_EXACT[d])return SORT_EXACT[d];const hit=SORT_PREFIX.find(([p])=>d.startsWith(p));return hit?hit[1]:''};
+const cleanIban=s=>String(s??'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const ibanCountry=s=>{const c=cleanIban(s).slice(0,2);return IBAN_LEN[c]?c:''};
+// ISO 13616 mod-97 over the rearranged IBAN, folded digit by digit.
+const ibanOk=s=>{
+  const t=cleanIban(s);
+  if(!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(t)||IBAN_LEN[t.slice(0,2)]!==t.length)return false;
+  let r=0;for(const ch of t.slice(4)+t.slice(0,4)){const v=parseInt(ch,36);r=(v>9?r*100+v:r*10+v)%97}
+  return r===1;
+};
+const abaOk=s=>/^\d{9}$/.test(s)&&[...s].reduce((a,d,i)=>a+d*[3,7,1][i%3],0)%10===0;
+const BIC=/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
+const cleanCode=s=>String(s??'').toUpperCase().replace(/[\s.\-/]/g,'');
+const slug=s=>String(s??'').normalize('NFKD').replace(/\p{M}/gu,'').replace(/['’`]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+
+// ---- rates
+// Warwick mileage (£/mile) by journey date; warwick.ac.uk/services/peopleteam/internal/payroll/expenses/uk1/travel (2026-09-18).
+const RATES=[{from:'',car:.45,moto:.24,bike:.2},{from:'2026-06-15',car:.55,moto:.24,bike:.2}];
+const FLAT={over:.25,school:.25,interview:.18};
+const rateFor=(veh,type,date)=>FLAT[type]??RATES.filter(r=>date>=r.from).pop()[veh];
+
+// ---- state
+// Schema defaults: '' text, 0 number (null = empty), null text override (null = auto), false flag, array = allowed values (first is default).
+// crit defaults to Student (owner, 2026-09-18); '' stays legal for saves made before that and means nothing chosen.
+const SCHEMA={first:'',last:'',job:'',dept:'',email:'',ref:'',vendor:'',crit:['stu','emp','vis',''],empType:['yes','unitemps','stp'],bank:['uk','foreign'],
+  bankName:'',holder:null,acct:'',sort:'',fxSrc:'',cap:{on:false,amt:0,ccy:'',conv:0,reduce:0},comments:'',declared:false,sigName:null,sigDate:'',
+  auth:{deptSig:'',deptDate:'',deptPrint:'',uniSig:'',uniDate:'',uniPrint:'',expTeam:'',docNo:''},
+  fp:{iban:'',country:'',ccy:'',bic:'',acctNo:'',clearing:'',clearingExtra:'',branch:'',bStreet:'',bCity:'',bProv:'',bPost:'',phone:'',street:'',city:'',prov:'',post:'',countryName:'',
+    route:['direct','inter','further'],inter:{name:'',acct:'',swift:'',routing:''},further:{recipient:'',bank:'',acct:'',bic:'',aba:'',finalAcct:'',finalName:''},info:''}};
+const ROWS={
+  exps:{date:'',type:'',place:'',purpose:'',amt:0,ccy:'',ref:null,repaid:0,taxiWhy:'',guests:'',staff:''},
+  miles:{date:'',from:'',to:'',mi:0,ret:false,why:'',veh:['car','moto','bike'],rateType:['std','over','school','interview'],rate:0,repaid:0},
+  codes:{gl:'',cc:'',amt:0,purpose:''}};
+const fitv=(d,v)=>Array.isArray(d)?(d.includes(v)?v:d[0]):d===null?(typeof v==='string'&&v?v:null):d===0?(typeof v==='number'&&Number.isFinite(v)?v:null):typeof d==='object'?fito(d,v):typeof v===typeof d?v:d;
+const fito=(d,v)=>Object.fromEntries(Object.entries(d).map(([k,dk])=>[k,fitv(dk,v?.[k])]));
+const strDict=o=>Object.fromEntries(Object.entries(o&&typeof o==='object'?o:{}).filter(([,x])=>typeof x==='string'||typeof x==='boolean'));
+// Any stored value (older, partial, hand-edited) → a complete v1 state; unknown keys dropped, ids made unique.
+const migrate=raw=>{
+  const v=raw&&typeof raw==='object'&&raw.v===1?raw:{},s={v:1,...fito(SCHEMA,v)},seen=new Set();
+  for(const[k,d]of Object.entries(ROWS))s[k]=(Array.isArray(v[k])?v[k]:[]).filter(r=>r&&typeof r==='object').map(r=>({id:r.id,...fito(d,r)}));
+  let next=Math.max(0,...['exps','miles','codes'].flatMap(k=>s[k].map(r=>Number.isInteger(r.id)?r.id:0)))+1;
+  for(const k of['exps','miles','codes'])for(const r of s[k]){if(!Number.isInteger(r.id)||r.id<1||seen.has(r.id))r.id=next++;seen.add(r.id)}
+  s.fx=Object.fromEntries(Object.entries(v.fx&&typeof v.fx==='object'?v.fx:{}).filter(([c,r])=>/^[A-Z]{3}$/.test(c)&&typeof r==='number'&&r>0&&Number.isFinite(r)).sort(([a],[b])=>a<b?-1:1));
+  s.draft={e:strDict(v.draft?.e),m:strDict(v.draft?.m),c:strDict(v.draft?.c)};
+  return s;
+};
+const blank=()=>migrate(null);
+const nextId=s=>Math.max(0,...['exps','miles','codes'].flatMap(k=>s[k].map(r=>r.id)))+1;
+
+// ---- derive
+// Undated rows last; Array.sort is stable, so same-day rows keep entry order.
+const byDate=(a,b)=>{const x=a.date||'9999',y=b.date||'9999';return x<y?-1:x>y?1:0};
+const lower=s=>s.trim().toLowerCase();
+// Everything computed from state; nothing here is stored.
+const derive=(s,today)=>{
+  const fp=s.fp,foreign=s.bank==='foreign',country=foreign?fp.country||ibanCountry(fp.iban):'';
+  const ccy=foreign?fp.ccy||CCY_BY_COUNTRY[country]||'':'GBP';
+  const name=[s.first,s.last].map(x=>x.trim()).filter(Boolean).join(' ');
+  const exps=[...s.exps].sort(byDate).map((e,i)=>{const same=!e.ccy||e.ccy===ccy;return{...e,i,aref:'#'+(i+1),ref:e.ref||'#'+(i+1),same,typed:same?null:e.repaid}});
+  const miles=[...s.miles].sort(byDate).map((m,i)=>{
+    const arate=rateFor(m.veh,m.rateType,m.date||today),rate=m.rate??arate,dist=(m.mi||0)*(m.ret?2:1);
+    return{...m,i,arate,rate,dist,gbp:Number((dist*rate).toPrecision(15)),typed:ccy==='GBP'?null:m.repaid};
+  });
+  // Implied rate per currency from typed statement figures: sum repaid / sum spent, 4 dp.
+  const pool={},add=(c,a,r)=>{if(r!=null&&a>0){const p=pool[c]||=[0,0];p[0]+=a;p[1]+=r}};
+  for(const e of exps)if(!e.same)add(e.ccy,e.amt,e.typed);
+  for(const m of miles)add('GBP',m.gbp,m.typed);
+  const implied={};for(const[c,[a,r]]of Object.entries(pool))implied[c]=Math.round(r/a*1e4)/1e4;
+  const rate=c=>s.fx[c]??implied[c]??null,conv=(a,c)=>a==null||rate(c)==null?null:round2(a*rate(c));
+  for(const e of exps){e.auto=e.same?(e.amt==null?null:round2(e.amt)):conv(e.amt,e.ccy);e.repaid=e.same?e.auto:e.typed??e.auto}
+  for(const m of miles){m.auto=ccy==='GBP'?round2(m.gbp):conv(m.gbp,'GBP');m.repaid=m.typed??m.auto}
+  const sum=a=>round2(a.reduce((x,r)=>x+(r.repaid||0),0)),mileTotal=sum(miles),expTotal=sum(exps);
+  let cap=null;
+  if(s.cap.on){
+    const c=s.cap.ccy||ccy,autoConv=c===ccy?s.cap.amt:conv(s.cap.amt,c),cv=c===ccy?s.cap.amt:s.cap.conv??autoConv;
+    const autoReduce=cv==null?null:Math.min(0,round2(cv-mileTotal-expTotal))||0;
+    cap={ccy:c,amt:s.cap.amt,same:c===ccy,autoConv,conv:cv,autoReduce,reduce:s.cap.reduce!=null?-Math.abs(s.cap.reduce)||0:autoReduce};
+  }
+  const grand=round2(mileTotal+expTotal+(cap?.reduce||0));
+  const fxList=ccy?[...new Set([...exps.filter(e=>!e.same).map(e=>e.ccy),...(miles.length&&ccy!=='GBP'?['GBP']:[]),...(cap&&!cap.same?[cap.ccy]:[])])]:[];
+  const fx=Object.fromEntries(fxList.map(c=>[c,{implied:implied[c]??null,rate:rate(c),need:rate(c)==null&&(exps.some(e=>e.ccy===c&&!e.same&&e.typed==null)||c==='GBP'&&miles.some(m=>m.typed==null)||cap?.ccy===c&&!cap.same&&s.cap.conv==null)}]));
+  const typedCodes=round2(s.codes.reduce((x,c)=>x+(c.amt||0),0)),unalloc=round2(grand-typedCodes);
+  let given=false;
+  const codes=s.codes.map(c=>{let amt=c.amt;if(amt==null&&!given&&unalloc>0){amt=unalloc;given=true}return{...c,amt}});
+  const autoComments=exps.flatMap(e=>{
+    const t=lower(e.type);
+    if(t==='taxi'&&e.taxiWhy.trim())return[`Receipt ${e.ref}: Taxi Reason: ${e.taxiWhy.trim()}`];
+    if(t==='entertainment'&&(e.guests.trim()||e.staff.trim()))return[`Receipt ${e.ref}: `+[e.guests.trim()&&'Guests: '+e.guests.trim(),e.staff.trim()&&'Staff Present: '+e.staff.trim()].filter(Boolean).join('; ')];
+    return[];
+  });
+  const clearing=foreign?CLEARING[country]||null:null;
+  return{today,ccy,country,name,foreign,exps,miles,fx,fxList,mileTotal,expTotal,cap,grand,codes,unalloc,autoComments,clearing,
+    job:s.job||(s.crit==='stu'?'Student':s.crit==='vis'?'Visitor':''),
+    holder:s.holder||name,sig:s.sigName||name,sigDate:s.sigDate||today,
+    bankName:s.bankName||(foreign?'':bankFromSort(s.sort)),
+    ibanShown:foreign&&(!country||!!IBAN_LEN[country]),acctReq:foreign&&!!country&&!IBAN_LEN[country],
+    comments:[...autoComments,s.comments.trim()].filter(Boolean).join('\n')};
+};
+
+// ---- validation
+const FIELDS={crit:'I Am A',first:'First Name',last:'Last Name',email:'Email (For Remittance)',dept:'Department',job:'Job Title',sort:'Sort Code',acct:'Account Number',
+  bankName:'Bank/Building Society Name','fp-iban':'IBAN','fp-country':'Bank Country','fp-ccy':'Account Currency','fp-bic':'BIC/SWIFT Code','fp-acctNo':'Account No',
+  'fp-clearing':'Clearing Code','fp-bCity':'Bank City','fp-phone':'Your Telephone','fp-street':'Street','fp-city':'City','fp-post':'Post/Zip Code','fp-countryName':'Country',
+  'fp-inter-name':'Intermediary Bank Name','fp-inter-swift':'Intermediary SWIFT Code','fp-further-recipient':'Recipient Name (Your Bank)','fp-further-bank':'Recipient Bank',
+  'fp-further-finalAcct':'Final Credit Account Number','fp-further-finalName':'Final Credit Account Name',fxSrc:'Exchange Rate Obtained From','cap-amt':'Cap Amount',declared:'I Confirm'};
+// Every required field that applies, in page order, as [element id, filled]; drives the missing list and the progress bar.
+const required=(s,D)=>{
+  const out=[],need=(k,v)=>out.push([k,!(v===''||v==null||v===false)]);
+  need('crit',s.crit);need('first',s.first.trim());need('last',s.last.trim());need('email',s.email.trim());need('dept',s.dept.trim());
+  if(s.crit==='emp')need('job',s.job.trim());
+  if(!D.foreign){need('sort',s.sort);need('acct',s.acct);need('bankName',D.bankName)}
+  else{
+    const f=s.fp;
+    if(D.ibanShown)need('fp-iban',f.iban);
+    need('fp-country',D.country);need('fp-ccy',D.ccy);need('fp-bic',f.bic);need('bankName',D.bankName);
+    if(D.acctReq)need('fp-acctNo',f.acctNo);
+    if(D.clearing)need('fp-clearing',f.clearing);
+    need('fp-bCity',f.bCity);need('fp-phone',f.phone);need('fp-street',f.street);need('fp-city',f.city);need('fp-post',f.post);need('fp-countryName',f.countryName);
+    if(f.route==='inter'){need('fp-inter-name',f.inter.name);need('fp-inter-swift',f.inter.swift)}
+    if(f.route==='further'){need('fp-further-recipient',f.further.recipient);need('fp-further-bank',f.further.bank);need('fp-further-finalAcct',f.further.finalAcct);need('fp-further-finalName',f.further.finalName)}
+  }
+  if(s.cap.on)need('cap-amt',s.cap.amt);
+  for(const[c,x]of Object.entries(D.fx))need('fx-'+c,!x.need);
+  if(D.fxList.length)need('fxSrc',s.fxSrc.trim());
+  need('declared',s.declared);
+  return out;
+};
+const missing=(s,D)=>required(s,D).filter(([,ok])=>!ok).map(([k])=>k);
+const label=k=>FIELDS[k]||(k.startsWith('fx-')?'Exchange Rate '+k.slice(3):k);
+// Soft problems: id → Title Case message. Row ids are e:<id>, m:<id>, c:<id>.
+const checks=(s,D)=>{
+  const out=new Map(),w=(k,cond,msg)=>{if(cond)out.set(k,out.has(k)?out.get(k)+' · '+msg:msg)},today=D.today,old=addMonths(today,-3);
+  w('email',s.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email.trim()),'Check Format');
+  if(!D.foreign){
+    w('sort',s.sort&&!/^\d{2}-\d{2}-\d{2}$/.test(normSort(s.sort)),'6 Digits');
+    w('acct',s.acct&&!/^\d{8}$/.test(s.acct.replace(/\s/g,'')),'8 Digits');
+  }else{
+    const f=s.fp,iban=cleanIban(f.iban),bic=cleanCode(f.bic);
+    w('fp-iban',iban&&!ibanOk(iban),IBAN_LEN[iban.slice(0,2)]&&IBAN_LEN[iban.slice(0,2)]!==iban.length?`Needs ${IBAN_LEN[iban.slice(0,2)]} Characters`:'Check Digits Fail');
+    w('fp-iban',iban.length>31,'Over 31 Characters');
+    w('fp-bic',bic&&!BIC.test(bic),'8 Or 11 Characters');
+    w('fp-bic',bic&&BIC.test(bic)&&D.country&&bic.slice(4,6)!==D.country&&!(D.country==='XK'&&bic.slice(4,6)==='RS'),'Not A Bank Country BIC');
+    const cc=cleanCode(f.clearing);
+    w('fp-clearing',cc&&D.clearing?.re&&!D.clearing.re.test(cc),'Check Format');
+    w('fp-clearing',cc&&D.country==='US'&&/^\d{9}$/.test(cc)&&!abaOk(cc),'Checksum Fails');
+    w('fp-phone',f.phone.length>30,'Too Long');
+  }
+  for(const e of D.exps){
+    const k='e:'+e.id,p=purposeText(e);
+    w(k,e.date&&e.date>today,'Date In The Future');
+    w(k,e.date&&e.date<old,'Older Than 3 Months');
+    const need=[!e.date&&'Date',!e.type.trim()&&'Type',!e.purpose.trim()&&'Purpose'].filter(Boolean);
+    w(k,need.length,need.join(', ').replace(/, ([^,]*)$/,' And $1')+' Needed');
+    w(k,p.length>150,'Purpose Too Long For The Form');
+    w(k,e.repaid==null,'To Be Repaid Unknown');
+  }
+  for(const m of D.miles){
+    const k='m:'+m.id;
+    w(k,m.date&&m.date>today,'Date In The Future');
+    w(k,m.date&&m.date<old,'Older Than 3 Months');
+    w(k,!m.date,'Date Needed');
+    w(k,[m.from,m.to].some(p=>p&&!UK_POSTCODE.test(p)),'Check Postcodes');
+    w(k,m.dist>1000,'Over 1000 Miles');
+    w(k,m.repaid==null,'To Be Repaid Unknown');
+  }
+  w('comments',D.comments.length>400,'Too Long');
+  w('ref',s.ref.length>16,'Max 16 Characters');
+  return out;
+};
+
+// ---- export
+const purposeText=e=>[fmtDay(e.date,true),e.place.trim(),e.purpose.trim()].filter(Boolean).join(' - ');
+const detailsText=m=>m.ret?(m.why.trim()?m.why.trim()+' (Return)':'Return'):m.why.trim();
+const fmtRate=r=>String(+r.toFixed(6));
+const fxText=D=>D.fxList.filter(c=>D.fx[c].rate!=null).map(c=>`1 ${c} = ${fmtRate(D.fx[c].rate)} ${D.ccy}`).join('; ');
+const txt=n=>n==null?'':n.toFixed(2);
+const splitRef=ref=>{const m=/^([A-Z]+)(\d+)$/.exec(ref);return[m[1],+m[2]]};
+const filename=(kind,s,D)=>[kind==='fp16a'?'fp16a':'foreign-payments',D.sigDate,slug(s.last)].filter(Boolean).join('-')+'.xlsx';
+// State → cell writes for both templates. Strings uppercase (emails lowercase); hidden-by-condition values are left out.
+const toCells=(s,D)=>{
+  const L=LAYOUT.fp16a,T=L.tables,counts={miles:D.miles.length,exps:D.exps.length,codes:D.codes.length};
+  const inserts=planInserts('fp16a',counts),F=rowShifter(inserts),cells=new Map(),cached=new Map();
+  const at=ref=>{const[c,r]=splitRef(ref);return c+F(r)},set=(k,v)=>cells.set(at(L.cells[k][0]),up(v)),serial=iso=>iso?isoToSerial(iso):'';
+  set('vendor',/^[1-9]\d{0,14}$/.test(s.vendor.trim())?+s.vendor.trim():s.vendor.trim());
+  set('name',D.name);set('dept',s.dept.trim());set('job',D.job.trim());set('ref',s.ref.trim());
+  cells.set(at(L.cells.email[0]),s.email.trim().toLowerCase());
+  if(s.crit){set('emp',s.crit==='emp'?{yes:'Yes',unitemps:'Yes (Unitemps)',stp:'Yes (STP)'}[s.empType]:'No');set('stu',s.crit==='stu'?'Yes':'No');set('vis',s.crit==='vis'?'Yes':'No')}
+  if(!D.foreign){set('bankName',D.bankName.trim());set('acct',s.acct.replace(/\s/g,''));set('sort',normSort(s.sort));set('holder',D.holder)}
+  D.miles.forEach((m,i)=>{
+    const r=F(T.miles.first)+i,c=T.miles.cols;
+    cells.set(c.date+r,serial(m.date));cells.set(c.from+r,up(m.from));cells.set(c.to+r,up(m.to));cells.set(c.mi+r,m.dist);cells.set(c.rate+r,m.rate);
+    cells.set(c.why+r,up(detailsText(m)));if(m.repaid!=null)cells.set(c.repaid+r,m.repaid);cached.set(T.miles.gbp+r,m.gbp);
+  });
+  D.exps.forEach((e,i)=>{
+    const row=F(T.exps.first)+i,c=T.exps.cols;
+    cells.set(c.ref+row,up(e.ref));cells.set(c.date+row,serial(e.date));cells.set(c.type+row,up(e.type.trim()));cells.set(c.purpose+row,up(purposeText(e)));
+    if(e.amt!=null)cells.set(c.amt+row,e.amt);cells.set(c.ccy+row,e.ccy||D.ccy);if(e.repaid!=null)cells.set(c.repaid+row,e.repaid);
+  });
+  if(D.ccy){if(D.miles.length)cells.set(at(T.miles.ccy+T.miles.first),D.ccy);if(D.exps.length)cells.set(at(T.exps.ccy+T.exps.first),D.ccy);if(D.miles.length||D.exps.length)set('grandCcy',D.ccy)}
+  cached.set(at(T.miles.total),D.mileTotal);cached.set(at(T.exps.total),D.expTotal);cached.set(at(L.grand),D.grand);
+  if(D.cap){
+    set('capAmt',txt(D.cap.amt));set('capCcy',D.cap.ccy);
+    if(!D.cap.same){set('capConv',txt(D.cap.conv));set('capConvCcy',D.ccy)}
+    if(D.cap.reduce!=null){cells.set(at(L.cells.capReduce[0]),D.cap.reduce);set('capReduceCcy',D.ccy)}
+  }
+  set('fx',fxText(D));if(D.fxList.length)set('fxSrc',s.fxSrc.trim());
+  set('comments',D.comments);
+  if(s.declared){set('sig',D.sig.trim());cells.set(at(L.cells.sigDate[0]),serial(D.sigDate))}
+  D.codes.forEach((x,i)=>{
+    const row=F(T.codes.first)+i,c=T.codes.cols;
+    cells.set(c.gl+row,up(x.gl.trim()));cells.set(c.cc+row,up(x.cc.trim()));if(x.amt!=null)cells.set(c.amt+row,x.amt);cells.set(c.purpose+row,up(x.purpose.trim()));
+  });
+  const a=s.auth;
+  set('deptSig',a.deptSig.trim());cells.set(at(L.cells.deptDate[0]),serial(a.deptDate));set('deptPrint',a.deptPrint.trim());
+  set('uniSig',a.uniSig.trim());cells.set(at(L.cells.uniDate[0]),serial(a.uniDate));set('uniPrint',a.uniPrint.trim());
+  set('expTeam',a.expTeam.trim());set('docNo',a.docNo.trim());
+  const out={fp16a:{inserts,cells,cached},foreign:null};
+  if(D.foreign)out.foreign={cells:foreignCells(s,D)};
+  return out;
+};
+const foreignCells=(s,D)=>{
+  const L=LAYOUT.foreign.cells,f=s.fp,cells=new Map(),set=(k,v)=>cells.set(L[k][0],up(typeof v==='string'?v.trim():v));
+  if(s.declared){set('sig',D.sig);set('date',isoToSerial(D.sigDate))}
+  set('name',D.name);set('phone',f.phone);cells.set(L.email[0],s.email.trim().toLowerCase());
+  set('street',f.street);set('city',f.city);set('prov',f.prov);set('post',f.post);set('country',f.countryName);
+  set('bank',D.bankName);set('branch',f.branch);set('bStreet',f.bStreet);set('bCity',f.bCity);set('bProv',f.bProv);set('bPost',f.bPost);set('bCountry',COUNTRIES[D.country]||D.country);
+  if(D.ccy)set('ccy',CCY_NAMES[D.ccy]?`${D.ccy} - ${CCY_NAMES[D.ccy]}`:D.ccy);
+  if(D.ibanShown)(cleanIban(f.iban).match(/.{1,4}/g)||[]).slice(0,8).forEach((chunk,i)=>set('iban'+i,chunk));
+  set('acctNo',f.acctNo.replace(/\s/g,''));set('bic',cleanCode(f.bic));set('clearing',f.clearing);set('clearingExtra',f.clearingExtra);
+  if(f.route==='inter'){const x=f.inter;set('iName',x.name);set('iAcct',x.acct);set('iSwift',cleanCode(x.swift));set('iRouting',x.routing)}
+  if(f.route==='further'){const x=f.further;set('fRecipient',x.recipient);set('fBank',x.bank);set('fAcct',x.acct);set('fBic',cleanCode(x.bic));set('fAba',x.aba);set('fFinalAcct',x.finalAcct);set('fFinalName',x.finalName)}
+  set('info',f.info);
+  return cells;
+};
+
+// ---- import
+const str=v=>v==null?'':String(v).trim();
+const lowerEq=(a,b)=>str(a).toLowerCase()===str(b).toLowerCase();
+const COMMENT=/^RECEIPT (\S+): (?:TAXI REASON: (.*)|(GUESTS: .*|STAFF PRESENT: .*))$/i;
+// Cells → a patch of only the values found. Every field reads on its own: one unreadable cell never stops the rest.
+const fromCells=(view,today)=>{
+  const set={},rows={},take=(path,fn)=>{try{const v=fn();if(v!==''&&v!=null&&!(typeof v==='number'&&!Number.isFinite(v)))set[path]=v}catch(_){}};
+  const g=k=>view.get(k),gs=k=>str(g(k)),gn=k=>num(g(k)),gd=k=>parseDay(g(k));
+  if(view.kind==='foreign'){
+    set.bank='foreign';
+    take('bankName',()=>gs('bank'));
+    const iban=[0,1,2,3,4,5,6,7].map(i=>{try{return str(g('iban'+i))}catch(_){return''}}).join('');
+    take('fp.iban',()=>cleanIban(iban));
+    take('fp.country',()=>{const n=gs('bCountry');return Object.keys(COUNTRIES).find(c=>lowerEq(COUNTRIES[c],n)||c===n.toUpperCase())||''});
+    take('fp.ccy',()=>{const t=gs('ccy');return/^[A-Za-z]{3}\b/.test(t)?t.slice(0,3).toUpperCase():normCcy(t)});
+    const F=LAYOUT.foreign.cells;
+    for(const k of['bic','acctNo','clearing','clearingExtra','branch','bStreet','bCity','bProv','bPost','phone','street','city','prov','post','info'])if(F[k])take('fp.'+k,()=>gs(k));
+    take('fp.countryName',()=>gs('country'));
+    for(const[k,p]of[['iName','inter.name'],['iAcct','inter.acct'],['iSwift','inter.swift'],['iRouting','inter.routing']])take('fp.'+p,()=>gs(k));
+    for(const[k,p]of[['fRecipient','further.recipient'],['fBank','further.bank'],['fAcct','further.acct'],['fBic','further.bic'],['fAba','further.aba'],['fFinalAcct','further.finalAcct'],['fFinalName','further.finalName']])take('fp.'+p,()=>gs(k));
+    if(Object.keys(set).some(k=>k.startsWith('fp.inter.')))set['fp.route']='inter';
+    else if(Object.keys(set).some(k=>k.startsWith('fp.further.')))set['fp.route']='further';
+    take('name',()=>gs('name'));take('email',()=>gs('email').toLowerCase());
+    take('sigName',()=>gs('sig'));take('sigDate',()=>gd('date'));
+    if(set.sigName)set.declared=true;
+    return{kind:'foreign',set,rows};
+  }
+  take('vendor',()=>gs('vendor'));take('name',()=>gs('name'));take('dept',()=>gs('dept'));take('job',()=>gs('job'));
+  take('email',()=>gs('email').toLowerCase());take('ref',()=>gs('ref'));
+  try{
+    const yes=k=>/^YES/i.test(gs(k)),emp=gs('emp');
+    if(yes('emp')){set.crit='emp';set.empType=/UNITEMPS/i.test(emp)?'unitemps':/STP/i.test(emp)?'stp':'yes'}
+    else if(yes('stu'))set.crit='stu';else if(yes('vis'))set.crit='vis';
+  }catch(_){}
+  take('bankName',()=>gs('bankName'));take('acct',()=>gs('acct'));take('sort',()=>normSort(gs('sort')));take('holder',()=>gs('holder'));
+  if(set.sort||set.acct)set.bank='uk';
+  take('fxSrc',()=>gs('fxSrc'));take('sigName',()=>gs('sig'));take('sigDate',()=>gd('sigDate'));
+  if(set.sigName)set.declared=true;
+  try{for(const m of gs('fx').matchAll(/1\s*([A-Za-z]{3})\s*=\s*([\d.,]+)\s*([A-Za-z]{3})?/g)){const r=num(m[2]);if(r>0)set['fx.'+m[1].toUpperCase()]=r}}catch(_){}
+  try{
+    const amt=num(g('capAmt'));
+    if(amt!=null){set['cap.on']=true;set['cap.amt']=amt;take('cap.ccy',()=>normCcy(gs('capCcy')));take('cap.conv',()=>num(g('capConv')));take('cap.reduce',()=>{const r=num(g('capReduce'));return r==null?null:Math.abs(r)})}
+  }catch(_){}
+  for(const k of['deptSig','deptPrint','uniSig','uniPrint','expTeam','docNo'])take('auth.'+k,()=>gs(k));
+  take('auth.deptDate',()=>gd('deptDate'));take('auth.uniDate',()=>gd('uniDate'));
+  const auto={};
+  try{
+    const lines=[];
+    for(const line of gs('comments').split(/\r?\n/)){
+      const m=COMMENT.exec(line.trim());
+      if(!m){lines.push(line);continue}
+      const a=auto[m[1].toUpperCase()]||={};
+      if(m[2]!==undefined)a.taxiWhy=m[2].trim();
+      else for(const part of m[3].split(/;\s*/)){const p=/^(GUESTS|STAFF PRESENT): (.*)$/i.exec(part);if(p)a[/^G/i.test(p[1])?'guests':'staff']=p[2].trim()}
+    }
+    const rest=lines.join('\n').trim();if(rest)set.comments=rest;
+  }catch(_){}
+  const read=(k,fn)=>{try{const r=view.rows(k);if(r&&r.length)rows[k]=r.map(x=>{try{return fn(x)}catch(_){return null}}).filter(Boolean)}catch(_){}};
+  read('exps',x=>{
+    const date=parseDay(x.date),p=/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s+-\s+(.*)$/.exec(str(x.purpose)),parts=p?p[1].split(' - '):[str(x.purpose)];
+    const place=parts.length>1?parts[0]:'',purpose=parts.length>1?parts.slice(1).join(' - '):parts[0];
+    const amtCcy=typeof x.amt==='string'?normCcy(x.amt):'';
+    const e={date,type:str(x.type),place:place.trim(),purpose:purpose.trim(),amt:num(x.amt),ccy:normCcy(str(x.ccy))||amtCcy,ref:str(x.ref)||null,repaid:num(x.repaid)};
+    Object.assign(e,auto[str(x.ref).toUpperCase()]||{});
+    return e.amt==null&&!e.type&&!e.purpose?null:e;
+  });
+  read('miles',x=>{
+    const why=str(x.why),ret=/^RETURN$|\s*\(RETURN\)$/i.test(why),dist=num(x.mi);
+    return dist==null&&!str(x.from)&&!str(x.to)?null:{date:parseDay(x.date),from:normPostcode(str(x.from)),to:normPostcode(str(x.to)),mi:dist==null?null:ret?dist/2:dist,ret,why:ret?why.replace(/^RETURN$|\s*\(RETURN\)$/i,''):why,rate:num(x.rate),repaid:num(x.repaid)};
+  });
+  read('codes',x=>({gl:str(x.gl),cc:str(x.cc),amt:num(x.amt),purpose:str(x.purpose)}));
+  // A foreign-bank claim leaves the UK bank block empty and states a non-GBP currency.
+  if(!set.bank){const c=normCcy(gs('grandCcy'));if(c&&c!=='GBP'){set.bank='foreign';set['fp.ccy']=c}}
+  return{kind:'fp16a',set,rows};
+};
+const setPath=(o,path,v)=>{const ks=path.split('.'),last=ks.pop();let t=o;for(const k of ks)t=t[k];t[last]=v};
+// Applies a patch over the current state: found values replace, everything else stays. Values equal to what
+// the form would derive anyway go back to auto, so the patch never pins a derived value.
+const merge=(state,patch,today)=>{
+  const s=migrate(structuredClone(state)),p=patch.set,count=Object.keys(p).length+Object.values(patch.rows).reduce((n,r)=>n+r.length,0);
+  for(const[path,v]of Object.entries(p)){
+    if(path==='name'){const n=str(v),i=n.lastIndexOf(' ');s.first=i<0?'':n.slice(0,i);s.last=i<0?n:n.slice(i+1);continue}
+    if(path.startsWith('fx.')){s.fx[path.slice(3)]=v;continue}
+    try{setPath(s,path,v)}catch(_){}
+  }
+  let id=nextId(s);
+  for(const[k,list]of Object.entries(patch.rows))s[k]=list.map(r=>({id:id++,...r}));
+  let out=migrate(s);
+  const D=derive(out,today);
+  if(lowerEq(out.holder,D.name))out.holder=null;
+  if(lowerEq(out.sigName,D.name))out.sigName=null;
+  const autoJob=out.crit==='stu'?'Student':out.crit==='vis'?'Visitor':'';
+  if(autoJob&&lowerEq(out.job,autoJob))out.job='';
+  if(!D.foreign&&lowerEq(out.bankName,bankFromSort(out.sort)))out.bankName='';
+  if(D.foreign&&out.fp.country&&out.fp.country===ibanCountry(out.fp.iban))out.fp.country='';
+  if(D.foreign&&out.fp.ccy&&out.fp.ccy===CCY_BY_COUNTRY[out.fp.country||ibanCountry(out.fp.iban)])out.fp.ccy='';
+  if(patch.rows.exps||patch.rows.miles){
+    // Rows whose figure matches the stated rate are auto; the rest are typed statement figures.
+    const Dx=derive(out,today),rates={...out.fx};
+    for(const e of out.exps){const d=Dx.exps.find(x=>x.id===e.id);if(e.ref===d.aref)e.ref=null;if(d.same||rates[e.ccy]!=null&&e.amt!=null&&e.repaid===round2(e.amt*rates[e.ccy]))e.repaid=null}
+    for(const m of out.miles){
+      const d=Dx.miles.find(x=>x.id===m.id),date=m.date||today;
+      const hit=[['car','std'],['moto','std'],['bike','std'],['car','interview'],['car',out.crit==='stu'?'school':'over']].find(([v,t])=>m.rate===rateFor(v,t,date));
+      if(hit){[m.veh,m.rateType]=hit;m.rate=null}
+      if(Dx.ccy==='GBP'||rates.GBP!=null&&m.repaid===round2(d.gbp*rates.GBP))m.repaid=null;
+    }
+    const Di=derive({...out,fx:{}},today);
+    for(const[c,r]of Object.entries(out.fx))if(Di.fx[c]?.implied===r)delete out.fx[c];
+  }
+  if(out.cap.on){
+    let Dc=derive({...out,cap:{...out.cap,conv:null,reduce:null}},today);
+    if(Dc.cap.same||out.cap.conv===Dc.cap.autoConv)out.cap.conv=null;
+    Dc=derive({...out,cap:{...out.cap,reduce:null}},today);
+    if(out.cap.reduce!=null&&-out.cap.reduce===Dc.cap.autoReduce)out.cap.reduce=null;
+  }
+  const lastCode=out.codes[out.codes.length-1];
+  if(lastCode&&lastCode.amt!=null&&out.codes.every(c=>c.amt!=null)&&round2(out.codes.reduce((x,c)=>x+c.amt,0))===derive(out,today).grand)lastCode.amt=null;
+  out=migrate(out);
+  return{state:out,count};
+};
+
+// ---- copy text
+const money=(n,c)=>{if(n==null)return'—';if(!c)return n.toFixed(2);try{return new Intl.NumberFormat('en-GB',{style:'currency',currency:c||'GBP'}).format(n)}catch(_){return n.toFixed(2)+(c?' '+c:'')}};
+const table=(head,rows,right)=>{
+  const w=head.map((h,i)=>Math.max(h.length,...rows.map(r=>r[i].length))),line=r=>r.map((c,i)=>right.includes(i)?c.padStart(w[i]):c.padEnd(w[i])).join(' | ').trimEnd();
+  return[line(head),...rows.map(line)].join('\n');
+};
+// Plain-text claim: form labels, CAPITAL answers (emails lowercase), DD/MM/YYYY, empty optionals left out, missing required shown as a dash.
+const toText=(s,D)=>{
+  const miss=new Set(missing(s,D)),out=[],sec=(title,lines)=>{const l=lines.filter(Boolean);if(l.length)out.push(title.toUpperCase()+'\n'+l.join('\n'))};
+  const f=(lab,v,key)=>{v=typeof v==='string'?v.trim():v;return v===''||v==null?(key&&miss.has(key)?`${lab}: —`:''):`${lab}: ${v}`};
+  const U=v=>up(typeof v==='string'?v.trim():v);
+  out.push(`FP16A TRAVEL & SUBSISTENCE CLAIM${D.name?' - '+U(D.name):''} - ${fmtDay(D.sigDate)}`);
+  const crit=s.crit==='emp'?'UNIVERSITY OF WARWICK EMPLOYEE'+{yes:'',unitemps:' (UNITEMPS)',stp:' (STP)'}[s.empType]:s.crit==='stu'?'UNIVERSITY OF WARWICK STUDENT':s.crit==='vis'?'VISITOR':'';
+  sec('Claimant',[f('Full Name',U(D.name),'first'),f('Claimant Criteria',crit,'crit'),f('Job Title',U(D.job),'job'),f('Department',U(s.dept),'dept'),f('Email (For Remittance)',s.email.trim().toLowerCase(),'email'),f('Dept/Payment Ref',U(s.ref))]);
+  if(!D.foreign)sec('Bank Details',[f('Bank/Building Society Name',U(D.bankName),'bankName'),f('Sort Code',normSort(s.sort),'sort'),f('Bank Account Number',s.acct.replace(/\s/g,''),'acct'),f("Bank Account Holder's Name",U(D.holder))]);
+  else{
+    const x=s.fp;
+    out.push('FOREIGN ACCOUNT');
+    sec('Beneficiary',[f('Beneficiary Name',U(D.name),'first'),f('Beneficiary Telephone',x.phone,'fp-phone'),f('Beneficiary Email',s.email.trim().toLowerCase(),'email'),
+      f('Address',U([x.street,x.city,x.prov,x.post,x.countryName].map(v=>v.trim()).filter(Boolean).join(', ')),'fp-street')]);
+    sec('Bank',[f('Name Of Bank',U(D.bankName),'bankName'),f('Branch',U(x.branch)),f('Bank Address',U([x.bStreet,x.bCity,x.bProv,x.bPost].map(v=>v.trim()).filter(Boolean).join(', ')),'fp-bCity'),f('Bank Country',U(COUNTRIES[D.country]||D.country),'fp-country')]);
+    sec('Account',[f('Currency Of This Account',D.ccy,'fp-ccy'),D.ibanShown?f('IBAN',(cleanIban(x.iban).match(/.{1,4}/g)||[]).join(' '),'fp-iban'):'',f('Account No',x.acctNo.replace(/\s/g,''),'fp-acctNo'),f('BIC/SWIFT Code',cleanCode(x.bic),'fp-bic'),
+      f(D.clearing?.label||'Clearing Code',U(x.clearing),'fp-clearing'),f(D.clearing?.extra||'Additional Clearing Information',U(x.clearingExtra))]);
+    if(x.route==='inter')sec('Routing (Intermediary)',[f('Intermediary Bank Name',U(x.inter.name),'fp-inter-name'),f('Intermediary Account Number',U(x.inter.acct)),f('Intermediary SWIFT Code',cleanCode(x.inter.swift),'fp-inter-swift'),f('Intermediary Routing Code',U(x.inter.routing))]);
+    if(x.route==='further'){const y=x.further;sec('Routing (For Further Credit)',[f('Recipient Name (Your Bank)',U(y.recipient),'fp-further-recipient'),f('Name Of The Recipient Bank',U(y.bank),'fp-further-bank'),f('Recipient Bank Account Number',U(y.acct)),f('Recipient BIC/SWIFT Code',cleanCode(y.bic)),f('Recipient Routing/ABA Code',U(y.aba)),f('Final Credit Account Number',U(y.finalAcct),'fp-further-finalAcct'),f('Final Credit Account Name',U(y.finalName),'fp-further-finalName')])}
+    sec('Additional Information',[U(x.info)]);
+  }
+  if(D.exps.length)out.push('EXPENSES\n'+table(['Ref','Date','Type','Business Purpose','Amount','To Be Repaid'],
+    D.exps.map(e=>[U(e.ref),fmtDay(e.date)||'—',U(e.type)||'—',U(purposeText(e))||'—',e.amt==null?'—':e.amt.toFixed(2)+' '+(e.ccy||D.ccy),money(e.repaid,D.ccy)]),[4,5])+`\nTravel & Subsistence Total: ${money(D.expTotal,D.ccy)}`);
+  if(D.miles.length)out.push('MILEAGE\n'+table(['Date','From','To','Miles','Rate','Details','To Be Repaid'],
+    D.miles.map(m=>[fmtDay(m.date)||'—',U(m.from)||'—',U(m.to)||'—',String(m.dist),m.rate.toFixed(2),U(detailsText(m)),money(m.repaid,D.ccy)]),[3,4,6])+`\nMileage Total: ${money(D.mileTotal,D.ccy)}`);
+  if(D.fxList.length)sec('Exchange Rates',[...D.fxList.map(c=>D.fx[c].rate!=null?`1 ${c} = ${fmtRate(D.fx[c].rate)} ${D.ccy}`:`1 ${c} = — ${D.ccy}`),f('Obtained From',U(s.fxSrc),'fxSrc')]);
+  if(D.cap)sec('Cap',[f('Cap Being Enforced',D.cap.amt==null?'':D.cap.amt.toFixed(2)+' '+D.cap.ccy,'cap-amt'),D.cap.same?'':f('Cap Converted',D.cap.conv==null?'—':money(D.cap.conv,D.ccy)),f('Claim To Be Reduced By',D.cap.reduce==null?'':money(D.cap.reduce,D.ccy))]);
+  out.push(`GRAND TOTAL TO BE REIMBURSED: ${money(D.grand,D.ccy)}`);
+  sec('Additional Comments',[U(D.comments)]);
+  sec('Declaration',[f('Declaration',s.declared?'CONFIRMED':'','declared'),s.declared?f('Signature',U(D.sig)):'',f('Date',fmtDay(D.sigDate))]);
+  const a=s.auth,dept=[s.vendor.trim()&&f('Vendor Number',U(s.vendor)),
+    D.codes.length?table(['GL Code','Cost Centre / Project / Internal Order','Amount','Business Purpose'],D.codes.map(c=>[U(c.gl),U(c.cc),c.amt==null?'':c.amt.toFixed(2),U(c.purpose)]),[2]):'',
+    f('Department Signature',U(a.deptSig)),f('Date',fmtDay(a.deptDate)),f('Print Name And Title',U(a.deptPrint)),f('University Level Authorisation',U(a.uniSig)),f('Date',fmtDay(a.uniDate)),f('Print Name And Title',U(a.uniPrint)),
+    f('Expense Team Approval',U(a.expTeam)),f('Document Number',U(a.docNo))];
+  sec('For Departmental Use',dept);
+  return out.join('\n\n')+'\n';
+};
+
+// tpl: {fp16a, foreign} template bytes; the foreign file only exists for a foreign bank account.
+const exportFiles=async(s,today,tpl)=>{
+  const D=derive(s,today),c=toCells(s,D),out=[{name:filename('fp16a',s,D),bytes:await sheet.fill(tpl.fp16a,'fp16a',c.fp16a)}];
+  if(c.foreign)out.push({name:filename('foreign',s,D),bytes:await sheet.fill(tpl.foreign,'foreign',c.foreign)});
+  return out;
+};
+const importFile=async(u8,s,today)=>{const v=await sheet.open(u8);return{kind:v.kind,...merge(s,fromCells(v,today),today)}};
+
+return{exportFiles,importFile,round2,normCcy,num,parseDay,fmtDay,addMonths,normPostcode,UK_POSTCODE,normSort,bankFromSort,cleanIban,ibanCountry,ibanOk,abaOk,BIC,cleanCode,slug,
+  RATES,rateFor,SCHEMA,migrate,blank,nextId,derive,required,missing,label,setPath,checks,purposeText,detailsText,fxText,filename,toCells,fromCells,merge,toText,money};
+})();
+/* -- end fp16a:model -- */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),B=window._base,M=model,KEY='fp16a:state',PREV='fp16a:prev',TIER='fp16a:tier';
+const{DEPTS,UK_BANKS,CCY_NAMES,CCY_BY_COUNTRY,COUNTRIES}=data;
+const IC={
+user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+userCheck:'<path d="m16 11 2 2 4-4"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
+mail:'<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>',
+building2:'<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>',
+briefcase:'<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+tag:'<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+idCard:'<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+landmark:'<path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/>',
+hash:'<line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/>',
+creditCard:'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+banknote:'<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+phone:'<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>',
+house:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+mapPin:'<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+route:'<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+fileText:'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+calendar:'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+receipt:'<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
+receiptText:'<path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',
+coins:'<path d="M13.744 17.736a6 6 0 1 1-7.48-7.48"/><path d="M15 6h1v4"/><path d="m6.134 14.768.866-.5 2 3.464"/><circle cx="16" cy="8" r="6"/>',
+handCoins:'<path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/>',
+notebookPen:'<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>',
+mapPinned:'<path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/>',
+car:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+bike:'<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+motorbike:'<path d="m18 14-1-3"/><path d="m3 9 6 2a2 2 0 0 1 2-2h2a2 2 0 0 1 1.99 1.81"/><path d="M8 17h3a1 1 0 0 0 1-1 6 6 0 0 1 6-6 1 1 0 0 0 1-1v-.75A5 5 0 0 0 17 5"/><circle cx="19" cy="17" r="3"/><circle cx="5" cy="17" r="3"/>',
+gauge:'<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+arrowRightLeft:'<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>',
+fileCheck:'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m9 15 2 2 4-4"/>',
+scale:'<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>',
+circleMinus:'<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/>',
+messageSquareText:'<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>',
+penLine:'<path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',
+badgeCheck:'<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',
+stamp:'<path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/><path d="M20 15.5a2.5 2.5 0 0 0-2.5-2.5h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1z"/><path d="M5 22h14"/>',
+userPen:'<path d="M11.5 15H7a4 4 0 0 0-4 4v2"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="7" r="4"/>',
+fileDigit:'<path d="M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 16h2v6"/><path d="M10 22h4"/><rect x="2" y="16" width="4" height="6" rx="2"/>',
+folderKanban:'<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v6"/>',
+plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+check:'<path d="M20 6 9 17l-5-5"/>',
+x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+download:'<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+fileUp:'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/>',
+externalLink:'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+trainFront:'<path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/>',
+carTaxiFront:'<path d="M10 2h4"/><path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/>',
+bus:'<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>',
+plane:'<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+coffee:'<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>',
+sandwich:'<path d="m2.37 11.223 8.372-6.777a2 2 0 0 1 2.516 0l8.371 6.777"/><path d="M21 15a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-5.25"/><path d="M3 15a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h9"/><path d="m6.67 15 6.13 4.6a2 2 0 0 0 2.8-.4l3.15-4.2"/><rect width="20" height="4" x="2" y="11" rx="1"/>',
+utensils:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+squareParking:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+wine:'<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
+percent:'<line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+filePlus:'<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M9 15h6"/><path d="M12 18v-6"/>',
+trash2:'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'
+};
+// Sidecar URLs carry each file's git blob hash; refresh both after a sanitize run (context/fp16a.md).
+const TPL={fp16a:'fp16a.xlsx?v=ce9e529',foreign:'foreign-payments.xlsx?v=5475ac2'};
+const TYPES=[['Train','trainFront'],['Taxi','carTaxiFront'],['Bus','bus'],['Flight','plane'],['Hotel','bed'],['Breakfast','coffee'],['Lunch','sandwich'],['Evening Meal','utensils'],['Parking','squareParking'],['Entertainment','wine'],['Other','receipt']];
+const MORE_TYPES=['Tube','Tram','Coach','Ferry','Car Hire','Fuel','Toll','Accommodation','Dinner','Subsistence','Conference Fee','Registration','Visa','Baggage','Postage','Printing','Books'];
+const KEYS={e:'exps',m:'miles',c:'codes'},FIRST={e:'draft-e-type',m:'draft-m-date',c:'draft-c-gl'},SEG_DEF={'draft.m.veh':'car','draft.m.rateType':'std'};
+const today=()=>new Date().toLocaleDateString('en-CA');
+const canZip=(()=>{try{new CompressionStream('deflate-raw');new DecompressionStream('deflate-raw');return true}catch(_){return false}})();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const getPath=(o,k)=>k.split('.').reduce((x,p)=>x?.[p],o);
+const svg=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const m2=n=>n==null?'':n.toFixed(2),fmtNum=n=>String(+n.toFixed(2));
+const main=$('main'),form=$('f');
+let S=M.migrate(B.load(KEY)),D=null,booting=true,showMiss=false,mOpen=false,saveT=0,reqPrev=[],missPrev=[];
+const edit={e:null,m:null,c:null},pre={e:null,m:null,c:null},listSig={},touched=new Set();
+
+// ---- static fill
+for(const el of document.querySelectorAll('svg[data-i]')){el.setAttribute('viewBox','0 0 24 24');el.setAttribute('aria-hidden','true');el.innerHTML=IC[el.dataset.i]}
+const opts=(id,list)=>{$(id).innerHTML=list.map(([v,l])=>`<option value="${esc(v)}"${l?` label="${esc(l)}"`:''}>`).join('')};
+opts('dl-dept',DEPTS.map(v=>[v]));opts('dl-banks',UK_BANKS.map(v=>[v]));opts('dl-ccy',Object.entries(CCY_NAMES));
+opts('dl-countries',Object.values(COUNTRIES).sort((a,b)=>a.localeCompare(b)).map(v=>[v]));
+opts('dl-types',[...TYPES.map(t=>t[0]),...MORE_TYPES].map(v=>[v]));opts('dl-src',['Bank Statement','Card Statement','XE.com','OANDA'].map(v=>[v]));
+$('e-chips').innerHTML=TYPES.map(([t,i])=>`<button type="button" class="chip" data-type="${t}">${svg(i)}${t}</button>`).join('');
+
+// ---- field <-> state
+const PARSE={
+  num:v=>M.num(v),
+  over:v=>v.trim()||null,
+  sort:v=>M.normSort(v),
+  digits:v=>v.replace(/\D/g,''),
+  upper:v=>v.trim().toUpperCase(),
+  iban:v=>M.cleanIban(v),
+  ccy:v=>{const t=v.trim().toUpperCase();return/^[A-Z]{3}$/.test(t)?t:M.normCcy(v)},
+  country:v=>{const t=v.trim().toLowerCase();return t?Object.keys(COUNTRIES).find(c=>c.toLowerCase()===t||COUNTRIES[c].toLowerCase()===t)||'':''}
+};
+const SHOW={num:v=>v==null?'':String(v),over:v=>v??'',iban:v=>(v.match(/.{1,4}/g)||[]).join(' '),country:v=>COUNTRIES[v]||v};
+const read=el=>(PARSE[el.dataset.f]||(v=>v))(el.value);
+const show=(el,v)=>(SHOW[el.dataset.f]||(x=>x??''))(v);
+const grow=el=>{el.style.height='auto';el.style.height=el.scrollHeight+'px'};
+const markSeg=row=>{const v=getPath(S,row.dataset.k)||SEG_DEF[row.dataset.k]||'';for(const b of row.children){const on=b.dataset.v===v;b.classList.toggle('active',on);b.setAttribute('aria-checked',on)}};
+function fillForm(){
+  for(const el of form.querySelectorAll('input[data-k],textarea[data-k]')){el.value=show(el,getPath(S,el.dataset.k));el.classList.remove('auto')}
+  for(const row of document.querySelectorAll('.seg-row[data-k]'))markSeg(row);
+  for(const r of document.querySelectorAll('.srow[data-k]')){const on=!!getPath(S,r.dataset.k);r.classList.toggle('sel',on);r.setAttribute('aria-checked',on)}
+  const ret=!!S.draft.m.ret;$('m-ret').classList.toggle('active',ret);$('m-ret').setAttribute('aria-pressed',ret);
+  for(const t of'emc'){const on=edit[t]!=null,b=$(t+'-add');$(t+'-card').classList.toggle('editing',on);b.innerHTML=svg(on?'check':'plus');b.setAttribute('aria-label',`${on?'Save':'Add'} ${b.dataset.n}`)}
+  grow($('comments'));
+}
+
+// ---- render
+const reveal=el=>{el.classList.remove('rv');void el.offsetWidth;el.classList.add('rv')};
+const tierAttr=(el,on)=>on?el.removeAttribute('data-t'):el.setAttribute('data-t','o');
+function applyVis(){
+  const de=S.draft.e,te=(de.type||'').trim().toLowerCase(),ec=PARSE.ccy(de.ccy||'')||D.ccy,open=mOpen||S.miles.length>0||edit.m!=null;
+  const C={emp:S.crit==='emp',uk:!D.foreign,foreign:D.foreign,iban:D.ibanShown,inter:S.fp.route==='inter',further:S.fp.route==='further',
+    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':te==='taxi','e-ent':te==='entertainment','m-fx':!!D.ccy&&D.ccy!=='GBP','m-card':open,'m-closed':!open,
+    fx:D.fxList.length>0,cap:S.cap.on,'cap-conv':!!D.cap&&!D.cap.same,miles:S.miles.length>0};
+  for(const el of document.querySelectorAll('[data-show]')){const on=!!C[el.dataset.show];if(el.hidden===on){el.hidden=!on;if(on&&!booting)reveal(el)}}
+  const slot=$(D.foreign?'slot-foreign':'slot-uk'),bw=$('w-bankName');if(bw.parentNode!==slot)slot.append(bw);
+  $('l-bankName').firstChild.textContent=D.foreign?'Name Of Bank':'Bank/Building Society Name';
+  const cl=D.clearing;
+  $('l-fp-clearing').textContent=cl?.label||'Clearing Code';$('fp-clearing').placeholder=cl?.hint||'';tierAttr($('w-fp-clearing'),!!cl);
+  $('l-fp-clearingExtra').textContent=cl?.extra||'Additional Clearing Information';tierAttr($('w-fp-clearingExtra'),!!cl?.extra);
+  tierAttr($('fp-acctNo').closest('.f'),D.acctReq);
+}
+// An empty date shows today as its auto value.
+const autoDate=(id,v,t)=>{const el=$(id);if(el===document.activeElement)return;const want=v||t;if(el.value!==want)el.value=want;el.classList.toggle('auto',!v)};
+function renderAuto(){
+  const t=today(),ccy=D.ccy||'GBP',de=S.draft.e,dm=S.draft.m;
+  $('job').placeholder=S.crit==='stu'?'Student':S.crit==='vis'?'Visitor':'';
+  $('holder').placeholder=$('sigName').placeholder=D.name;
+  $('bankName').placeholder=D.foreign?'':M.bankFromSort(S.sort);
+  $('fp-country').placeholder=COUNTRIES[M.ibanCountry(S.fp.iban)]||'';
+  $('fp-ccy').placeholder=CCY_BY_COUNTRY[D.country]||'';
+  for(const id of['e-bank-ccy','m-bank-ccy','cap-bank-ccy'])$(id).textContent=ccy;
+  $('draft-e-ccy').placeholder=$('cap-ccy').placeholder=ccy;
+  const te=(de.type||'').trim().toLowerCase();for(const b of $('e-chips').children)b.classList.toggle('active',b.dataset.type.toLowerCase()===te);
+  const amt=M.num(de.amt),rate=D.fx[PARSE.ccy(de.ccy||'')]?.rate;
+  $('draft-e-repaid').placeholder=amt!=null&&rate!=null?m2(M.round2(amt*rate)):'';
+  $('draft-e-ref').placeholder=edit.e!=null?D.exps.find(x=>x.id===edit.e)?.aref||'':'#'+(S.exps.length+1);
+  const arate=M.rateFor(dm.veh||'car',dm.rateType||'std',dm.date||t),r=M.num(dm.rate)??arate,mi=M.num(dm.mi),dist=mi==null?null:mi*(dm.ret?2:1);
+  const gbp=dist==null?null:M.round2(dist*r),fxg=D.fx.GBP?.rate;
+  $('draft-m-rate').placeholder=arate.toFixed(2);
+  $('draft-m-why').placeholder=(de.purpose||'').trim();
+  $('e-sum').textContent=`${edit.e!=null?'Save':'Add'} Expense`;
+  $('m-sum').textContent=`${edit.m!=null?'Save':'Add'} Journey`;
+  $('m-calc').textContent=dist==null?'':`${fmtNum(dist)} mi × £${r.toFixed(2)} = ${M.money(gbp,'GBP')}`+(ccy!=='GBP'&&fxg?` = ${M.money(M.round2(gbp*fxg),ccy)}`:'');
+  $('e-bin').disabled=edit.e==null&&!Object.values(de).some(Boolean);
+  $('draft-m-repaid').placeholder=ccy!=='GBP'&&gbp!=null&&fxg?m2(M.round2(gbp*fxg)):'';
+  const from=M.normPostcode(dm.from),to=M.normPostcode(dm.to),map=$('m-map');
+  map.hidden=!(from&&to);if(from&&to)map.href='https://www.google.com/maps/dir/'+encodeURIComponent(from)+'/'+encodeURIComponent(to);
+  if(D.cap){$('cap-conv').placeholder=m2(D.cap.autoConv);$('cap-reduce').placeholder=D.cap.autoReduce==null?'':m2(Math.abs(D.cap.autoReduce))}
+  $('draft-c-amt').placeholder=D.unalloc>0?m2(D.unalloc):'';
+  const ac=$('auto-comments');ac.textContent=D.autoComments.join('\n');ac.hidden=!D.autoComments.length;
+  $('comments-n').textContent=S.comments.length>300?S.comments.length+'/400':'';
+  $('ref-n').textContent=S.ref.length>=12?S.ref.length+'/16':'';
+  autoDate('sigDate',S.sigDate,t);autoDate('draft-e-date',de.date,t);autoDate('draft-m-date',dm.date,t);
+}
+function list(t,items){
+  const sig=JSON.stringify([items,edit[t]]);if(listSig[t]===sig)return;listSig[t]=sig;
+  $(t+'-list').innerHTML=items.map(x=>`<div class="item${edit[t]===x.id?' editing':''}" data-id="${x.id}" tabindex="0" role="button"><div class="it"><div class="it1">${esc(x.t)}</div><div class="it2">${x.miss?`<span class="w">${esc(x.miss)}</span>${x.s?' · ':''}`:''}${esc(x.s)}</div></div><b class="amt">${esc(x.v)}</b><button type="button" class="del" aria-label="Delete">${svg('x')}</button></div>`).join('');
+}
+function renderLists(ck){
+  const c=D.ccy,j=a=>a.filter(Boolean).join(' · ');
+  list('e',D.exps.map(e=>({id:e.id,miss:ck.get('e:'+e.id)||'',t:e.type.trim()||'Expense',v:M.money(e.repaid,c),
+    s:j([M.fmtDay(e.date),e.ref!==e.aref&&e.ref,[e.place,e.purpose].map(x=>x.trim()).filter(Boolean).join(' - '),!e.same&&e.amt!=null?M.money(e.amt,e.ccy):''])})));
+  list('m',D.miles.map(m=>({id:m.id,miss:ck.get('m:'+m.id)||'',t:`${m.from||'?'} → ${m.to||'?'}`,v:M.money(m.repaid,c),
+    s:j([M.fmtDay(m.date),`${fmtNum(m.dist)} mi × £${m.rate.toFixed(2)}`,m.ret&&'Return',m.why.trim()])})));
+  list('c',D.codes.map(x=>({id:x.id,miss:'',t:j([x.gl.trim(),x.cc.trim()])||'Code',v:M.money(x.amt,c),s:x.purpose.trim()})));
+}
+function renderFx(){
+  const box=$('fx-rows'),sig=D.fxList.join()+'|'+D.ccy;
+  if(box.dataset.sig!==sig){
+    box.dataset.sig=sig;
+    box.innerHTML=D.fxList.map(c=>`<label class="f">${svg('arrowRightLeft')}<span class="fl">1 ${c} In ${esc(D.ccy)}<i>*</i></span><input id="fx-${c}" data-k="fx.${c}" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"><span class="aux">${esc(D.ccy)}</span></label>`).join('');
+    for(const c of D.fxList)$('fx-'+c).value=S.fx[c]==null?'':String(S.fx[c]);
+  }
+  for(const c of D.fxList){const im=D.fx[c].implied;$('fx-'+c).placeholder=im==null?'':String(im)}
+}
+function renderTotals(){
+  const c=D.ccy;
+  $('t-m').textContent=M.money(D.mileTotal,c);$('t-e').textContent=M.money(D.expTotal,c);
+  $('t-c').textContent=D.cap?M.money(D.cap.reduce,c):'';$('t-g').textContent=M.money(D.grand,c);
+}
+const wrap=k=>{const el=$(k);return el&&(el.closest('.f,.g')||el.closest('.card'))};
+function renderReq(ck=M.checks(S,D)){
+  const req=M.required(S,D);
+  for(const w of reqPrev)w.classList.remove('req');
+  reqPrev=req.map(([k])=>wrap(k)).filter(Boolean);for(const w of reqPrev)w.classList.add('req');
+  for(const w of missPrev)w.querySelector('b.w')?.remove();
+  missPrev=[];
+  // Warnings are amber text after the label, never a border. Empty required fields show after a Download or /; wrong values once left.
+  const mark=(k,msg)=>{const w=wrap(k),at=w&&(w.querySelector('.fl')||w.querySelector('.slbl'));if(!at||at.querySelector('b.w'))return;at.append(Object.assign(document.createElement('b'),{className:'w',textContent:msg}));missPrev.push(w)};
+  for(const[k,ok]of req)if(!ok&&showMiss)mark(k,'Needed');
+  for(const[k,msg]of ck)if(!k.includes(':')&&touched.has(k))mark(k,msg);
+}
+function update(){
+  D=M.derive(S,today());
+  const ck=M.checks(S,D);
+  applyVis();renderAuto();renderLists(ck);renderFx();renderTotals();renderReq(ck);
+}
+const flush=()=>{clearTimeout(saveT);saveT=0;B.save(KEY,S)};
+const changed=()=>{clearTimeout(saveT);saveT=setTimeout(flush,300);update()};
+
+// ---- tiers
+const TIERS=['m','o','a'];
+const setTier=t=>{if(!TIERS.includes(t))t='m';main.dataset.tier=t;for(const b of $('tier').children){const on=b.dataset.tier===t;b.classList.toggle('active',on);b.setAttribute('aria-checked',on)}B.save(TIER,t)};
+$('tier').addEventListener('click',e=>{const b=e.target.closest('[data-tier]');if(b)setTier(b.dataset.tier)});
+const stepTier=d=>setTier(TIERS[Math.max(0,Math.min(2,TIERS.indexOf(main.dataset.tier)+d))]);
+function goTo(k){
+  const el=$(k);if(!el)return;
+  if(el.offsetParent===null)setTier('a');
+  el.scrollIntoView({block:'center',behavior:'smooth'});el.focus({preventScroll:true});
+}
+
+// ---- field events
+form.addEventListener('submit',e=>e.preventDefault());
+form.addEventListener('input',e=>{
+  const el=e.target,k=el.dataset.k;if(!k)return;
+  if(el.dataset.f==='sort'){const f=el.value.replace(/\D/g,'').slice(0,6).replace(/(\d{2})(?=\d)/g,'$1-');if(f!==el.value)el.value=f}
+  el.classList.remove('auto');
+  M.setPath(S,k,read(el));
+  if(k==='draft.e.amt'){const c=M.normCcy(el.value);if(c&&c!==S.draft.e.ccy){S.draft.e.ccy=c;$('draft-e-ccy').value=c}}
+  if(el.tagName==='TEXTAREA')grow(el);
+  changed();
+});
+const UPPER=new Set(['draft-e-ccy','draft-c-gl','draft-c-cc']);
+form.addEventListener('focusout',e=>{
+  const el=e.target;if(!el.id||!el.dataset.k)return;
+  touched.add(el.id);
+  let v=null;
+  if(el.id==='draft-m-from'||el.id==='draft-m-to')v=M.normPostcode(el.value);
+  else if(UPPER.has(el.id))v=el.value.trim().toUpperCase();
+  if(v!=null&&v!==el.value){el.value=v;M.setPath(S,el.dataset.k,v);changed();return}
+  const f=el.dataset.f;
+  if(f==='iban'||f==='num'||f==='country'&&getPath(S,el.dataset.k))el.value=show(el,getPath(S,el.dataset.k));
+  if(el.type==='date')autoDate(el.id,getPath(S,el.dataset.k),today());
+  renderReq();
+});
+const visibleFields=root=>[...root.querySelectorAll('input:not([type=file]),textarea')].filter(x=>x.offsetParent!==null&&!x.disabled);
+form.addEventListener('keydown',e=>{
+  const el=e.target,card=el.closest('.inp-row'),t=card?.id[0];
+  if(el.matches('.srow[data-k]')&&(e.key===' '||e.key==='Enter')){e.preventDefault();toggle(el);return}
+  if(e.key==='Escape'&&card&&edit[t]!=null){e.preventDefault();e.stopPropagation();cancelEdit(t);return}
+  if(e.key!=='Enter'||e.isComposing||!el.matches('input')||el.type==='file')return;
+  e.preventDefault();
+  const fields=visibleFields(card||form),i=fields.indexOf(el);
+  if(card&&i===fields.length-1)ADD[t]();else if(fields[i+1])fields[i+1].focus();else el.blur();
+});
+function toggle(row){const k=row.dataset.k,on=!getPath(S,k);M.setPath(S,k,on);row.classList.toggle('sel',on);row.setAttribute('aria-checked',on);changed()}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.seg-row[data-k]>.seg');
+  if(b){M.setPath(S,b.parentNode.dataset.k,b.dataset.v);markSeg(b.parentNode);changed();return}
+  const r=e.target.closest('.srow[data-k]');if(r)toggle(r);
+});
+$('e-chips').addEventListener('click',e=>{const b=e.target.closest('[data-type]');if(!b)return;S.draft.e.type=$('draft-e-type').value=b.dataset.type;changed();$('draft-e-amt').focus()});
+$('m-open').addEventListener('click',()=>{mOpen=true;update();$('draft-m-date').focus()});
+$('m-ret').addEventListener('click',()=>{S.draft.m.ret=!S.draft.m.ret;fillForm();changed()});
+
+// ---- rows: add, edit, delete
+const toDraft=(t,r)=>{const s=v=>v==null?'':String(v);return t==='e'?{type:r.type,amt:s(r.amt),ccy:r.ccy,date:r.date,place:r.place,purpose:r.purpose,repaid:s(r.repaid),taxiWhy:r.taxiWhy,guests:r.guests,staff:r.staff,ref:r.ref||''}
+  :t==='m'?{veh:r.veh,rateType:r.rateType,rate:s(r.rate),date:r.date,from:r.from,to:r.to,mi:s(r.mi),ret:r.ret,why:r.why,repaid:s(r.repaid)}:{gl:r.gl,cc:r.cc,amt:s(r.amt),purpose:r.purpose}};
+function startEdit(t,id){
+  if(edit[t]===id){cancelEdit(t);return}
+  const r=S[KEYS[t]].find(x=>x.id===id);if(!r)return;
+  if(edit[t]==null)pre[t]=structuredClone(S.draft[t]);
+  edit[t]=id;S.draft[t]=toDraft(t,r);if(t==='m')mOpen=true;
+  fillForm();changed();
+  $(t+'-card').scrollIntoView({block:'nearest',behavior:'smooth'});$(FIRST[t]).focus({preventScroll:true});
+}
+function cancelEdit(t){if(edit[t]==null)return;S.draft[t]=pre[t]||{};edit[t]=pre[t]=null;fillForm();changed()}
+function commit(t,row,sticky){
+  const arr=S[KEYS[t]],i=arr.findIndex(x=>x.id===row.id);
+  if(i>=0)arr[i]=row;else arr.push(row);
+  S.draft[t]=edit[t]!=null?pre[t]||{}:sticky;edit[t]=pre[t]=null;
+  S=M.migrate(S);fillForm();changed();
+}
+const txt=v=>(v||'').trim();
+const ADD={
+  e(){
+    const d=S.draft.e,amt=M.num(d.amt);
+    if(amt==null){B.notify('Amount Needed',false);$('draft-e-amt').focus();return}
+    commit('e',{id:edit.e??M.nextId(S),date:d.date||today(),type:txt(d.type),place:txt(d.place),purpose:txt(d.purpose),amt,ccy:PARSE.ccy(d.ccy||'')||D.ccy,
+      ref:txt(d.ref)||null,repaid:M.num(d.repaid),taxiWhy:txt(d.taxiWhy),guests:txt(d.guests),staff:txt(d.staff)},{date:d.date||'',place:d.place||'',purpose:d.purpose||'',ccy:d.ccy||''});
+    $('draft-e-type').focus();
+  },
+  m(){
+    const d=S.draft.m,mi=M.num(d.mi);
+    if(mi==null){B.notify('Miles Needed',false);$('draft-m-mi').focus();return}
+    const to=M.normPostcode(d.to);
+    commit('m',{id:edit.m??M.nextId(S),date:d.date||today(),from:M.normPostcode(d.from),to,mi,ret:!!d.ret,why:txt(d.why)||txt(S.draft.e.purpose),
+      veh:d.veh||'car',rateType:d.rateType||'std',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',rateType:d.rateType||'std',from:to,why:d.why||''});
+    $('draft-m-to').focus();
+  },
+  c(){
+    const d=S.draft.c;
+    if(![d.gl,d.cc,d.amt,d.purpose].some(txt)){$('draft-c-gl').focus();return}
+    commit('c',{id:edit.c??M.nextId(S),gl:txt(d.gl),cc:txt(d.cc),amt:M.num(d.amt),purpose:txt(d.purpose)},{purpose:d.purpose||''});
+    $('draft-c-gl').focus();
+  }
+};
+function del(t,id,el){
+  el.classList.add('removing');
+  setTimeout(()=>{
+    const arr=S[KEYS[t]],i=arr.findIndex(x=>x.id===id);if(i<0)return;
+    const[row]=arr.splice(i,1);
+    if(edit[t]===id){S.draft[t]=pre[t]||{};edit[t]=pre[t]=null;fillForm()}
+    changed();
+    B.notify('Undo Delete','warn',()=>{S[KEYS[t]].splice(i,0,row);changed()});
+  },100);
+}
+// Bin: while editing it deletes that row; otherwise it drops the entry in progress, folding an unused mileage card away.
+function discard(t){
+  if(edit[t]!=null){const id=edit[t];del(t,id,$(t+'-list').querySelector(`[data-id="${id}"]`)||document.createElement('i'));return}
+  S.draft[t]={};
+  if(t==='m'&&!S.miles.length)mOpen=false;
+  fillForm();changed();$(t==='m'&&!mOpen?'m-open':FIRST[t]).focus();
+}
+for(const t of'em'){$(t+'-bin').addEventListener('click',()=>discard(t));$(t+'-go').addEventListener('click',()=>ADD[t]())}
+for(const t of'emc'){
+  $(t+'-add').addEventListener('click',()=>ADD[t]());
+  const box=$(t+'-list');
+  box.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;if(e.target.closest('.del'))del(t,+it.dataset.id,it);else startEdit(t,+it.dataset.id)});
+  box.addEventListener('keydown',e=>{const it=e.target.closest('.item');if(!it||e.target!==it)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();startEdit(t,+it.dataset.id)}else if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();del(t,+it.dataset.id,it)}});
+}
+
+// ---- actions
+let tplP=null;
+const templates=()=>tplP||=Promise.all(Object.entries(TPL).map(async([k,u])=>{const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);return[k,new Uint8Array(await r.arrayBuffer())]}))
+  .then(Object.fromEntries).catch(e=>{tplP=null;throw e});
+const saveFile=f=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([f.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=f.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
+async function download(which){
+  const btn=$(which==='foreign'?'a-dlf':'a-dl');
+  if(!canZip){B.feedback(btn,'err-fb','Not Supported',1500);B.notify('Browser Too Old For Excel Files',false);return}
+  flush();
+  try{
+    const files=await M.exportFiles(S,today(),await templates());
+    (which==='foreign'?files.slice(1):files).forEach((f,i)=>setTimeout(()=>saveFile(f),i*400));
+    B.feedback(btn,'dl-fb','Downloaded',1500);
+  }catch(err){B.feedback(btn,'err-fb','Failed',1500);B.notify(err?.reason==='template-drift'?'Template Changed, Reload':'Download Failed',false);return}
+  const miss=M.missing(S,D);
+  if(miss.length){showMiss=true;renderReq();B.notify(`${miss.length} Required Field${miss.length===1?'':'s'} Missing`,'warn',()=>goTo(miss[0]))}
+}
+async function importFiles(files){
+  const list=[...files].filter(f=>f&&f.size);if(!list.length)return;
+  if(!canZip){B.notify('Browser Too Old For Excel Files',false);return}
+  const before=structuredClone(S);let n=0,bad=0;
+  for(const f of list){try{const r=await M.importFile(new Uint8Array(await f.arrayBuffer()),S,today());S=r.state;n+=r.count}catch(_){bad++}}
+  const btn=$('a-imp'),s=x=>x===1?'':'s';
+  if(n){B.save(PREV,before);for(const t of'emc')edit[t]=pre[t]=null;fillForm();changed();B.feedback(btn,'ok','Imported',1500)}
+  if(n&&!bad)B.notify(`${n} Field${s(n)} Imported`,true);
+  else if(n)B.notify(`${n} Field${s(n)} Imported, ${bad} File${s(bad)} Skipped`,'warn');
+  else if(bad){B.feedback(btn,'err-fb','Import Failed',1500);B.notify('Not an FP16a File',false)}
+  else B.notify('Nothing To Import','warn');
+}
+const copy=()=>B.copyText(M.toText(S,D),()=>B.feedback($('a-copy'),'ok','Copied',1500),()=>B.notify('Copy Failed',false));
+$('a-copy').addEventListener('click',copy);
+$('a-dl').addEventListener('click',()=>download('all'));
+$('a-dlf').addEventListener('click',()=>download('foreign'));
+$('a-imp').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',e=>{importFiles(e.target.files);e.target.value=''});
+B.setupDragDrop({overlay:$('drop'),onDrop:f=>importFiles(f)});
+document.addEventListener('paste',e=>{const f=e.clipboardData?.files;if(f&&f.length){e.preventDefault();importFiles(f)}});
+const clearUi=()=>{for(const t of'emc')edit[t]=pre[t]=null;touched.clear();showMiss=false;mOpen=false};
+// New Claim keeps You + Payment; everything about this trip goes.
+const nc=B.twoPress($('a-new'),{text:'New Claim',guard:()=>S.exps.length+S.miles.length+S.codes.length>0||!!S.comments||S.declared||S.cap.on,onConfirm:()=>{
+  const b=M.blank();S=M.migrate({...S,exps:[],miles:[],codes:[],fx:{},fxSrc:'',cap:b.cap,comments:'',declared:false,sigName:null,sigDate:'',vendor:'',auth:b.auth,draft:b.draft});
+  clearUi();fillForm();changed();
+}});
+$('a-new').addEventListener('click',nc.press);
+const rs=B.twoPress($('a-reset'),{text:'Reset All',guard:()=>JSON.stringify(S)!==JSON.stringify(M.blank()),onConfirm:()=>{S=M.blank();clearUi();fillForm();changed()}});
+$('a-reset').addEventListener('click',rs.press);
+B.onKey({
+  c:copy,d:()=>download('all'),i:e=>{e.preventDefault();$('file').click()},
+  e:e=>{e.preventDefault();$('draft-e-type').focus()},
+  m:e=>{e.preventDefault();mOpen=true;update();$('draft-m-date').focus()},
+  '/':e=>{e.preventDefault();showMiss=true;renderReq();const k=M.missing(S,D)[0];if(k)goTo(k)},
+  ArrowLeft:()=>stepTier(-1),ArrowRight:()=>stepTier(1),
+  ctrl:{s:e=>{e.preventDefault();download('all')},o:e=>{e.preventDefault();$('file').click()}}
+});
+
+// ---- persistence
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
+addEventListener('pagehide',flush);addEventListener('beforeunload',flush);
+addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{S=M.migrate(JSON.parse(e.newValue));fillForm();update()}catch(_){}});
+
+// ---- boot
+setTier(B.load(TIER,'m'));fillForm();update();booting=false;
+(window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>{if(canZip)templates().catch(()=>{})});
+})();
+</script>
+</body>
+</html>
