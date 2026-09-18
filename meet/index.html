@@ -402,7 +402,7 @@ html[data-theme="sepia"] .pick-ok{color:#F5EDDA}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script src="/shared/search.js?v=20"></script>
 <script>
 (()=>{
@@ -1570,13 +1570,7 @@ $('e-ics').addEventListener('click',()=>{
   let text=null;
   try{text=ics.buildIcs(ev,Date.now())}catch(_){}
   if(!text){_base.notify('Calendar Export Needs A Known Timezone',false);return}
-  const blob=new Blob([text],{type:'text/calendar'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=(ev.title||'meet').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.ics';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  _base.download(new Blob([text],{type:'text/calendar'}),(ev.title||'meet').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.ics');
 });
 
 /* -- share -- */

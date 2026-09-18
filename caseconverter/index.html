@@ -63,7 +63,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script>
 (()=>{
 'use strict';
@@ -707,14 +707,8 @@ window.addEventListener('drop',function(event){
 
 function doDownload(){
   doFlush(true);
-  var blob=new Blob([editor.value],{type:'text/plain'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
   var fname=editor.value.trim().split(/\s+/).slice(0,5).join('_').toLowerCase().replace(/[^a-z0-9_]/g,'')||'caseconverter';
-  a.download=fname+'.txt';
-  a.click();
-  URL.revokeObjectURL(url);
+  _base.download(new Blob([editor.value],{type:'text/plain'}),fname+'.txt');
 }
 
 // === Flush on visibility/page events ===

@@ -54,7 +54,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
   <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script>
 (()=>{
   'use strict';
@@ -563,14 +563,8 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
     if(!event.shiftKey&&!event.altKey&&event.code==='KeyS'){
       event.preventDefault();
       flush(true);
-      const blob=new Blob([editor.value],{type:'text/plain'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url;
       const fname=editor.value.trim().split(/\s+/).slice(0,5).join('_').toLowerCase().replace(/[^a-z0-9_]/g,'')||'wrighter';
-      a.download=fname+'.txt';
-      a.click();
-      URL.revokeObjectURL(url);
+      _base.download(new Blob([editor.value],{type:'text/plain'}),fname+'.txt');
       return;
     }
     if(event.shiftKey&&!event.altKey&&event.code==='KeyK'){

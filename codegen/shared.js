@@ -8,7 +8,6 @@ var ACT_SVG={
 };
 var NF='Nothing Found';
 var STYLES=[{fg:'#000000',bg:'#FFFFFF'},{fg:'#FFFFFF',bg:'#000000'},{fg:'#000000',bg:null}];
-var dlA=document.createElement('a');
 var jpgC=document.createElement('canvas');
 var jpgCtx=jpgC.getContext('2d',{alpha:false});
 
@@ -270,9 +269,7 @@ function dlName(fallback,inputEl){
 }
 
 function dlBlob(blob,name,btn){
-  var url=URL.createObjectURL(blob);
-  dlA.download=name;dlA.href=url;dlA.click();
-  setTimeout(function(){URL.revokeObjectURL(url)},1e4);
+  _base.download(blob,name);
   _base.feedback(btn,'dl-fb','Downloaded');
 }
 
@@ -323,7 +320,6 @@ window._cg={
   updatePvStyle:updatePvStyle,
   copyCanvas:copyCanvas,
   dlName:dlName,
-  dlBlob:dlBlob,
   downloadExport:downloadExport,
   scanImage:scanImage,
   doResetAll:doResetAll

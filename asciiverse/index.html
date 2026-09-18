@@ -90,7 +90,7 @@
   </div>
   <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script>
 (()=>{
 'use strict';
@@ -256,7 +256,6 @@ const viewer = $('viewer'), out = $('out'), txt = $('txt');
 const pasteBtn = $('pasteBtn'), copyBtn = $('copyBtn'), dlBtn = $('dlBtn'), resetBtn = $('resetBtn');
 const fmtRow = $('fmt'), spinRow = $('spin'), outRow = $('outmode');
 const sizeVal = $('size-val'), detailVal = $('detail-val'), thickVal = $('thick-val'), speedVal = $('speed-val');
-const dlA = document.createElement('a'); dlA.style.display = 'none'; document.body.appendChild(dlA);
 
 /* ── Font measurement + fit (exact, no CSS crop) ──────────────────────────── */
 const MONO = "700 100px ui-monospace,'SF Mono',Menlo,Monaco,Consolas,monospace";
@@ -477,10 +476,7 @@ function doCopy() {
 }
 function doDownload() {
   const text = outContent(crop(lastFrame));
-  const blob = new Blob([text], { type: st.out === 0 ? 'text/plain' : 'text/html' });
-  const u = URL.createObjectURL(blob);
-  dlA.download = outFilename(); dlA.href = u; dlA.click();
-  setTimeout(() => URL.revokeObjectURL(u), 1e4);
+  _base.download(new Blob([text], { type: st.out === 0 ? 'text/plain' : 'text/html' }), outFilename());
   _base.feedback(dlBtn, 'dl-fb', 'Downloaded');
 }
 pasteBtn.addEventListener('click', doPaste);

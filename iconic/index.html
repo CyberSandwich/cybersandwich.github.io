@@ -185,7 +185,7 @@ button:disabled,.seg:disabled{opacity:.35;cursor:default}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script src="/shared/search.js?v=20"></script>
 <script src="/shared/swr.js?v=3"></script>
 <script>
@@ -802,11 +802,7 @@ function downloadFormatted(inner,name){
     var text=fmt==='inline'?fullSvg(inner):buildSvgDoc(inner);
     // SVG file downloads get XML declaration
     if(fmt==='svg')text='<?xml version="1.0" encoding="UTF-8"?>\n'+text;
-    var blob=new Blob([text],{type:'image/svg+xml'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=url;a.download=name+'.svg';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(function(){URL.revokeObjectURL(url)},1e4);
+    _base.download(new Blob([text],{type:'image/svg+xml'}),name+'.svg');
     return Promise.resolve();
   }
   // PNG or JPEG
@@ -817,10 +813,7 @@ function downloadFormatted(inner,name){
     return new Promise(function(resolve){
       canvas.toBlob(function(blob){
         if(!blob){resolve();return}
-        var dl=URL.createObjectURL(blob);
-        var a=document.createElement('a');a.href=dl;a.download=name+ext;
-        document.body.appendChild(a);a.click();document.body.removeChild(a);
-        setTimeout(function(){URL.revokeObjectURL(dl)},1e4);
+        _base.download(blob,name+ext);
         resolve();
       },mime,fmt==='jpeg'?0.95:undefined);
     });

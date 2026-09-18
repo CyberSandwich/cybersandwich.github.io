@@ -42,17 +42,11 @@ function updateSummary(){
   $('sum').style.display='';
 }
 
-function downloadBlob(blob,name){
-  var a=document.createElement('a');var url=URL.createObjectURL(blob);
-  a.href=url;a.download=name;document.body.appendChild(a);a.click();
-  document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url)},100);
-}
-
 function downloadAll(){
   var items=results.filter(function(r){return r.blob});
   if(!items.length)return;
   var i=0;
-  function next(){if(i>=items.length)return;downloadBlob(items[i].blob,items[i].outName);i++;setTimeout(next,200)}
+  function next(){if(i>=items.length)return;_base.download(items[i].blob,items[i].outName);i++;setTimeout(next,200)}
   next();
 }
 
@@ -115,7 +109,7 @@ function completeCard(card,blob){
     var acts=document.createElement('div');acts.className='fc-acts';
     var dl=document.createElement('button');dl.textContent='Download';
     var outName=card._name.replace(/\.[^.]+$/,'')+'_optimized.'+cfg.ext;
-    dl.addEventListener('click',function(){downloadBlob(blob,outName)});
+    dl.addEventListener('click',function(){_base.download(blob,outName)});
     var cp=document.createElement('button');cp.textContent='Copy';
     cp.addEventListener('click',function(){cfg.copyBlob(blob,cp)});
     acts.appendChild(dl);acts.appendChild(cp);card.appendChild(acts);

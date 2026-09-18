@@ -139,7 +139,7 @@ Drop Here
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <canvas id="cvs" style="display:none"></canvas>
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script>
 'use strict';
 var $=function(id){return document.getElementById(id)},PI=Math.PI;
@@ -640,20 +640,13 @@ if(palette.length===0)return;
 var out=palette.map(function(p){return fmtVal(p,globalFmt)}).join(', ');
 copyText(out,function(){btnFeedback($('ca-btn'),'ok','Copy All','Copied',1500)},function(){btnFeedback($('ca-btn'),'err-fb','Copy All','Failed',800)})}
 
-function dlFile(name,content,type){
-var b=new Blob([content],{type:type||'text/plain'});
-var u=URL.createObjectURL(b);
-var a=document.createElement('a');a.href=u;a.download=name;
-document.body.appendChild(a);a.click();document.body.removeChild(a);
-setTimeout(function(){URL.revokeObjectURL(u)},100)}
-
 function doExportFmt(fmt){
 if(palette.length===0)return;
 var out='',name='palette',type='text/plain';
 if(fmt==='text'){out=palette.map(function(p){return fmtVal(p,globalFmt)}).join('\n');name='palette.txt'}
 else if(fmt==='css'){out=':root {\n'+palette.map(function(p,i){return'  --color-'+(i+1)+': '+p.hex+';'}).join('\n')+'\n}';name='palette.css';type='text/css'}
 else if(fmt==='tw'){out=palette.map(function(p,i){return"  'palette-"+(i+1)+"': '"+p.hex+"',"}).join('\n');name='palette-tailwind.txt'}
-dlFile(name,out,type);
+_base.download(new Blob([out],{type:type}),name);
 var btn=document.querySelector('.ex-opt[data-fmt="'+fmt+'"]');
 if(btn)btnFeedback(btn,'ok','','Downloaded',1200)}
 

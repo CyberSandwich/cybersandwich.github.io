@@ -125,7 +125,7 @@ Drop Text Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script>
 'use strict';
 (function(){
@@ -156,7 +156,6 @@ var savedText=_base.load(KEY_T);if(typeof savedText!=='string')savedText='';
 var pv=$('pv'),cv=$('cv'),ctx=cv.getContext('2d'),emptyEl=$('empty'),txt=$('txt');
 var psBtn=$('psBtn'),cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),rsBtn=$('rsBtn');
 var ov=$('drop-ov');
-var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
 
 var rafId=0,renderToken=0,lastHash=null,lastBlob=null,idleId=0;
 var measureCtx=null;
@@ -403,9 +402,7 @@ pv.addEventListener('click',function(e){
 });
 
 function fallbackDl(blob,fname){
-  var u=URL.createObjectURL(blob);
-  dlA.download=fname;dlA.href=u;dlA.click();
-  setTimeout(function(){URL.revokeObjectURL(u)},10000);
+  _base.download(blob,fname);
   _base.feedback(dlBtn,'dl-fb','Downloaded')
 }
 function doDownload(){

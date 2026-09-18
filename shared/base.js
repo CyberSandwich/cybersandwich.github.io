@@ -54,6 +54,14 @@
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(cb,fb)}else{fb()}
   }
 
+  /* Save a Blob as a file. The object URL outlives the click: Safari and Firefox read it after click() returns. */
+  function download(blob,name){
+    var a=document.createElement('a'),url=URL.createObjectURL(blob);
+    a.href=url;a.download=name;a.style.display='none';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},1e4);
+  }
+
   /* SVG icon helpers */
   function mkCheck(){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('width','14');s.setAttribute('height','14');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2.5');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.setAttribute('aria-hidden','true');var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points','4 12 9 17 20 6');s.appendChild(p);return s}
 
@@ -165,5 +173,5 @@
     clearTimeout(btn._sa);btn._sa=setTimeout(function(){btn.classList.remove('step-press')},300);
   });
 
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,download:download,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
 })();

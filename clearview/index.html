@@ -93,7 +93,7 @@ Drop Media Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=25"></script>
+<script src="/shared/base.js?v=26"></script>
 <script>
 var $=function(s){return document.getElementById(s)};
 
@@ -130,7 +130,6 @@ var pv=$('pv'),ov=$('drop-ov');
 var fileIn=document.createElement('input');fileIn.type='file';fileIn.accept='image/*,video/*';fileIn.style.display='none';document.body.appendChild(fileIn);
 fileIn.addEventListener('change',function(){var f=fileIn.files&&fileIn.files[0];if(!f){return}if(f.type.startsWith('image/'))loadImg(f);else if(f.type.startsWith('video/'))loadVid(f);else _base.notify('Unsupported File',false);fileIn.value=''});
 var cpBtn=$('cpBtn'),dlBtn=$('dlBtn'),psBtn=$('psBtn'),rsBtn=$('rsBtn');
-var dlA=document.createElement('a');dlA.style.display='none';document.body.appendChild(dlA);
 
 
 function rrPath(c,x,y,w,h,r){
@@ -443,10 +442,7 @@ rafId=requestAnimationFrame(tick)
 function finish(){
 if(done)return;done=true;
 restore();
-var blob=new Blob(chunks,{type:mime});
-var u=URL.createObjectURL(blob);
-dlA.download='clearview.'+VFMT_EXT[fmtIdx];dlA.href=u;dlA.click();
-setTimeout(function(){URL.revokeObjectURL(u)},1e4);
+_base.download(new Blob(chunks,{type:mime}),'clearview.'+VFMT_EXT[fmtIdx]);
 _base.feedback(dlBtn,'dl-fb','Downloaded')
 }
 recording=true;
@@ -488,9 +484,7 @@ if(!active()){_base.notify('No Media Loaded',false);return}
 if(isVid()){recordVideo();return}
 doExport(function(b){
 if(!b){_base.notify('Export Failed',false);return}
-var u=URL.createObjectURL(b);
-dlA.download='clearview.'+FMT_EXT[fmtIdx];dlA.href=u;dlA.click();
-setTimeout(function(){URL.revokeObjectURL(u)},1e4);
+_base.download(b,'clearview.'+FMT_EXT[fmtIdx]);
 _base.feedback(dlBtn,'dl-fb','Downloaded')
 })
 });
