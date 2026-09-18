@@ -283,12 +283,6 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
         <button type="button" class="seg" role="radio" data-v="moto">Motorcycle</button>
         <button type="button" class="seg" role="radio" data-v="bike">Bicycle</button>
       </div>
-      <div class="seg-row c4" role="radiogroup" aria-label="Rate" id="draft-m-rateType" data-k="draft.m.rateType" data-t="o">
-        <button type="button" class="seg" role="radio" data-v="std">Standard</button>
-        <button type="button" class="seg" role="radio" data-v="over">10,000+ Mi</button>
-        <button type="button" class="seg" role="radio" data-v="school">School</button>
-        <button type="button" class="seg" role="radio" data-v="interview">Interview</button>
-      </div>
       <label class="g" data-t="o"><svg data-i="percent"></svg><span class="fl">Rate (£ per Mile)</span><input id="draft-m-rate" data-k="draft.m.rate" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
       <label class="g"><svg data-i="calendar"></svg><span class="fl">Journey Date</span><input id="draft-m-date" data-k="draft.m.date" type="date" enterkeyhint="next"></label>
       <div class="g2 even">
@@ -1093,10 +1087,10 @@ const fixClearing=(s,cl)=>{const c=cleanCode(s),f=oFix(c,x=>!!cl?.re?.test(x));r
 const slug=s=>String(s??'').normalize('NFKD').replace(/\p{M}/gu,'').replace(/['’`]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 
 // ---- rates
-// Warwick mileage (£/mile) by journey date; warwick.ac.uk/services/peopleteam/internal/payroll/expenses/uk1/travel (2026-09-18).
-const RATES=[{from:'',car:.45,moto:.24,bike:.2},{from:'2026-06-15',car:.55,moto:.24,bike:.2}];
-const FLAT={over:.25,school:.25,interview:.18};
-const rateFor=(veh,type,date)=>FLAT[type]??RATES.filter(r=>date>=r.from).pop()[veh];
+// £/mile as the template's own header states them (owner: exactly the template), students' car journeys at the Students rate.
+// Warwick's payroll page has car at 0.55 from 15/6/26; a typed Rate covers that or any other exception.
+const RATES={car:.45,moto:.24,bike:.2},STUDENT_CAR=.25;
+const rateFor=(veh,student)=>veh==='car'&&student?STUDENT_CAR:RATES[veh];
 // Subsistence maxima incl. VAT, per receipt or per night; warwick.ac.uk/services/peopleteam/internal/payroll/expenses/uk1/subsistence (revised wef 1/8/24, fetched 2026-09-18).
 const LIMITS=[{from:'2024-08-01',breakfast:15,lunch:15,dinner:30,dinnerHotel:40,refresh:5,hotelLondon:200,hotel:150,incUK:5,incAbroad:10}];
 const LONDON=/\blondon\b|^\s*(EC|WC|E|N|NW|SE|SW|W)\d/i;
@@ -1135,7 +1129,7 @@ const SCHEMA={first:'',last:'',job:'',dept:'',email:'',ref:'',vendor:'',crit:['v
     route:['direct','inter','further'],inter:{name:'',acct:'',swift:'',routing:''},further:{recipient:'',bank:'',acct:'',bic:'',aba:'',finalAcct:'',finalName:''},info:''}};
 const ROWS={
   exps:{date:'',trip:'',type:'',place:'',purpose:'',amt:0,ccy:'',ref:null,repaid:0,taxiWhy:'',guests:'',staff:'',nights:0},
-  miles:{date:'',from:'',to:'',mi:0,ret:false,why:'',veh:['car','moto','bike'],rateType:['std','over','school','interview'],rate:0,repaid:0},
+  miles:{date:'',from:'',to:'',mi:0,ret:false,why:'',veh:['car','moto','bike'],rate:0,repaid:0},
   codes:{gl:'',cc:'',amt:0,purpose:''}};
 const fitv=(d,v)=>Array.isArray(d)?(d.includes(v)?v:d[0]):d===null?(typeof v==='string'&&v?v:null):d===0?(typeof v==='number'&&Number.isFinite(v)?v:null):typeof d==='object'?fito(d,v):typeof v===typeof d?v:d;
 const fito=(d,v)=>Object.fromEntries(Object.entries(d).map(([k,dk])=>[k,fitv(dk,v?.[k])]));
@@ -1169,7 +1163,7 @@ const derive=(s,today)=>{
   const name=[s.first,s.last].map(x=>x.trim()).filter(Boolean).join(' ');
   const exps=[...s.exps].sort(byDate).map((e,i)=>{const same=!e.ccy||e.ccy===ccy;return{...e,i,aref:'#'+(i+1),ref:e.ref||'#'+(i+1),same,typed:same?null:e.repaid}});
   const miles=[...s.miles].sort(byDate).map((m,i)=>{
-    const arate=rateFor(m.veh,m.rateType,m.date||today),rate=m.rate??arate,dist=(m.mi||0)*(m.ret?2:1);
+    const arate=rateFor(m.veh,s.crit==='stu'),rate=m.rate??arate,dist=(m.mi||0)*(m.ret?2:1);
     return{...m,i,arate,rate,dist,gbp:Number((dist*rate).toPrecision(15)),typed:ccy==='GBP'?null:m.repaid};
   });
   // Implied rate per currency from typed statement figures: sum repaid / sum spent, 4 dp.
@@ -1462,9 +1456,8 @@ const merge=(state,patch,today)=>{
     const Dx=derive(out,today),rates={...out.fx};
     for(const e of out.exps){const d=Dx.exps.find(x=>x.id===e.id);if(e.ref===d.aref)e.ref=null;if(d.same||rates[e.ccy]!=null&&e.amt!=null&&e.repaid===round2(e.amt*rates[e.ccy]))e.repaid=null}
     for(const m of out.miles){
-      const d=Dx.miles.find(x=>x.id===m.id),date=m.date||today;
-      const hit=[['car','std'],['moto','std'],['bike','std'],['car','interview'],['car',out.crit==='stu'?'school':'over']].find(([v,t])=>m.rate===rateFor(v,t,date));
-      if(hit){[m.veh,m.rateType]=hit;m.rate=null}
+      const d=Dx.miles.find(x=>x.id===m.id),hit=['car','moto','bike'].find(v=>m.rate===rateFor(v,out.crit==='stu'));
+      if(hit){m.veh=hit;m.rate=null}
       if(Dx.ccy==='GBP'||rates.GBP!=null&&m.repaid===round2(d.gbp*rates.GBP))m.repaid=null;
     }
     const Di=derive({...out,fx:{}},today);
@@ -1669,7 +1662,7 @@ trash2:'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H
 const TPL={fp16a:'fp16a.xlsx?v=ce9e529',foreign:'foreign-payments.xlsx?v=5475ac2'};
 const TYPES=[['Train','trainFront'],['Taxi','carTaxiFront'],['Bus','bus'],['Flight','plane'],['Hotel','bed'],['Breakfast','coffee'],['Lunch','sandwich'],['Evening Meal','utensils'],['Parking','squareParking'],['Entertainment','wine'],['Other','receipt']];
 const MORE_TYPES=['Refreshments','Incidentals','Tube','Tram','Coach','Ferry','Car Hire','Fuel','Toll','Accommodation','Dinner','Subsistence','Conference Fee','Registration','Visa','Baggage','Postage','Printing','Books'];
-const KEYS={e:'exps',m:'miles',c:'codes'},FIRST={e:'draft-e-type',m:'draft-m-date',c:'draft-c-gl'},SEG_DEF={'draft.m.veh':'car','draft.m.rateType':'std'};
+const KEYS={e:'exps',m:'miles',c:'codes'},FIRST={e:'draft-e-type',m:'draft-m-date',c:'draft-c-gl'},SEG_DEF={'draft.m.veh':'car'};
 const today=()=>new Date().toLocaleDateString('en-CA');
 const canZip=(()=>{try{new CompressionStream('deflate-raw');new DecompressionStream('deflate-raw');return true}catch(_){return false}})();
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
@@ -1748,7 +1741,7 @@ function renderAuto(){
   $('draft-e-purpose').placeholder=purposeEg(de.type||'');
   $('draft-e-repaid').placeholder=amt!=null&&rate!=null?m2(M.round2(amt*rate)):'';
   $('draft-e-ref').placeholder=edit.e!=null?D.exps.find(x=>x.id===edit.e)?.aref||'':'#'+(S.exps.filter(x=>(x.date||'9999')<=(de.date||t)).length+1);
-  const arate=M.rateFor(dm.veh||'car',dm.rateType||'std',dm.date||t),r=M.num(dm.rate)??arate,mi=M.num(dm.mi),dist=mi==null?null:mi*(dm.ret?2:1);
+  const arate=M.rateFor(dm.veh||'car',S.crit==='stu'),r=M.num(dm.rate)??arate,mi=M.num(dm.mi),dist=mi==null?null:mi*(dm.ret?2:1);
   const gbp=dist==null?null:M.round2(dist*r),fxg=D.fx.GBP?.rate;
   $('draft-m-rate').placeholder=arate.toFixed(2);
   $('draft-m-why').placeholder=(de.purpose||'').trim();
@@ -1892,7 +1885,7 @@ $('m-ret').addEventListener('click',()=>{S.draft.m.ret=!S.draft.m.ret;fillForm()
 
 // ---- rows: add, edit, delete
 const toDraft=(t,r)=>{const s=v=>v==null?'':String(v);return t==='e'?{type:r.type,amt:s(r.amt),ccy:r.ccy,date:r.date,trip:r.trip,place:r.place,purpose:r.purpose,repaid:s(r.repaid),taxiWhy:r.taxiWhy,guests:r.guests,staff:r.staff,ref:r.ref||'',nights:s(r.nights)}
-  :t==='m'?{veh:r.veh,rateType:r.rateType,rate:s(r.rate),date:r.date,from:r.from,to:r.to,mi:s(r.mi),ret:r.ret,why:r.why,repaid:s(r.repaid)}:{gl:r.gl,cc:r.cc,amt:s(r.amt),purpose:r.purpose}};
+  :t==='m'?{veh:r.veh,rate:s(r.rate),date:r.date,from:r.from,to:r.to,mi:s(r.mi),ret:r.ret,why:r.why,repaid:s(r.repaid)}:{gl:r.gl,cc:r.cc,amt:s(r.amt),purpose:r.purpose}};
 function startEdit(t,id){
   if(edit[t]===id){cancelEdit(t);return}
   const r=S[KEYS[t]].find(x=>x.id===id);if(!r)return;
@@ -1936,7 +1929,7 @@ const ADD={
     if(mi==null){B.notify('Miles Needed',false);$('draft-m-mi').focus();return}
     const to=M.normPostcode(d.to);
     commit('m',{id:edit.m??M.nextId(S),date:d.date||today(),from:M.normPostcode(d.from),to,mi,ret:!!d.ret,why:txt(d.why)||txt(S.draft.e.purpose),
-      veh:d.veh||'car',rateType:d.rateType||'std',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',rateType:d.rateType||'std',from:d.ret?M.normPostcode(d.from):to,why:d.why||''});
+      veh:d.veh||'car',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',from:d.ret?M.normPostcode(d.from):to,why:d.why||''});
     B.save(PC,[...new Set([to,M.normPostcode(d.from),...B.load(PC,[])])].filter(p=>M.UK_POSTCODE.test(p)).slice(0,8));pcOpts();
     if(!quiet)refocus('draft-m-to');
   },
