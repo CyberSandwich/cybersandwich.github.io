@@ -19,9 +19,10 @@
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
 <link rel="stylesheet" href="/shared/base.css?v=27">
 <style>
-:root{color-scheme:light;--fp-warn:#A16207}
-html[data-theme="dark"]{color-scheme:dark;--fp-warn:#FBBF24}
-html[data-theme="sepia"]{color-scheme:light;--fp-warn:#92400E}
+/* --fp-pos/--fp-neg pairs are the shared stepper's plus and bin colors in each theme (base.css). */
+:root{color-scheme:light;--fp-warn:#A16207;--fp-pos:#15803D;--fp-pos-bg:#F0FDF4;--fp-neg:#B91C1C;--fp-neg-bg:#FEF2F2}
+html[data-theme="dark"]{color-scheme:dark;--fp-warn:#FBBF24;--fp-pos:#86EFAC;--fp-pos-bg:#1A3A2A;--fp-neg:#FCA5A5;--fp-neg-bg:#3B1C1C}
+html[data-theme="sepia"]{color-scheme:light;--fp-warn:#92400E;--fp-pos:#3F6212;--fp-pos-bg:#D5E0C8;--fp-neg:#9A3412;--fp-neg-bg:#E8D5C8}
 [hidden]{display:none!important}
 main{max-width:440px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
 main[data-tier=m] [data-t=o],main:not([data-tier=a]) [data-t=d]{display:none}
@@ -116,6 +117,11 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .tot b.w{margin-left:8px;font-size:.8125rem;color:var(--fp-warn)}
 .tot b{font-weight:500;color:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
 .tots{overflow:hidden}
+/* Money coming back reads green, the reduction red, like the stepper's plus and bin (the Excel form shows the reduction red too). */
+.tot.pos{background:var(--fp-pos-bg);color:var(--fp-pos)}
+.tot.neg{background:var(--fp-neg-bg);color:var(--fp-neg)}
+.tot.pos svg,.tot.neg svg{color:inherit;opacity:.8}
+.tot.pos>b,.tot.neg>b{color:inherit}
 /* Grand Total wears the selected-segment look, like the Add Expense button. */
 .tot.grand{background:var(--tab-active);color:var(--tab-active-c);font-weight:600}
 .tot.grand svg{color:inherit;opacity:.8}
@@ -372,11 +378,15 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </section>
 
 <section class="sec"><h3>Actions</h3>
-<div class="card links" id="actions">
+<div class="card links">
   <button type="button" id="a-imp" data-l="Import"><svg class="id" data-i="fileUp"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Import</span></button>
+</div>
+<div class="card links">
   <button type="button" id="a-copy" data-l="Copy"><svg class="id" data-i="copy"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Copy</span></button>
   <button type="button" id="a-dl" data-l="Download"><svg class="id" data-i="download"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download</span></button>
   <button type="button" id="a-dlf" data-l="Download Foreign Payments Form" data-show="foreign" hidden><svg class="id" data-i="download"></svg><svg class="ic" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Download Foreign Payments Form</span></button>
+</div>
+<div class="card links">
   <button type="button" id="a-new"><svg class="id" data-i="filePlus"></svg><span>New Claim</span></button>
   <button type="button" id="a-reset"><svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset All</span></button>
 </div>
@@ -857,10 +867,12 @@ const PLACES=[
 ];
 const SORT_EXACT={
 '230580':'Metro Bank','231470':'Wise','608312':'Atom bank','608313':'Atom bank','608371':'Starling Bank',
-'608400':'Zopa','608407':'Chase','040004':'Monzo','040075':'Revolut (Modulr)','086064':'Virgin Money'
+'608400':'Zopa','608407':'Chase','040004':'Monzo','040003':'Monzo','040075':'Revolut (Modulr)','042909':'Revolut','086064':'Virgin Money',
+'230801':'Wise','608464':'Wise','165221':'Cumberland Building Society','165810':'Triodos Bank'
 };
-// Banks whose personal accounts all share the one sort code listed in SORT_EXACT, so the bank alone gives it.
-const SINGLE_SORT=['Monzo','Starling Bank','Chase','Wise','Metro Bank'];
+// Banks whose personal accounts all share one sort code, so the bank alone gives it (the bank's own page, or Wise's checker for Chase
+// and Zopa). Monzo (04-00-04 and 04-00-03), Wise (three codes), Revolut and branch banks such as HSBC have several.
+const SINGLE_SORT=['Starling Bank','Metro Bank','Cumberland Building Society','Triodos Bank','Chase','Zopa'];
 // Bank → space-separated sort code prefixes; '' marks agency ranges inside a big bank's block (no name shown).
 const SORT_GROUPS=[
 ['First Direct','404758 404759 404780 404781 404782 404783 404784 404785 404786 404787 40476 40477'],
@@ -1058,8 +1070,9 @@ const deptName=v=>deptOf(v)??v.trim(),placeName=v=>placeOf(v)??v.trim();
 const digitLike=s=>/^[\dOo\s.\-‐‑‒–—―−]*$/.test(String(s??''));
 const normDigits=s=>String(s??'').replace(/o/gi,'0').replace(/\D/g,'');
 const normSort=s=>{const d=String(s??'').replace(/o/gi,'0').replace(/\D/g,'');return d.length===6?d.replace(/(\d\d)(\d\d)(\d\d)/,'$1-$2-$3'):d};
-const SORT_OF=Object.fromEntries(Object.entries(SORT_EXACT).filter(([,n])=>SINGLE_SORT.includes(n)).map(([c,n])=>[n.toLowerCase().replace(/ bank$/,''),c]));
-const sortFromBank=s=>normSort(SORT_OF[String(s??'').trim().toLowerCase().replace(/ bank$/,'')]||'');
+const bankKey=s=>String(s??'').trim().toLowerCase().replace(/ (bank|building society)$/,'');
+const SORT_OF=Object.fromEntries(Object.entries(SORT_EXACT).filter(([,n])=>SINGLE_SORT.includes(n)).map(([c,n])=>[bankKey(n),c]));
+const sortFromBank=s=>normSort(SORT_OF[bankKey(s)]||'');
 const bankFromSort=s=>{const d=String(s??'').replace(/\D/g,'');if(d.length!==6)return'';if(SORT_EXACT[d])return SORT_EXACT[d];const hit=SORT_PREFIX.find(([p])=>d.startsWith(p));return hit?hit[1]:''};
 // The Foreign Payments Form warns against typing the letter O for zero: O becomes 0 only when that turns an invalid code valid.
 const oFix=(t,ok)=>/O/.test(t)&&!ok(t)&&ok(t.replace(/O/g,'0'))?t.replace(/O/g,'0'):t;
@@ -1783,7 +1796,8 @@ function renderFx(){
 function renderTotals(){
   const c=D.ccy;
   $('t-m').textContent=M.money(D.mileTotal,c);$('t-e').textContent=M.money(D.expTotal,c);
-  $('t-c').textContent=D.cap?M.money(D.cap.reduce,c):'';$('t-g').textContent=M.money(D.grand,c);
+  $('t-c').textContent=D.cap?M.money(D.cap.reduce,c):'';
+  $('t-m').parentNode.classList.toggle('pos',D.mileTotal>0);$('t-e').parentNode.classList.toggle('pos',D.expTotal>0);$('t-c').parentNode.classList.toggle('neg',!!D.cap&&D.cap.reduce<0);$('t-g').textContent=M.money(D.grand,c);
   for(const[id,on]of[['t-m',D.mileOpen],['t-e',D.expOpen]]){const lab=$(id).previousElementSibling,w=lab.querySelector('b.w');if(on&&!w)lab.append(Object.assign(document.createElement('b'),{className:'w',textContent:'Rate Needed'}));else if(!on&&w)w.remove()}
 }
 const wrap=k=>{const el=$(k);return el&&(el.closest('.f,.g')||el.closest('.card'))};
