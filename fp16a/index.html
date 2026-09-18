@@ -19,9 +19,9 @@
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
 <link rel="stylesheet" href="/shared/base.css?v=27">
 <style>
-:root{color-scheme:light;--fp-warn:#A16207;--fp-warn-bg:#FEF9C3}
-html[data-theme="dark"]{color-scheme:dark;--fp-warn:#FBBF24;--fp-warn-bg:#3A3520}
-html[data-theme="sepia"]{color-scheme:light;--fp-warn:#92400E;--fp-warn-bg:#EDE5C8}
+:root{color-scheme:light;--fp-warn:#A16207}
+html[data-theme="dark"]{color-scheme:dark;--fp-warn:#FBBF24}
+html[data-theme="sepia"]{color-scheme:light;--fp-warn:#92400E}
 [hidden]{display:none!important}
 main{max-width:440px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
 main[data-tier=m] [data-t=o],main:not([data-tier=a]) [data-t=d]{display:none}
@@ -235,16 +235,17 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <div class="chips" id="e-chips"></div>
       <label class="g"><svg data-i="receipt"></svg><span class="fl">Type</span><input id="draft-e-type" data-k="draft.e.type" list="dl-types" maxlength="29" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <div class="g2">
-        <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-e-amt" data-k="draft.e.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0.00"></label>
+        <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-e-amt" data-k="draft.e.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0.00"><span class="aux" id="e-limit"></span></label>
         <label class="g up"><span class="fl">Currency</span><input id="draft-e-ccy" data-k="draft.e.ccy" list="dl-ccy" maxlength="3" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
       </div>
       <label class="g"><svg data-i="calendar"></svg><span class="fl">Expense Date</span><input id="draft-e-date" data-k="draft.e.date" type="date" enterkeyhint="next"></label>
       <label class="g"><svg data-i="mapPinned"></svg><span class="fl">Business Location</span><input id="draft-e-place" data-k="draft.e.place" placeholder="e.g. London" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Business Purpose</span><input id="draft-e-purpose" data-k="draft.e.purpose" placeholder="e.g. ABC Conference" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
+      <label class="g" data-show="e-nights" hidden><svg data-i="bed"></svg><span class="fl">Nights</span><input id="draft-e-nights" data-k="draft.e.nights" inputmode="numeric" maxlength="3" autocomplete="off" enterkeyhint="next" placeholder="1"></label>
       <label class="g" data-show="e-fx" hidden><svg data-i="handCoins"></svg><span class="fl"><span>To Be Repaid (<span id="e-bank-ccy">GBP</span>)</span></span><input id="draft-e-repaid" data-k="draft.e.repaid" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
       <label class="g" data-show="e-taxi" hidden><svg data-i="carTaxiFront"></svg><span class="fl">Reason For Taxi</span><input id="draft-e-taxiWhy" data-k="draft.e.taxiWhy" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
       <label class="g" data-show="e-ent" hidden><svg data-i="user"></svg><span class="fl">Guests &amp; Organisation</span><input id="draft-e-guests" data-k="draft.e.guests" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
-      <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+      <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Number Of Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" inputmode="numeric" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g" data-t="o"><svg data-i="receiptText"></svg><span class="fl">Receipt Ref</span><input id="draft-e-ref" data-k="draft.e.ref" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
       <div class="srow" id="e-bar"><button type="button" class="slbl go" id="e-go"><svg data-i="receipt"></svg><span id="e-sum">Add Expense</span></button><div class="stepper"><button type="button" class="step-btn" id="e-bin" aria-label="Discard"><svg data-i="trash2"></svg></button><button type="button" class="step-btn" id="e-add" data-n="Expense"></button></div></div>
     </div>
@@ -320,7 +321,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   <div class="inp-row" id="c-card">
     <div class="inp-fields">
       <div class="g2 even">
-        <label class="g up"><svg data-i="folderKanban"></svg><span class="fl">GL Code</span><input id="draft-c-gl" data-k="draft.c.gl" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+        <label class="g up"><svg data-i="folderKanban"></svg><span class="fl">GL Code</span><input id="draft-c-gl" data-k="draft.c.gl" list="dl-gl" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
         <label class="g up"><span class="fl">Cost Centre / Project</span><input id="draft-c-cc" data-k="draft.c.cc" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
       </div>
       <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-c-amt" data-k="draft.c.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
@@ -363,7 +364,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   <button type="button" id="a-reset"><svg class="id" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span>Reset All</span></button>
 </div>
 <input type="file" id="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
-<datalist id="dl-dept"></datalist><datalist id="dl-banks"></datalist><datalist id="dl-ccy"></datalist><datalist id="dl-countries"></datalist><datalist id="dl-types"></datalist><datalist id="dl-src"></datalist>
+<datalist id="dl-dept"></datalist><datalist id="dl-banks"></datalist><datalist id="dl-ccy"></datalist><datalist id="dl-countries"></datalist><datalist id="dl-types"></datalist><datalist id="dl-src"></datalist><datalist id="dl-gl"></datalist>
 </main>
 <div class="drop-overlay" id="drop"><svg data-i="fileUp"></svg>Drop FP16a Here</div>
 <nav aria-label="Primary"><div class="tabs"><a href="/">Home</a><a class="active">FP16A</a></div><div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div></nav>
@@ -753,6 +754,12 @@ const SORT_GROUPS=[
 ['Ulster Bank','98']
 ];
 const SORT_PREFIX=SORT_GROUPS.flatMap(([n,ps])=>ps.split(' ').map(p=>[p,n])).sort((a,b)=>b[0].length-a[0].length);
+// Warwick Expenses FAQs, General Ledger Codes for Expenses (owner-pasted 2026-09-18).
+const GL_CODES=[['210401','General Travel & Subsistence UK'],['210402','General Travel & Subsistence Overseas'],['210410','Accommodation UK'],['210411','Accommodation Overseas'],
+['210420','Visa & Medical Certificate'],['210422','Public Transport / Taxi / Car Hire'],['210423','International Flights'],['210424','Mileage (all mileage claims)'],
+['210433','Domestic Flights'],['210501','External Conference UK Expenses'],['210502','External Conference UK Travel'],['210503','External Conference UK Accommodation & Subsistence'],
+['210521','External Conference Overseas Expenses'],['210522','External Conference Overseas Travel'],['210523','External Conference Overseas Accommodation & Subsistence'],
+['238501','Entertaining UK'],['238502','Entertaining Overseas'],['238510','Entertaining, Promotional & Launches'],['238530','Gifts']];
 const UK_BANKS=[...new Set([...SORT_GROUPS.map(([n])=>n),...Object.values(SORT_EXACT)].flatMap(n=>n.split(' / ')).map(n=>n.replace(/\s*\(.*\)$/,'')).filter(Boolean))].sort();
 const IBAN_LEN={
 AD:24,AE:23,AL:28,AT:20,AZ:28,BA:20,BE:16,BG:22,BH:22,BI:27,BR:29,BY:28,
@@ -861,7 +868,7 @@ MX:{label:'CLABE',re:/^(\d{18}|\d{11})$/,hint:'18 Digits'},
 ZA:{label:'Branch Code',re:/^\d{6}$/,hint:'250655'},
 US:{label:'Routing Number (ABA)',re:/^\d{9}$/,hint:'026009593'}
 };
-return{DEPTS,UK_BANKS,SORT_EXACT,SORT_PREFIX,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING};
+return{DEPTS,GL_CODES,UK_BANKS,SORT_EXACT,SORT_PREFIX,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING};
 })();
 /* -- end fp16a:data -- */
 /* -- fp16a:model -- */
@@ -906,6 +913,7 @@ const parseDay=v=>{
   return '';
 };
 const fmtDay=(iso,short)=>iso?`${iso.slice(8,10)}/${iso.slice(5,7)}/${short?iso.slice(2,4):iso.slice(0,4)}`:'';
+const addDays=(iso,n)=>new Date(Date.UTC(+iso.slice(0,4),+iso.slice(5,7)-1,+iso.slice(8,10)+n)).toISOString().slice(0,10);
 const addMonths=(iso,n)=>{const[y,m,d]=iso.split('-').map(Number),t=new Date(Date.UTC(y,m-1+n,1)),last=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0)).getUTCDate();t.setUTCDate(Math.min(d,last));return t.toISOString().slice(0,10)};
 const normPostcode=s=>{const raw=String(s??'').trim().toUpperCase(),t=raw.replace(/[^A-Z0-9]/g,'');return/^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(t)?t.slice(0,-3)+' '+t.slice(-3):raw};
 const UK_POSTCODE=/^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$/;
@@ -930,6 +938,28 @@ const slug=s=>String(s??'').normalize('NFKD').replace(/\p{M}/gu,'').replace(/['�
 const RATES=[{from:'',car:.45,moto:.24,bike:.2},{from:'2026-06-15',car:.55,moto:.24,bike:.2}];
 const FLAT={over:.25,school:.25,interview:.18};
 const rateFor=(veh,type,date)=>FLAT[type]??RATES.filter(r=>date>=r.from).pop()[veh];
+// Subsistence maxima incl. VAT, per receipt or per night; warwick.ac.uk/services/peopleteam/internal/payroll/expenses/uk1/subsistence (revised wef 1/8/24, fetched 2026-09-18).
+const LIMITS=[{from:'2024-08-01',breakfast:15,lunch:15,dinner:30,dinnerHotel:40,refresh:5,hotelLondon:200,hotel:150,incUK:5,incAbroad:10}];
+const LONDON=/\blondon\b|^\s*(EC|WC|E|N|NW|SE|SW|W)\d/i;
+// Limit for an expense by its type (null when none applies or the date predates the table); per-night limits scale by nights.
+const limitFor=(e,date)=>{
+  const L=LIMITS.filter(r=>date>=r.from).pop(),t=String(e.type||'').trim().toLowerCase(),n=e.nights||1;
+  if(!L||!t)return null;
+  if(/breakfast/.test(t))return{cap:L.breakfast};
+  if(/lunch/.test(t))return{cap:L.lunch};
+  if(/evening meal|dinner|supper/.test(t))return{cap:L.dinner,alt:L.dinnerHotel};
+  if(/refreshment|\btea\b|coffee/.test(t))return{cap:L.refresh};
+  if(/hotel|accommodation|lodging/.test(t)){const per=LONDON.test(e.place||'')?L.hotelLondon:L.hotel;return{cap:per*n,per}}
+  if(/incidental/.test(t)){const per=e.ccy&&e.ccy!=='GBP'?L.incAbroad:L.incUK;return{cap:per*n,per}}
+  return null;
+};
+const limitMsg=e=>{
+  const L=e.limit,g=e.gbpValue;
+  if(!L||g==null||g<=L.cap+.005)return'';
+  if(L.alt)return g<=L.alt+.005?`Over £${L.cap} Unless Dining In Your Hotel`:`Over £${L.alt} Limit`;
+  return L.per?`Over £${L.per} Per Night`:`Over £${L.cap} Limit`;
+};
+const typeText=e=>e.nights>1?`${e.type.trim()} (${e.nights} Nights)`:e.type.trim();
 
 // ---- state
 // Schema defaults: '' text, 0 number (null = empty), null text override (null = auto), false flag, array = allowed values (first is default).
@@ -940,7 +970,7 @@ const SCHEMA={first:'',last:'',job:'',dept:'',email:'',ref:'',vendor:'',crit:['s
   fp:{iban:'',country:'',ccy:'',bic:'',acctNo:'',clearing:'',clearingExtra:'',branch:'',bStreet:'',bCity:'',bProv:'',bPost:'',phone:'',street:'',city:'',prov:'',post:'',countryName:'',
     route:['direct','inter','further'],inter:{name:'',acct:'',swift:'',routing:''},further:{recipient:'',bank:'',acct:'',bic:'',aba:'',finalAcct:'',finalName:''},info:''}};
 const ROWS={
-  exps:{date:'',type:'',place:'',purpose:'',amt:0,ccy:'',ref:null,repaid:0,taxiWhy:'',guests:'',staff:''},
+  exps:{date:'',type:'',place:'',purpose:'',amt:0,ccy:'',ref:null,repaid:0,taxiWhy:'',guests:'',staff:'',nights:0},
   miles:{date:'',from:'',to:'',mi:0,ret:false,why:'',veh:['car','moto','bike'],rateType:['std','over','school','interview'],rate:0,repaid:0},
   codes:{gl:'',cc:'',amt:0,purpose:''}};
 const fitv=(d,v)=>Array.isArray(d)?(d.includes(v)?v:d[0]):d===null?(typeof v==='string'&&v?v:null):d===0?(typeof v==='number'&&Number.isFinite(v)?v:null):typeof d==='object'?fito(d,v):typeof v===typeof d?v:d;
@@ -980,6 +1010,8 @@ const derive=(s,today)=>{
   const implied={};for(const[c,[a,r]]of Object.entries(pool))implied[c]=Math.round(r/a*1e4)/1e4;
   const rate=c=>s.fx[c]??implied[c]??null,conv=(a,c)=>a==null||rate(c)==null?null:round2(a*rate(c));
   for(const e of exps){e.auto=e.same?(e.amt==null?null:round2(e.amt)):conv(e.amt,e.ccy);e.repaid=e.same?e.auto:e.typed??e.auto}
+  // Limits are in GBP: compare when the GBP value is knowable.
+  for(const e of exps){e.limit=limitFor(e,e.date||today);e.gbpValue=ccy==='GBP'?e.repaid:e.ccy==='GBP'?e.amt:e.repaid!=null&&rate('GBP')?round2(e.repaid/rate('GBP')):null}
   for(const m of miles){m.auto=ccy==='GBP'?round2(m.gbp):conv(m.gbp,'GBP');m.repaid=m.typed??m.auto}
   const sum=a=>round2(a.reduce((x,r)=>x+(r.repaid||0),0)),mileTotal=sum(miles),expTotal=sum(exps);
   let cap=null;
@@ -1065,6 +1097,11 @@ const checks=(s,D)=>{
     w(k,need.length,need.join(', ').replace(/, ([^,]*)$/,' And $1')+' Needed');
     w(k,p.length>150,'Purpose Too Long For The Form');
     w(k,e.repaid==null,'To Be Repaid Unknown');
+    // Form notes 4 and 5: a taxi needs its reason, entertainment its guests and the number of Warwick staff.
+    w(k,lower(e.type)==='taxi'&&!e.taxiWhy.trim(),'Taxi Reason Needed');
+    w(k,lower(e.type)==='entertainment'&&(!e.guests.trim()||!e.staff.trim()),'Guests And Staff Needed');
+    const over=limitMsg(e),inStay=/breakfast/i.test(e.type)&&e.date&&D.exps.some(h=>h!==e&&/hotel|accommodation|lodging/i.test(h.type)&&h.date&&e.date>=h.date&&e.date<=addDays(h.date,h.nights||1));
+    w(k,over,inStay?`Over £${e.limit.cap}, Add To Hotel Cost`:over);
   }
   for(const m of D.miles){
     const k='m:'+m.id;
@@ -1105,7 +1142,7 @@ const toCells=(s,D)=>{
   });
   D.exps.forEach((e,i)=>{
     const row=F(T.exps.first)+i,c=T.exps.cols;
-    cells.set(c.ref+row,up(e.ref));cells.set(c.date+row,serial(e.date));cells.set(c.type+row,up(e.type.trim()));cells.set(c.purpose+row,up(purposeText(e)));
+    cells.set(c.ref+row,up(e.ref));cells.set(c.date+row,serial(e.date));cells.set(c.type+row,up(typeText(e)));cells.set(c.purpose+row,up(purposeText(e)));
     if(e.amt!=null)cells.set(c.amt+row,e.amt);cells.set(c.ccy+row,e.ccy||D.ccy);if(e.repaid!=null)cells.set(c.repaid+row,e.repaid);
   });
   if(D.ccy){if(D.miles.length)cells.set(at(T.miles.ccy+T.miles.first),D.ccy);if(D.exps.length)cells.set(at(T.exps.ccy+T.exps.first),D.ccy);if(D.miles.length||D.exps.length)set('grandCcy',D.ccy)}
@@ -1207,7 +1244,8 @@ const fromCells=(view,today)=>{
     const date=parseDay(x.date),p=/^\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s+-\s+(.*)$/.exec(str(x.purpose)),parts=p?p[1].split(' - '):[str(x.purpose)];
     const place=parts.length>1?parts[0]:'',purpose=parts.length>1?parts.slice(1).join(' - '):parts[0];
     const amtCcy=typeof x.amt==='string'?normCcy(x.amt):'';
-    const e={date,type:str(x.type),place:place.trim(),purpose:purpose.trim(),amt:num(x.amt),ccy:normCcy(str(x.ccy))||amtCcy,ref:str(x.ref)||null,repaid:num(x.repaid)};
+    const tn=/^(.*?)\s*\((\d+) NIGHTS?\)$/i.exec(str(x.type));
+    const e={date,type:tn?tn[1]:str(x.type),place:place.trim(),purpose:purpose.trim(),amt:num(x.amt),ccy:normCcy(str(x.ccy))||amtCcy,ref:str(x.ref)||null,repaid:num(x.repaid),nights:tn?+tn[2]:null};
     Object.assign(e,auto[str(x.ref).toUpperCase()]||{});
     return e.amt==null&&!e.type&&!e.purpose?null:e;
   });
@@ -1294,7 +1332,7 @@ const toText=(s,D)=>{
     sec('Additional Information',[U(x.info)]);
   }
   if(D.exps.length)out.push('EXPENSES\n'+table(['Ref','Date','Type','Business Purpose','Amount','To Be Repaid'],
-    D.exps.map(e=>[U(e.ref),fmtDay(e.date)||'—',U(e.type)||'—',U(purposeText(e))||'—',e.amt==null?'—':e.amt.toFixed(2)+' '+(e.ccy||D.ccy),money(e.repaid,D.ccy)]),[4,5])+`\nTravel & Subsistence Total: ${money(D.expTotal,D.ccy)}`);
+    D.exps.map(e=>[U(e.ref),fmtDay(e.date)||'—',U(typeText(e))||'—',U(purposeText(e))||'—',e.amt==null?'—':e.amt.toFixed(2)+' '+(e.ccy||D.ccy),money(e.repaid,D.ccy)]),[4,5])+`\nTravel & Subsistence Total: ${money(D.expTotal,D.ccy)}`);
   if(D.miles.length)out.push('MILEAGE\n'+table(['Date','From','To','Miles','Rate','Details','To Be Repaid'],
     D.miles.map(m=>[fmtDay(m.date)||'—',U(m.from)||'—',U(m.to)||'—',String(m.dist),m.rate.toFixed(2),U(detailsText(m)),money(m.repaid,D.ccy)]),[3,4,6])+`\nMileage Total: ${money(D.mileTotal,D.ccy)}`);
   if(D.fxList.length)sec('Exchange Rates',[...D.fxList.map(c=>D.fx[c].rate!=null?`1 ${c} = ${fmtRate(D.fx[c].rate)} ${D.ccy}`:`1 ${c} = — ${D.ccy}`),f('Obtained From',U(s.fxSrc),'fxSrc')]);
@@ -1318,13 +1356,13 @@ const exportFiles=async(s,today,tpl)=>{
 };
 const importFile=async(u8,s,today)=>{const v=await sheet.open(u8);return{kind:v.kind,...merge(s,fromCells(v,today),today)}};
 
-return{exportFiles,importFile,round2,normCcy,num,parseDay,fmtDay,addMonths,normPostcode,UK_POSTCODE,normSort,bankFromSort,cleanIban,ibanCountry,ibanOk,abaOk,BIC,cleanCode,slug,
+return{exportFiles,importFile,LIMITS,limitFor,limitMsg,typeText,round2,normCcy,num,parseDay,fmtDay,addMonths,normPostcode,UK_POSTCODE,normSort,bankFromSort,cleanIban,ibanCountry,ibanOk,abaOk,BIC,cleanCode,slug,
   RATES,rateFor,SCHEMA,migrate,blank,nextId,derive,required,missing,label,setPath,checks,purposeText,detailsText,fxText,filename,toCells,fromCells,merge,toText,money};
 })();
 /* -- end fp16a:model -- */
 (()=>{'use strict';
 const $=id=>document.getElementById(id),B=window._base,M=model,KEY='fp16a:state',PREV='fp16a:prev',TIER='fp16a:tier';
-const{DEPTS,UK_BANKS,CCY_NAMES,CCY_BY_COUNTRY,COUNTRIES}=data;
+const{DEPTS,GL_CODES,UK_BANKS,CCY_NAMES,CCY_BY_COUNTRY,COUNTRIES}=data;
 const IC={
 user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
 userCheck:'<path d="m16 11 2 2 4-4"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
@@ -1389,7 +1427,7 @@ trash2:'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H
 // Sidecar URLs carry each file's git blob hash; refresh both after a sanitize run (context/fp16a.md).
 const TPL={fp16a:'fp16a.xlsx?v=ce9e529',foreign:'foreign-payments.xlsx?v=5475ac2'};
 const TYPES=[['Train','trainFront'],['Taxi','carTaxiFront'],['Bus','bus'],['Flight','plane'],['Hotel','bed'],['Breakfast','coffee'],['Lunch','sandwich'],['Evening Meal','utensils'],['Parking','squareParking'],['Entertainment','wine'],['Other','receipt']];
-const MORE_TYPES=['Tube','Tram','Coach','Ferry','Car Hire','Fuel','Toll','Accommodation','Dinner','Subsistence','Conference Fee','Registration','Visa','Baggage','Postage','Printing','Books'];
+const MORE_TYPES=['Refreshments','Incidentals','Tube','Tram','Coach','Ferry','Car Hire','Fuel','Toll','Accommodation','Dinner','Subsistence','Conference Fee','Registration','Visa','Baggage','Postage','Printing','Books'];
 const KEYS={e:'exps',m:'miles',c:'codes'},FIRST={e:'draft-e-type',m:'draft-m-date',c:'draft-c-gl'},SEG_DEF={'draft.m.veh':'car','draft.m.rateType':'std'};
 const today=()=>new Date().toLocaleDateString('en-CA');
 const canZip=(()=>{try{new CompressionStream('deflate-raw');new DecompressionStream('deflate-raw');return true}catch(_){return false}})();
@@ -1406,7 +1444,7 @@ for(const el of document.querySelectorAll('svg[data-i]')){el.setAttribute('viewB
 const opts=(id,list)=>{$(id).innerHTML=list.map(([v,l])=>`<option value="${esc(v)}"${l?` label="${esc(l)}"`:''}>`).join('')};
 opts('dl-dept',DEPTS.map(v=>[v]));opts('dl-banks',UK_BANKS.map(v=>[v]));opts('dl-ccy',Object.entries(CCY_NAMES));
 opts('dl-countries',Object.values(COUNTRIES).sort((a,b)=>a.localeCompare(b)).map(v=>[v]));
-opts('dl-types',[...TYPES.map(t=>t[0]),...MORE_TYPES].map(v=>[v]));opts('dl-src',['Bank Statement','Card Statement','XE.com','OANDA'].map(v=>[v]));
+opts('dl-types',[...TYPES.map(t=>t[0]),...MORE_TYPES].map(v=>[v]));opts('dl-src',['Bank Statement','Card Statement','XE.com','OANDA'].map(v=>[v]));opts('dl-gl',GL_CODES);
 $('e-chips').innerHTML=TYPES.map(([t,i])=>`<button type="button" class="chip" data-type="${t}">${svg(i)}${t}</button>`).join('');
 
 // ---- field <-> state
@@ -1440,7 +1478,7 @@ const tierAttr=(el,on)=>on?el.removeAttribute('data-t'):el.setAttribute('data-t'
 function applyVis(){
   const de=S.draft.e,te=(de.type||'').trim().toLowerCase(),ec=PARSE.ccy(de.ccy||'')||D.ccy,open=mOpen||S.miles.length>0||edit.m!=null;
   const C={emp:S.crit==='emp',uk:!D.foreign,foreign:D.foreign,iban:D.ibanShown,inter:S.fp.route==='inter',further:S.fp.route==='further',
-    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':te==='taxi','e-ent':te==='entertainment','m-fx':!!D.ccy&&D.ccy!=='GBP','m-card':open,'m-closed':!open,
+    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':te==='taxi','e-ent':te==='entertainment','e-nights':/hotel|accommodation|lodging|incidental/.test(te),'m-fx':!!D.ccy&&D.ccy!=='GBP','m-card':open,'m-closed':!open,
     fx:D.fxList.length>0,cap:S.cap.on,'cap-conv':!!D.cap&&!D.cap.same,miles:S.miles.length>0};
   for(const el of document.querySelectorAll('[data-show]')){const on=!!C[el.dataset.show];if(el.hidden===on){el.hidden=!on;if(on&&!booting)reveal(el)}}
   const slot=$(D.foreign?'slot-foreign':'slot-uk'),bw=$('w-bankName');if(bw.parentNode!==slot)slot.append(bw);
@@ -1463,6 +1501,8 @@ function renderAuto(){
   $('draft-e-ccy').placeholder=$('cap-ccy').placeholder=ccy;
   const te=(de.type||'').trim().toLowerCase();for(const b of $('e-chips').children)b.classList.toggle('active',b.dataset.type.toLowerCase()===te);
   const amt=M.num(de.amt),rate=D.fx[PARSE.ccy(de.ccy||'')]?.rate;
+  const lim=M.limitFor({type:de.type,place:de.place,nights:M.num(de.nights),ccy:PARSE.ccy(de.ccy||'')||D.ccy},de.date||t);
+  $('e-limit').textContent=!lim?'':lim.per?`Max £${lim.per}/Night`:`Max £${lim.cap}`+(lim.alt?`/${lim.alt}`:'');
   $('draft-e-repaid').placeholder=amt!=null&&rate!=null?m2(M.round2(amt*rate)):'';
   $('draft-e-ref').placeholder=edit.e!=null?D.exps.find(x=>x.id===edit.e)?.aref||'':'#'+(S.exps.length+1);
   const arate=M.rateFor(dm.veh||'car',dm.rateType||'std',dm.date||t),r=M.num(dm.rate)??arate,mi=M.num(dm.mi),dist=mi==null?null:mi*(dm.ret?2:1);
@@ -1489,7 +1529,7 @@ function list(t,items){
 }
 function renderLists(ck){
   const c=D.ccy,j=a=>a.filter(Boolean).join(' · ');
-  list('e',D.exps.map(e=>({id:e.id,miss:ck.get('e:'+e.id)||'',t:e.type.trim()||'Expense',v:M.money(e.repaid,c),
+  list('e',D.exps.map(e=>({id:e.id,miss:ck.get('e:'+e.id)||'',t:M.typeText(e)||'Expense',v:M.money(e.repaid,c),
     s:j([M.fmtDay(e.date),e.ref!==e.aref&&e.ref,[e.place,e.purpose].map(x=>x.trim()).filter(Boolean).join(' - '),!e.same&&e.amt!=null?M.money(e.amt,e.ccy):''])})));
   list('m',D.miles.map(m=>({id:m.id,miss:ck.get('m:'+m.id)||'',t:`${m.from||'?'} → ${m.to||'?'}`,v:M.money(m.repaid,c),
     s:j([M.fmtDay(m.date),`${fmtNum(m.dist)} mi × £${m.rate.toFixed(2)}`,m.ret&&'Return',m.why.trim()])})));
@@ -1585,7 +1625,7 @@ $('m-open').addEventListener('click',()=>{mOpen=true;update();$('draft-m-date').
 $('m-ret').addEventListener('click',()=>{S.draft.m.ret=!S.draft.m.ret;fillForm();changed()});
 
 // ---- rows: add, edit, delete
-const toDraft=(t,r)=>{const s=v=>v==null?'':String(v);return t==='e'?{type:r.type,amt:s(r.amt),ccy:r.ccy,date:r.date,place:r.place,purpose:r.purpose,repaid:s(r.repaid),taxiWhy:r.taxiWhy,guests:r.guests,staff:r.staff,ref:r.ref||''}
+const toDraft=(t,r)=>{const s=v=>v==null?'':String(v);return t==='e'?{type:r.type,amt:s(r.amt),ccy:r.ccy,date:r.date,place:r.place,purpose:r.purpose,repaid:s(r.repaid),taxiWhy:r.taxiWhy,guests:r.guests,staff:r.staff,ref:r.ref||'',nights:s(r.nights)}
   :t==='m'?{veh:r.veh,rateType:r.rateType,rate:s(r.rate),date:r.date,from:r.from,to:r.to,mi:s(r.mi),ret:r.ret,why:r.why,repaid:s(r.repaid)}:{gl:r.gl,cc:r.cc,amt:s(r.amt),purpose:r.purpose}};
 function startEdit(t,id){
   if(edit[t]===id){cancelEdit(t);return}
@@ -1608,7 +1648,7 @@ const ADD={
     const d=S.draft.e,amt=M.num(d.amt);
     if(amt==null){B.notify('Amount Needed',false);$('draft-e-amt').focus();return}
     commit('e',{id:edit.e??M.nextId(S),date:d.date||today(),type:txt(d.type),place:txt(d.place),purpose:txt(d.purpose),amt,ccy:PARSE.ccy(d.ccy||'')||D.ccy,
-      ref:txt(d.ref)||null,repaid:M.num(d.repaid),taxiWhy:txt(d.taxiWhy),guests:txt(d.guests),staff:txt(d.staff)},{date:d.date||'',place:d.place||'',purpose:d.purpose||'',ccy:d.ccy||''});
+      ref:txt(d.ref)||null,repaid:M.num(d.repaid),taxiWhy:txt(d.taxiWhy),guests:txt(d.guests),staff:txt(d.staff),nights:M.num(d.nights)>1?Math.round(M.num(d.nights)):null},{date:d.date||'',place:d.place||'',purpose:d.purpose||'',ccy:d.ccy||''});
     $('draft-e-type').focus();
   },
   m(){
