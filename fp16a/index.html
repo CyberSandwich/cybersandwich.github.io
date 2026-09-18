@@ -25,7 +25,7 @@ html[data-theme="sepia"]{color-scheme:light;--fp-warn:#92400E}
 [hidden]{display:none!important}
 main{max-width:440px;margin:0 auto;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px))}
 main[data-tier=m] [data-t=o],main:not([data-tier=a]) [data-t=d]{display:none}
-.sec,.tier-card{margin-bottom:clamp(20px,4vw,28px)}
+.sec{margin-bottom:clamp(20px,4vw,28px)}
 .sec>h3{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:0 0 12px 4px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row2>*{min-width:0}
@@ -113,8 +113,13 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .tot:last-child{border-bottom:0}
 .tot>span{display:flex;align-items:center;gap:12px}
 .tot svg{width:18px;height:18px;flex-shrink:0;color:var(--t4)}
+.tot b.w{margin-left:8px;font-size:.8125rem;color:var(--fp-warn)}
 .tot b{font-weight:500;color:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
-.tot.grand,.tot.grand b{font-weight:600}
+.tots{overflow:hidden}
+/* Grand Total wears the selected-segment look, like the Add Expense button. */
+.tot.grand{background:var(--tab-active);color:var(--tab-active-c);font-weight:600}
+.tot.grand svg{color:inherit;opacity:.8}
+.tot.grand b{color:inherit;font-weight:600}
 .ok{animation:none}
 .links>button:active:not([disabled]){opacity:.7}
 .drop-overlay svg{width:40px;height:40px}
@@ -129,13 +134,15 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </head>
 <body>
 <main data-tier="m" id="main">
+<section class="sec"><h3>Fields</h3>
 <div class="card tier-card">
   <div class="seg-row" role="radiogroup" aria-label="Fields Shown" id="tier">
     <button type="button" class="seg" role="radio" data-tier="m">Mandatory</button>
-    <button type="button" class="seg" role="radio" data-tier="o">Optional</button>
+    <button type="button" class="seg" role="radio" data-tier="o">+ Optional</button>
     <button type="button" class="seg" role="radio" data-tier="a">All</button>
   </div>
 </div>
+</section>
 <form id="f" autocomplete="on" novalidate>
 
 <section class="sec"><h3>You</h3>
@@ -155,7 +162,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
     <label class="f"><svg data-i="user"></svg><span class="fl">First Name<i>*</i></span><input id="first" data-k="first" autocomplete="given-name" autocapitalize="words" enterkeyhint="next"></label>
     <label class="f"><span class="fl">Last Name<i>*</i></span><input id="last" data-k="last" autocomplete="family-name" autocapitalize="words" enterkeyhint="next"></label>
   </div>
-  <label class="f"><svg data-i="mail"></svg><span class="fl">Email (For Remittance)<i>*</i></span><input id="email" data-k="email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"></label>
+  <label class="f"><svg data-i="mail"></svg><span class="fl">Email (For Remittance)<i>*</i></span><input id="email" data-k="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"></label>
   <label class="f"><svg data-i="building2"></svg><span class="fl">Department<i>*</i></span><input id="dept" data-k="dept" list="dl-dept" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
   <label class="f"><svg data-i="briefcase"></svg><span class="fl">Job Title<i>*</i></span><input id="job" data-k="job" autocomplete="organization-title" autocapitalize="words" enterkeyhint="next"></label>
   <label class="f" data-t="o"><svg data-i="tag"></svg><span class="fl">Dept/Payment Ref</span><input id="ref" data-k="ref" maxlength="16" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"><span class="aux" id="ref-n"></span></label>
@@ -170,8 +177,8 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   </div>
   <div data-show="uk">
     <div class="row2">
-      <label class="f"><svg data-i="hash"></svg><span class="fl">Sort Code<i>*</i></span><input id="sort" data-k="sort" data-f="sort" inputmode="numeric" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="next" placeholder="00-00-00"></label>
-      <label class="f"><span class="fl">Account Number<i>*</i></span><input id="acct" data-k="acct" data-f="digits" inputmode="numeric" maxlength="10" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="hash"></svg><span class="fl">Sort Code<i>*</i></span><input id="sort" data-k="sort" data-f="sort" maxlength="20" autocomplete="off" spellcheck="false" enterkeyhint="next" placeholder="00-00-00"></label>
+      <label class="f"><span class="fl">Account Number<i>*</i></span><input id="acct" data-k="acct" data-f="digits" maxlength="20" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
     </div>
     <div id="slot-uk"><label class="f" id="w-bankName"><svg data-i="landmark"></svg><span class="fl" id="l-bankName">Bank/Building Society Name<i>*</i></span><input id="bankName" data-k="bankName" list="dl-banks" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label></div>
     <label class="f" data-t="o"><svg data-i="userCheck"></svg><span class="fl">Account Holder's Name</span><input id="holder" data-k="holder" data-f="over" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
@@ -187,22 +194,22 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
     <label class="f"><svg data-i="hash"></svg><span class="fl">Account No<i>*</i></span><input id="fp-acctNo" data-k="fp.acctNo" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
     <label class="f up" id="w-fp-clearing"><svg data-i="route"></svg><span class="fl"><span id="l-fp-clearing">Clearing Code</span><i>*</i></span><input id="fp-clearing" data-k="fp.clearing" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
     <label class="f" id="w-fp-clearingExtra" data-t="o"><svg data-i="fileText"></svg><span class="fl" id="l-fp-clearingExtra">Additional Clearing Information</span><input id="fp-clearingExtra" data-k="fp.clearingExtra" maxlength="150" autocomplete="off" enterkeyhint="next"></label>
-    <label class="f" data-t="o"><svg data-i="landmark"></svg><span class="fl">Branch Name Or Number</span><input id="fp-branch" data-k="fp.branch" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f" data-t="o"><svg data-i="landmark"></svg><span class="fl">Branch Name or Number</span><input id="fp-branch" data-k="fp.branch" autocomplete="off" enterkeyhint="next"></label>
     <label class="f" data-t="o"><svg data-i="mapPin"></svg><span class="fl">Bank Street</span><input id="fp-bStreet" data-k="fp.bStreet" autocomplete="off" enterkeyhint="next"></label>
     <div class="row2">
       <label class="f"><svg data-i="mapPin"></svg><span class="fl">Bank City<i>*</i></span><input id="fp-bCity" data-k="fp.bCity" autocomplete="off" enterkeyhint="next"></label>
       <label class="f" data-t="o"><span class="fl">Bank Post Code</span><input id="fp-bPost" data-k="fp.bPost" autocomplete="off" enterkeyhint="next"></label>
     </div>
     <label class="f" data-t="o"><svg data-i="mapPin"></svg><span class="fl">Bank Province/State</span><input id="fp-bProv" data-k="fp.bProv" autocomplete="off" enterkeyhint="next"></label>
-    <label class="f"><svg data-i="phone"></svg><span class="fl">Your Telephone<i>*</i></span><input id="fp-phone" data-k="fp.phone" type="tel" maxlength="30" autocomplete="tel" enterkeyhint="next"></label>
-    <label class="f"><svg data-i="house"></svg><span class="fl">Your Street And Number<i>*</i></span><input id="fp-street" data-k="fp.street" autocomplete="address-line1" enterkeyhint="next"></label>
+    <label class="f"><svg data-i="phone"></svg><span class="fl">Your Telephone<i>*</i></span><input id="fp-phone" data-k="fp.phone" inputmode="tel" maxlength="30" autocomplete="tel" enterkeyhint="next"></label>
+    <label class="f"><svg data-i="house"></svg><span class="fl">Your Street and Number<i>*</i></span><input id="fp-street" data-k="fp.street" autocomplete="address-line1" enterkeyhint="next"></label>
     <div class="row2">
       <label class="f"><svg data-i="mapPin"></svg><span class="fl">City<i>*</i></span><input id="fp-city" data-k="fp.city" autocomplete="address-level2" enterkeyhint="next"></label>
       <label class="f"><span class="fl">Post/Zip Code<i>*</i></span><input id="fp-post" data-k="fp.post" maxlength="20" autocomplete="postal-code" enterkeyhint="next"></label>
     </div>
     <div class="row2">
       <label class="f" data-t="o"><svg data-i="mapPin"></svg><span class="fl">Province/State</span><input id="fp-prov" data-k="fp.prov" autocomplete="address-level1" enterkeyhint="next"></label>
-      <label class="f"><span class="fl">Country<i>*</i></span><input id="fp-countryName" data-k="fp.countryName" autocomplete="country-name" enterkeyhint="next"></label>
+      <label class="f"><span class="fl">Country<i>*</i></span><input id="fp-countryName" data-k="fp.countryName" list="dl-countries" autocomplete="country-name" enterkeyhint="next"></label>
     </div>
     <div class="card" data-t="o">
       <div class="seg-row" role="radiogroup" aria-label="Routing" id="fp-route" data-k="fp.route">
@@ -221,7 +228,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
     </div>
     <div data-show="further" hidden>
       <label class="f"><svg data-i="landmark"></svg><span class="fl">Recipient Name (Your Bank)<i>*</i></span><input id="fp-further-recipient" data-k="fp.further.recipient" autocomplete="off" enterkeyhint="next"></label>
-      <label class="f"><svg data-i="landmark"></svg><span class="fl">Name Of The Recipient Bank<i>*</i></span><input id="fp-further-bank" data-k="fp.further.bank" autocomplete="off" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="landmark"></svg><span class="fl">Name of the Recipient Bank<i>*</i></span><input id="fp-further-bank" data-k="fp.further.bank" autocomplete="off" enterkeyhint="next"></label>
       <label class="f"><svg data-i="hash"></svg><span class="fl">Recipient Bank Account Number</span><input id="fp-further-acct" data-k="fp.further.acct" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
       <div class="row2">
         <label class="f up"><svg data-i="hash"></svg><span class="fl">Recipient BIC/SWIFT</span><input id="fp-further-bic" data-k="fp.further.bic" data-f="upper" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
@@ -240,7 +247,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <div class="chips" id="e-chips"></div>
       <label class="g"><svg data-i="receipt"></svg><span class="fl">Type</span><input id="draft-e-type" data-k="draft.e.type" list="dl-types" maxlength="29" placeholder="e.g. Conference Fee" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <div class="g2">
-        <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-e-amt" data-k="draft.e.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0.00"><span class="aux" id="e-limit"></span></label>
+        <label class="g"><svg data-i="coins"></svg><span class="fl">Amount</span><input id="draft-e-amt" data-k="draft.e.amt" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0.00"></label>
         <label class="g up"><span class="fl">Currency</span><input id="draft-e-ccy" data-k="draft.e.ccy" list="dl-ccy" maxlength="3" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
       </div>
       <div class="g2 even">
@@ -251,9 +258,9 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Business Purpose</span><input id="draft-e-purpose" data-k="draft.e.purpose" placeholder="e.g. ABC Conference" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
       <label class="g" data-show="e-nights" hidden><svg data-i="bed"></svg><span class="fl">Nights</span><input id="draft-e-nights" data-k="draft.e.nights" inputmode="numeric" maxlength="3" autocomplete="off" enterkeyhint="next" placeholder="1"></label>
       <label class="g" data-show="e-fx" hidden><svg data-i="handCoins"></svg><span class="fl"><span>To Be Repaid (<span id="e-bank-ccy">GBP</span>)</span></span><input id="draft-e-repaid" data-k="draft.e.repaid" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
-      <label class="g" data-show="e-taxi" hidden><svg data-i="carTaxiFront"></svg><span class="fl">Reason For Taxi</span><input id="draft-e-taxiWhy" data-k="draft.e.taxiWhy" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
+      <label class="g" data-show="e-taxi" hidden><svg data-i="carTaxiFront"></svg><span class="fl">Reason for Taxi</span><input id="draft-e-taxiWhy" data-k="draft.e.taxiWhy" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
       <label class="g" data-show="e-ent" hidden><svg data-i="user"></svg><span class="fl">Guests &amp; Organisation</span><input id="draft-e-guests" data-k="draft.e.guests" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
-      <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Number Of Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" inputmode="numeric" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
+      <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Number of Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" inputmode="numeric" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g" data-t="o"><svg data-i="receiptText"></svg><span class="fl">Receipt Ref</span><input id="draft-e-ref" data-k="draft.e.ref" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
       <div class="srow" id="e-bar"><button type="button" class="slbl go" id="e-go"><svg data-i="receipt"></svg><span id="e-sum">Add Expense</span></button><div class="stepper"><button type="button" class="step-btn" id="e-bin" aria-label="Discard"><svg data-i="trash2"></svg></button><button type="button" class="step-btn" id="e-add" data-n="Expense"></button></div></div>
     </div>
@@ -276,7 +283,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
         <button type="button" class="seg" role="radio" data-v="school">School</button>
         <button type="button" class="seg" role="radio" data-v="interview">Interview</button>
       </div>
-      <label class="g" data-t="o"><svg data-i="percent"></svg><span class="fl">Rate (£ Per Mile)</span><input id="draft-m-rate" data-k="draft.m.rate" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+      <label class="g" data-t="o"><svg data-i="percent"></svg><span class="fl">Rate (£ per Mile)</span><input id="draft-m-rate" data-k="draft.m.rate" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
       <label class="g"><svg data-i="calendar"></svg><span class="fl">Journey Date</span><input id="draft-m-date" data-k="draft.m.date" type="date" enterkeyhint="next"></label>
       <div class="g2 even">
         <label class="g up"><svg data-i="mapPin"></svg><span class="fl">From Postcode</span><input id="draft-m-from" data-k="draft.m.from" list="dl-postcodes" maxlength="40" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
@@ -306,7 +313,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <label class="f up"><span class="fl">Cap Currency</span><input id="cap-ccy" data-k="cap.ccy" data-f="ccy" list="dl-ccy" maxlength="3" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
     </div>
     <label class="f" data-show="cap-conv" hidden><svg data-i="arrowRightLeft"></svg><span class="fl"><span>Cap Converted (<span id="cap-bank-ccy">GBP</span>)</span></span><input id="cap-conv" data-k="cap.conv" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
-    <label class="f"><svg data-i="circleMinus"></svg><span class="fl">Claim To Be Reduced By</span><input id="cap-reduce" data-k="cap.reduce" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f"><svg data-i="circleMinus"></svg><span class="fl">Claim to Be Reduced By</span><input id="cap-reduce" data-k="cap.reduce" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
   </div>
 </section>
 
@@ -317,6 +324,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 <section class="sec"><h3>Declaration</h3>
   <div class="card">
     <p class="note">I request reimbursement of the expenses, specified above, incurred necessarily on University business. I confirm that I have personally incurred the expenditure and have not reclaimed it by any other method.</p>
+    <p class="note" data-show="foreign" hidden>I certify that the foreign bank account details above are correct.</p>
     <p class="note" data-show="miles" hidden>In claiming business mileage for the use of my private vehicle, I confirm that I have valid &amp; appropriate vehicle insurance for business use, my vehicle has a valid road fund licence &amp; MOT certificate &amp; my vehicle is serviced &amp; maintained in a safe &amp; roadworthy condition. (The University of Warwick reserves the right to check documents &amp; inspect private vehicles at any time).</p>
     <div class="srow" id="declared" data-k="declared" role="checkbox" tabindex="0"><span class="slbl"><svg data-i="badgeCheck"></svg><span>I Confirm<i class="star">*</i></span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div>
   </div>
@@ -341,12 +349,12 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   <label class="f"><svg data-i="stamp"></svg><span class="fl">Department Signature</span><input id="auth-deptSig" data-k="auth.deptSig" autocomplete="off" enterkeyhint="next"></label>
   <div class="row2">
     <label class="f"><svg data-i="calendar"></svg><span class="fl">Date</span><input id="auth-deptDate" data-k="auth.deptDate" type="date" enterkeyhint="next"></label>
-    <label class="f"><span class="fl">Print Name And Title</span><input id="auth-deptPrint" data-k="auth.deptPrint" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f"><span class="fl">Print Name and Title</span><input id="auth-deptPrint" data-k="auth.deptPrint" autocomplete="off" enterkeyhint="next"></label>
   </div>
   <label class="f"><svg data-i="stamp"></svg><span class="fl">University Level Authorisation</span><input id="auth-uniSig" data-k="auth.uniSig" autocomplete="off" enterkeyhint="next"></label>
   <div class="row2">
     <label class="f"><svg data-i="calendar"></svg><span class="fl">Date</span><input id="auth-uniDate" data-k="auth.uniDate" type="date" enterkeyhint="next"></label>
-    <label class="f"><span class="fl">Print Name And Title</span><input id="auth-uniPrint" data-k="auth.uniPrint" autocomplete="off" enterkeyhint="next"></label>
+    <label class="f"><span class="fl">Print Name and Title</span><input id="auth-uniPrint" data-k="auth.uniPrint" autocomplete="off" enterkeyhint="next"></label>
   </div>
   <label class="f"><svg data-i="userPen"></svg><span class="fl">Expense Team Approval</span><input id="auth-expTeam" data-k="auth.expTeam" autocomplete="off" enterkeyhint="next"></label>
   <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Document Number</span><input id="auth-docNo" data-k="auth.docNo" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
@@ -851,6 +859,8 @@ const SORT_EXACT={
 '230580':'Metro Bank','231470':'Wise','608312':'Atom bank','608313':'Atom bank','608371':'Starling Bank',
 '608400':'Zopa','608407':'Chase','040004':'Monzo','040075':'Revolut (Modulr)','086064':'Virgin Money'
 };
+// Banks whose personal accounts all share the one sort code listed in SORT_EXACT, so the bank alone gives it.
+const SINGLE_SORT=['Monzo','Starling Bank','Chase','Wise','Metro Bank'];
 // Bank → space-separated sort code prefixes; '' marks agency ranges inside a big bank's block (no name shown).
 const SORT_GROUPS=[
 ['First Direct','404758 404759 404780 404781 404782 404783 404784 404785 404786 404787 40476 40477'],
@@ -979,23 +989,23 @@ YE:'Yemen',YT:'Mayotte',ZA:'South Africa',ZM:'Zambia',ZW:'Zimbabwe'
 // Warwick Foreign Payments notes; regexes run on the value with spaces, dots and dashes stripped, uppercased.
 const CLEARING={
 AU:{label:'BSB Number',re:/^\d{6}$/,hint:'062-000'},
-NZ:{label:'Bank And Branch Number',re:/^\d{6}$/,hint:'12-3140'},
+NZ:{label:'Bank and Branch Number',re:/^\d{6}$/,hint:'12-3140'},
 BR:{label:'CPF Number',re:/^\d{11}$/,hint:'123.456.789-09'},
-CA:{label:'Transit And Institution Number',re:/^0?\d{8}$/,hint:'12345-003'},
+CA:{label:'Transit and Institution Number',re:/^0?\d{8}$/,hint:'12345-003'},
 IN:{label:'IFSC Code',re:/^[A-Z]{4}0[A-Z0-9]{6}$/,hint:'HDFC0001234'},
-JP:{label:'Zengin Code',re:/^\d{7}$/,hint:'0005-123',extra:'Account Type And Branch Name'},
+JP:{label:'Zengin Code',re:/^\d{7}$/,hint:'0005-123',extra:'Account Type and Branch Name'},
 KE:{label:'Routing Code'},
 MX:{label:'CLABE',re:/^(\d{18}|\d{11})$/,hint:'18 Digits'},
 ZA:{label:'Branch Code',re:/^\d{6}$/,hint:'250655'},
 US:{label:'Routing Number (ABA)',re:/^\d{9}$/,hint:'026009593'}
 };
-return{DEPTS,DEPT_ALIASES,PLACES,GL_CODES,UK_BANKS,SORT_EXACT,SORT_PREFIX,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING};
+return{DEPTS,DEPT_ALIASES,PLACES,GL_CODES,UK_BANKS,SINGLE_SORT,SORT_EXACT,SORT_PREFIX,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING};
 })();
 /* -- end fp16a:data -- */
 /* -- fp16a:model -- */
 const model=(()=>{
 const{LAYOUT,isoToSerial,serialToIso,planInserts,rowShifter}=sheet;
-const{DEPTS,DEPT_ALIASES,PLACES,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING,SORT_EXACT,SORT_PREFIX}=data;
+const{DEPTS,DEPT_ALIASES,PLACES,IBAN_LEN,CCY_BY_COUNTRY,CCY_NAMES,COUNTRIES,CLEARING,SORT_EXACT,SORT_PREFIX,SINGLE_SORT}=data;
 
 // ---- normalizers
 const round2=x=>Math.sign(x)*Math.round((Math.abs(x)+Number.EPSILON)*100)/100;
@@ -1044,7 +1054,12 @@ const byAlias=rows=>{const m=new Map(rows.flatMap(([names,to])=>names.map(a=>[al
 const deptOf=byAlias(DEPTS.map(n=>[[n,...(DEPT_ALIASES[n]||[])],n])),placeOf=byAlias(PLACES.map(([n,a])=>[[n,...a],n]));
 const postcodeOf=byAlias(PLACES.filter(p=>UK_POSTCODE.test(p[2])).map(([n,a,pc])=>[[n,...a],pc]));
 const deptName=v=>deptOf(v)??v.trim(),placeName=v=>placeOf(v)??v.trim();
+// Digits typed with spaces, dots, any dash (a pasted en or em dash included) or the letter O for zero.
+const digitLike=s=>/^[\dOo\s.\-‐‑‒–—―−]*$/.test(String(s??''));
+const normDigits=s=>String(s??'').replace(/o/gi,'0').replace(/\D/g,'');
 const normSort=s=>{const d=String(s??'').replace(/o/gi,'0').replace(/\D/g,'');return d.length===6?d.replace(/(\d\d)(\d\d)(\d\d)/,'$1-$2-$3'):d};
+const SORT_OF=Object.fromEntries(Object.entries(SORT_EXACT).filter(([,n])=>SINGLE_SORT.includes(n)).map(([c,n])=>[n.toLowerCase().replace(/ bank$/,''),c]));
+const sortFromBank=s=>normSort(SORT_OF[String(s??'').trim().toLowerCase().replace(/ bank$/,'')]||'');
 const bankFromSort=s=>{const d=String(s??'').replace(/\D/g,'');if(d.length!==6)return'';if(SORT_EXACT[d])return SORT_EXACT[d];const hit=SORT_PREFIX.find(([p])=>d.startsWith(p));return hit?hit[1]:''};
 // The Foreign Payments Form warns against typing the letter O for zero: O becomes 0 only when that turns an invalid code valid.
 const oFix=(t,ok)=>/O/.test(t)&&!ok(t)&&ok(t.replace(/O/g,'0'))?t.replace(/O/g,'0'):t;
@@ -1076,26 +1091,31 @@ const LONDON=/\blondon\b|^\s*(EC|WC|E|N|NW|SE|SW|W)\d/i;
 const limitFor=(e,date)=>{
   const L=LIMITS.filter(r=>date>=r.from).pop(),t=String(e.type||'').trim().toLowerCase(),n=e.nights||1;
   if(!L||!t)return null;
+  // The table is Warwick's UK one; abroad only incidentals have a rate, so meals and hotels paid in another currency get none.
+  if(e.ccy&&e.ccy!=='GBP'&&!/incidental/.test(t))return null;
   if(/breakfast/.test(t))return{cap:L.breakfast};
   if(/lunch/.test(t))return{cap:L.lunch};
   if(/evening meal|dinner|supper/.test(t))return{cap:L.dinner,alt:L.dinnerHotel};
   if(/refreshment|\btea\b|coffee/.test(t))return{cap:L.refresh};
-  if(/hotel|accommodation|lodging/.test(t)){const per=LONDON.test(e.place||'')?L.hotelLondon:L.hotel;return{cap:per*n,per}}
+  if(/hotel|accommodation|lodging/.test(t)){const per=LONDON.test(e.place||'')||LONDON.test(e.purpose||'')?L.hotelLondon:L.hotel;return{cap:per*n,per}}
   if(/incidental/.test(t)){const per=e.ccy&&e.ccy!=='GBP'?L.incAbroad:L.incUK;return{cap:per*n,per}}
   return null;
 };
 const limitMsg=e=>{
   const L=e.limit,g=e.gbpValue;
   if(!L||g==null||g<=L.cap+.005)return'';
-  if(L.alt)return g<=L.alt+.005?`Over £${L.cap} Unless Dining In Your Hotel`:`Over £${L.alt} Limit`;
-  return L.per?`Over £${L.per} Per Night`:`Over £${L.cap} Limit`;
+  if(L.alt)return g<=L.alt+.005?`Over £${L.cap} Unless Dining in Your Hotel`:`Over £${L.alt} Limit`;
+  return L.per?`Over £${L.per} per Night`:`Over £${L.cap} Limit`;
 };
+// Form notes 4 and 5 by keyword, so "Uber" asks for a reason and "Entertaining" for guests.
+const isTaxi=t=>/taxi|\bcab\b|uber/i.test(t||''),isEnt=t=>/entertain/i.test(t||'');
+const TYPE_ONLY=/^(train|taxi|bus|coach|flight|hotel|accommodation|breakfast|lunch|dinner|evening meal|meals?|food|parking|entertainment|travel|subsistence|expenses?|other)$/i;
 const typeText=e=>e.nights>1?`${e.type.trim()} (${e.nights} Nights)`:e.type.trim();
 
 // ---- state
 // Schema defaults: '' text, 0 number (null = empty), null text override (null = auto), false flag, array = allowed values (first is default).
-// crit defaults to Student (owner, 2026-09-18); '' stays legal for saves made before that and means nothing chosen.
-const SCHEMA={first:'',last:'',job:'',dept:'',email:'',ref:'',vendor:'',crit:['stu','emp','vis',''],empType:['yes','unitemps','stp'],bank:['uk','foreign'],
+// crit defaults to Visitor (owner, 2026-09-18); '' stays legal for saves made before that and means nothing chosen.
+const SCHEMA={first:'',last:'',job:'',dept:'',email:'',ref:'',vendor:'',crit:['vis','emp','stu',''],empType:['yes','unitemps','stp'],bank:['uk','foreign'],
   bankName:'',holder:null,acct:'',sort:'',fxSrc:'',cap:{on:false,amt:0,ccy:'',conv:0,reduce:0},comments:'',declared:false,sigName:null,sigDate:'',
   auth:{deptSig:'',deptDate:'',deptPrint:'',uniSig:'',uniDate:'',uniPrint:'',expTeam:'',docNo:''},
   fp:{iban:'',country:'',ccy:'',bic:'',acctNo:'',clearing:'',clearingExtra:'',branch:'',bStreet:'',bCity:'',bProv:'',bPost:'',phone:'',street:'',city:'',prov:'',post:'',countryName:'',
@@ -1124,6 +1144,11 @@ const nextId=s=>Math.max(0,...['exps','miles','codes'].flatMap(k=>s[k].map(r=>r.
 // Undated rows last; Array.sort is stable, so same-day rows keep entry order.
 const byDate=(a,b)=>{const x=a.date||'9999',y=b.date||'9999';return x<y?-1:x>y?1:0};
 const lower=s=>s.trim().toLowerCase();
+// Country by ISO code, name (accents optional) or a common alternative, so "UK", "USA" and "Holland" resolve.
+const COUNTRY_ALT={UK:'GB','GREAT BRITAIN':'GB',BRITAIN:'GB',ENGLAND:'GB',SCOTLAND:'GB',WALES:'GB','NORTHERN IRELAND':'GB',USA:'US',AMERICA:'US','UNITED STATES OF AMERICA':'US',
+  HOLLAND:'NL','THE NETHERLANDS':'NL','CZECH REPUBLIC':'CZ',TURKEY:'TR',RUSSIA:'RU',KOREA:'KR','DR CONGO':'CD',DRC:'CD','IVORY COAST':'CI',MACEDONIA:'MK',SWAZILAND:'SZ','CAPE VERDE':'CV'};
+const ckey=v=>String(v??'').normalize('NFKD').replace(/\p{M}/gu,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toUpperCase();
+const countryCode=v=>{const t=ckey(v);if(!t)return'';if(COUNTRIES[t])return t;return COUNTRY_ALT[t]||Object.keys(COUNTRIES).find(c=>ckey(COUNTRIES[c])===t)||''};
 // Everything computed from state; nothing here is stored.
 const derive=(s,today)=>{
   const fp=s.fp,foreign=s.bank==='foreign',country=foreign?fp.country||ibanCountry(fp.iban):'';
@@ -1158,16 +1183,16 @@ const derive=(s,today)=>{
   let given=false;
   const codes=s.codes.map(c=>{let amt=c.amt;if(amt==null&&!given&&unalloc>0){amt=unalloc;given=true}return{...c,amt}});
   const autoComments=exps.flatMap(e=>{
-    const t=lower(e.type);
-    if(t==='taxi'&&e.taxiWhy.trim())return[`Receipt ${e.ref}: Taxi Reason: ${e.taxiWhy.trim()}`];
-    if(t==='entertainment'&&(e.guests.trim()||e.staff.trim()))return[`Receipt ${e.ref}: `+[e.guests.trim()&&'Guests: '+e.guests.trim(),e.staff.trim()&&'Staff Present: '+e.staff.trim()].filter(Boolean).join('; ')];
+    if(isTaxi(e.type)&&e.taxiWhy.trim())return[`Receipt ${e.ref}: Taxi Reason: ${e.taxiWhy.trim()}`];
+    if(isEnt(e.type)&&(e.guests.trim()||e.staff.trim()))return[`Receipt ${e.ref}: `+[e.guests.trim()&&'Guests: '+e.guests.trim(),e.staff.trim()&&'Staff Present: '+e.staff.trim()].filter(Boolean).join('; ')];
     return[];
   });
   const clearing=foreign?CLEARING[country]||null:null;
   return{today,ccy,country,name,foreign,exps,miles,fx,fxList,mileTotal,expTotal,cap,grand,codes,unalloc,autoComments,clearing,
-    dept:deptName(s.dept),job:s.job||(s.crit==='stu'?'Student':s.crit==='vis'?'Visitor':''),
+    sort:s.sort.trim()||(foreign?'':sortFromBank(s.bankName)),dept:deptName(s.dept),job:s.job||(s.crit==='stu'?'Student':s.crit==='vis'?'Visitor':''),
     holder:s.holder||name,sig:s.sigName||name,sigDate:s.sigDate||today,
     bankName:s.bankName||(foreign?'':bankFromSort(s.sort)),
+    countryName:fp.countryName.trim()||(foreign?COUNTRIES[country]||'':''),expOpen:exps.some(e=>e.repaid==null),mileOpen:miles.some(m=>m.repaid==null),
     ibanShown:foreign&&(!country||!!IBAN_LEN[country]),acctReq:foreign&&!!country&&!IBAN_LEN[country],
     comments:[...autoComments,s.comments.trim()].filter(Boolean).join('\n')};
 };
@@ -1183,14 +1208,14 @@ const required=(s,D)=>{
   const out=[],need=(k,v)=>out.push([k,!(v===''||v==null||v===false)]);
   need('crit',s.crit);need('first',s.first.trim());need('last',s.last.trim());need('email',s.email.trim());need('dept',s.dept.trim());
   if(s.crit==='emp')need('job',s.job.trim());
-  if(!D.foreign){need('sort',s.sort);need('acct',s.acct);need('bankName',D.bankName)}
+  if(!D.foreign){need('sort',D.sort);need('acct',s.acct);need('bankName',D.bankName)}
   else{
     const f=s.fp;
     if(D.ibanShown)need('fp-iban',f.iban);
     need('fp-country',D.country);need('fp-ccy',D.ccy);need('fp-bic',f.bic);need('bankName',D.bankName);
     if(D.acctReq)need('fp-acctNo',f.acctNo);
     if(D.clearing)need('fp-clearing',f.clearing);
-    need('fp-bCity',f.bCity);need('fp-phone',f.phone);need('fp-street',f.street);need('fp-city',f.city);need('fp-post',f.post);need('fp-countryName',f.countryName);
+    need('fp-bCity',f.bCity);need('fp-phone',f.phone);need('fp-street',f.street);need('fp-city',f.city);need('fp-post',f.post);need('fp-countryName',D.countryName);
     if(f.route==='inter'){need('fp-inter-name',f.inter.name);need('fp-inter-swift',f.inter.swift)}
     if(f.route==='further'){need('fp-further-recipient',f.further.recipient);need('fp-further-bank',f.further.bank);need('fp-further-finalAcct',f.further.finalAcct);need('fp-further-finalName',f.further.finalName)}
   }
@@ -1207,14 +1232,14 @@ const checks=(s,D)=>{
   const out=new Map(),w=(k,cond,msg)=>{if(cond)out.set(k,out.has(k)?out.get(k)+' · '+msg:msg)},today=D.today,old=addMonths(today,-3);
   w('email',s.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email.trim()),'Check Format');
   if(!D.foreign){
-    w('sort',s.sort&&!/^\d{2}-\d{2}-\d{2}$/.test(normSort(s.sort)),'6 Digits');
-    w('acct',s.acct&&!/^\d{8}$/.test(s.acct.replace(/\s/g,'')),'8 Digits');
+    w('sort',s.sort&&!digitLike(s.sort),'Numbers Only');w('sort',s.sort&&digitLike(s.sort)&&!/^\d{2}-\d{2}-\d{2}$/.test(normSort(s.sort)),'6 Digits');
+    w('acct',s.acct&&!digitLike(s.acct),'Numbers Only');w('acct',s.acct&&digitLike(s.acct)&&!/^\d{8}$/.test(normDigits(s.acct)),'8 Digits');
   }else{
     const f=s.fp,iban=cleanIban(f.iban),bic=cleanCode(f.bic);
     w('fp-iban',iban&&!ibanOk(iban),IBAN_LEN[iban.slice(0,2)]&&IBAN_LEN[iban.slice(0,2)]!==iban.length?`Needs ${IBAN_LEN[iban.slice(0,2)]} Characters`:'Check Digits Fail');
     w('fp-iban',iban.length>31,'Over 31 Characters');
-    w('fp-bic',bic&&!BIC.test(bic),'8 Or 11 Characters');
-    w('fp-bic',bic&&BIC.test(bic)&&D.country&&bic.slice(4,6)!==D.country&&!(D.country==='XK'&&bic.slice(4,6)==='RS'),'Not A Bank Country BIC');
+    w('fp-bic',bic&&!BIC.test(bic),'8 or 11 Characters');
+    w('fp-bic',bic&&BIC.test(bic)&&D.country&&bic.slice(4,6)!==D.country&&!(D.country==='XK'&&bic.slice(4,6)==='RS'),'Not a Bank Country BIC');
     const cc=cleanCode(f.clearing);
     w('fp-clearing',cc&&D.clearing?.re&&!D.clearing.re.test(cc),'Check Format');
     w('fp-clearing',cc&&D.country==='US'&&/^\d{9}$/.test(cc)&&!abaOk(cc),'Checksum Fails');
@@ -1222,28 +1247,33 @@ const checks=(s,D)=>{
   }
   for(const e of D.exps){
     const k='e:'+e.id,p=purposeText(e);
-    w(k,e.date&&e.date>today,'Date In The Future');
+    w(k,e.date&&e.date>today,'Date in the Future');
     w(k,e.date&&e.date<old,'Older Than 3 Months');
     const need=[!e.date&&'Date',!e.type.trim()&&'Type',!e.purpose.trim()&&'Purpose'].filter(Boolean);
     w(k,need.length,need.join(', ').replace(/, ([^,]*)$/,' And $1')+' Needed');
-    w(k,p.length>150,'Purpose Too Long For The Form');
-    w(k,e.repaid==null,'To Be Repaid Unknown');
+    w(k,p.length>150,'Purpose Too Long for the Form');
+    w(k,e.repaid==null,'Exchange Rate Needed');
     // Form notes 4 and 5: a taxi needs its reason, entertainment its guests and the number of Warwick staff.
-    w(k,lower(e.type)==='taxi'&&!e.taxiWhy.trim(),'Taxi Reason Needed');
-    w(k,lower(e.type)==='entertainment'&&(!e.guests.trim()||!e.staff.trim()),'Guests And Staff Needed');
+    w(k,isTaxi(e.type)&&!e.taxiWhy.trim(),'Taxi Reason Needed');
+    w(k,isEnt(e.type)&&(!e.guests.trim()||!e.staff.trim()),'Guests and Staff Needed');
+    // Warwick: tourist tax belongs in the nightly hotel rate; the purpose must give the reason, not the type (FP16a note).
+    w(k,/tourist tax|city tax|occupancy tax/i.test(e.type),'Add to Hotel Cost');
+    w(k,TYPE_ONLY.test(e.purpose.trim()),'Purpose Is an Expense Type');
     const on=x=>x.trip||x.date,over=limitMsg(e),inStay=/breakfast/i.test(e.type)&&on(e)&&D.exps.some(h=>h!==e&&/hotel|accommodation|lodging/i.test(h.type)&&on(h)&&on(e)>=on(h)&&on(e)<=addDays(on(h),h.nights||1));
-    w(k,over,inStay?`Over £${e.limit.cap}, Add To Hotel Cost`:over);
+    w(k,over,inStay?`Over £${e.limit.cap}, Add to Hotel Cost`:over);
   }
   for(const m of D.miles){
     const k='m:'+m.id;
-    w(k,m.date&&m.date>today,'Date In The Future');
+    w(k,m.date&&m.date>today,'Date in the Future');
     w(k,m.date&&m.date<old,'Older Than 3 Months');
     w(k,!m.date,'Date Needed');
     w(k,[m.from,m.to].some(p=>p&&!UK_POSTCODE.test(p)),'Check Postcodes');
     w(k,m.dist>1000,'Over 1000 Miles');
-    w(k,m.repaid==null,'To Be Repaid Unknown');
+    w(k,m.repaid==null,'Exchange Rate Needed');
   }
   w('ref',s.ref.length>16,'Max 16 Characters');
+  const last=[...D.exps.map(e=>e.date),...D.miles.map(m=>m.date)].filter(Boolean).sort().pop();
+  w('sigDate',!!last&&D.sigDate<last,'Before Latest Expense');
   return out;
 };
 
@@ -1265,7 +1295,7 @@ const toCells=(s,D)=>{
   set('name',D.name);set('dept',D.dept);set('job',D.job.trim());set('ref',s.ref.trim());
   set('email',s.email.trim());
   if(s.crit){set('emp',s.crit==='emp'?{yes:'Yes',unitemps:'Yes (Unitemps)',stp:'Yes (STP)'}[s.empType]:'No');set('stu',s.crit==='stu'?'Yes':'No');set('vis',s.crit==='vis'?'Yes':'No')}
-  if(!D.foreign){set('bankName',D.bankName.trim());set('acct',s.acct.replace(/\s/g,''));set('sort',normSort(s.sort));set('holder',D.holder)}
+  if(!D.foreign){set('bankName',D.bankName.trim());set('acct',normDigits(s.acct));set('sort',normSort(D.sort));set('holder',D.holder)}
   D.miles.forEach((m,i)=>{
     const r=F(T.miles.first)+i,c=T.miles.cols;
     cells.set(c.date+r,serial(m.date));cells.set(c.from+r,up(m.from));cells.set(c.to+r,up(m.to));cells.set(c.mi+r,m.dist);cells.set(c.rate+r,m.rate);
@@ -1305,7 +1335,7 @@ const foreignCells=(s,D)=>{
   const L=LAYOUT.foreign.cells,f=s.fp,cells=new Map(),set=(k,v)=>cells.set(L[k][0],up(typeof v==='string'?v.trim():v));
   if(s.declared){set('sig',D.sig);set('date',isoToSerial(D.sigDate))}
   set('name',D.name);set('phone',f.phone);set('email',s.email);
-  set('street',f.street);set('city',f.city);set('prov',f.prov);set('post',f.post);set('country',f.countryName);
+  set('street',f.street);set('city',f.city);set('prov',f.prov);set('post',f.post);set('country',D.countryName);
   set('bank',D.bankName);set('branch',f.branch);set('bStreet',f.bStreet);set('bCity',f.bCity);set('bProv',f.bProv);set('bPost',f.bPost);set('bCountry',COUNTRIES[D.country]||D.country);
   if(D.ccy)set('ccy',CCY_NAMES[D.ccy]?`${D.ccy} - ${CCY_NAMES[D.ccy]}`:D.ccy);
   if(D.ibanShown)(cleanIban(f.iban).match(/.{1,4}/g)||[]).slice(0,8).forEach((chunk,i)=>set('iban'+i,chunk));
@@ -1329,7 +1359,7 @@ const fromCells=(view,today)=>{
     take('bankName',()=>gs('bank'));
     const iban=[0,1,2,3,4,5,6,7].map(i=>{try{return str(g('iban'+i))}catch(_){return''}}).join('');
     take('fp.iban',()=>cleanIban(iban));
-    take('fp.country',()=>{const n=gs('bCountry');return Object.keys(COUNTRIES).find(c=>lowerEq(COUNTRIES[c],n)||c===n.toUpperCase())||''});
+    take('fp.country',()=>countryCode(gs('bCountry')));
     take('fp.ccy',()=>{const t=gs('ccy');return/^[A-Za-z]{3}\b/.test(t)?t.slice(0,3).toUpperCase():normCcy(t)});
     const F=LAYOUT.foreign.cells;
     for(const k of['bic','acctNo','clearing','clearingExtra','branch','bStreet','bCity','bProv','bPost','phone','street','city','prov','post','info'])if(F[k])take('fp.'+k,()=>gs(k));
@@ -1413,6 +1443,7 @@ const merge=(state,patch,today)=>{
   if(!D.foreign&&lowerEq(out.bankName,bankFromSort(out.sort)))out.bankName='';
   if(D.foreign&&out.fp.country&&out.fp.country===ibanCountry(out.fp.iban))out.fp.country='';
   if(D.foreign&&out.fp.ccy&&out.fp.ccy===CCY_BY_COUNTRY[out.fp.country||ibanCountry(out.fp.iban)])out.fp.ccy='';
+  if(D.foreign&&out.fp.countryName&&lowerEq(out.fp.countryName,COUNTRIES[out.fp.country||ibanCountry(out.fp.iban)]||''))out.fp.countryName='';
   if(patch.rows.exps||patch.rows.miles){
     // Rows whose figure matches the stated rate are auto; the rest are typed statement figures.
     const Dx=derive(out,today),rates={...out.fx};
@@ -1452,31 +1483,33 @@ const toText=(s,D)=>{
   out.push(`FP16A TRAVEL & SUBSISTENCE CLAIM${D.name?' - '+U(D.name):''} - ${fmtDay(D.sigDate)}`);
   const crit=s.crit==='emp'?'UNIVERSITY OF WARWICK EMPLOYEE'+{yes:'',unitemps:' (UNITEMPS)',stp:' (STP)'}[s.empType]:s.crit==='stu'?'UNIVERSITY OF WARWICK STUDENT':s.crit==='vis'?'VISITOR':'';
   sec('Claimant',[f('Full Name',U(D.name),'first'),f('Claimant Criteria',crit,'crit'),f('Job Title',U(D.job),'job'),f('Department',U(D.dept),'dept'),f('Email (For Remittance)',U(s.email),'email'),f('Dept/Payment Ref',U(s.ref))]);
-  if(!D.foreign)sec('Bank Details',[f('Bank/Building Society Name',U(D.bankName),'bankName'),f('Sort Code',normSort(s.sort),'sort'),f('Bank Account Number',s.acct.replace(/\s/g,''),'acct'),f("Bank Account Holder's Name",U(D.holder))]);
+  if(!D.foreign)sec('Bank Details',[f('Bank/Building Society Name',U(D.bankName),'bankName'),f('Sort Code',normSort(D.sort),'sort'),f('Bank Account Number',normDigits(s.acct),'acct'),f("Bank Account Holder's Name",U(D.holder))]);
   else{
     const x=s.fp;
     out.push('FOREIGN ACCOUNT');
+    // Address lines carry the Foreign Payments Form's own labels, one per line, so pasting the text back reads them exactly.
     sec('Beneficiary',[f('Beneficiary Name',U(D.name),'first'),f('Beneficiary Telephone',x.phone,'fp-phone'),f('Beneficiary Email',U(s.email),'email'),
-      f('Address',U([x.street,x.city,x.prov,x.post,x.countryName].map(v=>v.trim()).filter(Boolean).join(', ')),'fp-street')]);
-    sec('Bank',[f('Name Of Bank',U(D.bankName),'bankName'),f('Branch',U(x.branch)),f('Bank Address',U([x.bStreet,x.bCity,x.bProv,x.bPost].map(v=>v.trim()).filter(Boolean).join(', ')),'fp-bCity'),f('Bank Country',U(COUNTRIES[D.country]||D.country),'fp-country')]);
-    sec('Account',[f('Currency Of This Account',D.ccy,'fp-ccy'),D.ibanShown?f('IBAN',(cleanIban(x.iban).match(/.{1,4}/g)||[]).join(' '),'fp-iban'):'',f('Account No',fixAcct(x.acctNo),'fp-acctNo'),f('BIC/SWIFT Code',cleanCode(x.bic),'fp-bic'),
+      f('Street & Number/Name',U(x.street),'fp-street'),f('City',U(x.city),'fp-city'),f('Province/State',U(x.prov)),f('Post/Zip Code',U(x.post),'fp-post'),f('Country',U(D.countryName),'fp-countryName')]);
+    sec('Bank',[f('Name of Bank',U(D.bankName),'bankName'),f('Bank Branch Name/Number',U(x.branch)),f('Street & Number/Name',U(x.bStreet)),f('City',U(x.bCity),'fp-bCity'),
+      f('Province/State',U(x.bProv)),f('Post/Zip Code',U(x.bPost)),f('Bank Country',U(COUNTRIES[D.country]||D.country),'fp-country')]);
+    sec('Account',[f('Currency of This Account',D.ccy,'fp-ccy'),D.ibanShown?f('IBAN',(cleanIban(x.iban).match(/.{1,4}/g)||[]).join(' '),'fp-iban'):'',f('Account No',fixAcct(x.acctNo),'fp-acctNo'),f('BIC/SWIFT Code',cleanCode(x.bic),'fp-bic'),
       f(D.clearing?.label||'Clearing Code',U(x.clearing),'fp-clearing'),f(D.clearing?.extra||'Additional Clearing Information',U(x.clearingExtra))]);
     if(x.route==='inter')sec('Routing (Intermediary)',[f('Intermediary Bank Name',U(x.inter.name),'fp-inter-name'),f('Intermediary Account Number',U(x.inter.acct)),f('Intermediary SWIFT Code',cleanCode(x.inter.swift),'fp-inter-swift'),f('Intermediary Routing Code',U(x.inter.routing))]);
-    if(x.route==='further'){const y=x.further;sec('Routing (For Further Credit)',[f('Recipient Name (Your Bank)',U(y.recipient),'fp-further-recipient'),f('Name Of The Recipient Bank',U(y.bank),'fp-further-bank'),f('Recipient Bank Account Number',U(y.acct)),f('Recipient BIC/SWIFT Code',cleanCode(y.bic)),f('Recipient Routing/ABA Code',U(y.aba)),f('Final Credit Account Number',U(y.finalAcct),'fp-further-finalAcct'),f('Final Credit Account Name',U(y.finalName),'fp-further-finalName')])}
+    if(x.route==='further'){const y=x.further;sec('Routing (For Further Credit)',[f('Recipient Name (Your Bank)',U(y.recipient),'fp-further-recipient'),f('Name of the Recipient Bank',U(y.bank),'fp-further-bank'),f('Recipient Bank Account Number',U(y.acct)),f('Recipient BIC/SWIFT Code',cleanCode(y.bic)),f('Recipient Routing/ABA Code',U(y.aba)),f('Final Credit Account Number',U(y.finalAcct),'fp-further-finalAcct'),f('Final Credit Account Name',U(y.finalName),'fp-further-finalName')])}
     sec('Additional Information',[U(x.info)]);
   }
   if(D.exps.length)out.push('EXPENSES\n'+table(['Ref','Date','Type','Business Purpose','Amount','To Be Repaid'],
-    D.exps.map(e=>[U(e.ref),fmtDay(e.date)||'—',U(typeText(e))||'—',U(purposeText(e))||'—',e.amt==null?'—':e.amt.toFixed(2)+' '+(e.ccy||D.ccy),money(e.repaid,D.ccy)]),[4,5])+`\nTravel & Subsistence Total: ${money(D.expTotal,D.ccy)}`);
+    D.exps.map(e=>[U(e.ref),fmtDay(e.date)||'—',U(typeText(e))||'—',U(purposeText(e))||'—',e.amt==null?'—':e.amt.toFixed(2)+' '+(e.ccy||D.ccy),money(e.repaid,D.ccy)]),[4,5])+`\nTravel & Subsistence Total: ${D.expOpen?'—':money(D.expTotal,D.ccy)}`);
   if(D.miles.length)out.push('MILEAGE\n'+table(['Date','From','To','Miles','Rate','Details','To Be Repaid'],
-    D.miles.map(m=>[fmtDay(m.date)||'—',U(m.from)||'—',U(m.to)||'—',String(m.dist),m.rate.toFixed(2),U(detailsText(m)),money(m.repaid,D.ccy)]),[3,4,6])+`\nMileage Total: ${money(D.mileTotal,D.ccy)}`);
+    D.miles.map(m=>[fmtDay(m.date)||'—',U(m.from)||'—',U(m.to)||'—',String(m.dist),m.rate.toFixed(2),U(detailsText(m)),money(m.repaid,D.ccy)]),[3,4,6])+`\nMileage Total: ${D.mileOpen?'—':money(D.mileTotal,D.ccy)}`);
   if(D.fxList.length)sec('Exchange Rates',[...D.fxList.map(c=>D.fx[c].rate!=null?`1 ${c} = ${fmtRate(D.fx[c].rate)} ${D.ccy}`:`1 ${c} = — ${D.ccy}`),f('Obtained From',U(s.fxSrc),'fxSrc')]);
-  if(D.cap)sec('Cap',[f('Cap Being Enforced',D.cap.amt==null?'':D.cap.amt.toFixed(2)+' '+D.cap.ccy,'cap-amt'),D.cap.same?'':f('Cap Converted',D.cap.conv==null?'—':money(D.cap.conv,D.ccy)),f('Claim To Be Reduced By',D.cap.reduce==null?'':money(D.cap.reduce,D.ccy))]);
-  out.push(`GRAND TOTAL TO BE REIMBURSED: ${money(D.grand,D.ccy)}`);
+  if(D.cap)sec('Cap',[f('Cap Being Enforced',D.cap.amt==null?'':D.cap.amt.toFixed(2)+' '+D.cap.ccy,'cap-amt'),D.cap.same?'':f('Cap Converted',D.cap.conv==null?'—':money(D.cap.conv,D.ccy)),f('Claim to Be Reduced By',D.cap.reduce==null?'':money(D.cap.reduce,D.ccy))]);
+  out.push(`GRAND TOTAL TO BE REIMBURSED: ${D.expOpen||D.mileOpen?'—':money(D.grand,D.ccy)}`);
   sec('Additional Comments',[U(D.comments)]);
   sec('Declaration',[f('Declaration',s.declared?'CONFIRMED':'','declared'),s.declared?f('Signature',U(D.sig)):'',f('Date',fmtDay(D.sigDate))]);
   const a=s.auth,dept=[s.vendor.trim()&&f('Vendor Number',U(s.vendor)),
     D.codes.length?table(['GL Code','Cost Centre / Project / Internal Order','Amount','Business Purpose'],D.codes.map(c=>[U(c.gl),U(c.cc),c.amt==null?'':c.amt.toFixed(2),U(c.purpose)]),[2]):'',
-    f('Department Signature',U(a.deptSig)),f('Date',fmtDay(a.deptDate)),f('Print Name And Title',U(a.deptPrint)),f('University Level Authorisation',U(a.uniSig)),f('Date',fmtDay(a.uniDate)),f('Print Name And Title',U(a.uniPrint)),
+    f('Department Signature',U(a.deptSig)),f('Date',fmtDay(a.deptDate)),f('Print Name and Title',U(a.deptPrint)),f('University Level Authorisation',U(a.uniSig)),f('Date',fmtDay(a.uniDate)),f('Print Name and Title',U(a.uniPrint)),
     f('Expense Team Approval',U(a.expTeam)),f('Document Number',U(a.docNo))];
   sec('For Departmental Use',dept);
   return out.join('\n\n')+'\n';
@@ -1488,9 +1521,70 @@ const exportFiles=async(s,today,tpl)=>{
   if(c.foreign)out.push({name:filename('foreign',s,D),bytes:await sheet.fill(tpl.foreign,'foreign',c.foreign)});
   return out;
 };
-const importFile=async(u8,s,today)=>{const v=await sheet.open(u8);return{kind:v.kind,...merge(s,fromCells(v,today),today)}};
+const readFile=async(u8,today)=>{const v=await sheet.open(u8);return{kind:v.kind,patch:fromCells(v,today)}};
+const importFile=async(u8,s,today)=>{const r=await readFile(u8,today);return{kind:r.kind,...merge(s,r.patch,today)}};
+// Copy text back into the views a file import reads (paste = import), so the same merge rules and un-deriving apply.
+const TEXT_HEAD=/^\s*FP16A TRAVEL & SUBSISTENCE CLAIM\b/i;
+const isClaimText=t=>TEXT_HEAD.test(String(t??''));
+const SECTIONS=new Set(['CLAIMANT','BANK DETAILS','FOREIGN ACCOUNT','BENEFICIARY','BANK','ACCOUNT','ROUTING (INTERMEDIARY)','ROUTING (FOR FURTHER CREDIT)','ADDITIONAL INFORMATION',
+  'EXPENSES','MILEAGE','EXCHANGE RATES','CAP','ADDITIONAL COMMENTS','DECLARATION','FOR DEPARTMENTAL USE']);
+const CLEAR_LABELS=new Set(['Clearing Code',...Object.values(CLEARING).map(c=>c.label)].map(l=>l.toLowerCase())),CLEAR_EXTRAS=new Set(['Additional Clearing Information',...Object.values(CLEARING).map(c=>c.extra).filter(Boolean)].map(l=>l.toLowerCase()));
+const textViews=text=>{
+  if(!isClaimText(text))throw new Fp16aError('not-fp16a');
+  const by={};let cur=null;
+  for(const line of String(text).replace(/\r\n?/g,'\n').split('\n')){const t=line.trim();if(SECTIONS.has(t))cur=by[t]=[];else if(/^GRAND TOTAL TO BE REIMBURSED:/i.test(t))cur=null;else if(cur)cur.push(line)}
+  const dash=v=>v==='—'?'':v;
+  // Labels match case-insensitively, so text copied before a label's capitalization changed still reads.
+  const pairs=k=>(by[k]||[]).map(l=>{const i=l.indexOf(': ');return i>0?[l.slice(0,i).trim().toLowerCase(),dash(l.slice(i+2).trim())]:null}).filter(Boolean);
+  const kv=k=>{const m=new Map(pairs(k).reverse());return{get:x=>m.get(x.toLowerCase())}};
+  const lines=k=>(by[k]||[]).join('\n').trim();
+  const table=(k,cols)=>{const ls=(by[k]||[]).filter(l=>l.includes('|'));return ls.slice(1).map(l=>{const c=l.split('|').map(x=>dash(x.trim())),o={};cols.forEach((n,i)=>{if(n)o[n]=c[i]??''});return o})};
+  const C=kv('CLAIMANT'),K=kv('BANK DETAILS'),X=kv('EXCHANGE RATES'),P=kv('CAP'),Dc=kv('DECLARATION'),A=kv('ACCOUNT'),foreign=!!by['FOREIGN ACCOUNT'];
+  const crit=C.get('Claimant Criteria')||'',yn=on=>crit?on?'YES':'NO':'',cap=/^(\S+)\s+([A-Z]{3})$/i.exec(P.get('Cap Being Enforced')||'');
+  const dep={};let who='dept';
+  for(const[k,v]of pairs('FOR DEPARTMENTAL USE')){
+    if(k==='vendor number')dep.vendor=v;else if(k==='department signature')dep.deptSig=v;else if(k==='university level authorisation'){who='uni';dep.uniSig=v}
+    else if(k==='date'){if(who==='dept'&&dep.deptDate)who='uni';dep[who+'Date']=v}else if(k==='print name and title'){if(who==='dept'&&dep.deptPrint)who='uni';dep[who+'Print']=v}
+    else if(k==='expense team approval')dep.expTeam=v;else if(k==='document number')dep.docNo=v;
+  }
+  const exps=table('EXPENSES',['ref','date','type','purpose','amt','repaid']).map(r=>{const m=/^(\S+)\s+([A-Z]{3})$/i.exec(r.amt);return m?{...r,amt:m[1],ccy:m[2]}:r});
+  const fp={name:C.get('Full Name'),job:C.get('Job Title'),dept:C.get('Department'),email:C.get('Email (For Remittance)'),ref:C.get('Dept/Payment Ref'),
+    emp:yn(/EMPLOYEE/i.test(crit)).replace(/^YES$/,'YES'+(/UNITEMPS/i.test(crit)?' (UNITEMPS)':/\(STP\)/i.test(crit)?' (STP)':'')),stu:yn(/STUDENT/i.test(crit)),vis:yn(/VISITOR/i.test(crit)),
+    bankName:K.get('Bank/Building Society Name'),sort:K.get('Sort Code'),acct:K.get('Bank Account Number'),holder:K.get("Bank Account Holder's Name"),
+    fx:(by['EXCHANGE RATES']||[]).map(l=>l.trim()).filter(l=>/^1 [A-Z]{3} = \d/.test(l)).join('; '),fxSrc:X.get('Obtained From'),
+    capAmt:cap?.[1],capCcy:cap?.[2],capConv:P.get('Cap Converted'),capReduce:P.get('Claim to Be Reduced By'),grandCcy:foreign?A.get('Currency of This Account'):'GBP',
+    comments:lines('ADDITIONAL COMMENTS'),sig:Dc.get('Signature'),sigDate:Dc.get('Date'),...dep};
+  const rows={exps,miles:table('MILEAGE',['date','from','to','mi','rate','why','repaid']),codes:table('FOR DEPARTMENTAL USE',['gl','cc','amt','purpose'])};
+  const views=[{kind:'fp16a',get:k=>fp[k],rows:k=>rows[k]??null}];
+  if(foreign){
+    const Bn=kv('BENEFICIARY'),Bk=kv('BANK'),I=kv('ROUTING (INTERMEDIARY)'),Fc=kv('ROUTING (FOR FURTHER CREDIT)'),acc=pairs('ACCOUNT');
+    const fo={name:Bn.get('Beneficiary Name'),phone:Bn.get('Beneficiary Telephone'),email:Bn.get('Beneficiary Email'),street:Bn.get('Street & Number/Name'),city:Bn.get('City'),
+      prov:Bn.get('Province/State'),post:Bn.get('Post/Zip Code'),country:Bn.get('Country'),bank:Bk.get('Name of Bank'),branch:Bk.get('Bank Branch Name/Number'),
+      bStreet:Bk.get('Street & Number/Name'),bCity:Bk.get('City'),bProv:Bk.get('Province/State'),bPost:Bk.get('Post/Zip Code'),bCountry:Bk.get('Bank Country'),
+      ccy:A.get('Currency of This Account'),iban0:A.get('IBAN'),acctNo:A.get('Account No'),bic:A.get('BIC/SWIFT Code'),
+      clearing:acc.find(([k])=>CLEAR_LABELS.has(k))?.[1],clearingExtra:acc.find(([k])=>CLEAR_EXTRAS.has(k))?.[1],
+      iName:I.get('Intermediary Bank Name'),iAcct:I.get('Intermediary Account Number'),iSwift:I.get('Intermediary SWIFT Code'),iRouting:I.get('Intermediary Routing Code'),
+      fRecipient:Fc.get('Recipient Name (Your Bank)'),fBank:Fc.get('Name of the Recipient Bank'),fAcct:Fc.get('Recipient Bank Account Number'),fBic:Fc.get('Recipient BIC/SWIFT Code'),
+      fAba:Fc.get('Recipient Routing/ABA Code'),fFinalAcct:Fc.get('Final Credit Account Number'),fFinalName:Fc.get('Final Credit Account Name'),
+      info:lines('ADDITIONAL INFORMATION'),sig:Dc.get('Signature'),date:Dc.get('Date')};
+    views.push({kind:'foreign',get:k=>fo[k],rows:()=>null});
+  }
+  return views;
+};
+const readText=(text,today)=>textViews(text).map(v=>({kind:v.kind,patch:fromCells(v,today)}));
+// Import replaces the claim (owner, 2026-09-18). FP16a data applies before Foreign Payments data. An FP16a starts from a blank claim
+// and keeps the current foreign bank details only when it is itself for a foreign account (it has no cells for them); Foreign
+// Payments data replaces just those details.
+const applyImports=(s,reads,today)=>{
+  let state=s,count=0;
+  for(const{kind,patch}of[...reads].sort((a,b)=>(a.kind==='foreign')-(b.kind==='foreign'))){
+    const b=blank(),base=kind==='foreign'?{...state,bank:'foreign',fp:b.fp}:patch.set.bank==='foreign'?{...b,bank:'foreign',fp:state.fp}:b;
+    const r=merge(base,patch,today);state=r.state;count+=r.count;
+  }
+  return{state,count};
+};
 
-return{exportFiles,importFile,deptName,placeName,fixAcct,fixClearing,LIMITS,limitFor,limitMsg,typeText,round2,normCcy,num,parseDay,fmtDay,addMonths,normPostcode,UK_POSTCODE,normSort,bankFromSort,cleanIban,ibanCountry,ibanOk,abaOk,BIC,cleanCode,slug,
+return{exportFiles,importFile,sortFromBank,digitLike,normDigits,readFile,readText,isClaimText,applyImports,deptName,placeName,isTaxi,isEnt,countryCode,fixAcct,fixClearing,LIMITS,limitFor,limitMsg,typeText,round2,normCcy,num,parseDay,fmtDay,addMonths,normPostcode,UK_POSTCODE,normSort,bankFromSort,cleanIban,ibanCountry,ibanOk,abaOk,BIC,cleanCode,slug,
   RATES,rateFor,SCHEMA,migrate,blank,nextId,derive,required,missing,label,setPath,checks,purposeText,detailsText,fxText,filename,toCells,fromCells,merge,toText,money};
 })();
 /* -- end fp16a:model -- */
@@ -1580,7 +1674,7 @@ opts('dl-dept',DEPTS.map(v=>[v,(DEPT_ALIASES[v]||[]).join(', ')]));
 // Labels show what the value does not already say: short forms that are not inside the name, then the postcode or city.
 opts('dl-places',PLACES.map(([n,a,w])=>[n,[...a.filter(x=>!n.toLowerCase().includes(x.toLowerCase())),w].join(', ')]));
 const byPc={};for(const[n,,w]of PLACES)if(M.UK_POSTCODE.test(w))(byPc[w]||=[]).push(n);
-opts('dl-postcodes',Object.entries(byPc).map(([pc,ns])=>[pc,ns.join(', ')]));opts('dl-banks',UK_BANKS.map(v=>[v]));opts('dl-ccy',Object.entries(CCY_NAMES));
+opts('dl-banks',UK_BANKS.map(v=>[v]));opts('dl-ccy',Object.entries(CCY_NAMES));
 opts('dl-countries',Object.values(COUNTRIES).sort((a,b)=>a.localeCompare(b)).map(v=>[v]));
 opts('dl-types',[...TYPES.map(t=>t[0]),...MORE_TYPES].map(v=>[v]));opts('dl-src',['Bank Statement','Card Statement','XE.com','OANDA'].map(v=>[v]));opts('dl-gl',GL_CODES);
 $('e-chips').innerHTML=TYPES.map(([t,i])=>`<button type="button" class="chip" data-type="${t}">${svg(i)}${t}</button>`).join('');
@@ -1589,12 +1683,10 @@ $('e-chips').innerHTML=TYPES.map(([t,i])=>`<button type="button" class="chip" da
 const PARSE={
   num:v=>M.num(v),
   over:v=>v.trim()||null,
-  sort:v=>M.normSort(v),
-  digits:v=>v.replace(/o/gi,'0').replace(/\D/g,''),
   upper:v=>v.trim().toUpperCase(),
   iban:v=>M.cleanIban(v),
   ccy:v=>{const t=v.trim().toUpperCase();return/^[A-Z]{3}$/.test(t)?t:M.normCcy(v)},
-  country:v=>{const t=v.trim().toLowerCase();return t?Object.keys(COUNTRIES).find(c=>c.toLowerCase()===t||COUNTRIES[c].toLowerCase()===t)||'':''}
+  country:v=>M.countryCode(v)
 };
 const SHOW={num:v=>v==null?'':String(v),over:v=>v??'',iban:v=>(v.match(/.{1,4}/g)||[]).join(' '),country:v=>COUNTRIES[v]||v};
 const read=el=>(PARSE[el.dataset.f]||(v=>v))(el.value);
@@ -1616,15 +1708,16 @@ const tierAttr=(el,on)=>on?el.removeAttribute('data-t'):el.setAttribute('data-t'
 function applyVis(){
   const de=S.draft.e,te=(de.type||'').trim().toLowerCase(),ec=PARSE.ccy(de.ccy||'')||D.ccy,open=mOpen||S.miles.length>0||edit.m!=null;
   const C={emp:S.crit==='emp',uk:!D.foreign,foreign:D.foreign,iban:D.ibanShown,inter:S.fp.route==='inter',further:S.fp.route==='further',
-    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':te==='taxi','e-ent':te==='entertainment','e-nights':/hotel|accommodation|lodging|incidental/.test(te),'m-fx':!!D.ccy&&D.ccy!=='GBP','m-card':open,'m-closed':!open,
+    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':M.isTaxi(te),'e-ent':M.isEnt(te),'e-nights':/hotel|accommodation|lodging|incidental/.test(te),'m-fx':!!D.ccy&&D.ccy!=='GBP','m-card':open,'m-closed':!open,
     fx:D.fxList.length>0,cap:S.cap.on,'cap-conv':!!D.cap&&!D.cap.same,miles:S.miles.length>0};
   for(const el of document.querySelectorAll('[data-show]')){const on=!!C[el.dataset.show];if(el.hidden===on){el.hidden=!on;if(on&&!booting)reveal(el)}}
   const slot=$(D.foreign?'slot-foreign':'slot-uk'),bw=$('w-bankName');if(bw.parentNode!==slot)slot.append(bw);
-  $('l-bankName').firstChild.textContent=D.foreign?'Name Of Bank':'Bank/Building Society Name';
+  $('l-bankName').firstChild.textContent=D.foreign?'Name of Bank':'Bank/Building Society Name';
   const cl=D.clearing;
   $('l-fp-clearing').textContent=cl?.label||'Clearing Code';$('fp-clearing').placeholder=cl?.hint||'';tierAttr($('w-fp-clearing'),!!cl);
   $('l-fp-clearingExtra').textContent=cl?.extra||'Additional Clearing Information';tierAttr($('w-fp-clearingExtra'),!!cl?.extra);
-  tierAttr($('fp-acctNo').closest('.f'),D.acctReq);
+  tierAttr($('fp-acctNo').closest('.f'),D.acctReq);tierAttr($('job').closest('.f'),S.crit==='emp');
+  for(const t of'emc'){const f=visibleFields($(t+'-card'));f.forEach((x,i)=>{x.enterKeyHint=i===f.length-1?'done':'next'})}
 }
 // An empty date shows today as its auto value.
 const autoDate=(id,v,t)=>{const el=$(id);if(el===document.activeElement)return;const want=v||t;if(el.value!==want)el.value=want;el.classList.toggle('auto',!v)};
@@ -1632,17 +1725,16 @@ function renderAuto(){
   const t=today(),ccy=D.ccy||'GBP',de=S.draft.e,dm=S.draft.m;
   $('job').placeholder=S.crit==='stu'?'Student':S.crit==='vis'?'Visitor':'';
   $('holder').placeholder=$('sigName').placeholder=D.name;
-  $('bankName').placeholder=D.foreign?'':M.bankFromSort(S.sort);
-  $('fp-country').placeholder=COUNTRIES[M.ibanCountry(S.fp.iban)]||'';
+  $('bankName').placeholder=D.foreign?'':M.bankFromSort(S.sort);$('sort').placeholder=D.sort||'00-00-00';
+  $('fp-country').placeholder=COUNTRIES[M.ibanCountry(S.fp.iban)]||'';$('fp-countryName').placeholder=COUNTRIES[D.country]||'';
   $('fp-ccy').placeholder=CCY_BY_COUNTRY[D.country]||'';
   for(const id of['e-bank-ccy','m-bank-ccy','cap-bank-ccy'])$(id).textContent=ccy;
   $('draft-e-ccy').placeholder=$('cap-ccy').placeholder=ccy;
   const te=(de.type||'').trim().toLowerCase();for(const b of $('e-chips').children)b.classList.toggle('active',b.dataset.type.toLowerCase()===te);
   const amt=M.num(de.amt),rate=D.fx[PARSE.ccy(de.ccy||'')]?.rate;
-  const lim=M.limitFor({type:de.type,place:de.place,nights:M.num(de.nights),ccy:PARSE.ccy(de.ccy||'')||D.ccy},de.date||t);
-  $('e-limit').textContent=!lim?'':lim.per?`Max £${lim.per}/Night`:`Max £${lim.cap}`+(lim.alt?`/${lim.alt}`:'');
+  $('draft-e-purpose').placeholder=purposeEg(de.type||'');
   $('draft-e-repaid').placeholder=amt!=null&&rate!=null?m2(M.round2(amt*rate)):'';
-  $('draft-e-ref').placeholder=edit.e!=null?D.exps.find(x=>x.id===edit.e)?.aref||'':'#'+(S.exps.length+1);
+  $('draft-e-ref').placeholder=edit.e!=null?D.exps.find(x=>x.id===edit.e)?.aref||'':'#'+(S.exps.filter(x=>(x.date||'9999')<=(de.date||t)).length+1);
   const arate=M.rateFor(dm.veh||'car',dm.rateType||'std',dm.date||t),r=M.num(dm.rate)??arate,mi=M.num(dm.mi),dist=mi==null?null:mi*(dm.ret?2:1);
   const gbp=dist==null?null:M.round2(dist*r),fxg=D.fx.GBP?.rate;
   $('draft-m-rate').placeholder=arate.toFixed(2);
@@ -1683,7 +1775,7 @@ function renderFx(){
   const box=$('fx-rows'),sig=D.fxList.join()+'|'+D.ccy;
   if(box.dataset.sig!==sig){
     box.dataset.sig=sig;
-    box.innerHTML=D.fxList.map(c=>`<label class="f">${svg('arrowRightLeft')}<span class="fl">1 ${c} In ${esc(D.ccy)}<i>*</i></span><input id="fx-${c}" data-k="fx.${c}" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"><span class="aux">${esc(D.ccy)}</span></label>`).join('');
+    box.innerHTML=D.fxList.map(c=>`<label class="f">${svg('arrowRightLeft')}<span class="fl">1 ${c} in ${esc(D.ccy)}<i>*</i></span><input id="fx-${c}" data-k="fx.${c}" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"><span class="aux">${esc(D.ccy)}</span></label>`).join('');
     for(const c of D.fxList)$('fx-'+c).value=S.fx[c]==null?'':String(S.fx[c]);
   }
   for(const c of D.fxList){const im=D.fx[c].implied;$('fx-'+c).placeholder=im==null?'':String(im)}
@@ -1692,6 +1784,7 @@ function renderTotals(){
   const c=D.ccy;
   $('t-m').textContent=M.money(D.mileTotal,c);$('t-e').textContent=M.money(D.expTotal,c);
   $('t-c').textContent=D.cap?M.money(D.cap.reduce,c):'';$('t-g').textContent=M.money(D.grand,c);
+  for(const[id,on]of[['t-m',D.mileOpen],['t-e',D.expOpen]]){const lab=$(id).previousElementSibling,w=lab.querySelector('b.w');if(on&&!w)lab.append(Object.assign(document.createElement('b'),{className:'w',textContent:'Rate Needed'}));else if(!on&&w)w.remove()}
 }
 const wrap=k=>{const el=$(k);return el&&(el.closest('.f,.g')||el.closest('.card'))};
 function renderReq(ck=M.checks(S,D)){
@@ -1704,6 +1797,7 @@ function renderReq(ck=M.checks(S,D)){
   const mark=(k,msg)=>{const w=wrap(k),at=w&&(w.querySelector('.fl')||w.querySelector('.slbl'));if(!at||at.querySelector('b.w'))return;at.append(Object.assign(document.createElement('b'),{className:'w',textContent:msg}));missPrev.push(w)};
   for(const[k,ok]of req)if(!ok&&showMiss)mark(k,'Needed');
   for(const[k,msg]of ck)if(!k.includes(':')&&touched.has(k))mark(k,msg);
+  if(touched.has('fp-country')&&$('fp-country').value.trim()&&!S.fp.country)mark('fp-country','Unknown Country');
 }
 function update(){
   D=M.derive(S,today());
@@ -1729,8 +1823,8 @@ function goTo(k){
 form.addEventListener('submit',e=>e.preventDefault());
 form.addEventListener('input',e=>{
   const el=e.target,k=el.dataset.k;if(!k)return;
-  if(el.dataset.f==='digits'&&/o/i.test(el.value))el.value=el.value.replace(/o/gi,'0');
-  if(el.dataset.f==='sort'){const f=el.value.replace(/o/gi,'0').replace(/\D/g,'').slice(0,6).replace(/(\d{2})(?=\d)/g,'$1-');if(f!==el.value)el.value=f}
+  // Letters stay while typing so a keyboard text replacement can finish; digits alone format live.
+  if(el.dataset.f==='sort'&&M.digitLike(el.value)){const f=M.normDigits(el.value).slice(0,6).replace(/(\d{2})(?=\d)/g,'$1-');if(f!==el.value)el.value=f}
   el.classList.remove('auto');
   M.setPath(S,k,read(el));
   if(k==='draft.e.amt'){const c=M.normCcy(el.value);if(c&&c!==S.draft.e.ccy){S.draft.e.ccy=c;$('draft-e-ccy').value=c}}
@@ -1745,6 +1839,8 @@ form.addEventListener('focusout',e=>{
   if(el.id==='draft-m-from'||el.id==='draft-m-to')v=M.normPostcode(el.value);
   else if(el.id==='dept')v=M.deptName(el.value);
   else if(el.id==='draft-e-place')v=M.placeName(el.value);
+  else if(el.dataset.f==='sort'&&M.digitLike(el.value))v=M.normSort(el.value);
+  else if(el.dataset.f==='digits'&&M.digitLike(el.value))v=M.normDigits(el.value);
   else if(el.id==='fp-acctNo')v=M.fixAcct(el.value);
   else if(el.id==='fp-clearing')v=M.fixClearing(el.value,D.clearing);
   else if(UPPER.has(el.id))v=el.value.trim().toUpperCase();
@@ -1764,13 +1860,19 @@ form.addEventListener('keydown',e=>{
   const fields=visibleFields(card||form),i=fields.indexOf(el);
   if(card&&i===fields.length-1)ADD[t]();else if(fields[i+1])fields[i+1].focus();else el.blur();
 });
-function toggle(row){const k=row.dataset.k,on=!getPath(S,k);M.setPath(S,k,on);row.classList.toggle('sel',on);row.setAttribute('aria-checked',on);changed()}
+function toggle(row){
+  const k=row.dataset.k,on=!getPath(S,k);M.setPath(S,k,on);row.classList.toggle('sel',on);row.setAttribute('aria-checked',on);changed();
+  if(k==='declared'&&on){showMiss=true;renderReq();warnMissing()}
+}
 document.addEventListener('click',e=>{
   const b=e.target.closest('.seg-row[data-k]>.seg');
   if(b){M.setPath(S,b.parentNode.dataset.k,b.dataset.v);markSeg(b.parentNode);changed();return}
   const r=e.target.closest('.srow[data-k]');if(r)toggle(r);
 });
-$('e-chips').addEventListener('click',e=>{const b=e.target.closest('[data-type]');if(!b)return;S.draft.e.type=$('draft-e-type').value=b.dataset.type;changed();$('draft-e-amt').focus()});
+$('e-chips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-type]');if(!b)return;
+  const other=b.dataset.type==='Other';S.draft.e.type=$('draft-e-type').value=other?'':b.dataset.type;changed();$(other?'draft-e-type':'draft-e-amt').focus();
+});
 $('m-open').addEventListener('click',()=>{mOpen=true;update();$('draft-m-date').focus()});
 $('m-ret').addEventListener('click',()=>{S.draft.m.ret=!S.draft.m.ret;fillForm();changed()});
 
@@ -1783,7 +1885,7 @@ function startEdit(t,id){
   if(edit[t]==null)pre[t]=structuredClone(S.draft[t]);
   edit[t]=id;S.draft[t]=toDraft(t,r);if(t==='m')mOpen=true;
   fillForm();changed();
-  $(t+'-card').scrollIntoView({block:'nearest',behavior:'smooth'});$(FIRST[t]).focus({preventScroll:true});
+  $(t+'-card').scrollIntoView({block:'nearest',behavior:'smooth'});refocus(FIRST[t]);
 }
 function cancelEdit(t){if(edit[t]==null)return;S.draft[t]=pre[t]||{};edit[t]=pre[t]=null;fillForm();changed()}
 function commit(t,row,sticky){
@@ -1793,30 +1895,46 @@ function commit(t,row,sticky){
   S=M.migrate(S);fillForm();changed();
 }
 const txt=v=>(v||'').trim();
+// After a tap on a touch screen the keyboard stays down; keyboard and mouse users keep their place in the card.
+let touch=false;
+addEventListener('pointerdown',e=>{touch=e.pointerType==='touch'},true);addEventListener('keydown',()=>{touch=false},true);
+const refocus=id=>{if(!touch)$(id).focus({preventScroll:true})};
+// A worked Business Purpose per kind of expense: the reason, never the type (FP16a note).
+const PURPOSE_EG=[[/flight|plane|airfare/,'Presenting at a Conference in Berlin'],[/hotel|accommodation|lodging/,'Two-Day Workshop in Edinburgh'],
+  [/breakfast|lunch|evening meal|dinner|supper|refreshment|coffee/,'Fieldwork in Leeds'],[/entertain/,'Hosting a Visiting Speaker'],[/parking/,'Meeting at Innovation Campus'],
+  [/taxi|\bcab\b|uber/,'Examiners Meeting in Oxford'],[/\btrain\b|\brail|\bbus\b|coach|\btube\b|\btram\b/,'Research Interviews in Manchester']];
+const purposeEg=t=>'e.g. '+(PURPOSE_EG.find(([re])=>re.test(t.toLowerCase()))||[,'Presenting at a Conference in Berlin'])[1];
+// Postcodes used in journeys, newest first, suggested beside Warwick's sites (kept across claims on this device).
+const PC='fp16a:pc';
+const pcOpts=()=>{const recent=B.load(PC,[]).filter(p=>M.UK_POSTCODE.test(p));opts('dl-postcodes',[...recent.filter(p=>!byPc[p]).map(p=>[p,'Recent']),...Object.entries(byPc).map(([pc,ns])=>[pc,ns.join(', ')])])};
 const ADD={
-  e(){
+  e(quiet){
     const d=S.draft.e,amt=M.num(d.amt);
     if(amt==null){B.notify('Amount Needed',false);$('draft-e-amt').focus();return}
-    const date=d.date||today();
-    commit('e',{id:edit.e??M.nextId(S),date,trip:d.trip&&d.trip!==date?d.trip:'',type:txt(d.type),place:M.placeName(d.place||''),purpose:txt(d.purpose),amt,ccy:PARSE.ccy(d.ccy||'')||D.ccy,
+    const date=d.date||today(),id=edit.e??M.nextId(S);
+    commit('e',{id,date,trip:d.trip&&d.trip!==date?d.trip:'',type:txt(d.type),place:M.placeName(d.place||''),purpose:txt(d.purpose),amt,ccy:PARSE.ccy(d.ccy||'')||D.ccy||'GBP',
       ref:txt(d.ref)||null,repaid:M.num(d.repaid),taxiWhy:txt(d.taxiWhy),guests:txt(d.guests),staff:txt(d.staff),nights:M.num(d.nights)>1?Math.round(M.num(d.nights)):null},{date:d.date||'',trip:d.trip||'',place:d.place||'',purpose:d.purpose||'',ccy:d.ccy||''});
-    $('draft-e-type').focus();
+    const lm=M.limitMsg(D.exps.find(x=>x.id===id)||{});if(lm)B.notify(lm,'warn');
+    if(!quiet)refocus('draft-e-type');
   },
-  m(){
+  m(quiet){
     const d=S.draft.m,mi=M.num(d.mi);
     if(mi==null){B.notify('Miles Needed',false);$('draft-m-mi').focus();return}
     const to=M.normPostcode(d.to);
     commit('m',{id:edit.m??M.nextId(S),date:d.date||today(),from:M.normPostcode(d.from),to,mi,ret:!!d.ret,why:txt(d.why)||txt(S.draft.e.purpose),
-      veh:d.veh||'car',rateType:d.rateType||'std',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',rateType:d.rateType||'std',from:to,why:d.why||''});
-    $('draft-m-to').focus();
+      veh:d.veh||'car',rateType:d.rateType||'std',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',rateType:d.rateType||'std',from:d.ret?M.normPostcode(d.from):to,why:d.why||''});
+    B.save(PC,[...new Set([to,M.normPostcode(d.from),...B.load(PC,[])])].filter(p=>M.UK_POSTCODE.test(p)).slice(0,8));pcOpts();
+    if(!quiet)refocus('draft-m-to');
   },
-  c(){
+  c(quiet){
     const d=S.draft.c;
     if(![d.gl,d.cc,d.amt,d.purpose].some(txt)){$('draft-c-gl').focus();return}
     commit('c',{id:edit.c??M.nextId(S),gl:txt(d.gl),cc:txt(d.cc),amt:M.num(d.amt),purpose:txt(d.purpose)},{purpose:d.purpose||''});
-    $('draft-c-gl').focus();
+    if(!quiet)refocus('draft-c-gl');
   }
 };
+// Anything typed into a card but not yet added (or a row still open for editing) joins the claim before Copy or Download.
+const addPending=()=>{for(const t of'emc'){const d=S.draft[t],ready=t==='e'?M.num(d.amt)!=null:t==='m'?M.num(d.mi)!=null:[d.gl,d.cc,d.amt].some(txt);if(ready)ADD[t](true)}};
 function del(t,id,el){
   el.classList.add('removing');
   setTimeout(()=>{
@@ -1832,7 +1950,7 @@ function discard(t){
   if(edit[t]!=null){const id=edit[t];del(t,id,$(t+'-list').querySelector(`[data-id="${id}"]`)||document.createElement('i'));return}
   S.draft[t]={};
   if(t==='m'&&!S.miles.length)mOpen=false;
-  fillForm();changed();$(t==='m'&&!mOpen?'m-open':FIRST[t]).focus();
+  fillForm();changed();refocus(t==='m'&&!mOpen?'m-open':FIRST[t]);
 }
 for(const t of'em'){$(t+'-bin').addEventListener('click',()=>discard(t));$(t+'-go').addEventListener('click',()=>ADD[t]())}
 for(const t of'emc'){
@@ -1853,44 +1971,59 @@ const warm=()=>{if(!canZip)return;tpl('fp16a').catch(()=>{});if(D.foreign)tpl('f
 const saveFile=f=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([f.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=f.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
 async function download(which){
   const btn=$(which==='foreign'?'a-dlf':'a-dl');
-  if(!canZip){B.feedback(btn,'err-fb','Not Supported',1500);B.notify('Browser Too Old For Excel Files',false);return}
-  flush();
+  if(!canZip){B.feedback(btn,'err-fb','Not Supported',1500);B.notify('Browser Too Old for Excel Files',false);return}
+  addPending();flush();
   try{
     const files=await M.exportFiles(S,today(),await templates(D.foreign));
     (which==='foreign'?files.slice(1):files).forEach((f,i)=>setTimeout(()=>saveFile(f),i*400));
     B.feedback(btn,'dl-fb','Downloaded',1500);
   }catch(err){B.feedback(btn,'err-fb','Failed',1500);B.notify(err?.reason==='template-drift'?'Template Changed, Reload':'Download Failed',false);return}
-  const miss=M.missing(S,D);
-  if(miss.length){showMiss=true;renderReq();B.notify(`${miss.length} Required Field${miss.length===1?'':'s'} Missing`,'warn',()=>goTo(miss[0]))}
+  showMiss=true;renderReq();warnMissing();
+}
+// One amber toast for what would get the claim queried: required fields first, then an empty claim, then rows with a note.
+function warnMissing(){
+  const miss=M.missing(S,D),rows=[...M.checks(S,D).keys()].filter(k=>k.includes(':')),s=n=>n===1?'':'s';
+  if(miss.length)B.notify(`${miss.length} Required Field${s(miss.length)} Missing`,'warn',()=>goTo(miss[0]));
+  else if(!S.exps.length&&!S.miles.length)B.notify('Nothing Claimed','warn',()=>goTo('draft-e-type'));
+  else if(rows.length)B.notify(`${rows.length} Row${s(rows.length)} to Check`,'warn',()=>{const[t,id]=rows[0].split(':');$(t+'-list').querySelector(`[data-id="${id}"]`)?.scrollIntoView({block:'center',behavior:'smooth'})});
+}
+// Import replaces the claim (the model's applyImports); the previous claim is kept for Undo.
+function applyReads(reads,bad){
+  const btn=$('a-imp'),s=x=>x===1?'':'s';
+  if(!reads.length){if(bad){B.feedback(btn,'err-fb','Import Failed',1500);B.notify('Not an FP16a File',false)}else B.notify('Nothing to Import','warn');return}
+  const before=structuredClone(S),r=M.applyImports(S,reads,today());
+  S=r.state;B.save(PREV,before);clearUi();fillForm();changed();B.feedback(btn,'ok','Imported',1500);
+  const undo=()=>{S=M.migrate(before);clearUi();fillForm();changed();B.notify('Import Undone',true)};
+  B.notify(`${r.count} Field${s(r.count)} Imported${bad?`, ${bad} File${s(bad)} Skipped`:''} · Undo`,bad?'warn':true,undo);
 }
 async function importFiles(files){
   const list=[...files].filter(f=>f&&f.size);if(!list.length)return;
-  if(!canZip){B.notify('Browser Too Old For Excel Files',false);return}
-  const before=structuredClone(S);let n=0,bad=0;
-  for(const f of list){try{const r=await M.importFile(new Uint8Array(await f.arrayBuffer()),S,today());S=r.state;n+=r.count}catch(_){bad++}}
-  const btn=$('a-imp'),s=x=>x===1?'':'s';
-  if(n){B.save(PREV,before);for(const t of'emc')edit[t]=pre[t]=null;fillForm();changed();B.feedback(btn,'ok','Imported',1500)}
-  if(n&&!bad)B.notify(`${n} Field${s(n)} Imported`,true);
-  else if(n)B.notify(`${n} Field${s(n)} Imported, ${bad} File${s(bad)} Skipped`,'warn');
-  else if(bad){B.feedback(btn,'err-fb','Import Failed',1500);B.notify('Not an FP16a File',false)}
-  else B.notify('Nothing To Import','warn');
+  if(!canZip){B.notify('Browser Too Old for Excel Files',false);return}
+  const reads=[];let bad=0;
+  for(const f of list){try{reads.push(await M.readFile(new Uint8Array(await f.arrayBuffer()),today()))}catch(_){bad++}}
+  applyReads(reads,bad);
 }
-const copy=()=>B.copyText(M.toText(S,D),()=>B.feedback($('a-copy'),'ok','Copied',1500),()=>B.notify('Copy Failed',false));
+const copy=()=>{addPending();B.copyText(M.toText(S,D),()=>B.feedback($('a-copy'),'ok','Copied',1500),()=>B.notify('Copy Failed',false))};
 $('a-copy').addEventListener('click',copy);
 $('a-dl').addEventListener('click',()=>download('all'));
 $('a-dlf').addEventListener('click',()=>download('foreign'));
 $('a-imp').addEventListener('click',()=>$('file').click());
 $('file').addEventListener('change',e=>{importFiles(e.target.files);e.target.value=''});
 B.setupDragDrop({overlay:$('drop'),onDrop:f=>importFiles(f)});
-document.addEventListener('paste',e=>{const f=e.clipboardData?.files;if(f&&f.length){e.preventDefault();importFiles(f)}});
+// Pasting a file, or text from Copy, imports it wherever the cursor is; any other paste is left alone.
+document.addEventListener('paste',e=>{
+  const f=e.clipboardData?.files;if(f&&f.length){e.preventDefault();importFiles(f);return}
+  const t=e.clipboardData?.getData('text/plain');
+  if(M.isClaimText(t)){e.preventDefault();let reads=[];try{reads=M.readText(t,today())}catch(_){}applyReads(reads,reads.length?0:1)}
+});
 const clearUi=()=>{for(const t of'emc')edit[t]=pre[t]=null;touched.clear();showMiss=false;mOpen=false};
 // New Claim keeps You + Payment; everything about this trip goes.
 const nc=B.twoPress($('a-new'),{text:'New Claim',guard:()=>S.exps.length+S.miles.length+S.codes.length>0||!!S.comments||S.declared||S.cap.on,onConfirm:()=>{
-  const b=M.blank();S=M.migrate({...S,exps:[],miles:[],codes:[],fx:{},fxSrc:'',cap:b.cap,comments:'',declared:false,sigName:null,sigDate:'',vendor:'',auth:b.auth,draft:b.draft});
+  const b=M.blank();S=M.migrate({...S,exps:[],miles:[],codes:[],fx:{},fxSrc:'',cap:b.cap,comments:'',declared:false,sigName:null,sigDate:'',ref:'',auth:b.auth,draft:b.draft});
   clearUi();fillForm();changed();
 }});
 $('a-new').addEventListener('click',nc.press);
-const rs=B.twoPress($('a-reset'),{text:'Reset All',guard:()=>JSON.stringify(S)!==JSON.stringify(M.blank()),onConfirm:()=>{S=M.blank();clearUi();fillForm();changed()}});
+const rs=B.twoPress($('a-reset'),{text:'Reset All',guard:()=>JSON.stringify(S)!==JSON.stringify(M.blank())||main.dataset.tier!=='m',onConfirm:()=>{S=M.blank();clearUi();setTier('m');fillForm();changed()}});
 $('a-reset').addEventListener('click',rs.press);
 B.onKey({
   c:copy,d:()=>download('all'),i:e=>{e.preventDefault();$('file').click()},
@@ -1907,7 +2040,7 @@ addEventListener('pagehide',flush);addEventListener('beforeunload',flush);
 addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{S=M.migrate(JSON.parse(e.newValue));fillForm();update()}catch(_){}});
 
 // ---- boot
-setTier(B.load(TIER,'m'));fillForm();update();booting=false;
+setTier(B.load(TIER,'m'));pcOpts();fillForm();update();booting=false;
 (window.requestIdleCallback||(f=>setTimeout(f,1500)))(warm);
 })();
 </script>
