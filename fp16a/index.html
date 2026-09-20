@@ -173,6 +173,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   <label class="f"><svg data-i="mail"></svg><span class="fl">Email (For Remittance)<i>*</i></span><input id="email" data-k="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"></label>
   <label class="f"><svg data-i="building2"></svg><span class="fl">Department<i>*</i></span><input id="dept" data-k="dept" list="dl-dept" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
   <label class="f"><svg data-i="briefcase"></svg><span class="fl">Job Title<i>*</i></span><input id="job" data-k="job" autocomplete="organization-title" autocapitalize="words" enterkeyhint="next"></label>
+  <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Vendor Number</span><input id="vendor" data-k="vendor" inputmode="numeric" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
   <label class="f" data-t="o"><svg data-i="tag"></svg><span class="fl">Dept/Payment Ref</span><input id="ref" data-k="ref" maxlength="16" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"><span class="aux" id="ref-n"></span></label>
 </section>
 
@@ -351,7 +352,6 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </section>
 
 <section class="sec" data-t="d"><h3>For Departmental Use</h3>
-  <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Vendor Number</span><input id="vendor" data-k="vendor" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
   <div class="inp-row" id="c-card">
     <div class="inp-fields">
       <div class="g2 even">
@@ -1169,6 +1169,8 @@ const slug=s=>String(s??'').normalize('NFKD').replace(/\p{M}/gu,'').replace(/['�
 // £/mile as the template's own header states them (owner: exactly the template), students' car journeys at the Students rate.
 // Warwick's payroll page has car at 0.55 from 15/6/26; a typed Rate covers that or any other exception.
 const RATES={car:.45,moto:.24,bike:.2},STUDENT_CAR=.25;
+// Warwick tracks miles paid per tax year off this one code, so every mileage claim carries it.
+const MILEAGE_GL='210424';
 const rateFor=(veh,student)=>veh==='car'&&student?STUDENT_CAR:RATES[veh];
 // Subsistence maxima incl. VAT, per receipt or per night; warwick.ac.uk/services/peopleteam/internal/payroll/expenses/uk1/subsistence (revised wef 1/8/24, fetched 2026-09-18).
 const LIMITS=[{from:'2024-08-01',breakfast:15,lunch:15,dinner:30,dinnerHotel:40,refresh:5,hotelLondon:200,hotel:150,incUK:5,incAbroad:10}];
@@ -1195,6 +1197,13 @@ const limitMsg=e=>{
 };
 // Form notes 4 and 5 by keyword, so "Uber" asks for a reason and "Entertaining" for guests.
 const isTaxi=t=>/taxi|\bcab\b|uber/i.test(t||''),isEnt=t=>/entertain/i.test(t||'');
+// Spend the expenses route rejects outright: IT since 1 Aug 2025 (FP15, buy through IDG and a PO), and air travel
+// inside England, Scotland and Wales (FP16.3). Both are warnings, since only the claimant knows the exception.
+const isIT=t=>/laptop|desktop|monitor|keyboard|tablet|ipad|macbook|computer|software|licen[cs]e|subscription|saas|hardware|printer|ssd|hard drive/i.test(t||'');
+// Two distinct mainland GB places, so London to Paris does not trip it. Northern Ireland and the Crown
+// Dependencies are outside the rule and stay off the list.
+const isDomesticFlight=(t,p)=>/flight|airfare|\bplane\b/i.test(t||'')&&
+  new Set(((p||'').match(/\b(london|heathrow|gatwick|stansted|luton|manchester|edinburgh|glasgow|birmingham|bristol|leeds|newcastle|cardiff|aberdeen|dundee|inverness|exeter|southampton|liverpool|norwich|newquay)\b/gi)||[]).map(x=>x.toLowerCase())).size>1;
 // Journeys paid as expenses say where from and to (owner); tube and tram count, car hire and fuel do not.
 const TRAVEL=/\btrain\b|\brail|\btube\b|\btram\b|metro|underground|taxi|\bcab\b|uber|\bbus\b|coach|ferry|flight|plane|airfare/i;
 const TYPE_ONLY=/^(train|taxi|bus|coach|flight|hotel|accommodation|breakfast|lunch|dinner|evening meal|meals?|food|parking|entertainment|travel|subsistence|expenses?|other)$/i;
@@ -1272,10 +1281,21 @@ const derive=(s,today)=>{
   const fxList=ccy?[...new Set([...exps.filter(e=>!e.same).map(e=>e.ccy),...(miles.length&&ccy!=='GBP'?['GBP']:[]),...(cap&&!cap.same?[cap.ccy]:[])])]:[];
   const fx=Object.fromEntries(fxList.map(c=>[c,{implied:implied[c]??null,rate:rate(c),need:rate(c)==null&&(exps.some(e=>e.ccy===c&&!e.same&&e.typed==null)||c==='GBP'&&miles.some(m=>m.typed==null)||cap?.ccy===c&&!cap.same&&s.cap.conv==null)}]));
   const typedCodes=round2(s.codes.reduce((x,c)=>x+(c.amt||0),0)),unalloc=round2(grand-typedCodes);
+  // Warwick codes all mileage to 210424, so a claim holding both kinds splits the remainder instead of putting the
+  // grand total on one line: the mileage total goes to an empty row already carrying that code, the rest to the
+  // first other empty row. A claim of one kind allocates as before, in one lump.
+  // No row is invented for the mileage. A derived row has no counterpart in the state it came from, so importing the
+  // file back would return it as a typed row and break import(export(x)) === x. checks() asks for the row instead.
+  const mileRow=unalloc>0&&mileTotal>0&&round2(unalloc-mileTotal)>0?s.codes.findIndex(c=>c.amt==null&&c.gl.trim()===MILEAGE_GL):-1;
+  const mileShare=mileRow<0?0:mileTotal,rest=round2(unalloc-mileShare);
   let given=false;
-  const codes=s.codes.map(c=>{let amt=c.amt;if(amt==null&&!given&&unalloc>0){amt=unalloc;given=true}return{...c,amt}});
+  const codes=s.codes.map((c,i)=>{
+    if(c.amt!=null)return{...c};
+    if(i===mileRow)return{...c,amt:mileShare};
+    if(!given&&rest>0){given=true;return{...c,amt:rest}}
+    return{...c};
+  });
   const autoComments=exps.flatMap(e=>{
-    if(isTaxi(e.type)&&e.taxiWhy.trim())return[`Receipt ${e.ref}: Taxi Reason: ${e.taxiWhy.trim()}`];
     if(isEnt(e.type)&&(e.guests.trim()||e.staff.trim()))return[`Receipt ${e.ref}: `+[e.guests.trim()&&'Guests: '+e.guests.trim(),e.staff.trim()&&'Staff Present: '+e.staff.trim()].filter(Boolean).join('; ')];
     return[];
   });
@@ -1323,6 +1343,9 @@ const label=k=>FIELDS[k]||(k.startsWith('fx-')?'Exchange Rate '+k.slice(3):k);
 const checks=(s,D)=>{
   const out=new Map(),w=(k,cond,msg)=>{if(cond)out.set(k,out.has(k)?out.get(k)+' · '+msg:msg)},today=D.today,old=addMonths(today,-3);
   w('email',s.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email.trim()),'Check Format');
+  // A claim without a vendor number is returned unpaid, and only a first claim is exempt (FP16a guidance).
+  w('vendor',s.vendor.trim()&&!/^3\d{7}$/.test(normDigits(s.vendor)),'8 Digits Starting With 3');
+  w('vendor',!s.vendor.trim(),'Needed Unless This Is Your First Claim');
   if(!D.foreign){
     w('sort',s.sort&&!digitLike(s.sort),'Numbers Only');w('sort',s.sort&&digitLike(s.sort)&&!/^\d{2}-\d{2}-\d{2}$/.test(normSort(s.sort)),'6 Digits');
     w('acct',s.acct&&!digitLike(s.acct),'Numbers Only');w('acct',s.acct&&digitLike(s.acct)&&!/^\d{8}$/.test(normDigits(s.acct)),'8 Digits');
@@ -1349,6 +1372,9 @@ const checks=(s,D)=>{
     // Form notes 4 and 5: a taxi needs its reason, entertainment its guests and the number of Warwick staff.
     w(k,isTaxi(e.type)&&!e.taxiWhy.trim(),'Taxi Reason Needed');
     w(k,isEnt(e.type)&&(!e.guests.trim()||!e.staff.trim()),'Guests and Staff Needed');
+    // Spend the expenses route rejects outright, so the claimant sees it before submitting, not after.
+    w(k,isIT(e.type),'IT Spend Is Not Claimable, Needs IDG Approval and a PO');
+    w(k,isDomesticFlight(e.type,p),'Air Travel Within Great Britain Is Not Permitted');
     // Warwick: tourist tax belongs in the nightly hotel rate; the purpose must give the reason, not the type (FP16a note).
     w(k,/tourist tax|city tax|occupancy tax/i.test(e.type),'Add to Hotel Cost');
     w(k,TYPE_ONLY.test(e.purpose.trim()),'Purpose Is an Expense Type');
@@ -1365,6 +1391,9 @@ const checks=(s,D)=>{
     w(k,m.repaid==null,'Exchange Rate Needed');
   }
   w('ref',s.ref.length>16,'Max 16 Characters');
+  // Warwick reads miles paid per tax year off 210424, so a claim mixing mileage with expenses needs its own row for it.
+  if(D.mileTotal>0&&D.expTotal>0&&s.codes.length&&!s.codes.some(c=>c.gl.trim()===MILEAGE_GL))
+    w('c:'+s.codes[0].id,true,`Mileage Needs Its Own ${MILEAGE_GL} Row`);
   const last=[...D.exps.map(e=>e.date),...D.miles.map(m=>m.date)].filter(Boolean).sort().pop();
   w('sigDate',!!last&&D.sigDate<last,'Before Latest Expense');
   return out;
@@ -1376,7 +1405,8 @@ const checks=(s,D)=>{
 const tripText=(e,short)=>{const a=e.trip||e.date;return[a,e.tripEnd&&e.tripEnd!==a?e.tripEnd:''].filter(Boolean).map(d=>fmtDay(d,short)).join(' to ')};
 // A journey's route stands where the place goes; a journey saved before From/To existed keeps its place.
 const whereText=e=>TRAVEL.test(e.type||'')&&[e.from,e.to].map(x=>(x||'').trim()).filter(Boolean).join(' to ')||e.place.trim();
-const purposeText=e=>[tripText(e,true),whereText(e),e.purpose.trim()].filter(Boolean).join(' - ');
+// The taxi reason belongs in this column, not in Additional Comments: FP16a note 4 asks for it against the row.
+const purposeText=e=>[tripText(e,true),whereText(e),e.purpose.trim(),isTaxi(e.type)&&e.taxiWhy.trim()?'Taxi: '+e.taxiWhy.trim():''].filter(Boolean).join(' - ');
 const detailsText=m=>m.ret?(m.why.trim()?m.why.trim()+' (Return)':'Return'):m.why.trim();
 const fmtRate=r=>String(+r.toFixed(6));
 const fxText=D=>D.fxList.filter(c=>D.fx[c].rate!=null).map(c=>`1 ${c} = ${fmtRate(D.fx[c].rate)} ${D.ccy}`).join('; ');
@@ -1505,10 +1535,14 @@ const fromCells=(view,today)=>{
     const date=parseDay(x.date),p=/^\s*(\d{1,2}\/\d{1,2}\/\d{2,4})(?:\s+to\s+(\d{1,2}\/\d{1,2}\/\d{2,4}))?(?:\s+-\s+(.*))?$/i.exec(str(x.purpose));
     const parts=(p?p[3]??'':str(x.purpose)).split(' - '),trip=p?parseDay(p[1]):'',end=p?.[2]?parseDay(p[2]):'';
     const tn=/^(.*?)\s*\((\d+) NIGHTS?\)$/i.exec(str(x.type));
-    const where=parts.length>1?parts[0].trim():'',purpose=parts.length>1?parts.slice(1).join(' - '):parts[0];
+    const where=parts.length>1?parts[0].trim():'',rest=parts.length>1?parts.slice(1).join(' - '):parts[0];
+    // The taxi reason is the last " - " segment of the details column (see purposeText), so it un-derives back
+    // into its own field rather than staying glued to the purpose.
+    const seg=rest.split(' - '),tx=/^TAXI:\s*(.+)$/i.exec(seg.at(-1).trim());
+    const taxiWhy=tx?tx[1].trim():'',purpose=tx?seg.slice(0,-1).join(' - '):rest;
     const type=tn?tn[1]:str(x.type),go=TRAVEL.test(type),cut=go?/\s+to\s+/i.exec(where):null;
     const amtCcy=typeof x.amt==='string'?normCcy(x.amt):'';
-    const e={date,trip:trip===date?'':trip,tripEnd:end&&end!==(trip||date)?end:'',type,place:go?'':where,from:cut?where.slice(0,cut.index):'',to:go?cut?where.slice(cut.index+cut[0].length):where:'',purpose:purpose.trim(),amt:num(x.amt),ccy:normCcy(str(x.ccy))||amtCcy,ref:str(x.ref)||null,repaid:num(x.repaid),nights:tn?+tn[2]:null};
+    const e={date,trip:trip===date?'':trip,tripEnd:end&&end!==(trip||date)?end:'',type,place:go?'':where,from:cut?where.slice(0,cut.index):'',to:go?cut?where.slice(cut.index+cut[0].length):where:'',purpose:purpose.trim(),taxiWhy,amt:num(x.amt),ccy:normCcy(str(x.ccy))||amtCcy,ref:str(x.ref)||null,repaid:num(x.repaid),nights:tn?+tn[2]:null};
     Object.assign(e,auto[str(x.ref).toUpperCase()]||{});
     return e.amt==null&&!e.type&&!e.purpose?null:e;
   });
