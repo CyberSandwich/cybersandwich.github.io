@@ -29,6 +29,11 @@ body{display:flex;flex-direction:column;align-items:center;min-height:-webkit-fi
 .loader svg{width:32px;height:32px;animation:spin .8s linear infinite;color:var(--t4)}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/RGBELoader.js" crossorigin>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -100,8 +105,8 @@ Drop Image Here
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=26"></script>
-<script src="/shared/swr.js?v=3"></script>
+<script src="/shared/base.js?v=27"></script>
+<script src="/shared/swr.js?v=4"></script>
 <script>setTimeout(function(){var l=document.getElementById('loader');if(l&&!l.classList.contains('hidden')){l.classList.add('hidden');if(window._base)_base.notify('Loading Timed Out',false)}},20000)</script>
 <script type="module">
 import*as THREE from'three';

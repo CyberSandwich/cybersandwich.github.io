@@ -16,14 +16,18 @@ on:
         description: 'Category'
         required: true
         type: choice
+        # Keep in step with projectCategories in app.js, which is the source of truth for order too.
         options:
           - Flagship Projects
           - Image Tools
+          - Video Tools
           - Text Tools
+          - Time Tools
           - Generators
           - Utilities
           - Miscellaneous
           - In Development
+          - Archive
 
 permissions:
   contents: write
@@ -95,7 +99,8 @@ jobs:
           data.append({'title': title, 'subtitle': subtitle, 'url': url, 'category': category})
 
           # Sort alphabetically by title within each category, preserving category order
-          categories = ['Flagship Projects', 'Image Tools', 'Text Tools', 'Generators', 'Utilities', 'Miscellaneous', 'In Development']
+          # Same order as projectCategories in app.js; a category missing here sorts to the end.
+          categories = ['Flagship Projects', 'Image Tools', 'Video Tools', 'Text Tools', 'Time Tools', 'Generators', 'Utilities', 'Miscellaneous', 'In Development', 'Archive']
           cat_order = {c: i for i, c in enumerate(categories)}
           data.sort(key=lambda x: (cat_order.get(x['category'], 999), x['title'].lower()))
 

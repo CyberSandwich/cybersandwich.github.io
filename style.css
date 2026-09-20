@@ -47,6 +47,9 @@ body{line-height:1.5}
   overflow:visible
 }
 .ds-mono{
+  /* The donut rewrites its text 60x a second; containment keeps that off the siblings' layout.
+     Not `strict`: size containment would freeze the box at a fixed intrinsic size, and the font-size is clamp()ed to the viewport. */
+  contain:layout style paint;
   display:inline-block;
   margin:0;
   padding:.4em 0;

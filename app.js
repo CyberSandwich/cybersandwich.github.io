@@ -770,13 +770,16 @@ if(dsMono){
   }
   function loop(){
     rafId=0;
-    if(!document.hidden&&homeSection&&homeSection.classList.contains('active'))render();
+    if(document.hidden||!homeSection||!homeSection.classList.contains('active'))return;
+    render();
     schedule();
   }
   function schedule(){if(!rafId)rafId=requestAnimationFrame(loop)}
   render();
   schedule();
   document.addEventListener('visibilitychange',schedule);
+  // Leaving Home stops the loop; the route's class change on #home starts it again.
+  if(homeSection)new MutationObserver(schedule).observe(homeSection,{attributeFilter:['class']});
   dsMono.addEventListener('pointerdown',e=>{
     dragging=true;totalDrag=0;
     lastX=e.clientX;lastY=e.clientY;lastMoveTime=performance.now();

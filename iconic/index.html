@@ -185,9 +185,9 @@ button:disabled,.seg:disabled{opacity:.35;cursor:default}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=26"></script>
+<script src="/shared/base.js?v=27"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/swr.js?v=3"></script>
+<script src="/shared/swr.js?v=4"></script>
 <script>
 (function(){
 'use strict';
@@ -848,17 +848,15 @@ function handleIcon(idx,rowEl){
 /* ── Paste ────────────────────────────────────────────────────────── */
 var paTimer=null;
 function doPaste(){
-  if(!navigator.clipboard||!navigator.clipboard.readText){announce('Clipboard Not Available');return}
-  navigator.clipboard.readText().then(function(text){
-    if(!text||!text.trim()){announce('Clipboard Empty');return}
-    searchEl.value=text.trim();
+  _base.pasteText(function(text){
+    searchEl.value=text;
     updateSearchX();
     doSearch();
     if(paTimer){clearTimeout(paTimer);paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none';paL.textContent='Paste'}
     paI.style.display='none';paCk.style.display='';paL.textContent='Pasted';
     paBtn.classList.remove('ok');paBtn.offsetWidth;paBtn.classList.add('ok');
     paTimer=setTimeout(function(){paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none';paL.textContent='Paste';paTimer=null},800);
-  },function(){announce('Clipboard Access Denied')});
+  },announce);
 }
 
 /* ── Reset ────────────────────────────────────────────────────────── */

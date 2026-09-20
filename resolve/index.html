@@ -100,9 +100,9 @@ html[data-theme="dark"] .fw{--si:url("data:image/svg+xml,%3Csvg xmlns='http://ww
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=26"></script>
+<script src="/shared/base.js?v=27"></script>
 <script src="/shared/search.js?v=20"></script>
-<script src="/shared/swr.js?v=3"></script>
+<script src="/shared/swr.js?v=4"></script>
 <script>
 (function(){
 'use strict';
@@ -686,15 +686,13 @@ function doCopyAll(){
 }
 
 function doPaste(){
-  if(!navigator.clipboard||!navigator.clipboard.readText){_base.notify('Clipboard Not Available',false);return}
-  navigator.clipboard.readText().then(function(text){
-    if(!text||!text.trim()){_base.notify('Clipboard Empty',false);return}
-    inp.value=text;if(ready)solve();
+  _base.pasteText(function(text,raw){
+    inp.value=raw;if(ready)solve();
     if(paTimer){clearTimeout(paTimer);paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none'}
     paI.style.display='none';paCk.style.display='';paL.textContent='Pasted';
     paBtn.classList.remove('ok');void paBtn.offsetWidth;paBtn.classList.add('ok');
     paTimer=setTimeout(function(){paBtn.classList.remove('ok');paI.style.display='';paCk.style.display='none';paL.textContent='Paste';paTimer=null},800);
-  },function(){_base.notify('Clipboard Access Denied',false)});
+  },function(m){_base.notify(m,false)});
 }
 
 function doReset(){

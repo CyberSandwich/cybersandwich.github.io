@@ -32,6 +32,11 @@ function swrText(url,parse,key,onFresh){
 
 function swrBinary(url){
   if(mem[url])return Promise.resolve(mem[url]);
+  // No Cache API (Firefox private browsing, HTTP origins, some WebViews): fetch straight through, keeping the in-process cache.
+  if(typeof caches==='undefined')return fetch(url).then(function(r){
+    if(!r.ok)throw new Error(url+' HTTP '+r.status);
+    return r.arrayBuffer().then(function(b){mem[url]=b;return b})
+  });
   return caches.open(BIN_CACHE).then(function(c){
     return c.match(url).then(function(r){
       if(r){

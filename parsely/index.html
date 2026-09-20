@@ -78,7 +78,7 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=26"></script>
+<script src="/shared/base.js?v=27"></script>
 <script src="/shared/search.js?v=20"></script>
 <script src="/shared/dateparser.js?v=11"></script>
 <script>
@@ -1130,16 +1130,14 @@ searchX.addEventListener('click',function(){
 
 /* ── Action Buttons ──────────────────────────────────────────────── */
 $('pa-btn').addEventListener('click',function(){
-  if(!navigator.clipboard||!navigator.clipboard.readText){announce('Clipboard Not Available');return}
-  navigator.clipboard.readText().then(function(text){
-    if(!text||!text.trim()){announce('Clipboard Empty');return}
-    mergeResults(parseText(text,null));
+  _base.pasteText(function(text,raw){
+    mergeResults(parseText(raw,null));
     var btn=$('pa-btn'),pi=$('pa-i'),pk=$('pa-ck'),pl=$('pa-l');
     if(paTimer){clearTimeout(paTimer);btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste'}
     pi.style.display='none';pk.style.display='';pl.textContent='Pasted';
     btn.classList.remove('ok');btn.offsetWidth;btn.classList.add('ok');
     paTimer=setTimeout(function(){btn.classList.remove('ok');pi.style.display='';pk.style.display='none';pl.textContent='Paste';paTimer=null},800);
-  },function(){announce('Clipboard Access Denied')});
+  },announce);
 });
 $('ca-btn').addEventListener('click',doCopyAll);
 $('rs-btn').addEventListener('click',doReset);

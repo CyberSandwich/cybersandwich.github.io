@@ -237,7 +237,8 @@ function stripHtml(html) {
  * Generate a meta description from post plain text (~160 chars).
  */
 function metaDescription(html) {
-  var text = stripHtml(html);
+  // Section-heading wrappers are layout, not prose: left in, every description opened with the first heading.
+  var text = stripHtml(html.replace(/<div class="link-sec">[\s\S]*?<\/div>/g, ' '));
   if (text.length <= 160) return text;
   // Truncate at word boundary
   var truncated = text.slice(0, 160);

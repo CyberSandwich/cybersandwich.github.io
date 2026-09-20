@@ -62,6 +62,17 @@
     setTimeout(function(){URL.revokeObjectURL(url)},1e4);
   }
 
+  /* Clipboard read: onText(trimmed, raw) when there is text, else onErr(message) with one of
+     'Clipboard Not Available' (no permission-free API), 'Clipboard Empty', 'Clipboard Access Denied'. */
+  function pasteText(onText,onErr){
+    var err=onErr||function(){};
+    if(!navigator.clipboard||!navigator.clipboard.readText){err('Clipboard Not Available');return}
+    navigator.clipboard.readText().then(function(text){
+      if(!text||!text.trim()){err('Clipboard Empty');return}
+      onText(text.trim(),text);
+    },function(){err('Clipboard Access Denied')});
+  }
+
   /* SVG icon helpers */
   function mkCheck(){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('width','14');s.setAttribute('height','14');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2.5');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.setAttribute('aria-hidden','true');var p=document.createElementNS('http://www.w3.org/2000/svg','polyline');p.setAttribute('points','4 12 9 17 20 6');s.appendChild(p);return s}
 
@@ -173,5 +184,5 @@
     clearTimeout(btn._sa);btn._sa=setTimeout(function(){btn.classList.remove('step-press')},300);
   });
 
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,download:download,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,pasteText:pasteText,download:download,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
 })();

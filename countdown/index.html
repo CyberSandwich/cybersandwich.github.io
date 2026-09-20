@@ -118,7 +118,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
 </div>
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
-<script src="/shared/base.js?v=26"></script>
+<script src="/shared/base.js?v=27"></script>
 <script src="/shared/search.js?v=20"></script>
 <script src="/shared/dateparser.js?v=11"></script>
 <script>
@@ -555,11 +555,9 @@ function tryBulkPaste(text){
   return false;
 }
 $('pa-btn').addEventListener('click',function(){
-  if(!navigator.clipboard||!navigator.clipboard.readText){_base.notify('Clipboard Not Available',false);return}
-  navigator.clipboard.readText().then(function(text){
-    if(!text||!text.trim()){_base.notify('Clipboard Empty',false);return}
-    handlePastedText(text.trim());
-  },function(){_base.notify('Clipboard Access Denied',false)});
+  _base.pasteText(function(text){
+    handlePastedText(text);
+  },function(m){_base.notify(m,false)});
 });
 
 /* ── Paste Event (Cmd+V / Ctrl+V outside inputs) ────────────────── */
