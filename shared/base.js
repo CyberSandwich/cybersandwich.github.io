@@ -62,6 +62,21 @@
     setTimeout(function(){URL.revokeObjectURL(url)},1e4);
   }
 
+  /* Deliver [{blob,name}]: a touch device gets one share sheet carrying every file (Save to Files, Mail),
+     a desktop downloads. Closing the sheet is not an error, so the caller shows no failure; any other
+     refusal, such as a tap's activation already spent by the export, falls back to the download.
+     Resolves 'shared', 'cancelled' or 'downloaded'. */
+  function deliver(files){
+    function save(){files.forEach(function(f,i){setTimeout(function(){download(f.blob,f.name)},i*400)});return'downloaded'}
+    if(!matchMedia('(hover:none) and (pointer:coarse)').matches||!navigator.share||!navigator.canShare||typeof File!=='function')return Promise.resolve(save());
+    var list;
+    try{list=files.map(function(f){return new File([f.blob],f.name,{type:f.blob.type})})}catch(_){return Promise.resolve(save())}
+    if(!navigator.canShare({files:list}))return Promise.resolve(save());
+    return navigator.share({files:list}).then(function(){return'shared'},function(e){
+      return e&&e.name==='AbortError'?'cancelled':save();
+    });
+  }
+
   /* Clipboard read: onText(trimmed, raw) when there is text, else onErr(message) with one of
      'Clipboard Not Available' (no permission-free API), 'Clipboard Empty', 'Clipboard Access Denied'. */
   function pasteText(onText,onErr){
@@ -184,5 +199,5 @@
     clearTimeout(btn._sa);btn._sa=setTimeout(function(){btn.classList.remove('step-press')},300);
   });
 
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,pasteText:pasteText,download:download,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,pasteText:pasteText,download:download,deliver:deliver,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
 })();

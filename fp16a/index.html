@@ -409,7 +409,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </main>
 <div class="drop-overlay" id="drop"><svg data-i="fileUp"></svg>Drop FP16a Here</div>
 <nav aria-label="Primary"><div class="tabs"><a href="/">Home</a><a class="active">FP16A</a></div><div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div></nav>
-<script src="/shared/base.js?v=27"></script>
+<script src="/shared/base.js?v=28"></script>
 <script src="/shared/swr.js?v=4"></script>
 <script>
 /* -- fp16a:zip -- */
@@ -2137,16 +2137,10 @@ const bytes=u=>Promise.resolve().then(()=>window._swr(u,{binary:true})).catch(()
 const tpl=k=>tplP[k]||=bytes(TPL[k]).then(b=>new Uint8Array(b)).catch(e=>{delete tplP[k];throw e});
 const templates=async foreign=>{const[fp16a,f]=await Promise.all([tpl('fp16a'),foreign?tpl('foreign'):null]);return foreign?{fp16a,foreign:f}:{fp16a}};
 const warm=()=>{if(!canZip)return;tpl('fp16a').catch(()=>{});if(D.foreign)tpl('foreign').catch(()=>{})};
-// Phones get the share sheet with every file at once (Save to Files, Mail to the department); desktops download. Closing the
-// sheet is not an error; any other refusal (a tap's activation spent by the export, say) falls back to the download.
+// Phones get the share sheet with every file at once (Save to Files, Mail to the department); desktops download.
+// The behaviour lives in B.deliver, shared with codegen.
 const XLSX='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-async function deliver(files){
-  const list=files.map(f=>new File([f.bytes],f.name,{type:XLSX}));
-  if(matchMedia('(hover:none) and (pointer:coarse)').matches&&navigator.canShare?.({files:list})){
-    try{await navigator.share({files:list});return'shared'}catch(e){if(e?.name==='AbortError')return'cancelled'}
-  }
-  list.forEach((f,i)=>setTimeout(()=>B.download(f,f.name),i*400));return'downloaded';
-}
+const deliver=files=>B.deliver(files.map(f=>({blob:new Blob([f.bytes],{type:XLSX}),name:f.name})));
 async function download(which){
   const btn=$(which==='foreign'?'a-dlf':'a-dl');
   if(!canZip){B.feedback(btn,'err-fb','Not Supported',1500);B.notify('Browser Too Old for Excel Files',false);return}

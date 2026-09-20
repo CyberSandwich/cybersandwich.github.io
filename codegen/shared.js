@@ -269,8 +269,10 @@ function dlName(fallback,inputEl){
 }
 
 function dlBlob(blob,name,btn){
-  _base.download(blob,name);
-  _base.feedback(btn,'dl-fb','Downloaded');
+  _base.deliver([{blob:blob,name:name}]).then(function(how){
+    if(how==='cancelled')return;
+    _base.feedback(btn,'dl-fb',how==='shared'?'Shared':'Downloaded');
+  });
 }
 
 function downloadExport(canvas,svgStr,fmt,name,btn){
