@@ -45,9 +45,8 @@ function updateSummary(){
 function downloadAll(){
   var items=results.filter(function(r){return r.blob});
   if(!items.length)return;
-  var i=0;
-  function next(){if(i>=items.length)return;_base.download(items[i].blob,items[i].outName);i++;setTimeout(next,200)}
-  next();
+  // One sheet carries the whole batch on a phone, where iOS Safari drops the second and later of N sequential downloads.
+  _base.deliver(items.map(function(r){return{blob:r.blob,name:r.outName}}));
 }
 
 function copyTopImage(){
@@ -109,7 +108,7 @@ function completeCard(card,blob){
     var acts=document.createElement('div');acts.className='fc-acts';
     var dl=document.createElement('button');dl.textContent='Download';
     var outName=card._name.replace(/\.[^.]+$/,'')+'_optimized.'+cfg.ext;
-    dl.addEventListener('click',function(){_base.download(blob,outName)});
+    dl.addEventListener('click',function(){_base.deliver([{blob:blob,name:outName}])});
     var cp=document.createElement('button');cp.textContent='Copy';
     cp.addEventListener('click',function(){cfg.copyBlob(blob,cp)});
     acts.appendChild(dl);acts.appendChild(cp);card.appendChild(acts);

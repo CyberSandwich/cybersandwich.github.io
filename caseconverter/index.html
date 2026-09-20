@@ -708,7 +708,7 @@ window.addEventListener('drop',function(event){
 function doDownload(){
   doFlush(true);
   var fname=editor.value.trim().split(/\s+/).slice(0,5).join('_').toLowerCase().replace(/[^a-z0-9_]/g,'')||'caseconverter';
-  _base.download(new Blob([editor.value],{type:'text/plain'}),fname+'.txt');
+  _base.deliver([{blob:new Blob([editor.value],{type:'text/plain'}),name:fname+'.txt'}]);
 }
 
 // === Flush on visibility/page events ===

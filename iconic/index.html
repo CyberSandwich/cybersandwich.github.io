@@ -802,8 +802,7 @@ function downloadFormatted(inner,name){
     var text=fmt==='inline'?fullSvg(inner):buildSvgDoc(inner);
     // SVG file downloads get XML declaration
     if(fmt==='svg')text='<?xml version="1.0" encoding="UTF-8"?>\n'+text;
-    _base.download(new Blob([text],{type:'image/svg+xml'}),name+'.svg');
-    return Promise.resolve();
+    return _base.deliver([{blob:new Blob([text],{type:'image/svg+xml'}),name:name+'.svg'}]);
   }
   // PNG or JPEG
   var svgDoc=buildSvgDoc(inner);
@@ -813,8 +812,7 @@ function downloadFormatted(inner,name){
     return new Promise(function(resolve){
       canvas.toBlob(function(blob){
         if(!blob){resolve();return}
-        _base.download(blob,name+ext);
-        resolve();
+        _base.deliver([{blob:blob,name:name+ext}]).then(resolve);
       },mime,fmt==='jpeg'?0.95:undefined);
     });
   }).catch(function(){return Promise.reject()});
@@ -826,13 +824,14 @@ function handleIcon(idx,rowEl){
   var name=filtered[idx][0];
   fetchSvg(name).then(function(inner){
     if(!inner){_base.notify('Failed to Load Icon',false);announce('Failed to Load Icon');return}
-    var done=function(){
+    var done=function(how){
+      if(how==='cancelled')return;
       if(rowEl){
         rowEl.classList.remove('ok');rowEl.offsetWidth;rowEl.classList.add('ok');
         if(copyTimers[idx])clearTimeout(copyTimers[idx]);
         copyTimers[idx]=setTimeout(function(){if(rowEl.parentNode)rowEl.classList.remove('ok');delete copyTimers[idx]},800);
       }
-      var msg=action==='download'?'Downloaded':'Copied';
+      var msg=action!=='download'?'Copied':how==='shared'?'Shared':'Downloaded';
       _base.notify(msg,true);
       announce(msg+' '+titleCase(name));
     };

@@ -442,8 +442,9 @@ rafId=requestAnimationFrame(tick)
 function finish(){
 if(done)return;done=true;
 restore();
-_base.download(new Blob(chunks,{type:mime}),'clearview.'+VFMT_EXT[fmtIdx]);
-_base.feedback(dlBtn,'dl-fb','Downloaded')
+_base.deliver([{blob:new Blob(chunks,{type:mime}),name:'clearview.'+VFMT_EXT[fmtIdx]}]).then(function(how){
+if(how!=='cancelled')_base.feedback(dlBtn,'dl-fb',how==='shared'?'Shared':'Downloaded')
+})
 }
 recording=true;
 cancelAnimationFrame(rafId);
@@ -484,8 +485,9 @@ if(!active()){_base.notify('No Media Loaded',false);return}
 if(isVid()){recordVideo();return}
 doExport(function(b){
 if(!b){_base.notify('Export Failed',false);return}
-_base.download(b,'clearview.'+FMT_EXT[fmtIdx]);
-_base.feedback(dlBtn,'dl-fb','Downloaded')
+_base.deliver([{blob:b,name:'clearview.'+FMT_EXT[fmtIdx]}]).then(function(how){
+if(how!=='cancelled')_base.feedback(dlBtn,'dl-fb',how==='shared'?'Shared':'Downloaded')
+})
 })
 });
 

@@ -476,8 +476,9 @@ function doCopy() {
 }
 function doDownload() {
   const text = outContent(crop(lastFrame));
-  _base.download(new Blob([text], { type: st.out === 0 ? 'text/plain' : 'text/html' }), outFilename());
-  _base.feedback(dlBtn, 'dl-fb', 'Downloaded');
+  _base.deliver([{ blob: new Blob([text], { type: st.out === 0 ? 'text/plain' : 'text/html' }), name: outFilename() }]).then(how => {
+    if (how !== 'cancelled') _base.feedback(dlBtn, 'dl-fb', how === 'shared' ? 'Shared' : 'Downloaded');
+  });
 }
 pasteBtn.addEventListener('click', doPaste);
 copyBtn.addEventListener('click', doCopy);

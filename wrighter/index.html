@@ -564,7 +564,7 @@ main.drag{background:rgba(0,0,0,.02);outline:2px dashed var(--t3);outline-offset
       event.preventDefault();
       flush(true);
       const fname=editor.value.trim().split(/\s+/).slice(0,5).join('_').toLowerCase().replace(/[^a-z0-9_]/g,'')||'wrighter';
-      _base.download(new Blob([editor.value],{type:'text/plain'}),fname+'.txt');
+      _base.deliver([{blob:new Blob([editor.value],{type:'text/plain'}),name:fname+'.txt'}]);
       return;
     }
     if(event.shiftKey&&!event.altKey&&event.code==='KeyK'){

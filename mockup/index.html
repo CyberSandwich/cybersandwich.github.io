@@ -500,8 +500,9 @@ dlBtn.addEventListener('click',function(){
 if(!img){_base.notify('No Screenshot Loaded',false);return}
 doExport(function(b){
 if(!b){_base.notify('Export Failed',false);return}
-_base.download(b,'mockup.'+FMT_EXT[fmtIdx]);
-_base.feedback(dlBtn,'dl-fb','Downloaded')
+_base.deliver([{blob:b,name:'mockup.'+FMT_EXT[fmtIdx]}]).then(function(how){
+if(how!=='cancelled')_base.feedback(dlBtn,'dl-fb',how==='shared'?'Shared':'Downloaded')
+})
 })
 });
 

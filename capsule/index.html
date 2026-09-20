@@ -402,8 +402,9 @@ pv.addEventListener('click',function(e){
 });
 
 function fallbackDl(blob,fname){
-  _base.download(blob,fname);
-  _base.feedback(dlBtn,'dl-fb','Downloaded')
+  _base.deliver([{blob:blob,name:fname}]).then(function(how){
+    if(how!=='cancelled')_base.feedback(dlBtn,'dl-fb',how==='shared'?'Shared':'Downloaded')
+  })
 }
 function doDownload(){
   if(!txt.value.trim()){_base.notify('Type Something First',false);return}

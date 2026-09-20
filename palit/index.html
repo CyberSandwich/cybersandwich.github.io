@@ -646,9 +646,11 @@ var out='',name='palette',type='text/plain';
 if(fmt==='text'){out=palette.map(function(p){return fmtVal(p,globalFmt)}).join('\n');name='palette.txt'}
 else if(fmt==='css'){out=':root {\n'+palette.map(function(p,i){return'  --color-'+(i+1)+': '+p.hex+';'}).join('\n')+'\n}';name='palette.css';type='text/css'}
 else if(fmt==='tw'){out=palette.map(function(p,i){return"  'palette-"+(i+1)+"': '"+p.hex+"',"}).join('\n');name='palette-tailwind.txt'}
-_base.download(new Blob([out],{type:type}),name);
-var btn=document.querySelector('.ex-opt[data-fmt="'+fmt+'"]');
-if(btn)btnFeedback(btn,'ok','','Downloaded',1200)}
+_base.deliver([{blob:new Blob([out],{type:type}),name:name}]).then(function(how){
+  if(how==='cancelled')return;
+  var btn=document.querySelector('.ex-opt[data-fmt="'+fmt+'"]');
+  if(btn)btnFeedback(btn,'ok','',how==='shared'?'Shared':'Downloaded',1200);
+})}
 
 var fbTimers=new WeakMap();
 function btnFeedback(btn,cls,origText,fbText,dur){
