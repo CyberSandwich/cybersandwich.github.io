@@ -44,9 +44,12 @@ dim()  { printf "${D}%s${Z}\n" "$*"; }
 MAIN_HTML="index.html"
 DRY_RUN=false
 
-# Auto-discover sub-project HTML files
+# Auto-discover sub-project HTML files.
+# archive/ is skipped: retired pages are not deployed, and their ?v= refs are the
+# record of what shipped, which each archive/*/RESTORE.md tells the restorer to
+# re-sync by hand. Bumping them would silently rewrite that record.
 SUB_HTMLS=()
-for f in $(find . -name "index.html" -not -path "./$MAIN_HTML" -not -path "./.git/*" | sort); do
+for f in $(find . -name "index.html" -not -path "./$MAIN_HTML" -not -path "./.git/*" -not -path "./archive/*" | sort); do
   SUB_HTMLS+=("$f")
 done
 
