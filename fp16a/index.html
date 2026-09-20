@@ -75,6 +75,9 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .chips .chip{display:inline-flex;align-items:center;gap:5px;min-height:30px}
 .chips .chip svg{width:14px;height:14px}
 .inp-fields .srow{cursor:default}
+.addrow{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:50px;padding:14px 20px;border:0;border-top:1px solid var(--bdr2);background:var(--fp-pos-bg);color:var(--fp-pos);font:500 .9375rem/1.2 var(--font);cursor:pointer;transition:opacity .15s}
+.addrow svg{width:18px;height:18px;flex-shrink:0}
+.addrow:active{opacity:.7}
 /* Add/Save is a real button styled like a selected segment, beside the shared bin/plus stepper. */
 .slbl.go{min-width:0;width:100%;border:0;background:var(--tab-active);color:var(--tab-active-c);cursor:pointer;text-align:left;transition:opacity .15s}
 .slbl.go svg{color:inherit;opacity:.8}
@@ -118,10 +121,9 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .tot b{font-weight:500;color:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
 .tots{overflow:hidden}
 /* Money coming back reads green, the reduction red, like the stepper's plus and bin (the Excel form shows the reduction red too). */
-.tot.pos{background:var(--fp-pos-bg);color:var(--fp-pos)}
 .tot.neg{background:var(--fp-neg-bg);color:var(--fp-neg)}
-.tot.pos svg,.tot.neg svg{color:inherit;opacity:.8}
-.tot.pos>b,.tot.neg>b{color:inherit}
+.tot.neg svg{color:inherit;opacity:.8}
+.tot.neg>b{color:inherit}
 /* Grand Total wears the selected-segment look, like the Add Expense button. */
 .tot.grand{background:var(--tab-active);color:var(--tab-active-c);font-weight:600}
 .tot.grand svg{color:inherit;opacity:.8}
@@ -248,7 +250,8 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </section>
 
 <section class="sec"><h3>Expenses</h3>
-  <div class="inp-row" id="e-card">
+  <div class="card links" data-show="e-closed"><button type="button" id="e-open"><svg data-i="receipt"></svg><span>Add Expense</span></button></div>
+  <div class="inp-row" id="e-card" data-show="e-card" hidden>
     <div class="inp-fields">
       <div class="chips" id="e-chips"></div>
       <label class="g"><svg data-i="receipt"></svg><span class="fl">Type</span><input id="draft-e-type" data-k="draft.e.type" list="dl-types" maxlength="29" placeholder="e.g. Conference Fee" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
@@ -273,7 +276,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <label class="g" data-show="e-ent" hidden><svg data-i="user"></svg><span class="fl">Guests &amp; Organisation</span><input id="draft-e-guests" data-k="draft.e.guests" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Number of Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" inputmode="numeric" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g" data-t="o"><svg data-i="receiptText"></svg><span class="fl">Receipt Ref</span><input id="draft-e-ref" data-k="draft.e.ref" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
-      <div class="srow" id="e-bar"><button type="button" class="slbl go" id="e-go"><svg data-i="receipt"></svg><span id="e-sum">Add Expense</span></button><div class="stepper"><button type="button" class="step-btn" id="e-bin" aria-label="Discard"><svg data-i="trash2"></svg></button><button type="button" class="step-btn" id="e-add" data-n="Expense"></button></div></div>
+      <button type="button" class="addrow" id="e-go"><svg data-i="plus"></svg><span id="e-sum">Add Expense</span></button>
     </div>
   </div>
   <div class="items" id="e-list"></div>
@@ -299,7 +302,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Details</span><input id="draft-m-why" data-k="draft.m.why" maxlength="60" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
       <label class="g" data-show="m-fx" hidden><svg data-i="handCoins"></svg><span class="fl"><span>To Be Repaid (<span id="m-bank-ccy">GBP</span>)</span></span><input id="draft-m-repaid" data-k="draft.m.repaid" inputmode="decimal" autocomplete="off" enterkeyhint="done"></label>
       <div class="calc" id="m-calc"></div>
-      <div class="srow" id="m-bar"><button type="button" class="slbl go" id="m-go"><svg data-i="car"></svg><span id="m-sum">Add Journey</span></button><div class="stepper"><button type="button" class="step-btn" id="m-bin" aria-label="Discard"><svg data-i="trash2"></svg></button><button type="button" class="step-btn" id="m-add" data-n="Journey"></button></div></div>
+      <button type="button" class="addrow" id="m-go"><svg data-i="plus"></svg><span id="m-sum">Add Journey</span></button>
     </div>
   </div>
   <div class="items" id="m-list"></div>
@@ -369,8 +372,8 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 
 <section class="sec"><h3>Totals</h3>
   <div class="card tots" aria-live="polite">
-    <div class="tot"><span><svg data-i="car"></svg>Mileage Total</span><b id="t-m"></b></div>
-    <div class="tot"><span><svg data-i="receipt"></svg>Travel &amp; Subsistence Total</span><b id="t-e"></b></div>
+    <div class="tot" data-show="tot-m" hidden><span><svg data-i="car"></svg>Mileage Total</span><b id="t-m"></b></div>
+    <div class="tot" data-show="tot-e" hidden><span><svg data-i="receipt"></svg>Travel &amp; Subsistence Total</span><b id="t-e"></b></div>
     <div class="tot" data-show="cap" hidden><span><svg data-i="circleMinus"></svg>Claim Reduced By</span><b id="t-c"></b></div>
     <div class="tot grand"><span><svg data-i="handCoins"></svg>Grand Total</span><b id="t-g"></b></div>
   </div>
@@ -396,8 +399,8 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </main>
 <div class="drop-overlay" id="drop"><svg data-i="fileUp"></svg>Drop FP16a Here</div>
 <nav aria-label="Primary"><div class="tabs"><a href="/">Home</a><a class="active">FP16A</a></div><div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div></nav>
-<script src="/shared/base.js?v=26"></script>
-<script src="/shared/swr.js?v=3"></script>
+<script src="/shared/base.js?v=27"></script>
+<script src="/shared/swr.js?v=4"></script>
 <script>
 /* -- fp16a:zip -- */
 class Fp16aError extends Error{constructor(reason,detail){super(reason+(detail?': '+detail:''));this.name='Fp16aError';this.reason=reason;this.detail=detail}}
@@ -1791,7 +1794,9 @@ const getPath=(o,k)=>k.split('.').reduce((x,p)=>x?.[p],o);
 const svg=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 const m2=n=>n==null?'':n.toFixed(2),fmtNum=n=>String(+n.toFixed(2));
 const main=$('main'),form=$('f');
-let S=M.migrate(B.load(KEY)),D=null,booting=true,showMiss=false,mOpen=false,saveT=0,reqPrev=[],missPrev=[];
+let S=M.migrate(B.load(KEY)),D=null,booting=true,showMiss=false,saveT=0,reqPrev=[],missPrev=[];
+// A card is open while you are entering or editing a row, and folds back to its button once the row is added (owner).
+const open={e:false,m:false};
 const edit={e:null,m:null,c:null},pre={e:null,m:null,c:null},listSig={},touched=new Set();
 
 // ---- static fill
@@ -1828,7 +1833,8 @@ function fillForm(){
   for(const row of document.querySelectorAll('.seg-row[data-k]'))markSeg(row);
   for(const r of document.querySelectorAll('.srow[data-k]')){const on=!!getPath(S,r.dataset.k);r.classList.toggle('sel',on);r.setAttribute('aria-checked',on)}
   const ret=!!S.draft.m.ret;$('m-ret').classList.toggle('active',ret);$('m-ret').setAttribute('aria-pressed',ret);
-  for(const t of'emc'){const on=edit[t]!=null,b=$(t+'-add');$(t+'-card').classList.toggle('editing',on);b.innerHTML=svg(on?'check':'plus');b.setAttribute('aria-label',`${on?'Save':'Add'} ${b.dataset.n}`)}
+  for(const t of'emc')$(t+'-card').classList.toggle('editing',edit[t]!=null);
+  const cb=$('c-add');cb.innerHTML=svg(edit.c!=null?'check':'plus');cb.setAttribute('aria-label',`${edit.c!=null?'Save':'Add'} ${cb.dataset.n}`);
   grow($('comments'));
 }
 
@@ -1836,10 +1842,12 @@ function fillForm(){
 const reveal=el=>{el.classList.remove('rv');void el.offsetWidth;el.classList.add('rv')};
 const tierAttr=(el,on)=>on?el.removeAttribute('data-t'):el.setAttribute('data-t','o');
 function applyVis(){
-  const de=S.draft.e,te=(de.type||'').trim().toLowerCase(),ec=PARSE.ccy(de.ccy||'')||D.ccy,open=mOpen||S.miles.length>0||edit.m!=null;
+  const de=S.draft.e,te=(de.type||'').trim().toLowerCase(),ec=PARSE.ccy(de.ccy||'')||D.ccy;
+  const eo=open.e||edit.e!=null,mo=open.m||edit.m!=null;
   const C={emp:S.crit==='emp',uk:!D.foreign,foreign:D.foreign,iban:D.ibanShown,inter:S.fp.route==='inter',further:S.fp.route==='further',
-    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':M.isTaxi(te),'e-ent':M.isEnt(te),'e-nights':M.PER_NIGHT.test(te),'e-travel':M.TRAVEL.test(te),'e-place':!M.TRAVEL.test(te),'m-fx':!!D.ccy&&D.ccy!=='GBP','m-card':open,'m-closed':!open,
-    fx:D.fxList.length>0,cap:S.cap.on,'cap-conv':!!D.cap&&!D.cap.same,miles:S.miles.length>0};
+    'e-fx':!!D.ccy&&ec!==D.ccy,'e-taxi':M.isTaxi(te),'e-ent':M.isEnt(te),'e-nights':M.PER_NIGHT.test(te),'e-travel':M.TRAVEL.test(te),'e-place':!M.TRAVEL.test(te),'m-fx':!!D.ccy&&D.ccy!=='GBP','e-card':eo,'e-closed':!eo,'m-card':mo,'m-closed':!mo,
+    fx:D.fxList.length>0,cap:S.cap.on,'cap-conv':!!D.cap&&!D.cap.same,miles:S.miles.length>0,
+    'tot-m':D.miles.length>0,'tot-e':D.exps.length>0};
   for(const el of document.querySelectorAll('[data-show]')){const on=!!C[el.dataset.show];if(el.hidden===on){el.hidden=!on;if(on&&!booting)reveal(el)}}
   const slot=$(D.foreign?'slot-foreign':'slot-uk'),bw=$('w-bankName');if(bw.parentNode!==slot)slot.append(bw);
   $('l-bankName').firstChild.textContent=D.foreign?'Name of Bank':'Bank/Building Society Name';
@@ -1873,10 +1881,12 @@ function renderAuto(){
   const gbp=dist==null?null:M.round2(dist*r),fxg=D.fx.GBP?.rate;
   $('draft-m-rate').placeholder=arate.toFixed(2);
   $('draft-m-why').placeholder=(de.purpose||'').trim();
-  $('e-sum').textContent=`${edit.e!=null?'Save':'Add'} Expense`;
-  $('m-sum').textContent=`${edit.m!=null?'Save':'Add'} Journey`;
+  for(const[t,what]of[['e','Expense'],['m','Journey']]){
+    const on=edit[t]!=null;
+    $(t+'-sum').textContent=on?'Save Changes':'Add '+what;
+    $(t+'-go').querySelector('svg').innerHTML=IC[on?'check':'plus'];
+  }
   $('m-calc').textContent=dist==null?'':`${fmtNum(dist)} mi × £${r.toFixed(2)} = ${M.money(gbp,'GBP')}`+(ccy!=='GBP'&&fxg?` = ${M.money(M.round2(gbp*fxg),ccy)}`:'');
-  $('e-bin').disabled=edit.e==null&&!Object.values(de).some(Boolean);
   $('draft-m-repaid').placeholder=ccy!=='GBP'&&gbp!=null&&fxg?m2(M.round2(gbp*fxg)):'';
   const from=M.normPostcode(dm.from),to=M.normPostcode(dm.to),map=$('m-map');
   map.hidden=!(from&&to);if(from&&to)map.href='https://www.google.com/maps/dir/'+encodeURIComponent(from)+'/'+encodeURIComponent(to);
@@ -1918,7 +1928,7 @@ function renderTotals(){
   const c=D.ccy;
   $('t-m').textContent=M.money(D.mileTotal,c);$('t-e').textContent=M.money(D.expTotal,c);
   $('t-c').textContent=D.cap?M.money(D.cap.reduce,c):'';
-  $('t-m').parentNode.classList.toggle('pos',D.mileTotal>0);$('t-e').parentNode.classList.toggle('pos',D.expTotal>0);$('t-c').parentNode.classList.toggle('neg',!!D.cap&&D.cap.reduce<0);$('t-g').textContent=M.money(D.grand,c);
+  $('t-c').parentNode.classList.toggle('neg',!!D.cap&&D.cap.reduce<0);$('t-g').textContent=M.money(D.grand,c);
   for(const[id,on]of[['t-m',D.mileOpen],['t-e',D.expOpen]]){const lab=$(id).previousElementSibling,w=lab.querySelector('b.w');if(on&&!w)lab.append(Object.assign(document.createElement('b'),{className:'w',textContent:'Rate Needed'}));else if(!on&&w)w.remove()}
 }
 const wrap=k=>{const el=$(k);return el&&(el.closest('.f,.g')||el.closest('.card'))};
@@ -2011,7 +2021,6 @@ $('e-chips').addEventListener('click',e=>{
   const b=e.target.closest('[data-type]');if(!b)return;
   const other=b.dataset.type==='Other';S.draft.e.type=$('draft-e-type').value=other?'':b.dataset.type;changed();$(other?'draft-e-type':'draft-e-amt').focus();
 });
-$('m-open').addEventListener('click',()=>{mOpen=true;update();$('draft-m-date').focus()});
 $('m-ret').addEventListener('click',()=>{S.draft.m.ret=!S.draft.m.ret;fillForm();changed()});
 
 // ---- rows: add, edit, delete
@@ -2021,7 +2030,7 @@ function startEdit(t,id){
   if(edit[t]===id){cancelEdit(t);return}
   const r=S[KEYS[t]].find(x=>x.id===id);if(!r)return;
   if(edit[t]==null)pre[t]=structuredClone(S.draft[t]);
-  edit[t]=id;S.draft[t]=toDraft(t,r);if(t==='m')mOpen=true;
+  edit[t]=id;S.draft[t]=toDraft(t,r);open[t]=true;
   fillForm();changed();
   $(t+'-card').scrollIntoView({block:'nearest',behavior:'smooth'});refocus(FIRST[t]);
 }
@@ -2058,7 +2067,7 @@ const ADD={
       // The next journey starts where this one ended, as mileage does.
       {date:d.date||'',trip:d.trip||'',tripEnd:d.tripEnd||'',place:d.place||'',from:go?d.to||d.from||'':d.from||'',to:go?'':d.to||'',purpose:d.purpose||'',ccy:d.ccy||''});
     const lm=M.limitMsg(D.exps.find(x=>x.id===id)||{});if(lm)B.notify(lm,'warn');
-    if(!quiet)refocus('draft-e-type');
+    open.e=false;update();
   },
   m(quiet){
     const d=S.draft.m,mi=M.num(d.mi);
@@ -2067,7 +2076,7 @@ const ADD={
     commit('m',{id:edit.m??M.nextId(S),date:d.date||today(),from:M.normPostcode(d.from),to,mi,ret:!!d.ret,why:txt(d.why)||txt(S.draft.e.purpose),
       veh:d.veh||'car',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',from:d.ret?M.normPostcode(d.from):to,why:d.why||''});
     B.save(PC,[...new Set([to,M.normPostcode(d.from),...B.load(PC,[])])].filter(p=>M.UK_POSTCODE.test(p)).slice(0,8));pcOpts();
-    if(!quiet)refocus('draft-m-to');
+    open.m=false;update();
   },
   c(quiet){
     const d=S.draft.c;
@@ -2088,16 +2097,12 @@ function del(t,id,el){
     B.notify('Undo Delete','warn',()=>{S[KEYS[t]].splice(i,0,row);changed()});
   },100);
 }
-// Bin: while editing it deletes that row; otherwise it drops the entry in progress, folding an unused mileage card away.
-function discard(t){
-  if(edit[t]!=null){const id=edit[t];del(t,id,$(t+'-list').querySelector(`[data-id="${id}"]`)||document.createElement('i'));return}
-  S.draft[t]={};
-  if(t==='m'&&!S.miles.length)mOpen=false;
-  fillForm();changed();refocus(t==='m'&&!mOpen?'m-open':FIRST[t]);
+for(const t of'em'){
+  $(t+'-go').addEventListener('click',()=>ADD[t]());
+  $(t+'-open').addEventListener('click',()=>{open[t]=true;update();$(FIRST[t]).focus()});
 }
-for(const t of'em'){$(t+'-bin').addEventListener('click',()=>discard(t));$(t+'-go').addEventListener('click',()=>ADD[t]())}
 for(const t of'emc'){
-  $(t+'-add').addEventListener('click',()=>ADD[t]());
+  if(t==='c')$(t+'-add').addEventListener('click',()=>ADD[t]());
   const box=$(t+'-list');
   box.addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;if(e.target.closest('.del'))del(t,+it.dataset.id,it);else startEdit(t,+it.dataset.id)});
   box.addEventListener('keydown',e=>{const it=e.target.closest('.item');if(!it||e.target!==it)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();startEdit(t,+it.dataset.id)}else if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();del(t,+it.dataset.id,it)}});
@@ -2175,17 +2180,14 @@ function applyPaste(t,btn){
   $(ids[0]).scrollIntoView({block:'center',behavior:'smooth'});
 }
 $('a-paste').hidden=!navigator.clipboard?.readText;
-$('a-paste').addEventListener('click',async()=>{
-  let t;try{t=await navigator.clipboard.readText()}catch(_){B.feedback($('a-paste'),'err-fb','Paste Failed',1500);B.notify('Clipboard Blocked',false);return}
-  applyPaste(t,$('a-paste'));
-});
+$('a-paste').addEventListener('click',()=>B.pasteText(t=>applyPaste(t,$('a-paste')),m=>{B.feedback($('a-paste'),'err-fb','Paste Failed',1500);B.notify(m,false)}));
 // A pasted file imports anywhere; pasted text works like the Paste button unless it is going into a field (text from Copy imports even there).
 document.addEventListener('paste',e=>{
   const f=e.clipboardData?.files;if(f&&f.length){e.preventDefault();importFiles(f);return}
   const t=e.clipboardData?.getData('text/plain')||'';
   if(M.isClaimText(t)||!e.target.closest?.('input,textarea')){e.preventDefault();applyPaste(t,$('a-paste'))}
 });
-const clearUi=()=>{for(const t of'emc')edit[t]=pre[t]=null;touched.clear();showMiss=false;mOpen=false};
+const clearUi=()=>{for(const t of'emc')edit[t]=pre[t]=null;touched.clear();showMiss=false;open.e=open.m=false};
 // New Claim keeps You + Payment; everything about this trip goes.
 const nc=B.twoPress($('a-new'),{text:'New Claim',guard:()=>S.exps.length+S.miles.length+S.codes.length>0||!!S.comments||S.declared||S.cap.on,onConfirm:()=>{
   const b=M.blank();S=M.migrate({...S,exps:[],miles:[],codes:[],fx:{},fxSrc:'',cap:b.cap,comments:'',declared:false,sigName:null,sigDate:'',ref:'',auth:b.auth,draft:b.draft});
@@ -2196,8 +2198,8 @@ const rs=B.twoPress($('a-reset'),{text:'Reset All',guard:()=>JSON.stringify(S)!=
 $('a-reset').addEventListener('click',rs.press);
 B.onKey({
   c:copy,d:()=>download('all'),i:e=>{e.preventDefault();$('file').click()},
-  e:e=>{e.preventDefault();$('draft-e-type').focus()},
-  m:e=>{e.preventDefault();mOpen=true;update();$('draft-m-date').focus()},
+  e:e=>{e.preventDefault();open.e=true;update();$('draft-e-type').focus()},
+  m:e=>{e.preventDefault();open.m=true;update();$('draft-m-date').focus()},
   '/':e=>{e.preventDefault();showMiss=true;renderReq();const k=M.missing(S,D)[0];if(k)goTo(k)},
   ArrowLeft:()=>stepTier(-1),ArrowRight:()=>stepTier(1),
   ctrl:{s:e=>{e.preventDefault();download('all')},o:e=>{e.preventDefault();$('file').click()}}
