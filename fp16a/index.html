@@ -65,7 +65,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .g2.even{grid-template-columns:1fr 1fr}
 .g2>.g{border-bottom:0}
 .g2>.g+.g{border-left:1px solid var(--bdr2);padding-left:18px}
-.g.tools{padding-right:150px}
+.g.tools{padding-right:56px}
 .tb{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;gap:6px}
 .tb .chip{display:inline-flex;align-items:center;min-height:30px;text-decoration:none}
 .tb .chip svg{width:14px;height:14px}
@@ -73,6 +73,11 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .chips .chip{display:inline-flex;align-items:center;gap:5px;min-height:30px}
 .chips .chip svg{width:14px;height:14px}
 .inp-fields .srow{cursor:default}
+.addbar{display:flex}
+.addbar>.addrow{flex:1;min-width:0}
+.cancel{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:0;border-right:1px solid var(--bdr2);background:var(--card);color:var(--t4);cursor:pointer;transition:color .15s}
+.cancel svg{width:18px;height:18px}
+.cancel:active{opacity:.7}
 .addrow{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:50px;padding:14px 20px;border:0;background:var(--fp-pos-bg);color:var(--fp-pos);font:500 .9375rem/1.2 var(--font);cursor:pointer;transition:opacity .15s}
 .addrow svg{width:18px;height:18px;flex-shrink:0}
 .addrow:active{opacity:.7}
@@ -132,7 +137,6 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   .item .del:hover{color:var(--t1);border-color:var(--t4)}
   .tb .chip:hover{color:var(--t2)}
 }
-@media(max-width:380px){.g.tools{padding-right:130px}}
 </style>
 </head>
 <body>
@@ -271,7 +275,10 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
       <label class="g" data-show="e-ent" hidden><svg data-i="user"></svg><span class="fl">Guests &amp; Organisation</span><input id="draft-e-guests" data-k="draft.e.guests" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g" data-show="e-ent" hidden><svg data-i="userCheck"></svg><span class="fl">Number of Warwick Staff Present</span><input id="draft-e-staff" data-k="draft.e.staff" inputmode="numeric" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
       <label class="g" data-t="o"><svg data-i="receiptText"></svg><span class="fl">Receipt Ref</span><input id="draft-e-ref" data-k="draft.e.ref" maxlength="8" autocomplete="off" spellcheck="false" enterkeyhint="done"></label>
-      <button type="button" class="addrow" id="e-go"><svg data-i="plus"></svg><span id="e-sum">Add Expense</span></button>
+      <div class="addbar">
+        <button type="button" class="cancel" id="e-x" aria-label="Cancel"><svg data-i="x"></svg></button>
+        <button type="button" class="addrow" id="e-go"><svg data-i="plus"></svg><span id="e-sum">Add Expense</span></button>
+      </div>
     </div>
   </div>
   <div class="items" id="e-list"></div>
@@ -293,11 +300,18 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
         <label class="g up"><span class="fl">To Postcode</span><input id="draft-m-to" data-k="draft.m.to" list="dl-postcodes" maxlength="40" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"></label>
       </div>
       <label class="g tools"><svg data-i="gauge"></svg><span class="fl">Miles</span><input id="draft-m-mi" data-k="draft.m.mi" inputmode="decimal" autocomplete="off" enterkeyhint="next" placeholder="0">
-        <span class="tb"><button type="button" class="chip" id="m-ret" aria-pressed="false">Return</button><a class="chip" id="m-map" target="_blank" rel="noopener" aria-label="Directions" hidden><svg data-i="externalLink"></svg></a></span></label>
+        <span class="tb"><a class="chip" id="m-map" target="_blank" rel="noopener" aria-label="Directions" hidden><svg data-i="externalLink"></svg></a></span></label>
+      <div class="seg-row c2" role="radiogroup" aria-label="Journey Type" id="draft-m-ret" data-k="draft.m.ret" data-f="bool">
+        <button type="button" class="seg" role="radio" data-v="0">One Way</button>
+        <button type="button" class="seg" role="radio" data-v="1">Return</button>
+      </div>
       <label class="g"><svg data-i="notebookPen"></svg><span class="fl">Details</span><input id="draft-m-why" data-k="draft.m.why" maxlength="60" autocomplete="off" autocapitalize="sentences" enterkeyhint="next"></label>
       <label class="g" data-show="m-fx" hidden><svg data-i="handCoins"></svg><span class="fl"><span>To Be Repaid (<span id="m-bank-ccy">GBP</span>)</span></span><input id="draft-m-repaid" data-k="draft.m.repaid" inputmode="decimal" autocomplete="off" enterkeyhint="done"></label>
       <div class="calc" id="m-calc"></div>
-      <button type="button" class="addrow" id="m-go"><svg data-i="plus"></svg><span id="m-sum">Add Journey</span></button>
+      <div class="addbar">
+        <button type="button" class="cancel" id="m-x" aria-label="Cancel"><svg data-i="x"></svg></button>
+        <button type="button" class="addrow" id="m-go"><svg data-i="plus"></svg><span id="m-sum">Add Journey</span></button>
+      </div>
     </div>
   </div>
   <div class="items" id="m-list"></div>
@@ -309,7 +323,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </section>
 
 <section class="sec" data-t="o"><h3>Cap</h3>
-  <div class="card"><div class="srow" id="cap-on" data-k="cap.on" role="checkbox" tabindex="0"><span class="slbl"><svg data-i="scale"></svg><span>A Cap Applies</span></span><span class="bg-chk"><svg viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg></span></div></div>
+  <div class="card"><div class="seg-row c2" role="radiogroup" aria-label="Cap" id="cap-on" data-k="cap.on" data-f="bool"><button type="button" class="seg" role="radio" data-v="0">No Cap</button><button type="button" class="seg" role="radio" data-v="1">Cap Applies</button></div></div>
   <div data-show="cap" hidden>
     <div class="row2">
       <label class="f"><svg data-i="scale"></svg><span class="fl">Cap Amount<i>*</i></span><input id="cap-amt" data-k="cap.amt" data-f="num" inputmode="decimal" autocomplete="off" enterkeyhint="next"></label>
@@ -1822,12 +1836,11 @@ const AUTO_TEXT={holder:()=>D.name,bankName:()=>D.foreign?'':M.bankFromSort(S.so
 const read=el=>(PARSE[el.dataset.f]||(v=>v))(el.value);
 const show=(el,v)=>(SHOW[el.dataset.f]||(x=>x??''))(v);
 const grow=el=>{el.style.height='auto';el.style.height=el.scrollHeight+'px'};
-const markSeg=row=>{const v=getPath(S,row.dataset.k)||SEG_DEF[row.dataset.k]||'';for(const b of row.children){const on=b.dataset.v===v;b.classList.toggle('active',on);b.setAttribute('aria-checked',on)}};
+const markSeg=row=>{const v=row.dataset.f==='bool'?(getPath(S,row.dataset.k)?'1':'0'):getPath(S,row.dataset.k)||SEG_DEF[row.dataset.k]||'';for(const b of row.children){const on=b.dataset.v===v;b.classList.toggle('active',on);b.setAttribute('aria-checked',on)}};
 function fillForm(){
   for(const el of form.querySelectorAll('input[data-k],textarea[data-k]')){el.value=show(el,getPath(S,el.dataset.k));el.classList.remove('auto')}
   for(const row of document.querySelectorAll('.seg-row[data-k]'))markSeg(row);
   for(const r of document.querySelectorAll('.srow[data-k]')){const on=!!getPath(S,r.dataset.k);r.classList.toggle('sel',on);r.setAttribute('aria-checked',on)}
-  const ret=!!S.draft.m.ret;$('m-ret').classList.toggle('active',ret);$('m-ret').setAttribute('aria-pressed',ret);
   for(const t of'emc')$(t+'-card').classList.toggle('editing',edit[t]!=null);
   const cb=$('c-add');cb.innerHTML=svg(edit.c!=null?'check':'plus');cb.setAttribute('aria-label',`${edit.c!=null?'Save':'Add'} ${cb.dataset.n}`);
   grow($('comments'));
@@ -1997,7 +2010,7 @@ const visibleFields=root=>[...root.querySelectorAll('input:not([type=file]),text
 form.addEventListener('keydown',e=>{
   const el=e.target,card=el.closest('.inp-row'),t=card?.id[0];
   if(el.matches('.srow[data-k]')&&(e.key===' '||e.key==='Enter')){e.preventDefault();toggle(el);return}
-  if(e.key==='Escape'&&card&&edit[t]!=null){e.preventDefault();e.stopPropagation();cancelEdit(t);return}
+  if(e.key==='Escape'&&card&&'em'.includes(t)){e.preventDefault();e.stopPropagation();closeCard(t);return}
   if(e.key!=='Enter'||e.isComposing||!el.matches('input')||el.type==='file')return;
   e.preventDefault();
   const fields=visibleFields(card||form),i=fields.indexOf(el);
@@ -2009,14 +2022,13 @@ function toggle(row){
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('.seg-row[data-k]>.seg');
-  if(b){M.setPath(S,b.parentNode.dataset.k,b.dataset.v);markSeg(b.parentNode);changed();return}
+  if(b){const row=b.parentNode;M.setPath(S,row.dataset.k,row.dataset.f==='bool'?b.dataset.v==='1':b.dataset.v);markSeg(row);changed();return}
   const r=e.target.closest('.srow[data-k]');if(r)toggle(r);
 });
 $('e-chips').addEventListener('click',e=>{
   const b=e.target.closest('[data-type]');if(!b)return;
   const other=b.dataset.type==='Other';S.draft.e.type=$('draft-e-type').value=other?'':b.dataset.type;changed();$(other?'draft-e-type':'draft-e-amt').focus();
 });
-$('m-ret').addEventListener('click',()=>{S.draft.m.ret=!S.draft.m.ret;fillForm();changed()});
 
 // ---- rows: add, edit, delete
 const toDraft=(t,r)=>{const s=v=>v==null?'':String(v);return t==='e'?{type:r.type,amt:s(r.amt),ccy:r.ccy,date:r.date,trip:r.trip,tripEnd:r.tripEnd,place:r.place,from:r.from,to:r.to||(M.TRAVEL.test(r.type)&&!r.from?r.place:''),purpose:r.purpose,repaid:s(r.repaid),taxiWhy:r.taxiWhy,guests:r.guests,staff:r.staff,ref:r.ref||'',nights:s(r.nights)}
@@ -2030,6 +2042,11 @@ function startEdit(t,id){
   $(t+'-card').scrollIntoView({block:'nearest',behavior:'smooth'});refocus(FIRST[t]);
 }
 function cancelEdit(t){if(edit[t]==null)return;S.draft[t]=pre[t]||{};edit[t]=pre[t]=null;fillForm();changed()}
+// Closing a card without adding: an edit is simply cancelled, a new entry drops its own fields and keeps the trip's.
+function closeCard(t){
+  if(edit[t]!=null)cancelEdit(t);else{S.draft[t]=STICKY[t](S.draft[t]);fillForm();changed()}
+  open[t]=false;update();
+}
 function commit(t,row,sticky){
   const arr=S[KEYS[t]],i=arr.findIndex(x=>x.id===row.id);
   if(i>=0)arr[i]=row;else arr.push(row);
@@ -2049,6 +2066,11 @@ const purposeEg=t=>'e.g. '+(PURPOSE_EG.find(([re])=>re.test(t.toLowerCase()))||[
 // Postcodes used in journeys, newest first, suggested beside Warwick's sites (kept across claims on this device).
 const PC='fp16a:pc';
 const pcOpts=()=>{const recent=B.load(PC,[]).filter(p=>M.UK_POSTCODE.test(p));opts('dl-postcodes',[...recent.filter(p=>!byPc[p]).map(p=>[p,'Recent']),...Object.entries(byPc).map(([pc,ns])=>[pc,ns.join(', ')])])};
+// What a card keeps when it closes without adding: the trip's context, never the entry's own figures.
+const STICKY={
+  e:d=>({date:d.date||'',trip:d.trip||'',tripEnd:d.tripEnd||'',place:d.place||'',from:d.from||'',to:d.to||'',purpose:d.purpose||'',ccy:d.ccy||''}),
+  m:d=>({date:d.date||'',veh:d.veh||'car',from:d.from||'',why:d.why||''})
+};
 const ADD={
   e(quiet){
     const d=S.draft.e,amt=M.num(d.amt);
@@ -2094,6 +2116,7 @@ function del(t,id,el){
 }
 for(const t of'em'){
   $(t+'-go').addEventListener('click',()=>ADD[t]());
+  $(t+'-x').addEventListener('click',()=>closeCard(t));
   $(t+'-open').addEventListener('click',()=>{open[t]=true;update();$(FIRST[t]).focus()});
 }
 for(const t of'emc'){
