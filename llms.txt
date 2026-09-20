@@ -1,6 +1,6 @@
 # Duke Saputra
 
-> Personal website and project portfolio for Duke Saputra, a student at Warwick Business School.
+> Personal website and project portfolio for Duke Saputra, a Warwick Business School alum, previously at Microsoft and IBM.
 
 ## Website: https://saputra.co.uk
 
