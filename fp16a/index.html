@@ -173,7 +173,6 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   <label class="f"><svg data-i="mail"></svg><span class="fl">Email (For Remittance)<i>*</i></span><input id="email" data-k="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next"></label>
   <label class="f"><svg data-i="building2"></svg><span class="fl">Department<i>*</i></span><input id="dept" data-k="dept" list="dl-dept" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
   <label class="f"><svg data-i="briefcase"></svg><span class="fl">Job Title<i>*</i></span><input id="job" data-k="job" autocomplete="organization-title" autocapitalize="words" enterkeyhint="next"></label>
-  <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Vendor Number</span><input id="vendor" data-k="vendor" inputmode="numeric" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
   <label class="f" data-t="o"><svg data-i="tag"></svg><span class="fl">Dept/Payment Ref</span><input id="ref" data-k="ref" maxlength="16" autocomplete="off" spellcheck="false" autocapitalize="characters" enterkeyhint="next"><span class="aux" id="ref-n"></span></label>
 </section>
 
@@ -352,6 +351,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 </section>
 
 <section class="sec" data-t="d"><h3>For Departmental Use</h3>
+  <label class="f"><svg data-i="fileDigit"></svg><span class="fl">Vendor Number</span><input id="vendor" data-k="vendor" inputmode="numeric" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
   <div class="inp-row" id="c-card">
     <div class="inp-fields">
       <div class="g2 even">
@@ -1320,9 +1320,10 @@ const required=(s,D)=>{
   const out=[],need=(k,v)=>out.push([k,!(v===''||v==null||v===false)]);
   need('crit',s.crit);need('first',s.first.trim());need('last',s.last.trim());need('email',s.email.trim());need('dept',s.dept.trim());
   if(s.crit==='emp')need('job',s.job.trim());
-  // The form treats these as alternatives: a first claim (or a change of bank) states the account, a later one
-  // states the vendor number instead and leaves the bank box blank. A foreign claim always needs its own form.
-  if(!D.foreign){if(!s.vendor.trim()){need('sort',D.sort);need('acct',s.acct);need('bankName',D.bankName)}}
+  // The bank block is always asked for. Older FP16a guidance let a repeat claimant give a vendor number instead,
+  // but the template in hand labels that field "Vendor Number (Expenses use only)", so the claimant never fills it
+  // and has no way to signal a repeat claim. Stating the account again is never wrong.
+  if(!D.foreign){need('sort',D.sort);need('acct',s.acct);need('bankName',D.bankName)}
   else{
     const f=s.fp;
     if(D.ibanShown)need('fp-iban',f.iban);
@@ -1345,8 +1346,8 @@ const label=k=>FIELDS[k]||(k.startsWith('fx-')?'Exchange Rate '+k.slice(3):k);
 const checks=(s,D)=>{
   const out=new Map(),w=(k,cond,msg)=>{if(cond)out.set(k,out.has(k)?out.get(k)+' · '+msg:msg)},today=D.today,old=addMonths(today,-3);
   w('email',s.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email.trim()),'Check Format');
-  // A claim without a vendor number is returned unpaid unless it states the bank account instead, and required()
-  // enforces that alternative. So only the shape is checked here, never its absence.
+  // Expenses fills this, not the claimant (template label), so absence is never flagged. The shape check is for
+  // whoever does type it: an 8-digit number beginning with 3.
   w('vendor',s.vendor.trim()&&!/^3\d{7}$/.test(normDigits(s.vendor)),'8 Digits Starting With 3');
   if(!D.foreign){
     w('sort',s.sort&&!digitLike(s.sort),'Numbers Only');w('sort',s.sort&&digitLike(s.sort)&&!/^\d{2}-\d{2}-\d{2}$/.test(normSort(s.sort)),'6 Digits');
