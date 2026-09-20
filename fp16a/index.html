@@ -186,8 +186,8 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
   </div>
   <div data-show="uk">
     <div class="row2">
-      <label class="f"><svg data-i="hash"></svg><span class="fl">Sort Code<i>*</i></span><input id="sort" data-k="sort" data-f="sort" maxlength="20" autocomplete="off" spellcheck="false" enterkeyhint="next" placeholder="00-00-00"></label>
-      <label class="f"><span class="fl">Account Number<i>*</i></span><input id="acct" data-k="acct" data-f="digits" maxlength="20" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
+      <label class="f"><svg data-i="hash"></svg><span class="fl">Sort Code<i>*</i></span><input id="sort" data-k="sort" data-f="sort" inputmode="numeric" maxlength="20" autocomplete="off" spellcheck="false" enterkeyhint="next" placeholder="00-00-00"></label>
+      <label class="f"><span class="fl">Account Number<i>*</i></span><input id="acct" data-k="acct" data-f="digits" inputmode="numeric" maxlength="20" autocomplete="off" spellcheck="false" enterkeyhint="next"></label>
     </div>
     <div id="slot-uk"><label class="f" id="w-bankName"><svg data-i="landmark"></svg><span class="fl" id="l-bankName">Bank/Building Society Name<i>*</i></span><input id="bankName" data-k="bankName" list="dl-banks" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label></div>
     <label class="f"><svg data-i="userCheck"></svg><span class="fl">Account Holder's Name</span><input id="holder" data-k="holder" data-f="over" autocomplete="off" autocapitalize="words" enterkeyhint="next"></label>
@@ -1320,7 +1320,9 @@ const required=(s,D)=>{
   const out=[],need=(k,v)=>out.push([k,!(v===''||v==null||v===false)]);
   need('crit',s.crit);need('first',s.first.trim());need('last',s.last.trim());need('email',s.email.trim());need('dept',s.dept.trim());
   if(s.crit==='emp')need('job',s.job.trim());
-  if(!D.foreign){need('sort',D.sort);need('acct',s.acct);need('bankName',D.bankName)}
+  // The form treats these as alternatives: a first claim (or a change of bank) states the account, a later one
+  // states the vendor number instead and leaves the bank box blank. A foreign claim always needs its own form.
+  if(!D.foreign){if(!s.vendor.trim()){need('sort',D.sort);need('acct',s.acct);need('bankName',D.bankName)}}
   else{
     const f=s.fp;
     if(D.ibanShown)need('fp-iban',f.iban);
@@ -1343,9 +1345,9 @@ const label=k=>FIELDS[k]||(k.startsWith('fx-')?'Exchange Rate '+k.slice(3):k);
 const checks=(s,D)=>{
   const out=new Map(),w=(k,cond,msg)=>{if(cond)out.set(k,out.has(k)?out.get(k)+' · '+msg:msg)},today=D.today,old=addMonths(today,-3);
   w('email',s.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.email.trim()),'Check Format');
-  // A claim without a vendor number is returned unpaid, and only a first claim is exempt (FP16a guidance).
+  // A claim without a vendor number is returned unpaid unless it states the bank account instead, and required()
+  // enforces that alternative. So only the shape is checked here, never its absence.
   w('vendor',s.vendor.trim()&&!/^3\d{7}$/.test(normDigits(s.vendor)),'8 Digits Starting With 3');
-  w('vendor',!s.vendor.trim(),'Needed Unless This Is Your First Claim');
   if(!D.foreign){
     w('sort',s.sort&&!digitLike(s.sort),'Numbers Only');w('sort',s.sort&&digitLike(s.sort)&&!/^\d{2}-\d{2}-\d{2}$/.test(normSort(s.sort)),'6 Digits');
     w('acct',s.acct&&!digitLike(s.acct),'Numbers Only');w('acct',s.acct&&digitLike(s.acct)&&!/^\d{8}$/.test(normDigits(s.acct)),'8 Digits');
@@ -1360,8 +1362,13 @@ const checks=(s,D)=>{
     w('fp-clearing',cc&&D.country==='US'&&/^\d{9}$/.test(cc)&&!abaOk(cc),'Checksum Fails');
     w('fp-phone',f.phone.length>30,'Too Long');
   }
+  // Receipts are numbered sequentially and the number written against the matching row, so two rows claiming the
+  // same ref would point the processor at one receipt twice. Only a typed ref can collide; the auto sequence cannot.
+  const refUse=new Map();
+  for(const e of D.exps)refUse.set(e.ref.toUpperCase(),(refUse.get(e.ref.toUpperCase())||0)+1);
   for(const e of D.exps){
     const k='e:'+e.id,p=purposeText(e);
+    w(k,refUse.get(e.ref.toUpperCase())>1,'Receipt Ref Used Twice');
     w(k,e.date&&e.date>today,'Date in the Future');
     w(k,e.date&&e.date<old,'Older Than 3 Months');
     w(k,e.tripEnd&&e.tripEnd<(e.trip||e.date),'Trip End Before Start');
@@ -1372,6 +1379,7 @@ const checks=(s,D)=>{
     // Form notes 4 and 5: a taxi needs its reason, entertainment its guests and the number of Warwick staff.
     w(k,isTaxi(e.type)&&!e.taxiWhy.trim(),'Taxi Reason Needed');
     w(k,isEnt(e.type)&&(!e.guests.trim()||!e.staff.trim()),'Guests and Staff Needed');
+    w(k,isEnt(e.type)&&e.staff.trim()&&!/\d/.test(e.staff),'Staff Needs the Number Present');
     // Spend the expenses route rejects outright, so the claimant sees it before submitting, not after.
     w(k,isIT(e.type),'IT Spend Is Not Claimable, Needs IDG Approval and a PO');
     w(k,isDomesticFlight(e.type,p),'Air Travel Within Great Britain Is Not Permitted');
@@ -1386,6 +1394,9 @@ const checks=(s,D)=>{
     w(k,m.date&&m.date>today,'Date in the Future');
     w(k,m.date&&m.date<old,'Older Than 3 Months');
     w(k,!m.date,'Date Needed');
+    // A journey must state where it started and ended (FP16a page two, note 2). The postcode shape is only
+    // checked once something is there, since the endpoint itself is the part the form insists on.
+    w(k,!m.from.trim()||!m.to.trim(),'Start and End Needed');
     w(k,[m.from,m.to].some(p=>p&&!UK_POSTCODE.test(p)),'Check Postcodes');
     w(k,m.dist>1000,'Over 1000 Miles');
     w(k,m.repaid==null,'Exchange Rate Needed');
@@ -1394,6 +1405,9 @@ const checks=(s,D)=>{
   // Warwick reads miles paid per tax year off 210424, so a claim mixing mileage with expenses needs its own row for it.
   if(D.mileTotal>0&&D.expTotal>0&&s.codes.length&&!s.codes.some(c=>c.gl.trim()===MILEAGE_GL))
     w('c:'+s.codes[0].id,true,`Mileage Needs Its Own ${MILEAGE_GL} Row`);
+  // Entertaining and gifts code to 2385xx, so a claim holding one needs a row that carries it.
+  if(D.exps.some(e=>isEnt(e.type))&&s.codes.length&&!s.codes.some(c=>/^2385/.test(c.gl.trim())))
+    w('c:'+s.codes[0].id,true,'Entertainment Needs a 2385 Code');
   const last=[...D.exps.map(e=>e.date),...D.miles.map(m=>m.date)].filter(Boolean).sort().pop();
   w('sigDate',!!last&&D.sigDate<last,'Before Latest Expense');
   return out;
