@@ -35,12 +35,14 @@ main[data-tier=m] [data-t=o],main:not([data-tier=a]) [data-t=d]{display:none}
 .row2 .f+.f{padding-left:20px}
 .f:focus-within{border-color:var(--t4)}
 .f>svg,.g>svg{position:absolute;left:17px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--t4)}
-.fl{display:flex;gap:4px;font:500 .6875rem/1.3 var(--font);color:var(--t3);white-space:nowrap;overflow:hidden}
+.fl{display:flex;font:500 .6875rem/1.3 var(--font);color:var(--t3);white-space:nowrap;overflow:hidden}
 .fl i,.star{font-style:normal;display:none}
 .req .fl i,.req .star{display:inline}
 .w{color:var(--fp-warn)}
-.fl b.w{font-weight:500;overflow:hidden;text-overflow:ellipsis}
-.slbl b.w{font-weight:500;font-size:.8125rem}
+/* An empty required field colours its own label rather than saying so in words (owner, 2026-09-20). */
+.fl.w,.slbl.w{color:var(--fp-warn)}
+.fl b.w{margin-left:4px;font-weight:500;overflow:hidden;text-overflow:ellipsis}
+.slbl b.w{margin-left:4px;font-weight:500;font-size:.8125rem}
 .fl b.w::before,.slbl b.w::before{content:'· '}
 .f input,.f textarea,.g input{display:block;width:100%;min-width:0;padding:0;margin:0;border:0;border-radius:0;background:none;outline:none;font:400 1rem/1.35 var(--font);color:var(--t2);-webkit-appearance:none;appearance:none}
 .f textarea{resize:none;overflow:hidden;min-height:1.35em}
@@ -75,7 +77,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .inp-fields .srow{cursor:default}
 .addbar{display:flex}
 .addbar>.addrow{flex:1;min-width:0}
-.cancel{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:0;border-right:1px solid var(--bdr2);background:var(--card);color:var(--t4);cursor:pointer;transition:color .15s}
+.cancel{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:0;background:var(--fp-neg-bg);color:var(--fp-neg);cursor:pointer;transition:opacity .15s}
 .cancel svg{width:18px;height:18px}
 .cancel:active{opacity:.7}
 .addrow{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:50px;padding:14px 20px;border:0;background:var(--fp-pos-bg);color:var(--fp-pos);font:500 .9375rem/1.2 var(--font);cursor:pointer;transition:opacity .15s}
@@ -1937,18 +1939,20 @@ function renderTotals(){
   $('t-m').textContent=M.money(D.mileTotal,c);$('t-e').textContent=M.money(D.expTotal,c);
   $('t-c').textContent=D.cap?M.money(D.cap.reduce,c):'';
   $('t-c').parentNode.classList.toggle('neg',!!D.cap&&D.cap.reduce<0);$('t-g').textContent=M.money(D.grand,c);
-  for(const[id,on]of[['t-m',D.mileOpen],['t-e',D.expOpen]]){const lab=$(id).previousElementSibling,w=lab.querySelector('b.w');if(on&&!w)lab.append(Object.assign(document.createElement('b'),{className:'w',textContent:'Rate Needed'}));else if(!on&&w)w.remove()}
+  for(const[id,on]of[['t-m',D.mileOpen],['t-e',D.expOpen]]){const lab=$(id).previousElementSibling,w=lab.querySelector('b.w');if(on&&!w)lab.append(Object.assign(document.createElement('b'),{className:'w',textContent:'Rate Required'}));else if(!on&&w)w.remove()}
 }
 const wrap=k=>{const el=$(k);return el&&(el.closest('.f,.g')||el.closest('.card'))};
+const labelOf=k=>{const w=wrap(k);return w&&(w.querySelector('.fl')||w.querySelector('.slbl'))};
 function renderReq(ck=M.checks(S,D)){
   const req=M.required(S,D);
   for(const w of reqPrev)w.classList.remove('req');
   reqPrev=req.map(([k])=>wrap(k)).filter(Boolean);for(const w of reqPrev)w.classList.add('req');
-  for(const w of missPrev)w.querySelector('b.w')?.remove();
+  for(const at of missPrev){at.querySelector('b.w')?.remove();at.classList.remove('w')}
   missPrev=[];
-  // Warnings are amber text after the label, never a border. Empty required fields show after a Download or /; wrong values once left.
-  const mark=(k,msg)=>{const w=wrap(k),at=w&&(w.querySelector('.fl')||w.querySelector('.slbl'));if(!at||at.querySelector('b.w'))return;at.append(Object.assign(document.createElement('b'),{className:'w',textContent:msg}));missPrev.push(w)};
-  for(const[k,ok]of req)if(!ok&&showMiss)mark(k,'Needed');
+  // Never a border: an empty required field turns its own label amber, a wrong value says what is wrong after it.
+  // Empty required fields show after a Download or /; wrong values once the field is left.
+  const mark=(k,msg)=>{const at=labelOf(k);if(!at||at.querySelector('b.w'))return;at.append(Object.assign(document.createElement('b'),{className:'w',textContent:msg}));missPrev.push(at)};
+  if(showMiss)for(const[k,ok]of req)if(!ok){const at=labelOf(k);if(at){at.classList.add('w');missPrev.push(at)}}
   for(const[k,msg]of ck)if(!k.includes(':')&&touched.has(k))mark(k,msg);
   if(touched.has('fp-country')&&$('fp-country').value.trim()&&!S.fp.country)mark('fp-country','Unknown Country');
 }
@@ -2074,7 +2078,7 @@ const STICKY={
 const ADD={
   e(quiet){
     const d=S.draft.e,amt=M.num(d.amt);
-    if(amt==null){B.notify('Amount Needed',false);$('draft-e-amt').focus();return}
+    if(amt==null){B.notify('Amount Required',false);$('draft-e-amt').focus();return}
     const date=d.date||today(),id=edit.e??M.nextId(S),type=txt(d.type),go=M.TRAVEL.test(type);
     // Trip dates equal to what they default to stay auto, as do nights equal to the range's.
     const trip=d.trip&&d.trip!==date?d.trip:'',tripEnd=d.tripEnd&&d.tripEnd!==(trip||date)?d.tripEnd:'',n=Math.round(M.num(d.nights)??0);
@@ -2088,7 +2092,7 @@ const ADD={
   },
   m(quiet){
     const d=S.draft.m,mi=M.num(d.mi);
-    if(mi==null){B.notify('Miles Needed',false);$('draft-m-mi').focus();return}
+    if(mi==null){B.notify('Miles Required',false);$('draft-m-mi').focus();return}
     const to=M.normPostcode(d.to);
     commit('m',{id:edit.m??M.nextId(S),date:d.date||today(),from:M.normPostcode(d.from),to,mi,ret:!!d.ret,why:txt(d.why)||txt(S.draft.e.purpose),
       veh:d.veh||'car',rate:M.num(d.rate),repaid:M.num(d.repaid)},{date:d.date||'',veh:d.veh||'car',from:d.ret?M.normPostcode(d.from):to,why:d.why||''});
