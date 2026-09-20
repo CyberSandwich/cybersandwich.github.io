@@ -98,28 +98,16 @@
     "category": "Generators"
   },
   {
+    "title": "FP16a",
+    "subtitle": "Warwick Travel & Subsistence Claim",
+    "url": "/fp16a/",
+    "category": "Miscellaneous"
+  },
+  {
     "title": "Miele Laundry Guide",
     "subtitle": "Vita Student Cannon Park Laundry Guide",
     "url": "/laundry/",
     "category": "Miscellaneous"
-  },
-  {
-    "title": "Project Convergence",
-    "subtitle": "Stealth Mode",
-    "url": "#",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "Project Shifting Tides",
-    "subtitle": "Stealth Mode",
-    "url": "#",
-    "category": "Miscellaneous"
-  },
-  {
-    "title": "Meet",
-    "subtitle": "Group Availability Scheduler",
-    "url": "/meet/",
-    "category": "In Development"
   },
   {
     "title": "Whisp",
