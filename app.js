@@ -760,123 +760,453 @@ if(photo){
   photo.addEventListener('pointercancel',release);
 }
 
-// DS monogram surface: round tubes swept along the D and the S, emit(x,y,z,nx,ny,nz) per sample.
-const dsShape=(()=>{
-  const STEPS=22,r=0.25;
-  const aCos=new Float32Array(STEPS),aSin=new Float32Array(STEPS);
-  for(let i=0;i<STEPS;i++){const a=(2*Math.PI*i)/STEPS;aCos[i]=Math.cos(a);aSin[i]=Math.sin(a)}
-  function tube(emit,px,py,tx,ty){
-    const nxx=-ty,nxy=tx;
-    for(let i=0;i<STEPS;i++){const ca=aCos[i],sa=aSin[i];
-      emit(px+r*ca*nxx,py+r*ca*nxy,r*sa,ca*nxx,ca*nxy,sa)}
+/*ENGINE-START*/
+// DS monogram engine: letterforms, point cloud, grid bound. Pure (no DOM); tests/test-ds-monogram.js extracts it verbatim.
+const DSE=(()=>{
+const TAU=Math.PI*2,STEP=0.02;
+function line(o,x0,y0,x1,y1){const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/STEP));for(let i=1;i<=n;i++){const t=i/n;o.push(x0+(x1-x0)*t,y0+(y1-y0)*t)}}
+function bez(o,x0,y0,x1,y1,x2,y2,x3,y3){const L=Math.hypot(x1-x0,y1-y0)+Math.hypot(x2-x1,y2-y1)+Math.hypot(x3-x2,y3-y2),n=Math.max(2,Math.ceil(L/STEP));for(let i=1;i<=n;i++){const t=i/n,u=1-t,a=u*u*u,b=3*u*u*t,c=3*u*t*t,d=t*t*t;o.push(a*x0+b*x1+c*x2+d*x3,a*y0+b*y1+c*y2+d*y3)}}
+function arc(o,cx,cy,r,a0,a1){const n=Math.max(2,Math.ceil(Math.abs(a1-a0)*r/STEP));for(let i=1;i<=n;i++){const a=a0+(a1-a0)*i/n;o.push(cx+r*Math.cos(a),cy+r*Math.sin(a))}}
+// D: stem on x=0 from y=-1 to 1, flats of length f, bowl out to x=w as two cubics (k = handle fraction, 0.5523 is a circle).
+// Closed, starting at the stem foot so the pen goes up the stem, across the top and round the bowl.
+function letterD(w,f,k){const o=[0,-1];line(o,0,-1,0,1);line(o,0,1,f,1);bez(o,f,1,f+k*(w-f),1,w,k,w,0);bez(o,w,0,w,-k,f+k*(w-f),-1,f,-1);line(o,f,-1,0,-1);return{pts:o,closed:true}}
+// S: an upper circle (r1) and a larger lower one (r2) spanning top..-top, joined by their internal tangent, which is the spine.
+// Terminals at angles t1 (upper) and t4 (lower). Open, from the upper terminal: the pen draws it like a signature.
+function letterS(r1,r2,top,t1,t4){
+  const c1y=top-r1,c2y=-top+r2,al=Math.acos((r1+r2)/(c1y-c2y)),hx=Math.cos(al),hy=-Math.sin(al);
+  const p2x=r1*hy,p2y=c1y-r1*hx,p3x=-r2*hy,p3y=c2y+r2*hx;
+  let th2=Math.atan2(-hx,hy),th3=Math.atan2(hx,-hy);if(th2<t1)th2+=TAU;if(t4>th3)t4-=TAU;
+  const o=[r1*Math.cos(t1),c1y+r1*Math.sin(t1)];arc(o,0,c1y,r1,t1,th2);line(o,p2x,p2y,p3x,p3y);arc(o,0,c2y,r2,th3,t4);
+  return{pts:o,closed:false};
+}
+// Places the S after the D with an ink gap and centers the pair's ink box on x=0.
+function layout(sp){
+  const rD=sp.r,rS=sp.r*sp.sRatio,D=letterD(sp.dW,sp.dF,sp.dK),S=letterS(sp.sR1,sp.sR2,sp.sTop,sp.sT1,sp.sT4);
+  D.r=rD;S.r=rS;
+  const xS=sp.dW+rD+sp.gap+sp.sR2+rS,cx=(-rD+xS+sp.sR2+rS)/2;
+  for(let i=0;i<S.pts.length;i+=2)S.pts[i]+=xS-cx;for(let i=0;i<D.pts.length;i+=2)D.pts[i]-=cx;
+  return[D,S];
+}
+// Binned segment field: nearest segment to (x,y), optionally skipping one stroke's stations near a given one.
+function field(strokes){
+  const seg=[],meta=[];let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  strokes.forEach((L,si)=>{const p=L.pts,n=p.length/2,m=L.closed?n:n-1;for(let i=0;i<m;i++){const j=(i+1)%n;seg.push(p[2*i],p[2*i+1],p[2*j],p[2*j+1]);meta.push(si,i);
+    minx=Math.min(minx,p[2*i]);maxx=Math.max(maxx,p[2*i]);miny=Math.min(miny,p[2*i+1]);maxy=Math.max(maxy,p[2*i+1])}});
+  // Bin side must cover the longest query radius (a stroke radius plus a sample step), so a 3x3 block always holds the answer.
+  const BS=0.25;minx-=BS;miny-=BS;maxx+=BS;maxy+=BS;
+  const nx=Math.ceil((maxx-minx)/BS),ny=Math.ceil((maxy-miny)/BS),bins=new Array(nx*ny);
+  for(let i=0;i<bins.length;i++)bins[i]=[];
+  for(let s=0;s<seg.length/4;s++){const x0=Math.floor((Math.min(seg[4*s],seg[4*s+2])-minx)/BS),x1=Math.floor((Math.max(seg[4*s],seg[4*s+2])-minx)/BS),y0=Math.floor((Math.min(seg[4*s+1],seg[4*s+3])-miny)/BS),y1=Math.floor((Math.max(seg[4*s+1],seg[4*s+3])-miny)/BS);
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)bins[y*nx+x].push(s)}
+  const nSt=strokes.map(L=>L.pts.length/2);
+  function query(x,y,exS,exI,win,out){
+    const bx=Math.floor((x-minx)/BS),by=Math.floor((y-miny)/BS);let best=Infinity,bs=-1,bt=0;
+    for(let dy=-1;dy<=1;dy++){const yy=by+dy;if(yy<0||yy>=ny)continue;for(let dx=-1;dx<=1;dx++){const xx=bx+dx;if(xx<0||xx>=nx)continue;const list=bins[yy*nx+xx];
+      for(let k=0;k<list.length;k++){const s=list[k];
+        if(exS>=0&&meta[2*s]===exS){let d=Math.abs(meta[2*s+1]-exI);if(strokes[exS].closed)d=Math.min(d,nSt[exS]-d);if(d<win)continue}
+        const x0=seg[4*s],y0=seg[4*s+1],ex=seg[4*s+2]-x0,ey=seg[4*s+3]-y0;let t=((x-x0)*ex+(y-y0)*ey)/(ex*ex+ey*ey);t=t<0?0:t>1?1:t;
+        const qx=x0+ex*t-x,qy=y0+ey*t-y,d2=qx*qx+qy*qy;if(d2<best){best=d2;bs=s;bt=t}}}}
+    if(bs<0){out.d=Infinity;return}const s=bs;out.d=Math.sqrt(best);out.stroke=meta[2*s];out.station=meta[2*s+1];out.t=bt;
+    const x0=seg[4*s],y0=seg[4*s+1];out.qx=x0+(seg[4*s+2]-x0)*bt;out.qy=y0+(seg[4*s+3]-y0)*bt;
   }
-  const cxD=-1.3,bxD=0.4,hD=1.4,rxD=1.7,ryD=1.4,cxS=1.2,rs=0.7;
-  return function(emit){
-    for(let yy=-hD-r;yy<=hD+r;yy+=0.05)tube(emit,cxD-bxD,yy,0,1);
-    for(let phi=-Math.PI/2;phi<=Math.PI/2+0.001;phi+=0.04){
-      const cp=Math.cos(phi),sp=Math.sin(phi);
-      const px=cxD-bxD+rxD*cp,py=ryD*sp;
-      let tx=-rxD*sp,ty=ryD*cp;
-      const tl=1/Math.sqrt(tx*tx+ty*ty);
-      tube(emit,px,py,tx*tl,ty*tl);
+  return{query:query,nSt:nSt};
+}
+// Round-tube point cloud of the letters, sorted along each stroke's path (key = station + t), so drawing the points whose key
+// lies behind the pen is a clean cut across the tube. aoK darkens crevices: probes around each sample that hit another stroke
+// portion count as occluders.
+function build(strokes,step,aoK){
+  const F=field(strokes),q={},q2={},rec=[],aoWin=Math.ceil(1.2*0.18/STEP);
+  const AOD=6,aoDir=[];for(let i=0;i<AOD;i++)aoDir.push(Math.cos(TAU*i/AOD),Math.sin(TAU*i/AOD));
+  function ao(x,y,gx,gy,si,st,r){
+    if(!aoK)return 1;let occ=0,cnt=0;
+    for(let i=0;i<AOD;i++){const dx=aoDir[2*i],dy=aoDir[2*i+1];if(dx*gx+dy*gy<-0.7)continue;cnt++;
+      F.query(x+dx*1.6*r,y+dy*1.6*r,si,st,aoWin,q2);if(q2.d<strokes[q2.stroke].r)occ++}
+    return 1-aoK*(cnt?occ/cnt:0);
+  }
+  strokes.forEach((L,si)=>{
+    const r=L.r,p=L.pts;let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+    for(let i=0;i<p.length;i+=2){minx=Math.min(minx,p[i]);maxx=Math.max(maxx,p[i]);miny=Math.min(miny,p[i+1]);maxy=Math.max(maxy,p[i+1])}
+    const pad=r+2*step,Fs=field([L]);
+    const x0=Math.floor((minx-pad)/step)*step,y0=Math.floor((miny-pad)/step)*step;
+    for(let y=y0;y<=maxy+pad;y+=step)for(let x=x0;x<=maxx+pad;x+=step){
+      Fs.query(x,y,-1,0,0,q);if(q.d>r+step)continue;
+      const sd=q.d-r,gx=q.d>1e-9?(x-q.qx)/q.d:0,gy=q.d>1e-9?(y-q.qy)/q.d:0;
+      const dd=q.d,key=si*1e5+q.station+q.t,a=ao(x,y,gx,gy,si,q.station,r);
+      const em=(px,py,pz,nx,ny,nz)=>rec.push(key,px,py,pz,nx,ny,nz,a);
+      if(dd<=r){const z=Math.sqrt(r*r-dd*dd),c=dd/r;em(x,y,-z,gx*c,gy*c,-z/r);em(x,y,z,gx*c,gy*c,z/r)}
+      // The raster thins out toward the silhouette (z ~ sqrt), so the rim gets ring samples of its own.
+      if(Math.abs(sd)<=step*0.5){const bx=x-gx*sd,by=y-gy*sd,pm=Math.acos(Math.max(0,1-step/r)),dp=step/r;
+        for(let ph=-pm;ph<=pm+1e-9;ph+=dp){const c=Math.cos(ph),s=Math.sin(ph);em(bx-gx*r*(1-c),by-gy*r*(1-c),r*s,gx*c,gy*c,s)}}
     }
-    for(let phi=0;phi<=3*Math.PI/2+0.001;phi+=0.04){
-      const cp=Math.cos(phi),sp=Math.sin(phi);
-      tube(emit,cxS+rs*cp,rs+rs*sp,-sp,cp);
-    }
-    for(let phi=-Math.PI;phi<=Math.PI/2+0.001;phi+=0.04){
-      const cp=Math.cos(phi),sp=Math.sin(phi);
-      tube(emit,cxS+rs*cp,-rs+rs*sp,-sp,cp);
-    }
-  };
+  });
+  const n=rec.length/8,idx=new Uint32Array(n);for(let i=0;i<n;i++)idx[i]=i;
+  idx.sort((a,b)=>rec[8*a]-rec[8*b]);
+  const pos=new Float32Array(3*n),nrm=new Float32Array(3*n),aoA=new Float32Array(n),key=new Float32Array(n);
+  const start=new Uint32Array(strokes.length+1);let rho=0;
+  for(let k=0;k<n;k++){const i=idx[k]*8;key[k]=rec[i];pos[3*k]=rec[i+1];pos[3*k+1]=rec[i+2];pos[3*k+2]=rec[i+3];nrm[3*k]=rec[i+4];nrm[3*k+1]=rec[i+5];nrm[3*k+2]=rec[i+6];aoA[k]=rec[i+7];
+    start[Math.floor(rec[i]/1e5)+1]=k+1;rho=Math.max(rho,Math.hypot(rec[i+1],rec[i+2],rec[i+3]))}
+  for(let s=1;s<=strokes.length;s++)if(!start[s])start[s]=start[s-1];
+  return{n:n,pos:pos,nrm:nrm,ao:aoA,key:key,start:start,rho:rho,nSt:F.nSt};
+}
+// Exact per-point projection extremes over every yaw and every pitch in [-Bh,Bh]. A point's yaw sweep is a circle of radius
+// rho=hypot(x,z) about the y axis. Projected x peaks on the tangent ray, rho/sqrt(a^2-b^2) with a=K2+y sinB, b=rho cosB; over pitch
+// that has one interior critical point, sinB=-K2 y/(y^2+rho^2), so the extreme is there or at a clamp end. Projected y is monotone
+// in sin(yaw), so it peaks at sin(yaw)=+-1, where it is r cos(B+phi)/(K2+r sin(B+phi)) with r=hypot(y,rho): the tangent bound
+// r/sqrt(K2^2-r^2) if the clamp interval reaches a tangent angle, else a clamp end.
+function bound(cloud,K2,Bh){
+  let rx=0,ry=0;const P=cloud.pos;
+  const xAt=(y,rho,B)=>{const a=K2+y*Math.sin(B),b=rho*Math.cos(B);return rho/Math.sqrt(a*a-b*b)};
+  function yMax(r,phi){
+    const t0=-Math.asin(r/K2),inside=t=>{let d=t-phi;d-=Math.round(d/TAU)*TAU;return Math.abs(d)<=Bh};
+    if(inside(t0)||inside(Math.PI-t0))return r/Math.sqrt(K2*K2-r*r);
+    const f=t=>Math.abs(r*Math.cos(t)/(K2+r*Math.sin(t)));return Math.max(f(phi-Bh),f(phi+Bh));
+  }
+  for(let i=0;i<cloud.n;i++){const x=P[3*i],y=P[3*i+1],rho=Math.hypot(x,P[3*i+2]);
+    let m=Math.max(xAt(y,rho,-Bh),xAt(y,rho,Bh));const sc=-K2*y/(y*y+rho*rho);
+    if(Math.abs(sc)<=1){const Bc=Math.asin(sc);if(Math.abs(Bc)<=Bh)m=Math.max(m,xAt(y,rho,Bc))}
+    rx=Math.max(rx,m);
+    const r=Math.hypot(y,rho);ry=Math.max(ry,yMax(r,Math.atan2(rho,y)),yMax(r,Math.atan2(-rho,y)))}
+  return{rx:rx,ry:ry};
+}
+// Shatter confinement: a cylinder about the y axis (radius rc, half-height yc) 3% larger than the letters' own extents, so every
+// sample's home lies inside it with room for a spring overshoot. Its rim corners are the farthest points it holds, and their reach
+// joins the letters' in reachWith, so the grid covers debris anywhere in the cylinder at every rotation.
+function shatterFit(cloud,K2,Bh){
+  const P=cloud.pos;let RXZ=0,YM=0;
+  for(let i=0;i<cloud.n;i++){RXZ=Math.max(RXZ,Math.hypot(P[3*i],P[3*i+2]));YM=Math.max(YM,Math.abs(P[3*i+1]))}
+  const rc=RXZ*1.03,yc=YM*1.03;
+  return{rc:rc,yc:yc,reach:bound({n:2,pos:new Float32Array([rc,yc,0,rc,-yc,0])},K2,Bh)};
+}
+function reachWith(cloud,K2,Bh){const b=bound(cloud,K2,Bh),s=shatterFit(cloud,K2,Bh).reach;return{rx:Math.max(b.rx,s.rx),ry:Math.max(b.ry,s.ry)}}
+// Grid for W columns at a cell aspect (width/height): K1x so the widest reach lands inside W, H from the tallest.
+function grid(reach,W,aspect){const K1x=(W/2-1.5)/reach.rx,K1y=K1x*aspect;return{K1x:K1x,K1y:K1y,W:W,H:2*(Math.ceil(K1y*reach.ry)+1)}}
+// Sample step so neighbours land under a cell apart at the nearest depth the bound allows.
+function stepFor(K1x,K2,rho){return 0.8*(K2-rho)/K1x}
+// gap: ink gap between the D's bowl and the S (stroke width is 0.36); Bh: pitch clamp, which with free yaw sets the box height.
+const SPEC={letters:{r:0.18,sRatio:1.03,dW:1.32,dF:0.30,dK:0.58,sR1:0.42,sR2:0.48,sTop:1.025,sT1:8*Math.PI/180,sT4:188*Math.PI/180,gap:0.16},
+  K2:10,Bh:1.4,aoK:0.45,fog:0.4,light:{amb:0.08,kd:0.50,ks:0.46,kr:0.14}};
+return{TAU:TAU,layout:layout,build:build,bound:bound,shatterFit:shatterFit,reachWith:reachWith,grid:grid,stepFor:stepFor,SPEC:SPEC};
 })();
+/*ENGINE-END*/
 
 const dsMono=$('.ds-mono');
 if(dsMono){
-  const K1x=80,K1y=48,K2=5;
-  let R=0;
-  dsShape((x,y,z)=>{R=Math.max(R,Math.hypot(x,y,z))});
-  // Seen from K2 away, nothing within R of the origin projects more than R/sqrt(K2²-R²) off-axis at any
-  // rotation, so this grid holds every frame whole. style.css's .ds-mono font divisor assumes its width (98).
-  const reach=R/Math.sqrt(K2*K2-R*R);
-  const W=2*(Math.ceil(K1x*reach)+1),H=2*(Math.ceil(K1y*reach)+1);
-  const charset='.,-~:;=!*#$@';
-  const lx=0,ly=0.7071,lz=-0.7071;
-  const buf=new Array(W*H),zb=new Float32Array(W*H);
-  const B_TARGET=0.22,spinSpeed=0.003;
-  let A=0,B=B_TARGET,Av=0,Bv=0,cA=1,sA=0,cB=1,sB=0;
-  function plot(px,py,pz,nx,ny,nz){
-    const p1x=cA*px+sA*pz,p1z=-sA*px+cA*pz;
-    const p2y=cB*py-sB*p1z,p2z=sB*py+cB*p1z;
-    const z=p2z+K2;if(z<0.5)return;
-    const ooz=1/z;
-    const xp=(W>>1)+Math.floor(K1x*ooz*p1x);
-    const yp=(H>>1)-Math.floor(K1y*ooz*p2y);
-    if(xp<0||xp>=W||yp<0||yp>=H)return;
-    const n1x=cA*nx+sA*nz,n1z=-sA*nx+cA*nz;
-    const n2y=cB*ny-sB*n1z,n2z=sB*ny+cB*n1z;
-    const L=n1x*lx+n2y*ly+n2z*lz;if(L<=0)return;
-    const idx=yp*W+xp;
-    if(ooz>zb[idx]){zb[idx]=ooz;let ci=(L*11)|0;if(ci>11)ci=11;buf[idx]=charset[ci]}
+  // Pool of non-directional marks: slashes, bars, brackets and the horizontal-bar glyphs hatch a surface, so they never enter
+  // the ramp (in Menlo Bold the two full-width bars of = out-cover @ and would have been the brightest glyph).
+  const FONT="'Menlo','Monaco','Consolas','Courier New',monospace",RAMP_POOL=".,:;+*%#$@";
+  // Ink coverage of each candidate glyph in the real font, so the ramp steps evenly in ink rather than by folklore.
+  const FM=(()=>{
+    const c=document.createElement('canvas'),S=48;c.width=S*2;c.height=S*2;const x=c.getContext('2d',{willReadFrequently:true});
+    x.font='700 '+S+'px '+FONT;const adv=x.measureText('M').width/S,glyphs=[];
+    for(const ch of RAMP_POOL){x.clearRect(0,0,S*2,S*2);x.textBaseline='middle';x.textAlign='center';x.fillStyle='#000';x.fillText(ch,S,S);
+      const d=x.getImageData(S-adv*S/2-2,S-S/2,adv*S+4,S).data;let sum=0,sy=0;
+      for(let i=3,p=0;i<d.length;i+=4,p++){sum+=d[i];sy+=d[i]*Math.floor(p/(adv*S+4))}
+      glyphs.push({ch:ch,cov:sum/(255*adv*S*S),off:Math.abs(sum?sy/sum/S-0.5:0)})}
+    glyphs.sort((a,b)=>a.cov-b.cov);
+    const top=glyphs[glyphs.length-1].cov,lo=glyphs[0].cov,N=10,ramp=[' '],used=new Set();
+    for(let k=0;k<N;k++){const target=lo+(top-lo)*k/(N-1);let best=null,bs=1e9;
+      for(const g of glyphs){if(used.has(g.ch))continue;const s=Math.abs(g.cov-target)+0.05*g.off;if(s<bs){bs=s;best=g}}
+      used.add(best.ch);ramp.push(best.ch)}
+    return{adv:adv,ramp:ramp};
+  })();
+  const spec=DSE.SPEC,L=spec.light,K2=spec.K2,ramp=FM.ramp,NL=ramp.length-1,CELL_CSS=4.2;let DPR=1;
+  const lx=-0.42,ly=0.62,lz=-0.66,ll=Math.hypot(lx,ly,lz),hx=lx/ll,hy=ly/ll,hz=lz/ll-1,hl=Math.hypot(hx,hy,hz);
+  const rm=matchMedia('(prefers-reduced-motion: reduce)'),hoverMq=matchMedia('(hover:hover) and (pointer:fine)');
+  const homeSection=$('#home'),host=dsMono.parentElement,ctx=dsMono.getContext('2d'),atlas=document.createElement('canvas');
+  const strokes=DSE.layout(spec.letters),coarse=DSE.build(strokes,0.05,0),rho=coarse.rho,ooN=1/(K2-rho),ooF=1/(K2+rho);
+  // The pen: per stroke its station positions and tangents, a curvature-weighted time map (the pen slows through bends and
+  // corners, 1 + 9 x turning angle per station) and the time each station was laid down (fresh ink cools for 400 ms).
+  const pen=strokes.map(Ls=>{const p=Ls.pts,n=p.length/2,tg=new Float32Array(2*n),cost=new Float32Array(n);let tot=0;
+    for(let i=0;i<n;i++){const i0=Math.max(0,i-1),i1=Math.min(n-1,i+1),tx=p[2*i1]-p[2*i0],ty=p[2*i1+1]-p[2*i0+1],l=Math.hypot(tx,ty)||1;tg[2*i]=tx/l;tg[2*i+1]=ty/l}
+    for(let i=0;i<n;i++){const i0=Math.max(0,i-1),d=tg[2*i]*tg[2*i0]+tg[2*i+1]*tg[2*i0+1];cost[i]=1+9*Math.acos(Math.max(-1,Math.min(1,d)));tot+=cost[i]}
+    const map=new Float32Array(257);let acc=0,j=0;
+    for(let k=0;k<=256;k++){const target=k/256*tot;while(j<n-1&&acc+cost[j]<target){acc+=cost[j];j++}map[k]=Math.min(n-1,j+Math.max(0,Math.min(1,(target-acc)/cost[j])))}
+    return{pts:p,n:n,tg:tg,map:map,time:new Float32Array(n).fill(-1)}});
+  // Round end cap for the pen: unit directions on a hemisphere facing along the tangent (c >= 0), Fibonacci-spaced.
+  const CAPN=96,CAP=new Float32Array(3*CAPN);
+  for(let i=0;i<CAPN;i++){const ph=Math.acos(1-(i+0.5)/CAPN),th=i*2.399963;CAP[3*i]=Math.sin(ph)*Math.cos(th);CAP[3*i+1]=Math.sin(ph)*Math.sin(th);CAP[3*i+2]=Math.cos(ph)}
+  // Atlas rows 0..3: depth fade; 4..6: fade levels for the wake dye. Physics runs in fixed 1/120 s substeps so
+  // the bounce is the same at 60 and 120 Hz; springs are underdamped (zeta 0.42: one clear overshoot, a smaller second) and the
+  // pitch rebounds elastically at the clamp. HOME_B > 0 tips the top edge away from the viewer (a sign tipped back).
+  const ROWS=7,FADE_A=[0.34,0.22,0.12],HOME_B=0.24,SPR_K=30,SPR_Z=0.42,INTRO_K=9,INTRO_Z=0.45,BOUNCE=0.8,SUB=1/120;
+  const SWAY_A=0.45,SWAY_T=6.7,SWAY_O=0.07,SWAY_W=0.18,SWAY_MOD_T=19.3,BREATH_A=0.05,BREATH_T=4.1,BREATH_MOD_T=13.7;
+  let cloud=null,W=0,H=0,cw=0,ch=0,K1x=0,K1y=0,zb,acc,cnt,ci,alv,dCi,dAlv,dsp,dRow,full=true,built=false,buildQueued=false;
+  let rip,ripPrev,ripOn=false,FW=0,FH=0,fu,fv,fu2,fv2,fd,fd2,fp,fdiv,fsol,wakeOn=false,dP=null,dV=null,shat=0,shatT=0,fit=null;
+  let A=0,B=HOME_B,Av=0,Bv=0,homeA=0,swayT=0,free=false,last=0,rafId=0,inView=false,near=false,accum=0,bump=0,bumpV=0,sc=1;
+  let intro=null,introDone=false,coolUntil=0,fcA=1,fsA=0,fcB=1,fsB=0,pressA=0,pressB=0,hovA=0,hovB=0,drag=null,lastTap=0;
+  const reduced=()=>rm.matches;
+  // Cells snap to whole device pixels so the atlas glyphs stay crisp; W follows the column, the grid follows W and the reach of
+  // the letters joined with the shatter cylinder's. The box is sized from the coarse cloud at once (no layout shift later); the
+  // fine cloud is built off the main path at load, and synchronously only on a resize after it exists (a blank box would show).
+  // This first runs while the router still hides #home, so the column falls back to 350 until the ResizeObserver corrects it.
+  function layoutSize(sync){
+    DPR=Math.min(3,window.devicePixelRatio||1);
+    const col=Math.min(400,host.clientWidth||350);
+    cw=Math.max(2,Math.round(CELL_CSS*DPR));ch=Math.max(3,Math.round(cw/FM.adv));
+    const nW=Math.max(24,Math.floor(col*DPR/cw)),g=DSE.grid(DSE.reachWith(cloud||coarse,K2,spec.Bh),nW,cw/ch);
+    if(built&&g.W!==W){built=false;cloud=null}
+    W=g.W;H=g.H;K1x=g.K1x;K1y=g.K1y;
+    zb=new Float32Array(W*H);acc=new Float32Array(W*H);cnt=new Uint16Array(W*H);ci=new Uint8Array(W*H);alv=new Uint8Array(W*H);dCi=new Uint8Array(W*H);dAlv=new Uint8Array(W*H);
+    dsp=new Uint8Array(W*H);dRow=new Uint8Array(W*H);rip=new Float32Array(W*H);ripPrev=new Float32Array(W*H);ripOn=false;
+    FW=Math.ceil(W/2);FH=Math.ceil(H/2);const fn=FW*FH;fu=new Float32Array(fn);fv=new Float32Array(fn);fu2=new Float32Array(fn);fv2=new Float32Array(fn);fd=new Float32Array(fn);fd2=new Float32Array(fn);fp=new Float32Array(fn);fdiv=new Float32Array(fn);fsol=new Uint8Array(fn);wakeOn=false;shat=0;
+    dsMono.width=W*cw;dsMono.height=H*ch;dsMono.style.width=(W*cw/DPR)+'px';dsMono.style.height=(H*ch/DPR)+'px';
+    buildAtlas();if(!built)queueBuild(sync);else wake();
   }
-  let dragging=false,lastX=0,lastY=0,lastMoveTime=0,rafId=0;
-  const homeSection=$('#home');
+  function queueBuild(sync){
+    if(buildQueued)return;buildQueued=true;
+    const run=()=>{buildQueued=false;if(built)return;
+      cloud=DSE.build(strokes,DSE.stepFor(K1x,K2,rho),spec.aoK);built=true;fit=DSE.shatterFit(cloud,K2,spec.Bh);
+      if(!dP||dP.length!==cloud.n*3){dP=new Float32Array(cloud.n*3);dV=new Float32Array(cloud.n*3)}
+      const g=DSE.grid(DSE.reachWith(cloud,K2,spec.Bh),W,cw/ch);if(g.H!==H){layoutSize(true);return}
+      K1x=g.K1x;K1y=g.K1y;
+      if(inView&&!introDone&&!intro)startIntro();else wake()};
+    if(sync)run();else if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:1500});else setTimeout(run,1);
+  }
+  function buildAtlas(){
+    atlas.width=cw*(NL+1);atlas.height=ch*ROWS;
+    const x=atlas.getContext('2d');x.clearRect(0,0,atlas.width,atlas.height);
+    x.font='700 '+(cw/FM.adv)+'px '+FONT;x.textAlign='center';x.textBaseline='middle';x.fillStyle=getComputedStyle(dsMono).color;
+    for(let r=0;r<ROWS;r++){x.globalAlpha=r<4?1-spec.fog*r/3:FADE_A[r-4];for(let k=1;k<=NL;k++){x.save();x.beginPath();x.rect(k*cw,r*ch,cw,ch);x.clip();x.fillText(ramp[k],k*cw+cw/2,r*ch+ch/2+0.5);x.restore()}}
+    ctx.imageSmoothingEnabled=false;full=true;
+  }
+  // One auxiliary sample through the frame's projection and shading (pen cap), lit like the tube plus a boost.
+  function plot(px,py,pz,nx,ny,nz,boost){
+    const n1x=fcA*nx+fsA*nz,n1z=-fsA*nx+fcA*nz,n2z=fsB*ny+fcB*n1z;if(n2z>0.26)return;
+    const p1x=fcA*px+fsA*pz,p1z=-fsA*px+fcA*pz,p2y=fcB*py-fsB*p1z,ooz=1/(fsB*py+fcB*p1z+K2);
+    const xp=(W>>1)+Math.floor(K1x*ooz*p1x),yp=(H>>1)-Math.floor(K1y*ooz*p2y);if(xp<0||xp>=W||yp<0||yp>=H)return;
+    const idx=yp*W+xp,zc=zb[idx];if(ooz<zc-0.0007)return;
+    const n2y=fcB*ny-fsB*n1z;let d=n1x*lx+n2y*ly+n2z*lz;d=d<0?0:d/ll;let sp=(n1x*hx+n2y*hy+n2z*hz)/hl;sp=sp<0?0:sp*sp;sp*=sp;sp*=sp;sp*=sp;
+    const rim=n2z<0?(1+n2z)*(1+n2z)*(1+n2z):1;let v=L.amb+L.kd*d+L.ks*sp+L.kr*rim+boost;if(v>1)v=1;
+    if(ooz>zc+0.0007){zb[idx]=ooz;acc[idx]=v;cnt[idx]=1}else{acc[idx]+=v;cnt[idx]++}
+  }
+  // One frame: rotate, project, shade into a depth-tolerant z-buffer that averages the shades of near-tied samples.
   function render(){
-    if(!dragging){
-      Av+=(-spinSpeed-Av)*0.025;
-      Bv+=(B_TARGET-B)*0.006;
-      Bv*=0.94;
-      A+=Av;
-      let nB=B+Bv;
-      if(nB>1.4){nB=1.4;Bv=-Math.abs(Bv)*0.55}
-      if(nB<-1.4){nB=-1.4;Bv=Math.abs(Bv)*0.55}
-      B=nB;
+    const tNow=performance.now(),cool=tNow<coolUntil;
+    const cA=fcA=Math.cos(A),sA=fsA=Math.sin(A),cB=fcB=Math.cos(B),sB=fsB=Math.sin(B),P=shat?dP:cloud.pos,Nn=cloud.nrm,AO=cloud.ao,KEY=cloud.key;
+    zb.fill(0);cnt.fill(0);
+    const hw=W>>1,hh=H>>1,tol=0.0007,amb=L.amb,kd=L.kd,ks=L.ks,kr=L.kr,ns=cloud.start.length-1;
+    // Draw-on: per stroke, the points whose nearest station lies behind the pen (a clean cut across the tube), then the cap.
+    for(let s=0;s<ns;s++){
+      let lo=cloud.start[s],hi=cloud.start[s+1];
+      if(intro){if(intro.st[s]<0)continue;const th=s*1e5+intro.st[s];let a=lo,b=hi;while(a<b){const m=(a+b)>>1;if(KEY[m]<=th)a=m+1;else b=m}hi=a}
+      const tm=pen[s].time,base=s*1e5;
+      for(let i=lo;i<hi;i++){
+        const nx=Nn[3*i],ny=Nn[3*i+1],nz=Nn[3*i+2],n1x=cA*nx+sA*nz,n1z=-sA*nx+cA*nz,n2z=sB*ny+cB*n1z;
+        if(n2z>0.26)continue;
+        const px=P[3*i]*sc,py=P[3*i+1]*sc,pz=P[3*i+2]*sc,p1x=cA*px+sA*pz,p1z=-sA*px+cA*pz,p2y=cB*py-sB*p1z,ooz=1/(sB*py+cB*p1z+K2);
+        const xp=hw+Math.floor(K1x*ooz*p1x),yp=hh-Math.floor(K1y*ooz*p2y);
+        if(xp<0||xp>=W||yp<0||yp>=H)continue;
+        const idx=yp*W+xp,zc=zb[idx];
+        if(ooz<zc-tol)continue;
+        const n2y=cB*ny-sB*n1z;
+        let d=n1x*lx+n2y*ly+n2z*lz;d=d<0?0:d/ll;
+        let sp=(n1x*hx+n2y*hy+n2z*hz)/hl;sp=sp<0?0:sp*sp;sp*=sp;sp*=sp;sp*=sp;
+        const rim=n2z<0?(1+n2z)*(1+n2z)*(1+n2z):1;
+        let v=(amb+kd*d+ks*sp+kr*rim)*AO[i];
+        // Fresh ink: a station laid down within the last 400 ms glows and cools to its lit shade.
+        if(cool){const age=(tNow-tm[(KEY[i]-base)|0])/400;if(age<1)v+=0.55*(1-age)}
+        if(v>1)v=1;
+        if(ooz>zc+tol){zb[idx]=ooz;acc[idx]=v;cnt[idx]=1}else{acc[idx]+=v;cnt[idx]++}
+      }
     }
-    cA=Math.cos(A);sA=Math.sin(A);cB=Math.cos(B);sB=Math.sin(B);
-    for(let i=0;i<W*H;i++){buf[i]=' ';zb[i]=0}
-    dsShape(plot);
-    let s='';
-    for(let j=0;j<H;j++)s+=buf.slice(j*W,(j+1)*W).join('')+'\n';
-    dsMono.textContent=s;
+    if(intro)for(let s=0;s<ns;s++){const st=intro.st[s];if(st<0)continue;
+      const pn=pen[s],j=Math.min(pn.n-1,Math.floor(st)),f=st-j,j1=Math.min(pn.n-1,j+1),r=strokes[s].r*sc;
+      const qx=(pn.pts[2*j]+(pn.pts[2*j1]-pn.pts[2*j])*f)*sc,qy=(pn.pts[2*j+1]+(pn.pts[2*j1+1]-pn.pts[2*j+1])*f)*sc;
+      let tx=pn.tg[2*j]+(pn.tg[2*j1]-pn.tg[2*j])*f,ty=pn.tg[2*j+1]+(pn.tg[2*j1+1]-pn.tg[2*j+1])*f;const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
+      const nx=-ty,ny=tx;
+      for(let c=0;c<CAPN;c++){const a=CAP[3*c],b=CAP[3*c+1],cc=CAP[3*c+2],dx=a*nx+cc*tx,dy=a*ny+cc*ty;plot(qx+r*dx,qy+r*dy,r*b,dx,dy,b,0.4)}}
+    // Quantize with hysteresis (a cell changes glyph only once its shade leaves the old step by a margin); a ripple modulates it.
+    const N1=NL-1,useRip=ripOn&&!reduced();
+    for(let i=0;i<W*H;i++){
+      if(!cnt[i]){ci[i]=0;continue}
+      const raw=1+(acc[i]/cnt[i]+(useRip?0.45*rip[i]:0))*N1,prev=ci[i];
+      ci[i]=(prev&&Math.abs(raw-prev)<0.72)?prev:Math.max(1,Math.min(NL,Math.round(raw)));
+      let f=(zb[i]-ooF)/(ooN-ooF);f=f<0?0:f>1?1:f;alv[i]=Math.round((1-f)*3);
+    }
+    compose();
+    // Blit only the cells whose glyph or row changed.
+    if(full){ctx.clearRect(0,0,dsMono.width,dsMono.height);dCi.fill(0);dAlv.fill(0)}
+    for(let j=0;j<H;j++)for(let i=0;i<W;i++){const k=j*W+i,c=dsp[k],a=dRow[k];if(c===dCi[k]&&a===dAlv[k])continue;
+      if(!full)ctx.clearRect(i*cw,j*ch,cw,ch);if(c)ctx.drawImage(atlas,c*cw,a*ch,cw,ch,i*cw,j*ch,cw,ch);dCi[k]=c;dAlv[k]=a}
+    full=false;
   }
-  // It sits below the fold, so it only animates while on screen.
-  let inView=true;
-  if('IntersectionObserver' in window)new IntersectionObserver(es=>{inView=es[0].isIntersecting;schedule()},{rootMargin:'120px'}).observe(dsMono);
-  function loop(){
+  function speed(){return drag&&drag.moved?Math.abs(drag.vA)+0.7*Math.abs(drag.vB):Math.abs(Av)+0.7*Math.abs(Bv)}
+  // ---- Ripple. A damped wave equation on the cell grid; a tap injects a pulse that spreads across the letters and modulates
+  // their shade (never their geometry, so the bound is untouched). Stops itself when the energy is spent.
+  function rippleTap(x,y){ripOn=true;for(let j=Math.max(0,y-3);j<=Math.min(H-1,y+3);j++)for(let i=Math.max(0,x-3);i<=Math.min(W-1,x+3);i++){const d2=(i-x)*(i-x)+(j-y)*(j-y)*0.36;rip[j*W+i]+=1.3*Math.exp(-d2/2.5)}}
+  function rippleStep(){
+    if(!ripOn)return;let e=0;
+    for(let j=1;j<H-1;j++)for(let i=1;i<W-1;i++){const k=j*W+i,u=rip[k],lap=rip[k-1]+rip[k+1]+0.36*(rip[k-W]+rip[k+W])-2.72*u;
+      const nu=2*u-ripPrev[k]+0.28*lap-0.06*(u-ripPrev[k]);ripPrev[k]=u;rip[k]=nu;e+=nu*nu}
+    if(e<0.02){ripOn=false;rip.fill(0);ripPrev.fill(0)}
+  }
+  // ---- Wake. A 2D stable-fluids step on a half-resolution grid (semi-Lagrangian advection, vorticity confinement, 20 Jacobi
+  // pressure iterations, closed walls). Cells under the letters are solid and carry the letters' screen velocity, so a turn
+  // drags the fluid and sheds vortices off the corners and terminals; dye is injected at the trailing silhouette above the sway's
+  // speed and decays, and is drawn as faint glyphs into empty cells, faded to nothing over the last cells. Skipped when there is
+  // no dye and no speed.
+  function fsample(f,x,y){x=x<0?0:x>FW-1.001?FW-1.001:x;y=y<0?0:y>FH-1.001?FH-1.001:y;const i=x|0,j=y|0,a=x-i,b=y-j,k=j*FW+i;return (f[k]*(1-a)+f[k+1]*a)*(1-b)+(f[k+FW]*(1-a)+f[k+FW+1]*a)*b}
+  function wakeStep(dt){
+    let s=(speed()-1.0)/6;s=s<0?0:s>1?1:s;
+    const av=drag&&drag.moved?drag.vA:Av,bv=drag&&drag.moved?drag.vB:Bv;
+    const V0=0.3*rho*K1x/(K2-rho)/2,cx=FW/2,cy=FH/2;let total=0;
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,i2=Math.min(W-1,2*i+1),j2=Math.min(H-1,2*j+1);
+      const solid=cnt[2*j*W+2*i]||cnt[2*j*W+i2]||cnt[j2*W+2*i]||cnt[j2*W+i2];fsol[k]=solid?1:0;
+      if(solid){const rx=(i+0.5-cx)/cx,ry=(j+0.5-cy)/cy;fu[k]=-av*V0*Math.sqrt(Math.max(0,1-rx*rx));fv[k]=bv*V0*(ch/cw)*Math.sqrt(Math.max(0,1-ry*ry))*0.6;fd[k]=0}}
+    if(s>0){const mx=av<0?1:-1,my=bv>0?-1:1;
+      for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(!fsol[k])continue;
+        if(!fsol[k-mx])fd[k-mx]=Math.min(1,fd[k-mx]+0.3*s);if(!fsol[k-my*FW])fd[k-my*FW]=Math.min(1,fd[k-my*FW]+0.15*s)}}
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i;if(fsol[k]){fu2[k]=fu[k];fv2[k]=fv[k];fd2[k]=0;continue}
+      const x=i-fu[k]*dt,y=j-fv[k]*dt;fu2[k]=fsample(fu,x,y);fv2[k]=fsample(fv,x,y);fd2[k]=fsample(fd,x,y)*0.955;total+=fd2[k]}
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(fsol[k])continue;
+      const wl=(fv2[k]-fv2[k-1])-(fu2[k]-fu2[k-FW]);const wr=Math.abs((fv2[k+1]-fv2[k])-(fu2[k+1]-fu2[k+1-FW])),wu=Math.abs((fv2[k-FW]-fv2[k-FW-1])-(fu2[k-FW]-fu2[k-2*FW<0?k-FW:k-2*FW]));
+      const gx=wr-Math.abs(wl),gy=Math.abs(wl)-wu,gl=Math.hypot(gx,gy)+1e-6;fu2[k]+=0.35*(gy/gl)*wl*dt*8;fv2[k]-=0.35*(gx/gl)*wl*dt*8}
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;fdiv[k]=fsol[k]?0:0.5*(fu2[k+1]-fu2[k-1]+fv2[k+FW]-fv2[k-FW]);fp[k]=0}
+    for(let it=0;it<20;it++)for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(fsol[k])continue;fp[k]=(fp[k-1]+fp[k+1]+fp[k-FW]+fp[k+FW]-fdiv[k])*0.25}
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(fsol[k])continue;fu2[k]-=0.5*(fp[k+1]-fp[k-1]);fv2[k]-=0.5*(fp[k+FW]-fp[k-FW])}
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,wall=i===0||j===0||i===FW-1||j===FH-1;fu[k]=wall?0:fu2[k];fv[k]=wall?0:fv2[k];fd[k]=wall?0:fd2[k]}
+    wakeOn=total>0.05||s>0;
+    if(!wakeOn){fu.fill(0);fv.fill(0);fd.fill(0)}
+  }
+  // ---- Shatter. A hard fling bursts the letters into their own samples: each inherits the rigid velocity (omega x p) plus an
+  // outward kick, flies with drag inside the cylinder shatterFit allows (reflecting off its walls), then the underdamped springs
+  // pull every sample home and it clicks back with one overshoot. The rigid rotation keeps running, so the debris tumbles.
+  function shatterStart(){
+    const P=cloud.pos,n=cloud.n;
+    for(let i=0;i<n;i++){const x=P[3*i],y=P[3*i+1],z=P[3*i+2],r=Math.hypot(x,y,z)||1,k=(1.2+Math.random()*1.6)/r;
+      dP[3*i]=x;dP[3*i+1]=y;dP[3*i+2]=z;
+      dV[3*i]=Av*z*0.5+x*k+(Math.random()-0.5)*0.8;dV[3*i+1]=y*k+(Math.random()-0.5)*0.8;dV[3*i+2]=-Av*x*0.5+z*k+(Math.random()-0.5)*0.8}
+    shat=1;shatT=0;
+  }
+  function shatterStep(dt){
+    const P=cloud.pos,n=cloud.n,rc=fit.rc,yc=fit.yc,spring=shatT>0.45,k=30,c=2*0.42*Math.sqrt(30);let far=0;shatT+=dt;
+    for(let i=0;i<n;i++){let x=dP[3*i],y=dP[3*i+1],z=dP[3*i+2],vx=dV[3*i],vy=dV[3*i+1],vz=dV[3*i+2];
+      if(spring){vx+=(k*(P[3*i]-x)-c*vx)*dt;vy+=(k*(P[3*i+1]-y)-c*vy)*dt;vz+=(k*(P[3*i+2]-z)-c*vz)*dt}else{const g=Math.exp(-1.5*dt);vx*=g;vy*=g;vz*=g}
+      x+=vx*dt;y+=vy*dt;z+=vz*dt;
+      const rr=Math.hypot(x,z);if(rr>rc){const nx=x/rr,nz=z/rr,vn=vx*nx+vz*nz;if(vn>0){vx-=1.6*vn*nx;vz-=1.6*vn*nz}x=nx*rc;z=nz*rc}
+      if(y>yc){y=yc;if(vy>0)vy=-0.6*vy}else if(y<-yc){y=-yc;if(vy<0)vy=-0.6*vy}
+      dP[3*i]=x;dP[3*i+1]=y;dP[3*i+2]=z;dV[3*i]=vx;dV[3*i+1]=vy;dV[3*i+2]=vz;
+      const e=Math.abs(x-P[3*i])+Math.abs(y-P[3*i+1])+Math.abs(z-P[3*i+2])+Math.abs(vx)+Math.abs(vy)+Math.abs(vz);if(e>far)far=e}
+    if(spring&&(far<0.05||shatT>3.2))shat=0;
+  }
+  // Display composition: letters, then the wake dye into empty cells (fade rows, edge falloff).
+  function compose(){
+    const n=W*H;
+    for(let i=0;i<n;i++){dsp[i]=ci[i];dRow[i]=alv[i]}
+    if(wakeOn&&!reduced())for(let j=2;j<H-2;j++)for(let i=2;i<W-2;i++){const k=j*W+i;if(dsp[k])continue;
+      const d=fsample(fd,(i+0.5)/2-0.5,(j+0.5)/2-0.5)*Math.min(1,(Math.min(i,W-1-i,j,H-1-j)-1)/4);if(d<0.12)continue;
+      dsp[k]=d>0.55?3:d>0.3?2:1;dRow[k]=d>0.45?4:d>0.22?5:6}
+  }
+  // Motion. Idle is a sway: each half-swing is an eased S-curve (cubic in-out) that runs slightly past the far extreme and
+  // settles back over the last SWAY_W of the half period, so every turnaround has a small overshoot and settle with zero
+  // velocity at both ends of each segment; the amplitude breathes on a slow unrelated period and the pitch breath runs on two
+  // more, so it never repeats as a loop. Underdamped springs follow the curve and return pitch to the tipped-back home,
+  // rebounding elastically at the clamp. After any release the sway is re-centered on the nearest face-on turn and re-phased to
+  // the letters' offset and direction, so it is always balanced left and right. Under reduced motion nothing moves on its own.
+  function spring(x,v,target,dt,k,z){const a=k*(target-x)-2*z*Math.sqrt(k)*v;v+=a*dt;x+=v*dt;return[x,v]}
+  function pitch(dt,goal,k,z){const r=spring(B,Bv,goal,dt,k,z);B=r[0];Bv=r[1];if(B>spec.Bh){B=spec.Bh;Bv=-Math.abs(Bv)*BOUNCE}if(B<-spec.Bh){B=-spec.Bh;Bv=Math.abs(Bv)*BOUNCE}}
+  const ease=h=>h<0.5?4*h*h*h:1-Math.pow(2-2*h,3)/2;
+  function swayAt(t){
+    const amp=SWAY_A*(1+0.12*Math.sin(t*DSE.TAU/SWAY_MOD_T)),half=SWAY_T/2,n=Math.floor(t/half),q=t/half-n,from=n%2?1:-1,peak=-from*(1+SWAY_O);
+    return amp*(q<1-SWAY_W?from+(peak-from)*ease(q/(1-SWAY_W)):peak+(-from-peak)*ease((q-(1-SWAY_W))/SWAY_W));
+  }
+  function swayNow(){return reduced()?0:swayAt(swayT)}
+  function breathNow(){return reduced()?0:BREATH_A*(1+0.3*Math.sin(swayT*DSE.TAU/BREATH_MOD_T))*Math.sin((swayT+1.3)*DSE.TAU/BREATH_T)}
+  function rephase(){
+    homeA=Math.round(A/DSE.TAU)*DSE.TAU;
+    if(reduced())return;
+    const amp=SWAY_A*(1+0.12*Math.sin(swayT*DSE.TAU/SWAY_MOD_T)),dir=Av<0?-1:1,base=Math.floor(swayT/SWAY_T)*SWAY_T;
+    let d=A-homeA-pressA-hovA;d=Math.max(-amp,Math.min(amp,d));let best=swayT,bd=1e9;
+    for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t);if((swayAt(t+0.01)-v)*dir<0)continue;const e=Math.abs(v-d);if(e<bd){bd=e;best=t}}
+    swayT=best;
+  }
+  function step(dt){accum+=dt;while(accum>=SUB){substep(SUB);accum-=SUB}
+    if(!reduced()){rippleStep();if(wakeOn||speed()>1.0)wakeStep(Math.min(0.05,dt))}
+    if(shat)shatterStep(Math.min(0.05,dt));
+  }
+  function substep(dt){
+    swayT+=dt;
+    const sA_=swayNow(),sB_=breathNow();
+    // Landing squash after the intro: the letters dip to 96% and spring back (clamped at 1, the size the box was derived for).
+    let r=spring(bump,bumpV,0,dt,60,0.4);bump=r[0];bumpV=r[1];sc=Math.min(1,1-0.06*bump);
+    if(drag&&drag.moved)return;
+    if(free){Av*=Math.exp(-0.9*dt);A+=Av*dt;if(Math.abs(Av)<1.6){free=false;rephase()}pitch(dt,HOME_B+sB_+pressB+hovB,SPR_K,SPR_Z);return}
+    const k=intro?INTRO_K:SPR_K,z=intro?INTRO_Z:SPR_Z;
+    r=spring(A,Av,homeA+sA_+pressA+hovA,dt,k,z);A=r[0];Av=r[1];
+    pitch(dt,HOME_B+sB_+pressB+hovB,k,z);
+  }
+  function settled(){return reduced()&&!intro&&!drag&&!free&&!shat&&!ripOn&&!wakeOn&&Math.abs(Av)<2e-3&&Math.abs(Bv)<2e-3&&Math.abs(bump)<1e-3&&Math.abs(A-homeA-pressA-hovA)<1e-3&&Math.abs(B-HOME_B-pressB-hovB)<1e-3}
+  // The pen: D over the first 0.85 s, S from 0.55 s, eased overall and slowed through bends by the curvature map; -1 = not
+  // started, so a stroke begins from its first station with the round cap and never as a stray dot.
+  function introStep(){
+    if(!intro)return;const now=performance.now(),t=(now-intro.t0)/1000,e=x=>x<=0?0:x>=1?1:x<0.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+    const prog=[e(t/0.85),e((t-0.55)/0.9)];
+    for(let s=0;s<2;s++){const pn=pen[s];if(prog[s]<=0){intro.st[s]=-1;continue}
+      const u=Math.min(255.999,prog[s]*256),k=Math.floor(u),st=pn.map[k]+(pn.map[k+1]-pn.map[k])*(u-k);
+      const prev=intro.st[s]<0?-1:Math.floor(intro.st[s]);for(let j=prev+1;j<=Math.floor(st);j++)pn.time[j]=now;
+      intro.st[s]=st}
+    // The pen lifts: the letters land with a squash and a nod toward the viewer, and the underdamped springs settle them.
+    if(t>1.5){intro=null;introDone=true;bumpV=6;Bv-=1.4;coolUntil=now+450}
+  }
+  function frame(ts){
     rafId=0;
-    if(document.hidden||!inView||!homeSection||!homeSection.classList.contains('active'))return;
-    render();
+    if(document.hidden||!inView||!built||!homeSection.classList.contains('active'))return;
+    const dt=Math.min(0.05,last?(ts-last)/1000:0.016);last=ts;
+    introStep();step(dt);render();
+    if(settled()){last=0;return}
     schedule();
   }
-  function schedule(){if(!rafId)rafId=requestAnimationFrame(loop)}
-  render();
-  schedule();
-  document.addEventListener('visibilitychange',schedule);
-  // Leaving Home stops the loop; the route's class change on #home starts it again.
-  if(homeSection)new MutationObserver(schedule).observe(homeSection,{attributeFilter:['class']});
+  function schedule(){if(!rafId)rafId=requestAnimationFrame(frame)}
+  function wake(){last=0;schedule()}
+  function startIntro(){
+    if(reduced()){introDone=true;A=homeA;B=HOME_B;Av=Bv=0;wake();return}
+    intro={t0:performance.now(),st:[-1,-1]};for(const pn of pen)pn.time.fill(-1);A=homeA-0.55;B=0.26;Av=0;Bv=0;wake();
+  }
+  layoutSize();
+  // Sideways drags rotate (touch-action:pan-y leaves vertical swipes to the page); a drag that started sideways then has the full
+  // pitch range. The surface follows the pointer on both axes. A press (or a hover, on fine pointers) pushes the side under the
+  // pointer away; a tap sends a ripple; a double tap turns one full turn; a fling free-spins and the sway resumes, and a hard
+  // fling shatters the letters.
   dsMono.addEventListener('pointerdown',e=>{
-    dragging=true;
-    lastX=e.clientX;lastY=e.clientY;lastMoveTime=performance.now();
-    Av=0;Bv=0;
-    dsMono.classList.add('ds-grabbing');
-    try{dsMono.setPointerCapture(e.pointerId)}catch(_){}
+    if(e.button||!built)return;const r=dsMono.getBoundingClientRect();
+    drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,t:performance.now(),moved:false,A0:A,B0:B,vA:0,vB:0};
+    pressA=-(((e.clientX-r.left)/r.width)-0.5)*0.36;pressB=(0.5-(e.clientY-r.top)/r.height)*0.30;Av=0;Bv=0;free=false;wake();
   });
   dsMono.addEventListener('pointermove',e=>{
-    if(!dragging)return;
-    const now=performance.now();
-    const dt=Math.max(8,now-lastMoveTime);
-    const dx=e.clientX-lastX,dy=e.clientY-lastY;
-    const sens=0.01;
-    A-=dx*sens;
-    let nB=B-dy*sens;
-    if(nB>1.4)nB=1.4;if(nB<-1.4)nB=-1.4;B=nB;
-    Av=-(dx*sens)*(16/dt);
-    Bv=-(dy*sens)*(16/dt);
-    lastX=e.clientX;lastY=e.clientY;lastMoveTime=now;
+    if(!drag||e.pointerId!==drag.id){
+      if(!drag&&hoverMq.matches&&!reduced()){const r=dsMono.getBoundingClientRect();hovA=-(((e.clientX-r.left)/r.width)-0.5)*0.24;hovB=(0.5-(e.clientY-r.top)/r.height)*0.14;wake()}
+      return}
+    const dx=e.clientX-drag.x0,dy=e.clientY-drag.y0;
+    if(!drag.moved){if(Math.hypot(dx,dy)<(e.pointerType==='touch'?6:3))return;drag.moved=true;pressA=0;pressB=0;dsMono.classList.add('ds-grabbing');try{dsMono.setPointerCapture(e.pointerId)}catch(_){}}
+    const now=performance.now(),ddt=Math.max(4,now-drag.t)/1000,sens=DSE.TAU/(1.5*dsMono.clientWidth);
+    A=drag.A0-dx*sens;B=Math.max(-spec.Bh,Math.min(spec.Bh,drag.B0-dy*sens));
+    drag.vA=drag.vA*0.5-(e.clientX-drag.x)*sens/ddt*0.5;drag.vB=drag.vB*0.5-(e.clientY-drag.y)*sens/ddt*0.5;drag.x=e.clientX;drag.y=e.clientY;drag.t=now;wake();
   });
-  function endDrag(){dragging=false;dsMono.classList.remove('ds-grabbing')}
-  dsMono.addEventListener('pointerup',endDrag);
-  dsMono.addEventListener('pointercancel',endDrag);
+  function endDrag(e,cancel){
+    if(!drag||e.pointerId!==drag.id)return;
+    const d=drag;drag=null;dsMono.classList.remove('ds-grabbing');pressA=0;pressB=0;
+    const thrown=d.moved&&!cancel&&performance.now()-d.t<=80&&!reduced();
+    if(thrown){Bv=Math.max(-8,Math.min(8,d.vB));if(Math.abs(d.vA)>2.5){Av=Math.max(-14,Math.min(14,d.vA));free=true}
+      if(Math.abs(d.vA)>9&&!intro&&Math.abs(bump)<0.01&&!shat)shatterStart()}
+    if(!d.moved&&!cancel){const now=performance.now(),r=dsMono.getBoundingClientRect();
+      if(!reduced())rippleTap(Math.floor((d.x0-r.left)/r.width*W),Math.floor((d.y0-r.top)/r.height*H));
+      if(now-lastTap<320&&!reduced()){rephase();homeA+=DSE.TAU*(d.x0-r.left<dsMono.clientWidth/2?1:-1);lastTap=0}else lastTap=now}
+    if(d.moved&&!free)rephase();
+    wake();
+  }
+  dsMono.addEventListener('pointerup',e=>endDrag(e,false));
+  dsMono.addEventListener('pointercancel',e=>endDrag(e,true));
+  dsMono.addEventListener('pointerleave',()=>{hovA=0;hovB=0;wake()});
+  dsMono.addEventListener('dragstart',e=>e.preventDefault());
+  // Below the fold: build the fine cloud as it approaches, play the intro the first time a third of it is on screen.
+  new IntersectionObserver(es=>{near=es[0].isIntersecting;if(near&&!built)queueBuild()},{rootMargin:'600px'}).observe(dsMono);
+  new IntersectionObserver(es=>{const was=inView;inView=es[0].isIntersecting;if(inView&&built&&!introDone&&!intro)startIntro();if(inView&&!was)wake()},{threshold:0.35}).observe(dsMono);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
+  rm.addEventListener('change',()=>{if(reduced()){intro=null;introDone=true;free=false;Av=Bv=0;bump=bumpV=0;shat=0;ripOn=false;wakeOn=false;homeA=Math.round(A/DSE.TAU)*DSE.TAU}wake()});
+  new ResizeObserver(()=>{const col=Math.min(400,host.clientWidth),d=Math.min(3,window.devicePixelRatio||1);if(cw&&(d!==DPR||Math.abs(col*d/cw-W)>=1))layoutSize(built)}).observe(host);
+  // Theme changes recolor the atlas; leaving Home stops the loop and the route's class change on #home starts it again.
+  new MutationObserver(()=>{buildAtlas();wake()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  new MutationObserver(wake).observe(homeSection,{attributeFilter:['class']});
 }
 
 function cmdBuildItems(){

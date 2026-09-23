@@ -56,22 +56,17 @@ body{line-height:1.5}
 .coin picture{display:contents}
 .face{position:absolute;inset:0;display:block;width:100%;height:100%;border-radius:50%;background:var(--card);box-shadow:var(--shadow);backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:box-shadow .15s}
 .tails{transform:rotateY(180deg)}
+/* The script sizes the canvas (W columns snapped to whole device pixels, height
+   from the rotation bound), so no font rule and no containment are needed: a canvas never reflows its siblings.
+   pan-y leaves vertical swipes to the page; sideways drags rotate. */
 .ds-mono{
-  /* The donut rewrites its text 60x a second; containment keeps that off the siblings' layout.
-     Not `strict`: size containment would freeze the box at a fixed intrinsic size, and the font-size follows the viewport. */
-  contain:layout style paint;
   display:block;
-  width:max-content;
   margin:0 auto;
-  padding:.4em 0;
-  /* Fits the grid to the card column: app.js sizes it to 98 columns, x Menlo's .602em advance = 59em. */
-  font:700 calc(min(400px,100vw - 40px) / 59)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
-  letter-spacing:0;
   color:var(--t1);
-  white-space:pre;
   user-select:none;
   -webkit-user-select:none;
-  touch-action:none;
+  -webkit-touch-callout:none;
+  touch-action:pan-y;
   cursor:grab
 }
 .ds-mono.ds-grabbing{cursor:grabbing}
