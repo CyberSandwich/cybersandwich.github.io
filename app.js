@@ -882,10 +882,125 @@ function reachWith(cloud,K2,Bh){const b=bound(cloud,K2,Bh),s=shatterFit(cloud,K2
 function grid(reach,W,aspect){const K1x=(W/2-1.5)/reach.rx,K1y=K1x*aspect;return{K1x:K1x,K1y:K1y,W:W,H:2*(Math.ceil(K1y*reach.ry)+1)}}
 // Sample step so neighbours land under a cell apart at the nearest depth the bound allows.
 function stepFor(K1x,K2,rho){return 0.8*(K2-rho)/K1x}
+// ---- Pointer geometry, in screen cells from the box center (X right, Y up) with ooz = 1/depth as the z-buffer holds it.
+// unproject: the object-space point a cell holds. surfVel: that point's screen velocity (x right, y down) under yaw rate Av
+// and pitch rate Bv, the time derivative of the projection (yaw first, then pitch, depth = sB*py + cB*p1z + K2).
+function unproject(X,Y,ooz,A,B,K1x,K1y,K2,out){
+  const sA=Math.sin(A),cA=Math.cos(A),sB=Math.sin(B),cB=Math.cos(B),p1x=X/(K1x*ooz),p2y=Y/(K1y*ooz),zv=1/ooz-K2,p1z=cB*zv-sB*p2y;
+  out[0]=cA*p1x-sA*p1z;out[1]=cB*p2y+sB*zv;out[2]=sA*p1x+cA*p1z;
+}
+function surfVel(X,Y,ooz,sB,cB,K1x,K1y,K2,Av,Bv,out){
+  const p1x=X/(K1x*ooz),p2y=Y/(K1y*ooz),zv=1/ooz-K2,p1z=cB*zv-sB*p2y,dd=Bv*p2y-cB*Av*p1x;
+  out[0]=K1x*ooz*(Av*p1z-p1x*ooz*dd);out[1]=-K1y*ooz*(sB*Av*p1x-Bv*zv-p2y*ooz*dd);
+}
+// follow: the yaw and pitch that put a grabbed point q under the pointer. Yaw is solved on q's circle about the y axis
+// (psi = yaw + q's own angle, near-face root), then pitch with that yaw (root nearest the current), three passes for the
+// coupling. Each is a sin t + b cos t = c, exact while the pointer sits within 60 deg of the circle's screen center (CONE)
+// and continued at that slope beyond, since an arcball's sensitivity blows up at the rim; so a long drag keeps turning. The
+// pitch lever is the cone-clamped yaw point (past 90 deg of yaw the true point has none), and both levers are at least rmin
+// long, so a grab near the axis behaves like one on a small circle instead of pinning at once. out = [psi, pitch], unclamped.
+const CONE=Math.sin(Math.PI/3),wrap=x=>x-Math.round(x/TAU)*TAU;
+function trig(a,b,c,near){const R=Math.hypot(a,b),be=Math.atan2(b,a);let u=c/R;u=u>CONE?CONE:u<-CONE?-CONE:u;
+  const s=Math.asin(u),d1=wrap(s-be-near),d2=wrap(Math.PI-s-be-near);return near+(Math.abs(d1)<Math.abs(d2)?d1:d2)}
+function lin(f,x,xc){if(Math.abs(x)<=xc)return f(x);const x1=x<0?-xc:xc,h=x<0?-0.5:0.5,f1=f(x1);return f1+(f1-f(x1-h))/h*(x-x1)}
+function follow(q,X,Y,B,K1x,K1y,K2,rmin,out){
+  const rq=Math.max(rmin,Math.hypot(q[0],q[2])),qy=q[1];let psi=Math.PI;
+  for(let it=0;it<3;it++){
+    const sB=Math.sin(B),cB=Math.cos(B),D0=K2+sB*qy;
+    psi=lin(x=>trig(K1x*rq,-x*cB*rq,x*D0,Math.PI),X,CONE*rq*K1x/Math.sqrt(D0*D0-CONE*CONE*rq*rq*cB*cB));
+    const pc=Math.max(2*Math.PI/3,Math.min(4*Math.PI/3,psi)),p1z=rq*Math.cos(pc),r=Math.max(rmin,Math.hypot(qy,p1z)),near=B;
+    B=lin(y=>trig(y*qy+K1y*p1z,y*p1z-K1y*qy,-y*K2,near),Y,CONE*r*K1y/Math.sqrt(K2*K2-CONE*CONE*r*r));
+  }
+  out[0]=psi;out[1]=B;
+}
+// Pointer velocity: a ring of the last PN samples (t in ms, four values) and the least-squares slope of value c over the
+// FIT_MS before the newest sample, per second, which a jittery finger cannot spike the way a two-sample difference can.
+function fitter(PN,FIT_MS){
+  const S=new Float64Array(PN*5);let head=0,n=0;
+  function push(t,a,b,c,d){const o=5*head;S[o]=t;S[o+1]=a;S[o+2]=b;S[o+3]=c;S[o+4]=d;head=(head+1)%PN;n++}
+  function slope(c){const m=n<PN?n:PN,t0=S[5*((head+PN-1)%PN)];let k=0,st=0,sy=0,stt=0,sty=0;
+    for(let i=0;i<m;i++){const o=5*((head+PN-1-i)%PN),t=S[o]-t0,y=S[o+1+c];if(t<-FIT_MS)break;k++;st+=t;sy+=y;stt+=t*t;sty+=t*y}
+    const den=k*stt-st*st;return den>1e-9?(k*sty-st*sy)/den*1000:0}
+  return{reset:()=>{head=0;n=0},push:push,slope:slope};
+}
+// ---- Wake: air and dust over a W x H cell grid, in column widths (a row is hy of them). The air is a 2D stable-fluids
+// field on a half-resolution grid with open walls and no obstacle: in 3D the air a turning letter displaces goes round it,
+// so the screen sees only the boundary layer, here the cells under the near face relaxing toward the surface's own screen
+// velocity (rate KB, capped at VCAP). That lays a shear layer along every rim, which separates at the trailing corners and
+// rolls up; momentum then leaves the plane (KD), diffuses (NU) and is kept crisp by vorticity confinement (VC). Dust is a
+// fixed pool of inertial grains shed into the empty cell behind a trailing rim with the air's velocity there plus a small
+// kick, so it is left where it was released; each relaxes toward the air over a Stokes time and settles at a speed set by
+// its own mass (TAU0, VT per unit mass), with Brownian jitter for the light ones, and dies of age or within MARGIN cells of
+// a wall. Birth positions are kept for the drift measurement in tests/test-ds-monogram.js.
+function wake(W,H,hy,NG){
+  const FW=Math.ceil(W/2),FH=Math.ceil(H/2),N=FW*FH,HX=2,HY=2*hy,hw=W>>1,hh=H>>1;
+  const KB=14,VCAP=28,KD=2.8,NU=3,VC=2,JAC=12,VTH=3,RATE=720,KICK=7,TAU0=0.18,VT=3,JIT=4,MARGIN=1.5,AIR_DT=1/60;
+  const u=new Float32Array(N),v=new Float32Array(N),u2=new Float32Array(N),v2=new Float32Array(N),p=new Float32Array(N),dv=new Float32Array(N),om=new Float32Array(N);
+  const sol=new Uint8Array(N),su=new Float32Array(N),sv=new Float32Array(N),tr=new Uint16Array(N),tu=new Uint16Array(N),SV=new Float64Array(2);
+  const gx=new Float32Array(NG),gy=new Float32Array(NG),gx0=new Float32Array(NG),gy0=new Float32Array(NG),gvx=new Float32Array(NG),gvy=new Float32Array(NG),gm=new Float32Array(NG),ga=new Float32Array(NG),gl=new Float32Array(NG);
+  let live=0,acc=0,nt=0,vmax=0,airAcc=0;
+  function sample(f,x,y){x=x<0?0:x>FW-1.001?FW-1.001:x;y=y<0?0:y>FH-1.001?FH-1.001:y;const i=x|0,j=y|0,a=x-i,b=y-j,k=j*FW+i;return (f[k]*(1-a)+f[k+1]*a)*(1-b)+(f[k+FW]*(1-a)+f[k+FW+1]*a)*b}
+  function edges(f){for(let i=0;i<FW;i++){f[i]=f[i+FW];f[(FH-1)*FW+i]=f[(FH-2)*FW+i]}for(let j=0;j<FH;j++){f[j*FW]=f[j*FW+1];f[j*FW+FW-1]=f[j*FW+FW-2]}}
+  // The nearest inked cell among a half cell's four, as 1/depth (0 = empty).
+  function near(cnt,zb,i,j){let z=0;for(let dj=0;dj<2;dj++){const jj=2*j+dj;if(jj>=H)break;for(let di=0;di<2;di++){const ii=2*i+di;if(ii>=W)break;const c=jj*W+ii;if(cnt[c]&&zb[c]>z)z=zb[c]}}return z}
+  function spawn(x,y,vx,vy,rnd){if(live>=NG)return;const m=0.6+rnd();gx[live]=gx0[live]=x;gy[live]=gy0[live]=y;gvx[live]=vx;gvy[live]=vy;gm[live]=m;ga[live]=0;gl[live]=(1.2+1.6*rnd())*Math.pow(m,-0.3);live++}
+  function kill(i){live--;gx[i]=gx[live];gy[i]=gy[live];gx0[i]=gx0[live];gy0[i]=gy0[live];gvx[i]=gvx[live];gvy[i]=gvy[live];gm[i]=gm[live];ga[i]=ga[live];gl[i]=gl[live]}
+  // The near-face point under each half cell and its screen velocity, then the trailing cells: inked, moving, with the cell
+  // behind them (against the motion) empty.
+  function surface(cnt,zb,K1x,K1y,K2,B,Av,Bv){
+    const sB=Math.sin(B),cB=Math.cos(B);nt=0;vmax=0;
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,z=near(cnt,zb,i,j);sol[k]=z>0?1:0;if(!z){su[k]=sv[k]=0;continue}
+      surfVel(2*i+1-hw,hh-2*j,z,sB,cB,K1x,K1y,K2,Av,Bv,SV);su[k]=SV[0];sv[k]=SV[1]*hy;const s=Math.hypot(su[k],sv[k]);if(s>vmax)vmax=s}
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i;if(!sol[k])continue;const a=su[k],b=sv[k];if(a*a+b*b<VTH*VTH)continue;
+      const ax=Math.abs(a)>=Math.abs(b),ui=i-(ax?(a>0?1:-1):0),uj=j-(ax?0:(b>0?1:-1));if(ui<0||ui>=FW||uj<0||uj>=FH)continue;
+      const c=uj*FW+ui;if(!sol[c]){tr[nt]=k;tu[nt]=c;nt++}}
+  }
+  // The air advances in fixed AIR_DT steps (semi-Lagrangian, stable at any step); the grains every call.
+  function air(dt,force){
+    if(force){const kf=1-Math.exp(-KB*dt);for(let k=0;k<N;k++){if(!sol[k])continue;let a=su[k],b=sv[k];const s=Math.hypot(a,b);if(s>VCAP){a*=VCAP/s;b*=VCAP/s}u[k]+=(a-u[k])*kf;v[k]+=(b-v[k])*kf}}
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,x=i-u[k]*dt/HX,y=j-v[k]*dt/HY;u2[k]=sample(u,x,y);v2[k]=sample(v,x,y)}
+    const g=1-KD*dt,ax=NU*dt/(HX*HX),ay=NU*dt/(HY*HY);
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;
+      u[k]=(u2[k]+ax*(u2[k-1]+u2[k+1]-2*u2[k])+ay*(u2[k-FW]+u2[k+FW]-2*u2[k]))*g;
+      v[k]=(v2[k]+ax*(v2[k-1]+v2[k+1]-2*v2[k])+ay*(v2[k-FW]+v2[k+FW]-2*v2[k]))*g}
+    edges(u);edges(v);
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;om[k]=(v[k+1]-v[k-1])/(2*HX)-(u[k+FW]-u[k-FW])/(2*HY)}
+    for(let j=2;j<FH-2;j++)for(let i=2;i<FW-2;i++){const k=j*FW+i,nx=(Math.abs(om[k+1])-Math.abs(om[k-1]))/(2*HX),ny=(Math.abs(om[k+FW])-Math.abs(om[k-FW]))/(2*HY),l=Math.hypot(nx,ny)+1e-6;
+      u[k]+=VC*dt*ny/l*om[k];v[k]-=VC*dt*nx/l*om[k]}
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;dv[k]=(u[k+1]-u[k-1])/(2*HX)+(v[k+FW]-v[k-FW])/(2*HY)}
+    p.fill(0);const cx=1/(HX*HX),cy=1/(HY*HY),cc=1/(2*cx+2*cy);
+    for(let it=0;it<JAC;it++)for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;p[k]=((p[k-1]+p[k+1])*cx+(p[k-FW]+p[k+FW])*cy-dv[k])*cc}
+    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;u[k]-=(p[k+1]-p[k-1])/(2*HX);v[k]-=(p[k+FW]-p[k-FW])/(2*HY)}
+    edges(u);edges(v);
+  }
+  function step(dt,drive,rnd,force){
+    airAcc+=dt;if(airAcc>=AIR_DT-1e-6){air(airAcc,force);airAcc=0}
+    const sq=Math.sqrt(dt)*3.46,ym=(H-MARGIN)*hy;
+    for(let i=0;i<live;){const m=gm[i],a=dt/(TAU0*m),kf=a/(1+a),x=gx[i],y=gy[i],gi=x/HX-0.5,gj=y/HY-0.5;
+      const vx=gvx[i]+(sample(u,gi,gj)-gvx[i])*kf+(rnd()-0.5)*JIT/m*sq,vy=gvy[i]+(sample(v,gi,gj)+VT*m-gvy[i])*kf+(rnd()-0.5)*JIT/m*sq;
+      gx[i]=x+vx*dt;gy[i]=y+vy*dt;gvx[i]=vx;gvy[i]=vy;ga[i]+=dt;
+      if(ga[i]>=gl[i]||gx[i]<MARGIN||gx[i]>W-MARGIN||gy[i]<MARGIN*hy||gy[i]>ym)kill(i);else i++}
+    if(force&&drive>0&&nt>0){acc+=RATE*drive*dt;
+      while(acc>=1&&live<NG){acc-=1;let s=(rnd()*nt)|0;for(let t=0;t<6;t++){const c=(rnd()*nt)|0;if(Math.hypot(su[tr[c]],sv[tr[c]])>=rnd()*vmax){s=c;break}}
+        const k=tu[s],i=k%FW,j=(k-i)/FW,x=HX*(i+rnd()),y=HY*(j+rnd()),gi=x/HX-0.5,gj=y/HY-0.5;
+        spawn(x,y,sample(u,gi,gj)+(rnd()+rnd()-1)*KICK,sample(v,gi,gj)+(rnd()+rnd()-1)*KICK,rnd)}}
+    else acc=0;
+    if(!live&&drive<=0){u.fill(0);v.fill(0)}
+    return live;
+  }
+  // A radial gust of k column widths per second at (x, y), Gaussian over sg; stir relaxes the air near the pointer toward its
+  // velocity; knock sheds grains off every inked half cell within rad of (x, y) with probability pr, flying out from it at ~k.
+  function puff(x,y,sg,k){for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const dx=HX*(i+0.5)-x,dy=HY*(j+0.5)-y,r2=dx*dx+dy*dy;if(r2>9*sg*sg)continue;const c=j*FW+i,w=k*Math.exp(-r2/(2*sg*sg))/(Math.sqrt(r2)+0.5);u[c]+=w*dx;v[c]+=w*dy}}
+  function stir(x,y,vx,vy){const s=Math.hypot(vx,vy);if(s>60){vx*=60/s;vy*=60/s}for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const dx=HX*(i+0.5)-x,dy=HY*(j+0.5)-y,r2=dx*dx+dy*dy;if(r2>81)continue;const c=j*FW+i,w=0.3*Math.exp(-r2/18);u[c]+=(vx-u[c])*w;v[c]+=(vy-v[c])*w}}
+  function knock(cnt,zb,x,y,rad,pr,k,rnd){const i0=Math.max(0,Math.floor((x-rad)/HX)),i1=Math.min(FW-1,Math.ceil((x+rad)/HX)),j0=Math.max(0,Math.floor((y-rad)/HY)),j1=Math.min(FH-1,Math.ceil((y+rad)/HY));
+    for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){if(!near(cnt,zb,i,j)||rnd()>=pr)continue;const px=HX*(i+rnd()),py=HY*(j+rnd()),dx=px-x,dy=py-y,r=Math.hypot(dx,dy);if(r>rad)continue;const s=k*(0.5+rnd())/(r+1);spawn(px,py,dx*s,dy*s,rnd)}}
+  function clear(){u.fill(0);v.fill(0);live=0;acc=0;nt=0;airAcc=0}
+  return{live:()=>live,gx:gx,gy:gy,gx0:gx0,gy0:gy0,gm:gm,ga:ga,gl:gl,u:u,v:v,surface:surface,step:step,puff:puff,stir:stir,knock:knock,clear:clear};
+}
 // gap: ink gap between the D's bowl and the S (stroke width is 0.36); Bh: pitch clamp, which with free yaw sets the box height.
 const SPEC={letters:{r:0.18,sRatio:1.03,dW:1.32,dF:0.30,dK:0.58,sR1:0.42,sR2:0.48,sTop:1.025,sT1:8*Math.PI/180,sT4:188*Math.PI/180,gap:0.16},
   K2:10,Bh:1.4,aoK:0.45,fog:0.4,light:{amb:0.08,kd:0.50,ks:0.46,kr:0.14}};
-return{TAU:TAU,layout:layout,build:build,bound:bound,shatterFit:shatterFit,reachWith:reachWith,grid:grid,stepFor:stepFor,SPEC:SPEC};
+return{TAU:TAU,layout:layout,build:build,bound:bound,shatterFit:shatterFit,reachWith:reachWith,grid:grid,stepFor:stepFor,unproject:unproject,surfVel:surfVel,follow:follow,fitter:fitter,wake:wake,SPEC:SPEC};
 })();
 /*ENGINE-END*/
 
@@ -910,7 +1025,7 @@ if(dsMono){
     return{adv:adv,ramp:ramp};
   })();
   const spec=DSE.SPEC,L=spec.light,K2=spec.K2,ramp=FM.ramp,NL=ramp.length-1,CELL_CSS=4.2;let DPR=1;
-  const lx=-0.42,ly=0.62,lz=-0.66,ll=Math.hypot(lx,ly,lz),hx=lx/ll,hy=ly/ll,hz=lz/ll-1,hl=Math.hypot(hx,hy,hz);
+  const lx=-0.42,ly=0.62,lz=-0.66,ll=Math.hypot(lx,ly,lz),hx=lx/ll,hy_=ly/ll,hz=lz/ll-1,hl=Math.hypot(hx,hy_,hz);
   const rm=matchMedia('(prefers-reduced-motion: reduce)'),hoverMq=matchMedia('(hover:hover) and (pointer:fine)');
   const homeSection=$('#home'),host=dsMono.parentElement,ctx=dsMono.getContext('2d'),atlas=document.createElement('canvas');
   const strokes=DSE.layout(spec.letters),coarse=DSE.build(strokes,0.05,0),rho=coarse.rho,ooN=1/(K2-rho),ooF=1/(K2+rho);
@@ -925,15 +1040,22 @@ if(dsMono){
   // Round end cap for the pen: unit directions on a hemisphere facing along the tangent (c >= 0), Fibonacci-spaced.
   const CAPN=96,CAP=new Float32Array(3*CAPN);
   for(let i=0;i<CAPN;i++){const ph=Math.acos(1-(i+0.5)/CAPN),th=i*2.399963;CAP[3*i]=Math.sin(ph)*Math.cos(th);CAP[3*i+1]=Math.sin(ph)*Math.sin(th);CAP[3*i+2]=Math.cos(ph)}
-  // Atlas rows 0..3: depth fade; 4..6: fade levels for the wake dye. Physics runs in fixed 1/120 s substeps so
-  // the bounce is the same at 60 and 120 Hz; springs are underdamped (zeta 0.42: one clear overshoot, a smaller second) and the
-  // pitch rebounds elastically at the clamp. HOME_B > 0 tips the top edge away from the viewer (a sign tipped back).
+  // Atlas rows 0..3: depth fade; 4..6: the dust's last fade levels. Physics runs in fixed 1/120 s substeps so the bounce is
+  // the same at 60 and 120 Hz; springs are underdamped (zeta 0.42: one clear overshoot, a smaller second) and the pitch
+  // rebounds elastically at the clamp. HOME_B > 0 tips the top edge away from the viewer (a sign tipped back).
   const ROWS=7,FADE_A=[0.34,0.22,0.12],HOME_B=0.24,SPR_K=30,SPR_Z=0.42,INTRO_K=9,INTRO_Z=0.45,BOUNCE=0.8,SUB=1/120;
   const SWAY_A=0.45,SWAY_T=6.7,SWAY_O=0.07,SWAY_W=0.18,SWAY_MOD_T=19.3,BREATH_A=0.05,BREATH_T=4.1,BREATH_MOD_T=13.7;
-  let cloud=null,W=0,H=0,cw=0,ch=0,K1x=0,K1y=0,zb,acc,cnt,ci,alv,dCi,dAlv,dsp,dRow,full=true,built=false,buildQueued=false;
-  let rip,ripPrev,ripOn=false,FW=0,FH=0,fu,fv,fu2,fv2,fd,fd2,fp,fdiv,fsol,wakeOn=false,dP=null,dV=null,shat=0,shatT=0,fit=null;
+  // A free spin brakes like a body in air (quadratic plus a small linear term) and hands over at SPIN_END, when it is barely
+  // turning. The drag is scaled per fling (spinK) so the spin slows onto a face-on turn: with k(c1 v + c2 v^2) the angle to
+  // SPIN_END is ln((c1+c2 v0)/(c1+c2 v1))/(c2 k), so k picks the turn; a turn no reasonable k reaches leaves the natural drag.
+  // The return into the sway then ramps in over RET_T (see substep), so nothing catches the letters while they still move.
+  // A flick's speed is the fitter's slope over the last FIT_MS of pointer samples; NG grains of dust.
+  const SPIN_C1=0.6,SPIN_C2=0.08,SPIN_END=0.4,RET_T=1.5,FIT_MS=80,NG=400,PF=DSE.fitter(12,FIT_MS);let spinK=1,ret=1;
+  let cloud=null,W=0,H=0,cw=0,ch=0,hy=1,K1x=0,K1y=0,zb,acc,cnt,ci,alv,dCi,dAlv,full=true,built=false,buildQueued=false;
+  let wk=null,wakeOn=false,dP=null,dV=null,shat=0,shatT=0,fit=null;
+  const GQ=new Float64Array(3),GS=new Float64Array(2),PXY=new Float64Array(2),GD=new Int32Array(4*NG);let nGD=0;
   let A=0,B=HOME_B,Av=0,Bv=0,homeA=0,swayT=0,free=false,last=0,rafId=0,inView=false,near=false,accum=0,bump=0,bumpV=0,sc=1;
-  let intro=null,introDone=false,coolUntil=0,fcA=1,fsA=0,fcB=1,fsB=0,pressA=0,pressB=0,hovA=0,hovB=0,drag=null,lastTap=0;
+  let intro=null,introDone=false,coolUntil=0,fcA=1,fsA=0,fcB=1,fsB=0,pressA=0,pressB=0,hovA=0,hovB=0,drag=null,lastTap=0,hovX=0,hovY=0,hovT=0;
   const reduced=()=>rm.matches;
   // Cells snap to whole device pixels so the atlas glyphs stay crisp; W follows the column, the grid follows W and the reach of
   // the letters joined with the shatter cylinder's. The box is sized from the coarse cloud at once (no layout shift later); the
@@ -942,13 +1064,12 @@ if(dsMono){
   function layoutSize(sync){
     DPR=Math.min(3,window.devicePixelRatio||1);
     const col=Math.min(400,host.clientWidth||350);
-    cw=Math.max(2,Math.round(CELL_CSS*DPR));ch=Math.max(3,Math.round(cw/FM.adv));
+    cw=Math.max(2,Math.round(CELL_CSS*DPR));ch=Math.max(3,Math.round(cw/FM.adv));hy=ch/cw;
     const nW=Math.max(24,Math.floor(col*DPR/cw)),g=DSE.grid(DSE.reachWith(cloud||coarse,K2,spec.Bh),nW,cw/ch);
     if(built&&g.W!==W){built=false;cloud=null}
     W=g.W;H=g.H;K1x=g.K1x;K1y=g.K1y;
     zb=new Float32Array(W*H);acc=new Float32Array(W*H);cnt=new Uint16Array(W*H);ci=new Uint8Array(W*H);alv=new Uint8Array(W*H);dCi=new Uint8Array(W*H);dAlv=new Uint8Array(W*H);
-    dsp=new Uint8Array(W*H);dRow=new Uint8Array(W*H);rip=new Float32Array(W*H);ripPrev=new Float32Array(W*H);ripOn=false;
-    FW=Math.ceil(W/2);FH=Math.ceil(H/2);const fn=FW*FH;fu=new Float32Array(fn);fv=new Float32Array(fn);fu2=new Float32Array(fn);fv2=new Float32Array(fn);fd=new Float32Array(fn);fd2=new Float32Array(fn);fp=new Float32Array(fn);fdiv=new Float32Array(fn);fsol=new Uint8Array(fn);wakeOn=false;shat=0;
+    wk=DSE.wake(W,H,hy,NG);wakeOn=false;nGD=0;shat=0;
     dsMono.width=W*cw;dsMono.height=H*ch;dsMono.style.width=(W*cw/DPR)+'px';dsMono.style.height=(H*ch/DPR)+'px';
     buildAtlas();if(!built)queueBuild(sync);else wake();
   }
@@ -975,7 +1096,7 @@ if(dsMono){
     const p1x=fcA*px+fsA*pz,p1z=-fsA*px+fcA*pz,p2y=fcB*py-fsB*p1z,ooz=1/(fsB*py+fcB*p1z+K2);
     const xp=(W>>1)+Math.floor(K1x*ooz*p1x),yp=(H>>1)-Math.floor(K1y*ooz*p2y);if(xp<0||xp>=W||yp<0||yp>=H)return;
     const idx=yp*W+xp,zc=zb[idx];if(ooz<zc-0.0007)return;
-    const n2y=fcB*ny-fsB*n1z;let d=n1x*lx+n2y*ly+n2z*lz;d=d<0?0:d/ll;let sp=(n1x*hx+n2y*hy+n2z*hz)/hl;sp=sp<0?0:sp*sp;sp*=sp;sp*=sp;sp*=sp;
+    const n2y=fcB*ny-fsB*n1z;let d=n1x*lx+n2y*ly+n2z*lz;d=d<0?0:d/ll;let sp=(n1x*hx+n2y*hy_+n2z*hz)/hl;sp=sp<0?0:sp*sp;sp*=sp;sp*=sp;sp*=sp;
     const rim=n2z<0?(1+n2z)*(1+n2z)*(1+n2z):1;let v=L.amb+L.kd*d+L.ks*sp+L.kr*rim+boost;if(v>1)v=1;
     if(ooz>zc+0.0007){zb[idx]=ooz;acc[idx]=v;cnt[idx]=1}else{acc[idx]+=v;cnt[idx]++}
   }
@@ -1000,7 +1121,7 @@ if(dsMono){
         if(ooz<zc-tol)continue;
         const n2y=cB*ny-sB*n1z;
         let d=n1x*lx+n2y*ly+n2z*lz;d=d<0?0:d/ll;
-        let sp=(n1x*hx+n2y*hy+n2z*hz)/hl;sp=sp<0?0:sp*sp;sp*=sp;sp*=sp;sp*=sp;
+        let sp=(n1x*hx+n2y*hy_+n2z*hz)/hl;sp=sp<0?0:sp*sp;sp*=sp;sp*=sp;sp*=sp;
         const rim=n2z<0?(1+n2z)*(1+n2z)*(1+n2z):1;
         let v=(amb+kd*d+ks*sp+kr*rim)*AO[i];
         // Fresh ink: a station laid down within the last 400 ms glows and cools to its lit shade.
@@ -1015,68 +1136,44 @@ if(dsMono){
       let tx=pn.tg[2*j]+(pn.tg[2*j1]-pn.tg[2*j])*f,ty=pn.tg[2*j+1]+(pn.tg[2*j1+1]-pn.tg[2*j+1])*f;const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
       const nx=-ty,ny=tx;
       for(let c=0;c<CAPN;c++){const a=CAP[3*c],b=CAP[3*c+1],cc=CAP[3*c+2],dx=a*nx+cc*tx,dy=a*ny+cc*ty;plot(qx+r*dx,qy+r*dy,r*b,dx,dy,b,0.4)}}
-    // Quantize with hysteresis (a cell changes glyph only once its shade leaves the old step by a margin); a ripple modulates it.
-    const N1=NL-1,useRip=ripOn&&!reduced();
+    // Quantize with hysteresis: a cell changes glyph only once its shade leaves the old step by a margin.
+    const N1=NL-1;
     for(let i=0;i<W*H;i++){
       if(!cnt[i]){ci[i]=0;continue}
-      const raw=1+(acc[i]/cnt[i]+(useRip?0.45*rip[i]:0))*N1,prev=ci[i];
+      const raw=1+acc[i]/cnt[i]*N1,prev=ci[i];
       ci[i]=(prev&&Math.abs(raw-prev)<0.72)?prev:Math.max(1,Math.min(NL,Math.round(raw)));
       let f=(zb[i]-ooF)/(ooN-ooF);f=f<0?0:f>1?1:f;alv[i]=Math.round((1-f)*3);
     }
-    compose();
-    // Blit only the cells whose glyph or row changed.
+    // Blit only the cells whose glyph or row changed; the cells a grain covered last frame are redrawn beneath it first.
     if(full){ctx.clearRect(0,0,dsMono.width,dsMono.height);dCi.fill(0);dAlv.fill(0)}
-    for(let j=0;j<H;j++)for(let i=0;i<W;i++){const k=j*W+i,c=dsp[k],a=dRow[k];if(c===dCi[k]&&a===dAlv[k])continue;
+    for(let i=0;i<nGD;i++)dCi[GD[i]]=255;nGD=0;
+    for(let j=0;j<H;j++)for(let i=0;i<W;i++){const k=j*W+i,c=ci[k],a=alv[k];if(c===dCi[k]&&a===dAlv[k])continue;
       if(!full)ctx.clearRect(i*cw,j*ch,cw,ch);if(c)ctx.drawImage(atlas,c*cw,a*ch,cw,ch,i*cw,j*ch,cw,ch);dCi[k]=c;dAlv[k]=a}
     full=false;
+    if(wakeOn)drawDust();
   }
-  function speed(){return drag&&drag.moved?Math.abs(drag.vA)+0.7*Math.abs(drag.vB):Math.abs(Av)+0.7*Math.abs(Bv)}
-  // ---- Ripple. A damped wave equation on the cell grid; a tap injects a pulse that spreads across the letters and modulates
-  // their shade (never their geometry, so the bound is untouched). Stops itself when the energy is spent.
-  function rippleTap(x,y){ripOn=true;for(let j=Math.max(0,y-3);j<=Math.min(H-1,y+3);j++)for(let i=Math.max(0,x-3);i<=Math.min(W-1,x+3);i++){const d2=(i-x)*(i-x)+(j-y)*(j-y)*0.36;rip[j*W+i]+=1.3*Math.exp(-d2/2.5)}}
-  function rippleStep(){
-    if(!ripOn)return;let e=0;
-    for(let j=1;j<H-1;j++)for(let i=1;i<W-1;i++){const k=j*W+i,u=rip[k],lap=rip[k-1]+rip[k+1]+0.36*(rip[k-W]+rip[k+W])-2.72*u;
-      const nu=2*u-ripPrev[k]+0.28*lap-0.06*(u-ripPrev[k]);ripPrev[k]=u;rip[k]=nu;e+=nu*nu}
-    if(e<0.02){ripOn=false;rip.fill(0);ripPrev.fill(0)}
-  }
-  // ---- Wake. A 2D stable-fluids step on a half-resolution grid (semi-Lagrangian advection, vorticity confinement, 20 Jacobi
-  // pressure iterations, closed walls). Cells under the letters are solid and carry the letters' screen velocity, so a turn
-  // drags the fluid and sheds vortices off the corners and terminals; dye is injected at the trailing silhouette above the sway's
-  // speed and decays, and is drawn as faint glyphs into empty cells, faded to nothing over the last cells. Skipped when there is
-  // no dye and no speed.
-  function fsample(f,x,y){x=x<0?0:x>FW-1.001?FW-1.001:x;y=y<0?0:y>FH-1.001?FH-1.001:y;const i=x|0,j=y|0,a=x-i,b=y-j,k=j*FW+i;return (f[k]*(1-a)+f[k+1]*a)*(1-b)+(f[k+FW]*(1-a)+f[k+FW+1]*a)*b}
-  function wakeStep(dt){
-    let s=(speed()-1.0)/6;s=s<0?0:s>1?1:s;
-    const av=drag&&drag.moved?drag.vA:Av,bv=drag&&drag.moved?drag.vB:Bv;
-    const V0=0.3*rho*K1x/(K2-rho)/2,cx=FW/2,cy=FH/2;let total=0;
-    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,i2=Math.min(W-1,2*i+1),j2=Math.min(H-1,2*j+1);
-      const solid=cnt[2*j*W+2*i]||cnt[2*j*W+i2]||cnt[j2*W+2*i]||cnt[j2*W+i2];fsol[k]=solid?1:0;
-      if(solid){const rx=(i+0.5-cx)/cx,ry=(j+0.5-cy)/cy;fu[k]=-av*V0*Math.sqrt(Math.max(0,1-rx*rx));fv[k]=bv*V0*(ch/cw)*Math.sqrt(Math.max(0,1-ry*ry))*0.6;fd[k]=0}}
-    if(s>0){const mx=av<0?1:-1,my=bv>0?-1:1;
-      for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(!fsol[k])continue;
-        if(!fsol[k-mx])fd[k-mx]=Math.min(1,fd[k-mx]+0.3*s);if(!fsol[k-my*FW])fd[k-my*FW]=Math.min(1,fd[k-my*FW]+0.15*s)}}
-    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i;if(fsol[k]){fu2[k]=fu[k];fv2[k]=fv[k];fd2[k]=0;continue}
-      const x=i-fu[k]*dt,y=j-fv[k]*dt;fu2[k]=fsample(fu,x,y);fv2[k]=fsample(fv,x,y);fd2[k]=fsample(fd,x,y)*0.955;total+=fd2[k]}
-    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(fsol[k])continue;
-      const wl=(fv2[k]-fv2[k-1])-(fu2[k]-fu2[k-FW]);const wr=Math.abs((fv2[k+1]-fv2[k])-(fu2[k+1]-fu2[k+1-FW])),wu=Math.abs((fv2[k-FW]-fv2[k-FW-1])-(fu2[k-FW]-fu2[k-2*FW<0?k-FW:k-2*FW]));
-      const gx=wr-Math.abs(wl),gy=Math.abs(wl)-wu,gl=Math.hypot(gx,gy)+1e-6;fu2[k]+=0.35*(gy/gl)*wl*dt*8;fv2[k]-=0.35*(gx/gl)*wl*dt*8}
-    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;fdiv[k]=fsol[k]?0:0.5*(fu2[k+1]-fu2[k-1]+fv2[k+FW]-fv2[k-FW]);fp[k]=0}
-    for(let it=0;it<20;it++)for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(fsol[k])continue;fp[k]=(fp[k-1]+fp[k+1]+fp[k-FW]+fp[k+FW]-fdiv[k])*0.25}
-    for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;if(fsol[k])continue;fu2[k]-=0.5*(fp[k+1]-fp[k-1]);fv2[k]-=0.5*(fp[k+FW]-fp[k-FW])}
-    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,wall=i===0||j===0||i===FW-1||j===FH-1;fu[k]=wall?0:fu2[k];fv[k]=wall?0:fv2[k];fd[k]=wall?0:fd2[k]}
-    wakeOn=total>0.05||s>0;
-    if(!wakeOn){fu.fill(0);fv.fill(0);fd.fill(0)}
+  // Dust: each grain through the ramp at its fractional position, in front of the letters (it came off the near face). The
+  // glyph follows mass and age (heavy grains are bigger, all shrink as they fade), the alpha row age and the edge fade, which
+  // reaches nothing before the grain dies at the wake's margin; the cells under it are marked for redraw next frame.
+  function drawDust(){
+    const n=wk.live(),gx=wk.gx,gy=wk.gy,gm=wk.gm,ga=wk.ga,gl=wk.gl;
+    for(let i=0;i<n;i++){const x=gx[i],y=gy[i]/hy,b=1-ga[i]/gl[i];let e=(Math.min(x,W-x,y,H-y)-1.5)/4;e=e<0?0:e>1?1:e;const a=b*e;if(a<=0)continue;
+      const g=Math.max(1,Math.round((0.28+0.2*gm[i])*NL*Math.pow(b,0.7))),row=a>0.85?0:a>0.7?1:a>0.55?2:a>0.4?3:a>0.26?4:a>0.13?5:6;
+      ctx.drawImage(atlas,g*cw,row*ch,cw,ch,(x-0.5)*cw,(y-0.5)*ch,cw,ch);
+      const x0=Math.floor(x-0.5),y0=Math.floor(y-0.5);
+      for(let dj=0;dj<2;dj++)for(let di=0;di<2;di++){const xx=x0+di,yy=y0+dj;if(xx>=0&&xx<W&&yy>=0&&yy<H&&nGD<GD.length)GD[nGD++]=yy*W+xx}}
   }
   // ---- Shatter. A hard fling bursts the letters into their own samples: each inherits the rigid velocity (omega x p) plus an
   // outward kick, flies with drag inside the cylinder shatterFit allows (reflecting off its walls), then the underdamped springs
-  // pull every sample home and it clicks back with one overshoot. The rigid rotation keeps running, so the debris tumbles.
+  // pull every sample home and it clicks back with one overshoot. The rigid rotation keeps running, so the debris tumbles. The
+  // burst also gusts the air outward and knocks dust off the whole face; while the debris flies it neither drags air nor sheds.
   function shatterStart(){
     const P=cloud.pos,n=cloud.n;
     for(let i=0;i<n;i++){const x=P[3*i],y=P[3*i+1],z=P[3*i+2],r=Math.hypot(x,y,z)||1,k=(1.2+Math.random()*1.6)/r;
       dP[3*i]=x;dP[3*i+1]=y;dP[3*i+2]=z;
       dV[3*i]=Av*z*0.5+x*k+(Math.random()-0.5)*0.8;dV[3*i+1]=y*k+(Math.random()-0.5)*0.8;dV[3*i+2]=-Av*x*0.5+z*k+(Math.random()-0.5)*0.8}
     shat=1;shatT=0;
+    wk.knock(cnt,zb,W>>1,(H>>1)*hy,1e9,0.2,30,Math.random);wk.puff(W>>1,(H>>1)*hy,12,30);wakeOn=true;
   }
   function shatterStep(dt){
     const P=cloud.pos,n=cloud.n,rc=fit.rc,yc=fit.yc,spring=shatT>0.45,k=30,c=2*0.42*Math.sqrt(30);let far=0;shatT+=dt;
@@ -1089,20 +1186,12 @@ if(dsMono){
       const e=Math.abs(x-P[3*i])+Math.abs(y-P[3*i+1])+Math.abs(z-P[3*i+2])+Math.abs(vx)+Math.abs(vy)+Math.abs(vz);if(e>far)far=e}
     if(spring&&(far<0.05||shatT>3.2))shat=0;
   }
-  // Display composition: letters, then the wake dye into empty cells (fade rows, edge falloff).
-  function compose(){
-    const n=W*H;
-    for(let i=0;i<n;i++){dsp[i]=ci[i];dRow[i]=alv[i]}
-    if(wakeOn&&!reduced())for(let j=2;j<H-2;j++)for(let i=2;i<W-2;i++){const k=j*W+i;if(dsp[k])continue;
-      const d=fsample(fd,(i+0.5)/2-0.5,(j+0.5)/2-0.5)*Math.min(1,(Math.min(i,W-1-i,j,H-1-j)-1)/4);if(d<0.12)continue;
-      dsp[k]=d>0.55?3:d>0.3?2:1;dRow[k]=d>0.45?4:d>0.22?5:6}
-  }
   // Motion. Idle is a sway: each half-swing is an eased S-curve (cubic in-out) that runs slightly past the far extreme and
   // settles back over the last SWAY_W of the half period, so every turnaround has a small overshoot and settle with zero
   // velocity at both ends of each segment; the amplitude breathes on a slow unrelated period and the pitch breath runs on two
   // more, so it never repeats as a loop. Underdamped springs follow the curve and return pitch to the tipped-back home,
-  // rebounding elastically at the clamp. After any release the sway is re-centered on the nearest face-on turn and re-phased to
-  // the letters' offset and direction, so it is always balanced left and right. Under reduced motion nothing moves on its own.
+  // rebounding elastically at the clamp. A double tap re-centers the sway on the nearest face-on turn, re-phased to the
+  // letters' offset and direction (velocity breaking ties), and turns them once. Under reduced motion nothing moves on its own.
   function spring(x,v,target,dt,k,z){const a=k*(target-x)-2*z*Math.sqrt(k)*v;v+=a*dt;x+=v*dt;return[x,v]}
   function pitch(dt,goal,k,z){const r=spring(B,Bv,goal,dt,k,z);B=r[0];Bv=r[1];if(B>spec.Bh){B=spec.Bh;Bv=-Math.abs(Bv)*BOUNCE}if(B<-spec.Bh){B=-spec.Bh;Bv=Math.abs(Bv)*BOUNCE}}
   const ease=h=>h<0.5?4*h*h*h:1-Math.pow(2-2*h,3)/2;
@@ -1117,11 +1206,32 @@ if(dsMono){
     if(reduced())return;
     const amp=SWAY_A*(1+0.12*Math.sin(swayT*DSE.TAU/SWAY_MOD_T)),dir=Av<0?-1:1,base=Math.floor(swayT/SWAY_T)*SWAY_T;
     let d=A-homeA-pressA-hovA;d=Math.max(-amp,Math.min(amp,d));let best=swayT,bd=1e9;
-    for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t);if((swayAt(t+0.01)-v)*dir<0)continue;const e=Math.abs(v-d);if(e<bd){bd=e;best=t}}
+    for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t),dv=(swayAt(t+0.01)-v)*100;if(dv*dir<0)continue;const e=Math.abs(v-d)+0.05*Math.abs(dv-Av);if(e<bd){bd=e;best=t}}
     swayT=best;
   }
-  function step(dt){accum+=dt;while(accum>=SUB){substep(SUB);accum-=SUB}
-    if(!reduced()){rippleStep();if(wakeOn||speed()>1.0)wakeStep(Math.min(0.05,dt))}
+  // The return, once the letters are basically still: home is the turn they stopped on, else the one ahead within 2 rad,
+  // else the nearest; the sway is phased to its center crossing in their direction and starts at their speed's share of its
+  // own (retA), so the target leaves from where they are at the speed they have, and grows to the full swing over RET_T
+  // while the spring stiffens from nothing to SPR_K; nothing grabs a moving object, and a landed spin feels no force at all.
+  function startReturn(){
+    free=false;ret=true;retT=0;const s=Av<0?-1:1,near=Math.round(A/DSE.TAU)*DSE.TAU,ahead=(s>0?Math.ceil(A/DSE.TAU):Math.floor(A/DSE.TAU))*DSE.TAU;
+    homeA=Math.abs(near-A)<=0.15?near:(ahead-A)*s<=2?ahead:near;
+    const base=Math.floor(swayT/SWAY_T)*SWAY_T;let best=swayT,bd=1e9,vpk=1;
+    for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t),dv=(swayAt(t+0.01)-v)*100;if(dv*s<=0)continue;if(Math.abs(v)<bd){bd=Math.abs(v);best=t;vpk=Math.abs(dv)}}
+    swayT=best;retA=Math.min(1,Math.abs(Av)/vpk);
+  }
+  // Drag scale that lands a coast on a face-on turn ahead, when a turn is within a 40% change of drag; else the drag is real.
+  function planSpin(){
+    const nat=Math.log((SPIN_C1+SPIN_C2*Math.abs(Av))/(SPIN_C1+SPIN_C2*RET_V))/SPIN_C2,s=Av<0?-1:1,t0=Math.floor((A+s*nat)/DSE.TAU)*DSE.TAU;
+    spinK=1;let best=0.34;for(let t=t0;t<=t0+DSE.TAU;t+=DSE.TAU){const need=(t-A)*s;if(need<=0.05)continue;const k=nat/need,e=Math.abs(Math.log(k));if(e<best){best=e;spinK=k}}
+  }
+  // The wake runs while dust lives or the letters turn faster than the sway ever does (drive 0 at 1 rad/s, full at 7); its
+  // surface pass reads the last frame's z-buffer with the pose that drew it, a frame behind the pointer during a drag.
+  function step(dt){
+    const av=drag&&drag.moved?drag.vA:Av,bv=drag&&drag.moved?drag.vB:Bv;let drive=(Math.abs(av)+0.7*Math.abs(bv)-1)/6;drive=drive<0?0:drive>1?1:drive;
+    const air=!reduced()&&(wakeOn||drive>0);
+    if(air&&!shat)wk.surface(cnt,zb,K1x,K1y,K2,B,av,bv);
+    accum+=dt;while(accum>=SUB){substep(SUB);if(air)wakeOn=wk.step(SUB,drive,Math.random,!shat)>0||drive>0;accum-=SUB}
     if(shat)shatterStep(Math.min(0.05,dt));
   }
   function substep(dt){
@@ -1130,12 +1240,17 @@ if(dsMono){
     // Landing squash after the intro: the letters dip to 96% and spring back (clamped at 1, the size the box was derived for).
     let r=spring(bump,bumpV,0,dt,60,0.4);bump=r[0];bumpV=r[1];sc=Math.min(1,1-0.06*bump);
     if(drag&&drag.moved)return;
-    if(free){Av*=Math.exp(-0.9*dt);A+=Av*dt;if(Math.abs(Av)<1.6){free=false;rephase()}pitch(dt,HOME_B+sB_+pressB+hovB,SPR_K,SPR_Z);return}
-    const k=intro?INTRO_K:SPR_K,z=intro?INTRO_Z:SPR_Z;
-    r=spring(A,Av,homeA+sA_+pressA+hovA,dt,k,z);A=r[0];Av=r[1];
-    pitch(dt,HOME_B+sB_+pressB+hovB,k,z);
+    if(free){Av-=spinK*(SPIN_C1*Av+SPIN_C2*Av*Math.abs(Av))*dt;A+=Av*dt;if(Math.abs(Av)<SPIN_END){free=false;rephase();ret=0}pitch(dt,HOME_B+sB_+pressB+hovB,SPR_K,SPR_Z);return}
+    if(intro){r=spring(A,Av,homeA+sA_+pressA+hovA,dt,INTRO_K,INTRO_Z);A=r[0];Av=r[1];pitch(dt,HOME_B+sB_+pressB+hovB,INTRO_K,INTRO_Z);return}
+    // The return into the sway after a coast or a drag ramps in from nothing (smoothstep over RET_T): stiffness from zero,
+    // damping from critical down to the sway's bounce, air drag fading out and the swing blended in, so a letters-at-rest
+    // hand-off eases home instead of being caught. Pitch keeps its bounce: that tilt is always the user's own doing.
+    if(ret<1)ret=Math.min(1,ret+dt/RET_T);
+    const e=ret*ret*(3-2*ret),k=SPR_K*e,z=1-(1-SPR_Z)*e;
+    Av+=(k*(homeA+sA_*e+pressA+hovA-A)-2*z*Math.sqrt(k)*Av-(1-e)*SPIN_C1*Av)*dt;A+=Av*dt;
+    pitch(dt,HOME_B+sB_+pressB+hovB,SPR_K,SPR_Z);
   }
-  function settled(){return reduced()&&!intro&&!drag&&!free&&!shat&&!ripOn&&!wakeOn&&Math.abs(Av)<2e-3&&Math.abs(Bv)<2e-3&&Math.abs(bump)<1e-3&&Math.abs(A-homeA-pressA-hovA)<1e-3&&Math.abs(B-HOME_B-pressB-hovB)<1e-3}
+  function settled(){return reduced()&&!intro&&!drag&&!free&&!shat&&!wakeOn&&Math.abs(Av)<2e-3&&Math.abs(Bv)<2e-3&&Math.abs(bump)<1e-3&&Math.abs(A-homeA-pressA-hovA)<1e-3&&Math.abs(B-HOME_B-pressB-hovB)<1e-3}
   // The pen: D over the first 0.85 s, S from 0.55 s, eased overall and slowed through bends by the curvature map; -1 = not
   // started, so a stroke begins from its first station with the round cap and never as a stray dot.
   function introStep(){
@@ -1159,50 +1274,74 @@ if(dsMono){
   function schedule(){if(!rafId)rafId=requestAnimationFrame(frame)}
   function wake(){last=0;schedule()}
   function startIntro(){
-    if(reduced()){introDone=true;A=homeA;B=HOME_B;Av=Bv=0;wake();return}
+    ret=1;if(reduced()){introDone=true;A=homeA;B=HOME_B;Av=Bv=0;wake();return}
     intro={t0:performance.now(),st:[-1,-1]};for(const pn of pen)pn.time.fill(-1);A=homeA-0.55;B=0.26;Av=0;Bv=0;wake();
   }
   layoutSize();
-  // Sideways drags rotate (touch-action:pan-y leaves vertical swipes to the page); a drag that started sideways then has the full
-  // pitch range. The surface follows the pointer on both axes. A press (or a hover, on fine pointers) pushes the side under the
-  // pointer away; a tap sends a ripple; a double tap turns one full turn; a fling free-spins and the sway resumes, and a hard
-  // fling shatters the letters.
+  // ---- Pointer. Sideways drags rotate (touch-action:pan-y leaves vertical swipes to the page); a drag that started sideways
+  // then has the full pitch range. The point grabbed stays under the pointer (DSE.follow), a press (or a hover, on fine
+  // pointers) pushes the side under the pointer away, a tap knocks a little dust off, a double tap turns
+  // one full turn, a fling free-spins and the sway resumes, a hard fling shatters the letters, and a pointer moving through
+  // live dust stirs it.
+  // The pointer in cells from the box center (X right, Y up).
+  function pointerXY(e){const r=dsMono.getBoundingClientRect();PXY[0]=(e.clientX-r.left)/r.width*W-(W>>1);PXY[1]=(H>>1)-(e.clientY-r.top)/r.height*H}
+  // Grab: the nearest inked cell under or beside the pointer, as an object-space point; on empty space a point under the
+  // pointer on a sphere of 0.8 rho (the letters' body rather than their farthest corner; its rim beyond), so the air around
+  // them turns them too.
+  function grab(X,Y){const hw=W>>1,hh=H>>1,xp=Math.floor(X+hw),yp=Math.floor(hh-Y);let z=0,bx=0,by=0;
+    for(let j=yp-1;j<=yp+1;j++)for(let i=xp-1;i<=xp+1;i++){if(i<0||i>=W||j<0||j>=H)continue;const k=j*W+i;if(cnt[k]&&zb[k]>z){z=zb[k];bx=i+0.5-hw;by=hh-j-0.5}}
+    if(z){DSE.unproject(bx,by,z,A,B,K1x,K1y,K2,GQ);return}
+    const rs=0.8*rho,r=Math.min(0.98*rs,Math.hypot(X*K2/K1x,Y*K2/K1y)),zv=-Math.sqrt(rs*rs-r*r);DSE.unproject(X,Y,1/(zv+K2),A,B,K1x,K1y,K2,GQ);
+  }
   dsMono.addEventListener('pointerdown',e=>{
-    if(e.button||!built)return;const r=dsMono.getBoundingClientRect();
-    drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,t:performance.now(),moved:false,A0:A,B0:B,vA:0,vB:0};
-    pressA=-(((e.clientX-r.left)/r.width)-0.5)*0.36;pressB=(0.5-(e.clientY-r.top)/r.height)*0.30;Av=0;Bv=0;free=false;wake();
+    if(e.button||!built)return;pointerXY(e);
+    drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,X0:PXY[0],moved:false,last:0,A0:0,B0:0,ps0:0,bs0:0,Bs:B,vA:0,vB:0};PF.reset();
+    pressA=-(PXY[0]/W)*0.36;pressB=(PXY[1]/H)*0.30;Av=0;Bv=0;free=false;ret=false;wake();
   });
   dsMono.addEventListener('pointermove',e=>{
+    const now=performance.now();pointerXY(e);const X=PXY[0],Y=PXY[1];
     if(!drag||e.pointerId!==drag.id){
-      if(!drag&&hoverMq.matches&&!reduced()){const r=dsMono.getBoundingClientRect();hovA=-(((e.clientX-r.left)/r.width)-0.5)*0.24;hovB=(0.5-(e.clientY-r.top)/r.height)*0.14;wake()}
+      if(!drag&&hoverMq.matches&&!reduced()){hovA=-(X/W)*0.24;hovB=(Y/H)*0.14;
+        if(wakeOn&&now-hovT<100)wk.stir(X+(W>>1),((H>>1)-Y)*hy,(X-hovX)/(now-hovT)*1000,(hovY-Y)/(now-hovT)*1000*hy);
+        hovX=X;hovY=Y;hovT=now;wake()}
       return}
-    const dx=e.clientX-drag.x0,dy=e.clientY-drag.y0;
-    if(!drag.moved){if(Math.hypot(dx,dy)<(e.pointerType==='touch'?6:3))return;drag.moved=true;pressA=0;pressB=0;dsMono.classList.add('ds-grabbing');try{dsMono.setPointerCapture(e.pointerId)}catch(_){}}
-    const now=performance.now(),ddt=Math.max(4,now-drag.t)/1000,sens=DSE.TAU/(1.5*dsMono.clientWidth);
-    A=drag.A0-dx*sens;B=Math.max(-spec.Bh,Math.min(spec.Bh,drag.B0-dy*sens));
-    drag.vA=drag.vA*0.5-(e.clientX-drag.x)*sens/ddt*0.5;drag.vB=drag.vB*0.5-(e.clientY-drag.y)*sens/ddt*0.5;drag.x=e.clientX;drag.y=e.clientY;drag.t=now;wake();
+    const d=drag;
+    if(!d.moved){if(Math.hypot(e.clientX-d.x0,e.clientY-d.y0)<(e.pointerType==='touch'?6:3))return;
+      d.moved=true;pressA=0;pressB=0;dsMono.classList.add('ds-grabbing');try{dsMono.setPointerCapture(e.pointerId)}catch(_){}
+      // Grabbed here, in the pressed pose, so the letters never jump when the drag starts.
+      grab(X,Y);d.A0=A;d.B0=B;DSE.follow(GQ,X,Y,B,K1x,K1y,K2,0.3*rho,GS);d.ps0=GS[0];d.bs0=GS[1];d.Bs=GS[1]}
+    DSE.follow(GQ,X,Y,d.Bs,K1x,K1y,K2,0.3*rho,GS);d.Bs=GS[1];
+    A=d.A0+GS[0]-d.ps0;B=Math.max(-spec.Bh,Math.min(spec.Bh,d.B0+GS[1]-d.bs0));
+    PF.push(now,A,B,X,Y);d.last=now;d.vA=PF.slope(0);d.vB=PF.slope(1);
+    if(wakeOn)wk.stir(X+(W>>1),((H>>1)-Y)*hy,PF.slope(2),-PF.slope(3)*hy);
+    wake();
   });
   function endDrag(e,cancel){
     if(!drag||e.pointerId!==drag.id)return;
-    const d=drag;drag=null;dsMono.classList.remove('ds-grabbing');pressA=0;pressB=0;
-    const thrown=d.moved&&!cancel&&performance.now()-d.t<=80&&!reduced();
-    if(thrown){Bv=Math.max(-8,Math.min(8,d.vB));if(Math.abs(d.vA)>2.5){Av=Math.max(-14,Math.min(14,d.vA));free=true}
+    const d=drag,now=performance.now();drag=null;dsMono.classList.remove('ds-grabbing');pressA=0;pressB=0;
+    const thrown=d.moved&&!cancel&&now-d.last<=FIT_MS&&!reduced();
+    if(thrown){Bv=Math.max(-8,Math.min(8,d.vB));
+      if(Math.abs(d.vA)>SPIN_END){Av=Math.max(-14,Math.min(14,d.vA));free=true;spinK=1;
+        // Slow onto the face-on turn that needs the least change of drag, if one is within reach of a plausible drag (a gentle
+        // flick cannot brake like a wall or glide a whole extra turn); otherwise the natural drag, and the return handles it.
+        const nat=Math.log((SPIN_C1+SPIN_C2*Math.abs(Av))/(SPIN_C1+SPIN_C2*SPIN_END))/SPIN_C2,s=Av<0?-1:1,end=A+s*nat,t0=Math.floor(end/DSE.TAU)*DSE.TAU;
+        let best=1e9;for(let t=t0;t<=t0+DSE.TAU;t+=DSE.TAU){const need=(t-A)*s;if(need<=0.05)continue;const k=nat/need,e=Math.abs(Math.log(k));if(k>=0.45&&k<=2.2&&e<best){best=e;spinK=k}}}
       if(Math.abs(d.vA)>9&&!intro&&Math.abs(bump)<0.01&&!shat)shatterStart()}
-    if(!d.moved&&!cancel){const now=performance.now(),r=dsMono.getBoundingClientRect();
-      if(!reduced())rippleTap(Math.floor((d.x0-r.left)/r.width*W),Math.floor((d.y0-r.top)/r.height*H));
-      if(now-lastTap<320&&!reduced()){rephase();homeA+=DSE.TAU*(d.x0-r.left<dsMono.clientWidth/2?1:-1);lastTap=0}else lastTap=now}
-    if(d.moved&&!free)rephase();
+    if(!d.moved&&!cancel){const X=d.X0,Y=d.Y0,px=X+(W>>1),py=(H>>1)-Y;
+      if(!reduced()){wk.knock(cnt,zb,px,py*hy,11,0.7,16,Math.random);wk.puff(px,py*hy,5,24);wakeOn=true}
+      if(now-lastTap<320&&!reduced()){rephase();ret=1;homeA+=DSE.TAU*(X<0?1:-1);lastTap=0}else lastTap=now}
+    if(d.moved&&!free){rephase();ret=0}
     wake();
   }
   dsMono.addEventListener('pointerup',e=>endDrag(e,false));
   dsMono.addEventListener('pointercancel',e=>endDrag(e,true));
-  dsMono.addEventListener('pointerleave',()=>{hovA=0;hovB=0;wake()});
+  dsMono.addEventListener('pointerleave',()=>{hovA=0;hovB=0;hovT=0;wake()});
   dsMono.addEventListener('dragstart',e=>e.preventDefault());
   // Below the fold: build the fine cloud as it approaches, play the intro the first time a third of it is on screen.
   new IntersectionObserver(es=>{near=es[0].isIntersecting;if(near&&!built)queueBuild()},{rootMargin:'600px'}).observe(dsMono);
   new IntersectionObserver(es=>{const was=inView;inView=es[0].isIntersecting;if(inView&&built&&!introDone&&!intro)startIntro();if(inView&&!was)wake()},{threshold:0.35}).observe(dsMono);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
-  rm.addEventListener('change',()=>{if(reduced()){intro=null;introDone=true;free=false;Av=Bv=0;bump=bumpV=0;shat=0;ripOn=false;wakeOn=false;homeA=Math.round(A/DSE.TAU)*DSE.TAU}wake()});
+  rm.addEventListener('change',()=>{if(reduced()){intro=null;introDone=true;free=false;Av=Bv=0;bump=bumpV=0;shat=0;wakeOn=false;wk.clear();homeA=Math.round(A/DSE.TAU)*DSE.TAU}wake()});
   new ResizeObserver(()=>{const col=Math.min(400,host.clientWidth),d=Math.min(3,window.devicePixelRatio||1);if(cw&&(d!==DPR||Math.abs(col*d/cw-W)>=1))layoutSize(built)}).observe(host);
   // Theme changes recolor the atlas; leaving Home stops the loop and the route's class change on #home starts it again.
   new MutationObserver(()=>{buildAtlas();wake()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
