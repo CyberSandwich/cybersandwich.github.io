@@ -1190,8 +1190,9 @@ if(dsMono){
   // settles back over the last SWAY_W of the half period, so every turnaround has a small overshoot and settle with zero
   // velocity at both ends of each segment; the amplitude breathes on a slow unrelated period and the pitch breath runs on two
   // more, so it never repeats as a loop. Underdamped springs follow the curve and return pitch to the tipped-back home,
-  // rebounding elastically at the clamp. A double tap re-centers the sway on the nearest face-on turn, re-phased to the
-  // letters' offset and direction (velocity breaking ties), and turns them once. Under reduced motion nothing moves on its own.
+  // rebounding elastically at the clamp. After a coast or a drag, rephase re-centers the sway on the nearest face-on turn and
+  // re-phases it to the letters' offset and direction (velocity breaking ties), so it stays balanced left and right; the pull
+  // back then ramps in (substep). Under reduced motion nothing moves on its own.
   function spring(x,v,target,dt,k,z){const a=k*(target-x)-2*z*Math.sqrt(k)*v;v+=a*dt;x+=v*dt;return[x,v]}
   function pitch(dt,goal,k,z){const r=spring(B,Bv,goal,dt,k,z);B=r[0];Bv=r[1];if(B>spec.Bh){B=spec.Bh;Bv=-Math.abs(Bv)*BOUNCE}if(B<-spec.Bh){B=-spec.Bh;Bv=Math.abs(Bv)*BOUNCE}}
   const ease=h=>h<0.5?4*h*h*h:1-Math.pow(2-2*h,3)/2;
@@ -1208,22 +1209,6 @@ if(dsMono){
     let d=A-homeA-pressA-hovA;d=Math.max(-amp,Math.min(amp,d));let best=swayT,bd=1e9;
     for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t),dv=(swayAt(t+0.01)-v)*100;if(dv*dir<0)continue;const e=Math.abs(v-d)+0.05*Math.abs(dv-Av);if(e<bd){bd=e;best=t}}
     swayT=best;
-  }
-  // The return, once the letters are basically still: home is the turn they stopped on, else the one ahead within 2 rad,
-  // else the nearest; the sway is phased to its center crossing in their direction and starts at their speed's share of its
-  // own (retA), so the target leaves from where they are at the speed they have, and grows to the full swing over RET_T
-  // while the spring stiffens from nothing to SPR_K; nothing grabs a moving object, and a landed spin feels no force at all.
-  function startReturn(){
-    free=false;ret=true;retT=0;const s=Av<0?-1:1,near=Math.round(A/DSE.TAU)*DSE.TAU,ahead=(s>0?Math.ceil(A/DSE.TAU):Math.floor(A/DSE.TAU))*DSE.TAU;
-    homeA=Math.abs(near-A)<=0.15?near:(ahead-A)*s<=2?ahead:near;
-    const base=Math.floor(swayT/SWAY_T)*SWAY_T;let best=swayT,bd=1e9,vpk=1;
-    for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t),dv=(swayAt(t+0.01)-v)*100;if(dv*s<=0)continue;if(Math.abs(v)<bd){bd=Math.abs(v);best=t;vpk=Math.abs(dv)}}
-    swayT=best;retA=Math.min(1,Math.abs(Av)/vpk);
-  }
-  // Drag scale that lands a coast on a face-on turn ahead, when a turn is within a 40% change of drag; else the drag is real.
-  function planSpin(){
-    const nat=Math.log((SPIN_C1+SPIN_C2*Math.abs(Av))/(SPIN_C1+SPIN_C2*RET_V))/SPIN_C2,s=Av<0?-1:1,t0=Math.floor((A+s*nat)/DSE.TAU)*DSE.TAU;
-    spinK=1;let best=0.34;for(let t=t0;t<=t0+DSE.TAU;t+=DSE.TAU){const need=(t-A)*s;if(need<=0.05)continue;const k=nat/need,e=Math.abs(Math.log(k));if(e<best){best=e;spinK=k}}
   }
   // The wake runs while dust lives or the letters turn faster than the sway ever does (drive 0 at 1 rad/s, full at 7); its
   // surface pass reads the last frame's z-buffer with the pose that drew it, a frame behind the pointer during a drag.
@@ -1296,7 +1281,7 @@ if(dsMono){
   dsMono.addEventListener('pointerdown',e=>{
     if(e.button||!built)return;pointerXY(e);
     drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,X0:PXY[0],moved:false,last:0,A0:0,B0:0,ps0:0,bs0:0,Bs:B,vA:0,vB:0};PF.reset();
-    pressA=-(PXY[0]/W)*0.36;pressB=(PXY[1]/H)*0.30;Av=0;Bv=0;free=false;ret=false;wake();
+    pressA=-(PXY[0]/W)*0.36;pressB=(PXY[1]/H)*0.30;Av=0;Bv=0;free=false;wake();
   });
   dsMono.addEventListener('pointermove',e=>{
     const now=performance.now();pointerXY(e);const X=PXY[0],Y=PXY[1];
