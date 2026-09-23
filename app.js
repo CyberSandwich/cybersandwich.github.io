@@ -1324,9 +1324,10 @@ if(dsMono){
   dsMono.addEventListener('pointerleave',()=>{hovA=0;hovB=0;hovT=0;wake()});
   dsMono.addEventListener('dragstart',e=>e.preventDefault());
   // Below the fold: build the fine cloud as it approaches, run whenever any of the box is on screen, and play the intro the
-  // first time a third of it is (frame draws nothing before that, so the letters never show and then vanish into it).
+  // first time a third of it is (frame draws nothing before that, so the letters never show and then vanish into it). The
+  // ratio is compared below the 0.35 threshold: the crossing can report a hair under it, and no later callback would come.
   new IntersectionObserver(es=>{near=es[0].isIntersecting;if(near&&!built)queueBuild()},{rootMargin:'600px'}).observe(dsMono);
-  new IntersectionObserver(es=>{const e=es[0],was=inView;inView=e.isIntersecting;seen=inView&&e.intersectionRatio>=0.35;
+  new IntersectionObserver(es=>{const e=es[0],was=inView;inView=e.isIntersecting;seen=inView&&e.intersectionRatio>=0.3;
     if(seen&&built&&!introDone&&!intro)startIntro();if(inView&&!was)wake()},{threshold:[0,0.35]}).observe(dsMono);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
   rm.addEventListener('change',()=>{if(reduced()){intro=null;introDone=true;free=false;Av=Bv=0;bump=bumpV=0;shat=0;wakeOn=false;wk.clear();homeA=Math.round(A/DSE.TAU)*DSE.TAU}wake()});
