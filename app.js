@@ -694,8 +694,71 @@ function openQR(){
   qrModal.open(qrOverlay);
 }
 function closeQR(){qrModal.close()}
-const photo=$('.photo');
-if(photo)photo.addEventListener('click',openQR);
+// Home coin: yaw th spins and always lands on a face, pitch ph only tips and springs back. th'' = -a(w)*w - K*sin(2th):
+// friction light while spinning fast and heavy near rest, plus a pull toward the nearest face, so multiples of pi are
+// the only stable rests and it never stops edge-on. Substepped at 120 Hz so any frame rate lands the same way.
+// tests/test-coin.js holds it to that.
+function coinStep(c,dt){
+  const K=45,A_LO=.5,A_HI=12,W0=4,PK=160,PC=14;
+  for(let n=Math.ceil(dt*120),h=dt/n;n>0;n--){
+    const r=c.w/W0,a=A_LO+(A_HI-A_LO)*Math.exp(-r*r);
+    c.w+=(-a*c.w-K*Math.sin(2*c.th))*h;c.th+=c.w*h;
+    c.pv+=(-PK*c.ph-PC*c.pv)*h;c.ph+=c.pv*h;
+  }
+}
+function coinAtRest(c){
+  const e=c.th-Math.round(c.th/Math.PI)*Math.PI;
+  return Math.abs(e)<.002&&Math.abs(c.w)<.02&&Math.abs(c.ph)<.002&&Math.abs(c.pv)<.02;
+}
+const photo=$('.photo'),coin=photo&&photo.querySelector('.coin');
+if(photo){
+  const c={th:0,w:0,ph:0,pv:0},P_MAX=.35,W_MAX=30,still=matchMedia('(prefers-reduced-motion: reduce)');
+  let drag=null,moved=false,raf=0,last=0;
+  const draw=()=>{coin.style.transform='rotateX('+c.ph+'rad) rotateY('+c.th+'rad)'};
+  function frame(ts){
+    raf=0;coinStep(c,Math.min(.05,last?(ts-last)/1000:1/60));last=ts;
+    if(coinAtRest(c)){c.th=Math.round(c.th/Math.PI)%2?Math.PI:0;c.w=c.ph=c.pv=0;last=0}
+    else raf=requestAnimationFrame(frame);
+    draw();
+  }
+  const run=()=>{if(!raf)raf=requestAnimationFrame(frame)};
+  // A native button clicks on pointerup even after a long drag; only a tap (or Enter/Space) opens the QR.
+  photo.addEventListener('click',e=>{if(moved){e.preventDefault();return}openQR()});
+  photo.addEventListener('pointerdown',e=>{
+    if(e.button)return;
+    // Grabbing stops the coin, so a tap on a spinning coin is still a tap.
+    if(raf){cancelAnimationFrame(raf);raf=0;last=0}
+    c.w=c.pv=0;moved=false;
+    drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,t:e.timeStamp,th:c.th,ph:c.ph,vx:0,vy:0};
+  });
+  photo.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==drag.id)return;
+    if(!moved){
+      if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<(e.pointerType==='touch'?8:4))return;
+      moved=true;try{photo.setPointerCapture(e.pointerId)}catch(_){}
+    }
+    // The face follows the pointer: a coin-width drag is half a turn, and vertical tips at half that rate into a soft limit.
+    const k=Math.PI/photo.offsetWidth,dt=Math.max(8,e.timeStamp-drag.t)/1000;
+    c.th=drag.th+(e.clientX-drag.x0)*k;
+    c.ph=P_MAX*Math.tanh((drag.ph-(e.clientY-drag.y0)*k/2)/P_MAX);
+    drag.vx=(drag.vx+(e.clientX-drag.x)*k/dt)/2;
+    drag.vy=(drag.vy-(e.clientY-drag.y)*k/2/dt)/2;
+    drag.x=e.clientX;drag.y=e.clientY;drag.t=e.timeStamp;
+    draw();
+  });
+  function release(e){
+    if(!drag||e.pointerId!==drag.id)return;
+    const d=drag;drag=null;
+    // A pointer that rested before lifting throws nothing, and a cancelled gesture belongs to the browser's scroll.
+    if(moved&&e.type==='pointerup'&&e.timeStamp-d.t<80&&!still.matches){
+      c.w=Math.max(-W_MAX,Math.min(W_MAX,d.vx));c.pv=Math.max(-6,Math.min(6,d.vy));
+    }
+    if(moved)setTimeout(()=>{moved=false});
+    run();
+  }
+  photo.addEventListener('pointerup',release);
+  photo.addEventListener('pointercancel',release);
+}
 
 // DS monogram surface: round tubes swept along the D and the S, emit(x,y,z,nx,ny,nz) per sample.
 const dsShape=(()=>{

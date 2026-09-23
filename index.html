@@ -25,8 +25,8 @@
 <meta name="referrer" content="no-referrer-when-downgrade">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t==='dark'||t==='sepia'){document.documentElement.setAttribute('data-theme',t);var c=t==='dark'?'#1C1C1E':'#F5EDDA';document.querySelector('meta[name="theme-color"]').content=c;if(t==='dark')document.querySelector('meta[name="color-scheme"]').content='dark';var l=document.getElementById('theme-label');if(l)l.textContent='Theme: '+t[0].toUpperCase()+t.slice(1)}})()</script>
 <link rel="stylesheet" href="/shared/base.css?v=28">
-<link rel="stylesheet" href="style.css?v=142" fetchpriority="high">
-<link rel="preload" href="app.js?v=168" as="script">
+<link rel="stylesheet" href="style.css?v=144" fetchpriority="high">
+<link rel="preload" href="app.js?v=170" as="script">
 <link rel="dns-prefetch" href="https://wa.me">
 <link rel="dns-prefetch" href="https://linkedin.com">
 <link rel="dns-prefetch" href="https://github.com">
@@ -49,7 +49,7 @@
 
 <!-- ==================== HOME ==================== -->
 <section id="home" class="page">
-  <button class="photo" type="button" aria-label="Show QR code"><picture><source srcset="/photo.avif" type="image/avif"><img src="/photo.webp" alt="Duke Saputra" width="720" height="720" fetchpriority="high"></picture></button>
+  <button class="photo" type="button" aria-label="Show QR code"><span class="coin"><picture><source srcset="/photo.avif" type="image/avif"><img class="face" src="/photo.webp" alt="Duke Saputra" width="720" height="720" fetchpriority="high"></picture><img class="face tails" src="/tails.png" alt="" width="720" height="720" decoding="async"></span></button>
 
   <div class="links vcf-link">
     <a href="contact.vcf" download="Duke Saputra.vcf" title="Download contact card" aria-label="Download contact card (VCF file)">Add to Contacts</a>
@@ -181,6 +181,6 @@
 <script src="/shared/base.js?v=28"></script>
 <script src="/shared/swr.js?v=4"></script>
 <script src="/shared/search.js?v=20" defer></script>
-<script src="app.js?v=168" defer></script>
+<script src="app.js?v=170" defer></script>
 </body>
 </html>
