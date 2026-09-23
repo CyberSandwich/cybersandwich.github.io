@@ -1054,12 +1054,18 @@ if(dsMono){
   // turning. The drag is scaled per fling (spinK) so the spin slows onto a face-on turn: with k(c1 v + c2 v^2) the angle to
   // SPIN_END is ln((c1+c2 v0)/(c1+c2 v1))/(c2 k), so k picks the turn; a turn no reasonable k reaches leaves the natural drag.
   // The return into the sway then ramps in over RET_T (see substep), so nothing catches the letters while they still move.
-  // A flick's speed is the fitter's slope over the last FIT_MS of pointer samples.
-  const SPIN_C1=0.6,SPIN_C2=0.08,SPIN_END=0.4,RET_T=1.5,FIT_MS=80,PF=DSE.fitter(12,FIT_MS);let spinK=1,ret=1;
+  // A press on a spin catches it, braking at HOLD per second where it is. A flick's speed is the fitter's slope over the last
+  // FIT_MS of pointer samples.
+  const SPIN_C1=0.6,SPIN_C2=0.08,SPIN_END=0.4,RET_T=1.5,HOLD=14,FIT_MS=80,PF=DSE.fitter(12,FIT_MS);let spinK=1,ret=1;
+  // Where each hand-off into the sway ramps from: [yaw stiffness, damping ratio, air drag, sway share, pitch stiffness,
+  // pitch damping]. From a coast or a drag the yaw starts free (nothing catches a moving letter) while pitch keeps its bounce,
+  // since that tilt is the user's own doing; the intro starts on a soft entrance spring that stiffens into the sway's while
+  // the pen draws (RET_T is the pen's 1.5 s), so there is no switch to see when it lifts.
+  const FROM_COAST=[0,1,SPIN_C1,0,SPR_K,SPR_Z],FROM_INTRO=[INTRO_K,INTRO_Z,0,1,INTRO_K,INTRO_Z];let from=FROM_COAST;
   let cloud=null,W=0,H=0,cw=0,ch=0,hy=1,K1x=0,K1y=0,zb,acc,cnt,ci,alv,dCi,dAlv,full=true,built=false,buildQueued=false;
   let wk=null,wakeOn=false,dP=null,dV=null,shat=0,shatT=0,fit=null;
   const GQ=new Float64Array(3),PXY=new Float64Array(2),GR=0.8*rho,PITCH=(K2-GR)/GR;
-  let A=0,B=HOME_B,Av=0,Bv=0,homeA=0,swayT=0,free=false,last=0,rafId=0,inView=false,seen=false,near=false,accum=0,bump=0,bumpV=0,sc=1;
+  let A=0,B=HOME_B,Av=0,Bv=0,homeA=0,swayT=0,free=false,last=0,rafId=0,inView=false,seen=false,near=false,accum=0;
   let intro=null,introDone=false,coolUntil=0,fcA=1,fsA=0,fcB=1,fsB=0,pressA=0,pressB=0,hovA=0,hovB=0,drag=null,lastTap=0,hovX=0,hovY=0,hovT=0;
   const reduced=()=>rm.matches;
   // Cells snap to whole device pixels so the atlas glyphs stay crisp; W follows the column, the grid follows W and the reach of
@@ -1119,7 +1125,7 @@ if(dsMono){
       for(let i=lo;i<hi;i++){
         const nx=Nn[3*i],ny=Nn[3*i+1],nz=Nn[3*i+2],n1x=cA*nx+sA*nz,n1z=-sA*nx+cA*nz,n2z=sB*ny+cB*n1z;
         if(n2z>0.26)continue;
-        const px=P[3*i]*sc,py=P[3*i+1]*sc,pz=P[3*i+2]*sc,p1x=cA*px+sA*pz,p1z=-sA*px+cA*pz,p2y=cB*py-sB*p1z,ooz=1/(sB*py+cB*p1z+K2);
+        const px=P[3*i],py=P[3*i+1],pz=P[3*i+2],p1x=cA*px+sA*pz,p1z=-sA*px+cA*pz,p2y=cB*py-sB*p1z,ooz=1/(sB*py+cB*p1z+K2);
         const xp=hw+Math.floor(K1x*ooz*p1x),yp=hh-Math.floor(K1y*ooz*p2y);
         if(xp<0||xp>=W||yp<0||yp>=H)continue;
         const idx=yp*W+xp,zc=zb[idx];
@@ -1136,8 +1142,8 @@ if(dsMono){
       }
     }
     if(intro)for(let s=0;s<ns;s++){const st=intro.st[s];if(st<0)continue;
-      const pn=pen[s],j=Math.min(pn.n-1,Math.floor(st)),f=st-j,j1=Math.min(pn.n-1,j+1),r=strokes[s].r*sc;
-      const qx=(pn.pts[2*j]+(pn.pts[2*j1]-pn.pts[2*j])*f)*sc,qy=(pn.pts[2*j+1]+(pn.pts[2*j1+1]-pn.pts[2*j+1])*f)*sc;
+      const pn=pen[s],j=Math.min(pn.n-1,Math.floor(st)),f=st-j,j1=Math.min(pn.n-1,j+1),r=strokes[s].r;
+      const qx=pn.pts[2*j]+(pn.pts[2*j1]-pn.pts[2*j])*f,qy=pn.pts[2*j+1]+(pn.pts[2*j1+1]-pn.pts[2*j+1])*f;
       let tx=pn.tg[2*j]+(pn.tg[2*j1]-pn.tg[2*j])*f,ty=pn.tg[2*j+1]+(pn.tg[2*j1+1]-pn.tg[2*j+1])*f;const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
       const nx=-ty,ny=tx;
       for(let c=0;c<CAPN;c++){const a=CAP[3*c],b=CAP[3*c+1],cc=CAP[3*c+2],dx=a*nx+cc*tx,dy=a*ny+cc*ty;plot(qx+r*dx,qy+r*dy,r*b,dx,dy,b,0.4)}}
@@ -1213,21 +1219,19 @@ if(dsMono){
   }
   function substep(dt){
     swayT+=dt;
-    const sA_=swayNow(),sB_=breathNow();
-    // Landing squash after the intro: the letters dip to 96% and spring back (clamped at 1, the size the box was derived for).
-    let r=spring(bump,bumpV,0,dt,60,0.4);bump=r[0];bumpV=r[1];sc=Math.min(1,1-0.06*bump);
+    const sA_=swayNow(),sB_=breathNow(),pB=HOME_B+sB_+pressB+hovB;
     if(drag&&drag.moved)return;
-    if(free){Av-=spinK*(SPIN_C1*Av+SPIN_C2*Av*Math.abs(Av))*dt;A+=Av*dt;if(Math.abs(Av)<SPIN_END){free=false;rephase();ret=0}pitch(dt,HOME_B+sB_+pressB+hovB,SPR_K,SPR_Z);return}
-    if(intro){r=spring(A,Av,homeA+sA_+pressA+hovA,dt,INTRO_K,INTRO_Z);A=r[0];Av=r[1];pitch(dt,HOME_B+sB_+pressB+hovB,INTRO_K,INTRO_Z);return}
-    // The return into the sway after a coast or a drag ramps in from nothing (smoothstep over RET_T): stiffness from zero,
-    // damping from critical down to the sway's bounce, air drag fading out and the swing blended in, so a letters-at-rest
-    // hand-off eases home instead of being caught. Pitch keeps its bounce: that tilt is always the user's own doing.
+    if(drag&&drag.hold){Av*=Math.exp(-HOLD*dt);A+=Av*dt;pitch(dt,pB,SPR_K,SPR_Z);return}
+    if(free){Av-=spinK*(SPIN_C1*Av+SPIN_C2*Av*Math.abs(Av))*dt;A+=Av*dt;if(Math.abs(Av)<SPIN_END){free=false;toSway()}pitch(dt,pB,SPR_K,SPR_Z);return}
+    // Every hand-off into the sway ramps (smoothstep over RET_T) from the motion it takes over (from) to the sway's spring.
     if(ret<1)ret=Math.min(1,ret+dt/RET_T);
-    const e=ret*ret*(3-2*ret),k=SPR_K*e,z=1-(1-SPR_Z)*e;
-    Av+=(k*(homeA+sA_*e+pressA+hovA-A)-2*z*Math.sqrt(k)*Av-(1-e)*SPIN_C1*Av)*dt;A+=Av*dt;
-    pitch(dt,HOME_B+sB_+pressB+hovB,SPR_K,SPR_Z);
+    const e=ret*ret*(3-2*ret),f=from,k=f[0]+(SPR_K-f[0])*e,z=f[1]+(SPR_Z-f[1])*e;
+    Av+=(k*(homeA+sA_*(f[3]+(1-f[3])*e)+pressA+hovA-A)-2*z*Math.sqrt(k)*Av-f[2]*(1-e)*Av)*dt;A+=Av*dt;
+    pitch(dt,pB,f[4]+(SPR_K-f[4])*e,f[5]+(SPR_Z-f[5])*e);
   }
-  function settled(){return reduced()&&!intro&&!drag&&!free&&!shat&&!wakeOn&&Math.abs(Av)<2e-3&&Math.abs(Bv)<2e-3&&Math.abs(bump)<1e-3&&Math.abs(A-homeA-pressA-hovA)<1e-3&&Math.abs(B-HOME_B-pressB-hovB)<1e-3}
+  // Letters let go after a coast, a drag or a caught spin: the sway re-centers on them and its pull ramps in.
+  function toSway(){rephase();ret=0;from=FROM_COAST}
+  function settled(){return reduced()&&!intro&&!drag&&!free&&!shat&&!wakeOn&&Math.abs(Av)<2e-3&&Math.abs(Bv)<2e-3&&Math.abs(A-homeA-pressA-hovA)<1e-3&&Math.abs(B-HOME_B-pressB-hovB)<1e-3}
   // The pen: D over the first 0.85 s, S from 0.55 s, eased overall and slowed through bends by the curvature map; -1 = not
   // started, so a stroke begins from its first station with the round cap and never as a stray dot.
   function introStep(){
@@ -1237,8 +1241,8 @@ if(dsMono){
       const u=Math.min(255.999,prog[s]*256),k=Math.floor(u),st=pn.map[k]+(pn.map[k+1]-pn.map[k])*(u-k);
       const prev=intro.st[s]<0?-1:Math.floor(intro.st[s]);for(let j=prev+1;j<=Math.floor(st);j++)pn.time[j]=now;
       intro.st[s]=st}
-    // The pen lifts: the letters land with a squash and a nod toward the viewer, and the underdamped springs settle them.
-    if(t>1.5){intro=null;introDone=true;bumpV=6;Bv-=1.4;coolUntil=now+450}
+    // The pen lifts; the fresh ink cools over the next 450 ms while the letters are already swaying.
+    if(t>1.5){intro=null;introDone=true;coolUntil=now+450}
   }
   function frame(ts){
     rafId=0;
@@ -1251,14 +1255,14 @@ if(dsMono){
   function schedule(){if(!rafId)rafId=requestAnimationFrame(frame)}
   function wake(){last=0;schedule()}
   function startIntro(){
-    ret=1;if(reduced()){introDone=true;A=homeA;B=HOME_B;Av=Bv=0;wake();return}
-    intro={t0:performance.now(),st:[-1,-1]};for(const pn of pen)pn.time.fill(-1);A=homeA-0.55;B=0.26;Av=0;Bv=0;wake();
+    if(reduced()){ret=1;introDone=true;A=homeA;B=HOME_B;Av=Bv=0;wake();return}
+    intro={t0:performance.now(),st:[-1,-1]};for(const pn of pen)pn.time.fill(-1);A=homeA-0.55;B=0.26;Av=0;Bv=0;ret=0;from=FROM_INTRO;wake();
   }
   layoutSize();
   // ---- Pointer. Drags rotate: yaw keeps the grabbed point under the pointer (DSE.followYaw), pitch follows the vertical drag.
   // On touch, touch-action:pan-y leaves vertical swipes on the empty box to the page; a touch on the letters keeps them. A
   // press (or a hover, on fine pointers) pushes the side under the pointer away, a tap puffs a little smoke off, a double tap turns
-  // one full turn, a fling free-spins and the sway resumes, a hard fling shatters the letters, and a pointer moving through
+  // one full turn, a fling free-spins (a press catches it) and the sway resumes, a hard fling shatters the letters, and a pointer moving through
   // live smoke stirs it.
   // The pointer in cells from the box center (X right, Y up).
   function pointerXY(e){const r=dsMono.getBoundingClientRect();PXY[0]=(e.clientX-r.left)/r.width*W-(W>>1);PXY[1]=(H>>1)-(e.clientY-r.top)/r.height*H}
@@ -1275,8 +1279,11 @@ if(dsMono){
   }
   dsMono.addEventListener('pointerdown',e=>{
     if(e.button||!built)return;pointerXY(e);
-    drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,X0:PXY[0],Y0:PXY[1],moved:false,last:0,A0:0,B0:0,Xg:0,Yg:0,vA:0,vB:0};PF.reset();
-    pressA=-(PXY[0]/W)*0.36;pressB=(PXY[1]/H)*0.30;Av=0;Bv=0;free=false;wake();
+    // A press on a free spin catches it where it is (the hold brake in substep) and re-centers the sway on it, so the spring
+    // never pulls toward a face-on turns away; a press on letters at rest pushes the side under the pointer away.
+    drag={id:e.pointerId,x0:e.clientX,y0:e.clientY,X0:PXY[0],Y0:PXY[1],moved:false,hold:free,last:0,A0:0,B0:0,Xg:0,Yg:0,vA:0,vB:0};PF.reset();
+    if(free){free=false;toSway()}else{pressA=-(PXY[0]/W)*0.36;pressB=(PXY[1]/H)*0.30;Av=0;Bv=0}
+    wake();
   });
   dsMono.addEventListener('pointermove',e=>{
     const now=performance.now();pointerXY(e);const X=PXY[0],Y=PXY[1];
@@ -1308,11 +1315,11 @@ if(dsMono){
         // flick cannot brake like a wall or glide a whole extra turn); otherwise the natural drag, and the return handles it.
         const nat=Math.log((SPIN_C1+SPIN_C2*Math.abs(Av))/(SPIN_C1+SPIN_C2*SPIN_END))/SPIN_C2,s=Av<0?-1:1,end=A+s*nat,t0=Math.floor(end/DSE.TAU)*DSE.TAU;
         let best=1e9;for(let t=t0;t<=t0+DSE.TAU;t+=DSE.TAU){const need=(t-A)*s;if(need<=0.05)continue;const k=nat/need,e=Math.abs(Math.log(k));if(k>=0.45&&k<=2.2&&e<best){best=e;spinK=k}}}
-      if(Math.abs(d.vA)>9&&!intro&&Math.abs(bump)<0.01&&!shat)shatterStart()}
+      if(Math.abs(d.vA)>9&&!intro&&!shat)shatterStart()}
+    if(!free&&(d.moved||d.hold))toSway();
     if(!d.moved&&!cancel){const X=d.X0,Y=d.Y0,px=X+(W>>1),py=(H>>1)-Y;
       if(!reduced()){wk.knock(cnt,zb,px,py*hy,11,0.35);wk.puff(px,py*hy,5,24);wakeOn=true}
       if(now-lastTap<320&&!reduced()){rephase();ret=1;homeA+=DSE.TAU*(X<0?1:-1);lastTap=0}else lastTap=now}
-    if(d.moved&&!free){rephase();ret=0}
     wake();
   }
   // A touch that lands on the letters (or within a fingertip, 3 cells, of them) is theirs, so a vertical drag pitches them
@@ -1330,7 +1337,7 @@ if(dsMono){
   new IntersectionObserver(es=>{const e=es[0],was=inView;inView=e.isIntersecting;seen=inView&&e.intersectionRatio>=0.3;
     if(seen&&built&&!introDone&&!intro)startIntro();if(inView&&!was)wake()},{threshold:[0,0.35]}).observe(dsMono);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
-  rm.addEventListener('change',()=>{if(reduced()){intro=null;introDone=true;free=false;Av=Bv=0;bump=bumpV=0;shat=0;wakeOn=false;wk.clear();homeA=Math.round(A/DSE.TAU)*DSE.TAU}wake()});
+  rm.addEventListener('change',()=>{if(reduced()){intro=null;introDone=true;free=false;Av=Bv=0;shat=0;wakeOn=false;wk.clear();homeA=Math.round(A/DSE.TAU)*DSE.TAU}wake()});
   new ResizeObserver(()=>{const col=Math.min(400,host.clientWidth),d=Math.min(3,window.devicePixelRatio||1);if(cw&&(d!==DPR||Math.abs(col*d/cw-W)>=1))layoutSize(built)}).observe(host);
   // Theme changes recolor the atlas; leaving Home stops the loop and the route's class change on #home starts it again.
   new MutationObserver(()=>{buildAtlas();wake()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
