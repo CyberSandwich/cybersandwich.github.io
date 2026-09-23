@@ -1,6 +1,8 @@
 html{height:100%}
 body{display:flex;align-items:center;justify-content:center}
-.w{width:100%;max-width:440px;padding:20px 20px 100px;margin:auto 0}
+/* Fixed width: a shrink-to-fit main lets the preview canvas, which sizes to its container, lock the column narrow */
+main{width:100%}
+.w{width:100%;max-width:440px;padding:20px 20px 100px;margin:0 auto}
 .actions{margin-bottom:0}
 .settings{margin-top:14px;margin-bottom:0}
 .preview{
