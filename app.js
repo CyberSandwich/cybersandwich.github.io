@@ -694,21 +694,55 @@ function openQR(){
   qrModal.open(qrOverlay);
 }
 function closeQR(){qrModal.close()}
-const nameCard=$('.name-card');
-const dsMono=nameCard&&nameCard.querySelector('.ds-mono');
-if(nameCard){
-  nameCard.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openQR()}});
-}
+const photo=$('.photo');
+if(photo)photo.addEventListener('click',openQR);
+
+// DS monogram surface: round tubes swept along the D and the S, emit(x,y,z,nx,ny,nz) per sample.
+const dsShape=(()=>{
+  const STEPS=22,r=0.25;
+  const aCos=new Float32Array(STEPS),aSin=new Float32Array(STEPS);
+  for(let i=0;i<STEPS;i++){const a=(2*Math.PI*i)/STEPS;aCos[i]=Math.cos(a);aSin[i]=Math.sin(a)}
+  function tube(emit,px,py,tx,ty){
+    const nxx=-ty,nxy=tx;
+    for(let i=0;i<STEPS;i++){const ca=aCos[i],sa=aSin[i];
+      emit(px+r*ca*nxx,py+r*ca*nxy,r*sa,ca*nxx,ca*nxy,sa)}
+  }
+  const cxD=-1.3,bxD=0.4,hD=1.4,rxD=1.7,ryD=1.4,cxS=1.2,rs=0.7;
+  return function(emit){
+    for(let yy=-hD-r;yy<=hD+r;yy+=0.05)tube(emit,cxD-bxD,yy,0,1);
+    for(let phi=-Math.PI/2;phi<=Math.PI/2+0.001;phi+=0.04){
+      const cp=Math.cos(phi),sp=Math.sin(phi);
+      const px=cxD-bxD+rxD*cp,py=ryD*sp;
+      let tx=-rxD*sp,ty=ryD*cp;
+      const tl=1/Math.sqrt(tx*tx+ty*ty);
+      tube(emit,px,py,tx*tl,ty*tl);
+    }
+    for(let phi=0;phi<=3*Math.PI/2+0.001;phi+=0.04){
+      const cp=Math.cos(phi),sp=Math.sin(phi);
+      tube(emit,cxS+rs*cp,rs+rs*sp,-sp,cp);
+    }
+    for(let phi=-Math.PI;phi<=Math.PI/2+0.001;phi+=0.04){
+      const cp=Math.cos(phi),sp=Math.sin(phi);
+      tube(emit,cxS+rs*cp,-rs+rs*sp,-sp,cp);
+    }
+  };
+})();
+
+const dsMono=$('.ds-mono');
 if(dsMono){
-  const W=88,H=32,K1x=80,K1y=48,K2=5,STEPS=22;
+  const K1x=80,K1y=48,K2=5;
+  let R=0;
+  dsShape((x,y,z)=>{R=Math.max(R,Math.hypot(x,y,z))});
+  // Seen from K2 away, nothing within R of the origin projects more than R/sqrt(K2²-R²) off-axis at any
+  // rotation, so this grid holds every frame whole. style.css's .ds-mono font divisor assumes its width (98).
+  const reach=R/Math.sqrt(K2*K2-R*R);
+  const W=2*(Math.ceil(K1x*reach)+1),H=2*(Math.ceil(K1y*reach)+1);
   const charset='.,-~:;=!*#$@';
   const lx=0,ly=0.7071,lz=-0.7071;
   const buf=new Array(W*H),zb=new Float32Array(W*H);
-  const aCos=new Float32Array(STEPS),aSin=new Float32Array(STEPS);
-  for(let i=0;i<STEPS;i++){const a=(2*Math.PI*i)/STEPS;aCos[i]=Math.cos(a);aSin[i]=Math.sin(a)}
-  const B_TARGET=0.22,tubeR=0.25,spinSpeed=0.003;
-  let A=0,B=B_TARGET,Av=0,Bv=0;
-  function plot(px,py,pz,nx,ny,nz,cA,sA,cB,sB){
+  const B_TARGET=0.22,spinSpeed=0.003;
+  let A=0,B=B_TARGET,Av=0,Bv=0,cA=1,sA=0,cB=1,sB=0;
+  function plot(px,py,pz,nx,ny,nz){
     const p1x=cA*px+sA*pz,p1z=-sA*px+cA*pz;
     const p2y=cB*py-sB*p1z,p2z=sB*py+cB*p1z;
     const z=p2z+K2;if(z<0.5)return;
@@ -722,12 +756,7 @@ if(dsMono){
     const idx=yp*W+xp;
     if(ooz>zb[idx]){zb[idx]=ooz;let ci=(L*11)|0;if(ci>11)ci=11;buf[idx]=charset[ci]}
   }
-  function tube(px,py,tx,ty,r,cA,sA,cB,sB){
-    const nxx=-ty,nxy=tx;
-    for(let i=0;i<STEPS;i++){const ca=aCos[i],sa=aSin[i];
-      plot(px+r*ca*nxx,py+r*ca*nxy,r*sa,ca*nxx,ca*nxy,sa,cA,sA,cB,sB)}
-  }
-  let dragging=false,lastX=0,lastY=0,lastMoveTime=0,totalDrag=0,rafId=0;
+  let dragging=false,lastX=0,lastY=0,lastMoveTime=0,rafId=0;
   const homeSection=$('#home');
   function render(){
     if(!dragging){
@@ -740,33 +769,19 @@ if(dsMono){
       if(nB<-1.4){nB=-1.4;Bv=Math.abs(Bv)*0.55}
       B=nB;
     }
-    const cA=Math.cos(A),sA=Math.sin(A),cB=Math.cos(B),sB=Math.sin(B);
+    cA=Math.cos(A);sA=Math.sin(A);cB=Math.cos(B);sB=Math.sin(B);
     for(let i=0;i<W*H;i++){buf[i]=' ';zb[i]=0}
-    const cxD=-1.3,bxD=0.4,hD=1.4,rxD=1.7,ryD=1.4,r=tubeR;
-    for(let yy=-hD-r;yy<=hD+r;yy+=0.05)tube(cxD-bxD,yy,0,1,r,cA,sA,cB,sB);
-    for(let phi=-Math.PI/2;phi<=Math.PI/2+0.001;phi+=0.04){
-      const cp=Math.cos(phi),sp=Math.sin(phi);
-      const px=cxD-bxD+rxD*cp,py=ryD*sp;
-      let tx=-rxD*sp,ty=ryD*cp;
-      const tl=1/Math.sqrt(tx*tx+ty*ty);
-      tube(px,py,tx*tl,ty*tl,r,cA,sA,cB,sB);
-    }
-    const cxS=1.2,rs=0.7;
-    for(let phi=0;phi<=3*Math.PI/2+0.001;phi+=0.04){
-      const cp=Math.cos(phi),sp=Math.sin(phi);
-      tube(cxS+rs*cp,rs+rs*sp,-sp,cp,r,cA,sA,cB,sB);
-    }
-    for(let phi=-Math.PI;phi<=Math.PI/2+0.001;phi+=0.04){
-      const cp=Math.cos(phi),sp=Math.sin(phi);
-      tube(cxS+rs*cp,-rs+rs*sp,-sp,cp,r,cA,sA,cB,sB);
-    }
+    dsShape(plot);
     let s='';
     for(let j=0;j<H;j++)s+=buf.slice(j*W,(j+1)*W).join('')+'\n';
     dsMono.textContent=s;
   }
+  // It sits below the fold, so it only animates while on screen.
+  let inView=true;
+  if('IntersectionObserver' in window)new IntersectionObserver(es=>{inView=es[0].isIntersecting;schedule()},{rootMargin:'120px'}).observe(dsMono);
   function loop(){
     rafId=0;
-    if(document.hidden||!homeSection||!homeSection.classList.contains('active'))return;
+    if(document.hidden||!inView||!homeSection||!homeSection.classList.contains('active'))return;
     render();
     schedule();
   }
@@ -777,7 +792,7 @@ if(dsMono){
   // Leaving Home stops the loop; the route's class change on #home starts it again.
   if(homeSection)new MutationObserver(schedule).observe(homeSection,{attributeFilter:['class']});
   dsMono.addEventListener('pointerdown',e=>{
-    dragging=true;totalDrag=0;
+    dragging=true;
     lastX=e.clientX;lastY=e.clientY;lastMoveTime=performance.now();
     Av=0;Bv=0;
     dsMono.classList.add('ds-grabbing');
@@ -788,7 +803,6 @@ if(dsMono){
     const now=performance.now();
     const dt=Math.max(8,now-lastMoveTime);
     const dx=e.clientX-lastX,dy=e.clientY-lastY;
-    totalDrag+=Math.abs(dx)+Math.abs(dy);
     const sens=0.01;
     A-=dx*sens;
     let nB=B-dy*sens;
@@ -800,8 +814,6 @@ if(dsMono){
   function endDrag(){dragging=false;dsMono.classList.remove('ds-grabbing')}
   dsMono.addEventListener('pointerup',endDrag);
   dsMono.addEventListener('pointercancel',endDrag);
-  dsMono.addEventListener('click',e=>{if(totalDrag>=6){e.stopPropagation();e.preventDefault()}});
-  nameCard.addEventListener('click',e=>{e.preventDefault();openQR()});
 }
 
 function cmdBuildItems(){

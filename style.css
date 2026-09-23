@@ -33,27 +33,31 @@ body{line-height:1.5}
 .page{display:none}
 .page.active{display:block}
 
-.name-card{
+.photo{
   display:block;
-  width:100%;
+  width:60%;
+  max-width:240px;
   margin:0 auto 24px;
   padding:0;
-  background:none;
   border:none;
+  border-radius:50%;
+  overflow:hidden;
   cursor:pointer;
   -webkit-appearance:none;
   appearance:none;
-  text-align:center;
-  overflow:visible
+  transition:box-shadow .15s,transform .1s
 }
+.photo img{display:block;width:100%;height:auto}
 .ds-mono{
   /* The donut rewrites its text 60x a second; containment keeps that off the siblings' layout.
-     Not `strict`: size containment would freeze the box at a fixed intrinsic size, and the font-size is clamp()ed to the viewport. */
+     Not `strict`: size containment would freeze the box at a fixed intrinsic size, and the font-size follows the viewport. */
   contain:layout style paint;
-  display:inline-block;
-  margin:0;
+  display:block;
+  width:max-content;
+  margin:0 auto;
   padding:.4em 0;
-  font:700 clamp(5px,1.65vw,12px)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
+  /* Fits the grid to the card column: app.js sizes it to 98 columns, x Menlo's .602em advance = 59em. */
+  font:700 calc(min(400px,100vw - 40px) / 59)/1 'Menlo','Monaco','Consolas','Courier New',monospace;
   letter-spacing:0;
   color:var(--t1);
   white-space:pre;
@@ -77,7 +81,7 @@ body{line-height:1.5}
 .stitle:focus,#main:focus{outline:none}
 
 /* Shared card base */
-.pcard,.pcontent,.links{background:var(--card);box-shadow:var(--shadow)}
+.pcard,.pcontent,.links,.photo{background:var(--card);box-shadow:var(--shadow)}
 .pcard,.links{border-radius:20px}
 .pcard{margin-bottom:14px}
 
@@ -142,7 +146,9 @@ body{line-height:1.5}
   transition:box-shadow .15s,transform .1s
 }
 .pcard:hover{box-shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
-.pcard:active{transform:translateY(-1px) scale(.985)}
+.pcard:active,.photo:active{transform:translateY(-1px) scale(.985)}
+/* Touch keeps :hover after the tap, which would leave the photo lifted once the QR closes. */
+@media(hover:hover){.photo:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}}
 @media(hover:hover){.pcard:hover{will-change:transform}}
 .pcard .pinf{flex:1;min-width:0}
 .pcard .pt{font-size:1.0625rem;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
