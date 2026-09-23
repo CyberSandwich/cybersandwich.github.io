@@ -923,28 +923,24 @@ function fitter(PN,FIT_MS){
     const den=k*stt-st*st;return den>1e-9?(k*sty-st*sy)/den*1000:0}
   return{reset:()=>{head=0;n=0},push:push,slope:slope};
 }
-// ---- Wake: air and dust over a W x H cell grid, in column widths (a row is hy of them). The air is a 2D stable-fluids
+// ---- Wake: air and smoke over a W x H cell grid, in column widths (a row is hy of them). The air is a 2D stable-fluids
 // field on a half-resolution grid with open walls and no obstacle: in 3D the air a turning letter displaces goes round it,
 // so the screen sees only the boundary layer, here the cells under the near face relaxing toward the surface's own screen
 // velocity (rate KB, capped at VCAP). That lays a shear layer along every rim, which separates at the trailing corners and
-// rolls up; momentum then leaves the plane (KD), diffuses (NU) and is kept crisp by vorticity confinement (VC). Dust is a
-// fixed pool of inertial grains shed into the empty cell behind a trailing rim with the air's velocity there plus a small
-// kick, so it is left where it was released; each relaxes toward the air over a Stokes time and settles at a speed set by
-// its own mass (TAU0, VT per unit mass), with Brownian jitter for the light ones, and dies of age or within MARGIN cells of
-// a wall. Birth positions are kept for the drift measurement in tests/test-ds-monogram.js.
-function wake(W,H,hy,NG){
+// rolls up; momentum then leaves the plane (KD), diffuses (NU) and is kept crisp by vorticity confinement (VC). Smoke is a
+// density on the same grid, released into the empty cell behind each trailing rim at a rate set by that rim's speed, carried
+// by the air and thinning over DYE_T, so it is left where it was shed and curls with the eddies; the walls absorb it. The
+// release centroid (decayed like the smoke) is kept so tests/test-ds-monogram.js can measure how far the smoke drifts.
+function wake(W,H,hy){
   const FW=Math.ceil(W/2),FH=Math.ceil(H/2),N=FW*FH,HX=2,HY=2*hy,hw=W>>1,hh=H>>1;
-  const KB=14,VCAP=28,KD=2.8,NU=3,VC=2,JAC=12,VTH=3,RATE=720,KICK=7,TAU0=0.18,VT=3,JIT=4,MARGIN=1.5,AIR_DT=1/60;
+  const KB=14,VCAP=28,KD=2.8,NU=3,VC=2,JAC=12,VTH=3,AIR_DT=1/60,INJ=40,DYE_T=1.6;
   const u=new Float32Array(N),v=new Float32Array(N),u2=new Float32Array(N),v2=new Float32Array(N),p=new Float32Array(N),dv=new Float32Array(N),om=new Float32Array(N);
-  const sol=new Uint8Array(N),su=new Float32Array(N),sv=new Float32Array(N),tr=new Uint16Array(N),tu=new Uint16Array(N),SV=new Float64Array(2);
-  const gx=new Float32Array(NG),gy=new Float32Array(NG),gx0=new Float32Array(NG),gy0=new Float32Array(NG),gvx=new Float32Array(NG),gvy=new Float32Array(NG),gm=new Float32Array(NG),ga=new Float32Array(NG),gl=new Float32Array(NG);
-  let live=0,acc=0,nt=0,vmax=0,airAcc=0;
+  const d=new Float32Array(N),d2=new Float32Array(N),sol=new Uint8Array(N),su=new Float32Array(N),sv=new Float32Array(N),tr=new Uint16Array(N),tu=new Uint16Array(N),SV=new Float64Array(2);
+  let nt=0,vmax=0,airAcc=0,total=0,am=0,ax=0,ay=0;
   function sample(f,x,y){x=x<0?0:x>FW-1.001?FW-1.001:x;y=y<0?0:y>FH-1.001?FH-1.001:y;const i=x|0,j=y|0,a=x-i,b=y-j,k=j*FW+i;return (f[k]*(1-a)+f[k+1]*a)*(1-b)+(f[k+FW]*(1-a)+f[k+FW+1]*a)*b}
   function edges(f){for(let i=0;i<FW;i++){f[i]=f[i+FW];f[(FH-1)*FW+i]=f[(FH-2)*FW+i]}for(let j=0;j<FH;j++){f[j*FW]=f[j*FW+1];f[j*FW+FW-1]=f[j*FW+FW-2]}}
   // The nearest inked cell among a half cell's four, as 1/depth (0 = empty).
   function near(cnt,zb,i,j){let z=0;for(let dj=0;dj<2;dj++){const jj=2*j+dj;if(jj>=H)break;for(let di=0;di<2;di++){const ii=2*i+di;if(ii>=W)break;const c=jj*W+ii;if(cnt[c]&&zb[c]>z)z=zb[c]}}return z}
-  function spawn(x,y,vx,vy,rnd){if(live>=NG)return;const m=0.6+rnd();gx[live]=gx0[live]=x;gy[live]=gy0[live]=y;gvx[live]=vx;gvy[live]=vy;gm[live]=m;ga[live]=0;gl[live]=(1.2+1.6*rnd())*Math.pow(m,-0.3);live++}
-  function kill(i){live--;gx[i]=gx[live];gy[i]=gy[live];gx0[i]=gx0[live];gy0[i]=gy0[live];gvx[i]=gvx[live];gvy[i]=gvy[live];gm[i]=gm[live];ga[i]=ga[live];gl[i]=gl[live]}
   // The near-face point under each half cell and its screen velocity, then the trailing cells: inked, moving, with the cell
   // behind them (against the motion) empty.
   function surface(cnt,zb,K1x,K1y,K2,B,Av,Bv){
@@ -952,17 +948,20 @@ function wake(W,H,hy,NG){
     for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,z=near(cnt,zb,i,j);sol[k]=z>0?1:0;if(!z){su[k]=sv[k]=0;continue}
       surfVel(2*i+1-hw,hh-2*j,z,sB,cB,K1x,K1y,K2,Av,Bv,SV);su[k]=SV[0];sv[k]=SV[1]*hy;const s=Math.hypot(su[k],sv[k]);if(s>vmax)vmax=s}
     for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i;if(!sol[k])continue;const a=su[k],b=sv[k];if(a*a+b*b<VTH*VTH)continue;
-      const ax=Math.abs(a)>=Math.abs(b),ui=i-(ax?(a>0?1:-1):0),uj=j-(ax?0:(b>0?1:-1));if(ui<0||ui>=FW||uj<0||uj>=FH)continue;
+      const ax_=Math.abs(a)>=Math.abs(b),ui=i-(ax_?(a>0?1:-1):0),uj=j-(ax_?0:(b>0?1:-1));if(ui<1||ui>=FW-1||uj<1||uj>=FH-1)continue;
       const c=uj*FW+ui;if(!sol[c]){tr[nt]=k;tu[nt]=c;nt++}}
   }
-  // The air advances in fixed AIR_DT steps (semi-Lagrangian, stable at any step); the grains every call.
+  // The air advances in fixed AIR_DT steps (semi-Lagrangian, stable at any step) and carries the smoke with it.
   function air(dt,force){
     if(force){const kf=1-Math.exp(-KB*dt);for(let k=0;k<N;k++){if(!sol[k])continue;let a=su[k],b=sv[k];const s=Math.hypot(a,b);if(s>VCAP){a*=VCAP/s;b*=VCAP/s}u[k]+=(a-u[k])*kf;v[k]+=(b-v[k])*kf}}
-    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,x=i-u[k]*dt/HX,y=j-v[k]*dt/HY;u2[k]=sample(u,x,y);v2[k]=sample(v,x,y)}
-    const g=1-KD*dt,ax=NU*dt/(HX*HX),ay=NU*dt/(HY*HY);
+    const fade=Math.exp(-dt/DYE_T);
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,x=i-u[k]*dt/HX,y=j-v[k]*dt/HY;u2[k]=sample(u,x,y);v2[k]=sample(v,x,y);d2[k]=sample(d,x,y)*fade}
+    const g=1-KD*dt,gx=NU*dt/(HX*HX),gy=NU*dt/(HY*HY);total=0;
+    for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const k=j*FW+i,wall=i===0||j===0||i===FW-1||j===FH-1;d[k]=wall?0:d2[k];total+=d[k]}
+    am*=fade;ax*=fade;ay*=fade;
     for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;
-      u[k]=(u2[k]+ax*(u2[k-1]+u2[k+1]-2*u2[k])+ay*(u2[k-FW]+u2[k+FW]-2*u2[k]))*g;
-      v[k]=(v2[k]+ax*(v2[k-1]+v2[k+1]-2*v2[k])+ay*(v2[k-FW]+v2[k+FW]-2*v2[k]))*g}
+      u[k]=(u2[k]+gx*(u2[k-1]+u2[k+1]-2*u2[k])+gy*(u2[k-FW]+u2[k+FW]-2*u2[k]))*g;
+      v[k]=(v2[k]+gx*(v2[k-1]+v2[k+1]-2*v2[k])+gy*(v2[k-FW]+v2[k+FW]-2*v2[k]))*g}
     edges(u);edges(v);
     for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;om[k]=(v[k+1]-v[k-1])/(2*HX)-(u[k+FW]-u[k-FW])/(2*HY)}
     for(let j=2;j<FH-2;j++)for(let i=2;i<FW-2;i++){const k=j*FW+i,nx=(Math.abs(om[k+1])-Math.abs(om[k-1]))/(2*HX),ny=(Math.abs(om[k+FW])-Math.abs(om[k-FW]))/(2*HY),l=Math.hypot(nx,ny)+1e-6;
@@ -973,29 +972,27 @@ function wake(W,H,hy,NG){
     for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const k=j*FW+i;u[k]-=(p[k+1]-p[k-1])/(2*HX);v[k]-=(p[k+FW]-p[k-FW])/(2*HY)}
     edges(u);edges(v);
   }
-  function step(dt,drive,rnd,force){
+  function add(c,a){const i=c%FW,j=(c-i)/FW,n=Math.min(1,d[c]+a),g=n-d[c];d[c]=n;total+=g;am+=g;ax+=g*HX*(i+0.5);ay+=g*HY*(j+0.5)}
+  // Releases smoke behind the trailing rims (drive 0..1 from the rotation speed; force false while shatter debris flies),
+  // then advances the air. Returns the smoke left, which keeps the page's loop running until it has thinned away.
+  function step(dt,drive,force){
+    // Release goes as the cube of the rim's speed share, so the fastest rims (corners and terminals, farthest from the axis)
+    // lay the trails and the slow ones barely haze: a wake is its tips.
+    if(force&&drive>0&&vmax>0)for(let t=0;t<nt;t++){const k=tr[t],f=Math.hypot(su[k],sv[k])/vmax;add(tu[t],INJ*drive*f*f*f*dt)}
     airAcc+=dt;if(airAcc>=AIR_DT-1e-6){air(airAcc,force);airAcc=0}
-    const sq=Math.sqrt(dt)*3.46,ym=(H-MARGIN)*hy;
-    for(let i=0;i<live;){const m=gm[i],a=dt/(TAU0*m),kf=a/(1+a),x=gx[i],y=gy[i],gi=x/HX-0.5,gj=y/HY-0.5;
-      const vx=gvx[i]+(sample(u,gi,gj)-gvx[i])*kf+(rnd()-0.5)*JIT/m*sq,vy=gvy[i]+(sample(v,gi,gj)+VT*m-gvy[i])*kf+(rnd()-0.5)*JIT/m*sq;
-      gx[i]=x+vx*dt;gy[i]=y+vy*dt;gvx[i]=vx;gvy[i]=vy;ga[i]+=dt;
-      if(ga[i]>=gl[i]||gx[i]<MARGIN||gx[i]>W-MARGIN||gy[i]<MARGIN*hy||gy[i]>ym)kill(i);else i++}
-    if(force&&drive>0&&nt>0){acc+=RATE*drive*dt;
-      while(acc>=1&&live<NG){acc-=1;let s=(rnd()*nt)|0;for(let t=0;t<6;t++){const c=(rnd()*nt)|0;if(Math.hypot(su[tr[c]],sv[tr[c]])>=rnd()*vmax){s=c;break}}
-        const k=tu[s],i=k%FW,j=(k-i)/FW,x=HX*(i+rnd()),y=HY*(j+rnd()),gi=x/HX-0.5,gj=y/HY-0.5;
-        spawn(x,y,sample(u,gi,gj)+(rnd()+rnd()-1)*KICK,sample(v,gi,gj)+(rnd()+rnd()-1)*KICK,rnd)}}
-    else acc=0;
-    if(!live&&drive<=0){u.fill(0);v.fill(0)}
-    return live;
+    // Below half a cell's worth in all, nothing reaches the render's threshold: stop instead of simulating invisible smoke.
+    if(total<0.5&&drive<=0){u.fill(0);v.fill(0);d.fill(0);total=0}
+    return total;
   }
+  // Smoke at a full-grid cell (bilinear on the half grid).
+  function at(i,j){return sample(d,(i+0.5)/2-0.5,(j+0.5)/2-0.5)}
   // A radial gust of k column widths per second at (x, y), Gaussian over sg; stir relaxes the air near the pointer toward its
-  // velocity; knock sheds grains off every inked half cell within rad of (x, y) with probability pr, flying out from it at ~k.
+  // velocity; knock releases smoke amt from every inked half cell within rad of (x, y), strongest at the center.
   function puff(x,y,sg,k){for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const dx=HX*(i+0.5)-x,dy=HY*(j+0.5)-y,r2=dx*dx+dy*dy;if(r2>9*sg*sg)continue;const c=j*FW+i,w=k*Math.exp(-r2/(2*sg*sg))/(Math.sqrt(r2)+0.5);u[c]+=w*dx;v[c]+=w*dy}}
   function stir(x,y,vx,vy){const s=Math.hypot(vx,vy);if(s>60){vx*=60/s;vy*=60/s}for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const dx=HX*(i+0.5)-x,dy=HY*(j+0.5)-y,r2=dx*dx+dy*dy;if(r2>81)continue;const c=j*FW+i,w=0.3*Math.exp(-r2/18);u[c]+=(vx-u[c])*w;v[c]+=(vy-v[c])*w}}
-  function knock(cnt,zb,x,y,rad,pr,k,rnd){const i0=Math.max(0,Math.floor((x-rad)/HX)),i1=Math.min(FW-1,Math.ceil((x+rad)/HX)),j0=Math.max(0,Math.floor((y-rad)/HY)),j1=Math.min(FH-1,Math.ceil((y+rad)/HY));
-    for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){if(!near(cnt,zb,i,j)||rnd()>=pr)continue;const px=HX*(i+rnd()),py=HY*(j+rnd()),dx=px-x,dy=py-y,r=Math.hypot(dx,dy);if(r>rad)continue;const s=k*(0.5+rnd())/(r+1);spawn(px,py,dx*s,dy*s,rnd)}}
-  function clear(){u.fill(0);v.fill(0);live=0;acc=0;nt=0;airAcc=0}
-  return{live:()=>live,gx:gx,gy:gy,gx0:gx0,gy0:gy0,gm:gm,ga:ga,gl:gl,u:u,v:v,surface:surface,step:step,puff:puff,stir:stir,knock:knock,clear:clear};
+  function knock(cnt,zb,x,y,rad,amt){for(let j=1;j<FH-1;j++)for(let i=1;i<FW-1;i++){const r=Math.hypot(HX*(i+0.5)-x,HY*(j+0.5)-y);if(r>rad||!near(cnt,zb,i,j))continue;add(j*FW+i,amt*(rad>1e6?1:1-r/rad))}}
+  function clear(){u.fill(0);v.fill(0);d.fill(0);nt=0;airAcc=0;total=0;am=ax=ay=0}
+  return{d:d,u:u,v:v,FW:FW,FH:FH,at:at,total:()=>total,released:()=>am>1e-9?[ax/am,ay/am]:[0,0],centroid:()=>{let m=0,sx=0,sy=0;for(let j=0;j<FH;j++)for(let i=0;i<FW;i++){const w=d[j*FW+i];m+=w;sx+=w*HX*(i+0.5);sy+=w*HY*(j+0.5)}return m>1e-9?[sx/m,sy/m]:[0,0]},surface:surface,step:step,puff:puff,stir:stir,knock:knock,clear:clear};
 }
 // gap: ink gap between the D's bowl and the S (stroke width is 0.36); Bh: pitch clamp, which with free yaw sets the box height.
 const SPEC={letters:{r:0.18,sRatio:1.03,dW:1.32,dF:0.30,dK:0.58,sR1:0.42,sR2:0.48,sTop:1.025,sT1:8*Math.PI/180,sT4:188*Math.PI/180,gap:0.16},
@@ -1040,20 +1037,20 @@ if(dsMono){
   // Round end cap for the pen: unit directions on a hemisphere facing along the tangent (c >= 0), Fibonacci-spaced.
   const CAPN=96,CAP=new Float32Array(3*CAPN);
   for(let i=0;i<CAPN;i++){const ph=Math.acos(1-(i+0.5)/CAPN),th=i*2.399963;CAP[3*i]=Math.sin(ph)*Math.cos(th);CAP[3*i+1]=Math.sin(ph)*Math.sin(th);CAP[3*i+2]=Math.cos(ph)}
-  // Atlas rows 0..3: depth fade; 4..6: the dust's last fade levels. Physics runs in fixed 1/120 s substeps so the bounce is
-  // the same at 60 and 120 Hz; springs are underdamped (zeta 0.42: one clear overshoot, a smaller second) and the pitch
-  // rebounds elastically at the clamp. HOME_B > 0 tips the top edge away from the viewer (a sign tipped back).
-  const ROWS=7,FADE_A=[0.34,0.22,0.12],HOME_B=0.24,SPR_K=30,SPR_Z=0.42,INTRO_K=9,INTRO_Z=0.45,BOUNCE=0.8,SUB=1/120;
+  // Atlas rows 0..3: depth fade; 4..6: the smoke's faint levels (SMOKE_G: glyph steps the densest smoke climbs). Physics runs
+  // in fixed 1/120 s substeps so the bounce is the same at 60 and 120 Hz; springs are underdamped (zeta 0.42: one clear
+  // overshoot, a smaller second) and the pitch rebounds elastically at the clamp. HOME_B > 0 tips the top edge away from the viewer (a sign tipped back).
+  const ROWS=7,FADE_A=[0.34,0.22,0.12],SMOKE_G=5,HOME_B=0.24,SPR_K=30,SPR_Z=0.42,INTRO_K=9,INTRO_Z=0.45,BOUNCE=0.8,SUB=1/120;
   const SWAY_A=0.45,SWAY_T=6.7,SWAY_O=0.07,SWAY_W=0.18,SWAY_MOD_T=19.3,BREATH_A=0.05,BREATH_T=4.1,BREATH_MOD_T=13.7;
   // A free spin brakes like a body in air (quadratic plus a small linear term) and hands over at SPIN_END, when it is barely
   // turning. The drag is scaled per fling (spinK) so the spin slows onto a face-on turn: with k(c1 v + c2 v^2) the angle to
   // SPIN_END is ln((c1+c2 v0)/(c1+c2 v1))/(c2 k), so k picks the turn; a turn no reasonable k reaches leaves the natural drag.
   // The return into the sway then ramps in over RET_T (see substep), so nothing catches the letters while they still move.
-  // A flick's speed is the fitter's slope over the last FIT_MS of pointer samples; NG grains of dust.
-  const SPIN_C1=0.6,SPIN_C2=0.08,SPIN_END=0.4,RET_T=1.5,FIT_MS=80,NG=400,PF=DSE.fitter(12,FIT_MS);let spinK=1,ret=1;
+  // A flick's speed is the fitter's slope over the last FIT_MS of pointer samples.
+  const SPIN_C1=0.6,SPIN_C2=0.08,SPIN_END=0.4,RET_T=1.5,FIT_MS=80,PF=DSE.fitter(12,FIT_MS);let spinK=1,ret=1;
   let cloud=null,W=0,H=0,cw=0,ch=0,hy=1,K1x=0,K1y=0,zb,acc,cnt,ci,alv,dCi,dAlv,full=true,built=false,buildQueued=false;
   let wk=null,wakeOn=false,dP=null,dV=null,shat=0,shatT=0,fit=null;
-  const GQ=new Float64Array(3),GS=new Float64Array(2),PXY=new Float64Array(2),GD=new Int32Array(4*NG);let nGD=0;
+  const GQ=new Float64Array(3),GS=new Float64Array(2),PXY=new Float64Array(2);
   let A=0,B=HOME_B,Av=0,Bv=0,homeA=0,swayT=0,free=false,last=0,rafId=0,inView=false,near=false,accum=0,bump=0,bumpV=0,sc=1;
   let intro=null,introDone=false,coolUntil=0,fcA=1,fsA=0,fcB=1,fsB=0,pressA=0,pressB=0,hovA=0,hovB=0,drag=null,lastTap=0,hovX=0,hovY=0,hovT=0;
   const reduced=()=>rm.matches;
@@ -1069,7 +1066,7 @@ if(dsMono){
     if(built&&g.W!==W){built=false;cloud=null}
     W=g.W;H=g.H;K1x=g.K1x;K1y=g.K1y;
     zb=new Float32Array(W*H);acc=new Float32Array(W*H);cnt=new Uint16Array(W*H);ci=new Uint8Array(W*H);alv=new Uint8Array(W*H);dCi=new Uint8Array(W*H);dAlv=new Uint8Array(W*H);
-    wk=DSE.wake(W,H,hy,NG);wakeOn=false;nGD=0;shat=0;
+    wk=DSE.wake(W,H,hy);wakeOn=false;shat=0;
     dsMono.width=W*cw;dsMono.height=H*ch;dsMono.style.width=(W*cw/DPR)+'px';dsMono.style.height=(H*ch/DPR)+'px';
     buildAtlas();if(!built)queueBuild(sync);else wake();
   }
@@ -1144,36 +1141,28 @@ if(dsMono){
       ci[i]=(prev&&Math.abs(raw-prev)<0.72)?prev:Math.max(1,Math.min(NL,Math.round(raw)));
       let f=(zb[i]-ooF)/(ooN-ooF);f=f<0?0:f>1?1:f;alv[i]=Math.round((1-f)*3);
     }
-    // Blit only the cells whose glyph or row changed; the cells a grain covered last frame are redrawn beneath it first.
+    // Smoke fills the empty cells through the same ramp: dense smoke in mid glyphs at near-full alpha, thin smoke in the faint
+    // rows, and a fade to nothing over the last cells before the box edge (the walls absorb it anyway).
+    if(wakeOn&&!reduced())for(let j=1;j<H-1;j++)for(let i=1;i<W-1;i++){const k=j*W+i;if(cnt[k])continue;
+      let e=(Math.min(i,W-1-i,j,H-1-j)-1)/4;e=e<0?0:e>1?1:e;const s=wk.at(i,j)*e;if(s<0.1)continue;
+      ci[k]=Math.min(NL,1+Math.round(s*SMOKE_G));alv[k]=s>0.6?1:s>0.4?3:s>0.25?4:s>0.14?5:6}
+    // Blit only the cells whose glyph or row changed.
     if(full){ctx.clearRect(0,0,dsMono.width,dsMono.height);dCi.fill(0);dAlv.fill(0)}
-    for(let i=0;i<nGD;i++)dCi[GD[i]]=255;nGD=0;
     for(let j=0;j<H;j++)for(let i=0;i<W;i++){const k=j*W+i,c=ci[k],a=alv[k];if(c===dCi[k]&&a===dAlv[k])continue;
       if(!full)ctx.clearRect(i*cw,j*ch,cw,ch);if(c)ctx.drawImage(atlas,c*cw,a*ch,cw,ch,i*cw,j*ch,cw,ch);dCi[k]=c;dAlv[k]=a}
     full=false;
-    if(wakeOn)drawDust();
-  }
-  // Dust: each grain through the ramp at its fractional position, in front of the letters (it came off the near face). The
-  // glyph follows mass and age (heavy grains are bigger, all shrink as they fade), the alpha row age and the edge fade, which
-  // reaches nothing before the grain dies at the wake's margin; the cells under it are marked for redraw next frame.
-  function drawDust(){
-    const n=wk.live(),gx=wk.gx,gy=wk.gy,gm=wk.gm,ga=wk.ga,gl=wk.gl;
-    for(let i=0;i<n;i++){const x=gx[i],y=gy[i]/hy,b=1-ga[i]/gl[i];let e=(Math.min(x,W-x,y,H-y)-1.5)/4;e=e<0?0:e>1?1:e;const a=b*e;if(a<=0)continue;
-      const g=Math.max(1,Math.round((0.28+0.2*gm[i])*NL*Math.pow(b,0.7))),row=a>0.85?0:a>0.7?1:a>0.55?2:a>0.4?3:a>0.26?4:a>0.13?5:6;
-      ctx.drawImage(atlas,g*cw,row*ch,cw,ch,(x-0.5)*cw,(y-0.5)*ch,cw,ch);
-      const x0=Math.floor(x-0.5),y0=Math.floor(y-0.5);
-      for(let dj=0;dj<2;dj++)for(let di=0;di<2;di++){const xx=x0+di,yy=y0+dj;if(xx>=0&&xx<W&&yy>=0&&yy<H&&nGD<GD.length)GD[nGD++]=yy*W+xx}}
   }
   // ---- Shatter. A hard fling bursts the letters into their own samples: each inherits the rigid velocity (omega x p) plus an
   // outward kick, flies with drag inside the cylinder shatterFit allows (reflecting off its walls), then the underdamped springs
   // pull every sample home and it clicks back with one overshoot. The rigid rotation keeps running, so the debris tumbles. The
-  // burst also gusts the air outward and knocks dust off the whole face; while the debris flies it neither drags air nor sheds.
+  // burst also gusts the air outward and puffs smoke off the whole face; while the debris flies it neither drags air nor sheds.
   function shatterStart(){
     const P=cloud.pos,n=cloud.n;
     for(let i=0;i<n;i++){const x=P[3*i],y=P[3*i+1],z=P[3*i+2],r=Math.hypot(x,y,z)||1,k=(1.2+Math.random()*1.6)/r;
       dP[3*i]=x;dP[3*i+1]=y;dP[3*i+2]=z;
       dV[3*i]=Av*z*0.5+x*k+(Math.random()-0.5)*0.8;dV[3*i+1]=y*k+(Math.random()-0.5)*0.8;dV[3*i+2]=-Av*x*0.5+z*k+(Math.random()-0.5)*0.8}
     shat=1;shatT=0;
-    wk.knock(cnt,zb,W>>1,(H>>1)*hy,1e9,0.2,30,Math.random);wk.puff(W>>1,(H>>1)*hy,12,30);wakeOn=true;
+    wk.knock(cnt,zb,W>>1,(H>>1)*hy,1e9,0.5);wk.puff(W>>1,(H>>1)*hy,12,30);wakeOn=true;
   }
   function shatterStep(dt){
     const P=cloud.pos,n=cloud.n,rc=fit.rc,yc=fit.yc,spring=shatT>0.45,k=30,c=2*0.42*Math.sqrt(30);let far=0;shatT+=dt;
@@ -1210,13 +1199,13 @@ if(dsMono){
     for(let i=0;i<240;i++){const t=base+SWAY_T*i/240,v=swayAt(t),dv=(swayAt(t+0.01)-v)*100;if(dv*dir<0)continue;const e=Math.abs(v-d)+0.05*Math.abs(dv-Av);if(e<bd){bd=e;best=t}}
     swayT=best;
   }
-  // The wake runs while dust lives or the letters turn faster than the sway ever does (drive 0 at 1 rad/s, full at 7); its
+  // The wake runs while smoke lingers or the letters turn faster than the sway ever does (drive 0 at 1 rad/s, full at 7); its
   // surface pass reads the last frame's z-buffer with the pose that drew it, a frame behind the pointer during a drag.
   function step(dt){
     const av=drag&&drag.moved?drag.vA:Av,bv=drag&&drag.moved?drag.vB:Bv;let drive=(Math.abs(av)+0.7*Math.abs(bv)-1)/6;drive=drive<0?0:drive>1?1:drive;
     const air=!reduced()&&(wakeOn||drive>0);
     if(air&&!shat)wk.surface(cnt,zb,K1x,K1y,K2,B,av,bv);
-    accum+=dt;while(accum>=SUB){substep(SUB);if(air)wakeOn=wk.step(SUB,drive,Math.random,!shat)>0||drive>0;accum-=SUB}
+    accum+=dt;while(accum>=SUB){substep(SUB);if(air)wakeOn=wk.step(SUB,drive,!shat)>0||drive>0;accum-=SUB}
     if(shat)shatterStep(Math.min(0.05,dt));
   }
   function substep(dt){
@@ -1265,9 +1254,9 @@ if(dsMono){
   layoutSize();
   // ---- Pointer. Sideways drags rotate (touch-action:pan-y leaves vertical swipes to the page); a drag that started sideways
   // then has the full pitch range. The point grabbed stays under the pointer (DSE.follow), a press (or a hover, on fine
-  // pointers) pushes the side under the pointer away, a tap knocks a little dust off, a double tap turns
+  // pointers) pushes the side under the pointer away, a tap puffs a little smoke off, a double tap turns
   // one full turn, a fling free-spins and the sway resumes, a hard fling shatters the letters, and a pointer moving through
-  // live dust stirs it.
+  // live smoke stirs it.
   // The pointer in cells from the box center (X right, Y up).
   function pointerXY(e){const r=dsMono.getBoundingClientRect();PXY[0]=(e.clientX-r.left)/r.width*W-(W>>1);PXY[1]=(H>>1)-(e.clientY-r.top)/r.height*H}
   // Grab: the nearest inked cell under or beside the pointer, as an object-space point; on empty space a point under the
@@ -1313,7 +1302,7 @@ if(dsMono){
         let best=1e9;for(let t=t0;t<=t0+DSE.TAU;t+=DSE.TAU){const need=(t-A)*s;if(need<=0.05)continue;const k=nat/need,e=Math.abs(Math.log(k));if(k>=0.45&&k<=2.2&&e<best){best=e;spinK=k}}}
       if(Math.abs(d.vA)>9&&!intro&&Math.abs(bump)<0.01&&!shat)shatterStart()}
     if(!d.moved&&!cancel){const X=d.X0,Y=d.Y0,px=X+(W>>1),py=(H>>1)-Y;
-      if(!reduced()){wk.knock(cnt,zb,px,py*hy,11,0.7,16,Math.random);wk.puff(px,py*hy,5,24);wakeOn=true}
+      if(!reduced()){wk.knock(cnt,zb,px,py*hy,11,0.35);wk.puff(px,py*hy,5,24);wakeOn=true}
       if(now-lastTap<320&&!reduced()){rephase();ret=1;homeA+=DSE.TAU*(X<0?1:-1);lastTap=0}else lastTap=now}
     if(d.moved&&!free){rephase();ret=0}
     wake();
