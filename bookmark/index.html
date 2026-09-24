@@ -510,6 +510,8 @@ const tree=(()=>{
   const label=n=>n.c?n.t||'':burl.label(n);
   /* Folder names match trimmed and case-insensitive ("Github" is GitHub's folder). */
   const same=t=>String(t??'').trim().toLowerCase();
+  /* Attributes only a removed copy or merged folder had join the kept node's, after its own. */
+  const inherit=(f,n)=>{if(!n.x)return;const x={...f.x};for(const k in n.x)if(!Object.hasOwn(x,k))x[k]=n.x[k];f.x=x};
 
   /* Sorting is a live view over a copy, folders first; My Order is the manual array, never reordered. */
   const coll=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
@@ -674,7 +676,7 @@ const tree=(()=>{
       if(burl.untitled(f.t,f.u)&&!burl.untitled(n.t,n.u))f.t=n.t;
       if(f.i===undefined&&n.i!==undefined)f.i=n.i;
       if(f.n===undefined&&n.n!==undefined)f.n=n.n;
-      if(n.x)f.x={...n.x,...f.x};
+      inherit(f,n);
       gone.add(n);
     });
     if(gone.size)(function prune(l){for(let i=l.length-1;i>=0;i--){if(gone.has(l[i]))l.splice(i,1);else if(l[i].c)prune(l[i].c)}})(root);
@@ -692,7 +694,7 @@ const tree=(()=>{
       for(let i=0;i<l.length;i++){
         const n=l[i];if(!n.c)continue;
         const k=same(n.t),f=seen.get(k);
-        if(f){if(n.x)f.x={...n.x,...f.x};f.c.push(...n.c);l.splice(i--,1);r.merged++;again=true}else seen.set(k,n);
+        if(f){inherit(f,n);f.c.push(...n.c);l.splice(i--,1);r.merged++;again=true}else seen.set(k,n);
       }
       for(let i=0;i<l.length;i++){
         const n=l[i];if(!n.c)continue;
@@ -762,7 +764,7 @@ const tree=(()=>{
         if(n.c){if(typeof n.t!=='string')n.t='';scrub(n.c)}
         else if(n.t!==undefined&&typeof n.t!=='string')delete n.t;
         if(n.x!==undefined&&(typeof n.x!=='object'||!n.x||Array.isArray(n.x))){delete n.x;fixed++}
-        if(n.i!==undefined&&ic[n.i]===undefined){delete n.i;fixed++}
+        if(n.i!==undefined&&!Object.hasOwn(ic,n.i)){delete n.i;fixed++}
       }
     })(root);
     seq=0;
@@ -801,8 +803,10 @@ function loadLib(repair){
   const m=tree.migrate(B.load(K.lib,null),B.load(K.icons,null));
   root=m.root;icons=m.icons;ver++;
   const groups=new Set();tree.each(root,n=>{if(n.c)groups.add(n.id)});
-  const o=B.load(K.open,[]);
-  open=new Set((Array.isArray(o)?o:[]).filter(id=>groups.has(id)));
+  const o=B.load(K.open,[]),ok=(Array.isArray(o)?o:[]).filter(id=>groups.has(id));
+  open=new Set(ok);
+  /* Boot writes the pruned list back: after the counter re-seeds, a new folder can reuse a gone folder's id. */
+  if(repair&&(!Array.isArray(o)||ok.length<o.length))saveOpen();
   if(repair&&m.fixed){dirty=iconsDirty=true;schedule()}
   pruneBlobs();
 }
@@ -942,7 +946,7 @@ function render(){
   const shut=id=>{const out=[];for(let p=m.parent.get(id);p!=null;p=m.parent.get(p))if(!open.has(p))out.push(p);return out};
   if(q)searched=true;
   else{
-    if(searched){searched=false;let ch=false;for(const id of picked)for(const p of shut(id)){open.add(p);ch=true}if(ch)saveOpen()}
+    if(searched){searched=false;kb=-1;let ch=false;for(const id of picked)for(const p of shut(id)){open.add(p);ch=true}if(ch)saveOpen()}
     for(const id of picked)if(shut(id).length)picked.delete(id);
   }
   document.body.dataset.mode=mode;
@@ -1242,7 +1246,8 @@ function unpackPicked(){
 function moveTo(ids,parent,label){
   const s=snap(),k=tree.moveMany(root,ids,parent,null);
   if(!k){undos.pop();return}
-  clearPicks();changed();note((k>1?k+' ':'')+'Moved to '+(label.length>32?label.slice(0,31)+'…':label),true,s);
+  const cs=[...label];
+  clearPicks();changed();note((k>1?k+' ':'')+'Moved to '+(cs.length>32?cs.slice(0,31).join('')+'…':label),true,s);
   if(!search.value.trim())reveal(ids[0]);
 }
 
@@ -1363,13 +1368,15 @@ const drag=(()=>{
     slot.style.transform='translateY('+((g<L.vrows.length?L.vtop[g]:L.total)+L.top0+4)+'px)';
     slot.style.height=H-8+'px';slot.style.left=12+Math.min(depth,6)*16+'px';
   }
-  function hit(){
+  /* gap: a re-layout just dropped the target, so over the open slot take the gap it shows. Otherwise an
+     untargeted slot (the home one as the drag starts) stays no target: a release in place moves nothing. */
+  function hit(gap){
     const lr=list.getBoundingClientRect();
     if(!L.vrows.length||x<lr.left||x>lr.right)return null;
     let yl=y-lr.top-L.top0;
     const s=L.g<0?-1:L.g<L.vrows.length?L.vtop[L.g]:L.total;
-    /* Over the open slot: keep its target, or after a re-layout take the gap it shows. */
-    if(s>=0&&yl>=s){if(yl<s+H){if(tgt)return tgt;yl=s}else yl-=H}
+    /* Over the open slot its target holds, so nothing oscillates. */
+    if(s>=0&&yl>=s){if(yl<s+H){if(tgt||!gap)return tgt;yl=s}else yl-=H}
     if(yl<-8||yl>=L.total+48)return null;
     let j=L.vrows.length-1,f=.99;
     if(yl<L.total){j=0;while(j<L.vrows.length-1&&yl>=L.vtop[j]+L.vh[j])j++;f=Math.max(0,(yl-L.vtop[j])/L.vh[j])}
@@ -1449,7 +1456,7 @@ const drag=(()=>{
     const k=held?L.vrows.findIndex(r=>r.id===held.id):-1;
     if(k>=0)apply(held.down?k:-1,L.vrows[k].depth,false);
     else apply(prefs.sort==='manual'?L.home:-1,L.hd,false);
-    if(tgt){tgt=null;show(hit(),false)}
+    if(tgt){tgt=null;show(hit(true),false)}
   }
   list.addEventListener('pointerdown',e=>{
     if(st!==IDLE){stop();return}
@@ -1470,6 +1477,8 @@ const drag=(()=>{
   /* On the document: a press released outside the list ends it too. */
   document.addEventListener('pointerup',e=>{if(e.pointerId===pid)stop(true)});
   document.addEventListener('pointercancel',e=>{if(e.pointerId===pid)stop()});
+  /* A drag that loses its pointer mid-way ends without dropping: a later click elsewhere must not commit it. */
+  list.addEventListener('lostpointercapture',e=>{if(e.pointerId===pid&&st===DRAG)stop()});
   list.addEventListener('touchmove',e=>{if(st===DRAG)e.preventDefault()},{passive:false});
   list.addEventListener('contextmenu',e=>{if(st!==IDLE)e.preventDefault()});
   list.addEventListener('click',e=>{
