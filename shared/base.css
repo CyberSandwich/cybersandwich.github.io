@@ -50,16 +50,19 @@ nav{
   padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));
   display:flex;gap:8px;align-items:center
 }
+/* .glass is the nav's liquid-glass material alone, for other floating surfaces */
+.tabs,.glass{
+  background:var(--tab-bg);
+  box-shadow:var(--tab-shadow);
+  border:1px solid var(--tab-border)
+}
 .tabs{
   display:flex;
-  background:var(--tab-bg);
   border-radius:var(--rr);padding:5px;
-  box-shadow:var(--tab-shadow);
-  border:1px solid var(--tab-border);
   max-width:calc(100vw - 40px)
 }
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
-  .tabs{background:var(--tab-blur);backdrop-filter:blur(6px) saturate(180%);-webkit-backdrop-filter:blur(6px) saturate(180%)}
+  .tabs,.glass{background:var(--tab-blur);backdrop-filter:blur(6px) saturate(180%);-webkit-backdrop-filter:blur(6px) saturate(180%)}
 }
 .tabs a,.tabs button:not(.theme-toggle){
   background:none;border:none;
@@ -248,9 +251,9 @@ html[data-theme="sepia"] .ld svg,html[data-theme="sepia"] .ld .id{color:#4A7AA5!
 button:focus:not(:focus-visible){outline:none}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media(prefers-reduced-transparency:reduce){
-  .tabs{background:rgba(255,255,255,.82)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  html[data-theme="sepia"] .tabs{background:rgba(245,237,218,.82)!important}
-  html[data-theme="dark"] .tabs{background:rgba(44,44,46,.88)!important}
+  .tabs,.glass{background:rgba(255,255,255,.82)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  html[data-theme="sepia"] :is(.tabs,.glass){background:rgba(245,237,218,.82)!important}
+  html[data-theme="dark"] :is(.tabs,.glass){background:rgba(44,44,46,.88)!important}
 }
 @media(max-width:390px){.tabs{max-width:calc(100vw - 20px)}}
 .fx-bottom{bottom:0;left:50%;transform:translateX(-50%);position:fixed;z-index:10;padding:0 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center}
