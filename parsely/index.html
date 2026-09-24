@@ -353,7 +353,7 @@ function extractPhones(text){
 /* ══════════════════════════════════════════════════════════════════ */
 /*  URL / LINK PARSER                                                */
 /* ══════════════════════════════════════════════════════════════════ */
-var TLDS=_url.TLDS,TLD_SET=_url.TLD_SET,MULTI_TLDS=_url.MULTI_TLDS,TLDS_PAT=_url.TLDS_PAT;
+var TLD_SET=_url.TLD_SET,MULTI_TLDS=_url.MULTI_TLDS,TLDS_PAT=_url.TLDS_PAT;
 var RE_PROTO=/(?:https?|ftp):\/\/[a-zA-Z0-9][^\s<>\[\]{}\u201C\u201D\u2018\u2019`]*/gi;
 var RE_WWW=/www\.[a-zA-Z0-9][^\s<>\[\]{}\u201C\u201D\u2018\u2019`]*/gi;
 var RE_BARE=new RegExp('[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*?\\.(?:'+TLDS_PAT+')\\b(?:(?::\\d{1,5})?(?:\\/[^\\s<>\\[\\]{}\\u201C\\u201D\\u2018\\u2019`]*)?)','gi');
