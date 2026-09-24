@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 # bump-shared.sh — Cache buster manager for saputra.co.uk
 # Bumps ?v= params for shared/base.css, shared/base.js, shared/swr.js, shared/search.js,
-# shared/dateparser.js, style.css, app.js, codegen/shared.js, codegen/shared.css,
+# shared/dateparser.js, shared/url.js, style.css, app.js, codegen/shared.js, codegen/shared.css,
 # imageopt/shared.js, and imageopt/shared.css.
 #
 # Usage:
@@ -12,6 +12,7 @@
 #   ./scripts/bump-shared.sh js           Bump shared/base.js across sub-projects
 #   ./scripts/bump-shared.sh swr-js       Bump shared/swr.js across consumers
 #   ./scripts/bump-shared.sh dateparser-js Bump shared/dateparser.js across consumers
+#   ./scripts/bump-shared.sh url-js       Bump shared/url.js across consumers
 #   ./scripts/bump-shared.sh both         Bump all shared files
 #   ./scripts/bump-shared.sh main-css     Bump style.css in index.html
 #   ./scripts/bump-shared.sh main-js      Bump app.js in index.html
@@ -197,7 +198,7 @@ cmd_status() {
     printf "%-14s %-10s %-8s %-8s %b\n" "$f" "v=${v:-?}" "$fc" "$rc" "all HTML${drift}"
   done
 
-  for f in swr.js search.js dateparser.js; do
+  for f in swr.js search.js dateparser.js url.js; do
     local v=$(current_version "$f" "${ALL_HTMLS[@]}")
     local fc=$(count_files "$f" "$v" "${ALL_HTMLS[@]}")
     local rc=$(count_refs "$f" "$v" "${ALL_HTMLS[@]}")
@@ -265,7 +266,7 @@ cmd_verify() {
       (( errors++ ))
     fi
   done
-  for f in swr.js search.js dateparser.js; do
+  for f in swr.js search.js dateparser.js url.js; do
     local versions=(${(f)"$(find_versions "$f" "${ALL_HTMLS[@]}")"})
     if (( ${#versions} > 1 )); then
       err "Version drift in ${B}${f}${Z}: ${versions[*]}"
@@ -339,6 +340,11 @@ cmd_auto() {
     bump "dateparser.js" "${ALL_HTMLS[@]}"
     bumped=true
   fi
+  if echo "$changed" | grep -q "shared/url.js"; then
+    info "Detected shared/url.js change"
+    bump "url.js" "${ALL_HTMLS[@]}"
+    bumped=true
+  fi
   if echo "$changed" | grep -q "^style.css$"; then
     info "Detected style.css change"
     bump "style.css" "$MAIN_HTML"
@@ -398,9 +404,10 @@ case "$CMD" in
   search-js)   bump "search.js" "${ALL_HTMLS[@]}" ;;
   swr-js)      bump "swr.js" "${ALL_HTMLS[@]}" ;;
   dateparser-js) bump "dateparser.js" "${ALL_HTMLS[@]}" ;;
+  url-js)      bump "url.js" "${ALL_HTMLS[@]}" ;;
   both|shared) bump "base.css" "${ALL_HTMLS[@]}"; bump "base.js" "${ALL_HTMLS[@]}"
                bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}"
-               bump "dateparser.js" "${ALL_HTMLS[@]}"; rebuild_posts ;;
+               bump "dateparser.js" "${ALL_HTMLS[@]}"; bump "url.js" "${ALL_HTMLS[@]}"; rebuild_posts ;;
   main-css)    bump "style.css" "$MAIN_HTML"; rebuild_posts ;;
   main-js)     bump "app.js" "$MAIN_HTML"; rebuild_posts ;;
   data-v)      bump_data_v ;;
@@ -413,7 +420,7 @@ case "$CMD" in
   imageopt)     bump "shared.js" "${IMAGEOPT_HTMLS[@]}"; bump "shared.css" "${IMAGEOPT_HTMLS[@]}" ;;
   all)         bump "base.css" "${ALL_HTMLS[@]}"; bump "base.js" "${ALL_HTMLS[@]}"
                bump "swr.js" "${ALL_HTMLS[@]}"; bump "search.js" "${ALL_HTMLS[@]}"
-               bump "dateparser.js" "${ALL_HTMLS[@]}"
+               bump "dateparser.js" "${ALL_HTMLS[@]}"; bump "url.js" "${ALL_HTMLS[@]}"
                bump "shared.js" "${CODEGEN_HTMLS[@]}"; bump "shared.css" "${CODEGEN_HTMLS[@]}"
                bump "shared.js" "${IMAGEOPT_HTMLS[@]}"; bump "shared.css" "${IMAGEOPT_HTMLS[@]}"
                bump "style.css" "$MAIN_HTML"; bump "app.js" "$MAIN_HTML"; bump_data_v; rebuild_posts ;;
@@ -427,6 +434,7 @@ case "$CMD" in
     set_ver "swr.js" "$V" "${ALL_HTMLS[@]}"
     set_ver "search.js" "$V" "${ALL_HTMLS[@]}"
     set_ver "dateparser.js" "$V" "${ALL_HTMLS[@]}"
+    set_ver "url.js" "$V" "${ALL_HTMLS[@]}"
     ;;
   auto)        cmd_auto ;;
   help|-h|--help)
@@ -440,6 +448,7 @@ case "$CMD" in
     printf "  ${C}swr-js${Z}      Bump shared/swr.js\n"
     printf "  ${C}search-js${Z}   Bump shared/search.js\n"
     printf "  ${C}dateparser-js${Z} Bump shared/dateparser.js\n"
+    printf "  ${C}url-js${Z}      Bump shared/url.js\n"
     printf "  ${C}both${Z}        Bump all shared files\n"
     printf "  ${C}main-css${Z}    Bump style.css in index.html\n"
     printf "  ${C}main-js${Z}     Bump app.js in index.html\n"
