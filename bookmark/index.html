@@ -911,6 +911,8 @@ function rowEl(r,i,m){
 function segs(id,v){for(const b of $(id).children){const on=b.dataset.v===String(v);b.classList.toggle('active',on);b.setAttribute('aria-checked',on)}}
 function render(){
   const m=meta(),has=root.length>0,q=search.value.trim();
+  /* A sheet lists what was there when it opened: any change underneath (Undo, another tab, a drop) closes it. */
+  if(!$('sheet').hidden)closeSheet();
   if(mode!=='org')clearPicks();
   for(const id of picked)if(!m.byId.has(id))picked.delete(id);
   document.body.dataset.mode=mode;
@@ -1212,18 +1214,19 @@ function moveTo(ids,parent,label){
   if(!search.value.trim())reveal(ids[0]);
 }
 
-/* ── sheet: Move and the Delete All confirm; while open, page shortcuts are off ── */
-const sheet=$('sheet');let sheetYes=null;
+/* ── sheet: Move and the Delete All confirm; while open, the page behind is inert and its shortcuts are off ── */
+const sheet=$('sheet'),behind=[document.querySelector('.w'),document.querySelector('nav'),$('bar')];let sheetYes=null;
 function openSheet(title,msg,rows,yes){
   $('sheet-t').textContent=title;
   const m=$('sheet-m');m.hidden=!msg;m.textContent=msg||'';
   $('sheet-b').replaceChildren(...rows);
   $('sheet-yes').hidden=!yes;sheetYes=yes||null;
   document.activeElement?.blur?.();
+  for(const el of behind)el.inert=true;
   sheet.hidden=false;
   (sheet.querySelector('.dest:not([disabled])')||$('sheet-no')).focus();
 }
-function closeSheet(){sheet.hidden=true;sheetYes=null;$('sheet-b').replaceChildren()}
+function closeSheet(){sheet.hidden=true;sheetYes=null;$('sheet-b').replaceChildren();for(const el of behind)el.inert=false}
 $('sheet-no').addEventListener('click',closeSheet);
 sheet.querySelector('.sheet-bg').addEventListener('click',closeSheet);
 $('sheet-yes').addEventListener('click',()=>{const f=sheetYes;closeSheet();if(f)f()});
@@ -1231,6 +1234,8 @@ document.addEventListener('keydown',e=>{
   if(sheet.hidden)return;
   e.stopPropagation();
   if(e.key==='Escape'){e.preventDefault();closeSheet();return}
+  /* A key held down on the button that opened the sheet must not repeat onto the first row. */
+  if(e.repeat&&e.key!=='ArrowDown'&&e.key!=='ArrowUp'){e.preventDefault();return}
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){
     const bs=[...sheet.querySelectorAll('button:not([disabled]):not([hidden])')],i=bs.indexOf(document.activeElement);
     e.preventDefault();bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].focus();
@@ -1358,7 +1363,7 @@ const drag=(()=>{
       list.querySelector('.into')?.classList.remove('into');
       const landed=commit&&moved&&t?drop(did,t):null;
       if(!landed)render();
-      glide(p,did[0],landed?t:null);
+      glide(p,landed||did[0],landed?t:null);
       /* A touch hold released in place is a tap: tick it, unless the browser's own click does first. */
       if(tap){tapId=tap;clearTimeout(tapT);tapT=setTimeout(()=>{if(tapId!==null){const i=tapId;tapId=null;pick(i)}},TAP)}
       /* Eat this gesture's own pointer click; the next pointerdown resets it, and a keyboard click is never eaten. */
@@ -1438,14 +1443,16 @@ const drag=(()=>{
   const openView=o=>st===DRAG&&ids.some(i=>o.has(i))?new Set([...o].filter(i=>!ids.includes(i))):o;
   return{after,open:openView,active:()=>st!==IDLE,cancel:()=>stop()};
 })();
-/* Returns the first moved id, or null when nothing moved. A dragged selection is done: its ticks clear. */
+/* Returns the first moved id, or null when nothing moved. A sorted view only regroups, so items already in
+   the target folder stay put (appending them would silently rewrite My Order). A dragged selection is done:
+   its ticks clear. Every drop has an Undo toast (phones have no z key). */
 function drop(ids,t){
-  const s=tree.find(root,ids[0]);if(!s)return null;
-  if(prefs.sort!=='manual'&&ids.length===1&&t.parent===(s.path.length?s.path[s.path.length-1].id:null))return null;
-  snap();
+  if(prefs.sort!=='manual'){const m=meta();ids=ids.filter(i=>m.parent.get(i)!==t.parent)}
+  if(!ids.length)return null;
+  const s=snap();
   if(!tree.moveMany(root,ids,t.parent,t.before)){undos.pop();return null}
   if(ids.some(i=>picked.has(i)))clearPicks();
-  changed();
+  changed();note(ids.length>1?ids.length+' Moved':'Moved',true,s);
   return ids[0];
 }
 
