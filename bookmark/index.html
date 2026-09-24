@@ -71,13 +71,15 @@ html[data-theme="sepia"] .row .del.copied{background:#E8E0CE;color:#2D7D46;borde
 .row.kb-focus{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
 .row:is(.sel,.ed){background:var(--bg2)}
 .row.into{background:var(--tab-active);color:var(--tab-active-c)}
+/* A sorted-view drop at the top level: the list itself is the target */
+#list.into{outline:2px solid var(--tab-active);outline-offset:2px}
 .row.into :is(.sub,.crumb,.cnt,.chev,.fav svg){color:inherit;opacity:.7}
 .row.into .fav{background:none}
 .row.src{visibility:hidden}
 .row.landing{opacity:0}
 .row:active{opacity:.85}
 .row .del:active{opacity:.7}
-.notif-pill{white-space:normal;text-align:center;line-height:1.3;max-width:calc(100vw - 40px)}
+.notif-pill{white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.3;max-width:calc(100vw - 40px)}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .slot{position:absolute;top:0;right:12px;border-radius:12px;background:var(--bg2);pointer-events:none;transition:transform .2s ease,left .2s ease,height .2s ease}
 #list.glide .row{transition:transform .2s ease}
@@ -367,6 +369,8 @@ const bio=(()=>{
     }
   }
   const MODEL={A:['HREF','ADD_DATE','LAST_MODIFIED','ICON'],H3:['ADD_DATE','LAST_MODIFIED']};
+  /* Attribute names are written back verbatim, so only real names ride along (stored data is untrusted too). */
+  const NAME=/^[a-z_][\w.:-]*$/i;
   const isNetscape=h=>/NETSCAPE-Bookmark|<DT>\s*<A[\s>]/i.test(h);
 
   /* Netscape bookmark file -> {root, title}. Linear scan with a DL stack; tolerant of missing closers,
@@ -389,7 +393,7 @@ const bio=(()=>{
         if(a.ADD_DATE)n.d=a.ADD_DATE;
         if(a.LAST_MODIFIED)n.m=a.LAST_MODIFIED;
         if(tag==='A'&&a.ICON)n.ic=a.ICON;
-        for(const k in a)if(!MODEL[tag].includes(k))(n.x||(n.x={}))[k]=a[k];
+        for(const k in a)if(!MODEL[tag].includes(k)&&NAME.test(k))(n.x||(n.x={}))[k]=a[k];
         cur.push(n);last=n;pend=tag==='H3'?n:null;
       }else if(tag==='DL'){stack.push(pend?pend.c:cur);pend=null}
       else if(tag==='DD'){const t=text();if(last&&t&&last.n===undefined)last.n=t}
@@ -403,7 +407,7 @@ const bio=(()=>{
   function exportHtml(root,icon,label){
     const L=['<!DOCTYPE NETSCAPE-Bookmark-file-1>','<!-- This is an automatically generated file.','     It will be read and overwritten.','     DO NOT EDIT! -->','<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">','<TITLE>Bookmarks</TITLE>','<H1>Bookmarks</H1>','<DL><p>'];
     const at=(n,ic)=>(n.d?' ADD_DATE="'+esc(n.d)+'"':'')+(n.m?' LAST_MODIFIED="'+esc(n.m)+'"':'')+(ic?' ICON="'+esc(ic)+'"':'')+
-      Object.keys(n.x||{}).map(k=>' '+k+(n.x[k]===null?'':'="'+esc(n.x[k])+'"')).join('');
+      Object.keys(n.x||{}).filter(k=>NAME.test(k)).map(k=>' '+k+(n.x[k]===null?'':'="'+esc(n.x[k])+'"')).join('');
     (function walk(list,pad){
       for(const n of list){
         if(n.s){L.push(pad+'<HR>');continue}
@@ -504,6 +508,8 @@ const tree=(()=>{
   /* ADD_DATE is seconds in most exports; ms and µs appear too. */
   function dsec(d){const v=+d;return!d||!(v>0)?null:v>1e14?Math.floor(v/1e6):v>1e11?Math.floor(v/1e3):v}
   const label=n=>n.c?n.t||'':burl.label(n);
+  /* Folder names match trimmed and case-insensitive ("Github" is GitHub's folder). */
+  const same=t=>String(t??'').trim().toLowerCase();
 
   /* Sorting is a live view over a copy, folders first; My Order is the manual array, never reordered. */
   const coll=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
@@ -539,7 +545,7 @@ const tree=(()=>{
      c = {drag: Set of dragged ids, sorted}; the page passes the rows without the dragged ones, which collapse
      while they fly. Returns {parent, before, mark} or null (off the list, or inside a dragged group).
      Manual: row halves (group headers: quarters, middle = into), x picks the depth where nesting ends.
-     Sorted views only regroup (append). */
+     Sorted views only regroup (append); the mark is the target folder's header, or row -1 (the list) for the top. */
   const IND=16,BASE=20;
   function dropTarget(rows,i,f,dx,c){
     const r=rows[i];if(!r)return null;
@@ -547,7 +553,7 @@ const tree=(()=>{
     const D=c.drag,inside=pid=>pid!==null&&(D.has(pid)||(rows[at(pid)]?.path||[]).some(g=>D.has(g)));
     if(c.sorted){
       const pid=r.kind==='g'?r.id:r.parent;
-      return inside(pid)?null:{parent:pid,before:null,mark:pid===null?null:{row:at(pid),edge:'into'}};
+      return inside(pid)?null:{parent:pid,before:null,mark:{row:pid===null?-1:at(pid),edge:'into'}};
     }
     let parent,pos,into=false;
     if(r.kind==='e'){parent=r.parent;pos={end:1}}
@@ -647,16 +653,18 @@ const tree=(()=>{
         if(s){const a=by.get(s.name);if(a)a.push(n);else by.set(s.name,[n])}
       }
       for(const[name,arr]of by){
-        if(name===own)continue;
-        let g=list.find(n=>n.c&&n.t===name);
+        const k=same(name);
+        if(k===own)continue;
+        let g=list.find(n=>n.c&&same(n.t)===k);
         if(!g){if(arr.length<2||arr.length===items)continue;g={id:uid(),t:name,c:[],d:now()};list.splice(list.indexOf(arr[0]),0,g);made++}
         for(const n of arr){list.splice(list.indexOf(n),1);g.c.push(n);moved++}
       }
-      for(const n of list)if(n.c)walk(n.c,n.t);
+      for(const n of list)if(n.c)walk(n.c,same(n.t));
     })(root,null);
     return{made,moved};
   }
-  /* Keeps the first copy in depth-first order; it inherits a title or icon only a later copy had. */
+  /* Keeps the first copy in depth-first order; it inherits a title, icon, description or attribute only a
+     later copy had. */
   function dedupe(root){
     const seen=new Map(),gone=new Set();
     each(root,n=>{
@@ -665,13 +673,17 @@ const tree=(()=>{
       if(!f){seen.set(k,n);return}
       if(burl.untitled(f.t,f.u)&&!burl.untitled(n.t,n.u))f.t=n.t;
       if(f.i===undefined&&n.i!==undefined)f.i=n.i;
+      if(f.n===undefined&&n.n!==undefined)f.n=n.n;
+      if(n.x)f.x={...n.x,...f.x};
       gone.add(n);
     });
     if(gone.size)(function prune(l){for(let i=l.length-1;i>=0;i--){if(gone.has(l[i]))l.splice(i,1);else if(l[i].c)prune(l[i].c)}})(root);
     return gone.size;
   }
   /* Tidy Up: duplicates go, then until nothing changes: same-name sibling folders merge into the first,
-     empty folders (separators don't count) go, and a folder holding only a folder is replaced by it. */
+     empty folders (separators don't count) go, and a folder holding only a folder is replaced by it, unless
+     it is the browser's bookmarks bar or other-bookmarks folder (the flag would be lost on re-import). */
+  const special=n=>!!n.x&&('PERSONAL_TOOLBAR_FOLDER'in n.x||'UNFILED_BOOKMARKS_FOLDER'in n.x);
   function tidy(root){
     const r={dup:dedupe(root),merged:0,empty:0,unwrapped:0};
     let again=true;
@@ -679,14 +691,14 @@ const tree=(()=>{
       const seen=new Map();
       for(let i=0;i<l.length;i++){
         const n=l[i];if(!n.c)continue;
-        const k=n.t.trim().toLowerCase(),f=seen.get(k);
-        if(f){f.c.push(...n.c);l.splice(i--,1);r.merged++;again=true}else seen.set(k,n);
+        const k=same(n.t),f=seen.get(k);
+        if(f){if(n.x)f.x={...n.x,...f.x};f.c.push(...n.c);l.splice(i--,1);r.merged++;again=true}else seen.set(k,n);
       }
       for(let i=0;i<l.length;i++){
         const n=l[i];if(!n.c)continue;
         walk(n.c);
         if(!n.c.some(x=>!x.s)){l.splice(i--,1);r.empty++;again=true}
-        else if(n.c.length===1&&n.c[0].c){l[i--]=n.c[0];r.unwrapped++;again=true}
+        else if(n.c.length===1&&n.c[0].c&&!special(n)){l[i--]=n.c[0];r.unwrapped++;again=true}
       }
     };
     while(again){again=false;walk(root)}
@@ -711,12 +723,22 @@ const tree=(()=>{
     return{added,dup,bad,stripped,first};
   }
 
-  /* Icons live apart from the tree, deduped by FNV-1a, so a move never rewrites them. Only data:image is kept.
+  /* Icons live apart from the tree, deduped by FNV-1a, so a move never rewrites them. Only data:image is kept,
+     within caps (one icon, all icons) so they never fill the storage every tool on the site shares.
      Imported links lose their tracking parameters here. */
+  const ICON_MAX=32768,ICONS_MAX=1<<20;
   const fnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),0x01000193);return(h>>>0).toString(36)};
-  function intern(icons,data){const b=fnv(data);let id=b,k=0;while(icons[id]!==undefined&&icons[id]!==data)id=b+'_'+(++k);icons[id]=data;return id}
+  function intern(icons,data){const b=fnv(data);let id=b,k=0;while(icons[id]!==undefined&&icons[id]!==data)id=b+'_'+(++k);return id}
   function adopt(list,icons){
-    each(list,n=>{n.id=uid();if(typeof n.u==='string')n.u=burl.strip(n.u);if(n.ic!==undefined){if(/^data:image\//i.test(n.ic))n.i=intern(icons,n.ic);delete n.ic}});
+    let size=0;for(const k in icons)size+=icons[k].length;
+    each(list,n=>{
+      n.id=uid();if(typeof n.u==='string')n.u=burl.strip(n.u);
+      const d=n.ic;delete n.ic;
+      if(typeof d!=='string'||!/^data:image\//i.test(d)||d.length>ICON_MAX)return;
+      const id=intern(icons,d);
+      if(icons[id]===undefined){if(size+d.length>ICONS_MAX)return;icons[id]=d;size+=d.length}
+      n.i=id;
+    });
     return list;
   }
   function gc(root,icons){
@@ -730,7 +752,7 @@ const tree=(()=>{
   function migrate(lib,icons){
     let fixed=0;
     const ic={};
-    if(icons&&typeof icons==='object')for(const k in icons){if(typeof icons[k]==='string'&&/^data:image\//i.test(icons[k]))ic[k]=icons[k];else fixed++}
+    if(icons&&typeof icons==='object')for(const k in icons){const d=icons[k];if(typeof d==='string'&&/^data:image\//i.test(d)&&d.length<=ICON_MAX)ic[k]=d;else fixed++}
     const root=lib&&Array.isArray(lib.root)?lib.root:[];
     (function scrub(l){
       for(let i=l.length-1;i>=0;i--){
@@ -739,6 +761,7 @@ const tree=(()=>{
         if(!n||typeof n!=='object'||!(n.s===1||Array.isArray(n.c)||typeof n.u==='string')){l.splice(i,1);fixed++;continue}
         if(n.c){if(typeof n.t!=='string')n.t='';scrub(n.c)}
         else if(n.t!==undefined&&typeof n.t!=='string')delete n.t;
+        if(n.x!==undefined&&(typeof n.x!=='object'||!n.x||Array.isArray(n.x))){delete n.x;fixed++}
         if(n.i!==undefined&&ic[n.i]===undefined){delete n.i;fixed++}
       }
     })(root);
@@ -764,7 +787,7 @@ const pl=n=>n===1?'':'s',coll=new Intl.Collator(undefined,{numeric:true,sensitiv
 const fb=(btn,cls,text)=>B.feedback(btn,cls,text,1200);
 
 /* ── state ── */
-let root=[],icons={},prefs,open,mode,card={m:'add',id:null},shown=[],kb=-1,ver=0,anchor=null;
+let root=[],icons={},prefs,open,mode,card={m:'add',id:null},shown=[],kb=-1,ver=0,anchor=null,searched=false;
 const picked=new Set();
 let saveT=0,dirty=false,iconsDirty=false,persisted=false;
 const undos=[];
@@ -914,6 +937,14 @@ function render(){
   if(!$('sheet').hidden)closeSheet();
   if(mode!=='org')clearPicks();
   for(const id of picked)if(!m.byId.has(id))picked.delete(id);
+  /* Outside a search every tick is on screen: leaving a search opens the folders holding ticks, and a tick
+     left inside a closed folder (collapsed, or moved there from another tab) drops. */
+  const shut=id=>{const out=[];for(let p=m.parent.get(id);p!=null;p=m.parent.get(p))if(!open.has(p))out.push(p);return out};
+  if(q)searched=true;
+  else{
+    if(searched){searched=false;let ch=false;for(const id of picked)for(const p of shut(id)){open.add(p);ch=true}if(ch)saveOpen()}
+    for(const id of picked)if(shut(id).length)picked.delete(id);
+  }
   document.body.dataset.mode=mode;
   $('a-dl').hidden=!has;$('a-copy').hidden=!m.b;
   const ca=$('a-copy');ca.dataset.l=m.b===1?'Copy':'Copy All';if(!ca.classList.contains('ok'))ca.lastChild.textContent=ca.dataset.l;
@@ -1001,6 +1032,7 @@ function submit(){
     if(ch){snap();g.t=name;g.m=tree.now()}
     setCard('add');clearPicks();
     if(ch)changed();else render();
+    if(g)flash(g.id,true);
     return;
   }
   if(!raw){B.notify('Enter a Link',false);inU.focus();return}
@@ -1018,7 +1050,7 @@ function submit(){
     if(ch){snap();n.u=u;if(t)n.t=t;else delete n.t}
     setCard('add');clearPicks();
     if(ch)changed();else render();
-    flash(n.id);
+    flash(n.id,true);
     return;
   }
   const s=snap(),r=tree.merge(target(),[{u:raw,t:title}],keysOf());
@@ -1185,6 +1217,7 @@ function foldAll(){const f=meta().folders,all=f.every(id=>open.has(id));open=new
 /* ── bar actions: each works on the top-most ticked items and clears the ticks ── */
 function newFolder(){
   const s=snap(),g=tree.wrap(root,[...picked],'New Folder');
+  for(const p of tree.find(root,g.id).path)open.add(p.id);
   open.add(g.id);saveOpen();clearPicks();changed();note('Folder Created',true,s);
   edit(g);
 }
@@ -1209,7 +1242,7 @@ function unpackPicked(){
 function moveTo(ids,parent,label){
   const s=snap(),k=tree.moveMany(root,ids,parent,null);
   if(!k){undos.pop();return}
-  clearPicks();changed();note((k>1?k+' ':'')+'Moved to '+label,true,s);
+  clearPicks();changed();note((k>1?k+' ':'')+'Moved to '+(label.length>32?label.slice(0,31)+'…':label),true,s);
   if(!search.value.trim())reveal(ids[0]);
 }
 
@@ -1264,7 +1297,8 @@ function confirmClear(){
   const c=tree.count(root);
   openSheet('Delete Everything?',[c.b&&c.b+' Bookmark'+pl(c.b),c.g&&c.g+' Folder'+pl(c.g)].filter(Boolean).join(' and '),[],clearAll);
 }
-function clearAll(){const s=snap();root=[];icons={};open.clear();saveOpen();clearPicks();setCard('add');pruneBlobs();changed({icons:true});note('All Deleted',true,s)}
+/* The open ids stay (as after a single delete), so Undo brings folders back as they were; boot prunes them. */
+function clearAll(){const s=snap();root=[];icons={};clearPicks();setCard('add');pruneBlobs();changed({icons:true});note('All Deleted',true,s)}
 $('b-clear').addEventListener('click',()=>{clearPicks();paint()});
 $('b-all').addEventListener('click',pickAll);
 $('b-move').addEventListener('click',moveSheet);
@@ -1301,6 +1335,7 @@ const drag=(()=>{
   let hold=0,raf=0,spring=0,springId=null,tapId=null,tapT=0,pill=null,slot=null,tgt=null,L=null,floor=0,swallow=false;
   const enabled=()=>mode==='org'&&!search.value.trim();
   const ty=el=>{const m=/translateY\((-?[\d.]+)px/.exec(el.style.transform);return m?+m[1]:0};
+  const unmark=()=>{list.classList.remove('into');list.querySelector('.into')?.classList.remove('into')};
   /* The visible rows minus the dragged ones, stacked: vtop/vh per row, home = where the first dragged row was. */
   function layout(){
     const D=new Set(ids),els=list.querySelectorAll('.row'),vrows=[],vels=[],vtop=[],vh=[],off=[];
@@ -1332,8 +1367,9 @@ const drag=(()=>{
     const lr=list.getBoundingClientRect();
     if(!L.vrows.length||x<lr.left||x>lr.right)return null;
     let yl=y-lr.top-L.top0;
-    const gy=L.g<0?-1:L.g<L.vrows.length?L.vtop[L.g]:L.total;
-    if(gy>=0&&yl>=gy){if(yl<gy+H)return tgt;yl-=H}
+    const s=L.g<0?-1:L.g<L.vrows.length?L.vtop[L.g]:L.total;
+    /* Over the open slot: keep its target, or after a re-layout take the gap it shows. */
+    if(s>=0&&yl>=s){if(yl<s+H){if(tgt)return tgt;yl=s}else yl-=H}
     if(yl<-8||yl>=L.total+48)return null;
     let j=L.vrows.length-1,f=.99;
     if(yl<L.total){j=0;while(j<L.vrows.length-1&&yl>=L.vtop[j]+L.vh[j])j++;f=Math.max(0,(yl-L.vtop[j])/L.vh[j])}
@@ -1341,10 +1377,10 @@ const drag=(()=>{
   }
   function show(t,anim){
     tgt=t;
-    list.querySelector('.into')?.classList.remove('into');
+    unmark();
     const m=t&&t.mark;let into=null;
     if(!m)apply(-1,0,anim);
-    else if(m.edge==='into'){slot.hidden=true;into=L.vrows[m.row];L.vels[m.row]?.classList.add('into')}
+    else if(m.edge==='into'){slot.hidden=true;if(m.row<0)list.classList.add('into');else{into=L.vrows[m.row];L.vels[m.row]?.classList.add('into')}}
     else apply(m.edge==='top'?m.row:m.row+1,m.depth,anim);
     /* A closed folder held under the pointer springs open. */
     const sid=into&&into.kind==='g'&&!into.open?into.id:null;
@@ -1359,7 +1395,7 @@ const drag=(()=>{
       doc.classList.remove('dragging');
       if(list.hasPointerCapture(pid))list.releasePointerCapture(pid);
       const p=pill;pill=null;slot.remove();slot=null;L=null;list.classList.remove('glide');
-      list.querySelector('.into')?.classList.remove('into');
+      unmark();
       const landed=commit&&moved&&t?drop(did,t):null;
       if(!landed)render();
       glide(p,landed||did[0],landed?t:null);
@@ -1425,12 +1461,15 @@ const drag=(()=>{
   });
   list.addEventListener('pointermove',e=>{
     if(e.pointerId!==pid||st===IDLE)return;
+    /* A release the page never saw (a menu, another window) must not leave a drag armed. */
+    if(e.pointerType==='mouse'&&!e.buttons){stop();return}
     x=e.clientX;y=e.clientY;
     if(st===PEND){const d=Math.hypot(x-sx,y-sy);if(touch?d>8:d>4){if(touch)stop();else begin()}return}
     if(!raf)raf=requestAnimationFrame(frame);
   });
-  list.addEventListener('pointerup',e=>{if(e.pointerId===pid)stop(true)});
-  list.addEventListener('pointercancel',e=>{if(e.pointerId===pid)stop()});
+  /* On the document: a press released outside the list ends it too. */
+  document.addEventListener('pointerup',e=>{if(e.pointerId===pid)stop(true)});
+  document.addEventListener('pointercancel',e=>{if(e.pointerId===pid)stop()});
   list.addEventListener('touchmove',e=>{if(st===DRAG)e.preventDefault()},{passive:false});
   list.addEventListener('contextmenu',e=>{if(st!==IDLE)e.preventDefault()});
   list.addEventListener('click',e=>{
