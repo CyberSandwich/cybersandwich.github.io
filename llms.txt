@@ -27,6 +27,7 @@
 - [Wrighter](https://saputra.co.uk/wrighter/) — Minimal plain text editor
 - [Arbit](https://saputra.co.uk/arbit/) — Random picker tool
 - [ASCIIverse](https://saputra.co.uk/asciiverse/) — Spinnable 3D ASCII text generator
+- [Bookmark](https://saputra.co.uk/bookmark/), bookmark organizer: paste links or import a browser bookmarks file, then search, sort and export them, all kept in the browser
 - [NumGen](https://saputra.co.uk/numgen/) — UK phone number generator
 - [PasswdGen](https://saputra.co.uk/passwdgen/) — Secure password and passphrase generator
 - [Clock](https://saputra.co.uk/time/) — Minimal 8KB clock
