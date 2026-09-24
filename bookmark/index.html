@@ -74,6 +74,7 @@ html[data-theme="sepia"] .row .del.copied{background:#E8E0CE;color:#2D7D46;borde
 .row.src{opacity:.35}
 .row:active{opacity:.85}
 .row .del:active,.more:active{opacity:.7}
+.notif-pill{white-space:normal;text-align:center;line-height:1.3;max-width:calc(100vw - 40px)}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .gap{position:fixed;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--acc);pointer-events:none;z-index:61}
 .ghost{position:fixed;left:0;top:0;z-index:60;margin:0;pointer-events:none;background:var(--card);border-radius:14px;border-bottom:none;box-shadow:var(--shadow2);will-change:transform}
@@ -89,7 +90,7 @@ html.int-drag .drop-overlay{display:none}
 </style>
 </head>
 <body data-mode="open">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-fplus" viewBox="0 0 24 24"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-spark" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-fplus" viewBox="0 0 24 24"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-spark" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-expand" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></symbol><symbol id="i-collapse" viewBox="0 0 24 24"><path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/></symbol></svg>
 <div class="w">
   <div class="card links">
     <button type="button" id="a-paste" data-l="Paste"><svg class="id" aria-hidden="true" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
@@ -112,32 +113,22 @@ html.int-drag .drop-overlay{display:none}
   <div id="org" hidden>
     <div class="card links" id="g-acts" hidden>
       <button type="button" id="g-rename"><svg aria-hidden="true"><use href="#i-folder"/></svg><span>Rename</span></button>
-      <button type="button" id="g-domain"><svg aria-hidden="true"><use href="#i-globe"/></svg><span>Group by Domain</span></button>
-      <button type="button" id="g-clean"><svg aria-hidden="true"><use href="#i-spark"/></svg><span>Clean URLs</span></button>
-      <button type="button" id="g-ungroup"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="8" height="6" x="5" y="4" rx="1"/><rect width="8" height="6" x="11" y="14" rx="1"/></svg><span>Ungroup</span></button>
-      <button type="button" id="g-del"><svg aria-hidden="true"><use href="#i-trash"/></svg><span>Delete Group</span></button>
+      <button type="button" id="g-ungroup"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="8" height="6" x="5" y="4" rx="1"/><rect width="8" height="6" x="11" y="14" rx="1"/></svg><span>Unpack</span></button>
+      <button type="button" id="g-del"><svg aria-hidden="true"><use href="#i-trash"/></svg><span>Delete Folder</span></button>
     </div>
     <div class="card">
       <div class="seg-row c4" id="p-sort" role="radiogroup" aria-label="Sort">
-        <button type="button" class="seg" role="radio" data-v="manual">Manual</button>
+        <button type="button" class="seg" role="radio" data-v="manual">My Order</button>
         <button type="button" class="seg" role="radio" data-v="az">A-Z</button>
-        <button type="button" class="seg" role="radio" data-v="domain">Domain</button>
-        <button type="button" class="seg" role="radio" data-v="date">Date Added</button>
-      </div>
-      <div class="seg-row c2" id="p-gf" role="radiogroup" aria-label="Groups">
-        <button type="button" class="seg" role="radio" data-v="1">Groups First</button>
-        <button type="button" class="seg" role="radio" data-v="0">Groups Mixed</button>
-      </div>
-      <div class="seg-row c2" id="p-strip" role="radiogroup" aria-label="Tracking">
-        <button type="button" class="seg" role="radio" data-v="1">Strip Tracking</button>
-        <button type="button" class="seg" role="radio" data-v="0">Keep Tracking</button>
+        <button type="button" class="seg" role="radio" data-v="domain">Website</button>
+        <button type="button" class="seg" role="radio" data-v="date">Newest</button>
       </div>
     </div>
     <div class="card links">
-      <button type="button" id="l-new"><svg aria-hidden="true"><use href="#i-fplus"/></svg><span>New Group</span></button>
-      <button type="button" id="l-domain"><svg aria-hidden="true"><use href="#i-globe"/></svg><span>Group by Domain</span></button>
-      <button type="button" id="l-dedupe"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 15h6"/><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Remove Duplicates</span></button>
-      <button type="button" id="l-clean"><svg aria-hidden="true"><use href="#i-spark"/></svg><span>Clean URLs</span></button>
+      <button type="button" id="l-new"><svg aria-hidden="true"><use href="#i-fplus"/></svg><span>New Folder</span></button>
+      <button type="button" id="l-tidy"><svg aria-hidden="true"><use href="#i-spark"/></svg><span>Tidy Up</span></button>
+      <button type="button" id="l-site"><svg aria-hidden="true"><use href="#i-globe"/></svg><span>Sort Into Folders by Website</span></button>
+      <button type="button" id="l-fold"><svg aria-hidden="true"><use href="#i-expand"/></svg><span>Expand All</span></button>
       <button type="button" id="l-clear"><svg class="id" aria-hidden="true"><use href="#i-trash"/></svg><span>Delete All</span></button>
     </div>
   </div>
@@ -150,9 +141,9 @@ html.int-drag .drop-overlay{display:none}
 <div class="drop-overlay" id="drop"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>Drop Bookmarks Here</div>
 <input type="file" id="file" accept=".html,.htm,.txt,.md,text/html,text/plain" multiple hidden>
 <template id="tb"><div class="row b" role="treeitem"><span class="grip"></span><a class="main" target="_blank" rel="noopener noreferrer"><span class="fav"></span><span class="txt"><span class="nm"></span><span class="sub"></span><span class="crumb"></span></span></a><button type="button" class="del" aria-label="Remove"></button></div></template>
-<template id="tg"><div class="row g" role="treeitem"><span class="grip"></span><button type="button" class="main"><svg class="chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg><span class="fav"><svg aria-hidden="true"><use href="#i-folder"/></svg></span><span class="txt"><span class="nm"></span></span><span class="cnt"></span></button><button type="button" class="more" aria-label="Group Actions"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></template>
+<template id="tg"><div class="row g" role="treeitem"><span class="grip"></span><button type="button" class="main"><svg class="chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg><span class="fav"><svg aria-hidden="true"><use href="#i-folder"/></svg></span><span class="txt"><span class="nm"></span></span><span class="cnt"></span></button><button type="button" class="more" aria-label="Folder Actions"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></template>
 <template id="ts"><div class="row s" role="separator"><span class="grip"></span><span class="hr"></span><button type="button" class="del" aria-label="Remove"></button></div></template>
-<template id="te"><div class="row e"><span class="txt">Empty Group</span></div></template>
+<template id="te"><div class="row e"><span class="txt">Empty Folder</span></div></template>
 <nav aria-label="Primary">
   <div class="tabs">
     <a href="/">Home</a>
@@ -253,10 +244,12 @@ const burl=(()=>{
     return s.length>200?s.slice(0,199)+'…':s;
   }
 
-  /* Tracking removal is string surgery on the raw query: URLSearchParams would re-encode what it keeps. */
+  /* Tracking removal is string surgery on the raw query (URLSearchParams would re-encode what it keeps),
+     on http(s) only: a bookmarklet's code is never touched. */
   const tracks=p=>{const k=dec(p.split('=')[0]).toLowerCase();return TRACK.has(k)||k.startsWith('utm_')||k.startsWith('__hs')};
   function cleanQuery(q){const parts=q.split('&'),keep=parts.filter(p=>!tracks(p));return keep.length===parts.length?null:keep.filter(Boolean).join('&')}
   function strip(s){
+    if(!/^https?:\/\//i.test(s))return s;
     const h=s.indexOf('#'),base=h<0?s:s.slice(0,h),q=base.indexOf('?');
     if(q<0)return s;
     const c=cleanQuery(base.slice(q+1));
@@ -273,11 +266,11 @@ const burl=(()=>{
     return!s||s===u||s.replace(/\/$/,'')===String(u).replace(/\/$/,'')||s===streamline(u);
   }
   const label=n=>untitled(n.t,n.u)?name(n.u):n.t;
-  /* Manual add and paste: web links only, tracking stripped unless kept. */
-  function input(raw,keep){
+  /* Manual add and paste: web links only, tracking always stripped. */
+  function input(raw){
     const u=parse(raw);
     if(!verify(u))return null;
-    const s=keep?u.href:strip(u.href);
+    const s=strip(u.href);
     return{u:s,stripped:s!==u.href};
   }
   return{parse,verify,isWeb,site,name,streamline,strip,key,untitled,label,input};
@@ -451,7 +444,7 @@ const tree=(()=>{
   function dsec(d){const v=+d;return!d||!(v>0)?null:v>1e14?Math.floor(v/1e6):v>1e11?Math.floor(v/1e3):v}
   const label=n=>n.c?n.t||'':burl.label(n);
 
-  /* Sorting is a live view over a copy; the manual array underneath never changes order. */
+  /* Sorting is a live view over a copy, folders first; My Order is the manual array, never reordered. */
   const coll=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
   const KEY={
     az:n=>[label(n)],
@@ -462,9 +455,9 @@ const tree=(()=>{
   const byDate=(a,b)=>{const x=a.k[0],y=b.k[0];return x===y?a.i-b.i:x===null?1:y===null?-1:y-x};
   function view(list,p){
     const k=KEY[p.sort];
-    let out=k?list.filter(n=>!n.s):list.slice();
-    if(k)out=out.map((n,i)=>({n,k:k(n),i})).sort(p.sort==='date'?byDate:byKeys).map(x=>x.n);
-    return p.gf?out.filter(n=>n.c).concat(out.filter(n=>!n.c)):out;
+    if(!k)return list.slice();
+    const out=list.filter(n=>!n.s).map((n,i)=>({n,k:k(n),i})).sort(p.sort==='date'?byDate:byKeys).map(x=>x.n);
+    return out.filter(n=>n.c).concat(out.filter(n=>!n.c));
   }
   /* Visible rows, depth first, only inside open groups; an open empty group shows an 'e' row. */
   function rows(root,p,open){
@@ -482,9 +475,9 @@ const tree=(()=>{
   }
 
   /* Where a drag lands: row i under the pointer, f = fraction down that row, dx = pointer x in the list.
-     c = {drag, dragGroup, sorted, gf}. Returns {parent, before, mark} or null (off the list, or inside the
-     dragged group). Manual: row halves (group headers: quarters, middle = into), x picks the depth where
-     nesting ends, groups first keeps each kind in its block. Sorted views only regroup (append). */
+     c = {drag, sorted}. Returns {parent, before, mark} or null (off the list, or inside the dragged group).
+     Manual: row halves (group headers: quarters, middle = into), x picks the depth where nesting ends.
+     Sorted views only regroup (append). */
   const IND=16,BASE=20;
   function dropTarget(rows,i,f,dx,c){
     const r=rows[i];if(!r)return null;
@@ -511,8 +504,8 @@ const tree=(()=>{
     const hdr=parent===null?null:rows[at(parent)];
     if(parent!==null&&!hdr)return null;
     let full;
-    if(!hdr||hdr.open)full=rows.filter(x=>x.parent===parent&&x.kind!=='e').map(x=>({id:x.id,g:x.kind==='g'}));
-    else{full=hdr.n.c.map(n=>({id:n.id,g:!!n.c}));if(c.gf)full=full.filter(x=>x.g).concat(full.filter(x=>!x.g))}
+    if(!hdr||hdr.open)full=rows.filter(x=>x.parent===parent&&x.kind!=='e').map(x=>({id:x.id}));
+    else full=hdr.n.c.map(n=>({id:n.id}));
     const S=full.filter(x=>x.id!==c.drag);
     let p=S.length;
     if(!pos.end){
@@ -520,21 +513,16 @@ const tree=(()=>{
       if(full[k]&&full[k].id===c.drag)k++;
       if(full[k])p=S.indexOf(full[k]);
     }
-    let G=0;
-    if(c.gf){G=S.filter(x=>x.g).length;p=c.dragGroup?Math.min(p,G):Math.max(p,G)}
     const vis=S[p]?S[p].id:null;
     let mark;
     if(into)mark={row:i,edge:'into'};
     else if(vis!==null){const k=at(vis);mark={row:k,edge:'top',depth:rows[k].depth}}
     else if(S.length){const k0=at(S[S.length-1].id);let k=k0;while(rows[k+1]&&rows[k+1].depth>rows[k0].depth)k++;mark={row:k,edge:'bottom',depth:rows[k0].depth}}
     else{const k=at('e:'+parent);mark=k<0?{row:at(parent),edge:'into'}:{row:k,edge:'top',depth:rows[k].depth}}
-    /* Within a kind block the view keeps manual order, so "before the neighbour" maps straight onto the manual
-       array, except a group at the end of its block, whose visible neighbour is a bookmark: it goes after the last group. */
-    if(c.gf&&c.dragGroup&&p===G&&G>0)return{parent,before:null,after:S[G-1].id,mark};
     return{parent,before:vis,mark};
   }
-  /* Inserts before `before`, or right after `after`, or at the end. */
-  function move(root,id,parent,before,after){
+  /* Inserts before `before`, or at the end. */
+  function move(root,id,parent,before){
     const s=find(root,id);if(!s)return false;
     let dest=root;
     if(parent!==null){
@@ -542,25 +530,34 @@ const tree=(()=>{
       const g=find(root,parent);if(!g||!g.n.c)return false;
       dest=g.n.c;
     }
-    if(before===id||after===id)return true;
+    if(before===id)return true;
     s.list.splice(s.i,1);
-    let k;
-    if(after!=null){k=dest.findIndex(n=>n.id===after);k=k<0?dest.length:k+1}
-    else{k=before==null?-1:dest.findIndex(n=>n.id===before);if(k<0)k=dest.length}
+    let k=before==null?-1:dest.findIndex(n=>n.id===before);if(k<0)k=dest.length;
     dest.splice(k,0,s.n);
     return true;
   }
 
-  /* Sites with 2+ bookmarks here get a group named for the site; a site whose group already exists joins it. */
-  function groupByDomain(list){
-    const by=new Map();
-    for(const n of list)if(!n.c&&!n.s){const s=burl.site(n.u);if(s){const a=by.get(s.name);if(a)a.push(n);else by.set(s.name,[n])}}
+  /* Sites with 2+ bookmarks in a folder get a folder named for the site, at every level; a site's existing
+     same-name folder there takes even a lone bookmark. A site that is the whole folder, or the folder itself,
+     is left alone, so a second run changes nothing. */
+  function bySite(root){
     let made=0,moved=0;
-    for(const[name,items]of by){
-      let g=list.find(n=>n.c&&n.t===name);
-      if(!g){if(items.length<2)continue;g={id:uid(),t:name,c:[],d:now()};list.splice(list.indexOf(items[0]),0,g);made++}
-      for(const n of items){list.splice(list.indexOf(n),1);g.c.push(n);moved++}
-    }
+    (function walk(list,own){
+      const by=new Map();let items=0;
+      for(const n of list){
+        if(n.s)continue;
+        items++;
+        const s=!n.c&&burl.site(n.u);
+        if(s){const a=by.get(s.name);if(a)a.push(n);else by.set(s.name,[n])}
+      }
+      for(const[name,arr]of by){
+        if(name===own)continue;
+        let g=list.find(n=>n.c&&n.t===name);
+        if(!g){if(arr.length<2||arr.length===items)continue;g={id:uid(),t:name,c:[],d:now()};list.splice(list.indexOf(arr[0]),0,g);made++}
+        for(const n of arr){list.splice(list.indexOf(n),1);g.c.push(n);moved++}
+      }
+      for(const n of list)if(n.c)walk(n.c,n.t);
+    })(root,null);
     return{made,moved};
   }
   function ungroup(root,gid){const s=find(root,gid);if(!s||!s.n.c)return 0;s.list.splice(s.i,1,...s.n.c);return s.n.c.length}
@@ -578,12 +575,34 @@ const tree=(()=>{
     if(gone.size)(function prune(l){for(let i=l.length-1;i>=0;i--){if(gone.has(l[i]))l.splice(i,1);else if(l[i].c)prune(l[i].c)}})(root);
     return gone.size;
   }
+  /* Tidy Up: duplicates go, then until nothing changes: same-name sibling folders merge into the first,
+     empty folders (separators don't count) go, and a folder holding only a folder is replaced by it. */
+  function tidy(root){
+    const r={dup:dedupe(root),merged:0,empty:0,unwrapped:0};
+    let again=true;
+    const walk=l=>{
+      const seen=new Map();
+      for(let i=0;i<l.length;i++){
+        const n=l[i];if(!n.c)continue;
+        const k=n.t.trim().toLowerCase(),f=seen.get(k);
+        if(f){f.c.push(...n.c);l.splice(i--,1);r.merged++;again=true}else seen.set(k,n);
+      }
+      for(let i=0;i<l.length;i++){
+        const n=l[i];if(!n.c)continue;
+        walk(n.c);
+        if(!n.c.some(x=>!x.s)){l.splice(i--,1);r.empty++;again=true}
+        else if(n.c.length===1&&n.c[0].c){l[i--]=n.c[0];r.unwrapped++;again=true}
+      }
+    };
+    while(again){again=false;walk(root)}
+    return r;
+  }
   function clean(list){let k=0;each(list,n=>{if(!n.c&&!n.s){const s=burl.strip(n.u);if(s!==n.u){n.u=s;k++}}});return k}
-  /* Manual add and paste: verified web links go to the top of dest; keys (key -> id) catches repeats. */
-  function merge(dest,cands,keys,keep){
+  /* Manual add and paste: verified web links, tracking stripped, go to the top of dest; keys (key -> id) catches repeats. */
+  function merge(dest,cands,keys){
     const added=[];let dup=0,bad=0,stripped=0,first=null;
     for(const c of cands){
-      const r=burl.input(c.u,keep);
+      const r=burl.input(c.u);
       if(!r){bad++;continue}
       const k=burl.key(r.u);
       if(keys.has(k)){dup++;if(first===null)first=keys.get(k);continue}
@@ -597,11 +616,12 @@ const tree=(()=>{
     return{added,dup,bad,stripped,first};
   }
 
-  /* Icons live apart from the tree, deduped by FNV-1a, so a move never rewrites them. Only data:image is kept. */
+  /* Icons live apart from the tree, deduped by FNV-1a, so a move never rewrites them. Only data:image is kept.
+     Imported links lose their tracking parameters here. */
   const fnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),0x01000193);return(h>>>0).toString(36)};
   function intern(icons,data){const b=fnv(data);let id=b,k=0;while(icons[id]!==undefined&&icons[id]!==data)id=b+'_'+(++k);icons[id]=data;return id}
   function adopt(list,icons){
-    each(list,n=>{n.id=uid();if(n.ic!==undefined){if(/^data:image\//i.test(n.ic))n.i=intern(icons,n.ic);delete n.ic}});
+    each(list,n=>{n.id=uid();if(typeof n.u==='string')n.u=burl.strip(n.u);if(n.ic!==undefined){if(/^data:image\//i.test(n.ic))n.i=intern(icons,n.ic);delete n.ic}});
     return list;
   }
   function gc(root,icons){
@@ -610,7 +630,8 @@ const tree=(()=>{
     for(const id in icons)if(!used.has(id)){delete icons[id];k++}
     return k;
   }
-  /* Stored data is untrusted: drop junk nodes, repair ids and icon refs, re-seed the id counter. */
+  /* Stored data is untrusted: drop junk nodes, repair ids and icon refs, re-seed the id counter. Saved links
+     lose their tracking parameters too (a repair, so boot writes them back). */
   function migrate(lib,icons){
     let fixed=0;
     const ic={};
@@ -630,10 +651,10 @@ const tree=(()=>{
     each(root,n=>{if(typeof n.id==='string'&&ID.test(n.id))seq=Math.max(seq,parseInt(n.id,36))});
     const seen=new Set();
     each(root,n=>{if(typeof n.id!=='string'||!ID.test(n.id)||seen.has(n.id)){n.id=uid();fixed++}seen.add(n.id)});
-    fixed+=gc(root,ic);
+    fixed+=gc(root,ic)+clean(root);
     return{root,icons:ic,fixed};
   }
-  return{uid,now,each,find,count,keys,dsec,view,rows,dropTarget,move,groupByDomain,ungroup,dedupe,clean,merge,fnv,adopt,gc,migrate};
+  return{uid,now,each,find,count,keys,dsec,view,rows,dropTarget,move,bySite,ungroup,tidy,merge,fnv,adopt,gc,migrate};
 })();
 /* -- end bookmark:tree -- */
 
@@ -654,7 +675,7 @@ const undos=[];
 
 function loadPrefs(){
   const p=B.load(K.prefs,{})||{};
-  return{tap:p.tap==='copy'?'copy':'open',sort:['manual','az','domain','date'].includes(p.sort)?p.sort:'manual',gf:p.gf===true,strip:p.strip!==false};
+  return{tap:p.tap==='copy'?'copy':'open',sort:['manual','az','domain','date'].includes(p.sort)?p.sort:'manual'};
 }
 /* boot writes repairs back; a reload from another tab never does (its second key may not have landed yet). */
 function loadLib(repair){
@@ -732,9 +753,10 @@ let mv=-1,M=null;
 function meta(){
   if(mv===ver)return M;
   const counts=new Map();
-  const walk=l=>{let c=0;for(const n of l){if(n.c){const k=walk(n.c);counts.set(n.id,k);c+=k}else if(!n.s)c++}return c};
+  const folders=[];
+  const walk=l=>{let c=0;for(const n of l){if(n.c){folders.push(n.id);const k=walk(n.c);counts.set(n.id,k);c+=k}else if(!n.s)c++}return c};
   _search.clearCache();mv=ver;
-  return M={b:walk(root),counts,keys:null,index:null};
+  return M={b:walk(root),counts,folders,keys:null,index:null};
 }
 const keysOf=()=>{const m=meta();return m.keys||(m.keys=tree.keys(root))};
 
@@ -775,7 +797,7 @@ function rowEl(r,i,m){
   if(r.kind==='g'){
     const main=el.children[1];
     el.setAttribute('aria-expanded',r.open);
-    main.children[2].firstChild.textContent=n.t||'Group';
+    main.children[2].firstChild.textContent=n.t||'Folder';
     main.children[3].textContent=m.counts.get(n.id)||'';
   }else if(r.kind==='b'){
     const a=el.children[1],fav=a.children[0],txt=a.children[1].children,d=disp(n),src=n.i&&iconSrc(n.i);
@@ -799,7 +821,10 @@ function render(){
   const ca=$('a-copy');ca.dataset.l=m.b===1?'Copy':'Copy All';if(!ca.classList.contains('ok'))ca.lastChild.textContent=ca.dataset.l;
   $('search-wrap').style.display=has?'block':'none';
   $('org').hidden=mode!=='org';$('g-acts').hidden=!(mode==='org'&&sg&&sg.c);
-  segs('mode',mode);segs('p-sort',prefs.sort);segs('p-gf',prefs.gf?1:0);segs('p-strip',prefs.strip?1:0);
+  for(const id of['l-tidy','l-site','l-clear'])$(id).hidden=!has;
+  const lf=$('l-fold'),all=m.folders.every(id=>open.has(id));
+  lf.hidden=!m.folders.length;lf.lastChild.textContent=all?'Collapse All':'Expand All';lf.firstChild.firstChild.setAttribute('href',all?'#i-collapse':'#i-expand');
+  segs('mode',mode);segs('p-sort',prefs.sort);
   document.title=m.b?'Bookmark ('+m.b+')':'Bookmark';
   shown=q?hits(q):tree.rows(root,prefs,open);
   if(kb>=shown.length)kb=shown.length-1;
@@ -826,16 +851,16 @@ function reveal(id){
   render();flash(id,true);
 }
 
-/* ── add card: add, edit a bookmark, new group, rename a group ── */
+/* ── add card: add, edit a bookmark, new folder, rename a folder ── */
 const isGroupCard=()=>card.m==='group'||card.m==='rename';
 function setCard(m,n){
   card={m,id:n?n.id:null};
   inU.value=m==='edit'?n.u:m==='rename'?n.t:'';
   inT.value=m==='edit'&&!burl.untitled(n.t,n.u)?n.t:'';
   const g=isGroupCard();
-  inU.placeholder=g?'Group Name':'Link';inU.inputMode=g?'text':'url';inU.setAttribute('aria-label',inU.placeholder);
+  inU.placeholder=g?'Folder Name':'Link';inU.inputMode=g?'text':'url';inU.setAttribute('aria-label',inU.placeholder);
   addBtn.innerHTML='<svg aria-hidden="true"><use href="#i-'+(m==='add'?'plus':m==='group'?'fplus':'check')+'"/></svg>';
-  addBtn.setAttribute('aria-label',{add:'Add Bookmark',edit:'Save Bookmark',group:'Add Group',rename:'Save Group'}[m]);
+  addBtn.setAttribute('aria-label',{add:'Add Bookmark',edit:'Save Bookmark',group:'Add Folder',rename:'Save Folder'}[m]);
   syncTitle();
 }
 function syncTitle(){
@@ -843,7 +868,7 @@ function syncTitle(){
   const u=!isGroupCard()&&burl.parse(inU.value);
   inT.placeholder=u&&burl.verify(u)?burl.name(u.href):'Title';
 }
-/* New links land at the top of the selected group (opened), else the top of the library. */
+/* New links land at the top of the selected folder (opened), else the top of the library. */
 function target(){const g=node(sel);if(g&&g.c){if(!open.has(g.id)){open.add(g.id);saveOpen()}return g.c}return root}
 function select(id){
   const n=node(id);sel=n?id:null;
@@ -864,7 +889,7 @@ function submit(){
   }
   if(card.m==='group'){
     snap();
-    const g={id:tree.uid(),t:raw.replace(/\s+/g,' ')||'New Group',c:[],d:tree.now()};
+    const g={id:tree.uid(),t:raw.replace(/\s+/g,' ')||'New Folder',c:[],d:tree.now()};
     target().unshift(g);sel=g.id;setCard('add');changed();flash(g.id,true);
     return;
   }
@@ -874,7 +899,7 @@ function submit(){
     const n=node(card.id);if(!n){cancelCard();return}
     let u=n.u;
     if(raw!==n.u){
-      const r=burl.input(raw,!prefs.strip);if(!r){B.notify('Invalid Link',false);return}
+      const r=burl.input(raw);if(!r){B.notify('Invalid Link',false);return}
       const o=keysOf().get(burl.key(r.u));
       if(o&&o!==n.id){B.notify('Already Saved','warn');reveal(o);return}
       u=r.u;
@@ -886,10 +911,10 @@ function submit(){
     flash(n.id);
     return;
   }
-  const s=snap(),r=tree.merge(target(),[{u:raw,t:title}],keysOf(),!prefs.strip);
+  const s=snap(),r=tree.merge(target(),[{u:raw,t:title}],keysOf());
   if(!r.added.length){undos.pop();if(r.bad)B.notify('Invalid Link',false);else{B.notify('Already Saved','warn');reveal(r.first)}return}
   inU.value=inT.value='';syncTitle();changed();flash(r.added[0].id,true);
-  if(r.stripped)note('Added, Tracking Removed','warn',s);
+  if(r.stripped)note('Added, Tracking Removed',true,s);
 }
 inU.addEventListener('input',syncTitle);
 for(const el of[inU,inT])el.addEventListener('keydown',e=>{
@@ -900,7 +925,7 @@ addBtn.addEventListener('click',submit);
 
 /* ── paste, import, drop ── */
 function addLinks(cands,btn,skipped=0){
-  const s=snap(),r=tree.merge(target(),cands,keysOf(),!prefs.strip),a=r.added.length,bad=r.bad+skipped;
+  const s=snap(),r=tree.merge(target(),cands,keysOf()),a=r.added.length,bad=r.bad+skipped;
   if(!a){
     undos.pop();
     if(r.dup&&!bad){B.notify(r.dup===1?'Already Saved':r.dup+' Duplicates','warn');reveal(r.first)}
@@ -912,7 +937,7 @@ function addLinks(cands,btn,skipped=0){
   if(btn)fb(btn,'ps-fb','Pasted');
   const parts=[a===1&&!r.dup&&!bad?'Added':a+' Added',r.dup&&r.dup+' Duplicate'+pl(r.dup),bad&&bad+' Invalid'].filter(Boolean).join(', ');
   if(r.dup||bad)note(parts,'warn',a>1&&s);
-  else if(r.stripped)note(parts+', Tracking Removed','warn',s);
+  else if(r.stripped)note(parts+', Tracking Removed',true,s);
   else if(a>1)note(parts,true,s);
 }
 function ingestText(text,btn){if(bio.isNetscape(text))importTexts([{name:'',text}],btn);else addLinks(bio.text(text),btn)}
@@ -921,7 +946,7 @@ function ingestHtml(html,text,btn){
   const a=bio.anchors(html);
   if(a.items.length)addLinks(a.items,btn,a.skipped);else ingestText(text,btn);
 }
-/* A bookmark file becomes a new top-level group named after the file; any other file adds its links. */
+/* A bookmark file becomes a new top-level folder named after the file; any other file adds its links. */
 function importTexts(texts,btn,bad=0){
   const groups=[],links=[];
   for(const x of texts){
@@ -935,14 +960,14 @@ function importTexts(texts,btn,bad=0){
   if(!groups.length&&!links.length){fb(btn,'err-fb','Import Failed');B.notify('Not a Bookmark File',false);return}
   const s=snap();let b=0;
   for(const g of groups.reverse()){root.unshift({id:tree.uid(),t:g.t,c:tree.adopt(g.root,icons),d:tree.now()});b+=g.b}
-  const r=links.length?tree.merge(target(),links,keysOf(),!prefs.strip):{added:[],dup:0,bad:0};
+  const r=links.length?tree.merge(target(),links,keysOf()):{added:[],dup:0,bad:0};
   if(!groups.length&&!r.added.length){undos.pop();fb(btn,'err-fb','Import Failed');B.notify(r.dup?'Already Saved':'Not a Bookmark File',r.dup?'warn':false);return}
   changed({icons:true});
   const st=flush(true);
   if(st==='full'){B.notify('Storage Full',false);return}
   fb(btn,'ok','Imported');
   const g=!b&&groups.length,skip=bad+r.bad;
-  const msg=[b&&b+' Bookmark'+pl(b)+' Imported',g&&g+' Group'+pl(g)+' Imported',r.added.length&&r.added.length+' Added',r.dup&&r.dup+' Duplicate'+pl(r.dup),skip&&skip+' Skipped',st==='icons'&&'Icons Not Saved'].filter(Boolean).join(', ');
+  const msg=[b&&b+' Bookmark'+pl(b)+' Imported',g&&g+' Folder'+pl(g)+' Imported',r.added.length&&r.added.length+' Added',r.dup&&r.dup+' Duplicate'+pl(r.dup),skip&&skip+' Skipped',st==='icons'&&'Icons Not Saved'].filter(Boolean).join(', ');
   note(msg,skip||r.dup||st!=='ok'?'warn':true,s);
 }
 async function importFiles(files){
@@ -1014,7 +1039,7 @@ function remove(id){
   const u=snap();s.list.splice(s.i,1);
   if(card.id&&!node(card.id))setCard('add');
   changed({icons:gcIcons()});
-  note(s.n.c?'Group Deleted':'Deleted',true,u);
+  note(s.n.c?'Folder Deleted':'Deleted',true,u);
 }
 list.addEventListener('click',e=>{
   const row=e.target.closest('.row'),n=row&&node(row.dataset.id);
@@ -1039,20 +1064,22 @@ function setMode(m){
 const segClick=(id,fn)=>$(id).addEventListener('click',e=>{const b=e.target.closest('.seg');if(b)fn(b.dataset.v)});
 segClick('mode',setMode);
 segClick('p-sort',v=>{prefs.sort=v;B.save(K.prefs,prefs);render()});
-segClick('p-gf',v=>{prefs.gf=v==='1';B.save(K.prefs,prefs);render()});
-segClick('p-strip',v=>{prefs.strip=v==='1';B.save(K.prefs,prefs);render()});
-function byDomain(l){const s=snap(),r=tree.groupByDomain(l);if(!r.moved){undos.pop();B.notify('Nothing to Group','warn');return}changed();note(r.moved+' Bookmark'+pl(r.moved)+' Grouped',true,s)}
-function clean(l){const s=snap(),k=tree.clean(l);if(!k){undos.pop();B.notify('Already Clean','warn');return}changed();note(k+' Link'+pl(k)+' Cleaned',true,s)}
+function tidyUp(){
+  const s=snap(),r=tree.tidy(root);
+  const parts=[r.dup&&r.dup+' Duplicate'+pl(r.dup),r.empty&&r.empty+' Empty Folder'+pl(r.empty),r.merged&&r.merged+' Merged',r.unwrapped&&r.unwrapped+' Extra Folder'+pl(r.unwrapped)].filter(Boolean);
+  if(!parts.length){undos.pop();B.notify('Already Tidy','warn');return}
+  changed({icons:gcIcons()});note('Tidied: '+parts.join(', '),true,s);
+}
+function sortBySite(){const s=snap(),r=tree.bySite(root);if(!r.moved){undos.pop();B.notify('Nothing to Sort','warn');return}changed();note(r.moved+' Bookmark'+pl(r.moved)+' Sorted',true,s)}
+function foldAll(){const f=meta().folders,all=f.every(id=>open.has(id));open=new Set(all?[]:f);saveOpen();render()}
 const selGroup=()=>{const g=node(sel);return g&&g.c?g:null};
 $('g-rename').addEventListener('click',()=>{const g=selGroup();if(g)edit(g)});
-$('g-domain').addEventListener('click',()=>{const g=selGroup();if(g)byDomain(g.c)});
-$('g-clean').addEventListener('click',()=>{const g=selGroup();if(g)clean(g.c)});
-$('g-ungroup').addEventListener('click',()=>{const g=selGroup();if(!g)return;const s=snap();tree.ungroup(root,g.id);sel=null;changed();note('Ungrouped',true,s)});
+$('g-ungroup').addEventListener('click',()=>{const g=selGroup();if(!g)return;const s=snap();tree.ungroup(root,g.id);sel=null;changed();note('Folder Unpacked',true,s)});
 $('g-del').addEventListener('click',()=>{const g=selGroup();if(g){sel=null;remove(g.id)}});
 $('l-new').addEventListener('click',newGroup);
-$('l-domain').addEventListener('click',()=>byDomain(root));
-$('l-clean').addEventListener('click',()=>clean(root));
-$('l-dedupe').addEventListener('click',()=>{const s=snap(),k=tree.dedupe(root);if(!k){undos.pop();B.notify('No Duplicates','warn');return}changed({icons:gcIcons()});note(k+' Duplicate'+pl(k)+' Removed',true,s)});
+$('l-tidy').addEventListener('click',tidyUp);
+$('l-site').addEventListener('click',sortBySite);
+$('l-fold').addEventListener('click',foldAll);
 const clearAll=B.twoPress($('l-clear'),{text:'Delete All',guard:()=>root.length>0,onConfirm:()=>{
   const s=snap();root=[];icons={};open.clear();saveOpen();sel=null;setCard('add');pruneBlobs();changed({icons:true});note('All Deleted',true,s);
 }});
@@ -1114,7 +1141,7 @@ const drag=(()=>{
     let i,f;
     if(row){const r=row.getBoundingClientRect();i=+row.dataset.i;f=(y-r.top)/r.height}
     else if(x>=lr.left&&x<=lr.right&&y>=lr.bottom&&y<lr.bottom+48){i=shown.length-1;f=.99}
-    tgt=i===undefined?null:tree.dropTarget(shown,i,f,x-lr.left,{drag:id,dragGroup:!!node(id)?.c,sorted:prefs.sort!=='manual',gf:prefs.gf});
+    tgt=i===undefined?null:tree.dropTarget(shown,i,f,x-lr.left,{drag:id,sorted:prefs.sort!=='manual'});
     list.querySelector('.into')?.classList.remove('into');
     const m=tgt&&tgt.mark,mr=m&&list.querySelector('.row[data-i="'+m.row+'"]');
     if(!mr){gap.hidden=true;return}
@@ -1149,10 +1176,10 @@ const drag=(()=>{
 })();
 function drop(id,t){
   const s=tree.find(root,id);if(!s)return;
-  const cur=s.path.length?s.path[s.path.length-1].id:null,prev=s.list[s.i-1],next=s.list[s.i+1];
-  if(t.parent===cur&&(prefs.sort!=='manual'||(t.after!==undefined?t.after===id||t.after===prev?.id:t.before===id||t.before===(next?next.id:null))))return;
+  const cur=s.path.length?s.path[s.path.length-1].id:null,next=s.list[s.i+1];
+  if(t.parent===cur&&(prefs.sort!=='manual'||t.before===id||t.before===(next?next.id:null)))return;
   snap();
-  if(!tree.move(root,id,t.parent,t.before,t.after)){undos.pop();return}
+  if(!tree.move(root,id,t.parent,t.before)){undos.pop();return}
   changed();
   flash(t.parent!==null&&!open.has(t.parent)?t.parent:id);
 }
@@ -1180,8 +1207,8 @@ function primary(){
 function shift(d){
   const n=kbNode();if(!n||prefs.sort!=='manual'||search.value.trim())return;
   const s=tree.find(root,n.id),vis=tree.view(s.list,prefs),i=vis.indexOf(n),t=vis[i+d];
-  if(!t||(prefs.gf&&!t.c!==!n.c))return;
-  snap();tree.move(root,n.id,s.path.length?s.path[s.path.length-1].id:null,d>0?null:t.id,d>0?t.id:undefined);
+  if(!t)return;
+  snap();tree.move(root,n.id,s.path.length?s.path[s.path.length-1].id:null,d>0?(vis[i+2]?vis[i+2].id:null):t.id);
   changed();kbTo(n.id);
 }
 function del(){const n=focused();if(n)remove(n.id)}
