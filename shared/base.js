@@ -168,7 +168,8 @@
     pill.className='notif-pill '+(ok==='warn'?'nf-warn':ok?'nf-ok':'nf-err');
     pill.textContent=msg;wrap.appendChild(pill);
     var dismiss=function(){clearTimeout(toastT);clearTimeout(toastFadeT);wrap.style.animation='notifOut .2s ease forwards';toastFadeT=setTimeout(function(){wrap.remove()},200)};
-    wrap.addEventListener('click',function(){if(onTap)onTap();dismiss()});
+    /* Dismiss first: a toast raised by onTap owns the timers, and this dismiss would clear them. */
+    wrap.addEventListener('click',function(){dismiss();if(onTap)onTap()});
     document.body.appendChild(wrap);
     toastT=setTimeout(dismiss,5000);
   }

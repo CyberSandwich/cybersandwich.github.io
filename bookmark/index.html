@@ -212,7 +212,7 @@ body.picking .w{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
     <div class="sheet-f"><button type="button" id="sheet-no">Cancel</button><button type="button" id="sheet-yes" class="rs-warn" hidden>Delete All</button></div>
   </div>
 </div>
-<script src="/shared/base.js?v=28"></script>
+<script src="/shared/base.js?v=29"></script>
 <script src="/shared/search.js?v=20"></script>
 <script src="/shared/url.js?v=1"></script>
 <script>
@@ -814,8 +814,7 @@ function undo(s){
   const u=undos.pop();root=u.root;icons=u.icons;
   if(card.m!=='add'&&!node(card.id))setCard('add');
   pruneBlobs();changed({icons:true});
-  /* After the tapped toast's own dismiss, which would otherwise clear this toast's timer. */
-  setTimeout(()=>B.notify('Undone',true));
+  B.notify('Undone',true);
 }
 const note=(msg,kind,s)=>B.notify(s?msg+' · Undo':msg,kind,s?()=>undo(s):undefined);
 function gcIcons(){const k=tree.gc(root,icons);if(k)pruneBlobs();return k>0}
