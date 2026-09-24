@@ -73,13 +73,19 @@ html[data-theme="sepia"] .row .del.copied{background:#E8E0CE;color:#2D7D46;borde
 .row.into{background:var(--tab-active);color:var(--tab-active-c)}
 .row.into :is(.sub,.crumb,.cnt,.chev,.fav svg){color:inherit;opacity:.7}
 .row.into .fav{background:none}
-.row.src{opacity:.35}
+.row.src{visibility:hidden}
+.row.landing{opacity:0}
 .row:active{opacity:.85}
 .row .del:active{opacity:.7}
 .notif-pill{white-space:normal;text-align:center;line-height:1.3;max-width:calc(100vw - 40px)}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
-.gap{position:fixed;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--acc);pointer-events:none;z-index:61}
-.ghost{position:fixed;left:0;top:0;z-index:60;margin:0;pointer-events:none;background:var(--card);border-radius:14px;border-bottom:none;box-shadow:var(--shadow2);will-change:transform}
+.slot{position:absolute;top:0;right:12px;border-radius:12px;background:var(--bg2);pointer-events:none;transition:transform .2s ease,left .2s ease,height .2s ease}
+#list.glide .row{transition:transform .2s ease}
+/* The lifted item is a liquid-glass pill, like the nav */
+.ghost{position:fixed;left:0;top:0;z-index:60;margin:0;pointer-events:none;border:1px solid var(--tab-border);border-radius:var(--rr);will-change:transform}
+.ghost :is(.tick,.del){display:none!important}
+.ghost.gliding{transition:transform .2s ease,opacity .2s ease}
+.pill-n{position:absolute;top:-7px;right:-5px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--acc);color:var(--card);font:600 .75rem/22px var(--font);text-align:center}
 html.dragging,html.dragging *{cursor:grabbing!important}
 html.int-drag .drop-overlay{display:none}
 /* While anything is ticked the glass action bar takes the nav's place (iOS select mode) */
@@ -530,14 +536,15 @@ const tree=(()=>{
   }
 
   /* Where a drag lands: row i under the pointer, f = fraction down that row, dx = pointer x in the list.
-     c = {drag, sorted}. Returns {parent, before, mark} or null (off the list, or inside the dragged group).
+     c = {drag: Set of dragged ids, sorted}; the page passes the rows without the dragged ones, which collapse
+     while they fly. Returns {parent, before, mark} or null (off the list, or inside a dragged group).
      Manual: row halves (group headers: quarters, middle = into), x picks the depth where nesting ends.
      Sorted views only regroup (append). */
   const IND=16,BASE=20;
   function dropTarget(rows,i,f,dx,c){
     const r=rows[i];if(!r)return null;
     const at=id=>rows.findIndex(x=>x.id===id);
-    const inside=pid=>pid!==null&&(pid===c.drag||(rows[at(pid)]?.path||[]).includes(c.drag));
+    const D=c.drag,inside=pid=>pid!==null&&(D.has(pid)||(rows[at(pid)]?.path||[]).some(g=>D.has(g)));
     if(c.sorted){
       const pid=r.kind==='g'?r.id:r.parent;
       return inside(pid)?null:{parent:pid,before:null,mark:pid===null?null:{row:at(pid),edge:'into'}};
@@ -561,11 +568,11 @@ const tree=(()=>{
     let full;
     if(!hdr||hdr.open)full=rows.filter(x=>x.parent===parent&&x.kind!=='e').map(x=>({id:x.id}));
     else full=hdr.n.c.map(n=>({id:n.id}));
-    const S=full.filter(x=>x.id!==c.drag);
+    const S=full.filter(x=>!D.has(x.id));
     let p=S.length;
     if(!pos.end){
       let k=full.findIndex(x=>x.id===(pos.at??pos.after))+(pos.after===undefined?0:1);
-      if(full[k]&&full[k].id===c.drag)k++;
+      while(full[k]&&D.has(full[k].id))k++;
       if(full[k])p=S.indexOf(full[k]);
     }
     const vis=S[p]?S[p].id:null;
@@ -916,7 +923,7 @@ function render(){
   lf.hidden=!m.folders.length;lf.lastChild.textContent=all?'Collapse All':'Expand All';lf.firstChild.firstChild.setAttribute('href',all?'#i-collapse':'#i-expand');
   segs('mode',mode);segs('p-sort',prefs.sort);
   document.title=m.b?'Bookmark ('+m.b+')':'Bookmark';
-  shown=q?hits(q):tree.rows(root,prefs,open);
+  shown=q?hits(q):tree.rows(root,prefs,drag.open(open));
   if(kb>=shown.length)kb=shown.length-1;
   const frag=document.createDocumentFragment();
   for(let i=0;i<shown.length;i++)frag.appendChild(rowEl(shown[i],i,m));
@@ -1278,71 +1285,139 @@ searchX.addEventListener('click',()=>{search.value='';searchX.style.display='non
 search.addEventListener('keydown',e=>{if(e.key==='Escape'&&search.value){e.stopPropagation();search.value='';searchX.style.display='none';render()}});
 
 /* ── drag (Organize, not while searching). IDLE -> PENDING -> DRAG: touch after a 200 ms hold
-   (moving 8 px first hands back to scrolling), mouse after 4 px; a second pointer, Esc or hiding
-   the page cancels. Held by node id, so a re-render mid-drag is safe. ── */
+   (moving 8 px first hands back to scrolling; released without moving it is a tap), mouse after 4 px;
+   a second pointer, Esc or hiding the page cancels. A ticked row drags every ticked item. Each render is
+   laid out once without the dragged rows; the rows below the slot glide one pill height down (transforms).
+   Hit-testing reads the rows where they show, and the open slot keeps its target, so nothing oscillates;
+   over a folder's middle the rows hold still, so the folder never slides out from under the pointer.
+   Held by node id, so a re-render mid-drag is safe. ── */
 const drag=(()=>{
-  const IDLE=0,PEND=1,DRAG=2,EDGE=64;
-  let st=IDLE,pid=-1,id=null,touch=false,sx=0,sy=0,x=0,y=0,gx=0,gy=0,hold=0,raf=0,ghost=null,gap=null,tgt=null,floor=0,swallow=false;
+  const IDLE=0,PEND=1,DRAG=2,EDGE=64,HOLD=200,SPRING=600,TAP=350;
+  let st=IDLE,pid=-1,id=null,ids=[],touch=false,moved=false,sx=0,sy=0,x=0,y=0,gx=0,gy=0,H=0;
+  let hold=0,raf=0,spring=0,springId=null,tapId=null,tapT=0,pill=null,slot=null,tgt=null,L=null,floor=0,swallow=false;
   const enabled=()=>mode==='org'&&!search.value.trim();
+  const ty=el=>{const m=/translateY\((-?[\d.]+)px/.exec(el.style.transform);return m?+m[1]:0};
+  /* The visible rows minus the dragged ones, stacked: vtop/vh per row, home = where the first dragged row was. */
+  function layout(){
+    const D=new Set(ids),els=list.querySelectorAll('.row'),vrows=[],vels=[],vtop=[],vh=[],off=[];
+    let t=0,home=-1,hd=0;
+    const top0=els.length?els[0].offsetTop:0;
+    for(const el of els){
+      const r=shown[+el.dataset.i];
+      el.style.transform='';
+      if(D.has(r.id)){el.classList.add('src');if(home<0){home=vrows.length;hd=r.depth}continue}
+      vrows.push(r);vels.push(el);vtop.push(t);vh.push(el.offsetHeight);off.push(el.offsetTop-top0);t+=el.offsetHeight;
+    }
+    L={vrows,vels,vtop,vh,off,top0,total:t,home,hd,g:-1};
+  }
+  /* g = the slot's index among the rows (-1: none); rows from g down glide one pill height lower. */
+  function apply(g,depth,anim){
+    L.g=g;
+    list.classList.toggle('glide',!!anim);
+    for(let j=0;j<L.vels.length;j++){
+      const d=L.vtop[j]+(g>=0&&j>=g?H:0)-L.off[j];
+      if(d!==ty(L.vels[j]))L.vels[j].style.transform=d?'translateY('+d+'px)':'';
+    }
+    slot.hidden=g<0;
+    if(g<0)return;
+    slot.style.transition=anim?'':'none';
+    slot.style.transform='translateY('+((g<L.vrows.length?L.vtop[g]:L.total)+L.top0+4)+'px)';
+    slot.style.height=H-8+'px';slot.style.left=12+Math.min(depth,6)*16+'px';
+  }
+  function hit(){
+    const lr=list.getBoundingClientRect();
+    if(!L.vrows.length||x<lr.left||x>lr.right)return null;
+    let yl=y-lr.top-L.top0;
+    const gy=L.g<0?-1:L.g<L.vrows.length?L.vtop[L.g]:L.total;
+    if(gy>=0&&yl>=gy){if(yl<gy+H)return tgt;yl-=H}
+    if(yl<-8||yl>=L.total+48)return null;
+    let j=L.vrows.length-1,f=.99;
+    if(yl<L.total){j=0;while(j<L.vrows.length-1&&yl>=L.vtop[j]+L.vh[j])j++;f=Math.max(0,(yl-L.vtop[j])/L.vh[j])}
+    return tree.dropTarget(L.vrows,j,f,x-lr.left,{drag:new Set(ids),sorted:prefs.sort!=='manual'});
+  }
+  function show(t,anim){
+    tgt=t;
+    list.querySelector('.into')?.classList.remove('into');
+    const m=t&&t.mark;let into=null;
+    if(!m)apply(-1,0,anim);
+    else if(m.edge==='into'){slot.hidden=true;into=L.vrows[m.row];L.vels[m.row]?.classList.add('into')}
+    else apply(m.edge==='top'?m.row:m.row+1,m.depth,anim);
+    /* A closed folder held under the pointer springs open. */
+    const sid=into&&into.kind==='g'&&!into.open?into.id:null;
+    if(sid!==springId){clearTimeout(spring);springId=sid;if(sid)spring=setTimeout(()=>{if(st===DRAG&&springId===sid){open.add(sid);saveOpen();render()}},SPRING)}
+  }
   /* Back to IDLE before the drop: its re-render calls after(), which must not re-attach the drag. */
   function stop(commit){
-    clearTimeout(hold);cancelAnimationFrame(raf);raf=0;
-    const was=st,did=id,t=tgt;
-    st=IDLE;id=null;tgt=null;
+    clearTimeout(hold);clearTimeout(spring);springId=null;cancelAnimationFrame(raf);raf=0;
+    const was=st,t=tgt,did=ids,tap=commit&&was===DRAG&&!moved?id:null;
+    st=IDLE;tgt=null;id=null;ids=[];
     if(was===DRAG){
-      ghost.remove();gap.remove();ghost=gap=null;
       doc.classList.remove('dragging');
-      list.querySelector('.into')?.classList.remove('into');
-      rowOf(did)?.classList.remove('src');
       if(list.hasPointerCapture(pid))list.releasePointerCapture(pid);
-      swallow=true;
-      if(commit&&t)drop(did,t);
+      const p=pill;pill=null;slot.remove();slot=null;L=null;list.classList.remove('glide');
+      list.querySelector('.into')?.classList.remove('into');
+      const landed=commit&&moved&&t?drop(did,t):null;
+      if(!landed)render();
+      glide(p,did[0],landed?t:null);
+      /* A touch hold released in place is a tap: tick it, unless the browser's own click does first. */
+      if(tap){tapId=tap;clearTimeout(tapT);tapT=setTimeout(()=>{if(tapId!==null){const i=tapId;tapId=null;pick(i)}},TAP)}
+      /* Eat this gesture's own pointer click; the next pointerdown resets it, and a keyboard click is never eaten. */
+      else swallow=true;
     }
     pid=-1;
   }
+  /* The pill settles onto its row, shrinks into the closed folder it went into, or fades. */
+  function glide(p,first,t){
+    const el=rowOf(first),to=el||(t&&t.parent!==null?rowOf(t.parent):null);
+    if(el)el.classList.add('landing');
+    const end=()=>{p.remove();el?.classList.remove('landing')};
+    p.classList.add('gliding');
+    if(to){const r=to.getBoundingClientRect();p.style.transform='translate3d('+r.left+'px,'+r.top+'px,0) scale('+(el?1:.6)+')'}
+    if(!el)p.style.opacity='0';
+    p.addEventListener('transitionend',end,{once:true});setTimeout(end,300);
+  }
   function begin(){
     const row=rowOf(id);if(!row){stop();return}
-    st=DRAG;
+    st=DRAG;moved=!touch;
+    ids=picked.has(id)?tree.tops(root,[...picked]):[id];
     try{list.setPointerCapture(pid)}catch(_){}
     doc.classList.add('dragging');
-    const r=row.getBoundingClientRect();gx=sx-r.left;gy=sy-r.top;
-    ghost=row.cloneNode(true);ghost.classList.add('ghost');ghost.classList.remove('kb-focus','sel','hi');ghost.style.width=r.width+'px';
-    document.body.appendChild(ghost);
-    gap=document.createElement('div');gap.className='gap';gap.hidden=true;document.body.appendChild(gap);
-    floor=document.querySelector('nav').getBoundingClientRect().top;
-    after();frame();
+    const r=row.getBoundingClientRect();gx=sx-r.left;gy=sy-r.top;H=row.offsetHeight;
+    pill=row.cloneNode(true);pill.className='row ghost glass '+row.classList[1];
+    pill.removeAttribute('data-id');pill.style.width=r.width+'px';pill.style.paddingLeft='20px';
+    if(ids.length>1){const n=document.createElement('span');n.className='pill-n';n.textContent=ids.length;pill.appendChild(n)}
+    document.body.appendChild(pill);
+    slot=document.createElement('div');slot.className='slot';slot.hidden=true;
+    floor=(picked.size?$('bar'):document.querySelector('nav')).getBoundingClientRect().top||innerHeight;
+    if(ids.some(i=>open.has(i)))render();else after();
+    frame();
   }
   function frame(){
     raf=0;if(st!==DRAG)return;
-    ghost.style.transform='translate3d('+(x-gx)+'px,'+(y-gy)+'px,0) scale(1.02)';
-    hit();
+    pill.style.transform='translate3d('+(x-gx)+'px,'+(y-gy)+'px,0) scale(1.03)';
+    if(!moved&&Math.hypot(x-sx,y-sy)>8)moved=true;
+    const t=hit();if(t!==tgt)show(t,true);
     const dy=y<EDGE?-Math.ceil((EDGE-y)/4):y>floor-EDGE?Math.ceil((y-floor+EDGE)/4):0;
     if(dy){scrollBy(0,dy);raf=requestAnimationFrame(frame)}
   }
-  function hit(){
-    const lr=list.getBoundingClientRect(),row=document.elementFromPoint(x,y)?.closest('#list .row');
-    let i,f;
-    if(row){const r=row.getBoundingClientRect();i=+row.dataset.i;f=(y-r.top)/r.height}
-    else if(x>=lr.left&&x<=lr.right&&y>=lr.bottom&&y<lr.bottom+48){i=shown.length-1;f=.99}
-    tgt=i===undefined?null:tree.dropTarget(shown,i,f,x-lr.left,{drag:id,sorted:prefs.sort!=='manual'});
-    list.querySelector('.into')?.classList.remove('into');
-    const m=tgt&&tgt.mark,mr=m&&list.querySelector('.row[data-i="'+m.row+'"]');
-    if(!mr){gap.hidden=true;return}
-    if(m.edge==='into'){gap.hidden=true;mr.classList.add('into');return}
-    const r=mr.getBoundingClientRect(),left=lr.left+20+Math.min(m.depth,6)*16;
-    gap.hidden=false;
-    gap.style.top=(m.edge==='top'?r.top:r.bottom)+'px';
-    gap.style.left=left+'px';gap.style.width=lr.right-12-left+'px';
+  /* Re-attach after a render swaps the rows out: lay out again and redraw without animating. A folder held
+     open by spring stays where it showed, so the pointer is still over it. */
+  function after(){
+    if(st!==DRAG)return;
+    const m=L&&tgt&&tgt.mark,held=m&&m.edge==='into'?{id:L.vrows[m.row]?.id,down:L.g>=0&&m.row>=L.g}:null;
+    layout();list.prepend(slot);
+    const k=held?L.vrows.findIndex(r=>r.id===held.id):-1;
+    if(k>=0)apply(held.down?k:-1,L.vrows[k].depth,false);
+    else apply(prefs.sort==='manual'?L.home:-1,L.hd,false);
+    if(tgt){tgt=null;show(hit(),false)}
   }
-  /* Re-attach after a render swaps the rows out. */
-  function after(){if(st!==DRAG)return;rowOf(id)?.classList.add('src');hit()}
   list.addEventListener('pointerdown',e=>{
     if(st!==IDLE){stop();return}
     swallow=false;
     const row=e.target.closest('.row');
     if(!enabled()||!e.isPrimary||e.button>0||!row||row.classList.contains('e')||e.target.closest('.del'))return;
     id=row.dataset.id;pid=e.pointerId;sx=x=e.clientX;sy=y=e.clientY;touch=e.pointerType==='touch';st=PEND;
-    if(touch)hold=setTimeout(()=>{if(st===PEND)begin()},200);
+    if(touch)hold=setTimeout(()=>{if(st===PEND)begin()},HOLD);
   });
   list.addEventListener('pointermove',e=>{
     if(e.pointerId!==pid||st===IDLE)return;
@@ -1353,17 +1428,25 @@ const drag=(()=>{
   list.addEventListener('pointerup',e=>{if(e.pointerId===pid)stop(true)});
   list.addEventListener('pointercancel',e=>{if(e.pointerId===pid)stop()});
   list.addEventListener('touchmove',e=>{if(st===DRAG)e.preventDefault()},{passive:false});
-  list.addEventListener('click',e=>{if(swallow){swallow=false;e.preventDefault();e.stopPropagation()}},true);
+  list.addEventListener('contextmenu',e=>{if(st!==IDLE)e.preventDefault()});
+  list.addEventListener('click',e=>{
+    if(tapId!==null&&e.target.closest('.row')?.dataset.id===tapId){tapId=null;clearTimeout(tapT);return}
+    if(swallow&&e.detail>0){swallow=false;e.preventDefault();e.stopPropagation()}
+  },true);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
-  return{after,active:()=>st!==IDLE,cancel:()=>stop()};
+  /* While dragging, the dragged folders show closed (their contents travel inside them). */
+  const openView=o=>st===DRAG&&ids.some(i=>o.has(i))?new Set([...o].filter(i=>!ids.includes(i))):o;
+  return{after,open:openView,active:()=>st!==IDLE,cancel:()=>stop()};
 })();
-function drop(id,t){
-  const s=tree.find(root,id);if(!s)return;
-  if(prefs.sort!=='manual'&&t.parent===(s.path.length?s.path[s.path.length-1].id:null))return;
+/* Returns the first moved id, or null when nothing moved. A dragged selection is done: its ticks clear. */
+function drop(ids,t){
+  const s=tree.find(root,ids[0]);if(!s)return null;
+  if(prefs.sort!=='manual'&&ids.length===1&&t.parent===(s.path.length?s.path[s.path.length-1].id:null))return null;
   snap();
-  if(!tree.moveMany(root,[id],t.parent,t.before)){undos.pop();return}
+  if(!tree.moveMany(root,ids,t.parent,t.before)){undos.pop();return null}
+  if(ids.some(i=>picked.has(i)))clearPicks();
   changed();
-  flash(t.parent!==null&&!open.has(t.parent)?t.parent:id);
+  return ids[0];
 }
 
 /* ── keyboard ── */
