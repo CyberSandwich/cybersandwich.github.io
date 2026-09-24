@@ -45,14 +45,16 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .crumb{color:var(--t4)}
 .sub:empty,.crumb:empty{display:none}
 .cnt{font:500 .8125rem/1 var(--font);color:var(--t4);font-variant-numeric:tabular-nums}
-.chev{margin-right:-4px;transition:transform .15s}
+.cv{display:flex;align-items:center;justify-content:center;width:32px;height:40px;margin:-12px -12px -12px -8px;flex-shrink:0}
+.chev{transition:transform .15s}
 .row[aria-expanded="true"] .chev{transform:rotate(90deg)}
-.grip,.more,.row.s .del{display:none}
-[data-mode="org"] :is(.grip,.more,.row.s .del){display:flex}
+/* Organize: a tick circle per row (a CSS-masked check keeps rows SVG-free); the row X is Open/Copy only */
+.tick{display:none;position:relative;width:22px;height:22px;flex-shrink:0;margin:0 -2px 0 -6px;border-radius:50%;border:1.5px solid var(--t4);transition:background .15s,border-color .15s;--ck:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")}
+[data-mode="org"] .tick{display:block}
+[data-mode="org"] .row .del{display:none}
 [data-mode="org"] .row{-webkit-touch-callout:none}
-.grip{width:16px;height:16px;flex-shrink:0;margin:0 -4px 0 -8px;color:var(--t4);background:currentColor;cursor:grab;--m:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg%3E%3Ccircle cx='9' cy='5' r='2'/%3E%3Ccircle cx='9' cy='12' r='2'/%3E%3Ccircle cx='9' cy='19' r='2'/%3E%3Ccircle cx='15' cy='5' r='2'/%3E%3Ccircle cx='15' cy='12' r='2'/%3E%3Ccircle cx='15' cy='19' r='2'/%3E%3C/g%3E%3C/svg%3E");-webkit-mask:var(--m) center/16px no-repeat;mask:var(--m) center/16px no-repeat}
-.more{width:36px;height:36px;border-radius:50%;border:none;background:none;color:var(--t4);align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:color .15s}
-.more svg{width:18px;height:18px}
+.row.sel .tick{background:var(--acc);border-color:var(--acc)}
+.row.sel .tick::after{content:'';position:absolute;inset:0;background:var(--card);-webkit-mask:var(--ck) center/12px no-repeat;mask:var(--ck) center/12px no-repeat}
 .row.s{min-height:28px;padding-top:4px;padding-bottom:4px}
 .hr{flex:1;height:1px;background:var(--bdr)}
 .row.e{min-height:44px;font-weight:400;color:var(--t4);cursor:default}
@@ -67,30 +69,68 @@ html[data-theme="dark"] .row .del.copied{background:#1A3A2A;color:#34D399;border
 html[data-theme="sepia"] .row .del.copied{background:#E8E0CE;color:#2D7D46;border-color:#DDD4C0}
 .row.hi{background:var(--bg2)}
 .row.kb-focus{background:var(--bg2);outline:2px solid var(--acc);outline-offset:-2px}
-.row:is(.sel,.into){background:var(--tab-active);color:var(--tab-active-c)}
-.row:is(.sel,.into) :is(.sub,.crumb,.cnt,.chev,.grip,.more,.fav svg){color:inherit;opacity:.7}
-.row.sel .del{background:none;border-color:currentColor;color:inherit;opacity:.6}
-.row:is(.sel,.into) .fav{background:none}
+.row:is(.sel,.ed){background:var(--bg2)}
+.row.into{background:var(--tab-active);color:var(--tab-active-c)}
+.row.into :is(.sub,.crumb,.cnt,.chev,.fav svg){color:inherit;opacity:.7}
+.row.into .fav{background:none}
 .row.src{opacity:.35}
 .row:active{opacity:.85}
-.row .del:active,.more:active{opacity:.7}
+.row .del:active{opacity:.7}
 .notif-pill{white-space:normal;text-align:center;line-height:1.3;max-width:calc(100vw - 40px)}
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .gap{position:fixed;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--acc);pointer-events:none;z-index:61}
 .ghost{position:fixed;left:0;top:0;z-index:60;margin:0;pointer-events:none;background:var(--card);border-radius:14px;border-bottom:none;box-shadow:var(--shadow2);will-change:transform}
 html.dragging,html.dragging *{cursor:grabbing!important}
 html.int-drag .drop-overlay{display:none}
+/* While anything is ticked the glass action bar takes the nav's place (iOS select mode) */
+body.picking nav{display:none}
+body.picking .notif{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+body.picking .w{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+.bar{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:10;width:min(420px,calc(100vw - 24px));border-radius:24px;padding:4px 4px 2px;animation:barIn .2s ease}
+@keyframes barIn{from{opacity:0;transform:translate(-50%,12px)}}
+.bar-h{display:flex;align-items:center;padding:0 2px 0 14px;font:600 .8125rem/1 var(--font);color:var(--t1)}
+.bar-h span{flex:1}
+.bar button{border:none;background:none;color:var(--t2);cursor:pointer;transition:color .15s}
+.bar-h button{padding:10px 10px;border-radius:var(--rr);font:500 .8125rem/1 var(--font)}
+.bar-a{display:flex}
+.bar-a button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 1px 9px;border-radius:18px;font:500 clamp(.625rem,2.7vw,.6875rem)/1 var(--font);white-space:nowrap}
+.bar-a svg{width:20px;height:20px}
+.bar button:active{opacity:.7}
+/* Move and confirm sheet: the backdrop is a sibling, since a backdrop-filter parent would stop the panel's own blur */
+.sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet-bg{position:absolute;inset:0;background:var(--overlay-bg-blur);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}}
+.sheet-p{position:relative;width:100%;max-width:440px;max-height:min(72dvh,600px);display:flex;flex-direction:column;border-radius:24px;overflow:hidden;animation:sheetIn .25s ease}
+/* A panel of text needs thicker glass than the nav: the same tint, more blur */
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .sheet-p.glass{background:var(--tab-bg);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%)}
+}
+@keyframes sheetIn{from{opacity:0;transform:translateY(24px)}}
+.sheet-t{padding:18px 20px 12px;font:600 1rem/1.3 var(--font);color:var(--t1);text-align:center}
+.sheet-m{padding:0 20px 14px;font:400 .9375rem/1.4 var(--font);color:var(--t2);text-align:center}
+.sheet-b{overflow-y:auto;overscroll-behavior:contain;padding:0 8px}
+.sheet-b:empty{display:none}
+.dest{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:8px 14px;border:none;background:none;border-radius:14px;font:500 .9375rem/1.3 var(--font);color:var(--t1);text-align:left;cursor:pointer;transition:background .15s,color .15s}
+.dest svg{width:18px;height:18px;flex-shrink:0;color:var(--t3)}
+.dest .nm{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dest .cnt{color:var(--t3)}
+.dest[disabled]{opacity:.35;cursor:default}
+.sheet-f{display:flex;gap:8px;padding:12px}
+.sheet-f button{flex:1;min-height:46px;border-radius:var(--rr);border:1px solid var(--tab-border);background:var(--tab-bg);font:500 .9375rem/1 var(--font);color:var(--t1);cursor:pointer}
+.sheet-f button:active{opacity:.7}
 @media(hover:hover){
   .row:hover{background:var(--bg2)}
-  .row:is(.sel,.into):hover{background:var(--tab-active)}
+  .row.into:hover{background:var(--tab-active)}
   .row.e:hover{background:none}
   .row .del:hover{color:var(--t1);background:var(--bg2);border-color:var(--t4)}
-  .more:hover{color:var(--t1)}
+  .bar button:hover{color:var(--t1)}
+  .dest:not([disabled]):hover{background:var(--tab-active);color:var(--tab-active-c)}
+  .dest:not([disabled]):hover :is(svg,.cnt){color:inherit}
 }
 </style>
 </head>
 <body data-mode="open">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-fplus" viewBox="0 0 24 24"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-spark" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-expand" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></symbol><symbol id="i-collapse" viewBox="0 0 24 24"><path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-fplus" viewBox="0 0 24 24"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol><symbol id="i-spark" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-move" viewBox="0 0 24 24"><path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/></symbol><symbol id="i-out" viewBox="0 0 24 24"><path d="M14 9 9 4 4 9"/><path d="M20 20h-7a4 4 0 0 1-4-4V4"/></symbol><symbol id="i-unpack" viewBox="0 0 24 24"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol><symbol id="i-expand" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></symbol><symbol id="i-collapse" viewBox="0 0 24 24"><path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/></symbol></svg>
 <div class="w">
   <div class="card links">
     <button type="button" id="a-paste" data-l="Paste"><svg class="id" aria-hidden="true" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><polyline points="4 12 9 17 20 6"/></svg><span>Paste</span></button>
@@ -111,11 +151,6 @@ html.int-drag .drop-overlay{display:none}
     <button type="button" id="add-btn" class="add-tall" aria-label="Add Bookmark"></button>
   </div>
   <div id="org" hidden>
-    <div class="card links" id="g-acts" hidden>
-      <button type="button" id="g-rename"><svg aria-hidden="true"><use href="#i-folder"/></svg><span>Rename</span></button>
-      <button type="button" id="g-ungroup"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="8" height="6" x="5" y="4" rx="1"/><rect width="8" height="6" x="11" y="14" rx="1"/></svg><span>Unpack</span></button>
-      <button type="button" id="g-del"><svg aria-hidden="true"><use href="#i-trash"/></svg><span>Delete Folder</span></button>
-    </div>
     <div class="card">
       <div class="seg-row c4" id="p-sort" role="radiogroup" aria-label="Sort">
         <button type="button" class="seg" role="radio" data-v="manual">My Order</button>
@@ -140,9 +175,9 @@ html.int-drag .drop-overlay{display:none}
 </div>
 <div class="drop-overlay" id="drop"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>Drop Bookmarks Here</div>
 <input type="file" id="file" accept=".html,.htm,.txt,.md,text/html,text/plain" multiple hidden>
-<template id="tb"><div class="row b" role="treeitem"><span class="grip"></span><a class="main" target="_blank" rel="noopener noreferrer"><span class="fav"></span><span class="txt"><span class="nm"></span><span class="sub"></span><span class="crumb"></span></span></a><button type="button" class="del" aria-label="Remove"></button></div></template>
-<template id="tg"><div class="row g" role="treeitem"><span class="grip"></span><button type="button" class="main"><svg class="chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg><span class="fav"><svg aria-hidden="true"><use href="#i-folder"/></svg></span><span class="txt"><span class="nm"></span></span><span class="cnt"></span></button><button type="button" class="more" aria-label="Folder Actions"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div></template>
-<template id="ts"><div class="row s" role="separator"><span class="grip"></span><span class="hr"></span><button type="button" class="del" aria-label="Remove"></button></div></template>
+<template id="tb"><div class="row b" role="treeitem"><span class="tick"></span><a class="main" target="_blank" rel="noopener noreferrer"><span class="fav"></span><span class="txt"><span class="nm"></span><span class="sub"></span><span class="crumb"></span></span></a><button type="button" class="del" aria-label="Remove"></button></div></template>
+<template id="tg"><div class="row g" role="treeitem"><span class="tick"></span><button type="button" class="main"><span class="cv"><svg class="chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span><span class="fav"><svg aria-hidden="true"><use href="#i-folder"/></svg></span><span class="txt"><span class="nm"></span></span><span class="cnt"></span></button></div></template>
+<template id="ts"><div class="row s" role="separator"><span class="tick"></span><span class="hr"></span></div></template>
 <template id="te"><div class="row e"><span class="txt">Empty Folder</span></div></template>
 <nav aria-label="Primary">
   <div class="tabs">
@@ -151,6 +186,26 @@ html.int-drag .drop-overlay{display:none}
   </div>
   <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
+<div class="bar glass" id="bar" hidden>
+  <div class="bar-h"><span id="bar-n"></span><button type="button" id="b-all">Select All</button><button type="button" id="b-clear">Clear</button></div>
+  <div class="bar-a">
+    <button type="button" id="b-move"><svg aria-hidden="true"><use href="#i-move"/></svg><span>Move</span></button>
+    <button type="button" id="b-folder"><svg aria-hidden="true"><use href="#i-fplus"/></svg><span>New Folder</span></button>
+    <button type="button" id="b-out"><svg aria-hidden="true"><use href="#i-out"/></svg><span>Move Out</span></button>
+    <button type="button" id="b-unpack"><svg aria-hidden="true"><use href="#i-unpack"/></svg><span>Unpack</span></button>
+    <button type="button" id="b-edit"><svg aria-hidden="true"><use href="#i-edit"/></svg><span>Edit</span></button>
+    <button type="button" id="b-del"><svg aria-hidden="true"><use href="#i-trash"/></svg><span>Delete</span></button>
+  </div>
+</div>
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-bg"></div>
+  <div class="sheet-p glass" role="dialog" aria-modal="true" aria-labelledby="sheet-t">
+    <div class="sheet-t" id="sheet-t"></div>
+    <div class="sheet-m" id="sheet-m" hidden></div>
+    <div class="sheet-b" id="sheet-b"></div>
+    <div class="sheet-f"><button type="button" id="sheet-no">Cancel</button><button type="button" id="sheet-yes" class="rs-warn" hidden>Delete All</button></div>
+  </div>
+</div>
 <script src="/shared/base.js?v=28"></script>
 <script src="/shared/search.js?v=20"></script>
 <script src="/shared/url.js?v=1"></script>
@@ -521,20 +576,54 @@ const tree=(()=>{
     else{const k=at('e:'+parent);mark=k<0?{row:at(parent),edge:'into'}:{row:k,edge:'top',depth:rows[k].depth}}
     return{parent,before:vis,mark};
   }
-  /* Inserts before `before`, or at the end. */
-  function move(root,id,parent,before){
-    const s=find(root,id);if(!s)return false;
+  /* Picked ids minus those inside a picked folder (they travel with it), in depth-first order. */
+  function tops(root,ids){
+    const want=new Set(ids),out=[];
+    (function w(l){for(const n of l){if(want.has(n.id))out.push(n.id);else if(n.c)w(n.c)}})(root);
+    return out;
+  }
+  /* Moves the top-most picks, in depth-first order, into parent (null = top level) before `before` (null or
+     unknown = the end). Returns how many moved: 0 when refused (a folder into itself or its own descendant,
+     a parent that is not a folder) or when nothing would change. */
+  function moveMany(root,ids,parent,before){
+    const top=tops(root,ids);
+    if(!top.length||top.includes(before))return 0;
     let dest=root;
     if(parent!==null){
-      if(parent===id||(s.n.c&&find(s.n.c,parent)))return false;
-      const g=find(root,parent);if(!g||!g.n.c)return false;
+      const g=find(root,parent);
+      if(!g||!g.n.c||top.includes(parent)||g.path.some(p=>top.includes(p.id)))return 0;
       dest=g.n.c;
     }
-    if(before===id)return true;
-    s.list.splice(s.i,1);
+    const was=dest.map(n=>n.id).join(),nodes=top.map(id=>find(root,id)),same=nodes.every(s=>s.list===dest);
+    for(const s of nodes)s.list.splice(s.list.indexOf(s.n),1);
     let k=before==null?-1:dest.findIndex(n=>n.id===before);if(k<0)k=dest.length;
-    dest.splice(k,0,s.n);
-    return true;
+    dest.splice(k,0,...nodes.map(s=>s.n));
+    return same&&dest.map(n=>n.id).join()===was?0:top.length;
+  }
+  /* One level up: each top-most pick leaves its folder and lands right after it, keeping their order. */
+  function outdent(root,ids){
+    let k=0;const last=new Map();
+    for(const id of tops(root,ids)){
+      const s=find(root,id);if(!s.path.length)continue;
+      const par=s.path[s.path.length-1],up=s.path.length>1?s.path[s.path.length-2].c:root;
+      s.list.splice(s.i,1);
+      up.splice(up.indexOf(last.get(par.id)||par)+1,0,s.n);last.set(par.id,s.n);k++;
+    }
+    return k;
+  }
+  /* Each picked folder is replaced by its contents, in place. */
+  function unpack(root,ids){
+    let k=0;
+    for(const id of ids){const s=find(root,id);if(s&&s.n.c){s.list.splice(s.i,1,...s.n.c);k++}}
+    return k;
+  }
+  /* A new folder holding the top-most picks, where the first of them was; empty at the top otherwise. */
+  function wrap(root,ids,t){
+    const top=tops(root,ids),g={id:uid(),t,c:[],d:now()};
+    if(!top.length){root.unshift(g);return g}
+    const f=find(root,top[0]);f.list.splice(f.i,0,g);
+    for(const id of top){const s=find(root,id);s.list.splice(s.i,1);g.c.push(s.n)}
+    return g;
   }
 
   /* Sites with 2+ bookmarks in a folder get a folder named for the site, at every level; a site's existing
@@ -560,7 +649,6 @@ const tree=(()=>{
     })(root,null);
     return{made,moved};
   }
-  function ungroup(root,gid){const s=find(root,gid);if(!s||!s.n.c)return 0;s.list.splice(s.i,1,...s.n.c);return s.n.c.length}
   /* Keeps the first copy in depth-first order; it inherits a title or icon only a later copy had. */
   function dedupe(root){
     const seen=new Map(),gone=new Set();
@@ -654,7 +742,7 @@ const tree=(()=>{
     fixed+=gc(root,ic)+clean(root);
     return{root,icons:ic,fixed};
   }
-  return{uid,now,each,find,count,keys,dsec,view,rows,dropTarget,move,bySite,ungroup,tidy,merge,fnv,adopt,gc,migrate};
+  return{uid,now,each,find,count,keys,dsec,view,rows,dropTarget,tops,moveMany,outdent,unpack,wrap,bySite,tidy,merge,fnv,adopt,gc,migrate};
 })();
 /* -- end bookmark:tree -- */
 
@@ -669,7 +757,8 @@ const pl=n=>n===1?'':'s',coll=new Intl.Collator(undefined,{numeric:true,sensitiv
 const fb=(btn,cls,text)=>B.feedback(btn,cls,text,1200);
 
 /* ── state ── */
-let root=[],icons={},prefs,open,mode,sel=null,card={m:'add',id:null},shown=[],kb=-1,ver=0;
+let root=[],icons={},prefs,open,mode,card={m:'add',id:null},shown=[],kb=-1,ver=0,anchor=null;
+const picked=new Set();
 let saveT=0,dirty=false,iconsDirty=false,persisted=false;
 const undos=[];
 
@@ -716,8 +805,7 @@ function snap(){const s={root:structuredClone(root),icons:{...icons}};undos.push
 function undo(s){
   if(!undos.length||(s&&undos[undos.length-1]!==s))return;
   const u=undos.pop();root=u.root;icons=u.icons;
-  if(!node(sel))sel=null;
-  if(card.m!=='add'&&card.m!=='group'&&!node(card.id))setCard('add');
+  if(card.m!=='add'&&!node(card.id))setCard('add');
   pruneBlobs();changed({icons:true});
   /* After the tapped toast's own dismiss, which would otherwise clear this toast's timer. */
   setTimeout(()=>B.notify('Undone',true));
@@ -753,10 +841,10 @@ let mv=-1,M=null;
 function meta(){
   if(mv===ver)return M;
   const counts=new Map();
-  const folders=[];
-  const walk=l=>{let c=0;for(const n of l){if(n.c){folders.push(n.id);const k=walk(n.c);counts.set(n.id,k);c+=k}else if(!n.s)c++}return c};
+  const folders=[],byId=new Map(),parent=new Map();
+  const walk=(l,p)=>{let c=0;for(const n of l){byId.set(n.id,n);parent.set(n.id,p);if(n.c){folders.push(n.id);const k=walk(n.c,n.id);counts.set(n.id,k);c+=k}else if(!n.s)c++}return c};
   _search.clearCache();mv=ver;
-  return M={b:walk(root),counts,folders,keys:null,index:null};
+  return M={b:walk(root,null),counts,folders,byId,parent,keys:null,index:null};
 }
 const keysOf=()=>{const m=meta();return m.keys||(m.keys=tree.keys(root))};
 
@@ -808,19 +896,21 @@ function rowEl(r,i,m){
     if(src){const img=document.createElement('img');img.alt='';img.src=src;img.draggable=false;img.dataset.k=n.i;fav.appendChild(img)}
     else fav.textContent=mono(d.label);
   }
-  if(r.id===sel)el.classList.add('sel');
+  if(picked.has(r.id))el.classList.add('sel');
+  if(card.m!=='add'&&card.id===r.id)el.classList.add('ed');
   if(i===kb)el.classList.add('kb-focus');
   return el;
 }
 function segs(id,v){for(const b of $(id).children){const on=b.dataset.v===String(v);b.classList.toggle('active',on);b.setAttribute('aria-checked',on)}}
 function render(){
-  const m=meta(),has=root.length>0,q=search.value.trim(),sg=node(sel);
-  if(sel&&!sg)sel=null;
+  const m=meta(),has=root.length>0,q=search.value.trim();
+  if(mode!=='org')clearPicks();
+  for(const id of picked)if(!m.byId.has(id))picked.delete(id);
   document.body.dataset.mode=mode;
   $('a-dl').hidden=!has;$('a-copy').hidden=!m.b;
   const ca=$('a-copy');ca.dataset.l=m.b===1?'Copy':'Copy All';if(!ca.classList.contains('ok'))ca.lastChild.textContent=ca.dataset.l;
   $('search-wrap').style.display=has?'block':'none';
-  $('org').hidden=mode!=='org';$('g-acts').hidden=!(mode==='org'&&sg&&sg.c);
+  $('org').hidden=mode!=='org';
   for(const id of['l-tidy','l-site','l-clear'])$(id).hidden=!has;
   const lf=$('l-fold'),all=m.folders.every(id=>open.has(id));
   lf.hidden=!m.folders.length;lf.lastChild.textContent=all?'Collapse All':'Expand All';lf.firstChild.firstChild.setAttribute('href',all?'#i-collapse':'#i-expand');
@@ -834,8 +924,32 @@ function render(){
   list.replaceChildren(frag);
   list.classList.toggle('big',shown.length>300);
   list.style.display=has?'':'none';
+  bar();
   drag.after();
 }
+/* ── ticks (Organize): a Set of ids; the bar acts on the top-most of them ── */
+function clearPicks(){picked.clear();anchor=null}
+function bar(){
+  document.body.classList.toggle('picking',picked.size>0);
+  $('bar').hidden=!picked.size;
+  if(!picked.size)return;
+  const m=meta(),ns=[...picked].map(id=>m.byId.get(id)),one=ns.length===1?ns[0]:null;
+  $('bar-n').textContent=picked.size+' Selected';
+  $('b-all').hidden=shown.every(r=>r.kind==='e'||picked.has(r.id));
+  $('b-out').hidden=!tree.tops(root,[...picked]).some(id=>m.parent.get(id)!==null);
+  $('b-unpack').hidden=!ns.some(n=>n.c);
+  const e=$('b-edit');e.hidden=!one||!!one.s;e.lastChild.textContent=one&&one.c?'Rename':'Edit';
+}
+/* Ticks change without a re-render: only the row classes and the bar. */
+function paint(){for(const el of list.children)if(el.dataset.id)el.classList.toggle('sel',picked.has(el.dataset.id));bar()}
+function pick(id,range){
+  const a=range&&anchor!==null&&picked.has(anchor)?shown.findIndex(r=>r.id===anchor):-1,b=shown.findIndex(r=>r.id===id);
+  if(a>=0&&b>=0){for(let i=Math.min(a,b);i<=Math.max(a,b);i++)if(shown[i].kind!=='e')picked.add(shown[i].id)}
+  else if(picked.has(id))picked.delete(id);
+  else picked.add(id);
+  anchor=id;paint();
+}
+function pickAll(){for(const r of shown)if(r.kind!=='e')picked.add(r.id);paint()}
 const rowOf=id=>list.querySelector('.row[data-id="'+CSS.escape(id)+'"]');
 function flash(id,scroll){
   const row=rowOf(id);if(!row)return;
@@ -851,16 +965,16 @@ function reveal(id){
   render();flash(id,true);
 }
 
-/* ── add card: add, edit a bookmark, new folder, rename a folder ── */
-const isGroupCard=()=>card.m==='group'||card.m==='rename';
+/* ── add card: add, edit a bookmark, rename a folder ── */
+const isGroupCard=()=>card.m==='rename';
 function setCard(m,n){
   card={m,id:n?n.id:null};
   inU.value=m==='edit'?n.u:m==='rename'?n.t:'';
   inT.value=m==='edit'&&!burl.untitled(n.t,n.u)?n.t:'';
   const g=isGroupCard();
   inU.placeholder=g?'Folder Name':'Link';inU.inputMode=g?'text':'url';inU.setAttribute('aria-label',inU.placeholder);
-  addBtn.innerHTML='<svg aria-hidden="true"><use href="#i-'+(m==='add'?'plus':m==='group'?'fplus':'check')+'"/></svg>';
-  addBtn.setAttribute('aria-label',{add:'Add Bookmark',edit:'Save Bookmark',group:'Add Folder',rename:'Save Folder'}[m]);
+  addBtn.innerHTML='<svg aria-hidden="true"><use href="#i-'+(m==='add'?'plus':'check')+'"/></svg>';
+  addBtn.setAttribute('aria-label',{add:'Add Bookmark',edit:'Save Bookmark',rename:'Save Folder'}[m]);
   syncTitle();
 }
 function syncTitle(){
@@ -868,29 +982,17 @@ function syncTitle(){
   const u=!isGroupCard()&&burl.parse(inU.value);
   inT.placeholder=u&&burl.verify(u)?burl.name(u.href):'Title';
 }
-/* New links land at the top of the selected folder (opened), else the top of the library. */
-function target(){const g=node(sel);if(g&&g.c){if(!open.has(g.id)){open.add(g.id);saveOpen()}return g.c}return root}
-function select(id){
-  const n=node(id);sel=n?id:null;
-  if(n&&!n.c)setCard('edit',n);else if(card.m==='edit'||card.m==='rename')setCard('add');
-  render();
-}
-function edit(n){sel=n.id;setCard(n.c?'rename':'edit',n);render();inU.focus();inU.select()}
-function newGroup(){setCard('group');inU.focus()}
-function cancelCard(){if(card.m==='edit'||card.m==='rename')sel=null;setCard('add');render()}
+/* New links land at the top of the one ticked folder (opened), else the top of the library. */
+function target(){const g=picked.size===1&&node([...picked][0]);if(g&&g.c){if(!open.has(g.id)){open.add(g.id);saveOpen()}return g.c}return root}
+function edit(n){setCard(n.c?'rename':'edit',n);render();inU.focus();inU.select()}
+function cancelCard(){setCard('add');render()}
 function submit(){
   const raw=inU.value.trim(),title=inT.value.trim().replace(/\s+/g,' ');
   if(card.m==='rename'){
     const g=node(card.id),name=raw.replace(/\s+/g,' '),ch=!!g&&!!name&&name!==g.t;
     if(ch){snap();g.t=name;g.m=tree.now()}
-    setCard('add');
+    setCard('add');clearPicks();
     if(ch)changed();else render();
-    return;
-  }
-  if(card.m==='group'){
-    snap();
-    const g={id:tree.uid(),t:raw.replace(/\s+/g,' ')||'New Folder',c:[],d:tree.now()};
-    target().unshift(g);sel=g.id;setCard('add');changed();flash(g.id,true);
     return;
   }
   if(!raw){B.notify('Enter a Link',false);inU.focus();return}
@@ -906,7 +1008,7 @@ function submit(){
     }
     const t=title&&!burl.untitled(title,u)?title:undefined,ch=u!==n.u||t!==(burl.untitled(n.t,n.u)?undefined:n.t);
     if(ch){snap();n.u=u;if(t)n.t=t;else delete n.t}
-    sel=null;setCard('add');
+    setCard('add');clearPicks();
     if(ch)changed();else render();
     flash(n.id);
     return;
@@ -981,7 +1083,7 @@ $('a-import').addEventListener('click',()=>$('file').click());
 $('file').addEventListener('change',e=>{importFiles(e.target.files);e.target.value=''});
 /* Paste anywhere; inside the Link field only a paste holding several links or a bookmark file is taken over. */
 document.addEventListener('paste',e=>{
-  const cd=e.clipboardData;if(!cd)return;
+  const cd=e.clipboardData;if(!cd||!sheet.hidden)return;
   if(e.target.closest?.('input,textarea')){
     const t=cd.getData('text/plain');
     if(e.target===inU&&card.m==='add'&&(bio.isNetscape(t)||bio.text(t).length>1)){e.preventDefault();ingestText(t,$('a-paste'))}
@@ -1029,7 +1131,6 @@ function copyNode(n){B.copyText(n.u,()=>{copied(n.id);if(!burl.isWeb(n.u))B.noti
 /* Only http(s) is ever opened or linked: an imported javascript: bookmark must not run on this origin. */
 function openNode(n){const h=webHref(n.u);if(h)window.open(h,'_blank','noopener,noreferrer');else copyNode(n)}
 function act(n,e){
-  if(mode==='org'){e?.preventDefault();select(sel===n.id?null:n.id);return}
   if(mode==='copy'||!webHref(n.u)){e?.preventDefault();copyNode(n);return}
   if(!e||!e.target.closest('a[href]'))openNode(n);
 }
@@ -1046,7 +1147,8 @@ list.addEventListener('click',e=>{
   if(!n)return;
   kbClear();
   if(e.target.closest('.del')){remove(n.id);return}
-  if(e.target.closest('.more')){select(sel===n.id?null:n.id);return}
+  /* Organize: a tap ticks (Shift ticks the range); a folder's chevron still opens it */
+  if(mode==='org'){e.preventDefault();if(n.c&&e.target.closest('.cv'))toggle(n.id);else pick(n.id,e.shiftKey);return}
   if(n.c)toggle(n.id);else if(!n.s)act(n,e);
 });
 list.addEventListener('error',e=>{
@@ -1058,7 +1160,7 @@ list.addEventListener('error',e=>{
 /* ── mode, sort and library actions ── */
 function setMode(m){
   if(m!=='org'){prefs.tap=m;B.save(K.prefs,prefs)}
-  if(mode==='org'&&m!=='org'){sel=null;if(card.m!=='add')setCard('add')}
+  if(mode==='org'&&m!=='org'){clearPicks();if(card.m!=='add')setCard('add')}
   mode=m;render();
 }
 const segClick=(id,fn)=>$(id).addEventListener('click',e=>{const b=e.target.closest('.seg');if(b)fn(b.dataset.v)});
@@ -1072,18 +1174,99 @@ function tidyUp(){
 }
 function sortBySite(){const s=snap(),r=tree.bySite(root);if(!r.moved){undos.pop();B.notify('Nothing to Sort','warn');return}changed();note(r.moved+' Bookmark'+pl(r.moved)+' Sorted',true,s)}
 function foldAll(){const f=meta().folders,all=f.every(id=>open.has(id));open=new Set(all?[]:f);saveOpen();render()}
-const selGroup=()=>{const g=node(sel);return g&&g.c?g:null};
-$('g-rename').addEventListener('click',()=>{const g=selGroup();if(g)edit(g)});
-$('g-ungroup').addEventListener('click',()=>{const g=selGroup();if(!g)return;const s=snap();tree.ungroup(root,g.id);sel=null;changed();note('Folder Unpacked',true,s)});
-$('g-del').addEventListener('click',()=>{const g=selGroup();if(g){sel=null;remove(g.id)}});
-$('l-new').addEventListener('click',newGroup);
+/* ── bar actions: each works on the top-most ticked items and clears the ticks ── */
+function newFolder(){
+  const s=snap(),g=tree.wrap(root,[...picked],'New Folder');
+  open.add(g.id);saveOpen();clearPicks();changed();note('Folder Created',true,s);
+  edit(g);
+}
+function delPicked(){
+  const ids=tree.tops(root,[...picked]);if(!ids.length)return;
+  const s=snap(),one=ids.length===1&&node(ids[0]);
+  for(const id of ids){const f=tree.find(root,id);f.list.splice(f.i,1)}
+  clearPicks();if(card.m!=='add'&&!node(card.id))setCard('add');
+  changed({icons:gcIcons()});
+  note(one?(one.c?'Folder Deleted':'Deleted'):ids.length+' Deleted',true,s);
+}
+function outPicked(){
+  const ids=tree.tops(root,[...picked]),s=snap(),k=tree.outdent(root,ids);
+  if(!k){undos.pop();return}
+  clearPicks();changed();note(k>1?k+' Moved Out':'Moved Out',true,s);flash(ids.find(id=>rowOf(id))||ids[0]);
+}
+function unpackPicked(){
+  const s=snap(),k=tree.unpack(root,[...picked]);
+  if(!k){undos.pop();return}
+  clearPicks();changed();note(k>1?k+' Folders Unpacked':'Folder Unpacked',true,s);
+}
+function moveTo(ids,parent,label){
+  const s=snap(),k=tree.moveMany(root,ids,parent,null);
+  if(!k){undos.pop();return}
+  clearPicks();changed();note((k>1?k+' ':'')+'Moved to '+label,true,s);
+  if(!search.value.trim())reveal(ids[0]);
+}
+
+/* ── sheet: Move and the Delete All confirm; while open, page shortcuts are off ── */
+const sheet=$('sheet');let sheetYes=null;
+function openSheet(title,msg,rows,yes){
+  $('sheet-t').textContent=title;
+  const m=$('sheet-m');m.hidden=!msg;m.textContent=msg||'';
+  $('sheet-b').replaceChildren(...rows);
+  $('sheet-yes').hidden=!yes;sheetYes=yes||null;
+  document.activeElement?.blur?.();
+  sheet.hidden=false;
+  (sheet.querySelector('.dest:not([disabled])')||$('sheet-no')).focus();
+}
+function closeSheet(){sheet.hidden=true;sheetYes=null;$('sheet-b').replaceChildren()}
+$('sheet-no').addEventListener('click',closeSheet);
+sheet.querySelector('.sheet-bg').addEventListener('click',closeSheet);
+$('sheet-yes').addEventListener('click',()=>{const f=sheetYes;closeSheet();if(f)f()});
+document.addEventListener('keydown',e=>{
+  if(sheet.hidden)return;
+  e.stopPropagation();
+  if(e.key==='Escape'){e.preventDefault();closeSheet();return}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    const bs=[...sheet.querySelectorAll('button:not([disabled]):not([hidden])')],i=bs.indexOf(document.activeElement);
+    e.preventDefault();bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length].focus();
+  }
+},true);
+/* Top Level, then every folder in view order. Inert: the moved folders and everything inside them, and the
+   one place every pick already sits. */
+function moveSheet(){
+  const ids=tree.tops(root,[...picked]);if(!ids.length)return;
+  const m=meta(),bad=new Set(),pars=new Set(ids.map(id=>m.parent.get(id)));
+  for(const id of ids){const n=m.byId.get(id);if(n.c)tree.each([n],x=>{if(x.c)bad.add(x.id)})}
+  const here=pars.size===1?[...pars][0]:undefined,rows=[];
+  const dest=(id,label,depth,cnt)=>{
+    const b=document.createElement('button');b.type='button';b.className='dest';b.style.paddingLeft=14+Math.min(depth,6)*16+'px';
+    b.innerHTML='<svg aria-hidden="true"><use href="#i-'+(id===null?'home':'folder')+'"/></svg><span class="nm"></span><span class="cnt"></span>';
+    b.children[1].textContent=label;b.children[2].textContent=cnt||'';
+    b.disabled=bad.has(id)||id===here;
+    b.addEventListener('click',()=>{closeSheet();moveTo(ids,id,label)});
+    return b;
+  };
+  rows.push(dest(null,'Top Level',0,0));
+  (function w(l,d){for(const n of tree.view(l,prefs))if(n.c){rows.push(dest(n.id,n.t||'Folder',d,m.counts.get(n.id)));w(n.c,d+1)}})(root,1);
+  openSheet('Move To',ids.length>1?ids.length+' Items':'',rows);
+}
+function confirmClear(){
+  if(!root.length)return;
+  const c=tree.count(root);
+  openSheet('Delete Everything?',[c.b&&c.b+' Bookmark'+pl(c.b),c.g&&c.g+' Folder'+pl(c.g)].filter(Boolean).join(' and '),[],clearAll);
+}
+function clearAll(){const s=snap();root=[];icons={};open.clear();saveOpen();clearPicks();setCard('add');pruneBlobs();changed({icons:true});note('All Deleted',true,s)}
+$('b-clear').addEventListener('click',()=>{clearPicks();paint()});
+$('b-all').addEventListener('click',pickAll);
+$('b-move').addEventListener('click',moveSheet);
+$('b-folder').addEventListener('click',newFolder);
+$('b-out').addEventListener('click',outPicked);
+$('b-unpack').addEventListener('click',unpackPicked);
+$('b-edit').addEventListener('click',()=>{const n=picked.size===1&&node([...picked][0]);if(n)edit(n)});
+$('b-del').addEventListener('click',delPicked);
+$('l-new').addEventListener('click',newFolder);
 $('l-tidy').addEventListener('click',tidyUp);
 $('l-site').addEventListener('click',sortBySite);
 $('l-fold').addEventListener('click',foldAll);
-const clearAll=B.twoPress($('l-clear'),{text:'Delete All',guard:()=>root.length>0,onConfirm:()=>{
-  const s=snap();root=[];icons={};open.clear();saveOpen();sel=null;setCard('add');pruneBlobs();changed({icons:true});note('All Deleted',true,s);
-}});
-$('l-clear').addEventListener('click',clearAll.press);
+$('l-clear').addEventListener('click',confirmClear);
 
 /* ── search box ── */
 let searchT=0;
@@ -1157,7 +1340,7 @@ const drag=(()=>{
     if(st!==IDLE){stop();return}
     swallow=false;
     const row=e.target.closest('.row');
-    if(!enabled()||!e.isPrimary||e.button>0||!row||row.classList.contains('e')||e.target.closest('.del,.more'))return;
+    if(!enabled()||!e.isPrimary||e.button>0||!row||row.classList.contains('e')||e.target.closest('.del'))return;
     id=row.dataset.id;pid=e.pointerId;sx=x=e.clientX;sy=y=e.clientY;touch=e.pointerType==='touch';st=PEND;
     if(touch)hold=setTimeout(()=>{if(st===PEND)begin()},200);
   });
@@ -1176,16 +1359,15 @@ const drag=(()=>{
 })();
 function drop(id,t){
   const s=tree.find(root,id);if(!s)return;
-  const cur=s.path.length?s.path[s.path.length-1].id:null,next=s.list[s.i+1];
-  if(t.parent===cur&&(prefs.sort!=='manual'||t.before===id||t.before===(next?next.id:null)))return;
+  if(prefs.sort!=='manual'&&t.parent===(s.path.length?s.path[s.path.length-1].id:null))return;
   snap();
-  if(!tree.move(root,id,t.parent,t.before)){undos.pop();return}
+  if(!tree.moveMany(root,[id],t.parent,t.before)){undos.pop();return}
   changed();
   flash(t.parent!==null&&!open.has(t.parent)?t.parent:id);
 }
 
 /* ── keyboard ── */
-const kbRow=()=>shown[kb],kbNode=()=>node(kbRow()?.id),focused=()=>kb>=0?kbNode():node(sel);
+const kbRow=()=>shown[kb],kbNode=()=>node(kbRow()?.id),focused=()=>kb>=0?kbNode():picked.size===1?node([...picked][0]):null;
 function kbClear(){kb=-1;list.querySelector('.kb-focus')?.classList.remove('kb-focus')}
 function kbSet(i){
   kbClear();kb=i;
@@ -1202,23 +1384,24 @@ function kbSide(d){
 }
 function primary(){
   const n=kbNode();if(!n)return;
-  if(n.c){toggle(n.id);kbTo(n.id)}else if(!n.s)act(n);
+  if(n.c){toggle(n.id);kbTo(n.id)}else if(mode==='org')pick(n.id);else if(!n.s)act(n);
 }
 function shift(d){
   const n=kbNode();if(!n||prefs.sort!=='manual'||search.value.trim())return;
   const s=tree.find(root,n.id),vis=tree.view(s.list,prefs),i=vis.indexOf(n),t=vis[i+d];
   if(!t)return;
-  snap();tree.move(root,n.id,s.path.length?s.path[s.path.length-1].id:null,d>0?(vis[i+2]?vis[i+2].id:null):t.id);
+  snap();
+  if(!tree.moveMany(root,[n.id],s.path.length?s.path[s.path.length-1].id:null,d>0?(vis[i+2]?vis[i+2].id:null):t.id)){undos.pop();return}
   changed();kbTo(n.id);
 }
-function del(){const n=focused();if(n)remove(n.id)}
+function del(){if(picked.size){delPicked();return}const n=focused();if(n)remove(n.id)}
 function softReset(){
-  search.value='';searchX.style.display='none';sel=null;kb=-1;setCard('add');mode=prefs.tap;render();
+  search.value='';searchX.style.display='none';clearPicks();kb=-1;setCard('add');mode=prefs.tap;render();
 }
 function escape(){
   if(drag.active()){drag.cancel();return}
   if(card.m!=='add'){cancelCard();return}
-  if(sel){select(null);return}
+  if(picked.size){clearPicks();paint();return}
   if(search.value){search.value='';searchX.style.display='none';render();return}
   kbClear();
 }
@@ -1238,11 +1421,14 @@ B.onKey({
   o:()=>{const n=kbNode();if(n&&!n.c&&!n.s)openNode(n)},
   d:del,Backspace:del,Delete:del,
   e:e=>{const n=focused();if(n&&!n.s){e.preventDefault();edit(n)}},
-  g:e=>{e.preventDefault();newGroup()},
+  g:e=>{e.preventDefault();newFolder()},
+  ' ':e=>{const r=kbRow();if(mode==='org'&&r&&r.kind!=='e'){e.preventDefault();pick(r.id,e.shiftKey)}},
+  x:()=>{const r=kbRow();if(mode==='org'&&r&&r.kind!=='e')pick(r.id)},
   J:()=>shift(1),K:()=>shift(-1),
   z:()=>undo(),
   Escape:escape,
-  ctrl:{k:e=>{e.preventDefault();search.focus()},o:e=>{e.preventDefault();$('file').click()},s:e=>{e.preventDefault();download()}}
+  /* The ctrl map fires inside inputs too, where Cmd+A must stay the browser's select-all. */
+  ctrl:{a:e=>{const t=document.activeElement?.tagName;if(mode!=='org'||t==='INPUT'||t==='TEXTAREA')return;e.preventDefault();pickAll()},k:e=>{e.preventDefault();search.focus()},o:e=>{e.preventDefault();$('file').click()},s:e=>{e.preventDefault();download()}}
 });
 
 /* ── persistence hooks + cross-tab sync (a pending local change wins) ── */
