@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Clip</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=30">
+<link rel="stylesheet" href="/shared/base.css?v=31">
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
@@ -53,6 +53,7 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
     <input id="search" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search Items">
     <button type="button" class="search-x" id="search-x" aria-label="Clear Search"></button>
   </div>
+  <div class="card" id="sort-card" style="display:none"><div class="seg-row" id="sort" role="radiogroup" aria-label="Sort"><button type="button" class="seg" role="radio" data-s="manual"></button><button type="button" class="seg" role="radio" data-s="new"></button><button type="button" class="seg" role="radio" data-s="az"></button></div></div>
   <div class="card items" id="items" style="display:none" role="list"></div>
 </div>
 <div class="drop-overlay" id="drop-overlay">
@@ -69,20 +70,25 @@ html[data-theme="sepia"] .item .del.copied{background:#E8E0CE;color:#2D7D46;bord
 </nav>
 <script src="/shared/base.js?v=29"></script>
 <script src="/shared/search.js?v=20"></script>
+<script src="/shared/list.js?v=1"></script>
 <script>
 function $(id){return document.getElementById(id)}
-var items=[],copyTimers={},caTimer=null,searchTimer=null;
+/* items is My Order (newest added on top); sorted() is the view on screen. */
+var items=[],sort='manual',copyTimers={},caTimer=null,searchTimer=null;
 var kbIdx=-1;
 
 /* ── Storage ──────────────────────────────────────────────────────── */
 function load(){
   var p=_base.load('clip-items',[]);
   if(Array.isArray(p))items=p.filter(function(e){return e&&e.id&&e.text});
+  sort=_list.valid(_base.load('clip-sort','manual'));
 }
 function save(){
   try{localStorage.setItem('clip-items',JSON.stringify(items))}
   catch(e){if(e.name==='QuotaExceededError')announce('Storage Full')}
+  _base.save('clip-sort',sort);
 }
+function sorted(){return _list.view(items,sort,function(it){return it.text},function(it){return it.ts||0})}
 
 /* ── Text Cleaning ────────────────────────────────────────────────── */
 function clean(s){return s.replace(/\r\n/g,' ').replace(/\r/g,' ').replace(/\n/g,' ').replace(/\t/g,' ').replace(/ {2,}/g,' ').trim()}
@@ -108,14 +114,15 @@ function render(newId){
   $('ca-l').textContent=items.length>1?'Copy All':'Copy';
   $('rs-btn').style.display=hasItems?'':'none';
   $('search-wrap').style.display=hasItems?'block':'none';
+  $('sort-card').style.display=items.length>1?'':'none';
   inp.placeholder='Clip '+(items.length+1);
   updateTitle();
   if(!hasItems){c.textContent='';c.style.display='none';kbIdx=-1;return}
-  var list=items;
+  var list=sorted();
   if(words.length){
-    var scored=[];
-    for(var i=0;i<items.length;i++){
-      var it=items[i],t=it.text.toLowerCase(),total=0,ok=true;
+    var scored=[],all=list;
+    for(var i=0;i<all.length;i++){
+      var it=all[i],t=it.text.toLowerCase(),total=0,ok=true;
       for(var wi=0;wi<words.length;wi++){
         var s=scoreWord(words[wi],t);
         if(s<=0){ok=false;break}
@@ -210,7 +217,7 @@ function copyItem(id,btn){
 /* ── Copy All ─────────────────────────────────────────────────────── */
 function doCopyAll(){
   if(items.length===0)return;
-  var all=[];for(var i=0;i<items.length;i++)all.push(items[i].text);
+  var all=sorted().map(function(it){return it.text});
   var btn=$('ca-btn'),ci=$('ca-i'),ck=$('ca-ck'),cl=$('ca-l');
   _base.copyText(all.join('\n'),function(){
     if(caTimer){clearTimeout(caTimer);btn.classList.remove('ok');ci.style.display='';ck.style.display='none';cl.textContent=items.length>1?'Copy All':'Copy'}
@@ -321,7 +328,7 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='/'){e.preventDefault();kbClear();inp.focus()}
   else if(e.key==='a'){e.preventDefault();doCopyAll()}
   else if(e.key==='r')doReset();
-  else if(e.key==='x'){if(items.length>0)removeItem(items[0].id)}
+  else if(e.key==='x'){if(items.length>0)removeItem(sorted()[0].id)}
   else if(e.key==='t')_base.setTheme(_base.THEMES[(_base.THEMES.indexOf(_base.curTheme())+1)%_base.THEMES.length]);
   else if(e.key==='1')window.location.href='/';
 });
@@ -350,11 +357,12 @@ var resetDrag=_base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(fil
 
 /* ── Cross-Tab Sync ───────────────────────────────────────────────── */
 window.addEventListener('storage',function(e){
-  if(e.key==='clip-items'){
+  if(e.key==='clip-items'||e.key==='clip-sort'){
+    drag.cancel();
     clearTimeout(searchTimer);
     Object.keys(copyTimers).forEach(function(k){clearTimeout(copyTimers[k].t1);clearTimeout(copyTimers[k].t2)});
     copyTimers={};kbIdx=-1;
-    load();render();
+    load();sortCtl.set(sort);render();
   }
 });
 
@@ -379,8 +387,15 @@ document.addEventListener('visibilitychange',function(){
   }
 });
 
+/* ── Sort and Drag ────────────────────────────────────────────────── */
+var sortCtl=_list.sortSeg($('sort'),sort,function(s){sort=s;save();kbIdx=-1;render()});
+/* A drop makes what is on screen My Order, with the dragged item moved. Search reorders by score, so it locks drag. */
+var drag=_list.drag($('items'),{skip:'.del',enabled:function(){return !$('search').value.trim()},onDrop:function(from,to){
+  items=_list.move(sorted(),from,to);sort='manual';sortCtl.set(sort);save();kbIdx=-1;render();
+}});
+
 /* ── Init ─────────────────────────────────────────────────────────── */
-load();render();
+load();sortCtl.set(sort);render();
 </script>
 </body>
 </html>

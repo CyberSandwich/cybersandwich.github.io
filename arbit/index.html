@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/favicon.png">
 <title>Arbit</title>
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=30">
+<link rel="stylesheet" href="/shared/base.css?v=31">
 <style>
 :root{--num-bg:#48484A}
 html[data-theme="dark"]{--num-bg:#48484A}
@@ -45,6 +45,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
     <button id="copy-btn" aria-label="Copy Result"><svg id="cb-i" width="18" height="18" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg id="cb-ck" width="18" height="18" viewBox="0 0 24 24" style="display:none"><polyline points="4 12 9 17 20 6"/></svg><span id="cb-l">Copy</span></button>
     <button id="reset-btn" aria-label="Reset"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 2v6h-6M21 13a9 9 0 1 1-3-7.7L21 8"/></svg><span id="rl">Reset</span></button>
   </div>
+  <div class="card" id="sort-card" style="display:none"><div class="seg-row" id="sort" role="radiogroup" aria-label="Sort"><button type="button" class="seg" role="radio" data-s="manual"></button><button type="button" class="seg" role="radio" data-s="new"></button><button type="button" class="seg" role="radio" data-s="az"></button></div></div>
   <div class="card items" id="items" style="display:none"></div>
 </div>
 <div class="drop-overlay" id="drop-overlay">
@@ -59,21 +60,35 @@ body{display:flex;align-items:flex-start;justify-content:center}
 <div class="tabs"><button id="theme-btn" class="theme-toggle" aria-label="Toggle Theme"></button></div>
 </nav>
 <script src="/shared/base.js?v=29"></script>
+<script src="/shared/list.js?v=1"></script>
 <script>
 function $(id){return document.getElementById(id)}
-var items=[],mode=false,picked=null;
+/* items: {text, ts} in My Order; shown: the sorted view on screen. */
+var items=[],shown=[],mode=false,sort='manual',picked=null;
 var pickTimer=null,copyTimer=null,hiTimer=null;
-function load(){var p=_base.load('arbit-items',[]);if(Array.isArray(p))items=p;var m=_base.load('arbit-mode',false);if(m===true||m==='true')mode=true}
-function save(){_base.save('arbit-items',items);_base.save('arbit-mode',mode)}
+function txt(it){return it.text}
+function ts(it){return it.ts}
+/* A stored plain string is from before sorting; its index keeps the order it was added in. */
+function load(){
+  var p=_base.load('arbit-items',[]);
+  if(Array.isArray(p))items=p.map(function(e,i){return typeof e==='string'?{text:e,ts:i}:e}).filter(function(e){return e&&typeof e.text==='string'});
+  var m=_base.load('arbit-mode',false);if(m===true||m==='true')mode=true;
+  sort=_list.valid(_base.load('arbit-sort','manual'));
+}
+function save(){_base.save('arbit-items',items);_base.save('arbit-mode',mode);_base.save('arbit-sort',sort)}
+function find(text){for(var i=0;i<items.length;i++)if(items[i].text===text)return i;return -1}
 function render(){
   var c=$('items');
   c.textContent='';
+  shown=_list.view(items,sort,txt,ts);
+  $('sort-card').style.display=items.length>1?'':'none';
   if(items.length===0){c.style.display='none'}
   else{
     c.style.display='';
-    for(var i=0;i<items.length;i++){
+    for(var k=0;k<shown.length;k++){
+      var i=items.indexOf(shown[k]);
       var row=document.createElement('div');row.className='item';row.setAttribute('data-idx',i);
-      var s=document.createElement('span');s.textContent=items[i];
+      var s=document.createElement('span');s.textContent=shown[k].text;
       var btn=document.createElement('button');btn.className='del';btn.setAttribute('aria-label','Remove');
       var xsvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
       xsvg.setAttribute('width','14');xsvg.setAttribute('height','14');xsvg.setAttribute('viewBox','0 0 24 24');
@@ -88,15 +103,15 @@ function render(){
 }
 function addItem(text){
   var t=text.trim();if(!t)return;
-  var dup=items.indexOf(t);
+  var dup=find(t);
   if(dup!==-1){
     var row=$('items').querySelector('[data-idx="'+dup+'"]');
     if(row){row.classList.add('hi');setTimeout(function(){row.classList.remove('hi')},300)}
     return;
   }
-  items.push(t);save();render();
-  var all=$('items').querySelectorAll('.item'),last=all[all.length-1];
-  if(last)last.classList.add('fi');
+  items.push({text:t,ts:Date.now()});save();render();
+  var added=$('items').querySelector('[data-idx="'+(items.length-1)+'"]');
+  if(added)added.classList.add('fi');
 }
 function addBulk(text){var parts=text.split(/[,\n]/);for(var i=0;i<parts.length;i++){var t=parts[i].trim();if(t)addItem(t)}}
 function removeItem(idx){items.splice(idx,1);save();render()}
@@ -110,7 +125,7 @@ function sizeResult(text){
 function doPick(){
   if(items.length<2)return;
   var arr=new Uint32Array(1);crypto.getRandomValues(arr);
-  var idx=arr[0]%items.length;picked=items[idx];
+  var idx=arr[0]%items.length;picked=items[idx].text;
   var rEl=$('r');rEl.classList.remove('fi');rEl.offsetWidth;
   rEl.textContent=picked;sizeResult(picked);rEl.classList.add('fi');
   var row=$('items').querySelector('[data-idx="'+idx+'"]');
@@ -126,7 +141,7 @@ function doPick(){
   pickTimer=setTimeout(function(){pb.classList.remove('ok');pi.style.display='';pc.style.display='none';pl.textContent='Pick Random'},800);
   if(mode){
     setTimeout(function(){
-      var ci=items.indexOf(picked);
+      var ci=find(picked);
       if(ci!==-1){items.splice(ci,1);save();render()}
       if(items.length===0){$('r').textContent='-';sizeResult('-');picked=null}
     },350);
@@ -169,7 +184,7 @@ $('pick-btn').addEventListener('click',doPick);
 $('mode').addEventListener('click',function(e){var s=e.target.closest('.seg');if(s)setMode(s.dataset.m==='1')});
 $('reset-btn').addEventListener('click',function(){resetCtrl.press()});
 $('copy-btn').addEventListener('click',doCopy);
-_base.onKey({' ':function(e){e.preventDefault();doPick()},Enter:function(e){e.preventDefault();doPick()},c:function(e){e.preventDefault();doCopy()},p:function(){setMode(!mode)},r:function(){doReset()},x:function(){if(items.length>0)removeItem(0)},'/':function(e){e.preventDefault();$('inp').focus()}});
+_base.onKey({' ':function(e){e.preventDefault();doPick()},Enter:function(e){e.preventDefault();doPick()},c:function(e){e.preventDefault();doCopy()},p:function(){setMode(!mode)},r:function(){doReset()},x:function(){if(items.length>0)removeItem(items.indexOf(shown[0]))},'/':function(e){e.preventDefault();$('inp').focus()}});
 _base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(files,text){
   if(files&&files.length>0){
     for(var i=0;i<files.length;i++){
@@ -184,7 +199,13 @@ _base.setupDragDrop({overlay:$('drop-overlay'),onDrop:function(files,text){
     }
   }else if(text)addBulk(text);
 }});
-load();render();updateModeUI();
+load();
+var sortCtl=_list.sortSeg($('sort'),sort,function(s){sort=s;save();render()});
+/* A drop makes what is on screen My Order, with the dragged item moved. */
+_list.drag($('items'),{skip:'.del',onDrop:function(from,to){
+  items=_list.move(shown,from,to);sort='manual';sortCtl.set(sort);save();render();
+}});
+render();updateModeUI();
 </script>
 </body>
 </html>
