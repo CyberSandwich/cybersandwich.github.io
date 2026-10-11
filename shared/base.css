@@ -280,10 +280,10 @@ html[data-theme="dark"] .search-wrap{--si:url("data:image/svg+xml,%3Csvg xmlns='
 .search-x::before,.search-x::after{content:'';position:absolute;width:10px;height:1.5px;background:currentColor;border-radius:1px}
 .search-x::before{transform:rotate(45deg)}
 .search-x::after{transform:rotate(-45deg)}
-/* Drag to reorder (shared/list.js): the lifted row is a liquid-glass pill, like the nav */
+/* Drag to reorder (shared/list.js; bookmark's own drag uses the same pill): the lifted row is a liquid-glass pill, like the nav */
 .rd>*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .rd.rd-glide>*{transition:transform .2s ease}
 .rd-src{visibility:hidden}
 .rd-ghost{position:fixed;left:0;top:0;z-index:60;margin:0;pointer-events:none;border:1px solid var(--tab-border);border-radius:var(--rr);will-change:transform}
-.rd-ghost.rd-gliding{transition:transform .2s ease}
+.rd-ghost.rd-gliding{transition:transform .2s ease,opacity .2s ease}
 html.rd-dragging,html.rd-dragging *{cursor:grabbing!important}

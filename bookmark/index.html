@@ -19,7 +19,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
-<link rel="stylesheet" href="/shared/base.css?v=31">
+<link rel="stylesheet" href="/shared/base.css?v=32">
 <style>
 body{display:flex;align-items:flex-start;justify-content:center}
 .w{max-width:440px;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));width:100%}
@@ -83,12 +83,9 @@ html[data-theme="sepia"] .row .del.copied{background:#E8E0CE;color:#2D7D46;borde
 .no-match{padding:32px 20px;text-align:center;color:var(--t4);font:500 .9375rem/1 var(--font)}
 .slot{position:absolute;top:0;right:12px;border-radius:12px;background:var(--bg2);pointer-events:none;transition:transform .2s ease,left .2s ease,height .2s ease}
 #list.glide .row{transition:transform .2s ease}
-/* The lifted item is a liquid-glass pill, like the nav */
-.ghost{position:fixed;left:0;top:0;z-index:60;margin:0;pointer-events:none;border:1px solid var(--tab-border);border-radius:var(--rr);will-change:transform}
-.ghost :is(.tick,.del){display:none!important}
-.ghost.gliding{transition:transform .2s ease,opacity .2s ease}
+/* The lifted item is base.css's .rd-ghost pill */
+.rd-ghost :is(.tick,.del){display:none!important}
 .pill-n{position:absolute;top:-7px;right:-5px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--acc);color:var(--card);font:600 .75rem/22px var(--font);text-align:center}
-html.dragging,html.dragging *{cursor:grabbing!important}
 html.int-drag .drop-overlay{display:none}
 /* While anything is ticked the glass action bar takes the nav's place (iOS select mode) */
 body.picking nav{display:none}
@@ -1399,7 +1396,7 @@ const drag=(()=>{
     const was=st,t=tgt,did=ids,tap=commit&&was===DRAG&&!moved?id:null;
     st=IDLE;tgt=null;id=null;ids=[];
     if(was===DRAG){
-      doc.classList.remove('dragging');
+      doc.classList.remove('rd-dragging');
       if(list.hasPointerCapture(pid))list.releasePointerCapture(pid);
       const p=pill;pill=null;slot.remove();slot=null;L=null;list.classList.remove('glide');
       unmark();
@@ -1418,7 +1415,7 @@ const drag=(()=>{
     const el=rowOf(first),to=el||(t&&t.parent!==null?rowOf(t.parent):null);
     if(el)el.classList.add('landing');
     const end=()=>{p.remove();el?.classList.remove('landing')};
-    p.classList.add('gliding');
+    p.classList.add('rd-gliding');
     if(to){const r=to.getBoundingClientRect();p.style.transform='translate3d('+r.left+'px,'+r.top+'px,0) scale('+(el?1:.6)+')'}
     if(!el)p.style.opacity='0';
     p.addEventListener('transitionend',end,{once:true});setTimeout(end,300);
@@ -1428,9 +1425,9 @@ const drag=(()=>{
     st=DRAG;moved=!touch;
     ids=picked.has(id)?tree.tops(root,[...picked]):[id];
     try{list.setPointerCapture(pid)}catch(_){}
-    doc.classList.add('dragging');
+    doc.classList.add('rd-dragging');
     const r=row.getBoundingClientRect();gx=sx-r.left;gy=sy-r.top;H=row.offsetHeight;
-    pill=row.cloneNode(true);pill.className='row ghost glass '+row.classList[1];
+    pill=row.cloneNode(true);pill.className='row rd-ghost glass '+row.classList[1];
     pill.removeAttribute('data-id');pill.style.width=r.width+'px';pill.style.paddingLeft='20px';
     if(ids.length>1){const n=document.createElement('span');n.className='pill-n';n.textContent=ids.length;pill.appendChild(n)}
     document.body.appendChild(pill);
