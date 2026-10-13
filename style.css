@@ -133,6 +133,13 @@ body{line-height:1.5}
 .copy-btn.copied{background:var(--ok-bg);color:var(--ok-c);border-color:var(--ok-bdr);animation:pop .35s ease}
 .copy-btn.copied svg{width:14px;height:14px;display:block;margin:0 auto}
 .copy-btn.copied polyline{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .35s ease .08s forwards}
+/* The h1 already names the page, so the visible pill is hidden from screen readers.
+   It rises half its height (21px) over the photo's 24px gap so the glass sits on the photo; taps pass through to the coin. */
+.name{position:relative;z-index:1;pointer-events:none;width:fit-content;margin:-45px auto 16px;padding:10px 22px;border-radius:var(--rr);font:600 1.0625rem/1.2 var(--font);letter-spacing:-.01em;color:color-mix(in srgb,var(--t2) 65%,var(--t1))}
+/* Text over the photo needs a little more frost than the nav: half the nav's fallback tint and a 12px blur. */
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .name{background:color-mix(in srgb,var(--tab-bg) 50%,transparent);backdrop-filter:blur(12px) saturate(180%);-webkit-backdrop-filter:blur(12px) saturate(180%)}
+}
 .vcf-link{margin-bottom:14px}
 .vcf-link a{font-weight:600;color:var(--vcf-c);background:var(--vcf-bg);justify-content:center}
 .vcf-link a:hover{background:var(--vcf-hover);color:var(--vcf-c)}
