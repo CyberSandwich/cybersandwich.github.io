@@ -711,9 +711,23 @@ function coinAtRest(c){
   const e=c.th-Math.round(c.th/Math.PI)*Math.PI;
   return Math.abs(e)<.002&&Math.abs(c.w)<.02&&Math.abs(c.ph)<.002&&Math.abs(c.pv)<.02;
 }
+// The face a released coin will rest on: 0 photo, 1 QR (&1 keeps negative turns right).
+function coinLands(c){
+  const s=Object.assign({},c);
+  for(let i=0;i<1200&&!coinAtRest(s);i++)coinStep(s,1/120);
+  return Math.round(s.th/Math.PI)&1;
+}
+// A fair toss: nudge the throw's speed (+-2%, +-4%, ...) until it lands on the face asked for. From 12 rad/s up a
+// half turn is at most an eighth of the speed, so the nudge never shows (slower throws need far more, hence W_TOSS);
+// if none is found the throw stays as thrown.
+function coinToss(c,face){
+  const w=c.w;
+  for(let i=0;i<30;i++){c.w=w*(1+(i%2?-1:1)*Math.ceil(i/2)*.02);if(coinLands(c)===face)return}
+  c.w=w;
+}
 const photo=$('.photo'),coin=photo&&photo.querySelector('.coin');
 if(photo){
-  const c={th:0,w:0,ph:0,pv:0},P_MAX=.35,W_MAX=30,still=matchMedia('(prefers-reduced-motion: reduce)');
+  const c={th:0,w:0,ph:0,pv:0},P_MAX=.35,W_MAX=30,W_TOSS=12,still=matchMedia('(prefers-reduced-motion: reduce)');
   let drag=null,moved=false,raf=0,last=0;
   const draw=()=>{coin.style.transform='rotateX('+c.ph+'rad) rotateY('+c.th+'rad)'};
   function frame(ts){
@@ -753,6 +767,8 @@ if(photo){
     // A pointer that rested before lifting throws nothing, and a cancelled gesture belongs to the browser's scroll.
     if(moved&&e.type==='pointerup'&&e.timeStamp-d.t<80&&!still.matches){
       c.w=Math.max(-W_MAX,Math.min(W_MAX,d.vx));c.pv=Math.max(-6,Math.min(6,d.vy));
+      // A hard flick is a real toss, 50/50 either face; a gentle drag still settles where it was put.
+      if(Math.abs(c.w)>=W_TOSS)coinToss(c,Math.random()<.5?0:1);
     }
     if(moved)setTimeout(()=>{moved=false});
     run();
