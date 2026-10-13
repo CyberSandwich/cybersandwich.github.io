@@ -33,7 +33,7 @@ body{line-height:1.5}
 .page{display:none}
 .page.active{display:block}
 
-/* The photo is a coin: heads is the photo, tails.png the back; app.js drives .coin's transform.
+/* The photo is a coin: heads is the photo, the homepage QR the back; app.js drives .coin's transform.
    The button stays flat (it takes the hover lift), so the 3D and the card look live on .coin and its faces. */
 .photo{
   display:block;
@@ -55,7 +55,9 @@ body{line-height:1.5}
 /* display:contents puts the photo's img straight into .coin's 3D context. */
 .coin picture{display:contents}
 .face{position:absolute;inset:0;display:block;width:100%;height:100%;border-radius:50%;background:var(--card);box-shadow:var(--shadow);backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:box-shadow .15s}
-.tails{transform:rotateY(180deg)}
+/* Tails is the same QR as the tap overlay, on white in every theme (like .qr-card) so it always scans.
+   A background, since padding on a round img clips its content to a circle; at 58% its corners sit well inside the edge. */
+.tails{transform:rotateY(180deg);background:#fff url(/qr-homepage.png) center/58% no-repeat;image-rendering:pixelated}
 /* The script sizes the canvas (W columns snapped to whole device pixels, height
    from the rotation bound), so no font rule and no containment are needed: a canvas never reflows its siblings.
    pan-y leaves vertical swipes to the page; sideways drags rotate. */
