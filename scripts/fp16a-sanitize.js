@@ -41,7 +41,8 @@ const KIND = {
   const [src, out] = process.argv.slice(2);
   if (!src || !out) { console.error('usage: node scripts/fp16a-sanitize.js <src.xlsx> <out.xlsx>'); process.exit(2); }
   const u8 = new Uint8Array(fs.readFileSync(src));
-  const { kind } = await sheet.open(u8);
+  const { form: kind } = await sheet.open(u8);
+  if (sheet.LAYOUT[kind].importOnly) throw new Error(kind + ' is an import-only layout: an older form than the one the page exports');
   const z = zip.readZip(u8), changes = {}, fixes = {};
   for (const set of [COMMON, KIND[kind]]) for (const [name, fn] of Object.entries(set)) (fixes[name] ||= []).push(fn);
   for (const [name, fns] of Object.entries(fixes)) {
