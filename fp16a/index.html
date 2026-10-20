@@ -131,9 +131,10 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 .tot.grand svg{color:inherit;opacity:.8}
 .tot.grand b{color:inherit;font-weight:600}
 .ok{animation:none}
-/* Five claimant types fit one row at phone width only with tight padding. */
-.seg-row.c5{grid-template-columns:repeat(5,1fr)}
-.seg-row.c5 .seg{padding:12px 2px;font-size:.8125rem}
+/* Five claimant types as one group over two lines, 2 then 3, so no line is tighter than a three-way segment. */
+.seg-row.c23{grid-template-columns:repeat(6,1fr)}
+.seg-row.c23 .seg{grid-column:span 2}
+.seg-row.c23 .seg:nth-child(-n+2){grid-column:span 3;border-bottom:1px solid var(--bdr2)}
 .links>button:active:not([disabled]){opacity:.7}
 .drop-overlay svg{width:40px;height:40px}
 @media(hover:hover){
@@ -158,7 +159,7 @@ input[list]::-webkit-calendar-picker-indicator{display:none!important}
 
 <section class="sec"><h3>You</h3>
   <div class="card">
-    <div class="seg-row c5" role="radiogroup" aria-label="I Am A" id="crit" data-k="crit" tabindex="-1">
+    <div class="seg-row c23" role="radiogroup" aria-label="I Am A" id="crit" data-k="crit" tabindex="-1">
       <button type="button" class="seg" role="radio" data-v="acad">Academic</button>
       <button type="button" class="seg" role="radio" data-v="vis">Visitor</button>
       <button type="button" class="seg" role="radio" data-v="uni">Unitemps</button>
