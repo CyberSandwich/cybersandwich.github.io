@@ -3,7 +3,7 @@ description: A plain guide to the UK Innovator Founder visa: requirements, endor
 updated: 2026-10-22
 ---
 
-# The Innovator Founder Visa Guide
+# A Guide to the Innovator Founder Visa
 
 How the UK Innovator Founder visa works, from endorsement to settlement after 3 years.
 
