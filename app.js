@@ -369,6 +369,7 @@ function showPost(slug){
     }
     flush();
     el.appendChild(frag);
+    if(window._base)_base.restoreTicks(el);
     window.scrollTo(0,0);
   }
   // Resolve slug to filename: check posts for custom slug, fallback to slug.md

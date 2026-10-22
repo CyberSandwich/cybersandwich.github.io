@@ -192,6 +192,36 @@
     });
   }
 
+  /* Task-list ticks persist per page in this browser. Keyed by item text, not position, so editing a post resets only
+     the items whose words changed; the path drops its trailing slash so the static page and the SPA route share ticks.
+     Stores text -> checked, so unticking an item that is [x] in the markdown sticks too */
+  function tickKey(){return 'ticks:'+location.pathname.replace(/\/+$/,'')}
+  function tickText(input){return input.closest('label').textContent.trim()}
+  function restoreTicks(root){
+    var m=load(tickKey(),{});
+    (root||document).querySelectorAll('.task-item input').forEach(function(i){var t=tickText(i);if(t in m)i.checked=m[t]});
+  }
+  document.addEventListener('change',function(e){
+    var i=e.target;
+    if(!i.matches||!i.matches('.task-item input'))return;
+    var m=load(tickKey(),{});m[tickText(i)]=i.checked;save(tickKey(),m);
+  });
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){restoreTicks()});else restoreTicks();
+
+  /* A reload keeps the reader's place. A #fragment left in the URL by a Contents click otherwise wins: the browser
+     jumps to that section on reload instead of restoring the scroll position. Restored again on load because images
+     above the fold (a post cover) shift the layout as they arrive */
+  var scrollKey='scroll:'+location.pathname.replace(/\/+$/,'');
+  addEventListener('pagehide',function(){try{sessionStorage.setItem(scrollKey,String(scrollY))}catch(_){}});
+  (function(){
+    var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0],y=null;
+    if(!nav||nav.type!=='reload'||!location.hash)return;
+    try{y=sessionStorage.getItem(scrollKey)}catch(_){}
+    if(y===null)return;
+    function go(){scrollTo({top:+y,behavior:'instant'})}
+    go();addEventListener('load',go);
+  })();
+
   /* Delegated step-button press animation */
   document.addEventListener('click',function(e){
     var btn=e.target.closest('.step-btn');
@@ -200,5 +230,5 @@
     clearTimeout(btn._sa);btn._sa=setTimeout(function(){btn.classList.remove('step-press')},300);
   });
 
-  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,pasteText:pasteText,download:download,deliver:deliver,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save};
+  window._base={THEMES:THEMES,curTheme:curTheme,setTheme:setTheme,copyText:copyText,pasteText:pasteText,download:download,deliver:deliver,mkCheck:mkCheck,mkX:mkX,btnFeedback:btnFeedback,feedback:feedback,notify:notify,setupDragDrop:setupDragDrop,twoPress:twoPress,onKey:onKey,load:load,save:save,restoreTicks:restoreTicks};
 })();
