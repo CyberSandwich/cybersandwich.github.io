@@ -121,7 +121,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add projects/projects.json
+          # A push made with GITHUB_TOKEN does not trigger listings.yml, so rebuild the static /projects page here
+          node scripts/build-listings.js
+          git add projects/projects.json projects/index.html
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "Add project: $TITLE [$CATEGORY]"
           git push

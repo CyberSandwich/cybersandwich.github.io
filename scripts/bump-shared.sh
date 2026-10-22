@@ -160,12 +160,15 @@ IMAGEOPT_HTMLS=("./imageopt/index.html" "./imageopt/png/index.html")
 # ── Rebuild static post pages if versions drifted ─────────────────
 rebuild_posts() {
   $DRY_RUN && return
-  local out
-  out=$(node scripts/build-posts.js 2>&1) || return
-  local built=$(echo "$out" | grep -o '[0-9]* built' | grep -o '[0-9]*')
-  if [[ -n "$built" ]] && (( built > 0 )); then
-    ok "Rebuilt ${built} static post page(s)"
-  fi
+  local out script built
+  # Static pages (posts, /posts, /projects, /links) carry the ?v= params, so every bump rebuilds them
+  for script in build-posts build-listings; do
+    out=$(node "scripts/${script}.js" 2>&1) || { warn "${script}.js failed"; continue; }
+    built=$(echo "$out" | grep -o '[0-9]* built' | grep -o '[0-9]*')
+    if [[ -n "$built" ]] && (( built > 0 )); then
+      ok "Rebuilt ${built} static page(s) (${script})"
+    fi
+  done
 }
 
 bump_data_v() {
