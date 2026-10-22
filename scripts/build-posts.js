@@ -2,76 +2,28 @@
 'use strict';
 
 /**
- * build-posts.js — Generate static HTML pages for blog posts (SEO)
+ * build-posts.js: static HTML for every post (/posts/<slug>/) and the /posts
+ * listing, for crawlers and social previews.
  *
- * Zero dependencies. Extracts parseMd() from app.js using the same regex
- * pattern as tests/_helpers.js, then generates /posts/<slug>/index.html
- * for each post in posts.json.
+ * Zero dependencies. Parser, icons and page shell come from lib/static-page.js,
+ * which lifts them out of app.js so static pages match the SPA.
  *
  * Idempotent: only writes when content has changed.
  */
 
 var fs = require('fs');
 var path = require('path');
+var S = require('./lib/static-page.js');
 
-var ROOT = path.join(__dirname, '..');
-var POSTS_JSON = path.join(ROOT, 'posts', 'posts.json');
-var APP_JS = path.join(ROOT, 'app.js');
-var INDEX_HTML = path.join(ROOT, 'index.html');
-var POSTS_DIR = path.join(ROOT, 'posts');
+var POSTS_DIR = path.join(S.ROOT, 'posts');
+var parseMd = S.parseMd;
+var stripHtml = S.stripHtml;
+var SITE = S.SITE;
 
-// ---------------------------------------------------------------------------
-// 1. Read CSS/JS cache-bust versions from index.html (stays in sync with
-//    bump-shared.sh instead of hardcoding version numbers)
-// ---------------------------------------------------------------------------
-
-var indexSrc = fs.readFileSync(INDEX_HTML, 'utf8');
-
-function extractVersion(pattern, label) {
-  var m = indexSrc.match(pattern);
-  if (!m) throw new Error('Cannot find ' + label + ' version in index.html');
-  return m[1];
-}
-
-var V_BASE_CSS = extractVersion(/\/shared\/base\.css\?v=(\d+)/, 'base.css');
-var V_STYLE_CSS = extractVersion(/style\.css\?v=(\d+)/, 'style.css');
-var V_BASE_JS = extractVersion(/\/shared\/base\.js\?v=(\d+)/, 'base.js');
+var posts = JSON.parse(fs.readFileSync(path.join(POSTS_DIR, 'posts.json'), 'utf8'));
 
 // ---------------------------------------------------------------------------
-// 2. Extract parseMd from app.js (same pattern as tests/_helpers.js)
-// ---------------------------------------------------------------------------
-
-var appSrc = fs.readFileSync(APP_JS, 'utf8');
-
-var parserSrc =
-  'var RE_UL = /^[-*] /;\n' +
-  'var RE_OL = /^\\d+\\. /;\n' +
-  appSrc.match(/function esc\(s\)\{[\s\S]*?\n\}/)[0] + '\n' +
-  appSrc.match(/function il\(t\)\{[\s\S]*?\n\}/)[0] + '\n' +
-  appSrc.match(/function parseMd\(md[^)]*\)\{[\s\S]*?\n\}/)[0] + '\n';
-
-// Card pieces for the /posts listing, lifted the same way so its cards match renderCards in app.js
-var cardSrc = ['SVG_WRAP_OPEN', 'SVG_WRAP_CLOSE', 'CHEVRON'].map(function(n) {
-  return appSrc.match(new RegExp('const ' + n + "='[^']*';"))[0];
-}).join('\n') + '\n' + appSrc.match(/const ICONS=\{[\s\S]*?\n\};/)[0] + '\n';
-
-// Evaluate parser in an isolated module
-var tmp = path.join(__dirname, '_build_parser_tmp_' + process.pid + '.js');
-fs.writeFileSync(tmp, parserSrc + cardSrc +
-  '\nmodule.exports = { parseMd: parseMd, ICONS: ICONS, SVG_WRAP_OPEN: SVG_WRAP_OPEN, SVG_WRAP_CLOSE: SVG_WRAP_CLOSE, CHEVRON: CHEVRON };\n');
-var parser = require(tmp);
-fs.unlinkSync(tmp);
-
-var parseMd = parser.parseMd;
-
-// ---------------------------------------------------------------------------
-// 3. Read posts.json
-// ---------------------------------------------------------------------------
-
-var posts = JSON.parse(fs.readFileSync(POSTS_JSON, 'utf8'));
-
-// ---------------------------------------------------------------------------
-// 4. Multi-card layout builder (string-based, mirrors SPA render logic)
+// 1. Multi-card layout builder (string-based, mirrors SPA render logic)
 // ---------------------------------------------------------------------------
 
 /**
@@ -228,23 +180,8 @@ function findClosingTag(html, tagName) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. Metadata helpers
+// 2. Metadata helpers
 // ---------------------------------------------------------------------------
-
-/**
- * Strip HTML tags and decode common entities to get plain text.
- */
-function stripHtml(html) {
-  return html
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /**
  * Generate a meta description from post plain text (~160 chars).
@@ -279,21 +216,9 @@ function parseFrontmatter(md) {
   return fm;
 }
 
-/**
- * Escape a string for use inside an HTML attribute value.
- */
-function escAttr(s) {
-  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
 // ---------------------------------------------------------------------------
-// 6. HTML template
+// 3. Pages
 // ---------------------------------------------------------------------------
-
-// The site is US English (content-editing.md); index.html carries the same locale.
-var LANG = 'en-US';
-var SITE = 'https://saputra.co.uk';
-var OG_IMAGE = SITE + '/og-image.png';
 
 function generatePage(post, slug, layout, fm) {
   fm = fm || {};
@@ -311,16 +236,16 @@ function generatePage(post, slug, layout, fm) {
     'description': desc,
     'datePublished': published,
     'dateModified': modified,
-    'inLanguage': LANG,
+    'inLanguage': S.LANG,
     'url': canonical,
     'mainEntityOfPage': { '@type': 'WebPage', '@id': canonical },
-    'image': OG_IMAGE,
+    'image': S.OG_IMAGE,
     'author': author,
     'publisher': author
   };
   if (post.words) article.wordCount = post.words;
 
-  return pageShell({
+  return S.pageShell({
     title: plainTitle,
     desc: desc,
     canonical: canonical,
@@ -329,167 +254,59 @@ function generatePage(post, slug, layout, fm) {
       '<meta property="article:published_time" content="' + published + '">\n' +
       '<meta property="article:modified_time" content="' + modified + '">\n' +
       '<meta property="article:author" content="Duke Saputra">\n',
-    graph: [article, breadcrumbs([{ name: plainTitle, item: canonical }])],
+    graph: [article, S.breadcrumbs([{ name: 'Posts', item: SITE + '/posts' }, { name: plainTitle, item: canonical }])],
+    active: '/posts',
     body: layout.body
   });
 }
 
-// Home › Posts › ...extra, as a schema.org BreadcrumbList
-function breadcrumbs(extra) {
-  var items = [{ name: 'Home', item: SITE + '/' }, { name: 'Posts', item: SITE + '/posts' }].concat(extra);
-  return {
-    '@type': 'BreadcrumbList',
-    'itemListElement': items.map(function(x, i) {
-      return { '@type': 'ListItem', 'position': i + 1, 'name': x.name, 'item': x.item };
-    })
-  };
-}
-
-// fmtDate in app.js formats with en-GB; the static pages match it
-function fmtDate(d, opts) {
-  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', opts || { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-/**
- * /posts listing: the same month groups and cards renderCards draws in the SPA
- * (minus the search data attributes; the static page has no search).
- */
+// /posts listing: month groups, newest first, the cards showList draws in the SPA
 function generateIndex(list) {
   var canonical = SITE + '/posts';
-  var body = '';
-  var month = '';
-  list.forEach(function(p, i) {
-    var label = fmtDate(p.date, { month: 'long', year: 'numeric' });
-    if (label !== month) {
-      if (month) body += '</div>\n';
-      body += '<div class="link-sec"><h3>' + label + '</h3>';
-      month = label;
-    }
-    var href = '/posts/' + (p.slug || p.file.replace(/\.md$/, ''));
-    body += '<a class="pcard" href="' + href + '">' +
-      '<div class="picon">' + parser.SVG_WRAP_OPEN + (parser.ICONS[p.icon] || parser.ICONS.post) + parser.SVG_WRAP_CLOSE + '</div>' +
-      '<div class="pinf"><div class="pt">' + escAttr(p.title) + '</div><div class="pd">' + fmtDate(p.date) + '</div></div>' +
-      '<div class="arr">' + parser.CHEVRON + '</div></a>';
-    if (i === list.length - 1) body += '</div>\n';
+  var slugOf = function(p) { return p.slug || p.file.replace(/\.md$/, ''); };
+  var groups = [];
+  list.forEach(function(p) {
+    var label = S.fmtDate(p.date, { month: 'long', year: 'numeric' });
+    if (!groups.length || groups[groups.length - 1].label !== label) groups.push({ label: label, items: [] });
+    groups[groups.length - 1].items.push(p);
   });
-  if (!list.length) body = '<div class="empty" role="status">Coming Soon!</div>\n';
-
   var desc = 'Guides and articles by Duke Saputra.';
-  return pageShell({
+  return S.pageShell({
     title: 'Posts',
     desc: desc,
     canonical: canonical,
     ogType: 'website',
-    extraMeta: '',
     graph: [{
       '@type': 'CollectionPage',
       'name': 'Posts',
       'description': desc,
       'url': canonical,
-      'inLanguage': LANG,
+      'inLanguage': S.LANG,
       'mainEntity': {
         '@type': 'ItemList',
         'itemListElement': list.map(function(p, i) {
-          return { '@type': 'ListItem', 'position': i + 1, 'url': SITE + '/posts/' + (p.slug || p.file.replace(/\.md$/, '')) };
+          return { '@type': 'ListItem', 'position': i + 1, 'url': SITE + '/posts/' + slugOf(p) };
         })
       }
-    }, breadcrumbs([])],
-    body: body
+    }, S.breadcrumbs([{ name: 'Posts', item: canonical }])],
+    active: '/posts',
+    body: S.cardsHtml(groups, {
+      href: function(p) { return '/posts/' + slugOf(p); },
+      title: function(p) { return p.title; },
+      sub: function(p) { return S.fmtDate(p.date); },
+      icon: function(p) { return S.app.ICONS[p.icon] || S.app.ICONS.post; }
+    })
   });
 }
 
-/**
- * Shared static page: head (meta, OG, Twitter, JSON-LD @graph), theme FOUC guard,
- * shared CSS, nav with Posts active, h1.stitle, #ulist body, base.js.
- */
-function pageShell(o) {
-  return '<!DOCTYPE html>\n' +
-    '<html lang="' + LANG + '">\n' +
-    '<head>\n' +
-    '<meta charset="UTF-8">\n' +
-    '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
-    '<meta name="color-scheme" content="light dark">\n' +
-    '<title>' + escAttr(o.title) + ' | Duke Saputra</title>\n' +
-    '<meta name="description" content="' + escAttr(o.desc) + '">\n' +
-    '<meta name="theme-color" content="#FAFAFA">\n' +
-    '<link rel="canonical" href="' + o.canonical + '">\n' +
-    '<link rel="icon" type="image/png" href="/favicon.png">\n' +
-    '\n' +
-    '<!-- Open Graph -->\n' +
-    '<meta property="og:title" content="' + escAttr(o.title) + '">\n' +
-    '<meta property="og:description" content="' + escAttr(o.desc) + '">\n' +
-    '<meta property="og:type" content="' + o.ogType + '">\n' +
-    '<meta property="og:url" content="' + o.canonical + '">\n' +
-    '<meta property="og:site_name" content="Duke Saputra">\n' +
-    '<meta property="og:locale" content="' + LANG.replace('-', '_') + '">\n' +
-    '<meta property="og:image" content="' + OG_IMAGE + '">\n' +
-    '<meta property="og:image:width" content="1200">\n' +
-    '<meta property="og:image:height" content="630">\n' +
-    '<meta property="og:image:alt" content="' + escAttr(o.title) + '">\n' +
-    o.extraMeta +
-    '\n' +
-    '<!-- Twitter Card -->\n' +
-    '<meta name="twitter:card" content="summary_large_image">\n' +
-    '<meta name="twitter:title" content="' + escAttr(o.title) + '">\n' +
-    '<meta name="twitter:description" content="' + escAttr(o.desc) + '">\n' +
-    '<meta name="twitter:image" content="' + OG_IMAGE + '">\n' +
-    '\n' +
-    '<!-- JSON-LD -->\n' +
-    '<script type="application/ld+json">\n' +
-    // "</" would end the script element early; "<\/" is the same JSON string
-    JSON.stringify({ '@context': 'https://schema.org', '@graph': o.graph }, null, 2).replace(/<\//g, '<\\/') + '\n' +
-    '</script>\n' +
-    '\n' +
-    '<script>(function(){var t;try{t=localStorage.getItem(\'theme\')}catch(_){}if(t&&t!==\'light\')document.documentElement.setAttribute(\'data-theme\',t)})()</script>\n' +
-    '<link rel="stylesheet" href="/shared/base.css?v=' + V_BASE_CSS + '">\n' +
-    '<link rel="stylesheet" href="/style.css?v=' + V_STYLE_CSS + '">\n' +
-    '</head>\n' +
-    '<body>\n' +
-    '\n' +
-    '<!-- Navigation -->\n' +
-    '<nav aria-label="Main navigation">\n' +
-    '  <div class="tabs">\n' +
-    '    <a href="/">Home</a>\n' +
-    '    <a href="/projects">Projects</a>\n' +
-    '    <a href="/posts" class="active">Posts</a>\n' +
-    '    <a href="/links">Links</a>\n' +
-    '  </div>\n' +
-    '</nav>\n' +
-    '\n' +
-    '<main class="wrap">\n' +
-    '<h1 class="stitle">' + escAttr(o.title) + '</h1>\n' +
-    '<div id="ulist">\n' +
-    o.body +
-    '</div>\n' +
-    '</main>\n' +
-    '\n' +
-    '<script src="/shared/base.js?v=' + V_BASE_JS + '"></script>\n' +
-    '</body>\n' +
-    '</html>\n';
-}
-
 // ---------------------------------------------------------------------------
-// 7. Build loop
+// 4. Build
 // ---------------------------------------------------------------------------
 
 module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, generatePage: generatePage, generateIndex: generateIndex };
 if (require.main !== module) return;
 
-var built = 0;
-var unchanged = 0;
-
-// Idempotent: only write if content changed
-function write(rel, page) {
-  var outFile = path.join(POSTS_DIR, rel, 'index.html');
-  if (fs.existsSync(outFile) && fs.readFileSync(outFile, 'utf8') === page) {
-    unchanged++;
-    return;
-  }
-  fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, page);
-  built++;
-  console.log('BUILT: posts/' + (rel ? rel + '/' : '') + 'index.html');
-}
+var stats = { built: 0, unchanged: 0 };
 
 posts.forEach(function(post) {
   var slug = post.slug || post.file.replace(/\.md$/, '');
@@ -501,10 +318,10 @@ posts.forEach(function(post) {
   }
 
   var md = fs.readFileSync(mdPath, 'utf8');
-  write(slug, generatePage(post, slug, buildLayout(parseMd(md)), parseFrontmatter(md)));
+  S.writePage('posts/' + slug, generatePage(post, slug, buildLayout(parseMd(md)), parseFrontmatter(md)), stats);
 });
 
 // /posts itself, so the listing is a real 200 page and not the SPA's 404.html fallback
-write('', generateIndex(posts));
+S.writePage('posts', generateIndex(posts), stats);
 
-console.log('\n' + built + ' built, ' + unchanged + ' unchanged');
+console.log('\n' + stats.built + ' built, ' + stats.unchanged + ' unchanged');
