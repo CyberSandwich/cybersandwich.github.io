@@ -218,6 +218,23 @@ function parseFrontmatter(md) {
 // 3. Pages
 // ---------------------------------------------------------------------------
 
+/**
+ * The cover as the social card: a .jpg (or .png) beside the cover's file, since some platforms reject a WebP
+ * og:image. Null (site card) without a cover, or when no such copy exists or its size cannot be read.
+ */
+function coverImage(body) {
+  var m = body.match(/^<(?:p|figure) class="pcover"><img src="(\/[^"]+)" alt="([^"]*)"/m);
+  if (!m) return null;
+  var base = m[1].replace(/[?#].*$/, '').replace(/\.\w+$/, '');
+  var alt = m[2].replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  var exts = ['.jpg', '.jpeg', '.png'];
+  for (var i = 0; i < exts.length; i++) {
+    var size = S.imageSize(path.join(S.ROOT, base + exts[i]));
+    if (size) return { url: SITE + base + exts[i], width: size.width, height: size.height, alt: alt };
+  }
+  return null;
+}
+
 function generatePage(post, slug, layout, fm) {
   fm = fm || {};
   var canonical = SITE + '/posts/' + slug;
@@ -227,6 +244,7 @@ function generatePage(post, slug, layout, fm) {
   var published = post.date + 'T00:00:00+00:00';
   var modified = (fm.updated || post.date) + 'T00:00:00+00:00';
   var author = { '@type': 'Person', 'name': 'Duke Saputra', 'url': SITE };
+  var cover = coverImage(layout.body);
 
   var article = {
     '@type': 'Article',
@@ -237,7 +255,7 @@ function generatePage(post, slug, layout, fm) {
     'inLanguage': S.LANG,
     'url': canonical,
     'mainEntityOfPage': { '@type': 'WebPage', '@id': canonical },
-    'image': S.OG_IMAGE,
+    'image': cover ? cover.url : S.OG_IMAGE,
     'author': author,
     'publisher': author
   };
@@ -248,6 +266,7 @@ function generatePage(post, slug, layout, fm) {
     desc: desc,
     canonical: canonical,
     ogType: 'article',
+    image: cover,
     extraMeta:
       '<meta property="article:published_time" content="' + published + '">\n' +
       '<meta property="article:modified_time" content="' + modified + '">\n' +
@@ -308,7 +327,7 @@ function generateIndex(list) {
 // 4. Build
 // ---------------------------------------------------------------------------
 
-module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, renderPost: renderPost, generatePage: generatePage, generateIndex: generateIndex };
+module.exports = { parseFrontmatter: parseFrontmatter, coverImage: coverImage, buildLayout: buildLayout, renderPost: renderPost, generatePage: generatePage, generateIndex: generateIndex };
 if (require.main !== module) return;
 
 var stats = { built: 0, unchanged: 0 };

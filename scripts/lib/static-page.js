@@ -19,6 +19,21 @@ var SITE = 'https://saputra.co.uk';
 var LANG = 'en-US';
 var OG_IMAGE = SITE + '/og-image.png';
 
+// Pixel size of a JPEG (first SOF marker) or PNG (IHDR), or null: og:image width/height without an image library
+function imageSize(file) {
+  var b;
+  try { b = fs.readFileSync(file); } catch (_) { return null; }
+  if (b.length > 24 && b.readUInt32BE(0) === 0x89504E47) return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+  if (b[0] !== 0xFF || b[1] !== 0xD8) return null;
+  for (var i = 2; i + 9 < b.length && b[i] === 0xFF;) {
+    var m = b[i + 1];
+    // SOF0 to SOF15 carry the frame size; C4 (Huffman), C8 (reserved) and CC (arithmetic) are not frames
+    if (m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC) return { width: b.readUInt16BE(i + 7), height: b.readUInt16BE(i + 5) };
+    i += 2 + b.readUInt16BE(i + 2);
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Cache-bust versions from index.html
 // ---------------------------------------------------------------------------
@@ -151,6 +166,8 @@ function cardsHtml(groups, cfg) {
  * The tab title is the page title alone (owner: no site-name suffix); tabTitle overrides it where the SPA uses another.
  */
 function pageShell(o) {
+  // o.image {url, width, height, alt}: a post's cover; anything else shares the site card
+  var img = o.image || { url: OG_IMAGE, width: 1200, height: 630, alt: o.title };
   var tab = function(href, label) {
     return '    <a href="' + href + '"' + (o.active === href ? ' class="active"' : '') + '>' + label + '</a>\n';
   };
@@ -173,17 +190,17 @@ function pageShell(o) {
     '<meta property="og:url" content="' + o.canonical + '">\n' +
     '<meta property="og:site_name" content="Duke Saputra">\n' +
     '<meta property="og:locale" content="' + LANG.replace('-', '_') + '">\n' +
-    '<meta property="og:image" content="' + OG_IMAGE + '">\n' +
-    '<meta property="og:image:width" content="1200">\n' +
-    '<meta property="og:image:height" content="630">\n' +
-    '<meta property="og:image:alt" content="' + escAttr(o.title) + '">\n' +
+    '<meta property="og:image" content="' + img.url + '">\n' +
+    '<meta property="og:image:width" content="' + img.width + '">\n' +
+    '<meta property="og:image:height" content="' + img.height + '">\n' +
+    '<meta property="og:image:alt" content="' + escAttr(img.alt) + '">\n' +
     (o.extraMeta || '') +
     '\n' +
     '<!-- Twitter Card -->\n' +
     '<meta name="twitter:card" content="summary_large_image">\n' +
     '<meta name="twitter:title" content="' + escAttr(o.title) + '">\n' +
     '<meta name="twitter:description" content="' + escAttr(o.desc) + '">\n' +
-    '<meta name="twitter:image" content="' + OG_IMAGE + '">\n' +
+    '<meta name="twitter:image" content="' + img.url + '">\n' +
     '\n' +
     '<!-- JSON-LD -->\n' +
     '<script type="application/ld+json">\n' +
@@ -233,7 +250,7 @@ function writePage(rel, page, stats) {
 }
 
 module.exports = {
-  ROOT: ROOT, SITE: SITE, LANG: LANG, OG_IMAGE: OG_IMAGE,
+  ROOT: ROOT, SITE: SITE, LANG: LANG, OG_IMAGE: OG_IMAGE, imageSize: imageSize,
   app: app, parseMd: app.parseMd,
   escAttr: escAttr, stripHtml: stripHtml, fmtDate: fmtDate, breadcrumbs: breadcrumbs,
   catGroups: catGroups, cardsHtml: cardsHtml, pageShell: pageShell, writePage: writePage
