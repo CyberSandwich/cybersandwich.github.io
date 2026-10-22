@@ -263,6 +263,9 @@ body{line-height:1.5}
 .pcontent td{color:var(--t2);padding:12px;line-height:1.6;border-bottom:1px solid var(--bdr2)}
 /* A table ends at its last line of text, like a paragraph */
 .pcontent tr:last-child td{border-bottom:none;padding-bottom:0}
+/* Outer columns sit on the card padding, flush with the dividers, so the card's inset is even on all four sides */
+.pcontent th:first-child,.pcontent td:first-child{padding-left:0}
+.pcontent th:last-child,.pcontent td:last-child{padding-right:0}
 
 /* Search & Command Input (shared) */
 .search,.cmd-input{display:block;width:100%;border-radius:var(--rr);background:var(--card) var(--search-icon) 16px center/18px no-repeat;font:400 1rem/1 var(--font);color:var(--t1);outline:none}
