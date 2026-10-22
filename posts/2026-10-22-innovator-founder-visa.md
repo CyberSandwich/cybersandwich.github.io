@@ -72,7 +72,7 @@ Only 4 organizations can issue new endorsements (as of Oct 2026). Each runs its 
 
 | Body | Assessment | Turnaround |
 |---|---|---|
-| Innovator International | Plan answered against its published assessment questions; may raise questions on a borderline plan, then interviews plans that pass; 1 free second assessment after a refusal | Up to 40 days |
+| Innovator International | Plan answered against its published assessment questions; may raise questions on a borderline plan, then holds an online interview for plans that pass; 1 free second assessment after a refusal | Up to 40 days |
 | Envestors | Its own online business plan form, then a presentation and Q&A call; capital planned for 3 years, with the first 12 months' funding verified and held for 3 months | About 4 to 6 weeks |
 | UK Endorsing Services | Point-scored review of the plan, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for companies based outside the UK with revenue from about £250,000 (depending on sector) and a completed equity raise | Not published |
