@@ -39,6 +39,9 @@
 - [Capsule](https://saputra.co.uk/capsule/), text-to-capsule image generator
 - [Caption](https://github.com/DukeSaputra/caption), offline video subtitle generator
 
+## Posts
+- [The Innovator Founder Visa Guide](https://saputra.co.uk/posts/innovator-founder-visa) — 2026-10-22
+
 ## Contact
 - Email: duke@saputra.co.uk
 - LinkedIn: https://linkedin.com/in/dukedj
