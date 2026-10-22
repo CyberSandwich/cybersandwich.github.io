@@ -8,6 +8,7 @@ let posts=null;
 let projects=null;
 let links=null;
 let postVer=0;
+let routedPath='';
 const validPages=['home','projects','posts','links'];
 const titles={home:'Home',projects:'Projects',posts:'Posts',links:'Links'};
 const emailBody=encodeURIComponent('Hi Duke,\n\nName: \nRole: \nOrganization: \nWebsite/LinkedIn: \n\nInquiry & Desired Outcome: \nDeadline: \nBest Contact & Availability: ');
@@ -17,6 +18,7 @@ const SVG_WRAP_CLOSE='</svg>';
 const RE_UL=/^[-*+] /;
 const RE_OL=/^\d+[.)]\s/;
 function cleanUrl(u){return u.replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'')}
+function hashTarget(hash){return hash.length>1&&document.getElementById(hash.slice(1))}
 function mailtoUrl(t){return 'mailto:duke@saputra.co.uk?subject='+encodeURIComponent('Inquiry: '+t)+'&body='+emailBody}
 
 // Handle 404.html redirect (validate path is relative to prevent cross-origin crash)
@@ -76,6 +78,7 @@ function route(){
     if(slug){if(wrap)wrap.style.display='none';showPost(slug)}
     else{const st=$('#posts .stitle');if(st)st.textContent='Posts';const ul=$('#ulist');if(ul&&ul.querySelector('.pcontent'))ul.replaceChildren();if(wrap)wrap.style.display='block';showList()}
   }
+  routedPath=location.pathname;
 }
 
 // Screen-reader announcement region for copy feedback (WCAG 4.1.3)
@@ -124,6 +127,8 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('a[href]');
   if(!a)return;
   const href=a.getAttribute('href');
+  // In-post anchors: a native fragment jump fires popstate, which would re-route and scroll to the top
+  if(href.charAt(0)==='#'){const t=hashTarget(href);if(t){e.preventDefault();history.pushState(null,'',href);t.scrollIntoView({behavior:'smooth'})}return}
   if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download')||a.target==='_blank')return;
   const parts=href.split('/').filter(Boolean);
   const page=parts[0];
@@ -332,7 +337,7 @@ function showPost(slug){
     tmp.innerHTML=html;
     const h1=tmp.querySelector('h1');
     if(h1){
-      document.title='DS | '+h1.textContent;
+      document.title=h1.textContent+' | Duke Saputra';
       if(stitle)stitle.textContent=h1.textContent;
       h1.remove();
     }
@@ -346,7 +351,9 @@ function showPost(slug){
       if(n.nodeType===1&&n.tagName==='H1'){continue}
       if(n.nodeType===1&&n.tagName==='H2'){
         flush();
-        frag.appendChild(mkSection(n.textContent,'link-sec'));
+        const sec=mkSection(n.textContent,'link-sec');
+        if(n.id)sec.id=n.id;
+        frag.appendChild(sec);
         continue;
       }
       if(n.nodeType===1&&n.tagName==='HR'){
@@ -384,15 +391,16 @@ function showPost(slug){
 // Markdown parser — Obsidian-compatible, processes first-party .md files only
 // Supports: headings (h1-h6), paragraphs (soft wrap), line breaks (trailing  ),
 // bold, italic, strikethrough, highlight, inline code, code blocks, links, images,
-// blockquotes (recursive), unordered/ordered/task lists, tables, horizontal rules,
+// blockquotes (recursive), callouts (> [!tip|note|warning] Title), nested
+// unordered/ordered/task lists, tables, horizontal rules, h2/h3 anchor ids,
 // backslash escaping. Graceful fallback on malformed input.
 function parseMd(md,_depth){
   if(!md||typeof md!=='string')return '';
   if(!_depth)md=md.replace(/^---[\s\S]*?---\n?/,'');
   if((_depth||0)>4)return'<p>'+esc(md)+'</p>';
-  let h='',code=false,ul=false,ol=false,tbl=false,para=[];
-  // Track nested list depth: stack of 'ul'|'ol'
-  const listStack=[];
+  let h='',code=false,tbl=false,para=[];
+  // Open lists, outermost first; each <li> stays open until its sibling or parent closes
+  const ls=[],ids={};
   const lines=md.split('\n');
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
@@ -408,52 +416,66 @@ function parseMd(md,_depth){
     if(/^([-*_])(\s*\1){2,}\s*$/.test(line.trim())){cl();h+='<hr>';continue}
     // Headings h1-h6
     const hm=line.match(/^(#{1,6}) (.+)/);
-    if(hm){cl();h+='<h'+hm[1].length+'>'+il(hm[2])+'</h'+hm[1].length+'>';continue}
-    // Blockquotes (recursive)
+    if(hm){
+      cl();const n=hm[1].length,t=il(hm[2]);
+      h+='<h'+n+(n===2||n===3?' id="'+anchor(t)+'"':'')+'>'+t+'</h'+n+'>';continue}
+    // Blockquotes (recursive); a first line of [!type] makes it a callout
     if(line.startsWith('> ')||line==='>'){
       cl();
       const bq=[];
       while(i<lines.length&&(lines[i].startsWith('> ')||lines[i]==='>')){
         bq.push(lines[i]==='>'?'':lines[i].slice(2));i++}
       i--;
-      h+='<blockquote>'+parseMd(bq.join('\n'),(_depth||0)+1)+'</blockquote>';
+      const co=bq[0].match(/^\[!(tip|note|warning)\]\s*(.*)$/i);
+      if(co){
+        const type=co[1].toLowerCase();
+        h+='<aside class="callout callout-'+type+'"><p class="callout-title">'+(co[2]?il(co[2]):type.charAt(0).toUpperCase()+type.slice(1))+'</p>'+
+          parseMd(bq.slice(1).join('\n'),(_depth||0)+1)+'</aside>';
+      }else h+='<blockquote>'+parseMd(bq.join('\n'),(_depth||0)+1)+'</blockquote>';
       continue;
     }
-    // Tables
+    // Tables: wrapped so wide ones scroll inside the card; \| is a literal pipe, empty cells keep their column
     if(line.charAt(0)==='|'){
+      const cells=line.trim().replace(/^\||(?<!\\)\|$/g,'').split(/(?<!\\)\|/);
       if(!tbl){
-        cl();h+='<table><thead><tr>';
-        line.split('|').filter(c=>c.trim()).forEach(c=>{h+='<th>'+il(c.trim())+'</th>'});
+        cl();h+='<div class="table-wrap"><table><thead><tr>';
+        cells.forEach(c=>{h+='<th>'+il(c.trim())+'</th>'});
         h+='</tr></thead><tbody>';
         tbl=true;
         if(i+1<lines.length&&/^[\s|:\-]+$/.test(lines[i+1]))i++;
         continue;
       }
       h+='<tr>';
-      line.split('|').filter(c=>c.trim()).forEach(c=>{h+='<td>'+il(c.trim())+'</td>'});
+      cells.forEach(c=>{h+='<td>'+il(c.trim())+'</td>'});
       h+='</tr>';
       continue;
     }
-    // Task lists: - [ ] or - [x]
-    const tm=line.match(/^(\s*)([-*+]) \[([ xX])\] (.*)$/);
-    if(tm){
-      const indent=tm[1].length;
-      const checked=tm[3]!==' ';
-      if(!ul){cl();h+='<ul class="task-list">';ul=true}
-      h+='<li class="task-item'+(checked?' checked':'')+'"><input type="checkbox" disabled'+(checked?' checked':'')+'>'+il(tm[4])+'</li>';
+    // Lists: task (- [ ] / - [x]), unordered, ordered; deeper indentation nests inside the open item
+    const tm=line.match(/^(\s*)[-*+] \[([ xX])\] (.*)$/);
+    const ulm=!tm&&line.match(/^(\s*)[-*+] (.*)$/);
+    const olm=!tm&&!ulm&&line.match(/^(\s*)\d+[.)]\s(.*)$/);
+    const lm=tm||ulm||olm;
+    if(lm){
+      const ind=lm[1].replace(/\t/g,'    ').length,tag=olm?'ol':'ul';
+      while(ls.length&&ls[ls.length-1].ind>ind)closeList();
+      let top=ls[ls.length-1];
+      if(top&&top.ind===ind&&top.tag!==tag){closeList();top=ls[ls.length-1]}
+      if(top&&top.ind===ind)h+='</li>';
+      else{
+        if(!top)cl();
+        h+='<'+tag+(tm?' class="task-list"':'')+'>';
+        ls.push({tag:tag,ind:ind});
+      }
+      if(tm){
+        const checked=tm[2]!==' ';
+        h+='<li class="task-item'+(checked?' checked':'')+'"><input type="checkbox" disabled'+(checked?' checked':'')+'>'+il(tm[3]);
+      }else h+='<li>'+il(lm[2]);
       continue;
     }
-    // Unordered lists (with nesting via indentation)
-    const ulm=line.match(/^(\s*)([-*+]) (.*)$/);
-    if(ulm&&!(/^[-*_]{3,}$/.test(line.trim()))){
-      if(!ul){cl();h+='<ul>';ul=true}
-      h+='<li>'+il(ulm[3])+'</li>';continue;
-    }
-    // Ordered lists
-    const olm=line.match(/^(\s*)\d+[.)]\s(.*)$/);
-    if(olm){
-      if(!ol){cl();h+='<ol>';ol=true}
-      h+='<li>'+il(olm[2])+'</li>';continue;
+    // Indented text under a list item continues it; unindented text ends the list
+    if(ls.length){
+      if(/^\s/.test(line)){h+=' '+il(line.trim());continue}
+      cl();
     }
     // Paragraph: consecutive text lines join (standard markdown soft wraps)
     para.push(line.endsWith('  ')?il(line.slice(0,-2))+'<br>':il(line));
@@ -461,11 +483,17 @@ function parseMd(md,_depth){
   cl();if(code)h+='</code></pre>';
   return h;
 
+  function closeList(){h+='</li></'+ls.pop().tag+'>'}
   function cl(){
     if(para.length){h+='<p>'+para.join('\n')+'</p>';para=[]}
-    if(ul){h+='</ul>';ul=false}
-    if(ol){h+='</ol>';ol=false}
-    if(tbl){h+='</tbody></table>';tbl=false}
+    while(ls.length)closeList();
+    if(tbl){h+='</tbody></table></div>';tbl=false}
+  }
+  // Heading slug: "Settlement After 3 Years" -> settlement-after-3-years; repeats get -2, -3
+  function anchor(t){
+    const s=t.replace(/<[^>]+>/g,'').replace(/&[#\w]+;/g,' ').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'section';
+    ids[s]=(ids[s]||0)+1;
+    return ids[s]>1?s+'-'+ids[s]:s;
   }
 }
 
@@ -487,7 +515,7 @@ function il(t){
       return '<img src="'+src+'" alt="'+alt+'" loading="lazy" decoding="async">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_,text,href)=>{
-      return '<a href="'+href+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';
+      return '<a href="'+href+'"'+(href.charAt(0)==='#'?'':' target="_blank" rel="noopener noreferrer"')+'>'+text+'</a>';
     })
     .replace(/\uE000(\d+)\uE001/g,function(_,idx){var c=esc_slots[+idx];return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':c});
 }
@@ -1583,7 +1611,12 @@ document.addEventListener('keydown',e=>{
 });
 
 // Init
-window.addEventListener('popstate',()=>{closeCmd();closeQR();kbClear();route()});
+window.addEventListener('popstate',()=>{
+  closeCmd();closeQR();kbClear();
+  // Same page, only the #fragment moved: scroll, don't re-render
+  if(location.pathname===routedPath){const t=hashTarget(location.hash);if(t)t.scrollIntoView();else window.scrollTo(0,0);return}
+  route();
+});
 route();
 
 // Prefetch all data during idle time so tab switches are instant

@@ -134,7 +134,12 @@ jobs:
           post_entries = ''
           for p in posts:
               slug = p.get('slug') or p['file'].replace('.md', '')
-              post_entries += f'\n  <url><loc>https://saputra.co.uk/posts/{slug}</loc><lastmod>{p["date"]}</lastmod><priority>0.5</priority></url>'
+              # lastmod is the frontmatter `updated:` when set (same rule as build-posts.js dateModified)
+              with open('posts/' + p['file']) as f:
+                  fm = re.match(r'---\r?\n(.*?)\r?\n---', f.read(), re.DOTALL)
+              upd = fm and re.search(r'^updated:\s*(\d{4}-\d{2}-\d{2})\s*$', fm.group(1), re.MULTILINE)
+              lastmod = upd.group(1) if upd else p['date']
+              post_entries += f'\n  <url><loc>https://saputra.co.uk/posts/{slug}</loc><lastmod>{lastmod}</lastmod><priority>0.5</priority></url>'
 
           # Insert before closing tag
           sitemap = sitemap.replace(

@@ -103,7 +103,7 @@ function buildLayout(html) {
     var tok = tokens[i];
     if (tok.type === 'h2') {
       flush();
-      body += '<div class="link-sec"><h3>' + tok.text + '</h3></div>\n';
+      body += '<div class="link-sec"' + (tok.id ? ' id="' + tok.id + '"' : '') + '><h3>' + tok.text + '</h3></div>\n';
     } else if (tok.type === 'hr') {
       flush();
     } else {
@@ -132,9 +132,9 @@ function tokenize(html) {
     }
 
     // Check for <h2>
-    var h2 = remaining.match(/^<h2>([\s\S]*?)<\/h2>/);
+    var h2 = remaining.match(/^<h2(?: id="([^"]*)")?>([\s\S]*?)<\/h2>/);
     if (h2) {
-      tokens.push({ type: 'h2', text: h2[1] });
+      tokens.push({ type: 'h2', id: h2[1], text: h2[2] });
       remaining = remaining.slice(h2[0].length);
       continue;
     }
@@ -248,6 +248,25 @@ function metaDescription(html) {
 }
 
 /**
+ * Read the optional `key: value` frontmatter block. Only `description` and
+ * `updated` (YYYY-MM-DD) are used; anything else is ignored, never an error.
+ */
+function parseFrontmatter(md) {
+  var m = md.replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---/);
+  var fm = {};
+  if (!m) return fm;
+  m[1].split('\n').forEach(function(line) {
+    var kv = line.match(/^(\w+):\s*(.*?)\s*$/);
+    if (kv) fm[kv[1]] = kv[2].replace(/^(["'])(.*)\1$/, '$2');
+  });
+  if (fm.updated && !/^\d{4}-\d{2}-\d{2}$/.test(fm.updated)) {
+    console.error('WARN: ignoring updated "' + fm.updated + '" (want YYYY-MM-DD)');
+    delete fm.updated;
+  }
+  return fm;
+}
+
+/**
  * Escape a string for use inside an HTML attribute value.
  */
 function escAttr(s) {
@@ -258,63 +277,82 @@ function escAttr(s) {
 // 6. HTML template
 // ---------------------------------------------------------------------------
 
-function generatePage(post, slug, layout) {
-  var canonical = 'https://saputra.co.uk/posts/' + slug;
+// Posts are written in US English (content-editing.md); the homepage keeps its own locale.
+var LANG = 'en-US';
+var SITE = 'https://saputra.co.uk';
+var OG_IMAGE = SITE + '/og-image.png';
+
+function generatePage(post, slug, layout, fm) {
+  fm = fm || {};
+  var canonical = SITE + '/posts/' + slug;
   var pageTitle = layout.title || post.title;
-  var desc = metaDescription(layout.body);
-  var isoDate = post.date + 'T00:00:00+00:00';
+  var plainTitle = stripHtml(pageTitle);
+  var desc = fm.description || metaDescription(layout.body);
+  var published = post.date + 'T00:00:00+00:00';
+  var modified = (fm.updated || post.date) + 'T00:00:00+00:00';
+  var author = { '@type': 'Person', 'name': 'Duke Saputra', 'url': SITE };
+
+  var article = {
+    '@type': 'Article',
+    'headline': plainTitle,
+    'description': desc,
+    'datePublished': published,
+    'dateModified': modified,
+    'inLanguage': LANG,
+    'url': canonical,
+    'mainEntityOfPage': { '@type': 'WebPage', '@id': canonical },
+    'image': OG_IMAGE,
+    'author': author,
+    'publisher': author
+  };
+  if (post.words) article.wordCount = post.words;
+
+  var breadcrumb = {
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': SITE + '/' },
+      { '@type': 'ListItem', 'position': 2, 'name': 'Posts', 'item': SITE + '/posts' },
+      { '@type': 'ListItem', 'position': 3, 'name': plainTitle, 'item': canonical }
+    ]
+  };
 
   return '<!DOCTYPE html>\n' +
-    '<html lang="en">\n' +
+    '<html lang="' + LANG + '">\n' +
     '<head>\n' +
     '<meta charset="UTF-8">\n' +
     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
     '<meta name="color-scheme" content="light dark">\n' +
-    '<title>DS | ' + escAttr(pageTitle) + '</title>\n' +
+    '<title>' + escAttr(plainTitle) + ' | Duke Saputra</title>\n' +
     '<meta name="description" content="' + escAttr(desc) + '">\n' +
     '<meta name="theme-color" content="#FAFAFA">\n' +
     '<link rel="canonical" href="' + canonical + '">\n' +
     '<link rel="icon" type="image/png" href="/favicon.png">\n' +
     '\n' +
     '<!-- Open Graph -->\n' +
-    '<meta property="og:title" content="' + escAttr(pageTitle) + '">\n' +
+    '<meta property="og:title" content="' + escAttr(plainTitle) + '">\n' +
     '<meta property="og:description" content="' + escAttr(desc) + '">\n' +
     '<meta property="og:type" content="article">\n' +
     '<meta property="og:url" content="' + canonical + '">\n' +
     '<meta property="og:site_name" content="Duke Saputra">\n' +
-    '<meta property="og:locale" content="en_GB">\n' +
-    '<meta property="og:image" content="https://saputra.co.uk/og-image.png">\n' +
+    '<meta property="og:locale" content="' + LANG.replace('-', '_') + '">\n' +
+    '<meta property="og:image" content="' + OG_IMAGE + '">\n' +
     '<meta property="og:image:width" content="1200">\n' +
     '<meta property="og:image:height" content="630">\n' +
-    '<meta property="og:image:alt" content="' + escAttr(pageTitle) + '">\n' +
+    '<meta property="og:image:alt" content="' + escAttr(plainTitle) + '">\n' +
+    '<meta property="article:published_time" content="' + published + '">\n' +
+    '<meta property="article:modified_time" content="' + modified + '">\n' +
+    '<meta property="article:author" content="Duke Saputra">\n' +
     '\n' +
     '<!-- Twitter Card -->\n' +
     '<meta name="twitter:card" content="summary_large_image">\n' +
-    '<meta name="twitter:title" content="' + escAttr(pageTitle) + '">\n' +
+    '<meta name="twitter:title" content="' + escAttr(plainTitle) + '">\n' +
     '<meta name="twitter:description" content="' + escAttr(desc) + '">\n' +
-    '<meta name="twitter:image" content="https://saputra.co.uk/og-image.png">\n' +
+    '<meta name="twitter:image" content="' + OG_IMAGE + '">\n' +
     '\n' +
     '<!-- JSON-LD -->\n' +
     '<script type="application/ld+json">\n' +
-    JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Article',
-      'headline': pageTitle,
-      'description': desc,
-      'datePublished': isoDate,
-      'dateModified': isoDate,
-      'url': canonical,
-      'author': {
-        '@type': 'Person',
-        'name': 'Duke Saputra',
-        'url': 'https://saputra.co.uk'
-      },
-      'publisher': {
-        '@type': 'Person',
-        'name': 'Duke Saputra',
-        'url': 'https://saputra.co.uk'
-      }
-    }, null, 2) + '\n' +
+    // "</" would end the script element early; "<\/" is the same JSON string
+    JSON.stringify({ '@context': 'https://schema.org', '@graph': [article, breadcrumb] }, null, 2).replace(/<\//g, '<\\/') + '\n' +
     '</script>\n' +
     '\n' +
     '<script>(function(){var t;try{t=localStorage.getItem(\'theme\')}catch(_){}if(t&&t!==\'light\')document.documentElement.setAttribute(\'data-theme\',t)})()</script>\n' +
@@ -334,7 +372,7 @@ function generatePage(post, slug, layout) {
     '</nav>\n' +
     '\n' +
     '<main class="wrap">\n' +
-    '<h2 class="stitle">' + escAttr(pageTitle) + '</h2>\n' +
+    '<h1 class="stitle">' + escAttr(plainTitle) + '</h1>\n' +
     '<div id="ulist">\n' +
     layout.body +
     '</div>\n' +
@@ -348,6 +386,9 @@ function generatePage(post, slug, layout) {
 // ---------------------------------------------------------------------------
 // 7. Build loop
 // ---------------------------------------------------------------------------
+
+module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, generatePage: generatePage };
+if (require.main !== module) return;
 
 var built = 0;
 var unchanged = 0;
@@ -364,7 +405,7 @@ posts.forEach(function(post) {
   var md = fs.readFileSync(mdPath, 'utf8');
   var html = parseMd(md);
   var layout = buildLayout(html);
-  var page = generatePage(post, slug, layout);
+  var page = generatePage(post, slug, layout, parseFrontmatter(md));
 
   var outDir = path.join(POSTS_DIR, slug);
   var outFile = path.join(outDir, 'index.html');
