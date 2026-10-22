@@ -283,8 +283,8 @@ html[data-theme="sepia"] .pcontent{--acc-ink:#8B5E3C;--mark:rgba(166,123,91,.22)
 /* Outer columns sit on the card padding, flush with the dividers, so the card's inset is even on all four sides */
 .pcontent th:first-child,.pcontent td:first-child{padding-left:0}
 .pcontent th:last-child,.pcontent td:last-child{padding-right:0}
-/* Column alignment from the markdown separator row (---: and :---:); figures share digit widths so amounts line up */
-.pcontent td{font-variant-numeric:tabular-nums}
+/* Column alignment from the markdown separator row (---: and :---:). Proportional figures on purpose:
+   tabular ones gave the system font's narrow "1" a full-width slot and made amounts look gappy */
 .pcontent th.r,.pcontent td.r{text-align:right}
 .pcontent th.c,.pcontent td.c{text-align:center}
 
