@@ -77,7 +77,7 @@ Only 4 organizations can issue new endorsements (as of Oct 2026). Each runs its 
 | UK Endorsing Services | Point-scored review of the plan, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for companies based outside the UK with revenue from about £250,000 (depending on sector) and a completed equity raise | Not published |
 
-Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed before 13 April 2023. Their policies differ, so put anything the rules leave open, such as a side job or outsourced development, to the body you choose in writing before you apply.
+Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed before 13 April 2023. In recorded interviews, UK Endorsing Services said it scores outsourced development in bands, with largely outsourced work scoring zero, and Envestors said it wants an in-house technical team member the business already has. Their policies differ, so put anything the rules leave open, such as a side job or outsourced development, to the body you choose in writing before you apply.
 
 ## Getting Endorsed
 
@@ -94,6 +94,8 @@ You need sector or technical skill, plus the business skill to sell and run the 
 
 There is no official template or length. Write it yourself, using AI for wording at most: the plan has to show your own understanding of the business, and the interview tests it. Keep desk research short and the sales plan specific, and show the product with screenshots or a demo.
 
+Most of your income has to come from the innovation you are endorsed for, at endorsement and again at settlement. Innovator International's public guides name consultancy and other services as the usual way founders fail this; if services will fund the build, show their share of income falling over time.
+
 Write forecasts you can beat: cost every item, get supplier quotes for anything costly, model 3 scenarios, and divide annual sales by 365 to check the daily figure is believable. Forecasts become the benchmark at every checkpoint and at settlement, so state any pre-revenue or loss-making years up front.
 
 ### Evidence of Demand
@@ -108,7 +110,9 @@ Name contacts in the appendix so the letters can be checked.
 
 ### Funding
 
-There is no fixed minimum. You need enough to cover the deepest dip in your cash-flow forecast, plus contingency. The money must be cash you already hold, shown on bank statements; property, future salary and a raise planned after arrival do not count. Money from someone else needs their bank evidence and a signed letter of terms. Build the main forecast on money you hold and show any raise as a second scenario.
+There is no fixed minimum. You need enough to cover the deepest dip in your cash-flow forecast, plus contingency. The money must be cash you already hold, shown on bank statements; property, future salary and a raise planned after arrival do not count. Money from someone else needs their bank evidence and a signed letter of terms. Shares count if they convert easily to cash, and money held abroad must be transferable to a UK account. Build the main forecast on money you hold and show any raise as a second scenario.
+
+Innovator International asks for your passport, one document holding the plan, financials and CV, evidence of funds, and optional appendices and a 2-minute video, and nothing else unless it requests it.
 
 ---
 
@@ -131,7 +135,7 @@ The interview tests that you wrote the plan and can explain your numbers. Due di
 
 ### After a Refusal
 
-Innovator International offers 1 free second assessment and Envestors has an appeals process; use them when you can point to facts the assessor missed. A substantially rewritten proposal is usually a new paid application, and a refusal by one body does not bind another.
+Innovator International offers 1 free second assessment and Envestors has an appeals process; use them when you can point to facts the assessor missed. Innovator International publishes that 95% of second-assessment requests fail, and asks you not to attach documents: say what the assessor missed and what you hold, and it will ask for anything it needs. A substantially rewritten proposal is usually a new paid application, and a refusal by one body does not bind another.
 
 ## Applying for the Visa
 
@@ -144,7 +148,7 @@ Most visa holders, Graduate, Student and Skilled Worker included, can switch ins
 - **Graduate:** a Graduate visa applied for from 1 January 2027 lasts 18 months, not 2 years (PhD graduates keep 3 years), so start the plan early.
 - **Student:** you can switch once you complete your course, or during a PhD after at least 24 months of study (the Rules say 24; the caseworker guidance says 12). Since 25 November 2025 you may work self-employed on the business while your visa application is pending.
 
-If you apply before your current visa expires, your permission to stay (called leave) continues while the Home Office decides. Apply well before it expires, leaving time for a second endorsement attempt. The 3 years start when the Innovator Founder visa is granted; time on other visas does not count.
+If you apply before your current visa expires, your permission to stay (called leave) continues while the Home Office decides, but you cannot make a new application during that time, so apply well before it expires, leaving time for a second endorsement attempt. Do not travel outside the UK, Ireland, the Channel Islands or the Isle of Man while the application is pending: it is treated as withdrawn from the day you leave. The 3 years start when the Innovator Founder visa is granted; time on other visas does not count.
 
 ### Processing Times
 
@@ -161,20 +165,20 @@ The Home Office aims to decide in 3 weeks from outside the UK and 8 weeks from i
 - [ ] Company registered (£100 online), with you as a director and your Companies House identity verified
 - [ ] Business bank account open (often the slowest step)
 - [ ] All business money running through that account (settlement evidence is read from its statements)
-- [ ] Main trading premises in place by month 24 (a co-working space or incubator counts)
+- [ ] Main trading premises in place by the 12-month checkpoint (a co-working space or incubator counts)
 
 ---
 
 ### Checkpoints
 
-Your endorsing body meets you at 12 and 24 months and visits your main trading premises at one of them. Attend both: a body can withdraw endorsement from a founder who stops keeping in contact, and an extension needs at least 2 checkpoint meetings.
+Your endorsing body meets you at 12 and 24 months and visits your main trading premises at either one; having none by 24 months puts the endorsement at risk. Attend both: a body can withdraw endorsement from a founder who stops keeping in contact, and an extension needs at least 2 checkpoint meetings.
 
 - **12 months:** progress should be reasonable for the time; profit is not expected.
 - **24 months:** the body also expects commercial progress, such as engaged customers or sales.
 
 ### Changing the Business Plan
 
-Agree any change with your endorsing body before you make it. A substantially different business is assessed afresh, usually for a fee. If a forecast proves wrong, ask the body to agree a revised one rather than carry a target you cannot meet.
+Agree any change to your product, market or forecasts with your endorsing body in writing before you make it: progress is judged against your last endorsed plan, and activity the body never approved may not count at settlement. A substantially different business is assessed afresh, usually for a fee. If a forecast proves wrong, ask the body to agree a revised one rather than carry a target you cannot meet.
 
 ### When Endorsement Is Withdrawn
 
@@ -186,7 +190,7 @@ Apply for a settlement endorsement about 3 months before your visa ends: the bod
 
 - £50,000 invested and actively spent on the business
 - Customers at least doubled in 3 years and above the average for similar UK businesses (no reliable benchmark exists)
-- Significant R&D plus a UK intellectual property application (a trademark does not count)
+- Significant R&D plus a UK intellectual property application (a trademark on branding does not count)
 - £1 million annual gross revenue
 - £500,000 revenue, £100,000 of it from exports
 - 10 full-time jobs for settled workers
@@ -196,10 +200,11 @@ Meeting both jobs targets counts as 1 target, not 2. Evidence a third target whe
 
 ### Meeting the Targets
 
-- **£50,000:** new money you put in, not reinvested profit. Both the money in and the spending must show on the company's business account. Visa and endorsement fees and your own salary do not count.
+- **£50,000:** new money you put in, not reinvested profit. Both the money in and the spending must show on the company's business account. Your own salary does not count; check with your body whether visa and endorsement fees do.
 - **Jobs:** each must last 12 months at an average of 30 hours a week, so to settle at 3 years, hire by about month 22. Put everyone you count, a co-founder included, on a written employment contract.
 - **Pay:** the rules require 5 jobs "each of which has a mean salary of at least £25,000", so each role must reach it on its own.
-- **Settled workers:** British or Irish citizens and people with ILR or EU settled or pre-settled status. Graduate, Student and Skilled Worker visa holders do not count.
+- **Settled workers:** British, Irish and British Overseas Territories citizens and people with ILR or EU settled or pre-settled status, tested when each job starts. Graduate, Student and Skilled Worker visa holders do not count.
+- **R&D and IP:** the target needs an IP application, not a grant. Where nothing can be patented, the Home Office lets a body accept credible peer-reviewed research outputs plus evidence of commercialization instead; keep a dated R&D record from the start.
 - **Co-founders:** you cannot share a target. If both of you rely on the 5 jobs, the business needs 10.
 - **Cost of the 5-jobs target:** about £132,000 to £143,000 a year including employer National Insurance and pension (2026 to 2027 rates), on top of the £50,000.
 
@@ -207,11 +212,13 @@ Meeting both jobs targets counts as 1 target, not 2. Evidence a third target whe
 
 ### The Sustainability Test
 
-The rule asks whether the business is "sustainable for at least the following 12 months, based on its assets and expected income, weighed against its current and planned expenses." It looks forward, so evidence it with accounts, bank statements and a 12-month forecast for the endorsed business itself.
+The rule asks whether the business is "sustainable for at least the following 12 months, based on its assets and expected income, weighed against its current and planned expenses." It looks forward, so evidence it with accounts, bank statements and a 12-month forecast for the endorsed business itself, with sales broken down by income stream.
+
+Bodies apply this test themselves. Innovator International's published settlement guide, as its own reading rather than a Home Office rule, expects every employee to be paid a market-rate salary, expects a profit from the endorsed activity unless your plan said otherwise, and will not count money put in solely to reach settlement.
 
 ### The Extension Fallback
 
-If progress is significant but short of the targets, the body can offer a same-business endorsement instead, on the same timing as settlement. The extension lasts 3 years, with checkpoints again; extensions can repeat, and you can apply for ILR once the targets are met.
+If progress is significant but short of the targets, the body can offer a same-business endorsement instead, on the same timing as settlement. The extension lasts 3 years, with checkpoints again; extensions can repeat, and you can apply for ILR once the targets are met. Below significant progress, the body refuses settlement and offers no extension, so you would need another visa.
 
 ---
 
@@ -250,7 +257,7 @@ Fees to settlement for a single applicant applying inside the UK (as of Oct 2026
 | **Total** | **£11,674** |
 
 - **From outside the UK:** the visa fee is £1,357, £336 less.
-- **Same-business extension:** about £7,200 more: the £1,693 visa fee, £3,105 health surcharge and about £2,400 in endorsing-body fees with VAT.
+- **Same-business extension:** about £4,800 more in Home Office fees (the £1,693 visa fee and £3,105 health surcharge), plus endorsing-body fees, which vary by body.
 - **Refused endorsement:** fees are not refunded.
 
 ## Rule Changes
