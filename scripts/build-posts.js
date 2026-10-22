@@ -50,9 +50,15 @@ var parserSrc =
   appSrc.match(/function il\(t\)\{[\s\S]*?\n\}/)[0] + '\n' +
   appSrc.match(/function parseMd\(md[^)]*\)\{[\s\S]*?\n\}/)[0] + '\n';
 
+// Card pieces for the /posts listing, lifted the same way so its cards match renderCards in app.js
+var cardSrc = ['SVG_WRAP_OPEN', 'SVG_WRAP_CLOSE', 'CHEVRON'].map(function(n) {
+  return appSrc.match(new RegExp('const ' + n + "='[^']*';"))[0];
+}).join('\n') + '\n' + appSrc.match(/const ICONS=\{[\s\S]*?\n\};/)[0] + '\n';
+
 // Evaluate parser in an isolated module
 var tmp = path.join(__dirname, '_build_parser_tmp_' + process.pid + '.js');
-fs.writeFileSync(tmp, parserSrc + '\nmodule.exports = { parseMd: parseMd };\n');
+fs.writeFileSync(tmp, parserSrc + cardSrc +
+  '\nmodule.exports = { parseMd: parseMd, ICONS: ICONS, SVG_WRAP_OPEN: SVG_WRAP_OPEN, SVG_WRAP_CLOSE: SVG_WRAP_CLOSE, CHEVRON: CHEVRON };\n');
 var parser = require(tmp);
 fs.unlinkSync(tmp);
 
@@ -284,7 +290,7 @@ function escAttr(s) {
 // 6. HTML template
 // ---------------------------------------------------------------------------
 
-// Posts are written in US English (content-editing.md); the homepage keeps its own locale.
+// The site is US English (content-editing.md); index.html carries the same locale.
 var LANG = 'en-US';
 var SITE = 'https://saputra.co.uk';
 var OG_IMAGE = SITE + '/og-image.png';
@@ -314,52 +320,124 @@ function generatePage(post, slug, layout, fm) {
   };
   if (post.words) article.wordCount = post.words;
 
-  var breadcrumb = {
-    '@type': 'BreadcrumbList',
-    'itemListElement': [
-      { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': SITE + '/' },
-      { '@type': 'ListItem', 'position': 2, 'name': 'Posts', 'item': SITE + '/posts' },
-      { '@type': 'ListItem', 'position': 3, 'name': plainTitle, 'item': canonical }
-    ]
-  };
+  return pageShell({
+    title: plainTitle,
+    desc: desc,
+    canonical: canonical,
+    ogType: 'article',
+    extraMeta:
+      '<meta property="article:published_time" content="' + published + '">\n' +
+      '<meta property="article:modified_time" content="' + modified + '">\n' +
+      '<meta property="article:author" content="Duke Saputra">\n',
+    graph: [article, breadcrumbs([{ name: plainTitle, item: canonical }])],
+    body: layout.body
+  });
+}
 
+// Home › Posts › ...extra, as a schema.org BreadcrumbList
+function breadcrumbs(extra) {
+  var items = [{ name: 'Home', item: SITE + '/' }, { name: 'Posts', item: SITE + '/posts' }].concat(extra);
+  return {
+    '@type': 'BreadcrumbList',
+    'itemListElement': items.map(function(x, i) {
+      return { '@type': 'ListItem', 'position': i + 1, 'name': x.name, 'item': x.item };
+    })
+  };
+}
+
+// fmtDate in app.js formats with en-GB; the static pages match it
+function fmtDate(d, opts) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', opts || { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/**
+ * /posts listing: the same month groups and cards renderCards draws in the SPA
+ * (minus the search data attributes; the static page has no search).
+ */
+function generateIndex(list) {
+  var canonical = SITE + '/posts';
+  var body = '';
+  var month = '';
+  list.forEach(function(p, i) {
+    var label = fmtDate(p.date, { month: 'long', year: 'numeric' });
+    if (label !== month) {
+      if (month) body += '</div>\n';
+      body += '<div class="link-sec"><h3>' + label + '</h3>';
+      month = label;
+    }
+    var href = '/posts/' + (p.slug || p.file.replace(/\.md$/, ''));
+    body += '<a class="pcard" href="' + href + '">' +
+      '<div class="picon">' + parser.SVG_WRAP_OPEN + (parser.ICONS[p.icon] || parser.ICONS.post) + parser.SVG_WRAP_CLOSE + '</div>' +
+      '<div class="pinf"><div class="pt">' + escAttr(p.title) + '</div><div class="pd">' + fmtDate(p.date) + '</div></div>' +
+      '<div class="arr">' + parser.CHEVRON + '</div></a>';
+    if (i === list.length - 1) body += '</div>\n';
+  });
+  if (!list.length) body = '<div class="empty" role="status">Coming Soon!</div>\n';
+
+  var desc = 'Guides and articles by Duke Saputra.';
+  return pageShell({
+    title: 'Posts',
+    desc: desc,
+    canonical: canonical,
+    ogType: 'website',
+    extraMeta: '',
+    graph: [{
+      '@type': 'CollectionPage',
+      'name': 'Posts',
+      'description': desc,
+      'url': canonical,
+      'inLanguage': LANG,
+      'mainEntity': {
+        '@type': 'ItemList',
+        'itemListElement': list.map(function(p, i) {
+          return { '@type': 'ListItem', 'position': i + 1, 'url': SITE + '/posts/' + (p.slug || p.file.replace(/\.md$/, '')) };
+        })
+      }
+    }, breadcrumbs([])],
+    body: body
+  });
+}
+
+/**
+ * Shared static page: head (meta, OG, Twitter, JSON-LD @graph), theme FOUC guard,
+ * shared CSS, nav with Posts active, h1.stitle, #ulist body, base.js.
+ */
+function pageShell(o) {
   return '<!DOCTYPE html>\n' +
     '<html lang="' + LANG + '">\n' +
     '<head>\n' +
     '<meta charset="UTF-8">\n' +
     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
     '<meta name="color-scheme" content="light dark">\n' +
-    '<title>' + escAttr(plainTitle) + ' | Duke Saputra</title>\n' +
-    '<meta name="description" content="' + escAttr(desc) + '">\n' +
+    '<title>' + escAttr(o.title) + ' | Duke Saputra</title>\n' +
+    '<meta name="description" content="' + escAttr(o.desc) + '">\n' +
     '<meta name="theme-color" content="#FAFAFA">\n' +
-    '<link rel="canonical" href="' + canonical + '">\n' +
+    '<link rel="canonical" href="' + o.canonical + '">\n' +
     '<link rel="icon" type="image/png" href="/favicon.png">\n' +
     '\n' +
     '<!-- Open Graph -->\n' +
-    '<meta property="og:title" content="' + escAttr(plainTitle) + '">\n' +
-    '<meta property="og:description" content="' + escAttr(desc) + '">\n' +
-    '<meta property="og:type" content="article">\n' +
-    '<meta property="og:url" content="' + canonical + '">\n' +
+    '<meta property="og:title" content="' + escAttr(o.title) + '">\n' +
+    '<meta property="og:description" content="' + escAttr(o.desc) + '">\n' +
+    '<meta property="og:type" content="' + o.ogType + '">\n' +
+    '<meta property="og:url" content="' + o.canonical + '">\n' +
     '<meta property="og:site_name" content="Duke Saputra">\n' +
     '<meta property="og:locale" content="' + LANG.replace('-', '_') + '">\n' +
     '<meta property="og:image" content="' + OG_IMAGE + '">\n' +
     '<meta property="og:image:width" content="1200">\n' +
     '<meta property="og:image:height" content="630">\n' +
-    '<meta property="og:image:alt" content="' + escAttr(plainTitle) + '">\n' +
-    '<meta property="article:published_time" content="' + published + '">\n' +
-    '<meta property="article:modified_time" content="' + modified + '">\n' +
-    '<meta property="article:author" content="Duke Saputra">\n' +
+    '<meta property="og:image:alt" content="' + escAttr(o.title) + '">\n' +
+    o.extraMeta +
     '\n' +
     '<!-- Twitter Card -->\n' +
     '<meta name="twitter:card" content="summary_large_image">\n' +
-    '<meta name="twitter:title" content="' + escAttr(plainTitle) + '">\n' +
-    '<meta name="twitter:description" content="' + escAttr(desc) + '">\n' +
+    '<meta name="twitter:title" content="' + escAttr(o.title) + '">\n' +
+    '<meta name="twitter:description" content="' + escAttr(o.desc) + '">\n' +
     '<meta name="twitter:image" content="' + OG_IMAGE + '">\n' +
     '\n' +
     '<!-- JSON-LD -->\n' +
     '<script type="application/ld+json">\n' +
     // "</" would end the script element early; "<\/" is the same JSON string
-    JSON.stringify({ '@context': 'https://schema.org', '@graph': [article, breadcrumb] }, null, 2).replace(/<\//g, '<\\/') + '\n' +
+    JSON.stringify({ '@context': 'https://schema.org', '@graph': o.graph }, null, 2).replace(/<\//g, '<\\/') + '\n' +
     '</script>\n' +
     '\n' +
     '<script>(function(){var t;try{t=localStorage.getItem(\'theme\')}catch(_){}if(t&&t!==\'light\')document.documentElement.setAttribute(\'data-theme\',t)})()</script>\n' +
@@ -379,9 +457,9 @@ function generatePage(post, slug, layout, fm) {
     '</nav>\n' +
     '\n' +
     '<main class="wrap">\n' +
-    '<h1 class="stitle">' + escAttr(plainTitle) + '</h1>\n' +
+    '<h1 class="stitle">' + escAttr(o.title) + '</h1>\n' +
     '<div id="ulist">\n' +
-    layout.body +
+    o.body +
     '</div>\n' +
     '</main>\n' +
     '\n' +
@@ -394,11 +472,24 @@ function generatePage(post, slug, layout, fm) {
 // 7. Build loop
 // ---------------------------------------------------------------------------
 
-module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, generatePage: generatePage };
+module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, generatePage: generatePage, generateIndex: generateIndex };
 if (require.main !== module) return;
 
 var built = 0;
 var unchanged = 0;
+
+// Idempotent: only write if content changed
+function write(rel, page) {
+  var outFile = path.join(POSTS_DIR, rel, 'index.html');
+  if (fs.existsSync(outFile) && fs.readFileSync(outFile, 'utf8') === page) {
+    unchanged++;
+    return;
+  }
+  fs.mkdirSync(path.dirname(outFile), { recursive: true });
+  fs.writeFileSync(outFile, page);
+  built++;
+  console.log('BUILT: posts/' + (rel ? rel + '/' : '') + 'index.html');
+}
 
 posts.forEach(function(post) {
   var slug = post.slug || post.file.replace(/\.md$/, '');
@@ -410,29 +501,10 @@ posts.forEach(function(post) {
   }
 
   var md = fs.readFileSync(mdPath, 'utf8');
-  var html = parseMd(md);
-  var layout = buildLayout(html);
-  var page = generatePage(post, slug, layout, parseFrontmatter(md));
-
-  var outDir = path.join(POSTS_DIR, slug);
-  var outFile = path.join(outDir, 'index.html');
-
-  // Idempotent: only write if content changed
-  if (fs.existsSync(outFile)) {
-    var existing = fs.readFileSync(outFile, 'utf8');
-    if (existing === page) {
-      unchanged++;
-      return;
-    }
-  }
-
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
-  }
-
-  fs.writeFileSync(outFile, page);
-  built++;
-  console.log('BUILT: posts/' + slug + '/index.html');
+  write(slug, generatePage(post, slug, buildLayout(parseMd(md)), parseFrontmatter(md)));
 });
+
+// /posts itself, so the listing is a real 200 page and not the SPA's 404.html fallback
+write('', generateIndex(posts));
 
 console.log('\n' + built + ' built, ' + unchanged + ' unchanged');
