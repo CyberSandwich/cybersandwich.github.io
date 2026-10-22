@@ -208,19 +208,24 @@
   });
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){restoreTicks()});else restoreTicks();
 
-  /* A reload keeps the reader's place. A #fragment left in the URL by a Contents click otherwise wins: the browser
-     jumps to that section on reload instead of restoring the scroll position. Restored again on load because images
-     above the fold (a post cover) shift the layout as they arrive */
-  var scrollKey='scroll:'+location.pathname.replace(/\/+$/,'');
-  addEventListener('pagehide',function(){try{sessionStorage.setItem(scrollKey,String(scrollY))}catch(_){}});
-  (function(){
-    var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0],y=null;
-    if(!nav||nav.type!=='reload'||!location.hash)return;
-    try{y=sessionStorage.getItem(scrollKey)}catch(_){}
-    if(y===null)return;
-    function go(){scrollTo({top:+y,behavior:'instant'})}
-    go();addEventListener('load',go);
-  })();
+  /* In-page #links never leave a #fragment in the URL. With one there, a reload jumps back to that section instead of
+     keeping the reader's place, and Safari does that jump too late for any restore to win. So a click scrolls without
+     touching the URL, and a page opened at a #section scrolls there itself on load (after the cover has shifted the
+     layout) and then drops the fragment. Runs for the SPA too: app.js leaves # links to this handler */
+  function inPage(hash){return hash.length>1&&document.getElementById(decodeURIComponent(hash.slice(1)))}
+  document.addEventListener('click',function(e){
+    if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    var a=e.target.closest&&e.target.closest('a[href^="#"]'),t=a&&inPage(a.getAttribute('href'));
+    if(!t)return;
+    e.preventDefault();
+    t.scrollIntoView({behavior:'smooth'});
+  });
+  addEventListener('load',function(){
+    var t=inPage(location.hash);
+    if(!t)return;
+    t.scrollIntoView({behavior:'instant'});
+    history.replaceState(history.state,'',location.pathname+location.search);
+  });
 
   /* Delegated step-button press animation */
   document.addEventListener('click',function(e){

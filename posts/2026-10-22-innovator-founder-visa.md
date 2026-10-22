@@ -252,7 +252,8 @@ Fees to settlement for a single applicant applying inside the UK (as of Oct 2026
 | Immigration Health Surcharge, 3 years at £1,035 | £3,105 |
 | Checkpoints at 12 and 24 months, £500 each | £1,000 |
 | Settlement endorsement | £1,000 |
-| ILR application plus Life in the UK test | £3,276 |
+| ILR application | £3,226 |
+| Life in the UK test | £50 |
 | VAT at 20% on endorsing-body fees, where charged (UK residents) | £600 |
 | **Total** | **£11,674** |
 

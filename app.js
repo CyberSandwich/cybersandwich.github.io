@@ -127,8 +127,8 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('a[href]');
   if(!a)return;
   const href=a.getAttribute('href');
-  // In-post anchors: a native fragment jump fires popstate, which would re-route and scroll to the top
-  if(href.charAt(0)==='#'){const t=hashTarget(href);if(t){e.preventDefault();history.pushState(null,'',href);t.scrollIntoView({behavior:'smooth'})}return}
+  // In-post anchors scroll in base.js without touching the URL (see the note there)
+  if(href.charAt(0)==='#')return;
   if(!href.startsWith('/')||href.startsWith('//')||a.hasAttribute('download')||a.target==='_blank')return;
   const parts=href.split('/').filter(Boolean);
   const page=parts[0];
