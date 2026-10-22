@@ -29,7 +29,7 @@ updated: 2026-10-22
 |---|---|
 | **What it is** | A UK visa for founders whose business an approved endorsing body judges innovative, viable and scalable |
 | **Length** | 3 years, extendable for the same business |
-| **Settlement** | Indefinite Leave to Remain (ILR) after 3 years if the business meets 2 of 7 targets |
+| **Settlement** | Indefinite Leave to Remain (ILR) after 3 years if the business meets 2 of the 7 listed targets |
 | **Fees** | About £10,700 to £11,700 for a single applicant over 3 years (as of Oct 2026), plus the business's own funding |
 | **Endorsement rate** | About 1 in 3: Envestors reports 34.4% (Apr 2023 to Mar 2026), Innovator International about 28% to 30% (2025) |
 | **Endorsement time** | About 4 to 6 weeks |
@@ -59,7 +59,7 @@ updated: 2026-10-22
 - **Switching cost:** the most common innovation refusal is a modest edge over an incumbent customers are locked into. Quantify the buyer's cost of switching, not just your feature gap.
 - **Easy to copy:** without IP, development complexity, deep market knowledge and a defined proprietary method still count. The yardstick is an ordinary competitor in your sector, not a well-funded one.
 - **Not really UK:** the innovation, its control and the head of operations must be in the UK; an operating arm of an overseas business fails. Export share does not matter.
-- **Common refusal shapes:** generic retail and restaurants, another health app or beauty product, basic aggregators, price-based competition, bought franchises, adult, crypto, political or religious projects, and ideas that work at home but not in the UK.
+- **Common refusal shapes:** generic retail and restaurants, another health app or beauty product, basic aggregators, price-based competition, bought franchises, and ideas that work at home but not in the UK. Some bodies also exclude adult, crypto, and political or religious projects, so confirm before applying.
 
 ---
 
@@ -71,7 +71,9 @@ updated: 2026-10-22
 - [ ] A new business you founded or are founding, not a role in someone else's
 - [ ] The business is your main work, and you run it day to day
 
-A skilled side job (RQF level 3 or above) is allowed, but most of your time must go to the business: a job that displaces your day-to-day role can cost the endorsement, and still working half-time elsewhere at the end of the visa reads as a business that is not growing. To join an existing business, Skilled Worker is the usual route; leaders in their field can look at Global Talent.
+A skilled side job (RQF level 3 or above) is allowed, but most of your time must go to the business: a job that displaces your day-to-day role can cost the endorsement, and still working half-time elsewhere at the end of the visa reads as a business that is not growing.
+
+Other routes: to join an existing business, Skilled Worker is the usual route. Global Talent (digital technology) needs no company and settles in 5 years under Exceptional Promise or 3 under Exceptional Talent, but needs endorsement letters from organizations that have known your work for at least 12 months. Scale-up needs 6 months of sponsored employment, then allows self-employment on a 5-year clock.
 
 ## Endorsing Bodies
 
@@ -80,7 +82,7 @@ Only 4 organizations can issue new endorsements (as of Oct 2026). Each runs its 
 | Body | Assessment | Turnaround |
 |---|---|---|
 | Innovator International | Plan answered against its published assessment questions; may raise questions on a borderline plan, then holds an online interview for plans that pass; 1 free second assessment after a refusal | Up to 40 days (about 5 weeks on average) |
-| Envestors | Its own online business plan form, then a presentation and Q&A call; capital planned for 3 years, with the first 12 months' funding verified and held for 3 months | About 4 to 6 weeks |
+| Envestors | Its own online business plan form, then a presentation and Q&A call; capital planned for 3 years, with funding verified and held for 3 months | About 4 to 6 weeks |
 | UK Endorsing Services | Point-scored review of the plan, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for companies based outside the UK with revenue from about £250,000 (depending on sector) and a completed equity raise | Not published |
 
@@ -109,7 +111,7 @@ There is no official template. About 30 pages is a good target: 10 to 60 is norm
 
 Most of your income has to come from the innovation you are endorsed for, at endorsement and again at settlement. Consultancy and other services are the usual way founders fail this; if services will fund the build, show their share of income falling over time.
 
-Write forecasts you can beat: cost every item, get supplier quotes for anything costly, model 3 scenarios, and divide annual sales by 365 to check the daily figure is believable. Forecasts become the benchmark at every checkpoint and at settlement, so write any allowance into this first plan, because it cannot be added later: pre-revenue or loss-making years, a long development phase, or targets that will take 5 to 6 years rather than 3. Pre-revenue, you are judged on the metrics you nominate, so choose them deliberately.
+Write forecasts you can beat: cost every item, get supplier quotes for anything costly, model 3 scenarios, and divide annual sales by 365 to check the daily figure is believable. Forecasts become the benchmark at every checkpoint and at settlement, so write any allowance into this first plan, because it cannot be added later: pre-revenue or loss-making years, a long development phase, or targets that will take 5 to 6 years rather than 3. Pre-revenue, you are judged on the metrics you nominate, so choose them deliberately. Include a risk section that scores each risk's probability and impact and says whether you avoid, tolerate or repair it.
 
 ### Evidence of Demand
 
@@ -162,8 +164,8 @@ Request the endorsement letter only when the visa application is ready: it is va
 
 Most visa holders, Graduate, Student and Skilled Worker included, can switch inside the UK. Visitors cannot and must apply from outside.
 
-- **Graduate:** a Graduate visa applied for from 1 January 2027 lasts 18 months, not 2 years (PhD graduates keep 3 years), so start the plan early.
-- **Student:** you can switch once you complete your course, or during a PhD after at least 24 months of study (the Rules say 24; the caseworker guidance says 12). Since 25 November 2025 you may work self-employed on the business while your visa application is pending.
+- **Graduate:** a Graduate visa applied for from 1 January 2027 lasts 18 months, not 2 years (PhD graduates keep 3 years), so start the plan early. It can be used once and allows self-employment, so the business can start on it; lodge the switch before it expires.
+- **Student:** you can switch once you complete your course, or during a PhD after at least 24 months of study (the Rules say 24; the caseworker guidance says 12). Until then, Student leave bars self-employment and business activity, including taking money, accepting orders or becoming a company director; desk research and customer interviews are fine, and a breach risks refusal of later applications. Since 25 November 2025 you may work self-employed on the business once your Innovator Founder application is pending.
 
 If you apply before your current visa expires, your permission to stay (called leave) continues while the Home Office decides, but you cannot make a new application during that time, so apply well before it expires, leaving time for a second endorsement attempt. Do not travel outside the UK, Ireland, the Channel Islands or the Isle of Man while the application is pending: it is treated as withdrawn from the day you leave. The 3 years start when the Innovator Founder visa is granted; time on other visas does not count.
 
@@ -231,7 +233,7 @@ Meeting both jobs targets counts as 1 target, not 2. Evidence a third target whe
 ### Meeting the Targets
 
 - **£50,000:** new money you put in, not reinvested profit; your own savings or a documented loan count, and a relative's money should be documented as a gift or loan to you. Both the money in and the spending must show on the company's business account, and spend booked properly through the business counts even before the visa. Development, contractors, marketing, event travel and equipment pass if you can state the business reason. Your own salary does not count; check with your body whether visa and endorsement fees do. Avoid employee salaries as proof, spending solely to reach £50,000, and paying suppliers personally or from an offshore account.
-- **Jobs:** each must last 12 months at an average of 30 hours a week, so to settle at 3 years, hire by about month 22, or by about month 10 if a leaver restarts the clock (unsettled; hire early or over-hire by one). Put everyone you count, a co-founder included, on a written employment contract: a director paid through payroll with no contract is an office holder, not an employee.
+- **Jobs:** each must last 12 months at an average of 30 hours a week, so to settle at 3 years, hire by about month 22, or by about month 10 if a leaver restarts the clock (unsettled; hire early or over-hire by one). Put everyone you count, a co-founder included, on a written employment contract: a director paid through payroll with no contract is an office holder, not an employee. £25,000 roles suit customer success, operations and support, not engineering, so a senior technical hire is extra cost on top.
 - **Pay:** the rules require 5 jobs "each of which has a mean salary of at least £25,000", so each role must reach it on its own. Use employer-only pension contributions on counted jobs, since salary sacrifice lowers gross pay below the line.
 - **Customers doubled:** usually best avoided, because the comparison set is undefined. Where comparable customer numbers do not exist, the guidance accepts credible market share analysis showing an above-average share.
 - **Revenue that counts:** only income the endorsed company invoices and banks for the endorsed product. Revenue run through another business, or work delivered by hand instead of through the product (even for the same customers), does not count. Invoices should name the product so a third party can map the money to it.
@@ -239,6 +241,7 @@ Meeting both jobs targets counts as 1 target, not 2. Evidence a third target whe
 - **R&D and IP:** the target needs an IP application, not a grant. Where nothing can be patented, the Home Office lets a body accept credible peer-reviewed research outputs plus evidence of commercialization instead (from a reviewer independent of the work); keep a dated R&D record from the start. A patent should be professionally drafted, at roughly £6,000 to £7,000 over 3 to 4 years, and filed well inside year 2. A UK registered design is the cheapest filing (about £60) but is doubted where development is purely artistic, and a trademark counts only when tied to the R&D outcome.
 - **Co-founders:** you cannot share a target. If both of you rely on the 5 jobs, the business needs 10; on the £50,000, it needs £100,000 in and spent.
 - **Cost of the 5-jobs target:** about £132,000 to £143,000 a year including employer National Insurance and pension (2026 to 2027 rates), on top of the £50,000.
+- **Records:** from the first payment, keep a spend ledger tying each payment to a line of the endorsed plan, and the bank's own monthly PDF statements, never screenshots. Minute the funding decision the day it happens and file the share allotment with Companies House within a month, since its filing date is an independent timestamp. Keep everything until well after the ILR decision.
 
 ---
 
@@ -345,7 +348,7 @@ Your endorsement can be [withdrawn](#when-endorsement-is-withdrawn), leaving you
 
 ### Can I Spend Time Outside the UK?
 
-Yes. The visa sets no absence limit, but you must move to the UK and run the business here, and ILR allows no more than 180 days outside the UK in any 12 months.
+Yes. The visa sets no absence limit, but you must move to the UK and run the business here, and ILR allows no more than 180 days outside the UK in any 12 months. Once you hold ILR, it lapses after 2 continuous years away.
 
 ### Can I Claim Benefits?
 
