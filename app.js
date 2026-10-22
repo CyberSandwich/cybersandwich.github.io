@@ -349,8 +349,8 @@ function showPost(slug){
     for(var i=0;i<nodes.length;i++){
       var n=nodes[i];
       if(n.nodeType===1&&n.tagName==='H1'){continue}
-      // The dateline parse() prepends sits outside the cards
-      if(n.nodeType===1&&n.className==='pmeta'){frag.appendChild(n.cloneNode(true));continue}
+      // The dateline parse() prepends and the cover image sit outside the cards
+      if(n.nodeType===1&&(n.className==='pmeta'||n.className==='pcover')){frag.appendChild(n.cloneNode(true));continue}
       if(n.nodeType===1&&n.tagName==='H2'){
         flush();
         const sec=mkSection(n.textContent,'link-sec');
@@ -489,7 +489,19 @@ function parseMd(md,_depth){
 
   function closeList(){h+='</li></'+ls.pop().tag+'>'}
   function cl(){
-    if(para.length){h+='<p>'+para.join('\n')+'</p>';para=[]}
+    if(para.length){
+      let p=para.join('\n');
+      para=[];
+      if(/^<img [^>]*>$/.test(p)){
+        // An image alone directly under the title is the cover: above the fold, so it loads eagerly, and the
+        // layouts set it outside the cards. A titled image becomes a figure with the title as its caption.
+        const cover=/^(<h1[^>]*>[\s\S]*<\/h1>)?$/.test(h);
+        if(cover)p=p.replace(' loading="lazy"',' fetchpriority="high"');
+        const cap=p.match(/ title="([^"]*)"/);
+        const cls=cover?' class="pcover"':'';
+        h+=cap?'<figure'+cls+'>'+p.replace(cap[0],'')+'<figcaption>'+cap[1]+'</figcaption></figure>':'<p'+cls+'>'+p+'</p>';
+      }else h+='<p>'+p+'</p>';
+    }
     while(ls.length)closeList();
     if(tbl){h+='</tbody></table></div>';tbl=false}
   }
@@ -515,8 +527,11 @@ function il(t){
     .replace(/\*\*\*([^*]+)\*\*\*/g,'<strong><em>$1</em></strong>')
     .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g,'<em>$1</em>')
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(_,alt,src)=>{
-      return '<img src="'+src+'" alt="'+alt+'" loading="lazy" decoding="async">';
+    // ![alt](src "Title"): the title (already &quot;-escaped) becomes a caption when the image stands alone.
+    // A #bezel fragment opts into the black frame; servers and Obsidian ignore fragments, so the source stays plain
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;(.*?)&quot;)?\)/g,(_,alt,src,title)=>{
+      const bezel=/#bezel$/.test(src);
+      return '<img src="'+(bezel?src.slice(0,-6):src)+'" alt="'+alt+'"'+(bezel?' class="bezel"':'')+(title?' title="'+title+'"':'')+' loading="lazy" decoding="async">';
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_,text,href)=>{
       return '<a href="'+href+'"'+(href.charAt(0)==='#'?'':' target="_blank" rel="noopener noreferrer"')+'>'+text+'</a>';

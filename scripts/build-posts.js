@@ -59,8 +59,8 @@ function buildLayout(html) {
 
   for (var i = 0; i < tokens.length; i++) {
     var tok = tokens[i];
-    // The postMeta dateline sits outside the cards (mirrors showPost in app.js)
-    if (tok.type === 'content' && tok.html.indexOf('<p class="pmeta">') === 0) {
+    // The postMeta dateline and the cover image sit outside the cards (mirrors showPost in app.js)
+    if (tok.type === 'content' && /^<(p|figure) class="(pmeta|pcover)">/.test(tok.html)) {
       body += tok.html + '\n';
       continue;
     }

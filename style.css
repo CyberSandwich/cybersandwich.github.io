@@ -85,6 +85,19 @@ body{line-height:1.5}
 .stitle:first-child{margin-top:12px}
 /* Post dateline: tucked under the title, outside any card */
 #ulist>.pmeta{text-align:center;font-size:.8125rem;font-weight:500;color:var(--t3);margin:calc(-1*clamp(8px,2vw,12px)) 0 clamp(20px,4vw,28px)}
+/* Cover image: card-width and card radius, same gap below as the dateline. The image itself takes the raised
+   --shadow2 (the cards' --shadow vanishes against it). A captioned cover sits in a card-colored mat that matches the
+   cards exactly, with the caption inside it; the image corner nests in the card's (20px outer - 8px mat) */
+#ulist>.pcover{margin:0 0 clamp(20px,4vw,28px)}
+#ulist>.pcover img{display:block;width:100%;height:auto;border-radius:20px;box-shadow:var(--shadow2)}
+#ulist>figure.pcover{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:8px}
+#ulist>figure.pcover img{border-radius:12px}
+/* Captions: credit-sized gray text, centered under the image */
+#ulist figcaption{font-size:.75rem;color:var(--t3);text-align:center;line-height:1.5;padding:8px 8px 2px}
+/* Opt-in black bezel (src#bezel). An outline follows border-radius, so the frame's inner corner matches the image's;
+   outlines take no space, so the margin keeps the frame inside the column. Black in every theme on purpose: it is a
+   device-style frame, not a surface */
+#ulist img.bezel{--bz:14px;outline:var(--bz) solid #000;margin:var(--bz);width:calc(100% - 2*var(--bz));box-shadow:none}
 .stitle:focus,#main:focus{outline:none}
 
 /* Shared card base */
@@ -197,7 +210,10 @@ body{line-height:1.5}
      --acc-ink: link text, darker than the accent so links read at body contrast. */
   --inset:color-mix(in srgb,var(--t1) 4%,var(--card));
   --acc-ink:#1F7A6F;
-  --mark:rgba(255,208,0,.25)
+  --mark:rgba(255,208,0,.25);
+  /* --rule: the one divider color, mixed so it reads equally faint in every theme (--bdr2 is near-invisible in
+     light but equals --bdr in dark) */
+  --rule:color-mix(in srgb,var(--t1) 5%,var(--card))
 }
 html[data-theme="dark"] .pcontent{--acc-ink:#5EC4B6;--mark:rgba(255,208,0,.18)}
 html[data-theme="sepia"] .pcontent{--acc-ink:#8B5E3C;--mark:rgba(166,123,91,.22)}
@@ -209,8 +225,9 @@ html[data-theme="sepia"] .pcontent{--acc-ink:#8B5E3C;--mark:rgba(166,123,91,.22)
 .pcontent h2{font-size:1.125rem;font-weight:600;margin:28px 0 10px}
 /* Headings sit closer to what they introduce than to what came before */
 .pcontent h3{font-size:1rem;font-weight:600;margin:26px 0 8px}
-/* Subsections sharing a card are split by a hairline, so a run of ### blocks (an FAQ) reads as separate items */
-#ulist>.pcontent>h3:not(:first-child){border-top:1px solid var(--bdr2);padding-top:20px;margin-top:20px}
+/* Space, not lines, separates subsections. The FAQ is the one exception: its questions are peers, so a faint rule
+   ties each answer to its question */
+#faq+.pcontent>h3:not(:first-child){border-top:1px solid var(--rule);padding-top:20px;margin-top:20px}
 .pcontent h4{font-size:.9375rem;font-weight:600;margin:20px 0 6px}
 .pcontent p{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:14px}
 /* A faint underline marks links without relying on color alone; Contents is all links, so it goes without */
@@ -268,20 +285,23 @@ html[data-theme="sepia"] .pcontent{--acc-ink:#8B5E3C;--mark:rgba(166,123,91,.22)
 .pcontent .callout .callout-title{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);line-height:1.4;margin-bottom:6px}
 .pcontent [id],#ulist>.link-sec[id]{scroll-margin-top:16px}
 .pcontent img{max-width:100%;height:auto;border-radius:14px;margin:16px 0;display:block;box-shadow:var(--shadow)}
-.pcontent hr{border:none;border-top:1px solid var(--bdr2);margin:20px 0}
-/* Tables sit in the --inset panel (as callouts and code do) so their start and end are unmistakable; rules inside use
-   a stronger mix because the usual --bdr2 hairline vanishes on the panel. A table that is a card's whole content is
-   already framed by the card, so it drops the panel. */
+.pcontent figure{margin:16px 0}
+.pcontent figure img{margin:0}
+.pcontent hr{border:none;border-top:1px solid var(--rule);margin:24px 0}
+/* Tables sit in the --inset panel (as callouts and code do) so their start and end are unmistakable. Rules inside are
+   mixed from --inset so they read as faint as --rule does on the card: the header's a step stronger, rows just enough
+   to carry the eye across a wide gap (a right-aligned amount column). A table that is a card's whole content is
+   framed by the card, so it drops the panel. */
 .pcontent .table-wrap{overflow-x:auto;margin:18px 0;padding:14px 16px;border-radius:14px;background:var(--inset);-webkit-overflow-scrolling:touch}
-.pcontent .table-wrap th,.pcontent .table-wrap td{border-color:color-mix(in srgb,var(--t1) 9%,var(--card))}
+.pcontent .table-wrap th{border-color:color-mix(in srgb,var(--t1) 9%,var(--inset))}
+.pcontent .table-wrap td{border-color:color-mix(in srgb,var(--t1) 6%,var(--inset))}
 #ulist>.pcontent>.table-wrap:only-child{padding:0;border-radius:0;background:none}
-#ulist>.pcontent>.table-wrap:only-child th,#ulist>.pcontent>.table-wrap:only-child td{border-color:var(--bdr2)}
-#ulist>.pcontent>.table-wrap:only-child th{border-color:var(--bdr)}
+#ulist>.pcontent>.table-wrap:only-child th,#ulist>.pcontent>.table-wrap:only-child td{border-color:var(--rule)}
 .pcontent table{width:100%;border-collapse:collapse;font-size:.875rem}
 .pcontent th,.pcontent td{vertical-align:top}
 /* Header cells read as labels (the section-label style), so a bold row or first column can't pass for a header */
-.pcontent th{text-align:left;font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:0 12px 10px;border-bottom:1px solid var(--bdr)}
-.pcontent td{color:var(--t2);padding:12px;line-height:1.6;border-bottom:1px solid var(--bdr2)}
+.pcontent th{text-align:left;font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:0 12px 10px;border-bottom:1px solid var(--rule)}
+.pcontent td{color:var(--t2);padding:12px;line-height:1.6;border-bottom:1px solid var(--rule)}
 /* A table ends at its last line of text, like a paragraph */
 .pcontent tr:last-child td{border-bottom:none;padding-bottom:0}
 /* ...and a table with no header row (| | | in markdown) starts at its first line */
