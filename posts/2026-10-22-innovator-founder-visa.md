@@ -11,7 +11,7 @@ This guide explains how the UK Innovator Founder visa works, from getting endors
 
 ## Contents
 
-- [At a Glance](#at-a-glance)
+- [Summary](#summary)
 - [How It Works](#how-it-works)
 - [Requirements: Who Qualifies](#requirements-who-qualifies)
 - [Endorsing Bodies](#endorsing-bodies)
@@ -26,7 +26,7 @@ This guide explains how the UK Innovator Founder visa works, from getting endors
 - [FAQ](#faq)
 - [Sources](#sources)
 
-## At a Glance
+## Summary
 
 | Topic | Detail |
 |---|---|
@@ -77,9 +77,7 @@ Only four organizations can issue new endorsements (as of Oct 2026). The three p
 | **UK Endorsing Services** | R&D-led and deep-tech businesses | 21 working days | Not published |
 | **Global Entrepreneurs Programme** | Established overseas companies | By invitation | Not published |
 
----
-
-### How They Differ
+Each body also has its own requirements:
 
 - **Innovator International**
   - Publishes the questions its assessors answer
