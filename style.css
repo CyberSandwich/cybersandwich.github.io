@@ -87,11 +87,11 @@ body{line-height:1.5}
 #ulist>.pmeta{text-align:center;font-size:.8125rem;font-weight:500;color:var(--t3);margin:calc(-1*clamp(8px,2vw,12px)) 0 clamp(20px,4vw,28px)}
 /* Cover image: card-width and card radius, same gap below as the dateline. The image itself takes the raised
    --shadow2 (the cards' --shadow vanishes against it). A captioned cover sits in a card-colored mat that matches the
-   cards exactly, with the caption inside it; the image corner nests in the card's (20px outer - 8px mat) */
+   cards exactly, with the caption inside it; the image corner nests in the card's (20px outer - 12px mat) */
 #ulist>.pcover{margin:0 0 clamp(20px,4vw,28px)}
 #ulist>.pcover img{display:block;width:100%;height:auto;border-radius:20px;box-shadow:var(--shadow2)}
-#ulist>figure.pcover{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:8px}
-#ulist>figure.pcover img{border-radius:12px}
+#ulist>figure.pcover{background:var(--card);box-shadow:var(--shadow);border-radius:20px;padding:12px}
+#ulist>figure.pcover img{border-radius:8px}
 /* Captions: credit-sized gray text, centered under the image */
 #ulist figcaption{font-size:.75rem;color:var(--t3);text-align:center;line-height:1.5;padding:8px 8px 2px}
 /* Opt-in black bezel (src#bezel). An outline follows border-radius, so the frame's inner corner matches the image's;
