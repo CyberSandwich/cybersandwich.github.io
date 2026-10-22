@@ -99,6 +99,13 @@ function buildLayout(html) {
     }
   }
 
+  // An italic-only line first after the title is the page dateline (mirrors showPost in app.js)
+  var meta = tokens.length && tokens[0].type === 'content' && tokens[0].html.match(/^<p><em>((?:(?!<\/em>)[\s\S])*)<\/em><\/p>$/);
+  if (meta) {
+    body += '<p class="pmeta">' + meta[1] + '</p>\n';
+    tokens.shift();
+  }
+
   for (var i = 0; i < tokens.length; i++) {
     var tok = tokens[i];
     if (tok.type === 'h2') {

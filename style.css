@@ -83,6 +83,8 @@ body{line-height:1.5}
   text-align:center
 }
 .stitle:first-child{margin-top:12px}
+/* Post dateline: tucked under the title, outside any card */
+#ulist>.pmeta{text-align:center;font-size:.8125rem;font-weight:500;color:var(--t3);margin:calc(-1*clamp(8px,2vw,12px)) 0 clamp(20px,4vw,28px)}
 .stitle:focus,#main:focus{outline:none}
 
 /* Shared card base */
@@ -221,8 +223,9 @@ body{line-height:1.5}
 .pcontent del{color:var(--t4);text-decoration:line-through}
 .pcontent mark{background:rgba(255,208,0,.25);padding:1px 4px;border-radius:3px}
 .pcontent .task-list{list-style:none;padding-left:0}
-.pcontent .task-item{display:flex;align-items:baseline;gap:8px}
-.pcontent .task-item input{margin:0;flex-shrink:0;accent-color:var(--acc)}
+.pcontent .task-item>label{display:flex;align-items:baseline;gap:8px;cursor:pointer;transition:color .15s}
+.pcontent .task-item input{margin:0;flex-shrink:0;accent-color:var(--acc);cursor:pointer}
+.pcontent .task-item>label:has(input:checked){color:var(--t3)}
 .pcontent blockquote{
   border-left:3px solid var(--bdr);
   padding-left:16px;
@@ -230,21 +233,28 @@ body{line-height:1.5}
   color:var(--t3)
 }
 .pcontent li>ul,.pcontent li>ol{margin:4px 0 0}
-/* Callouts: --c is the accent; the tint is mixed from it so each theme needs only its accent */
-.pcontent .callout{--c:var(--t3);background:color-mix(in srgb,var(--c) 9%,var(--card));box-shadow:inset 3px 0 0 var(--c);border-radius:12px;padding:12px 16px;margin:12px 0}
+/* A card ending in a list otherwise keeps the last item's 4px below its text */
+.pcontent li:last-child{margin-bottom:0}
+/* A post's "## Contents" list: two columns once there is room */
+@media(min-width:481px){
+  #contents+.pcontent>ul{columns:2;column-gap:24px}
+  /* Symmetric padding, not margin-bottom: the item ending column 1 would otherwise leave 4px at the card's foot */
+  #contents+.pcontent>ul>li{break-inside:avoid;margin:0;padding:2px 0}
+}
+/* Callouts: a quiet inset panel with a section-style label, no stripe or icon.
+   The panel is mixed from tokens (--bg2 equals --card in dark); only a warning's label takes color. */
+.pcontent .callout{background:color-mix(in srgb,var(--t1) 4%,var(--card));border-radius:14px;padding:14px 16px;margin:14px 0}
 .pcontent .callout>:last-child{margin-bottom:0}
-.pcontent .callout .callout-title{font-weight:600;color:var(--c);margin-bottom:4px}
-.pcontent .callout-tip{--c:#2A9D8F}
-.pcontent .callout-warning{--c:#A16207}
-html[data-theme="dark"] .pcontent .callout-tip{--c:#5EC4B6}
-html[data-theme="dark"] .pcontent .callout-warning{--c:#FBBF24}
-html[data-theme="sepia"] .pcontent .callout-tip{--c:#5C7037}
-html[data-theme="sepia"] .pcontent .callout-warning{--c:#A6552B}
+.pcontent .callout .callout-title{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);line-height:1.4;margin-bottom:6px}
+.pcontent .callout-warning .callout-title{color:#A16207}
+html[data-theme="dark"] .pcontent .callout-warning .callout-title{color:#FBBF24}
+html[data-theme="sepia"] .pcontent .callout-warning .callout-title{color:#A6552B}
 .pcontent [id],#ulist>.link-sec[id]{scroll-margin-top:16px}
 .pcontent img{max-width:100%;height:auto;border-radius:14px;margin:16px 0;display:block;box-shadow:var(--shadow)}
 .pcontent hr{border:none;border-top:1px solid var(--bdr2);margin:20px 0}
 .pcontent .table-wrap{overflow-x:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch}
 .pcontent table{width:100%;border-collapse:collapse;font-size:.875rem}
+.pcontent th,.pcontent td{vertical-align:top}
 .pcontent th{text-align:left;font-weight:600;color:var(--t1);padding:10px 12px;border-bottom:2px solid var(--bdr)}
 .pcontent td{color:var(--t2);padding:10px 12px;border-bottom:1px solid var(--bdr2)}
 .pcontent tr:last-child td{border-bottom:none}

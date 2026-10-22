@@ -345,10 +345,16 @@ function showPost(slug){
     const frag=document.createDocumentFragment();
     var card=null;
     function flush(){if(card){frag.appendChild(card);card=null}}
-    var nodes=[].slice.call(tmp.childNodes);
+    var nodes=[].slice.call(tmp.childNodes),lead=true;
     for(var i=0;i<nodes.length;i++){
       var n=nodes[i];
       if(n.nodeType===1&&n.tagName==='H1'){continue}
+      // An italic-only line first after the title is the page dateline (mirrors build-posts.js buildLayout)
+      if(lead&&n.nodeType===1){
+        lead=false;
+        if(n.tagName==='P'&&n.childNodes.length===1&&n.firstChild.tagName==='EM'){
+          const m=document.createElement('p');m.className='pmeta';m.innerHTML=n.firstChild.innerHTML;frag.appendChild(m);continue}
+      }
       if(n.nodeType===1&&n.tagName==='H2'){
         flush();
         const sec=mkSection(n.textContent,'link-sec');
@@ -466,10 +472,9 @@ function parseMd(md,_depth){
         h+='<'+tag+(tm?' class="task-list"':'')+'>';
         ls.push({tag:tag,ind:ind});
       }
-      if(tm){
-        const checked=tm[2]!==' ';
-        h+='<li class="task-item'+(checked?' checked':'')+'"><input type="checkbox" disabled'+(checked?' checked':'')+'>'+il(tm[3]);
-      }else h+='<li>'+il(lm[2]);
+      // Task boxes are live so a reader can tick as they go; the label makes the text a tap target
+      if(tm)h+='<li class="task-item"><label><input type="checkbox"'+(tm[2]!==' '?' checked':'')+'>'+il(tm[3])+'</label>';
+      else h+='<li>'+il(lm[2]);
       continue;
     }
     // Indented text under a list item continues it; unindented text ends the list
