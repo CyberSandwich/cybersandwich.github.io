@@ -277,6 +277,7 @@ function generateIndex(list) {
   var desc = 'Guides and articles by Duke Saputra.';
   return S.pageShell({
     title: 'Posts',
+    tabTitle: 'DS | Posts', // what the SPA's router shows on /posts
     desc: desc,
     canonical: canonical,
     ogType: 'website',

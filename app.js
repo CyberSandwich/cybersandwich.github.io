@@ -337,7 +337,7 @@ function showPost(slug){
     tmp.innerHTML=html;
     const h1=tmp.querySelector('h1');
     if(h1){
-      document.title=h1.textContent+' | Duke Saputra';
+      document.title=h1.textContent;
       if(stitle)stitle.textContent=h1.textContent;
       h1.remove();
     }

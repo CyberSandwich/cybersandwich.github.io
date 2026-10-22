@@ -28,6 +28,7 @@ function listingPage(name, desc, active, listId, items, cfg, cats) {
   var canonical = S.SITE + active;
   return S.pageShell({
     title: name,
+    tabTitle: 'DS | ' + name, // what the SPA's router shows on the same URL
     desc: desc,
     canonical: canonical,
     ogType: 'website',

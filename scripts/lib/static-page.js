@@ -147,7 +147,8 @@ function cardsHtml(groups, cfg) {
  * A full static page: head (meta, OG, Twitter, JSON-LD @graph), theme FOUC
  * guard, shared CSS, nav with o.active highlighted, h1.stitle, o.body inside
  * o.listId (the SPA's container id, so page CSS applies), base.js.
- * o: { title, desc, canonical, ogType, extraMeta, graph, active, listId, body }
+ * o: { title, tabTitle?, desc, canonical, ogType, extraMeta, graph, active, listId, body }
+ * The tab title is the page title alone (owner: no site-name suffix); tabTitle overrides it where the SPA uses another.
  */
 function pageShell(o) {
   var tab = function(href, label) {
@@ -159,7 +160,7 @@ function pageShell(o) {
     '<meta charset="UTF-8">\n' +
     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n' +
     '<meta name="color-scheme" content="light dark">\n' +
-    '<title>' + escAttr(o.title) + ' | Duke Saputra</title>\n' +
+    '<title>' + escAttr(o.tabTitle || o.title) + '</title>\n' +
     '<meta name="description" content="' + escAttr(o.desc) + '">\n' +
     '<meta name="theme-color" content="#FAFAFA">\n' +
     '<link rel="canonical" href="' + o.canonical + '">\n' +
