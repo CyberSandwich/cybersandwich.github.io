@@ -283,6 +283,28 @@ function renderPost(md, file) {
   return (meta ? '<p class="pmeta">' + S.escAttr(meta) + '</p>' : '') + parseMd(md);
 }
 
+// Markdown syntax that survived parseMd as visible text, e.g. "### Heading" glued onto a paragraph.
+// Code spans and blocks are skipped since markdown there is meant literally.
+var LEAKS = [
+  ['heading', /(?:^|\s)#{1,6} \S/],
+  ['bold', /\*\*|__/],
+  ['link or image', /!?\[[^\]\n]*\]\([^)\n]*\)/],
+  ['wikilink', /\[\[|\]\]/],
+  ['table row', /\|\s*:?-{3,}|^\s*\|.*\|\s*$/m],
+  ['callout', /\[![a-z]+\]/i]
+];
+function markdownLeaks(html) {
+  var text = html.replace(/<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>/g, ' ')
+    .replace(/<\/(p|li|h\d|td|th|figcaption|blockquote|aside)>/g, '\n')
+    .replace(/<[^>]+>/g, '');
+  var found = [];
+  LEAKS.forEach(function(l) {
+    var m = l[1].exec(text);
+    if (m) found.push(l[0] + ': "' + text.slice(Math.max(0, m.index - 30), m.index + 40).replace(/\s+/g, ' ').trim() + '"');
+  });
+  return found;
+}
+
 // /posts listing: month groups, newest first, the cards showList draws in the SPA
 function generateIndex(list) {
   var canonical = SITE + '/posts';
@@ -327,10 +349,10 @@ function generateIndex(list) {
 // 4. Build
 // ---------------------------------------------------------------------------
 
-module.exports = { parseFrontmatter: parseFrontmatter, coverImage: coverImage, buildLayout: buildLayout, renderPost: renderPost, generatePage: generatePage, generateIndex: generateIndex };
+module.exports = { markdownLeaks: markdownLeaks, parseFrontmatter: parseFrontmatter, coverImage: coverImage, buildLayout: buildLayout, renderPost: renderPost, generatePage: generatePage, generateIndex: generateIndex };
 if (require.main !== module) return;
 
-var stats = { built: 0, unchanged: 0 };
+var stats = { built: 0, unchanged: 0, leaks: [] };
 
 posts.forEach(function(post) {
   var slug = post.slug || post.file.replace(/\.md$/, '');
@@ -342,10 +364,16 @@ posts.forEach(function(post) {
   }
 
   var md = fs.readFileSync(mdPath, 'utf8');
-  S.writePage('posts/' + slug, generatePage(post, slug, buildLayout(renderPost(md, post.file)), parseFrontmatter(md)), stats);
+  var html = renderPost(md, post.file);
+  markdownLeaks(html).forEach(function(l) { stats.leaks.push(post.file + ': ' + l); });
+  S.writePage('posts/' + slug, generatePage(post, slug, buildLayout(html), parseFrontmatter(md)), stats);
 });
 
 // /posts itself, so the listing is a real 200 page and not the SPA's 404.html fallback
 S.writePage('posts', generateIndex(posts), stats);
 
 console.log('\n' + stats.built + ' built, ' + stats.unchanged + ' unchanged');
+if (stats.leaks.length) {
+  console.error('\nUnrendered markdown (fix the source .md):\n  ' + stats.leaks.join('\n  '));
+  process.exit(1);
+}

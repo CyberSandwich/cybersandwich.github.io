@@ -86,7 +86,9 @@ Only 4 organizations can issue new endorsements (as of Oct 2026). Each runs its 
 | UK Endorsing Services | Point-scored review of the plan, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for companies based outside the UK with revenue from about £250,000 (depending on sector) and a completed equity raise | Not published |
 
-Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed before 13 April 2023. ### How They Differ
+Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed before 13 April 2023.
+
+### How They Differ
 
 - **Innovator International:** allows part-time work alongside the business.
 - **Envestors:** requires full-time involvement and an in-house technical team member the business already has, checks about 24 months of runway, wants your settlement targets named at endorsement, and adds a 36-month checkpoint and a monthly trading report.
