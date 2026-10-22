@@ -56,6 +56,7 @@ var liftedSrc = [
   lift(/function esc\(s\)\{[\s\S]*?\n\}/, 'esc'),
   lift(/function il\(t\)\{[\s\S]*?\n\}/, 'il'),
   lift(/function parseMd\(md[^)]*\)\{[\s\S]*?\n\}/, 'parseMd'),
+  lift(/function postMeta\(md,file\)\{[\s\S]*?\n\}/, 'postMeta'),
   lift(/function cleanUrl\(u\)\{[^\n]*\}/, 'cleanUrl'),
   lift(/function mailtoUrl\(t\)\{[^\n]*\}/, 'mailtoUrl'),
   lift(/const PROJECT_ICONS=\{[\s\S]*?\n\};/, 'PROJECT_ICONS'),
@@ -64,7 +65,7 @@ var liftedSrc = [
   return lift(new RegExp('const ' + n + '=[^\\n]*;'), n);
 })).join('\n');
 
-var exportNames = ['parseMd', 'cleanUrl', 'mailtoUrl', 'PROJECT_ICONS', 'ICONS'].concat(ONE_LINERS);
+var exportNames = ['parseMd', 'postMeta', 'cleanUrl', 'mailtoUrl', 'PROJECT_ICONS', 'ICONS'].concat(ONE_LINERS);
 var tmp = path.join(__dirname, '_lifted_tmp_' + process.pid + '.js');
 fs.writeFileSync(tmp, liftedSrc + '\nmodule.exports = { ' + exportNames.map(function(n) { return n + ': ' + n; }).join(', ') + ' };\n');
 var app;

@@ -186,19 +186,24 @@ body{line-height:1.5}
   margin-bottom:12px
 }
 
+/* Vertical padding is ~5px under horizontal: text line-height adds that much above and below the glyphs,
+   so the visible gap ends up even on all four sides */
 .pcontent{
-  padding:16px 20px;
+  padding:16px clamp(18px,4vw,22px);
   border-radius:18px;
-  margin-bottom:12px;
+  margin-bottom:16px;
   animation:fi .25s ease
 }
-.pcontent>:last-child{margin-bottom:0}
+/* The card's padding is its edge spacing: nothing adds margin past it. The id outranks every .pcontent .x margin
+   rule (a .table-wrap or .callout ending a card kept its 18px when this was a plain .pcontent rule) */
+#ulist>.pcontent>:first-child{margin-top:0}
+#ulist>.pcontent>:last-child{margin-bottom:0}
 .pcontent h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
-.pcontent h2{font-size:1.125rem;font-weight:600;margin:20px 0 8px}
-.pcontent h3{font-size:1rem;font-weight:600;margin:16px 0 4px}
-.pcontent>h3:first-child{margin-top:0}
-.pcontent h4{font-size:.9375rem;font-weight:600;margin:14px 0 4px}
-.pcontent p{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:12px}
+.pcontent h2{font-size:1.125rem;font-weight:600;margin:28px 0 10px}
+/* Headings sit closer to what they introduce than to what came before */
+.pcontent h3{font-size:1rem;font-weight:600;margin:26px 0 8px}
+.pcontent h4{font-size:.9375rem;font-weight:600;margin:20px 0 6px}
+.pcontent p{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:14px}
 .pcontent a{color:var(--acc);text-decoration:none}
 .pcontent a:hover{text-decoration:underline}
 .pcontent code{
@@ -216,8 +221,8 @@ body{line-height:1.5}
   margin-bottom:12px
 }
 .pcontent pre code{background:none;padding:0}
-.pcontent ul,.pcontent ol{padding-left:20px;margin-bottom:12px}
-.pcontent li{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:4px}
+.pcontent ul,.pcontent ol{padding-left:20px;margin-bottom:14px}
+.pcontent li{font-size:.875rem;color:var(--t2);line-height:1.7;margin-bottom:6px}
 .pcontent strong{color:var(--t1);font-weight:600}
 .pcontent em{font-style:normal;font-size:.75rem;font-weight:500;color:var(--t3);letter-spacing:.01em}
 .pcontent del{color:var(--t4);text-decoration:line-through}
@@ -225,39 +230,39 @@ body{line-height:1.5}
 .pcontent .task-list{list-style:none;padding-left:0}
 .pcontent .task-item>label{display:flex;align-items:baseline;gap:8px;cursor:pointer;transition:color .15s}
 .pcontent .task-item input{margin:0;flex-shrink:0;accent-color:var(--acc);cursor:pointer}
-.pcontent .task-item>label:has(input:checked){color:var(--t3)}
+.pcontent .task-item>label:has(input:checked){color:var(--t3);text-decoration:line-through;text-decoration-color:var(--t4)}
 .pcontent blockquote{
   border-left:3px solid var(--bdr);
   padding-left:16px;
   margin:12px 0;
   color:var(--t3)
 }
-.pcontent li>ul,.pcontent li>ol{margin:4px 0 0}
+.pcontent li>ul,.pcontent li>ol{margin:6px 0 0}
 /* A card ending in a list otherwise keeps the last item's 4px below its text */
 .pcontent li:last-child{margin-bottom:0}
 /* A post's "## Contents" list: two columns once there is room */
 @media(min-width:481px){
   #contents+.pcontent>ul{columns:2;column-gap:24px}
   /* Symmetric padding, not margin-bottom: the item ending column 1 would otherwise leave 4px at the card's foot */
-  #contents+.pcontent>ul>li{break-inside:avoid;margin:0;padding:2px 0}
+  #contents+.pcontent>ul>li{break-inside:avoid;margin:0;padding:3px 0}
 }
-/* Callouts: a quiet inset panel with a section-style label, no stripe or icon.
-   The panel is mixed from tokens (--bg2 equals --card in dark); only a warning's label takes color. */
-.pcontent .callout{background:color-mix(in srgb,var(--t1) 4%,var(--card));border-radius:14px;padding:14px 16px;margin:14px 0}
+/* Callouts: a quiet inset panel with a section-style label, no stripe, icon or color; the label's words carry the type.
+   The panel is mixed from tokens because --bg2 equals --card in dark. */
+.pcontent .callout{background:color-mix(in srgb,var(--t1) 4%,var(--card));border-radius:14px;padding:16px 18px;margin:18px 0}
 .pcontent .callout>:last-child{margin-bottom:0}
 .pcontent .callout .callout-title{font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);line-height:1.4;margin-bottom:6px}
-.pcontent .callout-warning .callout-title{color:#A16207}
-html[data-theme="dark"] .pcontent .callout-warning .callout-title{color:#FBBF24}
-html[data-theme="sepia"] .pcontent .callout-warning .callout-title{color:#A6552B}
 .pcontent [id],#ulist>.link-sec[id]{scroll-margin-top:16px}
 .pcontent img{max-width:100%;height:auto;border-radius:14px;margin:16px 0;display:block;box-shadow:var(--shadow)}
 .pcontent hr{border:none;border-top:1px solid var(--bdr2);margin:20px 0}
-.pcontent .table-wrap{overflow-x:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+/* Space above too: the small header labels otherwise sit right under a heading or paragraph */
+.pcontent .table-wrap{overflow-x:auto;margin:24px 0;-webkit-overflow-scrolling:touch}
 .pcontent table{width:100%;border-collapse:collapse;font-size:.875rem}
 .pcontent th,.pcontent td{vertical-align:top}
-.pcontent th{text-align:left;font-weight:600;color:var(--t1);padding:10px 12px;border-bottom:2px solid var(--bdr)}
-.pcontent td{color:var(--t2);padding:10px 12px;border-bottom:1px solid var(--bdr2)}
-.pcontent tr:last-child td{border-bottom:none}
+/* Header cells read as labels (the section-label style), so a bold row or first column can't pass for a header */
+.pcontent th{text-align:left;font-size:.6875rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:0 12px 10px;border-bottom:1px solid var(--bdr)}
+.pcontent td{color:var(--t2);padding:12px;line-height:1.6;border-bottom:1px solid var(--bdr2)}
+/* A table ends at its last line of text, like a paragraph */
+.pcontent tr:last-child td{border-bottom:none;padding-bottom:0}
 
 /* Search & Command Input (shared) */
 .search,.cmd-input{display:block;width:100%;border-radius:var(--rr);background:var(--card) var(--search-icon) 16px center/18px no-repeat;font:400 1rem/1 var(--font);color:var(--t1);outline:none}

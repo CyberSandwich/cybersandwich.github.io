@@ -345,16 +345,12 @@ function showPost(slug){
     const frag=document.createDocumentFragment();
     var card=null;
     function flush(){if(card){frag.appendChild(card);card=null}}
-    var nodes=[].slice.call(tmp.childNodes),lead=true;
+    var nodes=[].slice.call(tmp.childNodes);
     for(var i=0;i<nodes.length;i++){
       var n=nodes[i];
       if(n.nodeType===1&&n.tagName==='H1'){continue}
-      // An italic-only line first after the title is the page dateline (mirrors build-posts.js buildLayout)
-      if(lead&&n.nodeType===1){
-        lead=false;
-        if(n.tagName==='P'&&n.childNodes.length===1&&n.firstChild.tagName==='EM'){
-          const m=document.createElement('p');m.className='pmeta';m.innerHTML=n.firstChild.innerHTML;frag.appendChild(m);continue}
-      }
+      // The dateline parse() prepends sits outside the cards
+      if(n.nodeType===1&&n.className==='pmeta'){frag.appendChild(n.cloneNode(true));continue}
       if(n.nodeType===1&&n.tagName==='H2'){
         flush();
         const sec=mkSection(n.textContent,'link-sec');
@@ -379,7 +375,7 @@ function showPost(slug){
   var mdFile=slug+'.md';
   if(posts)posts.forEach(function(p){if(p.slug===slug||p.file.replace('.md','')===slug)mdFile=p.file});
   _swr('/posts/'+encodeURIComponent(mdFile),{
-    parse:function(md){try{return parseMd(md)}catch(e){console.error('Parse error:',e);return'<p>Unable to render this post.</p>'}},
+    parse:function(md){try{const m=postMeta(md,mdFile);return(m?'<p class="pmeta">'+esc(m)+'</p>':'')+parseMd(md)}catch(e){console.error('Parse error:',e);return'<p>Unable to render this post.</p>'}},
     key:'swr_post_'+slug,
     onFresh:function(html){
       el.style.opacity='0';
@@ -597,6 +593,18 @@ function filterList(input,container){
   }else if(empty){empty.style.display='none'}
 }
 
+// Post dateline, e.g. "Updated 22 Oct 2026 (14 min read)". The date comes from the YYYY-MM-DD file prefix, or frontmatter
+// `updated:` when later. Words follow the posts.yml manifest rule (frontmatter and heading lines excluded) at 230 wpm.
+// build-posts.js lifts this function, so static pages print the same line.
+function postMeta(md,file){
+  const pub=(String(file).match(/^\d{4}-\d{2}-\d{2}/)||[])[0];
+  const fm=md.match(/^---\r?\n([\s\S]*?)\r?\n---/),up=fm&&(fm[1].match(/^updated:\s*(\d{4}-\d{2}-\d{2})\s*$/m)||[])[1];
+  const day=up||pub;
+  if(!day)return '';
+  const words=md.replace(/^---[\s\S]*?---\n?/,'').replace(/^#+ .+$/gm,'').split(/\s+/).filter(Boolean).length;
+  const d=new Date(day+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  return (up&&up!==pub?'Updated ':'')+d+' ('+Math.max(1,Math.round(words/230))+' min read)';
+}
 function fmtDate(d,opts){
   if(!d)return '';
   const dt=new Date(d+'T12:00:00');

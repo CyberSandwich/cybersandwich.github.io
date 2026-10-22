@@ -57,15 +57,13 @@ function buildLayout(html) {
     }
   }
 
-  // An italic-only line first after the title is the page dateline (mirrors showPost in app.js)
-  var meta = tokens.length && tokens[0].type === 'content' && tokens[0].html.match(/^<p><em>((?:(?!<\/em>)[\s\S])*)<\/em><\/p>$/);
-  if (meta) {
-    body += '<p class="pmeta">' + meta[1] + '</p>\n';
-    tokens.shift();
-  }
-
   for (var i = 0; i < tokens.length; i++) {
     var tok = tokens[i];
+    // The postMeta dateline sits outside the cards (mirrors showPost in app.js)
+    if (tok.type === 'content' && tok.html.indexOf('<p class="pmeta">') === 0) {
+      body += tok.html + '\n';
+      continue;
+    }
     if (tok.type === 'h2') {
       flush();
       body += '<div class="link-sec"' + (tok.id ? ' id="' + tok.id + '"' : '') + '><h3>' + tok.text + '</h3></div>\n';
@@ -260,6 +258,12 @@ function generatePage(post, slug, layout, fm) {
   });
 }
 
+// Same HTML showPost's parse() builds: the postMeta dateline, then the parsed markdown
+function renderPost(md, file) {
+  var meta = S.app.postMeta(md, file);
+  return (meta ? '<p class="pmeta">' + S.escAttr(meta) + '</p>' : '') + parseMd(md);
+}
+
 // /posts listing: month groups, newest first, the cards showList draws in the SPA
 function generateIndex(list) {
   var canonical = SITE + '/posts';
@@ -303,7 +307,7 @@ function generateIndex(list) {
 // 4. Build
 // ---------------------------------------------------------------------------
 
-module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, generatePage: generatePage, generateIndex: generateIndex };
+module.exports = { parseFrontmatter: parseFrontmatter, buildLayout: buildLayout, renderPost: renderPost, generatePage: generatePage, generateIndex: generateIndex };
 if (require.main !== module) return;
 
 var stats = { built: 0, unchanged: 0 };
@@ -318,7 +322,7 @@ posts.forEach(function(post) {
   }
 
   var md = fs.readFileSync(mdPath, 'utf8');
-  S.writePage('posts/' + slug, generatePage(post, slug, buildLayout(parseMd(md)), parseFrontmatter(md)), stats);
+  S.writePage('posts/' + slug, generatePage(post, slug, buildLayout(renderPost(md, post.file)), parseFrontmatter(md)), stats);
 });
 
 // /posts itself, so the listing is a real 200 page and not the SPA's 404.html fallback
