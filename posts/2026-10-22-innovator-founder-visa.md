@@ -5,7 +5,7 @@ updated: 2026-10-22
 
 # The Innovator Founder Visa Guide
 
-*Updated 22 Oct 2026 · 14 min read*
+*Updated 22 Oct 2026 (14 min read)*
 
 This guide explains how the UK Innovator Founder visa works, from getting endorsed to settling after three years.
 
