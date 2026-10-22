@@ -5,8 +5,6 @@ updated: 2026-10-22
 
 # The Innovator Founder Visa Guide
 
-*Updated 22 Oct 2026 (14 min read)*
-
 This guide explains how the UK Innovator Founder visa works, from getting endorsed to settling after three years.
 
 ## Contents
@@ -204,17 +202,17 @@ Bodies withdraw when the business never started, the founder never moved or is n
 
 After 3 years on this route, you apply for a settlement endorsement. The body must confirm that the business is active and trading and sustainable for 12 months. It must also confirm significant achievements against the endorsed plan, your day-to-day role, and at least two of these seven targets:
 
-| # | Criterion | Realistic? |
-|---|---|---|
-| 1 | £50,000 invested and actively spent on the business | Yes; the most common choice |
-| 2 | Customers at least doubled in 3 years, and above the average for similar UK businesses | Hard to prove; no reliable benchmark exists |
-| 3 | Significant R&D plus a UK intellectual property application | Strict; a trademark does not count |
-| 4 | £1 million annual gross revenue | Fast growers only |
-| 5 | £500,000 revenue, £100,000 of it from exports | Export-led businesses only |
-| 6 | 10 full-time jobs for settled workers | Possible, at volume |
-| 7 | 5 full-time jobs for settled workers, each with a mean salary of at least £25,000 | Yes; usually paired with 1 |
+| Criterion | Realistic? |
+|---|---|
+| £50,000 invested and actively spent on the business | Yes; the most common choice |
+| Customers at least doubled in 3 years, and above the average for similar UK businesses | Hard to prove; no reliable benchmark exists |
+| Significant R&D plus a UK intellectual property application | Strict; a trademark does not count |
+| £1 million annual gross revenue | Fast growers only |
+| £500,000 revenue, £100,000 of it from exports | Export-led businesses only |
+| 10 full-time jobs for settled workers | Possible, at volume |
+| 5 full-time jobs for settled workers, each with a mean salary of at least £25,000 | Yes; usually paired with the £50,000 |
 
-The pair most founders aim for is 1 plus 7. Jobs must last 12 months at an average of 30 hours a week, held by settled workers: British or Irish citizens, people with EU settled or pre-settled status, other ILR holders and UK Ancestry visa holders, but not Graduate, Student or Skilled Worker visa holders. Your own salary does not count. Co-founders cannot share a target: if both rely on the five-jobs target, the business needs ten jobs.
+The pair most founders aim for is the £50,000 investment plus the five jobs. Jobs must last 12 months at an average of 30 hours a week, held by settled workers: British or Irish citizens, people with EU settled or pre-settled status, other ILR holders and UK Ancestry visa holders, but not Graduate, Student or Skilled Worker visa holders. Your own salary does not count. Co-founders cannot share a target: if both rely on the five-jobs target, the business needs ten jobs.
 
 ---
 
