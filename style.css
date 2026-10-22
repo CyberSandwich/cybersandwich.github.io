@@ -269,8 +269,14 @@ html[data-theme="sepia"] .pcontent{--acc-ink:#8B5E3C;--mark:rgba(166,123,91,.22)
 .pcontent [id],#ulist>.link-sec[id]{scroll-margin-top:16px}
 .pcontent img{max-width:100%;height:auto;border-radius:14px;margin:16px 0;display:block;box-shadow:var(--shadow)}
 .pcontent hr{border:none;border-top:1px solid var(--bdr2);margin:20px 0}
-/* Space above too: the small header labels otherwise sit right under a heading or paragraph */
-.pcontent .table-wrap{overflow-x:auto;margin:24px 0;-webkit-overflow-scrolling:touch}
+/* Tables sit in the --inset panel (as callouts and code do) so their start and end are unmistakable; rules inside use
+   a stronger mix because the usual --bdr2 hairline vanishes on the panel. A table that is a card's whole content is
+   already framed by the card, so it drops the panel. */
+.pcontent .table-wrap{overflow-x:auto;margin:18px 0;padding:14px 16px;border-radius:14px;background:var(--inset);-webkit-overflow-scrolling:touch}
+.pcontent .table-wrap th,.pcontent .table-wrap td{border-color:color-mix(in srgb,var(--t1) 9%,var(--card))}
+#ulist>.pcontent>.table-wrap:only-child{padding:0;border-radius:0;background:none}
+#ulist>.pcontent>.table-wrap:only-child th,#ulist>.pcontent>.table-wrap:only-child td{border-color:var(--bdr2)}
+#ulist>.pcontent>.table-wrap:only-child th{border-color:var(--bdr)}
 .pcontent table{width:100%;border-collapse:collapse;font-size:.875rem}
 .pcontent th,.pcontent td{vertical-align:top}
 /* Header cells read as labels (the section-label style), so a bold row or first column can't pass for a header */
@@ -285,7 +291,7 @@ html[data-theme="sepia"] .pcontent{--acc-ink:#8B5E3C;--mark:rgba(166,123,91,.22)
 .pcontent th:last-child,.pcontent td:last-child{padding-right:0}
 /* Column alignment from the markdown separator row (---: and :---:). Proportional figures on purpose:
    tabular ones gave the system font's narrow "1" a full-width slot and made amounts look gappy */
-.pcontent th.r,.pcontent td.r{text-align:right}
+.pcontent th.r,.pcontent td.r{text-align:right;white-space:nowrap}
 .pcontent th.c,.pcontent td.c{text-align:center}
 
 /* Search & Command Input (shared) */
