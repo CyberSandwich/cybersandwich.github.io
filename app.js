@@ -400,7 +400,7 @@ function parseMd(md,_depth){
   if(!md||typeof md!=='string')return '';
   if(!_depth)md=md.replace(/^---[\s\S]*?---\n?/,'');
   if((_depth||0)>4)return'<p>'+esc(md)+'</p>';
-  let h='',code=false,tbl=false,para=[];
+  let h='',code=false,tbl=false,para=[],al=[];
   // Open lists, outermost first; each <li> stays open until its sibling or parent closes
   const ls=[],ids={};
   const lines=md.split('\n');
@@ -436,20 +436,23 @@ function parseMd(md,_depth){
       }else h+='<blockquote>'+parseMd(bq.join('\n'),(_depth||0)+1)+'</blockquote>';
       continue;
     }
-    // Tables: wrapped so wide ones scroll inside the card; \| is a literal pipe, empty cells keep their column
+    // Tables: wrapped so wide ones scroll inside the card; \| is a literal pipe, empty cells keep their column.
+    // The separator row sets alignment (---: right, :---: center); an all-empty header row (| | |) means no header.
     if(line.charAt(0)==='|'){
-      const cells=line.trim().replace(/^\||(?<!\\)\|$/g,'').split(/(?<!\\)\|/);
+      const row=l=>l.trim().replace(/^\||(?<!\\)\|$/g,'').split(/(?<!\\)\|/);
+      const cell=(tag,c,k)=>'<'+tag+(al[k]?' class="'+al[k]+'"':'')+'>'+il(c.trim())+'</'+tag+'>';
+      const cells=row(line);
       if(!tbl){
-        cl();h+='<div class="table-wrap"><table><thead><tr>';
-        cells.forEach(c=>{h+='<th>'+il(c.trim())+'</th>'});
-        h+='</tr></thead><tbody>';
-        tbl=true;
-        if(i+1<lines.length&&/^[\s|:\-]+$/.test(lines[i+1]))i++;
+        cl();tbl=true;al=[];
+        if(i+1<lines.length&&/^[\s|:\-]+$/.test(lines[i+1])){
+          al=row(lines[++i]).map(s=>{s=s.trim();return/^:-+:$/.test(s)?'c':/^-+:$/.test(s)?'r':''});
+        }
+        h+='<div class="table-wrap"><table>';
+        if(cells.some(c=>c.trim()))h+='<thead><tr>'+cells.map((c,k)=>cell('th',c,k)).join('')+'</tr></thead>';
+        h+='<tbody>';
         continue;
       }
-      h+='<tr>';
-      cells.forEach(c=>{h+='<td>'+il(c.trim())+'</td>'});
-      h+='</tr>';
+      h+='<tr>'+cells.map((c,k)=>cell('td',c,k)).join('')+'</tr>';
       continue;
     }
     // Lists: task (- [ ] / - [x]), unordered, ordered; deeper indentation nests inside the open item
