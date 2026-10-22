@@ -5,7 +5,7 @@ updated: 2026-10-22
 
 # The Innovator Founder Visa Guide
 
-This is a short guide to the UK Innovator Founder visa, which lets you run your own business in the UK and can lead to settlement after 3 years. About two in three applications fail at endorsement, so that step gets the most detail here.
+How the UK Innovator Founder visa works, from endorsement to settlement after 3 years.
 
 ## Contents
 
@@ -75,8 +75,6 @@ Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed befo
 
 ---
 
-Each body also has its own requirements:
-
 - **Innovator International**
   - Publishes its assessment questions; answer each one inside your plan
   - One free second assessment after a refusal
@@ -89,7 +87,7 @@ Each body also has its own requirements:
   - Applicant must be based outside the UK, with revenue from about £250,000 (depending on sector) and a completed equity raise
 
 > [!tip] Why the Choice Matters
-> The bodies read one rulebook differently on side jobs, outsourcing, combining existing products and funding evidence. A refusal by one does not bind another, but every attempt costs a fee and months, so compare the bodies before applying.
+> The bodies read one rulebook differently on side jobs, outsourcing, combining existing products and funding evidence. A refusal by one does not bind another, but each attempt costs a fee and months.
 
 ## Getting Endorsed
 
@@ -103,7 +101,7 @@ Write forecasts you can beat: cost every item, get supplier quotes for anything 
 
 ### Evidence of Demand
 
-Most applicants bring only desk research. Instead:
+Desk research alone is weak. Instead:
 
 1. Interview about ten likely customers about their problem.
 2. Test a priced solution with them.
@@ -146,11 +144,11 @@ The endorsement letter is valid for 3 months, so do not request it too early. Ex
 - **Skilled Worker:** you can switch inside the UK.
 - **Visitor:** you cannot switch; apply from outside the UK.
 
-Apply with time to spare. An application made before your visa expires keeps your leave going while it is decided, but if it is refused after the expiry date you cannot make a fresh application from inside the UK. Leave room for a second endorsement attempt. The 3 years start at the Innovator Founder grant; time on other visas does not count.
+An application made before your visa expires keeps your leave going while it is decided, but if it is refused after the expiry date you cannot make a fresh application from inside the UK. Leave room for a second endorsement attempt. The 3 years start at the Innovator Founder grant; time on other visas does not count.
 
 ### Processing Times
 
-The Home Office aims to decide in 3 weeks from outside the UK and 8 weeks from inside, with paid priority (5 working days) and super priority (next working day). Founders report 3 to 6 months in practice as of Oct 2026, priority included, and priority slots are hard to book. Plan leases and notice periods around the longer figure.
+The Home Office aims to decide in 3 weeks from outside the UK and 8 weeks from inside, with paid priority (5 working days) and super priority (next working day). Founders report 3 to 6 months in practice as of Oct 2026, priority included, and priority slots are hard to book.
 
 > [!warning] Rising Refusals After Endorsement
 > Refusals of in-UK applications by main applicants (switches and extensions on this route and the old Innovator route) rose from 3.2% in 2021 to 31.4% in Q2 2026. Caseworkers send written questions about who built the product, funding, pricing and claimed customer conversations. Keep evidence you can share for every claim in the plan.
