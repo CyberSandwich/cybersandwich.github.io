@@ -612,17 +612,15 @@ function filterList(input,container){
   }else if(empty){empty.style.display='none'}
 }
 
-// Post dateline, e.g. "Updated 22 Oct 2026 (14 min read)". The date comes from the YYYY-MM-DD file prefix, or frontmatter
-// `updated:` when later. Words follow the posts.yml manifest rule (frontmatter and heading lines excluded) at 230 wpm.
-// build-posts.js lifts this function, so static pages print the same line.
+// Post dateline, e.g. "Updated 22 Oct 2026". The date comes from the YYYY-MM-DD file prefix, or frontmatter `updated:`
+// when later. No read time (owner). build-posts.js lifts this function, so static pages print the same line.
 function postMeta(md,file){
   const pub=(String(file).match(/^\d{4}-\d{2}-\d{2}/)||[])[0];
   const fm=md.match(/^---\r?\n([\s\S]*?)\r?\n---/),up=fm&&(fm[1].match(/^updated:\s*(\d{4}-\d{2}-\d{2})\s*$/m)||[])[1];
   const day=up||pub;
   if(!day)return '';
-  const words=md.replace(/^---[\s\S]*?---\n?/,'').replace(/^#+ .+$/gm,'').split(/\s+/).filter(Boolean).length;
   const d=new Date(day+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  return (up&&up!==pub?'Updated ':'')+d+' ('+Math.max(1,Math.round(words/230))+' min read)';
+  return (up&&up!==pub?'Updated ':'')+d;
 }
 function fmtDate(d,opts){
   if(!d)return '';
