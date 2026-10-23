@@ -118,7 +118,7 @@ Re-targeting the same service at a new demographic fails, because any provider c
 - **Route to market:** a sales channel or distribution alone does not qualify; it can only be the scaling mechanism.
 - **Feature grid:** a competitor grid where rivals hold most features answers the innovation question against you. Show indirect and free alternatives and your own weaknesses instead of 2 or 3 hand-picked rivals.
 - **Not really UK:** the innovation, its control and the head of operations must be in the UK, and the demand must be UK demand; an operating arm of an overseas business fails. Export share does not matter.
-- **Other shapes:** generic retail and restaurants, another health app or beauty product, basic aggregators, price-based competition and bought franchises. One body stated in 2021 that it also excludes adult, crypto, and political or religious projects; no published list exists.
+- **Other shapes:** generic retail and restaurants, another health app or beauty product, basic aggregators, price-based competition and bought franchises. Innovator International stated in 2021 that it also excludes adult, crypto, and political or religious projects; no published list exists.
 
 ### Scalability in Practice
 
@@ -139,16 +139,11 @@ To join an existing business, Skilled Worker is the usual route. Scale-up needs 
 
 Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed before 13 April 2023.
 
-### Where Bodies Differ
+### How They Differ
 
-- **Plan format:** one body takes no plan upload; you complete its own form, and payment starts a 4-week clock, so finish the plan before paying.
-- **Runway:** some bodies check about 12 months, others about 24 (reported), and one expects capital planned for 3 years.
-- **Time:** some require full-time involvement and an in-house technical team member, others allow part-time work alongside the business.
-- **Outsourced development:** one body scores it in bands, and largely outsourced scores zero.
-- **Existing components:** one body has reportedly accepted combining them since about Oct 2024; another likely refuses.
-- **Checkpoints:** 2 or 3, and one adds a monthly trading report and a 36-month checkpoint.
-- **Settlement targets:** one body wants them named at endorsement.
-- **R&D spend:** one body expects around 21% of revenue spent on R&D, reads very low startup costs as weak innovation, and treats innovation as a first yes or no gate.
+- **Innovator International:** allows part-time work alongside the business, checks about 12 months of runway, runs 2 checkpoints, and likely refuses a product that only combines existing components.
+- **Envestors:** takes no plan upload (you complete its own online form), and payment starts a 4-week clock, so finish the plan before paying. It requires full-time involvement and an in-house technical team member the business already has, checks about 24 months of runway (reported), wants your settlement targets named at endorsement, and runs checkpoints at 12, 24 and 36 months plus a monthly trading report.
+- **UK Endorsing Services:** treats innovation as a first yes or no gate, scores outsourced development in bands (largely outsourced scores zero), expects around 21% of revenue spent on R&D, and reads very low startup costs as weak innovation. It has reportedly accepted combining existing components since about Oct 2024, and allows part-time work if the business stays the main activity.
 
 Bodies cannot give individual pre-application advice (barred since 2023), so use their free webinars and public Q&A for general questions. A refusal at one body does not count against you at another.
 
@@ -196,7 +191,7 @@ Money from someone else needs their bank evidence and a signed letter of terms (
 - Where they are held and how they were injected
 - Any conditions attached, such as equity or repayment
 
-One body asks only for a profit and loss statement and cashflow, 3 years monthly; a balance sheet is worth adding if you can produce one.
+Innovator International asks only for a profit and loss statement and cashflow, 3 years monthly; a balance sheet is worth adding if you can produce one.
 
 ---
 
@@ -215,13 +210,13 @@ One body asks only for a profit and loss statement and cashflow, 3 years monthly
 
 ### Submitting
 
-Upload one PDF holding the plan, financials and CV: one body's upload page has slots for plan, financials, funds and extras but none for a CV. Assessors read the CV first, and an inflated past role contaminates the file. Also send your passport, evidence of funds, proof of address (it need not be a UK address) and optional appendices and a 2-minute video, and nothing else unless asked. You pay personally, never a third party.
+Upload one PDF holding the plan, financials and CV: Innovator International's upload page has slots for plan, financials, funds and extras but none for a CV. Assessors read the CV first, and an inflated past role contaminates the file. Also send your passport, evidence of funds, proof of address (it need not be a UK address) and optional appendices and a 2-minute video, and nothing else unless asked. You pay personally, never a third party.
 
 The file must be complete before assessment starts: material sent after the assessor forms a view may not count.
 
 ### Waiting and Chasing
 
-Silence during the wait is normal. Bodies give no progress updates and do not expedite. Reasonable points to chase: about 4 weeks (enquiry), 40 days (note, if time is critical), 60 days (urgent note). One body's pack says not to chase before day 60. Cases are investigated only after about day 50. A decision inside a week with no questions is usually a refusal.
+Silence during the wait is normal. Bodies give no progress updates and do not expedite. Reasonable points to chase: about 4 weeks (enquiry), 40 days (note, if time is critical), 60 days (urgent note). Innovator International's pack says not to chase before day 60. Cases are investigated only after about day 50. A decision inside a week with no questions is usually a refusal.
 
 ---
 
@@ -233,8 +228,8 @@ The interview is usually a recorded video call. It tests that you can explain ho
 
 The usual grounds, in order: not innovative enough, no customer validation, weak development plans, unrealistic projections, viability or scalability doubts, and the founder's capability. Some refusals are flat: no intent to build.
 
-- **Second assessment:** One body gives 1 free second assessment and reports that 95% fail. It wins only on a fact the assessor missed, never on repeating or amending the plan: say what was missed and what you hold, attach nothing, and expect about 4 to 5 weeks. The form has one box per criterion, so signpost the evidence you hold in the matching box.
-- **Appeal:** a separate assessor rereads the original submission only. Appeals succeed occasionally, each time on a plan the assessor misread. At one body, new information means a fresh paid application, and the Home Office is told an appeal was made.
+- **Second assessment:** Innovator International gives 1 free second assessment and reports that 95% fail. It wins only on a fact the assessor missed, never on repeating or amending the plan: say what was missed and what you hold, attach nothing, and expect about 4 to 5 weeks. The form has one box per criterion, so signpost the evidence you hold in the matching box.
+- **Appeal:** a separate assessor rereads the original submission only. Appeals succeed occasionally, each time on a plan the assessor misread. At Envestors, new information means a fresh paid application, and the Home Office is told an appeal was made.
 - **Reapplying:** no limit, but £1,000 each time. Assessors read a later application alongside earlier ones and ask why the strongest version was not sent first, and after 2 refusals they doubt you will ever be accepted. Fix the proposition on the feedback first.
 - **No legal remedy:** no case law exists on the route and whether a body is reviewable is untested. Plan for 2 to 3 attempts, about £3,600 in fees.
 
@@ -305,7 +300,7 @@ Agree any change to your product, market or forecasts with your endorsing body i
 - **Minor:** adding a revenue stream, segment, pricing model or market, or lowering a forecast. Carry on, but file it. Ten or more minor changes can add up to a major one.
 - **Major:** changing the innovation or the problem you solve, or drifting into consultancy. That is a new assessment (£1,000 plus VAT) on the same visa, allowed only once you show you exhausted reasonable attempts at the original plan; a better opportunity is not a ground.
 
-Lowering a forecast is free; do it before the checkpoint it matters for, so you are judged against the revised plan. Written guides read wider than one body's verbal reading (any change to product, market or forecasts), so notify every revision; Home Office confirmation is pending.
+Lowering a forecast is free; do it before the checkpoint it matters for, so you are judged against the revised plan. Written guides read wider than Innovator International's verbal reading (any change to product, market or forecasts), so notify every revision; Home Office confirmation is pending.
 
 Unapproved activity is discounted rather than counted: £1 million of revenue with £950,000 from unapproved consultancy counts as £50,000. A refused change does not withdraw the endorsement; you revert, apply for a full reassessment, or leave the route.
 
@@ -329,7 +324,7 @@ Bodies count the two jobs targets as 1 target, not 2. Evidence a third target wh
 
 ### Meeting the Targets
 
-- **£50,000:** new money you put in, not reinvested profit; your own savings or a documented loan count, and a relative's money should be documented as a gift or loan to you. Bodies record investment obtained at each checkpoint and the notes go into the settlement file, so aim to have it in by 12 months. Both the money in and the spending must show on the company's business account, and spend booked properly through the business counts even before the visa. Development, contractors, marketing, event travel and equipment pass if you can state the business reason. Tie every spend line to a line of the endorsed plan: one body's guide says spend must further the business, but the letter it signs says it must further the plan assessed at endorsement, and the second is the safe reading. Your own salary does not count; check with your body whether visa and endorsement fees do. Avoid employee salaries as proof, spending solely to reach £50,000, and paying suppliers personally or from an offshore account.
+- **£50,000:** new money you put in, not reinvested profit; your own savings or a documented loan count, and a relative's money should be documented as a gift or loan to you. Bodies record investment obtained at each checkpoint and the notes go into the settlement file, so aim to have it in by 12 months. Both the money in and the spending must show on the company's business account, and spend booked properly through the business counts even before the visa. Development, contractors, marketing, event travel and equipment pass if you can state the business reason. Tie every spend line to a line of the endorsed plan: Innovator International's guide says spend must further the business, but the letter it signs says it must further the plan assessed at endorsement, and the second is the safe reading. Your own salary does not count; check with your body whether visa and endorsement fees do. Avoid employee salaries as proof, spending solely to reach £50,000, and paying suppliers personally or from an offshore account.
 - **Jobs timing:** each must last 12 months at an average of 30 hours a week, so to settle at 3 years, hire by about month 22, or by about month 10 if a leaver restarts the clock (unsettled; hire early or over-hire by one).
 - **Contracts and payroll:** put everyone you count, a co-founder included, on a written employment contract: a director paid through payroll with no contract is an office holder, not an employee. Your own salary counts toward neither jobs target. £25,000 roles suit customer success, operations and support, not engineering, so a senior technical hire is extra cost on top. Register for PAYE before the first payday and hold employer liability insurance of at least £5 million from day one.
 - **Pay:** the rules require each of the 5 jobs to carry a mean salary of at least £25,000, so each role must reach it on its own. Use employer-only pension contributions on counted jobs, since salary sacrifice lowers gross pay below the line.
@@ -348,7 +343,7 @@ Bodies count the two jobs targets as 1 target, not 2. Evidence a third target wh
 
 The Rules ask whether the business appears sustainable for the next 12 months, weighing its assets and expected income against current and planned expenses. They set no profit requirement. The test looks forward, so evidence it with accounts, bank statements and a 12-month forecast for the endorsed business itself, with sales broken down by income stream.
 
-Bodies read it more strictly than the Rules. Sales must cover all costs, market-rate salaries included (yours too: you need not draw it, but profit must be able to pay it), with no top-ups: one body says founder capital cannot cover a trading shortfall at settlement, and money put in solely to reach settlement is not counted. A loss-making growth phase passes only if the original plan declared it. Sustainability is judged on the whole business, so a loss-making services arm drags it down, and no revenue at all by year 3 is a refusal.
+Bodies read it more strictly than the Rules. Sales must cover all costs, market-rate salaries included (yours too: you need not draw it, but profit must be able to pay it), with no top-ups: Innovator International says founder capital cannot cover a trading shortfall at settlement, and money put in solely to reach settlement is not counted. A loss-making growth phase passes only if the original plan declared it. Sustainability is judged on the whole business, so a loss-making services arm drags it down, and no revenue at all by year 3 is a refusal.
 
 Supply what the body cannot check itself: a working demo, invoices, bank statements, accounts, employment contracts and contracts for repeat or coming orders. The settlement assessor has not seen your checkpoint notes, so restate everything against the original plan, and describe your daily tasks rather than a title.
 
