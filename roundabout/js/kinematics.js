@@ -45,13 +45,15 @@ export function speedProfile(path, latComfort) {
 
 /**
  * Centre arc length at which a vehicle waits at the give-way line. Paths cross the ICD at an angle, so the
- * front corner on the ring side reaches the ring before the front centre does: hold back by that overhang.
+ * front corner on the ring side reaches the ring before the front centre does: hold back by that overhang,
+ * plus STOP_MARGIN, which also keeps a waiting nose clear of a bus or lorry whose ends swing out on the ring.
  */
+const STOP_MARGIN = 0.8;
 export function stopPoint(path, length, width) {
   const q = sampleAt(path, path.marks.giveWay);
   const phi = Math.abs(wrapPi(q.heading - (q.bearing + Math.PI / 2)));
   const overhang = ((width / 2) * Math.abs(Math.cos(phi))) / Math.max(0.3, Math.sin(phi));
-  return path.marks.giveWay - overhang - 0.3 - length / 2;
+  return path.marks.giveWay - overhang - STOP_MARGIN - length / 2;
 }
 
 export const allowedAt =(path, profile, s) => profile[indexAt(path, s)];
@@ -82,14 +84,24 @@ export function requiredDecel(v, d, T) {
  * For an entrant about to use its entry section, every other vehicle whose true path crosses it.
  * entrant: { path, s, v, length, accelMax, latComfort }; others: { path, s, v, length }.
  * Returns [{ other, inZone, distance, eta, needDecel, tClear }], soonest first.
- * eta uses max(v, minSpeed) so a vehicle crawling now is not treated as never arriving.
+ * eta uses max(v, minSpeed) so a vehicle crawling now is not treated as never arriving. With cruise, a
+ * vehicle still picking up speed is assumed to reach CRUISE_SHARE of its bend speed at the conflict, for
+ * both eta and needDecel (AI caution; the judge uses speeds as they are).
  */
-export function assessEntry(entrant, others, { minSpeed = 0, startDelay = 0 } = {}) {
+const CRUISE_SHARE = 0.9;
+const CRUISE_LAT = 3.0; // m/s^2 when a vehicle's own comfort is unknown
+
+export function assessEntry(entrant, others, { minSpeed = 0, startDelay = 0, cruise = false } = {}) {
   const profile = speedProfile(entrant.path, entrant.latComfort);
   const out = [];
   for (const o of others) {
-    // A vehicle sharing this approach lane is queued with the entrant: car-following handles it.
-    if (o.path.arm === entrant.path.arm && o.path.lane === entrant.path.lane && o.s < o.path.marks.entryEnd) continue;
+    // A vehicle sharing this approach lane is queued with the entrant: car-following handles it. One beside
+    // it on the same approach that has not crossed its line yet is no circulating traffic either (counting it
+    // deadlocks two lanes waiting on each other).
+    if (o.path.arm === entrant.path.arm) {
+      if (o.path.lane === entrant.path.lane && o.s < o.path.marks.entryEnd) continue;
+      if (o.s + o.length / 2 < o.path.marks.giveWay) continue;
+    }
     for (const run of entryConflicts(entrant.path, o.path, Math.max(entrant.length, o.length))) {
       const front = o.s + o.length / 2;
       const rear = o.s - o.length / 2;
@@ -99,8 +111,10 @@ export function assessEntry(entrant, others, { minSpeed = 0, startDelay = 0 } = 
         out.push({ other: o, inZone: true, distance: 0, eta: 0, needDecel: Infinity, tClear });
       } else {
         const distance = run.sFrom - front;
-        const eta = distance / Math.max(o.v, minSpeed, 0.1);
-        out.push({ other: o, inZone: false, distance, eta, needDecel: requiredDecel(o.v, distance, tClear + CLEAR_MARGIN), tClear });
+        const lat = o.latComfort ?? o.params?.latComfort ?? CRUISE_LAT;
+        const v = cruise ? Math.max(o.v, CRUISE_SHARE * allowedAt(o.path, speedProfile(o.path, lat), run.sFrom)) : o.v;
+        const eta = distance / Math.max(v, minSpeed, 0.1);
+        out.push({ other: o, inZone: false, distance, eta, needDecel: requiredDecel(v, distance, tClear + CLEAR_MARGIN), tClear });
       }
       break; // only the next pass of each vehicle matters
     }

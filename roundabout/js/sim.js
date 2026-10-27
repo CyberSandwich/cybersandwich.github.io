@@ -1,11 +1,21 @@
 /**
- * Traffic simulation. Pure and deterministic for a given (layout, seed): no clocks, no DOM.
+ * Traffic simulation. Pure and deterministic for a given (layout, trafficSeed, options): no clocks, no DOM.
+ * The arrivals (when, where, what, route, signal habit, driver) depend only on trafficSeed and density, never
+ * on what the player does.
  *
- *   const sim = createSim(layout, { seed?, traffic = true, warmup = 45, player = true })
+ *   const sim = createSim(layout, { trafficSeed?, density = 'normal', preset?, warmup = 45, player = true })
+ *     trafficSeed  traffic randomness, separate from the layout seed (rerun the same junction, new traffic);
+ *                  defaults to layout.seed. ('seed' is accepted as an alias.)
+ *     density      'none' | 'light' | 'normal' | 'heavy' (traffic-data DENSITY, heavy capped per tier)
+ *     preset       a traffic-data PRESETS key: 'exitPractice' | 'liarCars'; its options fill in the rest
+ *     honesty      share of correct signallers, overriding the tier's (presets set it)
+ *     traffic      false = density 'none' (kept for older callers)
+ *     rate         arrivals per arm per second, overriding density (tuning and tests only)
  *   sim.step(dt)              fixed step (60 Hz intended); advances every vehicle
  *   sim.t                     simulated seconds since creation (warm-up excluded)
  *   sim.snapshot()            { t, vehicles: [VehicleView] } plain data for rendering / interpolation
  *   sim.replay()              snapshots of the last 5 s, oldest first (30 Hz)
+ *   sim.spawns()              [{ t, id, arm, type, exitArm, signalBehaviour, driver }] arrivals since warm-up
  *   sim.state()               { t, layout, playerId, vehicles: [VehicleState] } for judge.js
  *   sim.player                the player's VehicleState (null when player = false)
  *   sim.setPlayerControl({ accel, indicator })   player.js drives the player car through this
@@ -32,6 +42,7 @@ import {
 } from './kinematics.js';
 import {
   VEHICLE_TYPES, LARGE_TYPES, COLOURS, colourFor, CRITICAL_GAP, FOLLOW_UP, DRIVER_TYPES, signalMix, TRAFFIC, INDICATOR_HZ,
+  PRESETS, PLAYER_FACING, arrivalRate,
 } from './traffic-data.js';
 
 export const PLAYER_ID = 0;
@@ -39,25 +50,42 @@ const HISTORY_SECONDS = 5;
 const HISTORY_EVERY = 2; // steps; 30 Hz at a 60 Hz step
 const MAX_DECEL = 8;
 const IDM_B = 2.0;
+const ACC_COOLNESS = 0.99; // Treiber and Kesting's c: weight of the constant-acceleration heuristic in follow()
 const DECISION_ZONE = 20; // metres before the line where an AI driver starts judging the gap
 const LOCK_DECEL = 3; // once stopping would need more than this, a committed driver no longer reconsiders
 const SIGNAL_FROM = 60; // metres before the line where approach signals start
 // s an AI driver wants between clearing a conflict and the circulating car arriving: crossing a car's
 // path makes its driver ease off well before the bodies meet.
 const AI_CLEAR_MARGIN = 1.5;
+// Estimates, not sourced: after `ramp` s stopped at the front of its queue a driver accepts gaps `gap` s
+// shorter and lets circulating traffic brake up to the full BRAKE_LIMIT (from brakeShare of it).
+const IMPATIENCE = { ramp: 30, gap: 1.0, brakeShare: 0.8 };
 const GO_ROUND_DECEL = 2.5; // m/s^2: an AI driver who would need more than this to yield before its exit goes round
+// A joiner keeps `headway` s clear of an inner-lane car crossing out of the ring within `reach` m past its merge.
+const CROSS_OUT = { headway: 1.5, reach: 60 };
+const EXIT_LANE_MARGIN = 1.0;
+const LARGE_BESIDE_MARGIN = 2.5; // m of side clearance on an approach under which a bus or lorry next door counts // m of side clearance under which two vehicles bound for one exit lane interact
 const STEER_LAG = 0.25; // s, steering follows path curvature with this time constant
 // Vehicles more crossed than this are not car-following pairs (an exit and the entry beside it cross at ~100 deg);
 // crossing conflicts are settled by gap acceptance instead.
 const MAX_HEADING_DIFF = (75 * Math.PI) / 180;
 
 export function createSim(layout, opts = {}) {
-  const { seed = layout.seed, traffic = true, warmup = 45, player = true } = opts;
-  const rng = createRng(`${seed}|${layout.tier}|sim`);
+  const preset = opts.preset ? PRESETS[opts.preset] : {};
+  const { warmup = 45, player = true } = opts;
+  const trafficSeed = opts.trafficSeed ?? opts.seed ?? layout.seed;
+  const density = opts.density ?? preset.density ?? (opts.traffic === false ? 'none' : 'normal');
+  // Arrivals come from their own streams (one per arm, one for the scheduled bus), each drawing a whole
+  // arrival at once, so the same trafficSeed brings the same vehicles whatever the player does; a blocked
+  // spawn only waits. `rng` serves everything the player can influence (drills, debug injections).
+  const streamSeed = `${trafficSeed}|${layout.tier}`;
+  const rng = createRng(`${streamSeed}|sim`);
   const cfg = TRAFFIC[layout.tier];
-  const mix = signalMix(layout.honesty);
+  const rate = opts.rate ?? arrivalRate(layout.tier, density);
+  const mix = signalMix(opts.honesty ?? preset.honesty ?? layout.honesty);
   const driverWeights = Object.fromEntries(Object.entries(DRIVER_TYPES).map(([k, d]) => [k, d.weight]));
   const vehicles = [];
+  const spawnLog = [];
   const history = [];
   const lastEntry = new Map();
   const signalLeftAt = new Map();
@@ -65,14 +93,41 @@ export function createSim(layout, opts = {}) {
   let nextId = 1;
   let steps = 0;
   let clock = 0;
-  let trafficOn = traffic;
-  const expDelay = () => -Math.log(1 - rng()) / cfg.rate;
-  const nextSpawn = layout.arms.map(() => expDelay() * rng());
-  let nextBus = cfg.busEvery ? rng.range(...cfg.busEvery) * 0.25 : Infinity;
+  let trafficOn = rate > 0;
+  const armStreams = layout.arms.map((_, i) => createRng(`${streamSeed}|arm${i}`));
+  const busStream = createRng(`${streamSeed}|bus`);
+
+  // The player's road is the minor arm and routes that pass its entry are favoured, so the player has gaps
+  // to read and reject without the whole junction running at capacity.
+  const playerPath = layout.paths[layout.player.pathId];
+  const exitWeights = layout.arms.map((arm, i) => Object.fromEntries(Object.entries(arm.exits).map(([exitArm, e]) => {
+    const passes = i !== layout.player.arm && entryConflicts(playerPath, layout.paths[pathId(i, e.lane, Number(exitArm), 0)]).length > 0;
+    return [exitArm, passes ? PLAYER_FACING.passWeight : 1];
+  })));
+  const armRate = (i) => rate * (i === layout.player.arm ? PLAYER_FACING.ownArm : 1);
+  const unitDelay = (r) => -Math.log(1 - r());
+
+  // pending[i]: { at, arrival } the next vehicle due on arm i
+  const pending = layout.arms.map((_, i) => (rate > 0 ? { at: (unitDelay(armStreams[i]) * armStreams[i]()) / armRate(i), arrival: drawArrival(armStreams[i], i) } : null));
+  let pendingBus = cfg.busEvery && rate > 0
+    ? { at: busStream.range(...cfg.busEvery) * 0.25, arrival: drawArrival(busStream, busStream.int(0, layout.arms.length - 1), 'bus') }
+    : null;
+  let nextLiar = preset.liarLag ? 0 : Infinity;
+
+  function drawArrival(r, arm, typeOverride) {
+    const exits = layout.arms[arm].exits;
+    const exitArm = Number(r.weighted(exitWeights[arm]));
+    const type = typeOverride ?? r.weighted(cfg.types);
+    return {
+      arm, exitArm, lane: exits[exitArm].lane, type, colour: colourFor(r, type), signalBehaviour: r.weighted(mix),
+      driver: r.weighted(driverWeights), seed: r(),
+    };
+  }
 
   // ---------- vehicles ----------
 
-  function makeVehicle({ path, type, colour, signalBehaviour, driver, s, v, isPlayer = false }) {
+  // r: the stream for this vehicle's own draws (signal phase, driver variation).
+  function makeVehicle({ path, type, colour, signalBehaviour, driver, s, v, isPlayer = false, r = rng }) {
     const dims = VEHICLE_TYPES[type];
     const d = DRIVER_TYPES[driver];
     const vehicle = {
@@ -91,18 +146,19 @@ export function createSim(layout, opts = {}) {
       committed: false,
       locked: false,
       enteredAt: null,
+      waitingSince: null,
       external: null,
       holdUntil: -Infinity,
-      signalPhase: rng(),
+      signalPhase: r(),
       params: {
-        T: d.T * rng.range(0.9, 1.1),
+        T: d.T * r.range(0.9, 1.1),
         s0: d.s0,
-        a: dims.accel * d.accelScale * rng.range(0.9, 1.1),
+        a: dims.accel * d.accelScale * r.range(0.9, 1.1),
         b: IDM_B,
-        speedScale: d.speedScale * rng.range(0.95, 1.05),
-        latComfort: Math.round(dims.latComfort * rng.range(0.9, 1.1) * 10) / 10,
-        tc: Math.max(CRITICAL_GAP.min, rng.normal(CRITICAL_GAP.mean + d.gapShift, CRITICAL_GAP.sd)),
-        tf: Math.max(FOLLOW_UP.min, rng.normal(FOLLOW_UP.mean + d.gapShift / 2, FOLLOW_UP.sd)),
+        speedScale: d.speedScale * r.range(0.95, 1.05),
+        latComfort: Math.round(dims.latComfort * d.latScale * r.range(0.9, 1.1) * 10) / 10,
+        tc: Math.max(CRITICAL_GAP.min, r.normal(CRITICAL_GAP.mean + d.gapShift, CRITICAL_GAP.sd)),
+        tf: Math.max(FOLLOW_UP.min, r.normal(FOLLOW_UP.mean + d.gapShift / 2, FOLLOW_UP.sd)),
       },
       geo: null,
       stopS: stopPoint(path, dims.length, dims.width),
@@ -134,32 +190,39 @@ export function createSim(layout, opts = {}) {
     return Math.min(vMax, Math.sqrt(Math.max(0, 2 * 1.5 * room)));
   }
 
-  function spawn(armIdx, typeOverride) {
-    const arm = layout.arms[armIdx];
-    const exitArm = Number(rng.pick(Object.keys(arm.exits)));
-    const lane = arm.exits[exitArm].lane;
-    const path = layout.paths[pathId(armIdx, lane, exitArm, 0)];
-    const type = typeOverride ?? rng.weighted(cfg.types);
-    if (!spawnClear(armIdx, lane, VEHICLE_TYPES[type].length)) return false;
-    const v = makeVehicle({
-      path, type, colour: colourFor(rng, type), signalBehaviour: rng.weighted(mix), driver: rng.weighted(driverWeights),
-      s: VEHICLE_TYPES[type].length / 2, v: 0,
-    });
+  function spawn(a) {
+    if (!spawnClear(a.arm, a.lane, VEHICLE_TYPES[a.type].length)) return false;
+    const path = layout.paths[pathId(a.arm, a.lane, a.exitArm, 0)];
+    const v = makeVehicle({ ...a, path, s: VEHICLE_TYPES[a.type].length / 2, v: 0, r: createRng(a.seed) });
     v.v = safeSpawnSpeed(path, v.length, allowed(v) * 0.9);
     vehicles.push(v);
+    spawnLog.push({ t: clock, id: v.id, arm: a.arm, type: a.type, exitArm: a.exitArm, signalBehaviour: a.signalBehaviour, driver: a.driver });
     return true;
   }
 
+  // A blocked arrival keeps its draw and retries a second later.
   function spawnDue() {
+    liarDue();
     if (!trafficOn) return;
     layout.arms.forEach((arm, i) => {
-      if (clock < nextSpawn[i]) return;
-      nextSpawn[i] = clock + (spawn(i) ? expDelay() : 1);
+      const p = pending[i];
+      if (!p || clock < p.at) return;
+      if (!spawn(p.arrival)) { p.at = clock + 1; return; }
+      const r = armStreams[i];
+      pending[i] = { at: p.at + unitDelay(r) / armRate(i), arrival: drawArrival(r, i) };
     });
-    if (clock >= nextBus) {
-      const ok = spawn(rng.int(0, layout.arms.length - 1), 'bus');
-      nextBus = clock + (ok ? rng.range(...cfg.busEvery) : 1);
+    if (pendingBus && clock >= pendingBus.at) {
+      if (!spawn(pendingBus.arrival)) pendingBus.at = clock + 1;
+      else pendingBus = { at: clock + busStream.range(...cfg.busEvery), arrival: drawArrival(busStream, busStream.int(0, layout.arms.length - 1), 'bus') };
     }
+  }
+
+  // liarCars drill: while the player waits near the line, a liar arrives preset.liarLag seconds later.
+  function liarDue() {
+    const p = playerVehicle;
+    if (!p || clock < nextLiar || p.committed || p.stopS - p.s > 16) return;
+    inject({ signalBehaviour: 'wrongLeft', arriveIn: playerTimeToLine() + rng.range(...preset.liarLag), isolate: false });
+    nextLiar = clock + preset.liarEvery;
   }
 
   // ---------- geometry cache per step ----------
@@ -198,17 +261,19 @@ export function createSim(layout, opts = {}) {
   const aheadOnly = (gap) => (gap < 0 ? Infinity : gap);
 
   // Gap along an arm-aligned frame (f forward, l lateral), or Infinity if w is not ahead within `m` sideways.
-  function linearGap(v, w, f, l, m = sideMargin(v, w)) {
+  // alongside: the gap to report when the bodies already overlap lengthways (Infinity = side by side is fine).
+  function linearGap(v, w, f, l, m = sideMargin(v, w), alongside = Infinity) {
     const ev = linearExtents(v.geo.box, f, l);
     const ew = linearExtents(w.geo.box, f, l);
     if ((ew.fMin + ew.fMax) / 2 <= (ev.fMin + ev.fMax) / 2) return Infinity;
     if (ev.lMin > ew.lMax + m || ew.lMin > ev.lMax + m) return Infinity;
-    return aheadOnly(ew.fMin - ev.fMax);
+    const gap = ew.fMin - ev.fMax;
+    return gap < 0 ? alongside : gap;
   }
 
-  // Whether w's body (its centreline, padded by both half-widths) reaches v's own path within `ahead` metres:
-  // a car turning off sees nothing beyond its exit.
-  function onPathAhead(v, w, ahead) {
+  // Arc length on v's own path, within `ahead` metres, where w's body (its centreline, padded by both
+  // half-widths) first reaches it, or null: a car turning off sees nothing beyond its exit.
+  function pathHit(v, w, ahead) {
     const p = v.path;
     const reach = v.width / 2 + w.width / 2 + 0.3;
     const f = dir(w.geo.heading);
@@ -219,16 +284,25 @@ export function createSim(layout, opts = {}) {
     const i1 = Math.min(p.x.length - 1, Math.ceil((v.s + ahead) / p.step));
     for (let i = i0; i <= i1; i += 2) {
       const t = Math.max(0, Math.min(2 * hl, (p.x[i] - ax) * f[0] + (p.z[i] - az) * f[1]));
-      if (Math.hypot(p.x[i] - ax - f[0] * t, p.z[i] - az - f[1] * t) < reach) return true;
+      if (Math.hypot(p.x[i] - ax - f[0] * t, p.z[i] - az - f[1] * t) < reach) return p.s[i];
     }
-    return false;
+    return null;
+  }
+  const onPathAhead = (v, w, ahead) => pathHit(v, w, ahead) !== null;
+
+  // A vehicle already out on the exit v is heading for, while v is still on the ring: neither the ring nor the
+  // exit test covers that stretch, and on a mini it is most of the way out.
+  function exitAheadGap(v, w) {
+    const hit = pathHit(v, w, v.path.marks.exitRing - v.s + w.length + 10);
+    return hit === null ? Infinity : aheadOnly(hit - (v.s + v.length / 2));
   }
 
   function ringGap(v, w) {
     const rel = wrapPi(w.geo.bearing - v.geo.bearing);
     if (rel <= 0 || rel > Math.PI / 2) return Infinity;
-    const m = sideMargin(v, w);
-    if (v.geo.rMin > w.geo.rMax + m || w.geo.rMin > v.geo.rMax + m) return Infinity;
+    // No radial-overlap test: an inner-lane car heading for its exit must follow the outer-lane car it is about
+    // to cut in behind as soon as its own path runs into that body, not once the bodies overlap radially (by
+    // then the gap is a few metres and it has to stamp on the brakes).
     if (!onPathAhead(v, w, rel * v.geo.r + w.length)) return Infinity;
     const vMax = Math.max(...v.geo.cb.map((b) => wrapPi(b - v.geo.bearing)));
     const wMin = Math.min(...w.geo.cb.map((b) => wrapPi(b - v.geo.bearing)));
@@ -245,23 +319,32 @@ export function createSim(layout, opts = {}) {
       if (Math.abs(dh) > MAX_HEADING_DIFF) continue;
       const large = LARGE_TYPES.has(v.type) || LARGE_TYPES.has(w.type);
       let gap = Infinity;
-      // Same approach lane: shared entry geometry, so arc lengths compare directly. Adjacent lanes only
-      // interact when a long vehicle sweeps across the lane line.
-      if (v.geo.approach && w.geo.approach && w.path.arm === v.path.arm) {
+      // Same approach lane: shared entry geometry up to the merge, so arc lengths compare directly while the
+      // leader's rear is still on it (its centre may already be on the ring). Adjacent lanes only interact
+      // when a long vehicle sweeps across the lane line.
+      if (v.geo.approach && w.path.arm === v.path.arm && w.s - w.length / 2 <= w.path.marks.merge) {
         if (w.path.lane === v.path.lane) {
           if (w.s > v.s) gap = w.s - v.s - (v.length + w.length) / 2;
-        } else if (large) {
-          gap = linearGap(v, w, dir(armV + Math.PI), dir(armV + Math.PI / 2));
+        } else if (large && w.geo.approach && !v.isPlayer) {
+          // (The player's approach is player.js's: it pulls up to its own line whatever is in the next lane.)
+          // Never draw up alongside a bus or lorry in the next lane (HC 187): its rear swings across as it turns
+          // off. The side margin spans a whole lane so the queue beside it holds back behind its rear in good
+          // time, rather than finding itself alongside. Once committed to joining it has judged the gap and goes.
+          gap = v.committed
+            ? linearGap(v, w, dir(armV + Math.PI), dir(armV + Math.PI / 2))
+            : linearGap(v, w, dir(armV + Math.PI), dir(armV + Math.PI / 2), LARGE_BESIDE_MARGIN, 0.05);
         }
       }
       if (v.geo.exit && w.geo.exit && w.path.exitArm === v.path.exitArm && (large || w.path.exitLane === v.path.exitLane)) {
         const f = dir(exitV);
-        gap = Math.min(gap, w.path.exitLane === v.path.exitLane
-          ? linearGap(v, w, f, dir(exitV + Math.PI / 2), Infinity)
-          : linearGap(v, w, f, dir(exitV + Math.PI / 2)));
+        // Same exit lane: a wider side margin catches two paths converging into it, but a finite one, since on
+        // a mini 'exit' starts on the ring side and a car across the junction projects ahead on the exit axis.
+        gap = Math.min(gap, linearGap(v, w, f, dir(exitV + Math.PI / 2),
+          w.path.exitLane === v.path.exitLane ? Math.max(EXIT_LANE_MARGIN, sideMargin(v, w)) : sideMargin(v, w)));
       }
       if (v.geo.ring && w.geo.ring) gap = Math.min(gap, ringGap(v, w));
-      if (gap < best.gap) best = { id: w.id, gap, speed: Math.max(0, w.v * Math.cos(dh)) };
+      if (v.geo.ring && !v.geo.exit && w.geo.exit && w.path.exitArm === v.path.exitArm) gap = Math.min(gap, exitAheadGap(v, w));
+      if (gap < best.gap) best = { id: w.id, gap, speed: Math.max(0, w.v * Math.cos(dh)), accel: w.a };
     }
     return best;
   }
@@ -275,20 +358,69 @@ export function createSim(layout, opts = {}) {
     return p.a * (free - (sStar / Math.max(gap, 0.05)) ** 2);
   }
 
+  /**
+   * Car-following toward a moving leader: IDM blended with the constant-acceleration heuristic (Treiber and
+   * Kesting's ACC model). Plain IDM brakes at up to MAX_DECEL when a vehicle appears a few metres ahead (a
+   * joiner, or the outer-lane car an inner-lane car cuts in behind) even if it is pulling away; the heuristic
+   * asks only for what the kinematics need, so such cut-ins cost about IDM_B, while a closing gap still gets
+   * full IDM braking. A (nearly) stopped leader gets plain IDM: the heuristic would stop right at its bumper,
+   * without the s0 margin.
+   */
+  function follow(v, v0, lead, p) {
+    const a = idm(v, v0, lead.gap, lead.speed, p);
+    if (lead.gap === Infinity || lead.speed < 1) return a;
+    const s = Math.max(lead.gap, 0.05);
+    const aLead = Math.min(lead.accel ?? 0, p.a);
+    const dv = v - lead.speed;
+    const denom = lead.speed * lead.speed - 2 * s * aLead;
+    const cah = lead.speed * dv <= -2 * s * aLead && denom > 1e-6
+      ? (v * v * aLead) / denom
+      : aLead - (dv > 0 ? (dv * dv) / (2 * s) : 0);
+    if (a >= cah) return a;
+    // IDM's term is unbounded as the gap closes; clipped, its 1% share cannot swamp the blend.
+    const aIdm = Math.max(a, -MAX_DECEL);
+    return (1 - ACC_COOLNESS) * aIdm + ACC_COOLNESS * (cah + p.b * Math.tanh((aIdm - cah) / p.b));
+  }
+
   const asEntrant = (v) => ({ path: v.path, s: v.s, v: v.v, length: v.length, accelMax: v.params.a, latComfort: v.params.latComfort });
 
   // Vehicles that are on the ring or committed to joining it; waiting vehicles will give way themselves.
   const activeOthers = (v) => vehicles.filter((w) => w !== v && (w.geo.ring || w.committed));
 
+  // Waiting drivers accept shorter gaps (gap acceptance falls with waiting time), within limits that still
+  // never make circulating traffic brake harder than BRAKE_LIMIT. Without this a bus or lorry at a busy ring
+  // can wait minutes and starve its arm.
   function canEnter(v) {
     const tMe = Math.max(0, v.stopS - v.s) / Math.max(v.v, 2);
     const key = v.path.arm + ':' + v.path.lane;
     const followUp = clock - (lastEntry.get(key) ?? -Infinity) < v.params.tf + 1.5;
-    const needGap = followUp ? v.params.tf : v.params.tc;
-    for (const c of assessEntry(asEntrant(v), activeOthers(v), { minSpeed: 4 })) {
-      if (c.inZone || c.eta < tMe + needGap || c.eta < c.tClear + AI_CLEAR_MARGIN || c.needDecel > BRAKE_LIMIT * 0.8) return false;
+    const impatience = v.waitingSince === null ? 0 : Math.min(1, (clock - v.waitingSince) / IMPATIENCE.ramp);
+    const needGap = (followUp ? v.params.tf : v.params.tc) - IMPATIENCE.gap * impatience;
+    const brakeOk = BRAKE_LIMIT * (IMPATIENCE.brakeShare + (1 - IMPATIENCE.brakeShare) * impatience);
+    for (const c of assessEntry(asEntrant(v), activeOthers(v), { minSpeed: 4, cruise: true })) {
+      if (c.inZone || c.eta < tMe + needGap || c.eta < c.tClear + AI_CLEAR_MARGIN || c.needDecel > brakeOk) return false;
     }
-    return true;
+    return !crossOutConflict(v);
+  }
+
+  // An inner-lane vehicle (the player included) that will cut out across the lane this entrant joins, just
+  // downstream of its entry, on the way to a later exit: the entry-section conflict test never sees it, and
+  // joining would put the entrant alongside it as it crosses. Compared by when each reaches the crossing.
+  function crossOutConflict(v) {
+    const p = v.path;
+    const m = p.marks;
+    const rLane = p.r[indexAt(p, m.entryEnd)];
+    for (const w of vehicles) {
+      if (w === v || !w.geo.ring || w.path.ringLane === 0 || w.s >= w.path.marks.exitRing || w.geo.r > rLane - 1) continue;
+      const x = crossingAt(w, rLane);
+      if (!x) continue;
+      const sx = sAtBearing(p, x.bearing, m.merge, Math.min(m.diverge, m.merge + CROSS_OUT.reach));
+      if (sx === null) continue;
+      const tw = (x.s - w.s) / Math.max(w.v, 1);
+      const tv = timeToReach(p, profileOf(v), v.s, v.v, v.params.a, sx);
+      if (Math.abs(tv - tw) < CROSS_OUT.headway + (v.length + w.length) / 2 / Math.max(w.v, 3)) return true;
+    }
+    return false;
   }
 
   // Only the front vehicle of a lane queue judges the gap; the rest follow it.
@@ -297,7 +429,9 @@ export function createSim(layout, opts = {}) {
 
   function decideEntry(v) {
     const toStop = v.stopS - v.s;
-    if (toStop < -0.2) {
+    // The player only enters on Go: creeping a little past its stop point while waiting is not entering, and
+    // ring traffic yielding to it then would deadlock the junction.
+    if (toStop < -0.2 && !(v.isPlayer && !v.committed)) {
       if (v.enteredAt === null) {
         v.enteredAt = clock;
         v.committed = v.locked = true;
@@ -306,26 +440,51 @@ export function createSim(layout, opts = {}) {
       return;
     }
     if (v.locked || v.isPlayer || toStop > DECISION_ZONE) return;
-    v.committed = !queuedBehind(v) && canEnter(v);
+    const front = !queuedBehind(v);
+    if (front && v.waitingSince === null && v.v < 0.5) v.waitingSince = clock;
+    v.committed = front && canEnter(v);
     if (v.committed && toStop <= Math.max(1, (v.v * v.v) / (2 * LOCK_DECEL))) v.locked = true;
   }
 
-  // An inner-lane vehicle about to cut across outer lanes waits for anything alongside on its left; if it
-  // cannot stop comfortably before its exit it goes round again instead (never swerve).
+  // Arc length and bearing where v's path first reaches radius r on its way out, or null.
+  function crossingAt(v, r) {
+    const p = v.path;
+    const end = Math.min(p.s.length - 1, indexAt(p, p.marks.exitRing));
+    for (let i = indexAt(p, v.s); i <= end; i++) if (p.r[i] >= r) return { s: p.s[i], bearing: p.bearing[i] };
+    return null;
+  }
+
+  // An inner-lane vehicle cutting across outer lanes to its exit, judged both now and where and when it
+  // reaches each outer car's lane. A car that will be just ahead there is followed until this one is out of
+  // the ring (it slots in behind); one alongside or just behind makes it wait before the exit, or, if it
+  // cannot stop comfortably, go round again (never swerve).
   function crossingYield(v) {
     const m = v.path.marks;
-    if (v.path.ringLane === 0 || v.s >= m.diverge || v.s < m.diverge - 30) return Infinity;
+    if (v.path.ringLane === 0 || v.s >= m.exitRing || v.s < m.diverge - 30) return Infinity;
     let a = Infinity;
     for (const w of vehicles) {
-      // A vehicle already following this one is held back by it; waiting for it would deadlock.
-      if (w === v || !w.geo.ring || w.geo.r < v.geo.r + 1.5 || w.leaderId === v.id) continue;
-      const off = v.geo.r * wrapPi(w.geo.bearing - v.geo.bearing);
+      // A vehicle already following this one is held back by it, and one still waiting at its line (nose over
+      // it) waits for this one: yielding to either would deadlock.
+      if (w === v || !w.geo.ring || !w.committed || w.geo.r < v.geo.r + 1.5 || w.leaderId === v.id) continue;
+      // Already peeling off at an earlier exit: gone before this one crosses its lane.
+      if (w.s > w.path.marks.diverge && w.path.exitArm !== v.path.exitArm) continue;
+      // Leaving side by side into the other lane of a two-lane exit: the paths never cross (unless a bus or
+      // lorry sweeps across the lane line).
+      const large = LARGE_TYPES.has(v.type) || LARGE_TYPES.has(w.type);
+      if (!large && w.path.exitArm === v.path.exitArm && w.path.exitLane !== v.path.exitLane && w.path.marks.diverge - w.s < 40) continue;
       const reach = (v.length + w.length) / 2 + 1;
-      if (off >= reach || off < -(reach + 4 + w.v)) continue;
-      if (off > 0) {
-        a = Math.min(a, idm(v.v, allowed(v), off - (v.length + w.length) / 2, w.v, v.params));
-      } else if ((v.v * v.v) / (2 * Math.max(0.1, m.diverge - v.s)) > GO_ROUND_DECEL) {
-        goRound(v);
+      const behind = -(reach + 4 + w.v);
+      const off = v.geo.r * wrapPi(w.geo.bearing - v.geo.bearing);
+      const x = crossingAt(v, w.geo.r);
+      const offAtCross = x ? w.geo.r * wrapPi(w.geo.bearing - x.bearing) + (w.v * (x.s - v.s)) / Math.max(v.v, 1) : null;
+      const ahead = (off > 0 && off < reach) || (offAtCross !== null && offAtCross >= 0 && offAtCross < reach + 2 * v.v);
+      const level = (off <= 0 && off >= behind) || (offAtCross !== null && offAtCross < 0 && offAtCross >= behind);
+      if (ahead && off > 0) {
+        const gap = w.geo.r * wrapPi(w.geo.bearing - v.geo.bearing) - (v.length + w.length) / 2;
+        a = Math.min(a, follow(v.v, allowed(v), { gap: Math.max(0.05, gap), speed: w.v, accel: w.a }, v.params));
+      } else if (!level || v.s >= m.diverge) {
+        continue;
+      } else if (goRoundIfGentler(v, (v.v * v.v) / (2 * Math.max(0.1, m.diverge - v.s)))) {
         return Infinity;
       } else {
         a = Math.min(a, idm(v.v, allowed(v), Math.max(0.05, m.diverge - v.s), 0, v.params, 0.5));
@@ -334,21 +493,57 @@ export function createSim(layout, opts = {}) {
     return a;
   }
 
-  function goRound(v) {
+  // Going round only when stopping short of the exit would need more than GO_ROUND_DECEL, and only if the
+  // lap ahead does not need even harder braking for a car that has already pulled out onto it (it judged
+  // its gap on this vehicle leaving).
+  function goRoundIfGentler(v, stopNeed) {
+    if (stopNeed <= GO_ROUND_DECEL) return false;
     const p = v.path;
     v.path = pathFor(p.arm, p.lane, p.exitArm, p.loops + 1);
+    if (-Math.min(0, entrantYield(v)) <= stopNeed) return true;
+    v.path = p;
+    return false;
   }
 
   function aiAccel(v) {
     if (clock < v.holdUntil) return -MAX_DECEL;
     const lead = leaderOf(v);
     v.leaderId = lead.id;
-    let a = idm(v.v, allowed(v), lead.gap, lead.speed, v.params);
+    let a = follow(v.v, allowed(v), lead, v.params);
     if (!v.committed && v.s < v.stopS + 0.5) {
       a = Math.min(a, idm(v.v, allowed(v), v.stopS - v.s, 0, v.params, 0.05));
     }
-    a = Math.min(a, crossingYield(v));
+    a = Math.min(a, crossingYield(v), entrantYield(v));
     return Math.max(-MAX_DECEL, Math.min(v.params.a, a));
+  }
+
+  // A circulating driver eases off for a vehicle already pulling out across its path that will not clear in
+  // time (one that misjudged the gap, or that it surprised by going round again). Only true conflicts count.
+  // Vehicles joining side by side from one arm are a lane-discipline matter, not a crossing; and of two
+  // vehicles each yielding to the other, only the first keeps yielding (either would deadlock both).
+  function entrantYield(v) {
+    v.yieldTo = null;
+    if (!v.geo.ring) return Infinity;
+    const front = v.s + v.length / 2;
+    let a = Infinity;
+    for (const w of vehicles) {
+      if (w === v || !w.locked || w.s - w.length / 2 > w.path.marks.entryEnd) continue;
+      if (w.path.arm === v.path.arm || w.yieldTo === v.id) continue;
+      for (const run of entryConflicts(w.path, v.path, Math.max(v.length, w.length))) {
+        if (front > run.sFrom || v.s - v.length / 2 > run.sTo) continue;
+        const gap = run.sFrom - front;
+        if (gap > 60) break;
+        const wClear = timeToReach(w.path, profileOf(w), w.s, w.v, w.params?.a ?? 2, run.sEntryMax + w.length / 2, 15);
+        if (gap / Math.max(v.v, 1) < wClear + 0.5) {
+          // The entrant moves on as it joins: only its speed along this vehicle's heading holds the zone up.
+          const along = Math.max(0, Math.cos(wrapPi(w.geo.heading - v.geo.heading)));
+          const need = follow(v.v, allowed(v), { gap: Math.max(0.05, gap), speed: w.v * along, accel: w.a * along }, v.params);
+          if (need < a) { a = need; v.yieldTo = w.id; }
+        }
+        break;
+      }
+    }
+    return a;
   }
 
   // ---------- signals ----------
@@ -459,7 +654,8 @@ export function createSim(layout, opts = {}) {
   function insertPlayer() {
     const pl = layout.player;
     const path = layout.paths[pl.pathId];
-    const s = Math.max(VEHICLE_TYPES.hatch.length / 2, path.marks.giveWay - 90);
+    // Far enough out to read the speed-limit, 510 and map signs on the way in.
+    const s = Math.max(VEHICLE_TYPES.hatch.length / 2, path.marks.giveWay - 185);
     for (let i = vehicles.length - 1; i >= 0; i--) {
       const w = vehicles[i];
       if (w.path.arm === pl.arm && w.s < w.path.marks.giveWay && Math.abs(w.s - s) < 30) vehicles.splice(i, 1);
@@ -571,6 +767,9 @@ export function createSim(layout, opts = {}) {
    *   tight    car arriving inside the critical gap but with room (expect tight)
    *   bus      bus passing the player's entry, inner lane where there is one (expect notAllowed on 2+ lanes)
    *   blocked  stationary car just inside the player's entry (expect notAllowed)
+   *   shield   car joining from the right and turning off at the player's road, holding up a car behind it
+   *   farRight van from the far arm signalling right whose true path comes past the player
+   *   leftLiar van from the left arm signalling right that turns off before reaching the player
    *   alongside car in the lane to the player's left, level with it (call on the ring; expect alongside)
    *   clear    no traffic at all (exit timing QA: early / late / missed)
    * Returns the injected vehicle id (or null).
@@ -579,23 +778,30 @@ export function createSim(layout, opts = {}) {
     const tLine = playerTimeToLine();
     switch (name) {
       case 'liar':
-        return inject({ signalBehaviour: 'wrongLeft', colour: 'Silver', arriveIn: tLine + 1.2, filter: (p) => p.direction !== 'left' || p.exitArm !== layout.player.arm });
+        return inject({ signalBehaviour: 'wrongLeft', colour: 'Silver', arriveIn: tLine + 1.2, filter: (p) => p.exitArm !== layout.player.arm });
       case 'unsafe':
         return inject({ signalBehaviour: 'none', colour: 'Blue', arriveIn: tLine + 1.0 });
       case 'tight': {
         clearTraffic({ keepApproach: true });
         const me = stateOf(playerVehicle);
+        // Of every conflicting path's arrivals that read tight, the one asking least braking: tight turns unsafe
+        // as the car closes in, and a person needs time to tap.
+        let best = null;
         for (const path of conflictingPaths()) {
-          for (let arrive = 1.5; arrive < 8; arrive += 0.1) {
+          for (let arrive = 1.5; arrive < 8; arrive += 0.05) {
             const id = inject({ path, colour: 'Red', arriveIn: tLine + arrive, isolate: false });
             const c = assessEntry(me, [stateOf(vehicles.find((w) => w.id === id))])[0];
-            if (c && c.needDecel <= BRAKE_LIMIT * 0.9 && c.eta - tLine < CRITICAL_GAP.mean) return id;
             vehicles.splice(vehicles.findIndex((w) => w.id === id), 1);
+            if (c && c.eta - tLine >= CRITICAL_GAP.mean) break;
+            if (c && c.needDecel <= BRAKE_LIMIT * 0.9 && (!best || c.needDecel < best.needDecel)) best = { path, arrive, needDecel: c.needDecel };
           }
         }
-        return null;
+        return best && inject({ path: best.path, colour: 'Red', arriveIn: tLine + best.arrive, isolate: false });
       }
       case 'bus': return injectBus();
+      case 'shield': return injectShield();
+      case 'farRight': return injectFarSignaller(true);
+      case 'leftLiar': return injectFarSignaller(false);
       case 'blocked': {
         clearTraffic({ keepApproach: true });
         const path = conflictingPaths()[0];
@@ -635,6 +841,45 @@ export function createSim(layout, opts = {}) {
     return null;
   }
 
+  // A car joining from the arm to the player's right and leaving at the player's road (so it never crosses
+  // the player), with a circulating car close behind that it holds up.
+  function injectShield() {
+    clearTraffic({ keepApproach: true });
+    const n = layout.arms.length;
+    const p = layout.player.arm;
+    const right = (p - 1 + n) % n;
+    const shieldPath = pathFor(right, 0, p, 0);
+    const shield = placeAt({ colour: 'Blue', signalBehaviour: 'correct' }, shieldPath, shieldPath.marks.merge - 2, 2);
+    for (const path of otherPaths().filter((q) => q.arm !== right && q.ringLane === 0)) {
+      const s = sAtBearing(path, shield.geo.bearing, path.marks.merge, path.marks.diverge);
+      if (s === null || s - 10 < path.marks.merge) continue;
+      placeAt({ colour: 'White', signalBehaviour: 'none' }, path, s - 10, 4);
+      break;
+    }
+    return shield.id;
+  }
+
+  // A car that has just joined from an arm further round, honestly signalling right. comes = true: from the
+  // farthest arm, its true path passes the player's entry. comes = false: from the arm on the player's left,
+  // it turns off at the player's road, so its right signal does not mean it reaches the player.
+  function injectFarSignaller(comes) {
+    clearTraffic({ keepApproach: true });
+    const n = layout.arms.length;
+    const p = layout.player.arm;
+    const arms = comes ? [(p + 2) % n, (p + 1) % n] : [(p + 1) % n];
+    for (const arm of arms) {
+      if (arm === (p - 1 + n) % n) continue;
+      for (const exitArm of Object.keys(layout.arms[arm].exits).map(Number)) {
+        const path = pathFor(arm, 0, exitArm, 0);
+        if (path.direction !== 'right' || (entryConflicts(playerVehicle.path, path).length > 0) !== comes) continue;
+        const s = path.marks.merge + 2;
+        const prof = speedProfile(path, VEHICLE_TYPES.van.latComfort);
+        return placeAt({ type: 'van', colour: 'White', signalBehaviour: 'correct' }, path, s, allowedAt(path, prof, s)).id;
+      }
+    }
+    return null;
+  }
+
   function injectAlongside() {
     const p = playerVehicle;
     if (p.path.ringLane === 0) return null;
@@ -662,18 +907,22 @@ export function createSim(layout, opts = {}) {
   // ---------- boot ----------
 
   for (let t = 0; t < warmup; t += 1 / 30) step(1 / 30);
+  const warmed = clock;
   clock = 0;
   history.length = 0;
   lastEntry.clear();
-  for (const v of vehicles) if (v.enteredAt !== null) v.enteredAt -= warmup;
-  for (let i = 0; i < nextSpawn.length; i++) nextSpawn[i] = Math.max(0, nextSpawn[i] - warmup);
-  nextBus = Math.max(0, nextBus - warmup);
+  spawnLog.length = 0;
+  for (const v of vehicles) if (v.enteredAt !== null) v.enteredAt -= warmed;
+  for (const p of [...pending, pendingBus]) if (p) p.at = Math.max(0, p.at - warmed);
   if (player) insertPlayer();
 
   return {
     get t() { return clock; },
+    layout,
+    density,
     get player() { return playerVehicle && stateOf(playerVehicle); },
     get vehicleCount() { return vehicles.length; },
+    spawns: () => spawnLog.slice(),
     step,
     snapshot,
     replay: () => history.slice(),

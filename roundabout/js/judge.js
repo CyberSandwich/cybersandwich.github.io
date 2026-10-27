@@ -1,48 +1,105 @@
 /**
  * Pure judging of the player's two decisions. Inputs are sim.state() snapshots; nothing is mutated.
  *
- *   judgeGo(state, { windowOpen })   -> Verdict for a Go tap now
- *   judgeExit(state)                 -> Verdict for an Exit tap now
- *   missedExit()                     -> Verdict when the exit passes with no (or too late a) tap
- *   createGapLog(layout)             -> recorder for the analysis sheet; see below
- *   judgeHesitation(summary)         -> post-run Verdict from a gap-log summary
+ *   judgeGo(state)            -> Verdict for a Go tap now
+ *   judgeExit(state)          -> Verdict for an Exit tap now
+ *   missedExit()              -> Verdict when the exit passes with no (or too late a) tap
+ *   createGapLog(layout)      -> recorder for the analysis sheet; see below
+ *   judgeHesitation(summary)  -> post-run Verdict from a gap-log summary
  *
- * Verdict: { verdict, reason, hcRef, culpritId, cue? }
- *   verdict: 'ok' | 'tight' | 'unsafe' | 'notAllowed' | 'early' | 'late' | 'alongside' | 'hesitation'
- *   cue (Go verdicts with a culprit): { indicator, wheels: 'in'|'out'|'straight', comingRound: true }
+ * Verdict: { verdict, title, detail, reason, hcRef, culpritId, eta?, needDecel?, signalLead?, cue? }
+ *   verdict: 'ok' | 'tight' | 'unsafe' | 'notAllowed' | 'early' | 'late' | 'alongside' | 'lateSignal' | 'hesitation'
+ *   title: short Title Case line for a toast; detail: sentence-case explanation; reason: same as detail
+ *   eta (s) and needDecel (m/s^2): the culprit's arrival and the braking it would need (Go verdicts)
+ *   signalLead (s): how long before peeling off the left signal comes on (Exit verdicts on the ring)
+ *   cue (unsafe): { indicator, wheels: 'in'|'out'|'straight', comingRound: true }
  *
  * Unsafe means a vehicle's TRUE path reaches the player's entry before the player can clear it, so it would
- * have to brake harder than BRAKE_LIMIT; its signal never matters, which is exactly what the reason explains.
+ * have to brake harder than BRAKE_LIMIT; its signal never matters, which is exactly what the detail explains.
+ * Sources: gov.uk Highway Code 184-189; DVSA "Understanding your driving test result" (DL25 faults).
  */
 import { assessEntry, entryConflicts, BRAKE_LIMIT } from './kinematics.js';
 import { wrapPi, wrap2Pi, indexAt } from './geom.js';
 import { LARGE_TYPES, CRITICAL_GAP } from './traffic-data.js';
 
 export const TIGHT_GAP = CRITICAL_GAP.mean; // s: joining with less than a typical accepted gap is tight
-export const HESITATION_GAP = 6; // s: a clear gap this long that is not taken counts against the driver
-export const HESITATION_COUNT = 2;
+export const REACTION = 1.5; // s to see a gap and move off
+export const CLEAR_GAP = CRITICAL_GAP.mean + REACTION; // s of lag that leaves no reason to wait
 export const EXIT_LATE = 1.0; // s before peeling off: too late to mirror, signal and leave
+export const SIGNAL_DELAY = 0.4; // s from the Exit tap (mirror glance) to the left signal
+export const LATE_SIGNAL = 2.0; // s: a left signal with less warning than this is late
+export const OK_WINDOW = 2.0; // s of 'ok' Exit timing every route keeps, however close the exits
+const CROSS_TIME = 1.5; // s past the diverge point an inner-lane car takes to cross the outer lane (estimate)
 const STOPPED = 1.5; // m/s: a vehicle this slow inside the entry is a blockage, not traffic
 const LARGE_ALONGSIDE = 15; // m either side of the player's merge point
 
 const TYPE_NAMES = { hatch: 'car', estate: 'estate', van: 'van', bus: 'bus', lorry: 'lorry' };
 export const vehicleName = (v) => `${v.colour} ${TYPE_NAMES[v.type] ?? v.type}`;
 const capital = (s) => s[0].toUpperCase() + s.slice(1);
+const secs = (x) => `${x.toFixed(1)} s`;
+const WHEEL_WORDS = { in: 'turned in', out: 'turned out', straight: 'straight' };
+const HC185_QUOTE = 'Be aware they may not be signalling correctly or at all (HC 185).';
 
-const verdict = (v, reason = '', hcRef = null, culpritId = null, extra = {}) => ({ verdict: v, reason, hcRef, culpritId, ...extra });
+// All verdict copy: title (Title Case, short) and detail (sentence case).
+export const COPY = {
+  ok: () => ({ title: 'Good', detail: '' }),
+  unsafeInEntry: (n) => ({ title: 'Unsafe Gap', detail: `${capital(n)} was already at your entry. ${HC185_QUOTE}` }),
+  unsafeLeft: (n, eta, wheels) => ({
+    title: 'Unsafe Gap',
+    detail: `${capital(n)} was ${secs(eta)} away, signalling left with wheels ${WHEEL_WORDS[wheels]}: it was coming round. ${HC185_QUOTE}`,
+  }),
+  unsafeRight: (n, eta) => ({ title: 'Unsafe Gap', detail: `${capital(n)} was ${secs(eta)} away. It was signalling right: it was always coming past you.` }),
+  unsafeNone: (n, eta, wheels) => ({
+    title: 'Unsafe Gap',
+    detail: `${capital(n)} was ${secs(eta)} away with no signal and wheels ${WHEEL_WORDS[wheels]}: it was coming round. ${HC185_QUOTE}`,
+  }),
+  tight: (n, lag) => ({ title: 'Tight Gap', detail: `${capital(n)} was ${secs(lag)} away. Leave more room before you join.` }),
+  longVehicle: (type) => ({
+    title: 'Too Close to a Long Vehicle',
+    detail: `Long vehicles might have to take a different course or straddle lanes. Let the ${type} pass before you join.`,
+  }),
+  blocked: (n) => ({ title: 'No Room to Join', detail: `${capital(n)} was stopped where you would join. Wait until your way is clear.` }),
+  notOnRing: () => ({ title: 'Not on the Roundabout Yet', detail: 'Signal left for your exit once you are on the roundabout.' }),
+  earlyExit: () => ({
+    title: 'Too Early',
+    detail: 'Signalling left now reads as taking the earlier exit. Signal left once you pass the exit before yours.',
+  }),
+  missed: () => ({ title: 'Missed It', detail: 'Too late to signal and leave safely. Go round again, never swerve.' }),
+  alongside: (n) => ({
+    title: 'Car Alongside',
+    detail: `${capital(n)} is alongside on your left. Check your mirror and hold your lane: vehicles may straddle lanes.`,
+  }),
+  lateSignal: (lead, mini) => ({
+    title: 'Late Signal',
+    detail: `Your left signal came ${secs(lead)} before the exit. Signal once you pass the exit before yours.`
+      + (mini ? ' On a mini roundabout there is less time to signal (HC 188).' : ''),
+  }),
+  hesitation: (lag) => ({
+    title: 'Undue Hesitation',
+    detail: lag === null
+      ? 'Nothing was coming and you waited at the line. Go when it is safe to do so.'
+      : `A clear gap of ${secs(lag)} went by at the line. Go when it is safe to do so.`,
+  }),
+};
+
+function verdict(kind, copy, hcRef = null, culpritId = null, extra = {}) {
+  return { verdict: kind, title: copy.title, detail: copy.detail, reason: copy.detail, hcRef, culpritId, ...extra };
+}
 const playerOf = (state) => state.vehicles.find((v) => v.isPlayer);
 
-function wheelsOf(v) {
+export function wheelsOf(v) {
   if (v.steer < -0.02) return 'in'; // right lock: following the ring
   if (v.steer > 0.02) return 'out';
   return 'straight';
 }
 
-function unsafeReason(v) {
-  const name = capital(vehicleName(v));
-  if (v.indicator === 'left') return `${name} was signalling left but its wheels were turned in. It was coming round.`;
-  if (v.indicator === 'right') return `${name} was signalling right and kept coming round.`;
-  return `${name} wasn't signalling, but it was coming round. Read its wheels and position.`;
+function unsafeCopy(c) {
+  const o = c.other;
+  const n = vehicleName(o);
+  if (c.inZone) return COPY.unsafeInEntry(n);
+  if (o.indicator === 'left') return COPY.unsafeLeft(n, c.eta, wheelsOf(o));
+  if (o.indicator === 'right') return COPY.unsafeRight(n, c.eta);
+  return COPY.unsafeNone(n, c.eta, wheelsOf(o));
 }
 
 // Large vehicle on the ring passing the player's merge point (in any lane).
@@ -55,41 +112,34 @@ function largeAlongside(state, me) {
   });
 }
 
-export function judgeGo(state, { windowOpen = true } = {}) {
+const conflictsFor = (state, me) => assessEntry(me, state.vehicles.filter((w) => !w.isPlayer && (w.inRing || w.committed)));
+const timeToLine = (me) => Math.max(0, me.stopS - me.s) / Math.max(me.v, 2);
+
+export function judgeGo(state) {
   const me = playerOf(state);
-  if (!windowOpen) return verdict('early', 'Wait until you can see into the roundabout.');
-  const others = state.vehicles.filter((w) => !w.isPlayer && (w.inRing || w.committed));
-  const tLine = Math.max(0, me.stopS - me.s) / Math.max(me.v, 2);
-  const list = assessEntry(me, others);
+  const tLine = timeToLine(me);
+  const list = conflictsFor(state, me);
 
   const hits = list.filter((c) => (c.inZone && c.other.v >= STOPPED) || (!c.inZone && c.needDecel > BRAKE_LIMIT));
   if (hits.length) {
     // The culprit is the vehicle that would have to brake hardest (one already in the entry: infinitely).
     const c = hits.reduce((a, b) => (b.needDecel > a.needDecel ? b : a));
     const o = c.other;
-    return verdict('unsafe', unsafeReason(o), 'HC 185', o.id, {
-      cue: { indicator: o.indicator, wheels: wheelsOf(o), comingRound: true },
-      needDecel: c.needDecel, eta: c.eta,
+    return verdict('unsafe', unsafeCopy(c), 'HC 185', o.id, {
+      cue: { indicator: o.indicator, wheels: wheelsOf(o), comingRound: true }, needDecel: c.needDecel, eta: c.eta,
     });
   }
-
   const big = largeAlongside(state, me);
-  if (big) {
-    return verdict('notAllowed', `Never join alongside a ${TYPE_NAMES[big.type]}: long vehicles can need more than one lane.`, 'HC 187', big.id);
-  }
-
+  if (big) return verdict('notAllowed', COPY.longVehicle(TYPE_NAMES[big.type]), 'HC 187', big.id);
   const blocked = list.find((c) => c.inZone);
-  if (blocked) {
-    const name = vehicleName(blocked.other);
-    return verdict('notAllowed', `No room: the ${name} was stopped where you would join. Only go when your way is clear.`, 'HC 185', blocked.other.id);
-  }
-
+  if (blocked) return verdict('notAllowed', COPY.blocked(vehicleName(blocked.other)), 'HC 185', blocked.other.id);
   const close = list.find((c) => c.eta - tLine < TIGHT_GAP);
   if (close) {
-    const lag = Math.max(0, close.eta - tLine);
-    return verdict('tight', `Tight: the ${vehicleName(close.other)} was ${lag.toFixed(1)} s away. Aim for a gap of 4-5 s.`, 'HC 185', close.other.id, { eta: close.eta });
+    return verdict('tight', COPY.tight(vehicleName(close.other), Math.max(0, close.eta - tLine)), 'HC 185', close.other.id, {
+      eta: close.eta, needDecel: close.needDecel,
+    });
   }
-  return verdict('ok');
+  return verdict('ok', COPY.ok());
 }
 
 // Arc length on the player's path where it passes the exit before its own; -Infinity if never on the ring.
@@ -112,47 +162,96 @@ export function previousExitS(layout, path) {
   return path.s[hi];
 }
 
-export function missedExit() {
-  return verdict('late', 'Missed it: go round, never swerve.', 'HC 186');
+export const missedExit = () => verdict('late', COPY.missed());
+
+// Signed distance (m, > 0 ahead) of w along the ring from the player, when w is circulating in a lane outside
+// the player's; null otherwise (cars waiting at or joining from an arm, or already turning off, never count).
+export function outerOffset(me, w) {
+  if (w.isPlayer || w.path.ringLane >= me.path.ringLane || w.s < w.path.marks.merge || w.s > w.path.marks.diverge) return null;
+  return me.r * wrapPi(w.bearing - me.bearing);
 }
+
+// Seconds from now until the left signal would come on, measured to the point of peeling off.
+export const signalLeadOf = (me) => (me.path.marks.diverge - me.s) / Math.max(me.v, 1) - SIGNAL_DELAY;
 
 export function judgeExit(state) {
   const me = playerOf(state);
   const m = me.path.marks;
-  if (!me.inRing || me.s < m.giveWay) return verdict('early', 'You are not on the roundabout yet.', 'HC 186');
-  if (me.s + me.length / 2 < previousExitS(state.layout, me.path)) {
-    return verdict('early', 'Reads as taking the earlier exit: signal left once you pass the exit before yours.', 'HC 186');
-  }
+  if (!me.inRing || me.s < m.giveWay) return verdict('early', COPY.notOnRing(), 'HC 186');
+  if (me.s + me.length / 2 < previousExitS(state.layout, me.path)) return verdict('early', COPY.earlyExit(), 'HC 186');
   if ((m.diverge - me.s) / Math.max(me.v, 1) < EXIT_LATE) return missedExit();
+  const signalLead = signalLeadOf(me);
   if (me.path.ringLane > 0) {
+    // Level on the left now, or closing from behind fast enough to be level before the player is across.
+    const tAcross = (m.diverge - me.s) / Math.max(me.v, 1) + CROSS_TIME;
     const side = state.vehicles.find((w) => {
-      if (w.isPlayer || !w.inRing || w.r < me.r + 1.5) return false;
-      const off = me.r * wrapPi(w.bearing - me.bearing);
-      return Math.abs(off) < (w.length + me.length) / 2 + 1;
+      const off = outerOffset(me, w);
+      if (off === null) return false;
+      const reach = (w.length + me.length) / 2 + 1;
+      return off < reach && off > -(reach + Math.max(0, w.v - me.v) * tAcross);
     });
-    if (side) {
-      return verdict('alongside', `${capital(vehicleName(side))} alongside on your left: hold your lane or go round.`, 'HC 186', side.id);
-    }
+    if (side) return verdict('alongside', COPY.alongside(vehicleName(side)), 'HC 187, DL25 Mirrors: Change Direction', side.id, { signalLead });
   }
-  return verdict('ok');
+  // Between two close exits there may be under LATE_SIGNAL of signalling time at all (minis especially,
+  // HC 188): there the bar drops so at least OK_WINDOW of good timing remains after passing the previous exit.
+  const available = (m.diverge - previousExitS(state.layout, me.path) + me.length / 2) / Math.max(me.v, 1) - SIGNAL_DELAY;
+  const lateBelow = Math.max(EXIT_LATE, Math.min(LATE_SIGNAL, available - OK_WINDOW));
+  if (signalLead < lateBelow) {
+    const mini = state.layout.type === 'mini';
+    return verdict('lateSignal', COPY.lateSignal(signalLead, mini), mini ? 'DL25 Signals: Timed, HC 188' : 'DL25 Signals: Timed', null, { signalLead });
+  }
+  return verdict('ok', COPY.ok(), null, null, { signalLead });
 }
 
 /**
- * Gap log for the analysis sheet. Call record(state) every sim step; windowOpened(t) and goTapped(t) bracket
- * the decision. A gap is the time between consecutive conflicting vehicles passing the player's entry.
- *   summary() -> { gaps: [{ start, end, length, taken, reaction? }], cars: [CarCue], missedClear }
+ * Gap log for the analysis sheet and the hesitation fault. Call record(state) on every sim step of the run
+ * (it ignores steps before windowOpened and stops by itself once the player has cleared its entry after Go);
+ * bracket the decision with windowOpened(t), atLine(t) and goTapped(t, state).
+ *   Lag = time until the next conflicting vehicle reaches the player's entry (0 while one is in it).
+ *   Only time spent stopped at the line counts towards hesitation. A clear gap is a lag of at least
+ *   CLEAR_GAP while judgeGo says 'ok'; it is missed when it lasts REACTION seconds without a Go, including
+ *   inside the gap finally taken.
+ * summary() -> {
+ *   gaps: [{ start, end, length, taken, lag?, nextCarId?, reaction? }]   offered gaps between conflicting
+ *                                           passes from the Go window; the taken one carries `taken` below
+ *   taken: { at, lag, nextCarId, reaction } | null   lag (s) to the next conflicting car at the tap, null
+ *                                           when none was coming; nextCarId its id; reaction = s since the
+ *                                           last car passed (or the window opened)
+ *   missed: [{ start, end, lag }]           clear gaps let go by at the line (the taken one if waited in);
+ *                                           lag at the gap's start, null when nothing was coming
+ *   missedClear: missed.length, cars: [CarCue], end }
  *   CarCue: { id, name, type, colour, indicator, wheels, signalBehaviour, intent, comingRound, misleading }
  */
 export function createGapLog(layout) {
   const passes = [];
   const cars = new Map();
   const lastFront = new Map();
+  const missed = [];
   let windowAt = null;
+  let lineAt = null;
   let tapAt = null;
+  let taken = null;
+  let clearSince = null; // start of the current clear stretch at the line
+  let clearLag = 0;
+  let cleared = false;
+  let lastState = null;
+
+  function lagNow(state) {
+    const me = playerOf(state);
+    const next = conflictsFor(state, me)[0]; // soonest first; one in the entry has eta 0
+    return { lag: next ? next.eta : Infinity, nextCarId: next ? next.other.id : null };
+  }
+
+  function closeClear(t) {
+    if (clearSince !== null && t - clearSince >= REACTION) missed.push({ start: clearSince, end: t, lag: Number.isFinite(clearLag) ? clearLag : null });
+    clearSince = null;
+  }
 
   function record(state) {
     const me = playerOf(state);
-    if (!me || windowAt === null || tapAt !== null) return;
+    if (!me || windowAt === null || cleared) return;
+    lastState = state;
+    if (tapAt !== null && me.s > me.path.marks.entryEnd) { cleared = true; return; }
     for (const w of state.vehicles) {
       if (w.isPlayer) continue;
       const front = w.s + w.length / 2;
@@ -161,11 +260,18 @@ export function createGapLog(layout) {
       const run = entryConflicts(me.path, w.path, Math.max(me.length, w.length))[0];
       const turnsOffHere = w.path.exitArm === layout.player.arm;
       if (run && prev < run.sFrom && front >= run.sFrom) {
-        passes.push(state.t);
+        if (tapAt === null) passes.push(state.t);
         noteCar(w, true);
       } else if (!run && turnsOffHere && prev < w.path.marks.diverge && front >= w.path.marks.diverge) {
         noteCar(w, false);
       }
+    }
+    if (lineAt === null || tapAt !== null) return;
+    const { lag } = lagNow(state);
+    if (lag >= CLEAR_GAP && judgeGo(state).verdict === 'ok') {
+      if (clearSince === null) { clearSince = state.t; clearLag = lag; }
+    } else {
+      closeClear(state.t);
     }
   }
 
@@ -177,31 +283,50 @@ export function createGapLog(layout) {
     });
   }
 
+  function goTapped(t, state = lastState) {
+    if (tapAt !== null) return;
+    tapAt = t;
+    const now = state ? lagNow(state) : { lag: Infinity, nextCarId: null };
+    const lastPass = passes.length ? passes[passes.length - 1] : windowAt ?? t;
+    taken = {
+      at: t, lag: Number.isFinite(now.lag) ? now.lag : null, nextCarId: now.nextCarId, reaction: t - Math.max(lastPass, windowAt ?? t),
+    };
+    if (state && now.nextCarId !== null) {
+      const car = state.vehicles.find((v) => v.id === now.nextCarId);
+      if (car) noteCar(car, true);
+    }
+    closeClear(t);
+  }
+
   function summary() {
     const gaps = [];
-    if (windowAt === null) return { gaps, cars: [...cars.values()], missedClear: 0 };
+    if (windowAt === null) return { gaps, taken, missed, missedClear: missed.length, cars: [...cars.values()], end: null };
     const end = tapAt ?? passes[passes.length - 1] ?? windowAt;
     let start = windowAt;
     for (const p of passes) {
       if (p > start) gaps.push({ start, end: p, length: p - start, taken: false });
       start = Math.max(start, p);
     }
-    if (tapAt !== null) gaps.push({ start, end: tapAt, length: tapAt - start, taken: true, reaction: tapAt - start });
-    const missedClear = gaps.filter((g) => !g.taken && g.length > HESITATION_GAP).length;
-    return { gaps, cars: [...cars.values()], missedClear, end };
+    if (tapAt !== null) {
+      gaps.push({ start, end: tapAt, length: tapAt - start, taken: true, lag: taken.lag, nextCarId: taken.nextCarId, reaction: taken.reaction });
+    }
+    return { gaps, taken, missed, missedClear: missed.length, cars: [...cars.values()], end };
   }
 
   return {
     record,
     windowOpened: (t) => { if (windowAt === null) windowAt = t; },
-    goTapped: (t) => { tapAt = t; },
+    atLine: (t) => { if (lineAt === null) lineAt = t; if (windowAt === null) windowAt = t; },
+    goTapped,
     summary,
   };
 }
 
+// DVSA marks "not proceeding when it is safe to do so at junctions": one clear gap let go by is enough.
 export function judgeHesitation(summary) {
-  if (summary.missedClear >= HESITATION_COUNT) {
-    return verdict('hesitation', `${summary.missedClear} clear gaps of over ${HESITATION_GAP} s went by. Go when it is safe.`, 'DL25 undue hesitation');
+  if (summary.missed.length) {
+    const worst = summary.missed.reduce((a, b) => ((b.lag ?? Infinity) > (a.lag ?? Infinity) ? b : a));
+    return verdict('hesitation', COPY.hesitation(worst.lag), 'DL25 Progress: Undue Hesitation');
   }
-  return verdict('ok');
+  return verdict('ok', COPY.ok());
 }

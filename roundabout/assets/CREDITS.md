@@ -38,8 +38,6 @@ Source: Poly Haven (https://polyhaven.com), licence CC0, https://polyhaven.com/l
 
 | File | Texture | Author | Source |
 |---|---|---|---|
-| tex/asphalt.webp, tex/asphalt_n.webp | Clean Asphalt | Dimitrios Savva | https://polyhaven.com/a/clean_asphalt |
-| tex/kerb.webp | Concrete Pavement | Charlotte Baglioni | https://polyhaven.com/a/concrete_pavement |
 | tex/pavement.webp | Concrete Pavement 02 | Charlotte Baglioni | https://polyhaven.com/a/concrete_pavement_02 |
 | tex/grass.webp | Grass Ground | Charlotte Baglioni | https://polyhaven.com/a/grass_ground |
 | tex/brick.webp | Red Brick 03 | Rob Tuytel | https://polyhaven.com/a/red_brick_03 |

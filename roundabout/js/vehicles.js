@@ -2,8 +2,13 @@
  * Traffic rendering: sim snapshots -> instanced vehicles, wheels, lamps and blob shadows.
  *
  *   const vehicles = await createVehicles(scene, { meta, base })
- *   vehicles.update(prev, curr, alpha, { showPlayer, dt, ghosts, statics })  interpolated draw of two snapshots
- *   vehicles.highlight(id | null)    rim glow on one vehicle (the freeze culprit)
+ *   vehicles.update(prev, curr, alpha, { showPlayer, dt, ghosts, statics, eye })  interpolated poses of two snapshots
+ *                                    (no GPU write: commit before every render)
+ *   vehicles.commit(allLod, camera?) writes the poses to the GPU; true for the mirror passes (only vehicles a
+ *                                    mirror can show, as their simplified copy), false + the camera for the main
+ *                                    view (frustum-culled, simplified beyond LOD_DISTANCE). eye = { x, z, heading? }
+ *   vehicles.highlight(id | null, { lamp })   pulsing outline on one vehicle; lamp keeps its indicator lit
+ *   vehicles.dispose()               frees every geometry, material and texture it made
  *   vehicles.setLayout(layout)       ghosts need the ring radius; clears ghosts
  *   vehicles.clearGhosts()           after debug traffic changes
  *   vehicles.setTheme(palette)       shadow strength
@@ -15,9 +20,10 @@
  * the player judges are the gaps the sim uses.
  */
 import * as THREE from 'three';
-import { loadGlb, flatten, triangles } from './gltf.js';
+import { loadGlb, flatten, cluster, triangles } from './gltf.js';
 import { VEHICLE_TYPES, COLOURS } from './traffic-data.js';
 import { wrapPi } from './geom.js';
+import { LAMP, lampsFor } from './lamps.js';
 
 export const TYPES = ['hatch', 'estate', 'van', 'bus', 'lorry'];
 const CAPACITY = { hatch: 40, estate: 24, van: 20, bus: 4, lorry: 8 };
@@ -26,9 +32,15 @@ const PAINT_KEY = { hatch: '#8ECFB3', estate: '#9CCFBD', van: '#F1B18C', bus: '#
 // Road-wheel angles at roundabout radii are 5-10 deg; a little gain keeps the cue the trainer teaches readable on a phone.
 const STEER_GAIN = 1.5;
 const GHOST_SECONDS = 6;
+// m from the eye beyond which a vehicle is drawn from its clustered copy (~50 px wide on a phone here; full
+// models are 6-10k tris against ~3.5k, and the 200k frame budget is shared with scenery)
+const LOD_DISTANCE = 20;
+const LOD_CELL = 0.11; // m grid of the clustered copy
+// Mirror cull: a car beyond this is a few pixels in a 256 px glass; one further ahead than this (m along the
+// driver's heading) is outside every mirror's rearward view.
+const MIRROR_RANGE = 45;
+const MIRROR_AHEAD = 4;
 const LAMP_CAPACITY = 640;
-const AMBER = new THREE.Vector3(1.0, 0.6, 0.08);
-const RED = new THREE.Vector3(1.0, 0.1, 0.06);
 
 const isWheelNode = (o) => /^wheel_/.test(o.name) || /^wheel_/.test(o.parent?.name ?? '');
 const wheelName = (o) => (/^wheel_/.test(o.name) ? o.name : o.parent?.name);
@@ -63,24 +75,23 @@ function paintable(material, key) {
   return material;
 }
 
-function glowMaterial() {
+// Culprit outline: back faces pushed out along their normals, so the car keeps its own colour (the toast names it).
+function outlineMaterial() {
   return new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: new THREE.Color('#ffd27a') }, uStrength: { value: 0.8 } },
+    // White, not amber: an amber outline would hide the very indicator the learner should have read.
+    uniforms: { uColor: { value: new THREE.Color('#ffffff') }, uStrength: { value: 1 }, uWidth: { value: 0.06 } },
     vertexShader: `
-      varying vec3 vN; varying vec3 vV;
+      uniform float uWidth;
       void main() {
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz);
+        vec3 n = normalize(normalMatrix * normal);
+        mv.xyz += n * uWidth * max(1.0, -mv.z / 25.0);
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: `
-      uniform vec3 uColor; uniform float uStrength; varying vec3 vN; varying vec3 vV;
-      void main() {
-        float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.0);
-        gl_FragColor = vec4(uColor, (0.18 + 0.82 * f) * uStrength);
-      }`,
-    transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4,
-    toneMapped: false,
+      uniform vec3 uColor; uniform float uStrength;
+      void main() { gl_FragColor = vec4(uColor, uStrength); }`,
+    side: THREE.BackSide, transparent: true, depthWrite: false, toneMapped: false,
   });
 }
 
@@ -95,40 +106,47 @@ function lampMesh() {
   g.setAttribute('iCol', attr(3));
   g.setAttribute('iNrm', attr(3));
   g.setAttribute('iSize', attr(1));
+  g.setAttribute('iSoft', attr(1));
   g.instanceCount = 0;
   const uniforms = { uPxWorld: { value: 0.002 }, uMinPx: { value: 11 } };
+  // iCol is written out as is (no colour-space step in a ShaderMaterial), so lamps.js colours are sRGB.
   const m = new THREE.ShaderMaterial({
     uniforms,
     vertexShader: `
-      attribute vec3 iPos; attribute vec3 iCol; attribute vec3 iNrm; attribute float iSize;
+      attribute vec3 iPos; attribute vec3 iCol; attribute vec3 iNrm; attribute float iSize; attribute float iSoft;
       uniform float uPxWorld; uniform float uMinPx;
-      varying vec2 vUv; varying vec3 vCol;
+      varying vec2 vUv; varying vec3 vCol; varying float vSoft; varying float vFace;
       void main() {
         vec4 mv = viewMatrix * vec4(iPos, 1.0);
         float d = max(0.1, -mv.z);
         // Pulled toward the eye so the lamp's own bodywork never clips it; other vehicles still occlude it.
         mv.xyz += normalize(-mv.xyz) * min(0.35, d * 0.5);
-        float face = clamp(dot(iNrm, normalize(cameraPosition - iPos)), 0.0, 1.0);
-        vCol = iCol * mix(0.5, 1.0, face);
+        // Seen from the side a lamp fades, never darkens: a darkened amber would drift toward red.
+        vFace = mix(0.45, 1.0, clamp(dot(iNrm, normalize(cameraPosition - iPos)), 0.0, 1.0));
+        vCol = iCol;
+        vSoft = iSoft;
         mv.xy += position.xy * max(iSize, uMinPx * uPxWorld * d);
         vUv = position.xy * 2.0;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: `
-      varying vec2 vUv; varying vec3 vCol;
+      varying vec2 vUv; varying vec3 vCol; varying float vSoft; varying float vFace;
       void main() {
         float r = length(vUv);
         if (r > 1.0) discard;
         float core = smoothstep(0.36, 0.16, r);
-        float a = clamp(core + pow(1.0 - r, 2.6) * 0.55, 0.0, 1.0);
-        gl_FragColor = vec4(mix(vCol, vec3(1.0, 0.94, 0.8), core * 0.4), a);
+        float crisp = clamp(core + pow(1.0 - r, 2.6) * 0.55, 0.0, 1.0);
+        float soft = pow(1.0 - r, 1.5) * 0.95;
+        // Only the crisp indicator gets a hot centre; a red lamp stays red all the way in.
+        vec3 c = mix(mix(vCol, vec3(1.0, 0.94, 0.8), core * 0.4), vCol, vSoft);
+        gl_FragColor = vec4(c, mix(crisp, soft, vSoft) * vFace);
       }`,
     transparent: true, depthWrite: false, toneMapped: false,
   });
   const mesh = new THREE.Mesh(g, m);
   mesh.frustumCulled = false;
   mesh.renderOrder = 5;
-  return { mesh, uniforms, attrs: ['iPos', 'iCol', 'iNrm', 'iSize'].map((n) => g.getAttribute(n)) };
+  return { mesh, uniforms, attrs: ['iPos', 'iCol', 'iNrm', 'iSize', 'iSoft'].map((n) => g.getAttribute(n)) };
 }
 
 export function blobTexture() {
@@ -155,28 +173,17 @@ async function buildType(type, meta, base) {
   const bake = new THREE.Matrix4().makeScale(1, 1, sz).multiply(new THREE.Matrix4().makeTranslation(0, 0, -zc));
   const local = ([x, y, z]) => new THREE.Vector3(x, y, (z - zc) * sz);
   const cap = CAPACITY[type];
-  const paint = new THREE.InstancedBufferAttribute(new Float32Array(cap * 3), 3).setUsage(THREE.DynamicDrawUsage);
 
   const parts = flatten(root, { include: (o) => !isWheelNode(o), mask: (mat) => (/paint/i.test(mat.name) ? 1 : 0), matrix: bake });
-  const meshes = [];
   let bodyGeometry = null;
-  let tris = 0;
   for (const p of parts) {
-    let material;
-    if (p.key === 'flat') material = paintable(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.05 }), null);
-    else if (p.key === 'glass') material = new THREE.MeshStandardMaterial({ color: 0x0c1218, roughness: 0.06, metalness: 0.3 });
-    else if (p.key === 'emissive') material = p.material;
+    if (p.key === 'flat') p.mat = paintable(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.05 }), null);
+    else if (p.key === 'glass') p.mat = new THREE.MeshStandardMaterial({ color: 0x0c1218, roughness: 0.06, metalness: 0.3 });
+    else if (p.key === 'emissive') p.mat = p.material;
     else {
-      material = paintable(new THREE.MeshStandardMaterial({ map: p.material.map, roughness: 0.42, metalness: 0.08 }), PAINT_KEY[type]);
+      p.mat = paintable(new THREE.MeshStandardMaterial({ map: p.material.map, roughness: 0.42, metalness: 0.08 }), PAINT_KEY[type]);
       bodyGeometry ??= p.geometry;
     }
-    if (p.key !== 'glass' && p.key !== 'emissive') p.geometry.setAttribute('aPaint', paint);
-    const im = new THREE.InstancedMesh(p.geometry, material, cap);
-    im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    im.frustumCulled = false;
-    im.count = 0;
-    meshes.push(im);
-    tris += triangles(p.geometry);
   }
 
   // Wheels: the FL wheel serves all four (six on the lorry); right-side wheels turn it round so the hub faces out.
@@ -187,21 +194,40 @@ async function buildType(type, meta, base) {
     colour: (mat) => (/paint|hubcap/i.test(mat.name) ? new THREE.Color(0.32, 0.34, 0.36) : mat.map ? new THREE.Color(0.03, 0.03, 0.035) : mat.color),
     matrix: new THREE.Matrix4().makeTranslation(-fl[0], -fl[1], -fl[2]),
   })[0].geometry;
-  const wheelMesh = new THREE.InstancedMesh(wheelGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 }), cap * 6);
-  wheelMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  wheelMesh.frustumCulled = false;
-  wheelMesh.count = 0;
-  meshes.push(wheelMesh);
+  const wheelMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 });
   const wheels = Object.entries(m.wheels).map(([name, p]) => ({ pos: local(p), front: /_F/.test(name), right: /R\d?$/.test(name) }));
-  tris += triangles(wheelGeo) * wheels.length;
+
+  // Two instance sets sharing materials: full detail, and a clustered copy for distance and mirrors.
+  const makeSet = (simplify) => {
+    const paint = new THREE.InstancedBufferAttribute(new Float32Array(cap * 3), 3).setUsage(THREE.DynamicDrawUsage);
+    const mk = (geometry, material, n) => {
+      const im = new THREE.InstancedMesh(geometry, material, n);
+      im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      im.frustumCulled = false;
+      im.count = 0;
+      return im;
+    };
+    let tris = 0;
+    const meshes = parts.map((p) => {
+      const g = simplify ? cluster(p.geometry, LOD_CELL) : p.geometry;
+      if (p.key !== 'glass' && p.key !== 'emissive') g.setAttribute('aPaint', paint);
+      tris += triangles(g);
+      return mk(g, p.mat, cap);
+    });
+    const wg = simplify ? cluster(wheelGeo, LOD_CELL * 0.6) : wheelGeo;
+    const wheelMesh = mk(wg, wheelMat, cap * 6);
+    tris += triangles(wg) * wheels.length;
+    return { meshes, wheelMesh, paint, tris, count: 0, wheelCount: 0 };
+  };
 
   const ind = m.indicators;
-  const inward = (p, side) => local([p[0] - side * 0.16, p[1] - 0.02, p[2]]);
+  // Model +X is its left, so inboard of the left lamp is -X.
+  const inboard = (p, side) => local([p[0] - side * LAMP.inboard, p[1] + LAMP.raise, p[2]]);
   return {
-    type, meshes, wheelMesh, wheels, wheelRadius: m.wheelRadius, paint, bodyGeometry, tris, count: 0, wheelCount: 0,
+    type, wheels, wheelRadius: m.wheelRadius, bodyGeometry, full: makeSet(false), lod: makeSet(true),
     lamps: {
       frontL: local(ind.front.L), frontR: local(ind.front.R), rearL: local(ind.rear.L), rearR: local(ind.rear.R),
-      brakeL: inward(ind.rear.L, 1), brakeR: inward(ind.rear.R, -1),
+      brakeL: inboard(ind.rear.L, 1), brakeR: inboard(ind.rear.R, -1),
     },
     shadow: { w: dims.width + 0.5, l: dims.length + 0.6 },
   };
@@ -210,7 +236,8 @@ async function buildType(type, meta, base) {
 export async function createVehicles(scene, { meta, base }) {
   const types = Object.fromEntries(await Promise.all(TYPES.map(async (t) => [t, await buildType(t, meta, base)])));
   const group = new THREE.Group();
-  for (const t of Object.values(types)) for (const im of t.meshes) group.add(im);
+  const sets = Object.values(types).flatMap((t) => [t.full, t.lod]);
+  for (const s of sets) group.add(...s.meshes, s.wheelMesh);
   scene.add(group);
 
   const lamps = lampMesh();
@@ -225,12 +252,14 @@ export async function createVehicles(scene, { meta, base }) {
   shadows.renderOrder = 1;
   group.add(shadows);
 
-  const glow = new THREE.Mesh(types.hatch.bodyGeometry, glowMaterial());
+  const glow = new THREE.Mesh(types.hatch.bodyGeometry, outlineMaterial());
   glow.matrixAutoUpdate = false;
   glow.visible = false;
   glow.renderOrder = 4;
   group.add(glow);
   let highlightId = null;
+  let highlightLamp = false;
+  let tails = false;
 
   let ringRadius = 30;
   let ghosts = [];
@@ -253,50 +282,69 @@ export async function createVehicles(scene, { meta, base }) {
   const colour = new THREE.Color();
   let lampN = 0;
 
-  function lamp(p, normalSign, rgb, intensity, size) {
+  // kind: a LAMP entry; normalSign: +1 front-facing, -1 rear-facing.
+  function lamp(p, normalSign, kind) {
     if (lampN >= LAMP_CAPACITY) return;
     v3.copy(p).applyMatrix4(M);
     nrm.set(0, 0, normalSign).transformDirection(M);
-    const [pos, col, n, sz] = lamps.attrs;
+    const [pos, col, n, sz, soft] = lamps.attrs;
+    const k = kind.intensity ?? 1;
     pos.setXYZ(lampN, v3.x, v3.y, v3.z);
-    col.setXYZ(lampN, rgb.x * intensity, rgb.y * intensity, rgb.z * intensity);
+    col.setXYZ(lampN, kind.colour[0] * k, kind.colour[1] * k, kind.colour[2] * k);
     n.setXYZ(lampN, nrm.x, nrm.y, nrm.z);
-    sz.setX(lampN, size);
+    sz.setX(lampN, kind.size);
+    soft.setX(lampN, kind.soft);
     lampN++;
   }
 
-  // One vehicle at (x, z) facing heading h; s drives wheel spin, steer the front wheels.
-  function draw(v, x, z, h, s, steer) {
+  // One vehicle pose { v, x, z, h, s, steer }: s drives wheel spin, steer the front wheels.
+  function draw({ v, x, z, h, s, steer }, allLod, view) {
     const t = types[v.type];
-    if (!t || t.count >= CAPACITY[v.type]) return;
+    if (!t) return;
+    // Main view: only vehicles in the camera frustum (the instanced meshes are never culled as a whole).
+    if (view) {
+      sphere.center.set(x, 1.5, z);
+      sphere.radius = VEHICLE_TYPES[v.type].length / 2 + 1.5;
+      if (!view.intersectsSphere(sphere)) return;
+    }
+    const dx = x - eye.x;
+    const dz = z - eye.z;
+    const d = Math.hypot(dx, dz);
+    // Mirror passes: a vehicle further than MIRROR_RANGE, or well ahead of the driver, is in no mirror.
+    if (allLod && (d > MIRROR_RANGE || (eye.heading != null && dx * Math.sin(eye.heading) - dz * Math.cos(eye.heading) > MIRROR_AHEAD))) return;
+    const set = allLod || d > LOD_DISTANCE ? t.lod : t.full;
+    if (set.count >= CAPACITY[v.type]) return;
     const c = -Math.cos(h);
     const sn = Math.sin(h);
     M.set(c, 0, sn, x, 0, 1, 0, 0, -sn, 0, c, z, 0, 0, 0, 1);
-    const i = t.count++;
-    for (const im of t.meshes) if (im !== t.wheelMesh) im.setMatrixAt(i, M);
+    const i = set.count++;
+    for (const im of set.meshes) im.setMatrixAt(i, M);
     colour.set(v.colourHex ?? COLOURS[v.colour] ?? '#888888');
-    t.paint.setXYZ(i, colour.r, colour.g, colour.b);
+    set.paint.setXYZ(i, colour.r, colour.g, colour.b);
     const spin = s / t.wheelRadius;
     for (const w of t.wheels) {
       W.copy(M).multiply(R.makeTranslation(w.pos.x, w.pos.y, w.pos.z));
       if (w.front) W.multiply(R.makeRotationY(steer * STEER_GAIN));
       W.multiply(R.makeRotationX(spin));
       if (w.right) W.multiply(flip);
-      t.wheelMesh.setMatrixAt(t.wheelCount++, W);
+      set.wheelMesh.setMatrixAt(set.wheelCount++, W);
     }
     if (shadows.count < 160) {
       S.copy(M).multiply(R.makeScale(t.shadow.w, 1, t.shadow.l));
       S.elements[13] = 0.03;
       shadows.setMatrixAt(shadows.count++, S);
     }
-    if (v.lamp && v.indicator) {
-      const L = v.indicator === 'left';
-      lamp(L ? t.lamps.frontL : t.lamps.frontR, 1, AMBER, 1, 0.75);
-      lamp(L ? t.lamps.rearL : t.lamps.rearR, -1, AMBER, 1, 0.75);
+    // While frozen on a culprit its indicator stays lit, so the cue is on screen whatever the blink phase was.
+    const on = lampsFor(v, { forceOn: v.id === highlightId && highlightLamp, tails });
+    // Red first: where far lamps' pixel floors overlap, the amber is drawn over it, never under.
+    const red = on.brake ? LAMP.brake : on.tail ? LAMP.tail : null;
+    if (red) {
+      lamp(t.lamps.brakeL, -1, red);
+      lamp(t.lamps.brakeR, -1, red);
     }
-    if (v.brake) {
-      lamp(t.lamps.brakeL, -1, RED, 0.9, 0.6);
-      lamp(t.lamps.brakeR, -1, RED, 0.9, 0.6);
+    if (on.indL || on.indR) {
+      lamp(on.indL ? t.lamps.frontL : t.lamps.frontR, 1, LAMP.indicator);
+      lamp(on.indL ? t.lamps.rearL : t.lamps.rearR, -1, LAMP.indicator);
     }
     if (v.id === highlightId && t.bodyGeometry) {
       glow.geometry = t.bodyGeometry;
@@ -306,11 +354,13 @@ export async function createVehicles(scene, { meta, base }) {
     }
   }
 
-  function update(prev, curr, alpha, { showPlayer = false, dt = 0, ghosts: keepGhosts = true, statics = [] } = {}) {
-    for (const t of Object.values(types)) t.count = t.wheelCount = 0;
-    shadows.count = 0;
-    lampN = 0;
-    glow.visible = false;
+  let poses = [];
+  const eye = { x: 0, z: 0, heading: null };
+
+  function update(prev, curr, alpha, { showPlayer = false, dt = 0, ghosts: keepGhosts = true, statics = [], eye: at } = {}) {
+    if (at) { eye.x = at.x; eye.z = at.z; eye.heading = at.heading ?? null; }
+    poses = [];
+    const pose = (v, x, z, h, s, steer) => poses.push({ v, x, z, h, s, steer });
     const prevMap = mapOf(prev);
     const currMap = mapOf(curr);
 
@@ -326,7 +376,7 @@ export async function createVehicles(scene, { meta, base }) {
       g.x += Math.sin(g.heading) * g.speed * dt;
       g.z -= Math.cos(g.heading) * g.speed * dt;
       g.s += g.speed * dt;
-      draw(g, g.x, g.z, g.heading, g.s, 0);
+      pose(g, g.x, g.z, g.heading, g.s, 0);
     }
 
     if (curr) {
@@ -335,33 +385,63 @@ export async function createVehicles(scene, { meta, base }) {
         const p = prevMap?.get(v.id) ?? v;
         const pathSwap = p.pathId !== v.pathId && Math.abs(p.s - v.s) > 5;
         const f = pathSwap ? 1 : alpha;
-        draw(v, p.x + (v.x - p.x) * f, p.z + (v.z - p.z) * f, p.heading + wrapPi(v.heading - p.heading) * f,
+        pose(v, p.x + (v.x - p.x) * f, p.z + (v.z - p.z) * f, p.heading + wrapPi(v.heading - p.heading) * f,
           p.s + (v.s - p.s) * f, p.steer + (v.steer - p.steer) * f);
       }
     }
-    for (const v of statics) draw(v, v.x, v.z, v.heading, 0, 0);
+    for (const v of statics) pose(v, v.x, v.z, v.heading, 0, 0);
+  }
 
-    for (const t of Object.values(types)) {
-      for (const im of t.meshes) {
-        im.count = im === t.wheelMesh ? t.wheelCount : t.count;
+  const frustum = new THREE.Frustum();
+  const viewProj = new THREE.Matrix4();
+  const sphere = new THREE.Sphere();
+
+  function commit(allLod, camera = null) {
+    let view = null;
+    if (camera && !allLod) {
+      camera.updateWorldMatrix(true, false);
+      viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      view = frustum.setFromProjectionMatrix(viewProj);
+    }
+    for (const s of sets) s.count = s.wheelCount = 0;
+    shadows.count = 0;
+    lampN = 0;
+    glow.visible = false;
+    for (const p of poses) draw(p, allLod, view);
+    for (const s of sets) {
+      for (const im of s.meshes) {
+        im.count = s.count;
         im.instanceMatrix.needsUpdate = true;
       }
-      t.paint.needsUpdate = true;
+      s.wheelMesh.count = s.wheelCount;
+      s.wheelMesh.instanceMatrix.needsUpdate = true;
+      s.paint.needsUpdate = true;
     }
     shadows.instanceMatrix.needsUpdate = true;
     lamps.mesh.geometry.instanceCount = lampN;
     for (const a of lamps.attrs) a.needsUpdate = true;
-    if (glow.visible) glow.material.uniforms.uStrength.value = 0.62 + 0.25 * Math.sin(performance.now() / 1000 * Math.PI * 2 * 0.9);
+    if (glow.visible) glow.material.uniforms.uStrength.value = 0.75 + 0.25 * Math.sin(performance.now() / 1000 * Math.PI * 2 * 0.9);
   }
 
   return {
     group,
     update,
-    highlight(id) { highlightId = id; },
+    commit,
+    highlight(id, { lamp = false } = {}) { highlightId = id; highlightLamp = lamp; },
     setLayout(layout) { ringRadius = layout.outerRadius; ghosts = []; lastCurr = null; },
     clearGhosts() { ghosts = []; },
-    setTheme(palette) { shadowMat.opacity = palette.shadow; },
+    // Tail lights follow the scene's own lights (streetlights on: the dark theme).
+    setTheme(palette) { shadowMat.opacity = palette.shadow; tails = palette.leds > 0; },
     lampUniforms: lamps.uniforms,
-    triangles: Object.fromEntries(Object.values(types).map((t) => [t.type, t.tris])),
+    dispose() {
+      group.traverse((o) => {
+        o.geometry?.dispose();
+        for (const k of ['map', 'emissiveMap']) o.material?.[k]?.dispose();
+        o.material?.dispose();
+        o.dispose?.();
+      });
+      group.removeFromParent();
+    },
+    triangles: Object.fromEntries(Object.values(types).map((t) => [t.type, [t.full.tris, t.lod.tris]])),
   };
 }

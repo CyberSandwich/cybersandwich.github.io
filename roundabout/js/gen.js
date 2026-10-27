@@ -20,7 +20,7 @@
  *   arms[] { index, bearing, name, destination, limitMph, entryLanes, laneWidth, entryWidth, approachWidth,
  *     flareLength, exitLanes, exitLaneWidth, exitWidth, entryAngle, entryAngles[], entryRadius (kerb),
  *     entryPathRadius, exitRadius, splitter { kind, width, length, polygon }, kerbs { entryLeft, entryRight,
- *     exitLeft, exitRight } as [x, z] polylines, giveWay[lane] { x, z, heading, a, b }, giveWayS[lane],
+ *     exitLeft, exitRight } as [x, z] polylines, giveWay[lane] { x, z, heading }, giveWayS[lane],
  *     mergeBearing[ringLane], divergeBearing[ringLane], exits { [armIdx]: { exitNumber, direction, lane } },
  *     laneArrows[lane] (['left'|'ahead'|'right']), arrowsOverride, footprint, entrySegs, exitSegs }
  *   paths { id: Path }  one per legal movement; Path = geom.js Path + { id, arm, lane, exitArm, exitLane,
@@ -42,7 +42,7 @@ import {
 } from './geom.js';
 
 const DEG = Math.PI / 180;
-const APPROACH_LENGTH = 110;
+const APPROACH_LENGTH = 200; // long enough for the speed-limit, 510 and map signs ahead of the player's start
 const EXIT_LENGTH = 80;
 const KERB_REACH = 35; // radius beyond the ICD within which neighbouring arms' kerbs must not meet
 const PAVEMENT = 1.5; // minimum kerb-to-kerb gap between neighbouring arms at the ICD, metres
@@ -50,20 +50,24 @@ const RING_MARGIN = 2; // minimum ring arc between one arm's merge and the next 
 
 export const TIERS = {
   mini: {
-    type: 'mini', icd: [14, 28], arms: [3, 4], lanes: [1], limits: [20, 30], exitRadius: [6, 12],
-    deflectRadius: [6, 12], splitter: { kind: 'painted', width: [0.5, 1.0], length: [3, 6] }, honesty: 0.85,
+    // CD 116 fixes only ICD <= 28 m and a 1-4 m disc. Typical residential minis (estimates): ICD ~14-20 m,
+    // 6.5-7.3 m single carriageways, rarely a splitter (a short painted one at most), kerb radii ~4-8 m, and
+    // none of the entry-angle and deflection design of a normal roundabout.
+    type: 'mini', icd: [14, 28], icdSkew: 1.8, icdTail: { from: 22, chance: 0.1 }, arms: [3, 4], lanes: [1], limits: [20, 30], exitRadius: [3.5, 6.5],
+    laneWidth: [3.25, 3.65], deflectRadius: [6, 10], entryAngle: null,
+    splitter: { kind: 'painted', chance: 0.3, width: [0.4, 1.0], length: [3, 6] }, honesty: 0.85,
   },
   easy: {
     type: 'compact', icd: [28, 36], arms: [3, 4], lanes: [1], limits: [20, 30, 30], exitRadius: [10, 20],
-    deflectRadius: [15, 30], splitter: { kind: 'raised', width: [1.5, 3.0], length: [10, 20] }, honesty: 0.8,
+    deflectRadius: [15, 30], splitter: { kind: 'raised', width: [1.5, 3.0], length: [10, 20] }, entryAngle: [20, 60], honesty: 0.8,
   },
   medium: {
     type: 'normal', icd: [40, 60], arms: [4, 4], lanes: [2], limits: [30, 30, 40], exitRadius: [15, 35],
-    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [1.5, 3.0], length: [12, 25] }, honesty: 0.65,
+    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [1.5, 3.0], length: [12, 25] }, entryAngle: [20, 60], honesty: 0.65,
   },
   hard: {
     type: 'large', icd: [60, 90], arms: [4, 5], lanes: [2, 3], limits: [30, 40, 40], exitRadius: [20, 45],
-    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [2.0, 4.0], length: [15, 30] }, honesty: 0.5,
+    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [2.0, 4.0], length: [15, 30] }, entryAngle: [20, 60], honesty: 0.5,
   },
 };
 
@@ -165,12 +169,13 @@ function offsetPolyline(segs, offset, from = 0, to = Infinity, step = 1) {
     const Ls = segLength(seg);
     const t0 = Math.max(0, from - base);
     const t1 = Math.min(Ls, to - base);
-    for (let t = t0; t <= t1 + 1e-9; t += step) {
-      const q = segPoint(seg, Math.min(t, t1));
+    // Counted steps plus the exact end: stepping a float up to t1 can land a hair short of it forever.
+    const steps = t1 >= t0 ? Math.floor((t1 - t0) / step) : -1;
+    for (let i = 0; i <= steps + 1 && steps >= 0; i++) {
+      const q = segPoint(seg, i <= steps ? t0 + i * step : t1);
       const p = add(q.p, scale(leftOf(q.heading), offset));
       const last = pts[pts.length - 1];
       if (!last || Math.hypot(p[0] - last[0], p[1] - last[1]) > 0.05) pts.push(p);
-      if (t < t1 && t + step > t1) t = t1 - step;
     }
     base += Ls;
   }
@@ -182,9 +187,11 @@ const chainLength = (segs) => segs.reduce((sum, s) => sum + segLength(s), 0);
 // First point along a segment chain at or inside radius R: { s, p, heading }.
 function firstInside(segs, R) {
   const total = chainLength(segs);
-  let s = 0;
-  while (s < total && len(pointOnChain(segs, s).p) > R) s += 0.25;
-  let lo = Math.max(0, s - 0.25);
+  // The first segment is the long straight approach: skip its far end, which is well outside the ICD.
+  let s = Math.max(0, segLength(segs[0]) - (2 * R + 60));
+  const step = 1;
+  while (s < total && len(pointOnChain(segs, s).p) > R) s += step;
+  let lo = Math.max(0, s - step);
   let hi = s;
   for (let i = 0; i < 20; i++) {
     const mid = (lo + hi) / 2;
@@ -199,10 +206,12 @@ function firstInside(segs, R) {
 
 function pickArmParams(rng, tier, n, isSingle) {
   const t = TIERS[tier];
-  const laneWidth = isSingle ? 4.5 : Math.round(rng.range(3.0, 3.5) * 100) / 100;
+  const round2 = (x) => Math.round(x * 100) / 100;
+  const laneWidth = t.laneWidth ? round2(rng.range(...t.laneWidth)) : isSingle ? 4.5 : round2(rng.range(3.0, 3.5));
   const exitLanes = isSingle ? 1 : (tier === 'hard' ? 2 : rng.int(1, 2));
-  const exitLaneWidth = exitLanes === 1 ? Math.round(rng.range(4.0, 4.5) * 100) / 100 : 3.5;
-  const approachLaneWidth = isSingle ? 3.65 : Math.min(laneWidth, 3.0);
+  const exitLaneWidth = t.laneWidth ? laneWidth : exitLanes === 1 ? round2(rng.range(4.0, 4.5)) : 3.5;
+  const approachLaneWidth = t.laneWidth ? laneWidth : isSingle ? 3.65 : Math.min(laneWidth, 3.0);
+  const hasSplitter = t.splitter.chance === undefined || rng.chance(t.splitter.chance);
   return {
     limitMph: rng.pick(t.limits),
     entryLanes: n,
@@ -213,18 +222,16 @@ function pickArmParams(rng, tier, n, isSingle) {
     exitLanes,
     exitLaneWidth,
     exitWidth: exitLaneWidth * exitLanes,
-    splitter: {
-      kind: t.splitter.kind,
-      width: Math.round(rng.range(...t.splitter.width) * 100) / 100,
-      length: Math.round(rng.range(...t.splitter.length)),
-    },
+    splitter: hasSplitter
+      ? { kind: t.splitter.kind, width: round2(rng.range(...t.splitter.width)), length: Math.round(rng.range(...t.splitter.length)) }
+      : { kind: 'none', width: 0, length: 0 },
     deflectRadius: rng.range(...t.deflectRadius),
     exitRadius: rng.range(...t.exitRadius),
   };
 }
 
 // Builds one arm in local coordinates; null when the parameters cannot make valid geometry.
-function buildArmLocal(rng, p, R, ringRadii) {
+function buildArmLocal(rng, p, R, ringRadii, entryAngle) {
   const s2 = p.splitter.width / 2;
   const n = p.entryLanes;
   const w = p.laneWidth;
@@ -232,9 +239,11 @@ function buildArmLocal(rng, p, R, ringRadii) {
   const d0 = deflection(off0, w, n, 0, p.deflectRadius, R);
   const d1 = deflection(off0, w, n, 45 * DEG, p.deflectRadius, R);
   if (!d0 || !d1) return null;
-  // Within ~8 deg of aiming tangent to the outer ring lane the fillet radius blows up.
-  const phiLo = Math.max(20 * DEG, d1.phi, Math.acos(Math.min(1, ringRadii[0] / R)) + 8 * DEG);
-  const phiHi = Math.min(60 * DEG, d0.phi);
+  // Within ~8 deg of aiming tangent to the outer ring lane the fillet radius blows up. Minis have no
+  // entry-angle design range (entryAngle null): any angle the geometry allows.
+  const [angleLo, angleHi] = entryAngle ?? [0, 90];
+  const phiLo = Math.max(angleLo * DEG, d1.phi, Math.acos(Math.min(1, ringRadii[0] / R)) + 8 * DEG);
+  const phiHi = Math.min(angleHi * DEG, d0.phi);
   if (phiLo > phiHi) return null;
 
   // A left-turning fillet only reaches a ring lane if the entry heading aims inside it; flatter entries give
@@ -251,8 +260,13 @@ function buildArmLocal(rng, p, R, ringRadii) {
     return out;
   };
   let entries = null;
-  const start = phiLo + (Math.min(phiHi, phiLo + 25 * DEG) - phiLo) * rng() ** 1.5;
-  for (let phi = start; phi <= phiHi + 1e-9 && !entries; phi += 2 * DEG) entries = entryFor(phi);
+  if (entryAngle) {
+    const start = phiLo + (Math.min(phiHi, phiLo + 25 * DEG) - phiLo) * rng() ** 1.5;
+    for (let phi = start; phi <= phiHi + 1e-9 && !entries; phi += 2 * DEG) entries = entryFor(phi);
+  } else {
+    // Minis: arms run nearly straight into the circle, so start at the least deflection and flatten from there.
+    for (let phi = phiHi; phi >= phiLo - 1e-9 && !entries; phi -= 2 * DEG) entries = entryFor(phi);
+  }
   if (!entries) return null;
   // Each lane gives way where it meets the ICD, so a waiting vehicle never pokes into the ring.
   for (const e of entries) e.stop = firstInside(e.segs, R);
@@ -287,7 +301,7 @@ function buildArmLocal(rng, p, R, ringRadii) {
 
 function tryLayout(rng, tier, overrides) {
   const t = TIERS[tier];
-  const icd = overrides.icd ?? Math.round(rng.range(...t.icd) * 10) / 10;
+  const icd = overrides.icd;
   const R = icd / 2;
   const nArms = overrides.arms;
   const nLanes = overrides.lanes ?? rng.pick(t.lanes);
@@ -306,7 +320,7 @@ function tryLayout(rng, tier, overrides) {
 
   const locals = [];
   for (const p of params) {
-    const local = buildArmLocal(rng, p, R, ringRadii);
+    const local = buildArmLocal(rng, p, R, ringRadii, t.entryAngle);
     if (!local) return null;
     locals.push(local);
   }
@@ -362,15 +376,29 @@ function pickTarget(rng, arm, forced) {
   return (surprising.length && rng.chance(0.6) ? rng.pick(surprising) : rng.pick(options)).j;
 }
 
+// ICD in [icd0, icd1], skewed toward the small end; a tier with icdTail draws that fraction uniformly from the
+// tail beyond `from`, so large minis stay rare without dragging the median up.
+function pickIcd(rng, t) {
+  const [lo, hi] = t.icd;
+  const tail = t.icdTail;
+  const inTail = tail && rng.chance(tail.chance);
+  const v = inTail ? rng.range(tail.from, hi) : lo + ((tail ? tail.from : hi) - lo) * rng() ** (t.icdSkew ?? 1);
+  return Math.round(v * 10) / 10;
+}
+
 export function generate(tier, seed, overrides = {}) {
   if (!TIERS[tier]) throw new Error('unknown tier ' + tier);
   const rng = createRng(seed + '|' + tier);
   const t = TIERS[tier];
-  // The arm count is drawn once so the tier's whole arm range is honoured even where few ICDs can fit it.
+  // ICD and arm count are drawn once, then kept if any geometry fits: retrying with fresh ICDs would favour
+  // the large ones that fit most easily. Only if nothing fits does the arm count drop, then the ICD grow.
   let raw = null;
   const wanted = overrides.arms ?? rng.int(...t.arms);
-  for (let arms = wanted; arms >= 3 && !raw; arms--) {
-    for (let attempt = 0; attempt < 300 && !raw; attempt++) raw = tryLayout(rng, tier, { ...overrides, arms });
+  const icd0 = overrides.icd ?? pickIcd(rng, t);
+  for (let icd = icd0; !raw && icd <= Math.max(icd0, t.icd[1]); icd = Math.round((icd + 1) * 10) / 10) {
+    for (let arms = wanted; !raw && arms >= (overrides.arms ?? t.arms[0]); arms--) {
+      for (let attempt = 0; attempt < 100 && !raw; attempt++) raw = tryLayout(rng, tier, { ...overrides, arms, icd });
+    }
   }
   if (!raw) throw new Error('no valid layout for ' + tier + ' seed ' + seed);
 
@@ -399,21 +427,17 @@ export function generate(tier, seed, overrides = {}) {
       entryRadius: p.deflectRadius,
       entryPathRadius: Math.min(...local.entries.map((e) => e.entryRadius)),
       exitRadius: p.exitRadius,
-      splitter: { ...p.splitter, polygon: splitterPolygon(p.splitter, raw.R).map(rot) },
+      splitter: { ...p.splitter, polygon: p.splitter.kind === 'none' ? [] : splitterPolygon(p.splitter, raw.R).map(rot) },
       footprint: { entryExtent: local.entryExtent, exitExtent: local.exitExtent },
       kerbs: Object.fromEntries(Object.entries(local.kerbs).map(([k, pts]) => [k, pts.map(rot)])),
       entrySegs: local.entries.map((e) => e.segs.map((s) => rotateSeg(s, b))),
       exitSegs: local.exits.map((e) => e.segs.map((s) => rotateSeg(s, b))),
       exitLaneOfRing: local.exits.map((e) => e.exitLane),
       giveWayS: local.entries.map((e) => e.stop.s),
-      // Per-lane give-way marking: centred where the lane meets the ICD and laid along the ICD.
+      // Per-lane give-way point: where the lane meets the ICD, and the heading there.
       giveWay: local.entries.map((e) => {
         const G = rot(e.stop.p);
-        const h = e.stop.heading + b;
-        const tangent = bearingOf(G[0], G[1]) + Math.PI / 2;
-        const half = p.laneWidth / 2 / Math.max(0.5, Math.abs(Math.sin(h - tangent)));
-        const side = scale(dir(tangent), half);
-        return { x: G[0], z: G[1], heading: h, a: add(G, scale(side, -1)), b: add(G, side) };
+        return { x: G[0], z: G[1], heading: e.stop.heading + b };
       }),
       mergeBearing: local.entries.map((e) => wrap2Pi(bearingOf(...e.M) + b)),
       divergeBearing: local.exits.map((e) => wrap2Pi(bearingOf(...e.D) + b)),
@@ -459,7 +483,8 @@ export function generate(tier, seed, overrides = {}) {
     direction: ex.direction,
     lane: ex.lane,
     pathId: pathId(playerArm, ex.lane, targetArm, 0),
-    route: { exitNumber: ex.exitNumber, road: arms[targetArm].name, destination: arms[targetArm].destination },
+    // First exit: signal left on approach and keep it on (HC 186), so there is no Exit decision to make.
+    route: { exitNumber: ex.exitNumber, road: arms[targetArm].name, destination: arms[targetArm].destination, exitDecision: ex.exitNumber !== 1 },
   };
 
   layout.markings = markingsOf(layout);
@@ -532,8 +557,9 @@ function splitterPolygon(sp, R) {
 
 function islandOf(rng, tier, raw) {
   if (tier === 'mini') {
-    const radius = Math.min(rng.range(0.5, 2.0), raw.innerRadius);
-    return { kind: 'painted', radius, diameter: radius * 2, feature: 'none', apron: 0 };
+    // Domed white disc (1003.4), 1-4 m across; scales with the junction (estimate: ~12-20% of the ICD).
+    const diameter = Math.min(4, 2 * raw.innerRadius, Math.max(1, raw.icd * rng.range(0.12, 0.2)));
+    return { kind: 'painted', radius: diameter / 2, diameter, feature: 'none', apron: 0 };
   }
   const apron = tier === 'easy' ? rng.range(1, 2) : 0;
   const feature = { easy: 'planting', medium: 'statue', hard: 'clockTower' }[tier];
@@ -546,7 +572,6 @@ function markingsOf(layout) {
     arm: arm.index,
     diagram: mini ? '1003.3' : '1003.1',
     width: giveWayWidth(arm.limitMph),
-    lanes: arm.giveWay.map((g) => ({ a: g.a, b: g.b })),
   }));
   const laneLines = [];
   const arrows = [];
@@ -587,23 +612,70 @@ function pointOnChain(segs, s) {
   return segPoint(last, segLength(last));
 }
 
-// Position on the left verge of an arm's approach, `axial` metres from the centre.
-function verge(arm, axial, R, extra = 1.5) {
-  const lateral = arm.splitter.width / 2 + arm.entryWidth + extra;
-  return rotate(add(scale(U, Math.max(axial, R + 2)), scale(L, lateral)), arm.bearing);
+export function pointInPolygon(p, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, zi] = poly[i];
+    const [xj, zj] = poly[j];
+    if ((zi > p[1]) !== (zj > p[1]) && p[0] < ((xj - xi) * (p[1] - zi)) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
 }
+
+// Nearest point on a polyline: { d, q }.
+export function nearestOnPolyline(poly, p) {
+  let best = { d: Infinity, q: null };
+  for (let i = 0; i + 1 < poly.length; i++) {
+    const a = poly[i];
+    const ab = [poly[i + 1][0] - a[0], poly[i + 1][1] - a[1]];
+    const l2 = dot(ab, ab);
+    const t = l2 > 0 ? Math.max(0, Math.min(1, dot([p[0] - a[0], p[1] - a[1]], ab) / l2)) : 0;
+    const q = [a[0] + ab[0] * t, a[1] + ab[1] * t];
+    const d = Math.hypot(p[0] - q[0], p[1] - q[1]);
+    if (d < best.d) best = { d, q };
+  }
+  return best;
+}
+
+// An arm's carriageway outline: the outer entry kerb in, the outer exit kerb out (the splitter lies inside).
+export const carriagewayOutline = (arm) => [...arm.kerbs.entryLeft, ...arm.kerbs.exitLeft];
+
+const POST_CLEAR = 0.3; // a sign post stands at least this far from any carriageway edge
+
+// Metres before the give-way line, by approach limit: the 510 warning ~100 m out at 30 mph, the map sign
+// 50-80 m, the limit roundel beyond both (estimates scaled for 20 and 40 mph).
+export const SIGN_DISTANCES = {
+  20: { limit: 110, 510: 70, map: 50 },
+  30: { limit: 140, 510: 100, map: 65 },
+  40: { limit: 165, 510: 120, map: 80 },
+};
 
 function signsOf(layout) {
   const R = layout.outerRadius;
   const mini = layout.type === 'mini';
   const signs = [];
+  const outlines = layout.arms.flatMap((a) => [a.kerbs.entryLeft, a.kerbs.exitLeft]);
+  const roads = layout.arms.map(carriagewayOutline);
+  const clear = (p) => len(p) >= R + POST_CLEAR && !roads.some((poly) => pointInPolygon(p, poly))
+    && outlines.every((k) => nearestOnPolyline(k, p).d >= POST_CLEAR);
   for (const arm of layout.arms) {
     const gwAxial = -dot(rotate([arm.giveWay[0].x, arm.giveWay[0].z], -arm.bearing), [0, 1]);
-    const at = (axial, code, extra) => {
-      const p = verge(arm, axial, R, extra);
-      return { arm: arm.index, code, x: p[0], z: p[1], facing: arm.bearing, side: 'left' };
+    // Nearside sign `distance` m before the give-way line on the kerb lane: stands `offsets[0]` m beyond the
+    // real kerb polyline, nudged by the alternatives where a neighbouring arm's kerb is too close.
+    const at = (distance, code, offsets) => {
+      const q = pointOnChain(arm.entrySegs[0], arm.giveWayS[0] - distance);
+      const kerb = nearestOnPolyline(arm.kerbs.entryLeft, add(q.p, scale(leftOf(q.heading), arm.laneWidth / 2))).q;
+      const outward = scale([kerb[0] - q.p[0], kerb[1] - q.p[1]], 1 / Math.hypot(kerb[0] - q.p[0], kerb[1] - q.p[1]));
+      const spots = offsets.map((o) => add(kerb, scale(outward, o)));
+      const p = spots.find(clear) ?? spots[0];
+      return { arm: arm.index, code, x: p[0], z: p[1], facing: arm.bearing, side: 'left', distance };
     };
-    const map = at(gwAxial + 70, 'map', 2.5);
+    const d = SIGN_DISTANCES[arm.limitMph];
+    const limit = at(d.limit, 'limit', [0.8, 0.6, 1.0]);
+    limit.mph = arm.limitMph;
+    limit.diagram = '670';
+    // The map sign is wide: its nearer post sits 0.75 m inboard of the centre.
+    const map = at(d.map, 'map', [1.7, 1.5, 2.0]);
     map.map = {
       mini,
       exits: Object.entries(arm.exits).map(([j, e]) => ({
@@ -614,7 +686,13 @@ function signsOf(layout) {
         relBearing: wrapPi(layout.arms[j].bearing - (arm.bearing + Math.PI)),
       })),
     };
-    signs.push(map, at(gwAxial + 45, '510'), at(gwAxial + 1, mini ? '611.1' : '602'));
+    signs.push(limit, at(d[510], '510', [0.8, 0.6, 1.0]), map, at(1.5, mini ? '611.1' : '602', [0.8, 0.6, 1.0]));
+    // Offside repeater on the raised splitter, on its axis a few metres past the nose.
+    if (arm.splitter.kind === 'raised') {
+      const axial = R + 0.6 + 3;
+      const p = rotate(scale(U, axial), arm.bearing);
+      signs.push({ arm: arm.index, code: '602', x: p[0], z: p[1], facing: arm.bearing, side: 'right', distance: axial - gwAxial });
+    }
   }
   return signs;
 }

@@ -1,29 +1,61 @@
 /**
- * Driver's seat: a code-built right-hand-drive Polo-ish interior, the head camera and the mirrors.
+ * Driver's seat: a code-built right-hand-drive Polo Mk6 interior, the head camera, the mirrors and the automatic
+ * head-look. Pure geometry, framing and scheduling live in headlook.js (tested); this file only draws them.
  *
  *   const cockpit = createCockpit({ canvas, reducedMotion })
  *   cockpit.group                 add to the scene; sits at the player car (frame: forward -z, right +x)
- *   cockpit.camera                the eye; sees layers 0 and 1 (the interior is on layer 1, so mirrors skip it)
- *   cockpit.update(view, dt)      view = the player's interpolated VehicleView
- *   cockpit.look(yaw, pitch, hold)  automatic glance (radians, + = left / up) for `hold` s; a drag overrides it
- *   cockpit.rest(yaw)             resting yaw while waiting at the line (null to face ahead)
- *   cockpit.glanceMirrors()       rear-view then left wing mirror, as before signalling left
- *   cockpit.renderMirrors(renderer, scene, frame)   every other frame; off when quality is low
- *   cockpit.setAspect(a)  cockpit.setQuality(q)  cockpit.setVisible(on)  cockpit.resetLook()
+ *   cockpit.camera                the eye; sees layers 0, 1 and 2 (the interior is on layer 1, so mirrors skip it)
+ *   cockpit.update(view, dt)      view = the player's interpolated VehicleView { x, z, heading, steer, speed,
+ *                                 accel, indicator, lamp }
+ *   cockpit.setDrive(drive)       once per frame during a run, null otherwise:
+ *                                 { phase, distToLine, goWindowOpen, layout, path, vehicles }
+ *                                 phase = player.phase, distToLine = metres to the stop line (sim.player.stopS -
+ *                                 sim.player.s), path = sim.player.path, vehicles = the snapshot's vehicles
+ *   cockpit.focus(target, hold)   guided focus: { id } (a vehicle) or { x, z } (a world point), null to drop;
+ *                                 overrides the scan for `hold` s (default LOOK.focusHold), renewed by calling again
+ *   cockpit.look(yaw, pitch, hold)  fixed glance (radians, + = left / up) for `hold` s; beats the scheduler
+ *   cockpit.rest(yaw)             resting yaw when no drive is set (null to face ahead)
+ *   cockpit.glanceMirrors()       the mirror-signal glances: interior, left wing, then toward the exit
+ *   cockpit.renderMirrors(renderer, scene)  refreshes at most one mirror per frame, only mirrors in view;
+ *                                 mirror cameras see layer 0 only: road, signs, traffic (scenery is layer 2)
+ *   cockpit.setTheme(palette)     world.js PALETTES entry (env.setTheme's return): tints the static mirror glass
+ *   cockpit.speedoInFrame        true while the whole speedometer face is in the frame (the HUD mph shows otherwise)
+ *   cockpit.setAspect(a)  cockpit.setQuality(q)  cockpit.setVisible(on)  cockpit.resetLook()  cockpit.nudge(dYaw)
+ *   cockpit.dispose()
  *
+ * Head priority: drag or keys (auto resumes LOOK idle s after release) > look() > focus > scheduler > rest().
  * The A-pillars are solid and placed where a Polo's are: they hide cars, which is part of what is taught.
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { PALETTES } from './world.js';
+import {
+  CAB, LOOK, povFor, aim, bonnetPoint, inFrame, mirrorPose, panelPose, mirrorCamera, rearMirrorX, pickMirror,
+  routePoints, lookInputFor, createHeadLook,
+} from './headlook.js';
 
-export const EYE = new THREE.Vector3(0.37, 1.15, 0.15);
-const H_FOV = THREE.MathUtils.degToRad(98);
-const V_FOV_MIN = 50;
-const V_FOV_MAX = 80;
-const STEERING_RATIO = 15;
-const YAW_LIMIT = THREE.MathUtils.degToRad(120);
-const PITCH_LIMIT = THREE.MathUtils.degToRad(25);
-const BASE_PITCH = THREE.MathUtils.degToRad(-3);
+export const EYE = new THREE.Vector3(...CAB.eye);
+
+// Cab tunables. Angles in radians unless named deg.
+const T = {
+  steeringRatio: 15,
+  yawLimit: THREE.MathUtils.degToRad(120),
+  pitchLimit: THREE.MathUtils.degToRad(25),
+  idle: 1.5, // s after a drag or key before the automatic head-look takes over again
+  povRate: 15, // 1/s: frame changes on resize or rotation settle in ~200 ms
+  // Mirror render targets (px at high; medium scales them) and refresh period in frames per tier.
+  rt: { rear: [256, 64], left: [256, 160], right: [256, 160] },
+  tiers: { high: { scale: 1, period: 2, live: ['rear', 'left', 'right'] }, medium: { scale: 0.75, period: 3, live: ['rear', 'left'] }, low: { scale: 0.75, period: Infinity, live: [] } },
+  accelPitch: 0.0025, // rad per m/s^2, capped at accelPitchMax: the nose dips under braking
+  accelPitchMax: THREE.MathUtils.degToRad(0.5),
+  vibration: 0.0004, // m at 30 mph
+  stalkTravel: 0.14, // rad
+  // Cabin fill per theme, as a share of each surface's own colour (so dark parts stay darker than light ones):
+  // dusk lights the cabin only by a warm low sun and a blue sky fill, so the dash went navy and the trim maroon;
+  // a little neutral self-light keeps shapes and the speedo hood readable while the cabin stays darker than the road.
+  fill: { light: 0, dark: 0.35, sepia: 0 },
+};
+const MIRRORS = ['rear', 'left', 'right'];
 
 // Geometry with a flat vertex colour and no uv, so differently built parts merge into one draw.
 function tint(g, hex) {
@@ -46,26 +78,47 @@ function beam(a, b, w, t, hex, up = new THREE.Vector3(0, 1, 0)) {
 }
 
 const box = (w, h, d, x, y, z, hex) => tint(new THREE.BoxGeometry(w, h, d).translate(x, y, z), hex);
+const V = (a) => new THREE.Vector3(...a);
+
+// Rotation that turns a plane's +z toward `normal` (car frame), independent of where the car is.
+function facing(normal) {
+  const m = new THREE.Matrix4().lookAt(V(normal), new THREE.Vector3(), new THREE.Vector3(0, 1, 0));
+  return new THREE.Quaternion().setFromRotationMatrix(m);
+}
 
 function dash() {
+  const { far, c1, crest, c2, near } = CAB.dash;
   const s = new THREE.Shape();
-  s.moveTo(-1.0, 0.95);
-  s.quadraticCurveTo(-0.78, 1.0, -0.6, 0.985);
-  s.quadraticCurveTo(-0.48, 0.97, -0.46, 0.9);
+  s.moveTo(...far);
+  s.quadraticCurveTo(...c1, ...crest);
+  s.quadraticCurveTo(...c2, ...near);
   s.lineTo(-0.44, 0.62);
   s.lineTo(-1.0, 0.62);
   s.closePath();
   const g = new THREE.ExtrudeGeometry(s, { depth: 1.56, bevelEnabled: false, curveSegments: 6 });
   g.rotateY(-Math.PI / 2).translate(0.78, 0, 0);
-  return tint(g.toNonIndexed(), '#25272b');
+  return tint(g, '#3a3c41');
+}
+
+// A mirror's black shell, behind its glass and turned with it.
+function shell(m, pose, depth) {
+  const g = tint(new THREE.BoxGeometry(m.w + 0.024, m.h + 0.024, depth).translate(0, 0, -depth / 2 - 0.002), '#1c1d20');
+  g.applyQuaternion(facing(pose.normal)).translate(...pose.centre);
+  return g;
 }
 
 function interior() {
   const pillar = '#38393d';
+  const hood = '#26282c';
+  const [sx, sy, sz] = CAB.speedo.at;
   const parts = [
     dash(),
-    // Instrument hood over the speedometer.
-    tint(new THREE.CylinderGeometry(0.15, 0.15, 0.2, 14, 1, true, -Math.PI / 2, Math.PI).rotateX(Math.PI / 2).scale(1, 0.55, 1).translate(0.37, 0.975, -0.56).toNonIndexed(), '#1c1d20'),
+    // Instrument hood: open toward the driver, its lip low enough to hide only bonnet, never road.
+    box(0.19, 0.008, 0.1, sx, sy + 0.048, sz + 0.01, hood),
+    box(0.01, 0.094, 0.1, sx - 0.095, sy - 0.003, sz + 0.01, hood),
+    box(0.01, 0.094, 0.1, sx + 0.095, sy - 0.003, sz + 0.01, hood),
+    box(0.19, 0.1, 0.01, sx, sy - 0.005, sz - 0.045, hood),
+    box(0.19, 0.03, 0.1, sx, sy - 0.04, sz + 0.01, hood),
     beam(new THREE.Vector3(0.71, 0.97, -0.97), new THREE.Vector3(0.6, 1.41, -0.25), 0.09, 0.06, pillar),
     beam(new THREE.Vector3(-0.71, 0.97, -0.97), new THREE.Vector3(-0.6, 1.41, -0.25), 0.09, 0.06, pillar),
     // Header rail, sun visors, roof side rails, B-pillars.
@@ -76,7 +129,7 @@ function interior() {
     beam(new THREE.Vector3(-0.66, 1.42, -0.25), new THREE.Vector3(-0.66, 1.42, 1.3), 0.08, 0.05, '#55534f'),
     beam(new THREE.Vector3(0.75, 0.98, 0.58), new THREE.Vector3(0.68, 1.42, 0.5), 0.12, 0.06, pillar),
     beam(new THREE.Vector3(-0.75, 0.98, 0.58), new THREE.Vector3(-0.68, 1.42, 0.5), 0.12, 0.06, pillar),
-    box(1.44, 0.02, 1.6, 0, 1.44, 0.55, '#6c6964'),
+    box(1.44, 0.02, 1.6, 0, 1.44, 0.55, '#a29e97'),
     // Door cards with sills; centre console; the passenger seat seen when glancing left.
     box(0.06, 0.55, 1.5, 0.8, 0.7, -0.15, '#2b2d31'),
     box(0.06, 0.55, 1.5, -0.8, 0.7, -0.15, '#2b2d31'),
@@ -86,53 +139,65 @@ function interior() {
     box(0.06, 0.1, 0.06, 0, 0.66, -0.12, '#141517'),
     box(0.5, 0.66, 0.14, -0.4, 0.92, 0.42, '#303236'),
     box(0.46, 0.14, 0.5, -0.4, 0.55, 0.15, '#303236'),
-    // Rear-view mirror housing and stem.
-    box(0.27, 0.075, 0.035, 0, 1.31, -0.67, '#16171a'),
-    box(0.025, 0.07, 0.025, 0, 1.37, -0.66, '#16171a'),
+    // Footwell and floor: carpet, bulkhead under the dash, kick panels and lower door cards, so no road shows
+    // below the dash at any aspect or head pose.
+    box(1.62, 0.03, 1.9, 0, 0.285, -0.2, '#141517'),
+    box(1.56, 0.36, 0.05, 0, 0.46, -0.97, '#1b1c1f'),
+    tint(new THREE.BoxGeometry(1.56, 0.03, 0.5).rotateX(0.55).translate(0, 0.37, -0.8), '#17181a'),
+    box(0.06, 0.72, 0.36, 0.8, 0.64, -1.05, '#232428'),
+    box(0.06, 0.72, 0.36, -0.8, 0.64, -1.05, '#232428'),
+    box(0.06, 0.16, 1.5, 0.8, 0.35, -0.15, '#232428'),
+    box(0.06, 0.16, 1.5, -0.8, 0.35, -0.15, '#232428'),
+    // Steering column under the wheel.
+    beam(new THREE.Vector3(0.37, 0.74, -0.36), new THREE.Vector3(0.37, 0.66, -0.62), 0.07, 0.07, '#202225'),
+    // Wing mirror shells, black plastic, each on a sail plate from the door's front corner.
+    shell(CAB.left, mirrorPose(CAB.left), 0.07),
+    shell(CAB.right, mirrorPose(CAB.right), 0.07),
+    box(0.17, 0.05, 0.12, -0.885, 0.985, CAB.left.at[2] - 0.01, '#1c1d20'),
+    box(0.17, 0.05, 0.12, 0.885, 0.985, CAB.right.at[2] - 0.01, '#1c1d20'),
   ];
   return mergeGeometries(parts.map((g) => (g.index ? g.toNonIndexed() : g)));
 }
 
-// Bonnet with a slight crown, plus both wing mirror housings, in the player's paint.
+// Bonnet with a slight crown, in the player's paint.
 function bodywork() {
   const g = new THREE.PlaneGeometry(1.0, 1.0, 8, 6);
   const p = g.getAttribute('position');
-  for (let i = 0; i < p.count; i++) {
-    const u = p.getX(i) + 0.5; // 0..1 across
-    const v = p.getY(i) + 0.5; // 0 at the windscreen, 1 at the nose
-    const halfW = 0.8 - 0.16 * v * v;
-    const x = (u - 0.5) * 2 * halfW;
-    const z = -0.98 - v * 1.08;
-    const y = 0.935 - 0.13 * v * v + 0.025 * (1 - ((u - 0.5) * 2) ** 2);
-    p.setXYZ(i, x, y, z);
-  }
+  for (let i = 0; i < p.count; i++) p.setXYZ(i, ...bonnetPoint(p.getX(i) + 0.5, p.getY(i) + 0.5));
   g.computeVertexNormals();
-  const housing = (x) => new THREE.BoxGeometry(0.09, 0.12, 0.18).translate(x, 1.02, -0.79);
-  return mergeGeometries([g, housing(-0.99), housing(0.99)].map((x) => {
-    const n = x.toNonIndexed();
-    n.deleteAttribute('uv');
-    return n;
-  }));
+  g.deleteAttribute('uv');
+  return g;
 }
 
 function steeringWheel() {
+  const { r, tube } = CAB.wheel;
   const parts = [
-    new THREE.TorusGeometry(0.185, 0.021, 10, 40),
+    new THREE.TorusGeometry(r, tube, 10, 40),
     new THREE.CylinderGeometry(0.065, 0.075, 0.06, 18).rotateX(Math.PI / 2),
     new THREE.BoxGeometry(0.17, 0.035, 0.02).translate(-0.1, -0.01, 0),
     new THREE.BoxGeometry(0.17, 0.035, 0.02).translate(0.1, -0.01, 0),
     new THREE.BoxGeometry(0.035, 0.13, 0.02).translate(0, -0.11, 0),
   ].map((g) => tint(g.toNonIndexed(), '#18191b'));
-  parts.push(tint(new THREE.BoxGeometry(0.05, 0.012, 0.022).translate(0, 0.18, 0.004).toNonIndexed(), '#5a5c60'));
+  parts.push(tint(new THREE.BoxGeometry(0.05, 0.012, 0.022).translate(0, r - 0.005, 0.004).toNonIndexed(), '#5a5c60'));
+  return mergeGeometries(parts);
+}
+
+// Indicator stalk on the left of the column (VW: down for left, up for right), pivoting at its root.
+function stalk() {
+  const parts = [
+    new THREE.CylinderGeometry(0.007, 0.009, 0.15, 8).rotateZ(Math.PI / 2).translate(-0.075, 0, 0),
+    new THREE.CylinderGeometry(0.011, 0.011, 0.035, 10).rotateZ(Math.PI / 2).translate(-0.16, 0, 0),
+  ].map((g, i) => tint(g.toNonIndexed(), i ? '#3a3c40' : '#1c1d20'));
   return mergeGeometries(parts);
 }
 
 function speedoTexture() {
   const c = document.createElement('canvas');
   c.width = 256;
-  c.height = 96;
+  c.height = 88;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
   let last = '';
   function draw(mph, left, right) {
     const key = `${mph}|${left}|${right}`;
@@ -140,93 +205,141 @@ function speedoTexture() {
     last = key;
     const x = c.getContext('2d');
     x.fillStyle = '#0a0b0d';
-    x.fillRect(0, 0, 256, 96);
+    x.fillRect(0, 0, 256, 88);
     x.fillStyle = '#e9e9e6';
     x.textAlign = 'center';
     x.textBaseline = 'alphabetic';
-    x.font = "600 52px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif";
-    x.fillText(String(mph), 128, 62);
+    x.font = "600 54px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif";
+    x.fillText(String(mph), 128, 58);
     x.fillStyle = '#8b8d90';
     x.font = "500 17px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif";
-    x.fillText('mph', 128, 84);
+    x.fillText('mph', 128, 80);
+    // Telltales: green arrows, lit with the shared blink clock (view.lamp).
     const arrow = (cx, s, on) => {
       x.fillStyle = on ? '#3ddc84' : '#1d2a22';
       x.beginPath();
-      x.moveTo(cx + s * 22, 44);
-      x.lineTo(cx, 28);
-      x.lineTo(cx, 38);
-      x.lineTo(cx - s * 16, 38);
-      x.lineTo(cx - s * 16, 50);
-      x.lineTo(cx, 50);
-      x.lineTo(cx, 60);
+      x.moveTo(cx + s * 24, 40);
+      x.lineTo(cx, 22);
+      x.lineTo(cx, 33);
+      x.lineTo(cx - s * 16, 33);
+      x.lineTo(cx - s * 16, 47);
+      x.lineTo(cx, 47);
+      x.lineTo(cx, 58);
       x.closePath();
       x.fill();
     };
-    arrow(36, -1, left);
-    arrow(220, 1, right);
+    arrow(38, -1, left);
+    arrow(218, 1, right);
     t.needsUpdate = true;
   }
   return { texture: t, draw };
-}
-
-function mirror(w, h, rt) {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: 0xffffff, fog: false }));
-  m.userData.rt = rt;
-  if (rt) {
-    // Mirrors show the world flipped left to right.
-    rt.texture.repeat.set(-1, 1);
-    rt.texture.offset.set(1, 0);
-    m.material.map = rt.texture;
-  } else {
-    m.material.color.set('#3a4048');
-  }
-  return m;
 }
 
 export function createCockpit({ canvas, reducedMotion = false }) {
   const group = new THREE.Group();
   const inside = new THREE.Group();
   group.add(inside);
-  const cabinMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, metalness: 0, envMapIntensity: 0.4 });
-  inside.add(new THREE.Mesh(interior(), cabinMat));
-  const paint = new THREE.MeshStandardMaterial({ color: '#f2f2f0', roughness: 0.32, metalness: 0.05 });
-  inside.add(new THREE.Mesh(bodywork(), paint));
+  const disposables = [];
+  const keep = (x) => { disposables.push(x); return x; };
+
+  // Emissive here is a share of the surface colour (T.fill), not a flat glow: three adds emissive unscaled.
+  const albedoFill = (m) => {
+    m.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n\ttotalEmissiveRadiance *= diffuseColor.rgb;');
+    };
+    return m;
+  };
+  const cabinMat = keep(albedoFill(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, metalness: 0, envMapIntensity: 0.4 })));
+  inside.add(new THREE.Mesh(keep(interior()), cabinMat));
+  const paint = keep(new THREE.MeshStandardMaterial({ color: '#f2f2f0', roughness: 0.32, metalness: 0.05 }));
+  inside.add(new THREE.Mesh(keep(bodywork()), paint));
 
   const wheelPivot = new THREE.Group();
-  wheelPivot.position.set(0.37, 0.92, -0.41);
-  wheelPivot.rotation.x = -0.42;
-  const wheel = new THREE.Mesh(steeringWheel(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7 }));
+  wheelPivot.position.set(...CAB.wheel.at);
+  wheelPivot.rotation.x = CAB.wheel.tilt;
+  const wheelMat = keep(albedoFill(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7 })));
+  const wheel = new THREE.Mesh(keep(steeringWheel()), wheelMat);
   wheelPivot.add(wheel);
   inside.add(wheelPivot);
 
+  const stalkPivot = new THREE.Group();
+  stalkPivot.position.set(CAB.wheel.at[0] - 0.05, CAB.wheel.at[1] - 0.045, CAB.wheel.at[2] - 0.05);
+  stalkPivot.add(new THREE.Mesh(keep(stalk()), wheelMat));
+  inside.add(stalkPivot);
+  let stalkAngle = 0;
+
   const speedo = speedoTexture();
+  keep(speedo.texture);
   speedo.draw(0, false, false);
-  const display = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.075), new THREE.MeshBasicMaterial({ map: speedo.texture, fog: false, toneMapped: false }));
-  display.position.set(0.37, 0.958, -0.53);
-  display.lookAt(EYE);
+  const display = new THREE.Mesh(keep(new THREE.PlaneGeometry(CAB.speedo.w, CAB.speedo.h)), keep(new THREE.MeshBasicMaterial({ map: speedo.texture, fog: false, toneMapped: false })));
+  display.position.set(...CAB.speedo.at);
+  const speedoPose = panelPose(CAB.speedo);
+  const speedoCorners = speedoPose.corners;
+  display.quaternion.copy(facing(speedoPose.normal));
   inside.add(display);
 
-  const rtOpts = { samples: 0 };
-  const rearRT = new THREE.WebGLRenderTarget(256, 128, rtOpts);
-  const wingRT = new THREE.WebGLRenderTarget(256, 160, rtOpts);
-  const rearGlass = mirror(0.245, 0.062, rearRT);
-  rearGlass.position.set(0, 1.31, -0.65);
-  rearGlass.lookAt(new THREE.Vector3(EYE.x, EYE.y, EYE.z + 0.6));
-  const wingGlass = mirror(0.15, 0.095, wingRT);
-  wingGlass.position.set(-0.99, 1.02, -0.69);
-  wingGlass.lookAt(EYE);
-  const rightGlass = mirror(0.15, 0.095, null);
-  rightGlass.position.set(0.99, 1.02, -0.69);
-  rightGlass.lookAt(EYE);
-  inside.add(rearGlass, wingGlass, rightGlass);
+  // ---------- mirrors ----------
+  // Live glass shows a render target flipped left to right (a mirror image). Static glass carries a
+  // sky-horizon-road gradient in vertex colours taken from the scene palette (setTheme), so it reads as a mirror,
+  // never a slab; live glass ignores them. Rows run top to bottom: PlaneGeometry(w, h, 1, 2) has 2 vertices a row.
+  const staticGlass = keep(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false }));
+  const glassGeometry = (m) => {
+    const g = new THREE.PlaneGeometry(m.w, m.h, 1, 2);
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(g.getAttribute('position').count * 3).fill(0.5), 3));
+    return g;
+  };
+  function glassTheme(palette) {
+    const horizon = new THREE.Color(palette.skyHorizon);
+    const rows = [
+      new THREE.Color(palette.skyTop).lerp(horizon, 0.4), // a mirror shows the low sky behind, not the zenith
+      horizon,
+      // The road behind: between the low sky and the ground light, dimmed; follows the theme's brightness.
+      new THREE.Color(palette.skyBottom).lerp(new THREE.Color(palette.hemiGround), 0.5).multiplyScalar(0.7),
+    ];
+    for (const name of MIRRORS) {
+      const c = mirrors[name].glass.geometry.getAttribute('color');
+      for (let i = 0; i < c.count; i++) c.setXYZ(i, ...rows[Math.floor(i / 2)].toArray());
+      c.needsUpdate = true;
+    }
+  }
+  const mirrors = {};
+  for (const name of MIRRORS) {
+    const m = CAB[name];
+    const rt = keep(new THREE.WebGLRenderTarget(...T.rt[name], { samples: 0 }));
+    rt.texture.repeat.set(-1, 1);
+    rt.texture.offset.set(1, 0);
+    const live = keep(new THREE.MeshBasicMaterial({ map: rt.texture, color: 0xe4e4e4, fog: false }));
+    const glass = new THREE.Mesh(keep(glassGeometry(m)), staticGlass);
+    glass.geometry.computeBoundingSphere();
+    const cam = new THREE.PerspectiveCamera(30, m.w / m.h, 0.5, 250);
+    group.add(cam);
+    mirrors[name] = { m, rt, live, glass, cam, mount: null, pose: null, aim: null, age: Infinity, on: false };
+  }
+  glassTheme(PALETTES.light);
+  // The interior mirror sits in its own mount (housing and stem) that slides with rearMirrorX.
+  const rearMount = new THREE.Group();
+  const housing = keep(tint(new THREE.BoxGeometry(CAB.rear.w + 0.02, CAB.rear.h + 0.02, 0.035).translate(0, 0, -0.019).toNonIndexed(), '#1e1f22'));
+  const stem = keep(beam(new THREE.Vector3(0, CAB.rear.h / 2, -0.02), new THREE.Vector3(0, CAB.rear.h / 2 + 0.06, -0.06), 0.022, 0.022, '#16171a').toNonIndexed());
+  rearMount.add(new THREE.Mesh(keep(mergeGeometries([housing, stem])), cabinMat), mirrors.rear.glass);
+  inside.add(rearMount, mirrors.left.glass, mirrors.right.glass);
 
-  const rearCam = new THREE.PerspectiveCamera(13, 2, 0.5, 250);
-  rearCam.position.set(0, 1.3, 0.4);
-  rearCam.rotation.y = Math.PI;
-  const wingCam = new THREE.PerspectiveCamera(17, 1.6, 0.5, 200);
-  wingCam.position.set(-0.99, 1.02, -0.7);
-  wingCam.rotation.y = Math.PI - 0.2;
-  group.add(rearCam, wingCam);
+  function placeMirror(name, x) {
+    const mr = mirrors[name];
+    mr.pose = mirrorPose(mr.m, x);
+    mr.aim = aim(mr.pose.centre);
+    const holder = name === 'rear' ? rearMount : mr.glass;
+    holder.position.set(...mr.pose.centre);
+    holder.quaternion.copy(facing(mr.pose.normal));
+    const c = mirrorCamera(mr.m, mr.pose);
+    mr.cam.position.set(...c.pos);
+    mr.cam.quaternion.setFromRotationMatrix(new THREE.Matrix4().lookAt(V(c.pos), V(c.pos).add(V(c.look)), new THREE.Vector3(0, 1, 0)));
+    mr.cam.fov = c.fovV;
+    mr.cam.aspect = c.aspect;
+    mr.cam.updateProjectionMatrix();
+  }
+  placeMirror('left');
+  placeMirror('right');
+  placeMirror('rear', 0);
 
   inside.traverse((o) => o.layers.set(1));
 
@@ -235,8 +348,44 @@ export function createCockpit({ canvas, reducedMotion = false }) {
   head.rotation.order = 'YXZ';
   const camera = new THREE.PerspectiveCamera(60, 1, 0.03, 900);
   camera.layers.enable(1);
+  camera.layers.enable(2);
   head.add(camera);
   group.add(head);
+
+  // ---------- framing ----------
+  let aspect = 1;
+  let povTarget = povFor(1);
+  const pov = { ...povTarget };
+  let povSnap = true;
+
+  function applyPov() {
+    camera.fov = pov.vFov;
+    camera.setViewOffset(aspect, 1, 0, pov.shift, aspect, 1);
+    camera.updateProjectionMatrix();
+  }
+
+  function setAspect(a) {
+    aspect = a;
+    povTarget = povFor(a);
+    const w = canvas.clientWidth || innerWidth;
+    const h = canvas.clientHeight || innerHeight;
+    placeMirror('rear', rearMirrorX(povTarget, w, h));
+    if (povSnap) {
+      Object.assign(pov, povTarget);
+      povSnap = false;
+    }
+    applyPov();
+  }
+
+  function easePov(dt) {
+    const k = 1 - Math.exp(-dt * T.povRate);
+    let moved = false;
+    for (const key of ['vFov', 'hFov', 'shift', 'tanH', 'tanV']) {
+      const d = povTarget[key] - pov[key];
+      if (Math.abs(d) > 1e-5) { pov[key] += d * k; moved = true; } else pov[key] = povTarget[key];
+    }
+    if (moved) applyPov();
+  }
 
   // ---------- look-around ----------
   let yaw = 0;
@@ -247,66 +396,97 @@ export function createCockpit({ canvas, reducedMotion = false }) {
   let userAt = -Infinity;
   let auto = null; // { yaw, pitch, until }
   let restYaw = null;
-  const glances = [];
   let now = 0;
   let bobPhase = 0;
   let roll = 0;
+  let accelPitch = 0;
   let quality = 'high';
   let mirrorsOn = true;
+  let drive = null;
+  let routeKey = null;
+  let route = null; // world points for the current layout + path
+  let focusTarget = null;
+  let focusUntil = 0;
+  let lastPlan = { key: 'rest', yaw: 0, pitch: 0, rate: 0 };
+  const headLook = createHeadLook({ gentle: reducedMotion });
 
-  const radPerPx = () => (2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect)) / Math.max(1, canvas.clientWidth);
+  const radPerPx = () => (2 * Math.atan(pov.tanH)) / Math.max(1, canvas.clientWidth);
 
-  canvas.addEventListener('pointerdown', (e) => {
+  const onDown = (e) => {
     dragging = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
     canvas.setPointerCapture(e.pointerId);
     vYaw = vPitch = 0;
-    glances.length = 0;
-  });
-  canvas.addEventListener('pointermove', (e) => {
+    userAt = now;
+  };
+  const onMove = (e) => {
     if (!dragging || e.pointerId !== dragging.id) return;
     const k = radPerPx();
     const t = performance.now();
     const dt = Math.max(1, t - dragging.t) / 1000;
     const dy = (e.clientX - dragging.x) * k;
     const dp = (e.clientY - dragging.y) * k;
-    yaw = THREE.MathUtils.clamp(yaw + dy, -YAW_LIMIT, YAW_LIMIT);
-    pitch = THREE.MathUtils.clamp(pitch + dp, -PITCH_LIMIT, PITCH_LIMIT);
+    yaw = THREE.MathUtils.clamp(yaw + dy, -T.yawLimit, T.yawLimit);
+    pitch = THREE.MathUtils.clamp(pitch + dp, -T.pitchLimit, T.pitchLimit);
     vYaw = vYaw * 0.5 + (dy / dt) * 0.5;
     vPitch = vPitch * 0.5 + (dp / dt) * 0.5;
     dragging.x = e.clientX;
     dragging.y = e.clientY;
     dragging.t = t;
     userAt = now;
-  });
+  };
   const release = (e) => {
     if (!dragging || e.pointerId !== dragging.id) return;
     if (performance.now() - dragging.t > 80) vYaw = vPitch = 0;
     dragging = null;
     userAt = now;
   };
+  canvas.addEventListener('pointerdown', onDown);
+  canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
 
   function nudge(dYaw) {
-    yaw = THREE.MathUtils.clamp(yaw + dYaw, -YAW_LIMIT, YAW_LIMIT);
+    yaw = THREE.MathUtils.clamp(yaw + dYaw, -T.yawLimit, T.yawLimit);
     userAt = now;
   }
 
-  function target() {
-    while (glances.length && glances[0].until <= now) glances.shift();
-    if (glances.length) return glances[0];
-    if (auto && auto.until > now) return auto;
-    return { yaw: restYaw ?? 0, pitch: 0 };
+  function lookInput(view) {
+    let focusPoint = null;
+    if (focusTarget && now < focusUntil) {
+      const v = focusTarget.id !== undefined ? drive?.vehicles?.find((w) => w.id === focusTarget.id) : focusTarget;
+      if (v) focusPoint = { x: v.x, z: v.z, y: 1 };
+    }
+    const glasses = { rear: mirrors.rear.aim, left: mirrors.left.aim, right: mirrors.right.aim };
+    return lookInputFor({ view, drive, route, pov, mirrors: glasses, focusPoint });
   }
 
   function update(view, dt) {
     now += dt;
+    easePov(dt);
     if (view) {
       group.position.set(view.x, 0, view.z);
       group.rotation.y = -view.heading;
-      wheel.rotation.z = view.steer * STEERING_RATIO;
+      wheel.rotation.z = view.steer * T.steeringRatio;
       const mph = Math.round(view.speed / 0.44704);
       speedo.draw(mph, view.indicator === 'left' && view.lamp, view.indicator === 'right' && view.lamp);
+      const stalkTo = view.indicator === 'left' ? T.stalkTravel : view.indicator === 'right' ? -T.stalkTravel : 0;
+      stalkAngle += (stalkTo - stalkAngle) * Math.min(1, dt * 18);
+      stalkPivot.rotation.z = stalkAngle;
+    }
+
+    // The scheduler always runs, so its rhythm stays in step while a drag or a fixed look overrides it.
+    if (drive?.layout && drive.path) {
+      const key = `${drive.layout.seed}|${drive.layout.tier}|${drive.path.id}`;
+      if (key !== routeKey) { routeKey = key; route = routePoints(drive.layout, drive.path); }
+    }
+    const planned = view ? headLook.update(lookInput(view), dt) : null;
+    if (planned) lastPlan = planned;
+    // Mirror-glance zoom (LOOK.mirrorZoom; off at 1): only while the scheduler, not the user or look(), has the head.
+    const zoomTo = !dragging && now - userAt > T.idle && !(auto && auto.until > now) ? planned?.zoom ?? 1 : 1;
+    if (Math.abs(zoomTo - camera.zoom) > 1e-4) {
+      camera.zoom += (zoomTo - camera.zoom) * (1 - Math.exp(-dt * LOOK.rate.glance));
+      if (Math.abs(zoomTo - camera.zoom) <= 1e-4) camera.zoom = zoomTo;
+      camera.updateProjectionMatrix();
     }
 
     if (!dragging) {
@@ -316,47 +496,90 @@ export function createCockpit({ canvas, reducedMotion = false }) {
       const decay = Math.exp(-dt * 5);
       vYaw *= decay;
       vPitch *= decay;
-      // After a drag, hold where the user looked for a moment, then ease back to the current target.
-      if (idle > 1.4) {
-        const t = target();
-        const k = 1 - Math.exp(-dt * (glances.length ? 7 : 2.6));
-        yaw += (t.yaw - yaw) * k;
-        pitch += (t.pitch - pitch) * k;
+      // After a drag, hold where the user looked for a moment, then ease to the current target.
+      if (idle > T.idle) {
+        let t = planned;
+        if (auto && auto.until > now) t = { ...auto, rate: LOOK.rate.glance };
+        else if (!drive && planned?.key === 'rest') t = { yaw: restYaw ?? 0, pitch: 0, rate: LOOK.rate.drift };
+        if (t) {
+          const k = 1 - Math.exp(-dt * t.rate);
+          yaw += (t.yaw - yaw) * k;
+          pitch += (t.pitch - pitch) * k;
+        }
       }
-      yaw = THREE.MathUtils.clamp(yaw, -YAW_LIMIT, YAW_LIMIT);
-      pitch = THREE.MathUtils.clamp(pitch, -PITCH_LIMIT, PITCH_LIMIT);
+      yaw = THREE.MathUtils.clamp(yaw, -T.yawLimit, T.yawLimit);
+      pitch = THREE.MathUtils.clamp(pitch, -T.pitchLimit, T.pitchLimit);
     }
 
     let bob = 0;
     let lean = 0;
+    let shake = 0;
+    let surge = 0;
     if (!reducedMotion && view) {
+      const v30 = Math.min(1, view.speed / 13.4);
       bobPhase += view.speed * dt * 1.6;
       bob = Math.sin(bobPhase) * 0.0035 * Math.min(1, view.speed / 8);
-      const latAcc = view.speed * view.speed * Math.tan(view.steer) / 2.55;
+      shake = (Math.sin(now * 144.5) + 0.6 * Math.sin(now * 199.2)) * T.vibration * v30;
+      const latAcc = (view.speed * view.speed * Math.tan(view.steer)) / CAB.wheelbase;
       lean = THREE.MathUtils.clamp(-latAcc * 0.006, -0.03, 0.03);
+      surge = THREE.MathUtils.clamp((view.accel ?? 0) * T.accelPitch, -T.accelPitchMax, T.accelPitchMax);
     }
     roll += (lean - roll) * Math.min(1, dt * 4);
-    head.position.set(EYE.x + roll * 0.4, EYE.y + bob, EYE.z);
-    head.rotation.set(BASE_PITCH + pitch, yaw, roll);
+    accelPitch += (surge - accelPitch) * Math.min(1, dt * 3);
+    head.position.set(EYE.x + roll * 0.4, EYE.y + bob + shake, EYE.z);
+    head.rotation.set(pitch + accelPitch, yaw, roll);
   }
 
-  function renderMirrors(renderer, scene, frame) {
-    if (!mirrorsOn || !inside.visible || frame % 2) return;
+  // ---------- mirror rendering ----------
+  const frustum = new THREE.Frustum();
+  const viewProj = new THREE.Matrix4();
+  let period = T.tiers.high.period;
+
+  function renderMirrors(renderer, scene) {
+    group.updateMatrixWorld(true);
+    viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    frustum.setFromProjectionMatrix(viewProj);
+    const ages = [];
+    const visible = [];
+    for (const name of MIRRORS) {
+      const mr = mirrors[name];
+      mr.age++;
+      ages.push(mr.age);
+      visible.push(mr.on && frustum.intersectsObject(mr.glass));
+    }
+    const i = pickMirror(ages, visible, period);
+    if (i < 0) return;
+    const mr = mirrors[MIRRORS[i]];
+    mr.age = 0;
     const prev = renderer.getRenderTarget();
-    renderer.setRenderTarget(rearRT);
-    renderer.render(scene, rearCam);
-    renderer.setRenderTarget(wingRT);
-    renderer.render(scene, wingCam);
+    renderer.setRenderTarget(mr.rt);
+    renderer.render(scene, mr.cam);
     renderer.setRenderTarget(prev);
   }
 
-  function setMirrors(on) {
-    mirrorsOn = on;
-    for (const g of [rearGlass, wingGlass]) {
-      g.material.map = on ? g.userData.rt.texture : null;
-      g.material.color.set(on ? '#ffffff' : '#3a4048');
-      g.material.needsUpdate = true;
+  function setQuality(q) {
+    quality = q;
+    const tier = T.tiers[q] ?? T.tiers.high;
+    period = tier.period;
+    mirrorsOn = tier.live.length > 0;
+    for (const name of MIRRORS) {
+      const mr = mirrors[name];
+      mr.on = tier.live.includes(name);
+      const [w, h] = T.rt[name];
+      mr.rt.setSize(Math.round(w * tier.scale), Math.round(h * tier.scale));
+      mr.glass.material = mr.on ? mr.live : staticGlass;
+      mr.age = Infinity;
     }
+  }
+  setQuality('high');
+
+  function dispose() {
+    canvas.removeEventListener('pointerdown', onDown);
+    canvas.removeEventListener('pointermove', onMove);
+    canvas.removeEventListener('pointerup', release);
+    canvas.removeEventListener('pointercancel', release);
+    for (const d of disposables) d.dispose();
+    group.removeFromParent();
   }
 
   return {
@@ -365,24 +588,46 @@ export function createCockpit({ canvas, reducedMotion = false }) {
     update,
     renderMirrors,
     nudge,
+    setDrive(d) { drive = d; if (!d) { route = null; routeKey = null; } },
+    focus(target, hold = LOOK.focusHold) {
+      focusTarget = target ?? null;
+      focusUntil = target ? now + hold : 0;
+    },
     look(y, p = 0, hold = 1.5) { auto = { yaw: y, pitch: p, until: now + hold }; },
     rest(y) { restYaw = y; },
-    glanceMirrors() {
-      glances.length = 0;
-      // Angles from the eye to the rear-view glass, then to the left wing glass.
-      glances.push({ yaw: 0.43, pitch: 0.22, until: now + 0.5 }, { yaw: 1.01, pitch: -0.03, until: now + 1.2 });
+    glanceMirrors() { headLook.mirrors(); },
+    resetLook() {
+      yaw = pitch = vYaw = vPitch = 0;
+      auto = null;
+      restYaw = null;
+      focusTarget = null;
+      userAt = -Infinity;
+      drive = null;
+      route = null;
+      routeKey = null;
+      headLook.reset();
     },
-    resetLook() { yaw = pitch = vYaw = vPitch = 0; auto = null; restYaw = null; glances.length = 0; userAt = -Infinity; },
-    setAspect(a) {
-      camera.aspect = a;
-      const v = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(H_FOV / 2) / a));
-      camera.fov = THREE.MathUtils.clamp(v, V_FOV_MIN, V_FOV_MAX);
-      camera.updateProjectionMatrix();
-    },
-    setQuality(q) { quality = q; setMirrors(q !== 'low'); },
-    get quality() { return quality; },
+    setAspect,
+    setQuality,
     setVisible(on) { inside.visible = on; },
     setPaint(hex) { paint.color.set(hex); },
+    setTheme(palette) {
+      glassTheme(palette);
+      const name = Object.keys(PALETTES).find((k) => PALETTES[k] === palette);
+      for (const m of [cabinMat, wheelMat]) {
+        m.emissive.set('#ffffff');
+        m.emissiveIntensity = T.fill[name] ?? 0;
+      }
+    },
+    dispose,
+    get quality() { return quality; },
+    get mirrorsActive() { return mirrorsOn && inside.visible; },
     get yaw() { return yaw; },
+    // True while the speedometer's whole face is in the frame; the HUD shows its own mph only when it is not.
+    get speedoInFrame() { return inside.visible && inFrame(speedoCorners, { yaw, pitch: pitch + accelPitch }, pov, 0); },
+    // QA: what the head is doing and where the cab parts are.
+    get lookKey() { return dragging || now - userAt <= T.idle ? 'user' : auto && auto.until > now ? 'look' : drive ? lastPlan.key : 'rest'; },
+    get lookPlan() { return { ...lastPlan }; },
+    get pov() { return { ...pov }; },
   };
 }

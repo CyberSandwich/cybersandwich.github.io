@@ -3,12 +3,14 @@
  * Dimensions in metres (length x width x height), accelerations in m/s^2.
  */
 
+// accel (pull-away) and latComfort (cornering) are engineering estimates of typical UK driving, not sourced
+// figures; never quote them to the learner.
 export const VEHICLE_TYPES = {
-  hatch: { length: 4.05, width: 1.75, height: 1.45, wheelbase: 2.55, accel: 1.8, latComfort: 2.6 }, // VW Polo Mk6
-  estate: { length: 4.7, width: 1.8, height: 1.5, wheelbase: 2.7, accel: 1.6, latComfort: 2.5 },
-  van: { length: 5.4, width: 2.0, height: 2.5, wheelbase: 3.3, accel: 1.3, latComfort: 2.2 },
-  bus: { length: 11.0, width: 2.55, height: 4.3, wheelbase: 5.9, accel: 1.0, latComfort: 1.8 },
-  lorry: { length: 10.0, width: 2.55, height: 3.8, wheelbase: 5.8, accel: 0.9, latComfort: 1.8 }, // rigid HGV <= 12 m
+  hatch: { length: 4.05, width: 1.75, height: 1.45, wheelbase: 2.55, accel: 2.3, latComfort: 3.5 }, // VW Polo Mk6
+  estate: { length: 4.7, width: 1.8, height: 1.5, wheelbase: 2.7, accel: 2.1, latComfort: 3.4 },
+  van: { length: 5.4, width: 2.0, height: 2.5, wheelbase: 3.3, accel: 1.7, latComfort: 2.8 },
+  bus: { length: 11.0, width: 2.55, height: 4.3, wheelbase: 5.9, accel: 1.1, latComfort: 2.1 },
+  lorry: { length: 10.0, width: 2.55, height: 3.8, wheelbase: 5.8, accel: 1.0, latComfort: 2.0 }, // rigid HGV <= 12 m
 };
 
 export const LARGE_TYPES = new Set(['bus', 'lorry']);
@@ -34,9 +36,9 @@ export const CRITICAL_GAP = { mean: 4.5, sd: 0.6, min: 3.0 };
 export const FOLLOW_UP = { mean: 2.7, sd: 0.3, min: 2.0 };
 
 export const DRIVER_TYPES = {
-  cautious: { weight: 0.25, T: 1.6, s0: 2.5, gapShift: 0.6, accelScale: 0.85, speedScale: 0.92 },
-  normal: { weight: 0.55, T: 1.3, s0: 2.0, gapShift: 0, accelScale: 1, speedScale: 1 },
-  assertive: { weight: 0.2, T: 1.0, s0: 1.6, gapShift: -0.6, accelScale: 1.15, speedScale: 1.05 },
+  cautious: { weight: 0.25, T: 1.6, s0: 2.5, gapShift: 0.6, accelScale: 0.85, speedScale: 0.92, latScale: 0.9 },
+  normal: { weight: 0.55, T: 1.3, s0: 2.0, gapShift: 0, accelScale: 1, speedScale: 1, latScale: 1 },
+  assertive: { weight: 0.2, T: 1.0, s0: 1.6, gapShift: -0.6, accelScale: 1.2, speedScale: 1.05, latScale: 1.1 },
 };
 
 /**
@@ -51,12 +53,38 @@ export function signalMix(honesty) {
   return mix;
 }
 
-// Arrivals per arm per second; types by tier. Medium also gets a scheduled bus.
+// The player's own arm gets ownArm x the rate (it is the minor road); routes from other arms that pass the
+// player's entry are picked passWeight times as often as the rest.
+export const PLAYER_FACING = { ownArm: 0.5, passWeight: 2 };
+
+/**
+ * TRAFFIC[tier].rate is arrivals per arm per second at 'normal'; DENSITY scales it. Normal sits close to
+ * what each tier clears without arm queues growing; heavy is capped per tier (HEAVY_CAP) just below the
+ * rate where some arm's queue stops clearing (measured with AI-only 300-600 s runs; bus and lorry entries
+ * are the bottleneck). Medium's scheduled bus and hard's lorries run at every density but 'none'.
+ */
+export const DENSITY = { none: 0, light: 0.5, normal: 1, heavy: 1.4 };
+export const HEAVY_CAP = { mini: 0.065, easy: 0.11, medium: 0.12, hard: 0.1 };
+export function arrivalRate(tier, density = 'normal') {
+  const rate = TRAFFIC[tier].rate * DENSITY[density];
+  return density === 'heavy' ? Math.min(rate, HEAVY_CAP[tier]) : rate;
+}
+
+/**
+ * Drill presets the HUD can offer. Each lists sim options; autoGo means the HUD taps Go itself.
+ *   exitPractice: empty roundabout, Go handled for you: practise only the exit.
+ *   liarCars: mostly dishonest signals, plus a liar timed to arrive 3-6 s after you reach the line.
+ */
+export const PRESETS = {
+  exitPractice: { density: 'none', autoGo: true },
+  liarCars: { honesty: 0.3, liarLag: [3, 6], liarEvery: 12 },
+};
+
 export const TRAFFIC = {
-  mini: { rate: 0.035, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
-  easy: { rate: 0.05, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
-  medium: { rate: 0.085, types: { hatch: 0.5, estate: 0.27, van: 0.23 }, busEvery: [40, 80] },
-  hard: { rate: 0.09, types: { hatch: 0.44, estate: 0.22, van: 0.18, lorry: 0.11, bus: 0.05 }, busEvery: null },
+  mini: { rate: 0.05, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
+  easy: { rate: 0.08, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
+  medium: { rate: 0.095, types: { hatch: 0.5, estate: 0.27, van: 0.23 }, busEvery: [40, 80] },
+  hard: { rate: 0.085, types: { hatch: 0.44, estate: 0.22, van: 0.18, lorry: 0.11, bus: 0.05 }, busEvery: null },
 };
 
 export const INDICATOR_HZ = 1.5; // R48: 60-120 flashes per minute

@@ -6,7 +6,7 @@
 #
 # Sources (licences and authors are in roundabout/assets/CREDITS.md):
 #   models  Grab3D GLBs (CC0), normalized and slimmed by scripts/lib/roundabout-models.mjs
-#   tex     Poly Haven 1k diffuse JPGs (CC0), resized to 512 webp; asphalt also keeps its normal map
+#   tex     Poly Haven 1k diffuse JPGs (CC0), resized to 512 webp (the asphalt is drawn at runtime by world.js)
 #   signs   gov.uk traffic-sign-images JPG zips (OGL v3), white ground keyed out, 256 px webp
 # Downloads and the npm toolchain are cached in $ROUNDABOUT_CACHE (default $TMPDIR/roundabout-assets);
 # delete it to refetch. Downloaded files are only parsed or converted, never executed.
@@ -52,7 +52,7 @@ build_models() {
 }
 
 # id -> output name; a texture's page is https://polyhaven.com/a/<id>
-typeset -A textures=(clean_asphalt asphalt concrete_pavement kerb grass_ground grass concrete_pavement_02 pavement red_brick_03 brick)
+typeset -A textures=(grass_ground grass concrete_pavement_02 pavement red_brick_03 brick)
 
 webp512() {  # webp512 <in.jpg> <out.webp>
   magick $1 -resize 512x512! -strip png:- | cwebp -quiet -q 80 -m 6 -o $2 -- -
@@ -65,8 +65,6 @@ build_tex() {
     fetch https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/$id/${id}_diff_1k.jpg $dl/$id.jpg
     webp512 $dl/$id.jpg $out/tex/$textures[$id].webp
   done
-  fetch https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clean_asphalt/clean_asphalt_nor_gl_1k.jpg $dl/clean_asphalt_n.jpg
-  webp512 $dl/clean_asphalt_n.jpg $out/tex/asphalt_n.webp
 }
 
 # Keys out the white ground by flood fill from a white frame around the image; the sign's own white

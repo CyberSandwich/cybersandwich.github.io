@@ -88,4 +88,35 @@ export function flatten(root, opts = {}) {
   return [...groups.values()].map((g) => ({ key: g.key, material: g.material, geometry: mergeGeometries(g.parts) }));
 }
 
-export const triangles = (geometry) => (geometry.index ? geometry.index.count : geometry.getAttribute('position').count) / 3;
+/**
+ * Vertex-clustering simplification for distant and mirrored copies: vertices in the same `cell`-sized grid
+ * cell collapse onto the first one seen (keeping its normal and uv), and triangles that collapse vanish.
+ * Shares the source attributes; only the index is new.
+ */
+export function cluster(geometry, cell) {
+  const pos = geometry.getAttribute('position');
+  const rep = new Int32Array(pos.count);
+  const seen = new Map();
+  for (let i = 0; i < pos.count; i++) {
+    const key = `${Math.round(pos.getX(i) / cell)},${Math.round(pos.getY(i) / cell)},${Math.round(pos.getZ(i) / cell)}`;
+    if (!seen.has(key)) seen.set(key, i);
+    rep[i] = seen.get(key);
+  }
+  const src = geometry.index.array;
+  const out = [];
+  const tris = new Set();
+  for (let i = 0; i < src.length; i += 3) {
+    const a = rep[src[i]], b = rep[src[i + 1]], c = rep[src[i + 2]];
+    if (a === b || b === c || a === c) continue;
+    const key = [a, b, c].sort((x, y) => x - y).join(',');
+    if (tris.has(key)) continue;
+    tris.add(key);
+    out.push(a, b, c);
+  }
+  const g = new THREE.BufferGeometry();
+  for (const [name, attr] of Object.entries(geometry.attributes)) g.setAttribute(name, attr);
+  g.setIndex(out);
+  return g;
+}
+
+export const triangles =(geometry) => (geometry.index ? geometry.index.count : geometry.getAttribute('position').count) / 3;
