@@ -22,7 +22,8 @@ export function createControls(app) {
     exit: act,
     replay: () => app.run?.showReplay(),
     replayAgain: () => app.run?.replayAgain(),
-    continue: () => app.run?.continue(),
+    seeAnalysis: () => app.run?.continue(),
+    keepDriving: () => app.run?.keepDriving(),
     retry: () => app.retry(),
     retryGuided: () => app.retryAs('guided'),
     watch: () => app.retryAs('watch'),
@@ -30,7 +31,13 @@ export function createControls(app) {
     mute: () => app.setSound(app.muted),
     settings: () => hud.sheet(hud.openSheet === 'settings' ? null : 'settings'),
     close: () => hud.sheet(null),
-    pause: () => hud.chip(app.run?.togglePause() ? 'Paused' : null),
+    pause: () => {
+      const { run } = app;
+      if (!run) return;
+      const was = run.state === 'paused';
+      const now = run.togglePause();
+      if (now !== was) hud.paused(now); // a state that cannot pause leaves the chip alone
+    },
   };
 
   const hud = createHud({
@@ -44,8 +51,9 @@ export function createControls(app) {
     onChangeTier: () => app.preview(),
     onShowReplay: actions.replay,
     onReplayAgain: actions.replayAgain,
-    onReplayView: () => hud.replayView(app.view.toggleDriverView() ? 'Above View' : 'Driver View'),
-    onReplayNext: actions.continue,
+    onReplayView: () => hud.replayView(app.view.toggleDriverView()),
+    onReplayNext: actions.seeAnalysis,
+    onKeepDriving: actions.keepDriving,
     onMute: actions.mute,
     onSound: (on) => app.setSound(on),
     onTips: (mode) => app.setTips(mode),
@@ -53,7 +61,6 @@ export function createControls(app) {
     onDrill: (drill) => app.setDrill(drill),
     onSeed: (text) => app.setSeed(text),
     onCopyLink: () => window._base.copyText(location.href, () => hud.copied()),
-    onSheet: () => {},
   });
 
   function onKeyDown(e) {

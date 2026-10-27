@@ -42,49 +42,65 @@ export const DRIVER_TYPES = {
 };
 
 /**
- * Signal behaviour vs true intent. UK survey: ~65% signal correctly, ~20-33% not at all, ~13% signal left
- * wrongly when going straight, ~9% late. The dishonest share keeps those proportions; honesty scales by tier.
+ * Signal behaviour vs true intent, as shares of all cars (tasks/roundabout-status/liar-research.md). The only
+ * UK roundabout split is the Tempcover 2025 survey (self-reported, n=2,000): 65% correct, 13% signal left and
+ * go past the exit (wrongLeft), 9% signal late (lateLeft). No signal (none, 10%) is the remainder, cross-checked
+ * against Compare the Market's 2023 counts; leftNotCancelled (2%) and rightEarly (signals right, leaves at an
+ * earlier exit, 1%) are estimates with no published figure. Every tier and drill uses the same real mix.
+ *   none  no signal at all          wrongLeft  left while coming round     lateLeft  left only at the exit
+ *   leftNotCancelled  left throughout       rightEarly  right until it peels off, no left signal
  */
-const DISHONEST = { none: 0.25, wrongLeft: 0.13, lateLeft: 0.09, leftNotCancelled: 0.04 };
-export function signalMix(honesty) {
+export const HONESTY = 0.65;
+export const DISHONEST = { none: 0.1, wrongLeft: 0.13, lateLeft: 0.09, leftNotCancelled: 0.02, rightEarly: 0.01 };
+export function signalMix(honesty = HONESTY) {
   const total = Object.values(DISHONEST).reduce((a, b) => a + b, 0);
   const mix = { correct: honesty };
   for (const [k, w] of Object.entries(DISHONEST)) mix[k] = ((1 - honesty) * w) / total;
   return mix;
 }
 
-// The player's own arm gets ownArm x the rate (it is the minor road); routes from other arms that pass the
-// player's entry are picked passWeight times as often as the rest.
-export const PLAYER_FACING = { ownArm: 0.5, passWeight: 2 };
+/**
+ * The player's own arm gets ownArm x the rate (it is the minor road). Routes from the other arms are weighted
+ * by how they meet the player's entry, per density (light uses normal's):
+ *   passes  routes that cross the player's entry: the traffic it has to judge
+ *   into    routes that turn into the player's road: they use up the entry capacity of the arms that feed
+ *           the player's entry without ever crossing it, so heavy keeps them rare
+ */
+export const PLAYER_FACING = {
+  ownArm: 0.5,
+  routes: { normal: { passes: 2, into: 1 }, heavy: { passes: 6, into: 0.15 } },
+};
 
 /**
- * TRAFFIC[tier].rate is arrivals per arm per second at 'normal'; DENSITY scales it. Normal sits close to
- * what each tier clears without arm queues growing; heavy is capped per tier (HEAVY_CAP) just below the
- * rate where some arm's queue stops clearing (measured with AI-only 300-600 s runs; bus and lorry entries
- * are the bottleneck). Medium's scheduled bus and hard's lorries run at every density but 'none'.
+ * TRAFFIC[tier].rate is arrivals per arm per second at 'normal' (DENSITY scales it); TRAFFIC[tier].heavy is
+ * the rate at 'heavy'. Normal sits close to what each tier clears without arm queues growing. Heavy runs the
+ * other arms at or past capacity, so it is tuned at the player's line instead (tests/test-roundabout-sim.js):
+ * few clear gaps, yet a gap-accepting driver still gets out (median wait under 40 s). No approach lane ever holds
+ * more than LANE_QUEUE_CAP vehicles that have not joined: an arrival due on a full lane waits its turn, so
+ * queues cannot grow without bound. Medium's scheduled bus and hard's lorries run at every density but 'none'.
  */
-export const DENSITY = { none: 0, light: 0.5, normal: 1, heavy: 1.4 };
-export const HEAVY_CAP = { mini: 0.065, easy: 0.11, medium: 0.12, hard: 0.1 };
+export const LANE_QUEUE_CAP = 5;
+const DENSITY = { none: 0, light: 0.5, normal: 1 };
 export function arrivalRate(tier, density = 'normal') {
-  const rate = TRAFFIC[tier].rate * DENSITY[density];
-  return density === 'heavy' ? Math.min(rate, HEAVY_CAP[tier]) : rate;
+  return density === 'heavy' ? TRAFFIC[tier].heavy : TRAFFIC[tier].rate * DENSITY[density];
 }
 
 /**
  * Drill presets the HUD can offer. Each lists sim options; autoGo means the HUD taps Go itself.
- *   exitPractice: empty roundabout, Go handled for you: practise only the exit.
- *   liarCars: mostly dishonest signals, plus a liar timed to arrive 3-6 s after you reach the line.
+ *   exitPractice: traffic as set, Go handled for you (on an ok gap): practise only the exit.
+ *   liarCars: the real signal mix, plus a liar (behaviour drawn from DISHONEST's wrong-signal shares) timed
+ *             to arrive 3-6 s after you reach the line, every liarEvery s while you wait.
  */
 export const PRESETS = {
-  exitPractice: { density: 'none', autoGo: true },
-  liarCars: { honesty: 0.3, liarLag: [3, 6], liarEvery: 12 },
+  exitPractice: { autoGo: true },
+  liarCars: { liarLag: [3, 6], liarEvery: 12 },
 };
 
 export const TRAFFIC = {
-  mini: { rate: 0.05, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
-  easy: { rate: 0.08, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
-  medium: { rate: 0.095, types: { hatch: 0.5, estate: 0.27, van: 0.23 }, busEvery: [40, 80] },
-  hard: { rate: 0.085, types: { hatch: 0.44, estate: 0.22, van: 0.18, lorry: 0.11, bus: 0.05 }, busEvery: null },
+  mini: { rate: 0.05, heavy: 0.11, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
+  easy: { rate: 0.08, heavy: 0.2, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
+  medium: { rate: 0.095, heavy: 0.1, types: { hatch: 0.5, estate: 0.27, van: 0.23 }, busEvery: [40, 80] },
+  hard: { rate: 0.085, heavy: 0.18, types: { hatch: 0.44, estate: 0.22, van: 0.18, lorry: 0.11, bus: 0.05 }, busEvery: null },
 };
 
 export const INDICATOR_HZ = 1.5; // R48: 60-120 flashes per minute

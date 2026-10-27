@@ -2,7 +2,8 @@
  * Auto-drive for the player car. Pure: drives the sim's player through sim.setPlayerControl.
  *
  *   const player = createPlayer(sim, { onEvent })
- *   player.update()      call once per sim step BEFORE sim.step(dt); returns the events fired this step
+ *   player.update(st?)   call once per sim step BEFORE sim.step(dt), with that step's sim.state() (built
+ *                        here when omitted); returns the events fired this step
  *   player.go()          Go tapped: stop holding at the line (an early tap commits to rolling in). Accepted
  *                        only while goWindowOpen; returns true when accepted, false (ignored) otherwise
  *   player.goWindowOpen  true within CREEP_DISTANCE of the line while first in the queue (no vehicle ahead
@@ -13,7 +14,6 @@
  *   player.exitWindowOpen  on the ring with an exit decision
  *   player.exitDecision  false on a first-exit route: no Exit tap, the car leaves by itself (HC 186)
  *   player.dispose()
- *   CREEP_DISTANCE       metres before the line where the Go window opens
  *
  * Invariants (tests/test-roundabout-judge.js): car-following beats every speed target, so the player never
  * overlaps another vehicle and queues >= 2 m back; once committed it drops below MIN_ROLL only behind a
@@ -32,23 +32,22 @@
  *   on Exit tap  v = judgeExit(sim.state()); 'ok'/'lateSignal' -> player.exit(); 'late' -> player.goRoundAgain().
  */
 import { PLAYER_ID } from './sim.js';
-import { EXIT_LATE, SIGNAL_DELAY, outerOffset } from './judge.js';
+import { EXIT_LATE, SIGNAL_DELAY, outerOffset, queuedBehind } from './judge.js';
 import { wrapPi } from './geom.js';
+import { entryConflicts, CREEP_DISTANCE, PLAYER_ACCEL as MAX_ACCEL, SIGNAL_FROM } from './kinematics.js';
 
 // Estimates of a brisk but ordinary automatic Polo, not sourced figures.
 const CREEP = 4.5; // m/s, about 10 mph
-export const CREEP_DISTANCE = 16; // m before the line where the creep starts and the Go window opens
 const APPROACH_DECEL = 1.75;
 const STOP_DECEL = 1.6;
-const MAX_ACCEL = 2.4;
 const MAX_BRAKE = 3.0;
-const SIGNAL_FROM = 60; // m before the line
 // Car-following (IDM interaction term): stopped gap FOLLOW.s0, time headway FOLLOW.T, comfortable braking
 // FOLLOW.b. It may brake up to EMERGENCY_BRAKE: a leader can stop harder than any of the player's own targets.
 const FOLLOW = { s0: 2.2, T: 1.2, b: 2.0 };
 const EMERGENCY_BRAKE = 7;
 const LINE_EPS = 0.02; // m: at the stop point
 const CUT_IN_SPARE = FOLLOW.s0; // m of gap left when the player has matched a leader's speed
+const FOLLOW_ALIGN = Math.cos(Math.PI / 4); // a vehicle within 45 degrees of the player's heading can lead it
 const MIN_ROLL = 3; // m/s: the least a committed car slows to for anything but a vehicle ahead in its lane
 
 export function createPlayer(sim, { onEvent } = {}) {
@@ -91,12 +90,25 @@ export function createPlayer(sim, { onEvent } = {}) {
       const gap = w.s - me.s - (w.length + me.length) / 2;
       if (gap < best.gap) best = { gap, speed: w.v };
     }
+    if (phase === 'approach' || phase === 'waiting') return best;
+    // Joining behind a vehicle that passed in front (judge lets that Go): until the entry has merged, the sim
+    // sees no leader on the ring lane ahead, so follow its rear through the conflict run, the gap measured
+    // along the player's path to the first entry point that rear conflicts with.
+    // Only one heading the player's way: a vehicle crossing ahead clears its short run in moments (the judge
+    // timed that pass), and read as a stopped leader it made the player brake hard and stall.
+    const front = me.s + me.length / 2;
+    for (const w of vehicles) {
+      if (w.isPlayer || Math.cos(w.heading - me.heading) < FOLLOW_ALIGN) continue;
+      const rear = w.s - w.length / 2;
+      for (const run of entryConflicts(me.path, w.path, Math.max(me.length, w.length))) {
+        if (rear < run.sFrom || rear > run.sTo) continue;
+        const pair = run.pairs.find((p) => p[0] >= rear) ?? run.pairs[run.pairs.length - 1];
+        const gap = pair[1] - front;
+        if (gap > 0 && gap < best.gap) best = { gap, speed: w.v * Math.cos(w.heading - me.heading) };
+      }
+    }
     return best;
   }
-
-  // A vehicle ahead in the player's own entry lane that has not crossed its line yet: the player is queued.
-  const queuedAhead = (me, vehicles) => vehicles.some((w) => !w.isPlayer && w.path.arm === me.path.arm
-    && w.path.lane === me.path.lane && w.s > me.s && w.s - w.length / 2 < w.path.marks.giveWay);
 
   // Acceleration car-following allows: settles FOLLOW.s0 behind the vehicle ahead, whatever it does.
   function followAccel(me, vehicles) {
@@ -106,9 +118,10 @@ export function createPlayer(sim, { onEvent } = {}) {
     const idm = MAX_ACCEL * (1 - (want / Math.max(lead.gap, 0.05)) ** 2);
     // A car cutting in close but barely slower (a merge into the same exit) needs only gentle braking: IDM
     // alone stamps on the brakes for any gap under its desired spacing. Brake at least as hard as matching
-    // the leader's speed CUT_IN_SPARE behind it takes, never less than comfortable.
+    // the leader's speed CUT_IN_SPARE behind it takes, never less than comfortable. One that cuts in already
+    // inside CUT_IN_SPARE is matched within half the gap left, not by an emergency stop.
     const closing = me.v - lead.speed;
-    const need = closing > 0 ? (closing * closing) / (2 * Math.max(lead.gap - CUT_IN_SPARE, 0.05)) : 0;
+    const need = closing > 0 ? (closing * closing) / (2 * Math.max(lead.gap - CUT_IN_SPARE, lead.gap / 2, 0.05)) : 0;
     return Math.max(idm, -Math.max(FOLLOW.b, 1.2 * need));
   }
 
@@ -146,12 +159,13 @@ export function createPlayer(sim, { onEvent } = {}) {
   const track = (vTarget, v) => Math.max(-MAX_BRAKE, Math.min(MAX_ACCEL, 2 * (vTarget - v)));
 
   // Approach signal (HC 186): left for the first exit, right past 12 o'clock, none straight on.
-  const approachSignal = () => (!exitDecision ? 'left' : sim.player.path.direction === 'right' ? 'right' : null);
+  const approachSignal = () => (!exitDecision ? 'left' : sim.layout.player.direction === 'right' ? 'right' : null);
 
-  function update() {
+  // state: this step's sim.state(), built once by the caller (optional).
+  function update(state = sim.state()) {
     events = [];
-    const me = sim.player;
-    const { vehicles } = sim.state();
+    const { vehicles } = state;
+    const me = vehicles.find((v) => v.isPlayer);
     const m = me.path.marks;
     const d = me.stopS - me.s;
     let vTarget;
@@ -159,7 +173,7 @@ export function createPlayer(sim, { onEvent } = {}) {
     if (phase === 'approach' || phase === 'waiting') {
       vTarget = approachTarget(d, me.path.limits.approach);
       // The Go decision is the player's own, judged at its own line: open only when first in the queue.
-      const open = d < CREEP_DISTANCE && !queuedAhead(me, vehicles);
+      const open = d < CREEP_DISTANCE && !queuedBehind(state, me);
       if (open && !windowEverOpened) {
         windowEverOpened = true;
         emit('goWindowOpen');

@@ -1,7 +1,9 @@
 /**
  * Pure judging of the player's two decisions. Inputs are sim.state() snapshots; nothing is mutated.
  *
- *   judgeGo(state)            -> Verdict for a Go tap now
+ *   judgeGo(state)            -> Verdict for a Go tap now (memoised per state object)
+ *   goAssessment(state)       -> { me, tLine, tMerge, list }: the conflicts judgeGo weighs (see below)
+ *   queuedBehind(state, me)   -> true while a vehicle ahead in the player's own entry lane is short of its line
  *   judgeExit(state)          -> Verdict for an Exit tap now
  *   missedExit()              -> Verdict when the exit passes with no (or too late a) tap
  *   createGapLog(layout)      -> recorder for the analysis sheet; see below
@@ -16,9 +18,12 @@
  *
  * Unsafe means a vehicle's TRUE path reaches the player's entry before the player can clear it, so it would
  * have to brake harder than BRAKE_LIMIT; its signal never matters, which is exactly what the detail explains.
+ * All timing is from the player's real motion (pulling away at its real acceleration): a vehicle that will be
+ * out of the conflict zone before the player reaches it passes in front and only opens the gap; tight is
+ * measured from the player's real arrival at its line.
  * Sources: gov.uk Highway Code 184-189; DVSA "Understanding your driving test result" (DL25 faults).
  */
-import { assessEntry, entryConflicts, BRAKE_LIMIT } from './kinematics.js';
+import { assessEntry, entryConflicts, requiredDecel, speedProfile, timeToReach, BRAKE_LIMIT, CLEAR_MARGIN } from './kinematics.js';
 import { wrapPi, wrap2Pi, indexAt } from './geom.js';
 import { LARGE_TYPES, CRITICAL_GAP } from './traffic-data.js';
 
@@ -30,6 +35,9 @@ export const SIGNAL_DELAY = 0.4; // s from the Exit tap (mirror glance) to the l
 export const LATE_SIGNAL = 2.0; // s: a left signal with less warning than this is late
 export const OK_WINDOW = 2.0; // s of 'ok' Exit timing every route keeps, however close the exits
 const CROSS_TIME = 1.5; // s past the diverge point an inner-lane car takes to cross the outer lane (estimate)
+// s between a vehicle's rear leaving the conflict zone and the player's front reaching it; a post-encroachment
+// time under about 1 s is read as a conflict in traffic-conflict studies (estimate).
+const PASS_MARGIN = 1.0;
 const STOPPED = 1.5; // m/s: a vehicle this slow inside the entry is a blockage, not traffic
 const LARGE_ALONGSIDE = 15; // m either side of the player's merge point
 
@@ -102,24 +110,106 @@ function unsafeCopy(c) {
   return COPY.unsafeNone(n, c.eta, wheelsOf(o));
 }
 
-// Large vehicle on the ring passing the player's merge point (in any lane).
-function largeAlongside(state, me) {
+// Seconds to cover d metres from speed v at constant acceleration a (only braking counts); Infinity if it stops first.
+function timeToCover(d, v, a) {
+  if (d <= 0) return 0;
+  const b = Math.min(0, a);
+  if (b === 0) return v > 0.1 ? d / v : Infinity;
+  const disc = v * v + 2 * b * d;
+  return disc < 0 ? Infinity : (v - Math.sqrt(disc)) / -b;
+}
+
+// Large vehicle on the ring (in any lane) that will be passing the player's merge point when the player,
+// pulling away for real, gets there (PASS_MARGIN either side): one already gone by then, or still far upstream,
+// is not alongside.
+function largeAlongside(state, me, tMerge) {
   const mergeBearing = me.path.bearing[indexAt(me.path, me.path.marks.merge)];
   return state.vehicles.find((w) => {
     if (w.isPlayer || !w.inRing || !LARGE_TYPES.has(w.type)) return false;
     const ahead = wrapPi(mergeBearing - w.bearing) * w.r; // > 0: still upstream of the merge point
-    return ahead > -(w.length / 2 + LARGE_ALONGSIDE / 2) && ahead < LARGE_ALONGSIDE + w.length / 2;
+    const past = ahead + w.length / 2 + LARGE_ALONGSIDE / 2; // m it still has to go to be clear
+    if (past <= 0) return false;
+    const tReach = timeToCover(ahead - (LARGE_ALONGSIDE + w.length / 2), w.v, w.a);
+    return tReach < tMerge + PASS_MARGIN && timeToCover(past, w.v, w.a) + PASS_MARGIN > tMerge;
   });
 }
 
-const conflictsFor = (state, me) => assessEntry(me, state.vehicles.filter((w) => !w.isPlayer && (w.inRing || w.committed)));
-const timeToLine = (me) => Math.max(0, me.stopS - me.s) / Math.max(me.v, 2);
+// The player is queued (no Go is possible) while a vehicle ahead in its own entry lane has not crossed its line.
+export const queuedBehind = (state, me) => state.vehicles.some((w) => !w.isPlayer && w.path.arm === me.path.arm
+  && w.path.lane === me.path.lane && w.s > me.s && w.s - w.length / 2 < w.path.marks.giveWay);
 
-export function judgeGo(state) {
+/**
+ * The Go as the player would really make it now: pulling away from its current speed at its real acceleration
+ * (state's accelMax). Memoised per state object, so the guide, the gap log and a tap share one answer.
+ *   tLine   s until the player reaches its line (0 at the line): the accepted gap is measured from here
+ *   tMerge  s until the player is at its merge point
+ *   list    assessEntry results that still matter, one per vehicle, soonest first. A vehicle passes in front
+ *           of a conflict run when its rear passes every point of the run PASS_MARGIN before the player's front
+ *           reaches the first entry point that point conflicts with (run.pairs). Point by point, because where
+ *           the entry joins the vehicle's lane the run goes on downstream: a from-rest player then follows a
+ *           faster vehicle in, long after its rear has passed. One that passes in front of all its remaining
+ *           runs starts the gap and is left out; otherwise it counts by the first run it does not.
+ */
+const goMemo = new WeakMap();
+export function goAssessment(state) {
+  let a = goMemo.get(state);
+  if (a) return a;
   const me = playerOf(state);
-  const tLine = timeToLine(me);
-  const list = conflictsFor(state, me);
+  const profile = speedProfile(me.path, me.latComfort);
+  const reach = (s) => timeToReach(me.path, profile, me.s, me.v, me.accelMax, s);
+  const frontAt = new Map(); // entry arc length -> s until the player's front gets there
+  const frontTime = (sEntry) => {
+    let t = frontAt.get(sEntry);
+    if (t === undefined) frontAt.set(sEntry, (t = reach(sEntry - me.length / 2)));
+    return t;
+  };
+  const passesInFront = ({ other: o, run }) => {
+    const rear = o.s - o.length / 2;
+    // NaN (no speed or acceleration on a hand-built state) fails the test: kept, fail safe.
+    return run.pairs.every(([sOther, sEntry]) => sOther <= rear || timeToCover(sOther - rear, o.v, o.a) + PASS_MARGIN <= frontTime(sEntry));
+  };
+  const others = state.vehicles.filter((w) => !w.isPlayer && (w.inRing || w.committed));
+  // Every remaining pass of each vehicle (on a mini one may cross the entry twice); it counts by the first it
+  // does not pass in front of.
+  const byVehicle = new Map();
+  for (const c of assessEntry(me, others, { allRuns: true })) {
+    if (passesInFront(c)) continue;
+    const kept = byVehicle.get(c.other.id);
+    if (!kept || c.run.sFrom < kept.run.sFrom) byVehicle.set(c.other.id, c);
+  }
+  // Braking a vehicle still to arrive needs, point by point: it reaches each run point no sooner than
+  // CLEAR_MARGIN after the player's rear has passed the last entry point that point conflicts with. A car
+  // following the player into the lane it joins only has to stay behind it, not out of the whole merge run.
+  const rearAt = new Map();
+  const rearTime = (sEntry) => {
+    let t = rearAt.get(sEntry);
+    if (t === undefined) rearAt.set(sEntry, (t = reach(sEntry + me.length / 2)));
+    return t;
+  };
+  const pointwise = (c) => {
+    if (c.inZone) return c;
+    const front = c.other.s + c.other.length / 2;
+    let needDecel = 0;
+    for (const [sOther, , sLast] of c.run.pairs) {
+      if (sOther > front) needDecel = Math.max(needDecel, requiredDecel(c.other.v, sOther - front, rearTime(sLast) + CLEAR_MARGIN));
+    }
+    return { ...c, needDecel };
+  };
+  const list = [...byVehicle.values()].map(pointwise).sort((x, y) => x.eta - y.eta);
+  a = { me, tLine: reach(me.stopS), tMerge: reach(me.path.marks.merge), list };
+  goMemo.set(state, a);
+  return a;
+}
 
+const goVerdicts = new WeakMap();
+export function judgeGo(state) {
+  let v = goVerdicts.get(state);
+  if (!v) goVerdicts.set(state, (v = judgeGoNow(state)));
+  return v;
+}
+
+function judgeGoNow(state) {
+  const { me, tLine, tMerge, list } = goAssessment(state);
   const hits = list.filter((c) => (c.inZone && c.other.v >= STOPPED) || (!c.inZone && c.needDecel > BRAKE_LIMIT));
   if (hits.length) {
     // The culprit is the vehicle that would have to brake hardest (one already in the entry: infinitely).
@@ -129,7 +219,7 @@ export function judgeGo(state) {
       cue: { indicator: o.indicator, wheels: wheelsOf(o), comingRound: true }, needDecel: c.needDecel, eta: c.eta,
     });
   }
-  const big = largeAlongside(state, me);
+  const big = largeAlongside(state, me, tMerge);
   if (big) return verdict('notAllowed', COPY.longVehicle(TYPE_NAMES[big.type]), 'HC 187', big.id);
   const blocked = list.find((c) => c.inZone);
   if (blocked) return verdict('notAllowed', COPY.blocked(vehicleName(blocked.other)), 'HC 185', blocked.other.id);
@@ -172,7 +262,7 @@ export function outerOffset(me, w) {
 }
 
 // Seconds from now until the left signal would come on, measured to the point of peeling off.
-export const signalLeadOf = (me) => (me.path.marks.diverge - me.s) / Math.max(me.v, 1) - SIGNAL_DELAY;
+const signalLeadOf = (me) => (me.path.marks.diverge - me.s) / Math.max(me.v, 1) - SIGNAL_DELAY;
 
 export function judgeExit(state) {
   const me = playerOf(state);
@@ -207,7 +297,8 @@ export function judgeExit(state) {
  * Gap log for the analysis sheet and the hesitation fault. Call record(state) on every sim step of the run
  * (it ignores steps before windowOpened and stops by itself once the player has cleared its entry after Go);
  * bracket the decision with windowOpened(t), atLine(t) and goTapped(t, state).
- *   Lag = time until the next conflicting vehicle reaches the player's entry (0 while one is in it).
+ *   Lag = time until the next conflicting vehicle reaches the player's entry (0 while one is in it), from
+ *   goAssessment, so one that passes in front of a Go now never counts: lag and judgeGo always agree.
  *   Only time spent stopped at the line counts towards hesitation. A clear gap is a lag of at least
  *   CLEAR_GAP while judgeGo says 'ok'; it is missed when it lasts REACTION seconds without a Go, including
  *   inside the gap finally taken.
@@ -237,8 +328,7 @@ export function createGapLog(layout) {
   let lastState = null;
 
   function lagNow(state) {
-    const me = playerOf(state);
-    const next = conflictsFor(state, me)[0]; // soonest first; one in the entry has eta 0
+    const next = goAssessment(state).list[0]; // soonest first; one in the entry has eta 0; one passing in front is out
     return { lag: next ? next.eta : Infinity, nextCarId: next ? next.other.id : null };
   }
 

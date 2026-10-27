@@ -5,15 +5,29 @@
  */
 import { conflictRuns, indexAt, mph, sampleAt, wrapPi } from './geom.js';
 
-export const COMFORT_DECEL = 1.5; // m/s^2, used to slow ahead of bends
+const COMFORT_DECEL = 1.5; // m/s^2, used to slow ahead of bends
 export const RING_CAP = mph(30);
-export const CONFLICT_CLEARANCE = 2.6; // m between parallel path centrelines that counts as a conflict
-export const CONFLICT_REACH = 3.0; // m of extra sweep for a body crossing at right angles (half a van)
-// Long vehicles sweep further, so reach grows to half the longer vehicle (cached per distinct reach).
-export const entryConflicts = (entryPath, otherPath, longest = 0) =>
-  conflictRuns(entryPath, otherPath, CONFLICT_CLEARANCE, Math.max(CONFLICT_REACH, longest / 2));
+const CONFLICT_CLEARANCE = 2.6; // m between parallel path centrelines that counts as a conflict
+const CONFLICT_REACH = 3.0; // m of extra sweep for a body crossing at right angles (half a van)
+// Long vehicles sweep further, so reach grows to half the longer vehicle. Cached per path pair and reach:
+// conflictRuns keeps one reach per pair, and pairs of vehicles of different lengths on the same two paths
+// would recompute it on every call.
+const runsCache = new WeakMap();
+export function entryConflicts(entryPath, otherPath, longest = 0) {
+  const reach = Math.max(CONFLICT_REACH, longest / 2);
+  let byOther = runsCache.get(entryPath);
+  if (!byOther) runsCache.set(entryPath, (byOther = new WeakMap()));
+  let byReach = byOther.get(otherPath);
+  if (!byReach) byOther.set(otherPath, (byReach = new Map()));
+  let runs = byReach.get(reach);
+  if (!runs) byReach.set(reach, (runs = conflictRuns(entryPath, otherPath, CONFLICT_CLEARANCE, reach)));
+  return runs;
+}
 export const BRAKE_LIMIT = 1.0; // m/s^2 a circulating driver should never be made to exceed
 export const CLEAR_MARGIN = 0.5; // s after the entrant's rear clears before the other may arrive
+export const SIGNAL_FROM = 60; // m before the line where approach signals start (AI and player)
+export const CREEP_DISTANCE = 16; // m before the line where the player creeps and the Go window opens
+export const PLAYER_ACCEL = 2.4; // m/s^2 the player's car pulling away (estimate: a brisk automatic Polo)
 
 const profileCache = new WeakMap();
 
@@ -56,7 +70,7 @@ export function stopPoint(path, length, width) {
   return path.marks.giveWay - overhang - STOP_MARGIN - length / 2;
 }
 
-export const allowedAt =(path, profile, s) => profile[indexAt(path, s)];
+export const allowedAt = (path, profile, s) => profile[indexAt(path, s)];
 
 /** Seconds until a vehicle at (s, v) accelerating at up to aMax along its profile reaches sTarget. */
 export function timeToReach(path, profile, s, v, aMax, sTarget, horizon = 20) {
@@ -83,7 +97,9 @@ export function requiredDecel(v, d, T) {
 /**
  * For an entrant about to use its entry section, every other vehicle whose true path crosses it.
  * entrant: { path, s, v, length, accelMax, latComfort }; others: { path, s, v, length }.
- * Returns [{ other, inZone, distance, eta, needDecel, tClear }], soonest first.
+ * Returns [{ other, run, inZone, distance, eta, needDecel, tClear }], soonest first (run: the entryConflicts
+ * run). By default only each vehicle's next pass; allRuns: one result per remaining pass (the judge: a vehicle
+ * passing in front may cross the entry again).
  * eta uses max(v, minSpeed) so a vehicle crawling now is not treated as never arriving. With cruise, a
  * vehicle still picking up speed is assumed to reach CRUISE_SHARE of its bend speed at the conflict, for
  * both eta and needDecel (AI caution; the judge uses speeds as they are).
@@ -91,7 +107,7 @@ export function requiredDecel(v, d, T) {
 const CRUISE_SHARE = 0.9;
 const CRUISE_LAT = 3.0; // m/s^2 when a vehicle's own comfort is unknown
 
-export function assessEntry(entrant, others, { minSpeed = 0, startDelay = 0, cruise = false } = {}) {
+export function assessEntry(entrant, others, { minSpeed = 0, startDelay = 0, cruise = false, allRuns = false } = {}) {
   const profile = speedProfile(entrant.path, entrant.latComfort);
   const out = [];
   for (const o of others) {
@@ -108,15 +124,15 @@ export function assessEntry(entrant, others, { minSpeed = 0, startDelay = 0, cru
       if (rear > run.sTo) continue;
       const tClear = startDelay + timeToReach(entrant.path, profile, entrant.s, entrant.v, entrant.accelMax, run.sEntryMax + entrant.length / 2);
       if (front >= run.sFrom) {
-        out.push({ other: o, inZone: true, distance: 0, eta: 0, needDecel: Infinity, tClear });
+        out.push({ other: o, run, inZone: true, distance: 0, eta: 0, needDecel: Infinity, tClear });
       } else {
         const distance = run.sFrom - front;
         const lat = o.latComfort ?? o.params?.latComfort ?? CRUISE_LAT;
         const v = cruise ? Math.max(o.v, CRUISE_SHARE * allowedAt(o.path, speedProfile(o.path, lat), run.sFrom)) : o.v;
         const eta = distance / Math.max(v, minSpeed, 0.1);
-        out.push({ other: o, inZone: false, distance, eta, needDecel: requiredDecel(v, distance, tClear + CLEAR_MARGIN), tClear });
+        out.push({ other: o, run, inZone: false, distance, eta, needDecel: requiredDecel(v, distance, tClear + CLEAR_MARGIN), tClear });
       }
-      break; // only the next pass of each vehicle matters
+      if (!allRuns) break;
     }
   }
   return out.sort((a, b) => a.eta - b.eta);

@@ -25,23 +25,28 @@
 <!-- No modulepreload: against an HTTP/1.x server Chrome sometimes fetched preloaded modules twice and left the graph
      pending; the boot watchdog below recovers any stall that remains. -->
 <style>
-/* Tokens. Floating panels over the scene are concentric: outer radius = inner radius + padding (owner rule),
+/* Tokens. Floating panels over the scene are concentric: outer radius = inner radius + padding,
    every control is one 46 px pill, and text panels take the near-opaque --rb-glass (scene-proof legibility).
-   --rb-ground matches world.js PALETTES[].skyHorizon, so slivers during toolbar collapse match the fog. */
+   --rb-ground is set by main.js applyTheme from the palette's skyHorizon (one copy); until then the page colour. */
 :root{color-scheme:light;
   --rb-route:#2A9D8F;--rule:color-mix(in srgb,var(--t1) 10%,transparent);
-  --rb-glass:rgba(250,250,250,.88);--rb-inset:color-mix(in srgb,var(--card) 92%,transparent);--rb-ground:#dde4ea;
+  --rb-glass:rgba(250,250,250,.88);--rb-inset:color-mix(in srgb,var(--card) 92%,transparent);
   --ctl:46px;--in-r:calc(var(--ctl) / 2);--pad:14px;--out-r:calc(var(--in-r) + var(--pad));--gap:8px;--sec:16px;--edge:14px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
-html[data-theme="dark"]{color-scheme:dark;--rb-route:#5EC4B6;--rb-glass:rgba(36,36,38,.88);--rb-ground:#4b5262}
-html[data-theme="sepia"]{color-scheme:light;--rb-route:#A67B5B;--rb-glass:rgba(245,237,218,.9);--rb-ground:#eedcbf}
+html[data-theme="dark"]{color-scheme:dark;--rb-route:#5EC4B6;--rb-glass:rgba(36,36,38,.88)}
+html[data-theme="sepia"]{color-scheme:light;--rb-route:#A67B5B;--rb-glass:rgba(245,237,218,.9)}
+/* The hint's leader line: a quiet ink with a thin halo of the opposite tone, so it reads on sky and on the dark
+   dashboard alike. */
+:root{--rb-leader:rgba(17,24,39,.78);--rb-leader-halo:rgba(255,255,255,.9)}
+html[data-theme="dark"]{--rb-leader:rgba(245,245,247,.85);--rb-leader-halo:rgba(0,0,0,.65)}
+html[data-theme="sepia"]{--rb-leader:rgba(84,58,36,.8);--rb-leader-halo:rgba(255,250,240,.9)}
 /* Guided mode's light on the big button: go / caution / stop, sepia in earth tones. */
 :root{--rb-go:#15803D;--rb-caution:#B45309;--rb-stop:#B91C1C}
 html[data-theme="dark"]{--rb-go:#1F9D55;--rb-caution:#D97706;--rb-stop:#DC2626}
 html[data-theme="sepia"]{--rb-go:#3F6212;--rb-caution:#92400E;--rb-stop:#9A3412}
 @media(max-width:480px){:root{--pad:12px;--edge:12px}}
 [hidden]{display:none!important}
-html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--rb-ground)}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--rb-ground,var(--bg))}
 body{-webkit-user-select:none;user-select:none;touch-action:none}
 /* Full bleed: the large viewport reaches under iOS's floating toolbar and the status bar. */
 #gl{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;display:block;touch-action:none;cursor:grab}
@@ -73,6 +78,7 @@ body{-webkit-user-select:none;user-select:none;touch-action:none}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:var(--ctl);border:none;border-radius:var(--in-r);font:500 .875rem/1 var(--font);cursor:pointer;padding:0 16px}
 .btn:active{opacity:.75}
 .btn:disabled{opacity:.45;cursor:default}
+/* Theme exemption: a 12% black drop shadow and 12% white top light read the same on every theme's fill. */
 .primary{background:var(--tab-active);color:var(--tab-active-c);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)}
 .ghost{background:var(--rb-inset);color:var(--t2)}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap)}
@@ -128,9 +134,8 @@ span.link{text-decoration:none;cursor:default}
 .r2{font:500 .75rem/1.3 var(--font);color:var(--t2);overflow:hidden;text-overflow:ellipsis}
 #route>div{min-width:0}
 #speed{position:absolute;top:calc(var(--edge) + var(--st) + var(--ctl) + var(--gap));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;height:34px;padding:0 12px 0 4px;border-radius:17px;font:600 .875rem/1 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
-/* Collapses rather than just fading, so the pill shrinks around the limit and arrows. */
-#mph{display:inline-block;max-width:5em;overflow:hidden;white-space:nowrap;transition:opacity .2s,max-width .2s}
-#mph.off{opacity:0;max-width:0}
+#mph{display:inline-block;white-space:nowrap}
+/* Theme exemption: the limit roundel is a regulatory sign (TSRGD), white, red and black in every theme. */
 #limit{width:26px;height:26px}
 #limit circle{fill:#fff;stroke:#C8102E;stroke-width:3.2}
 #limit text{font:700 11px var(--font);fill:#111;stroke:none}
@@ -141,30 +146,46 @@ html[data-theme="sepia"] .ind{color:#3F6212}
 #act{position:absolute;left:50%;bottom:calc(18px + var(--sb));transform:translateX(-50%);width:min(340px,calc(100cqw - 2 * var(--edge)));height:64px;border-radius:32px;border:1px solid var(--tab-border);background:var(--tab-active);color:var(--tab-active-c);font:600 1.125rem/1 var(--font);letter-spacing:.01em;cursor:pointer;box-shadow:var(--tab-shadow);transition:opacity .2s,transform .12s;display:flex;align-items:center;justify-content:center;gap:10px}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){#act{backdrop-filter:blur(10px) saturate(180%);-webkit-backdrop-filter:blur(10px) saturate(180%)}}
 #act:disabled,#act.inert{opacity:.38;cursor:default}
-/* Only a live button carries the light: faded under :disabled the tints turn muddy and read as neither colour. */
+/* Only a live button carries the light: faded under :disabled the tints turn muddy and read as neither colour.
+   Theme exemption: white text, since every theme's go/caution/stop fill is a deep saturated tone. */
 #act[data-tone]:not(:disabled){transition:background-color .15s,opacity .2s,transform .12s;color:#fff}
 #act[data-tone="go"]:not(:disabled){background:var(--rb-go)}
 #act[data-tone="caution"]:not(:disabled){background:var(--rb-caution)}
 #act[data-tone="stop"]:not(:disabled){background:var(--rb-stop)}
 #act:not(:disabled):active{transform:translateX(-50%) scale(.97)}
 .cap{display:none;min-width:22px;height:22px;padding:0 6px;border-radius:6px;border:1px solid color-mix(in srgb,var(--tab-active-c) 45%,transparent);font:500 .75rem/20px var(--font);opacity:.8}
-/* max-content: a box at left:50% would otherwise shrink to the half-width right of it and wrap into a column. */
-#chip{position:absolute;left:50%;bottom:calc(96px + var(--sb));transform:translateX(-50%);width:max-content;max-width:calc(100cqw - 2 * var(--edge));box-sizing:border-box;padding:10px 18px;border-radius:var(--in-r);font:500 .875rem/1.3 var(--font);color:var(--t1);text-align:center;text-wrap:balance;transition:opacity .35s;pointer-events:none}
-#chip.caption{font:600 1rem/1.3 var(--font);padding:12px 20px}
-#chip.off{opacity:0}
 #edge{position:absolute;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t1);pointer-events:none}
 #edge svg{width:18px;height:18px}
 /* Bottom-centre sits on the anchor point above the culprit's roof. */
 #tag{position:absolute;transform:translate(-50%,-100%);padding:6px 12px;border-radius:var(--in-r);font:600 .75rem/1.2 var(--font);color:var(--t1);white-space:nowrap;pointer-events:none}
-#replaybar{position:absolute;left:50%;bottom:calc(var(--edge) + var(--sb));transform:translateX(-50%);width:min(440px,calc(100cqw - 2 * var(--edge)));padding:var(--pad);border-radius:var(--out-r);display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--gap)}
-/* No nav here: the toast sits above the Go/Exit button, one line, growing sideways first. */
+/* Freeze and replay bar: two buttons a row at every width (four labels never fit one row at 390 px). The freeze
+   shows only Keep Driving and See Analysis; See Analysis takes the row alone when Keep Driving is not offered. */
+#replaybar{position:absolute;left:50%;bottom:calc(var(--edge) + var(--sb));transform:translateX(-50%);width:min(440px,calc(100cqw - 2 * var(--edge)));padding:var(--pad);border-radius:var(--out-r);display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+#replaybar.frozen #r-again,#replaybar.frozen #r-view{display:none}
+#r-keep[hidden]+#r-next{grid-column:1 / -1}
+/* No nav here: toasts sit above the Go/Exit button (or above the bar while it shows), one line each, growing
+   sideways first. Verdicts and the hint line stack in #toasts (ui.createToastQueue); base.js's single .notif is
+   left for the boot error only. --bar-h is the bar's height while it shows (hud.js). */
 .notif{padding-bottom:calc(98px + var(--sb))}
 .notif-pill{white-space:nowrap;width:max-content;max-width:calc(100vw - 32px - var(--sl) - var(--sr));overflow:hidden;text-overflow:ellipsis}
+#toasts{--base:calc(98px + var(--sb));position:absolute;left:50%;bottom:max(var(--base),calc(var(--edge) + var(--sb) + var(--bar-h,0px) + var(--gap)));transform:translateX(-50%);width:max-content;display:flex;flex-direction:column;align-items:center;gap:var(--gap);pointer-events:none}
+#toasts .notif-pill{pointer-events:auto;cursor:pointer;animation:toastIn .25s ease}
+#toasts .notif-pill.out{pointer-events:none;animation:toastOut .2s ease forwards}
+/* The hint: the toasts' shape in neutral glass, so verdict colours still stand out above it. */
+#toasts .nf-note{pointer-events:none;cursor:default;background:var(--rb-glass);color:var(--t1);border-color:var(--tab-border);font-weight:600}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){#toasts .nf-note{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px)}}
+/* Leader line from the hint to what it names: thin, a dot at the target, fading with the hint. */
+#leader{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;opacity:0;transition:opacity .25s;filter:drop-shadow(0 0 1px var(--rb-leader-halo)) drop-shadow(0 0 1px var(--rb-leader-halo))}
+#leader.on{opacity:1}
+#leader line{stroke:var(--rb-leader);stroke-width:1.75;stroke-linecap:round}
+#leader circle{fill:var(--rb-leader);stroke:none}
 
 @container (max-height:460px){
   #act{height:52px;bottom:calc(10px + var(--sb));width:min(300px,calc(100cqw - 2 * var(--edge)))}
-  #chip{bottom:calc(72px + var(--sb))}
   .notif{padding-bottom:calc(72px + var(--sb))}
+  #toasts{--base:calc(72px + var(--sb))}
   .sheet{bottom:calc(10px + var(--sb))}
   #speed{top:auto;bottom:calc(10px + var(--sb));left:calc(var(--edge) + var(--sl));transform:none}
 }
@@ -178,8 +199,8 @@ html[data-theme="sepia"] .ind{color:#3F6212}
   #act{left:auto;right:calc(var(--edge) + var(--sr));bottom:calc(var(--edge) + var(--sb));transform:none;width:260px;height:56px}
   #act:not(:disabled):active{transform:scale(.97)}
   .cap{display:inline-block}
-  #chip{left:auto;right:calc(var(--edge) + var(--sr));bottom:calc(var(--edge) + 56px + var(--gap) + var(--sb));transform:none;max-width:420px}
   .notif{padding-bottom:calc(var(--edge) + var(--sb))}
+  #toasts{--base:calc(var(--edge) + var(--sb))}
 }
 </style>
 </head>
@@ -203,14 +224,16 @@ html[data-theme="sepia"] .ind{color:#3F6212}
     <span id="mph">0 mph</span>
     <svg class="ind" id="ind-r" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5l7 7-7 7v-4H3V9h11z" fill="currentColor" stroke="none"/></svg>
   </div>
-  <div id="chip" class="panel off" hidden></div>
+  <svg id="leader" aria-hidden="true"><line/><circle r="3"/></svg>
   <div id="tag" class="panel" hidden></div>
+  <div id="toasts"></div>
   <div id="edge" class="panel" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
   <button id="act" hidden disabled><span id="act-l">Go</span><span class="cap">Space</span></button>
   <div id="replaybar" class="panel" hidden>
-    <button class="btn ghost" id="r-again" title="Replay Again (R)">Replay Again</button>
-    <button class="btn ghost" id="r-view">Driver View</button>
-    <button class="btn primary" id="r-next" title="Continue (Space)">Continue</button>
+    <button class="btn ghost" id="r-again" title="Replay Again (R)"></button>
+    <button class="btn ghost" id="r-view"></button>
+    <button class="btn ghost" id="r-keep" title="Keep Driving (K)" hidden></button>
+    <button class="btn primary" id="r-next" title="See Analysis (Space)"></button>
   </div>
 
   <section id="start" class="sheet panel">
@@ -220,7 +243,7 @@ html[data-theme="sepia"] .ind{color:#3F6212}
       </div></div>
       <button class="icon-btn" id="shuffle-start" aria-label="New Roundabout" title="New Roundabout (N)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg></button>
     </div>
-    <div class="actions"><button class="btn primary" id="start-btn" disabled title="Start (Space)">Loading</button></div>
+    <div class="actions"><button class="btn primary" id="start-btn" disabled title="Start (Space)"></button></div>
   </section>
 
   <section id="settings" class="sheet panel" hidden>
@@ -240,7 +263,7 @@ html[data-theme="sepia"] .ind{color:#3F6212}
         <span class="row-end"><input class="val" id="seed" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24"><button class="icon-btn" id="shuffle" aria-label="New Seed" title="New Roundabout (N)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/></svg></button></span>
       </div>
       <div class="srow" id="copy-link" tabindex="0" role="button">
-        <span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span id="copy-l">Copy Link</span></span>
+        <span class="slbl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span id="copy-l"></span></span>
       </div>
     </div>
     <div class="grp">
@@ -291,6 +314,7 @@ html[data-theme="sepia"] .ind{color:#3F6212}
    keys on progress, not total time, so a slow connection still loading is never interrupted. */
 (function () {
   var STALL = 8000, EVERY = 500, RETRIES = 2, KEY = 'rb-boot-retry';
+  var FAILED = 'Could Not Load the Roundabout'; // ui.js COPY.bootFailed: no module has run when this one is needed
   var seen = -1, still = 0, broken = false;
   var store = function (v) { try { if (v) sessionStorage.setItem(KEY, v); else sessionStorage.removeItem(KEY); } catch (_) {} };
   // A script error before boot (a module that fails to parse or link) will not heal on reload: report it now.
@@ -299,7 +323,7 @@ html[data-theme="sepia"] .ind{color:#3F6212}
     broken = true;
     clearInterval(timer);
     store(null);
-    window._base.notify('Could Not Load the Roundabout', false);
+    window._base.notify(FAILED, false);
   });
   var timer = setInterval(function () {
     if (window.__rbBoot) { clearInterval(timer); store(null); return; }
@@ -313,7 +337,7 @@ html[data-theme="sepia"] .ind{color:#3F6212}
     store(null);
     var js = performance.getEntriesByType('resource').map(function (e) { return e.name.split('/').pop(); }).filter(function (n) { return /\.js$/.test(n); });
     console.error('Roundabout: the page scripts stalled after ' + RETRIES + ' reloads. Loaded so far:', js);
-    window._base.notify('Could Not Load the Roundabout', false);
+    window._base.notify(FAILED, false);
   }, EVERY);
 })();
 </script>

@@ -13,7 +13,7 @@
  *   r.fork(label)       independent stream derived from this seed and label
  */
 
-export function hashSeed(seed) {
+function hashSeed(seed) {
   if (typeof seed === 'number' && Number.isFinite(seed)) return seed >>> 0;
   const s = String(seed);
   let h = 2166136261;

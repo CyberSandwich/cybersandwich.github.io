@@ -21,11 +21,11 @@
  */
 import * as THREE from 'three';
 import { loadGlb, flatten, cluster, triangles } from './gltf.js';
-import { VEHICLE_TYPES, COLOURS } from './traffic-data.js';
+import { VEHICLE_TYPES } from './traffic-data.js';
 import { wrapPi } from './geom.js';
 import { LAMP, lampsFor } from './lamps.js';
 
-export const TYPES = ['hatch', 'estate', 'van', 'bus', 'lorry'];
+const TYPES = Object.keys(VEHICLE_TYPES);
 const CAPACITY = { hatch: 40, estate: 24, van: 20, bus: 4, lorry: 8 };
 // Dominant body colour of each model's texture atlas (sRGB); texels near it are repainted.
 const PAINT_KEY = { hatch: '#8ECFB3', estate: '#9CCFBD', van: '#F1B18C', bus: '#7AB4E3', lorry: '#D69F96' };
@@ -319,7 +319,7 @@ export async function createVehicles(scene, { meta, base }) {
     M.set(c, 0, sn, x, 0, 1, 0, 0, -sn, 0, c, z, 0, 0, 0, 1);
     const i = set.count++;
     for (const im of set.meshes) im.setMatrixAt(i, M);
-    colour.set(v.colourHex ?? COLOURS[v.colour] ?? '#888888');
+    colour.set(v.colourHex); // every VehicleView carries it (sim.js view() owns the fallback)
     set.paint.setXYZ(i, colour.r, colour.g, colour.b);
     const spin = s / t.wheelRadius;
     for (const w of t.wheels) {
@@ -354,13 +354,18 @@ export async function createVehicles(scene, { meta, base }) {
     }
   }
 
-  let poses = [];
+  const poses = []; // pooled: update() refills the first poseN entries
+  let poseN = 0;
   const eye = { x: 0, z: 0, heading: null };
+
+  function pose(v, x, z, h, s, steer) {
+    const p = poses[poseN++] ?? (poses[poseN - 1] = {});
+    p.v = v; p.x = x; p.z = z; p.h = h; p.s = s; p.steer = steer;
+  }
 
   function update(prev, curr, alpha, { showPlayer = false, dt = 0, ghosts: keepGhosts = true, statics = [], eye: at } = {}) {
     if (at) { eye.x = at.x; eye.z = at.z; eye.heading = at.heading ?? null; }
-    poses = [];
-    const pose = (v, x, z, h, s, steer) => poses.push({ v, x, z, h, s, steer });
+    poseN = 0;
     const prevMap = mapOf(prev);
     const currMap = mapOf(curr);
 
@@ -371,7 +376,9 @@ export async function createVehicles(scene, { meta, base }) {
       }
     }
     lastCurr = curr;
-    ghosts = ghosts.filter((g) => (g.age += dt) < GHOST_SECONDS);
+    let kept = 0;
+    for (const g of ghosts) if ((g.age += dt) < GHOST_SECONDS) ghosts[kept++] = g;
+    ghosts.length = kept;
     for (const g of ghosts) {
       g.x += Math.sin(g.heading) * g.speed * dt;
       g.z -= Math.cos(g.heading) * g.speed * dt;
@@ -392,6 +399,14 @@ export async function createVehicles(scene, { meta, base }) {
     for (const v of statics) pose(v, v.x, v.z, v.heading, 0, 0);
   }
 
+  // Only the first `items` entries were written and are drawn, so only they are uploaded; an empty set uploads nothing.
+  function upload(attr, items) {
+    if (!items) return;
+    attr.clearUpdateRanges();
+    attr.addUpdateRange(0, items * attr.itemSize);
+    attr.needsUpdate = true;
+  }
+
   const frustum = new THREE.Frustum();
   const viewProj = new THREE.Matrix4();
   const sphere = new THREE.Sphere();
@@ -407,19 +422,19 @@ export async function createVehicles(scene, { meta, base }) {
     shadows.count = 0;
     lampN = 0;
     glow.visible = false;
-    for (const p of poses) draw(p, allLod, view);
+    for (let i = 0; i < poseN; i++) draw(poses[i], allLod, view);
     for (const s of sets) {
       for (const im of s.meshes) {
         im.count = s.count;
-        im.instanceMatrix.needsUpdate = true;
+        upload(im.instanceMatrix, s.count);
       }
       s.wheelMesh.count = s.wheelCount;
-      s.wheelMesh.instanceMatrix.needsUpdate = true;
-      s.paint.needsUpdate = true;
+      upload(s.wheelMesh.instanceMatrix, s.wheelCount);
+      upload(s.paint, s.count);
     }
-    shadows.instanceMatrix.needsUpdate = true;
+    upload(shadows.instanceMatrix, shadows.count);
     lamps.mesh.geometry.instanceCount = lampN;
-    for (const a of lamps.attrs) a.needsUpdate = true;
+    for (const a of lamps.attrs) upload(a, lampN);
     if (glow.visible) glow.material.uniforms.uStrength.value = 0.75 + 0.25 * Math.sin(performance.now() / 1000 * Math.PI * 2 * 0.9);
   }
 

@@ -3,13 +3,14 @@
  * The run's own state machine lives in run.js; everything drawn per frame in render.js; buttons and keys in
  * controls.js (onto the `app` commands below); pure rules in ui.js.
  *
- * URL hash (ui.parseHash): #seed=abc&cars=<traffic seed>&tier=easy[&traffic=heavy][&tips=guided][&drill=liarCars][&debug=...]
- * window.__rb is a read-only QA handle.
+ * URL hash (ui.parseHash): #seed=abc&cars=<traffic seed>&tier=easy[&traffic=heavy][&tips=guided][&drill=liarCars][&debug=...][&qa=1]
+ * window.__rb is a read-only QA handle, present only with qa=1 or a debug= scenario in the hash.
  */
 import * as THREE from 'three';
 import { generate } from './gen.js';
 import { createSim } from './sim.js';
 import { vehicleName } from './judge.js';
+import { COLOURS } from './traffic-data.js';
 import { createEnvironment, buildWorld } from './world.js';
 import { createVehicles } from './vehicles.js';
 import { createCockpit } from './cockpit.js';
@@ -17,7 +18,7 @@ import { createAudio } from './audio.js';
 import { createRun } from './run.js';
 import { createView, playerView } from './render.js';
 import { createControls } from './controls.js';
-import { resolveSettings, hashOf, newSeed, cleanSeed, nextTrafficSeed, within, QUALITY } from './ui.js';
+import { resolveSettings, hashOf, newSeed, cleanSeed, nextTrafficSeed, within, routeView, COPY, QUALITY } from './ui.js';
 
 window.__rbBoot = true; // the module graph settled: index.html's boot watchdog stands down
 
@@ -43,7 +44,7 @@ const audio = createAudio({ muted: store.load('rb-mute', false) });
 // ---------- settings ----------
 
 const STORED = { tier: 'rb-tier', traffic: 'rb-traffic', tips: 'rb-tips-mode', drill: 'rb-drill' };
-// cfg: { seed, trafficSeed, tier, traffic, tips, drill, debug }: the session's settings, mirrored in the hash.
+// cfg: { seed, trafficSeed, tier, traffic, tips, drill, debug, qa }: the session's settings, mirrored in the hash.
 const cfg = resolveSettings(Object.fromEntries(Object.entries(STORED).map(([k, key]) => [k, store.load(key, null)])), location.hash);
 const tipsShown = store.load('rb-tips-shown', {});
 
@@ -85,8 +86,8 @@ function setLayout() {
   world.setTheme(palette);
   vehicles?.setLayout(layout);
   const pc = layout.scenery.parkedCar;
-  statics = pc ? [{ id: -1, type: pc.type, colour: 'Blue', colourHex: '#2a4f8f', x: pc.x, z: pc.z, heading: pc.heading, s: 0, steer: 0 }] : [];
-  hud.route(layout);
+  statics = pc ? [{ id: -1, type: pc.type, colour: 'Blue', colourHex: COLOURS.Blue, x: pc.x, z: pc.z, heading: pc.heading, s: 0, steer: 0 }] : [];
+  hud.route(routeView(layout));
   hud.setSeed(cfg.seed);
   const built = world;
   // Scenery after the road and cars are on screen; a failure costs only dressing, so it is reported, not fatal.
@@ -114,6 +115,7 @@ function endRun() {
   run?.dispose();
   run = null;
   view.clear();
+  hud.chip(null); // also cancels a caption's hold, which would otherwise clear the next run's first line
   hud.clearToasts();
 }
 
@@ -163,10 +165,7 @@ function newRoundabout() {
 const out = {
   act: (label, opts) => hud.act(label, opts),
   advice: (tone) => hud.advice(tone),
-  chip: (text, { caption = false, holdMs } = {}) => {
-    hud.chip(text, { caption });
-    if (text && holdMs) setTimeout(() => hud.chip(null), holdMs);
-  },
+  chip: (text, opts) => hud.chip(text, opts),
   toasts: (plan) => hud.toasts(plan, (item) => { if (item.kind === 'err') run?.showReplay(); }),
   clearToasts: () => hud.clearToasts(),
   highlight: (id, opts) => vehicles.highlight(id, opts),
@@ -200,6 +199,20 @@ const out = {
 let last = 0;
 let raf = 0;
 
+// The freeze has no out hook, so its bar follows run.state here: up on a red freeze, down when the learner keeps
+// driving (the replay and the analysis bring their own screens through out.replay and out.ended).
+let freezeKey = null;
+function syncFreeze() {
+  const key = run ? `${run.state}|${run.canKeepDriving}` : null;
+  if (key === freezeKey) return;
+  const was = freezeKey?.split('|')[0];
+  freezeKey = key;
+  if (!run) return;
+  if (run.state === 'frozen') hud.screen('frozen');
+  else if (was === 'frozen' && run.state !== 'replay' && run.state !== 'analysis') hud.screen('run');
+  hud.keepDriving(Boolean(run.canKeepDriving));
+}
+
 function loop(now) {
   raf = requestAnimationFrame(loop);
   const rawDt = last ? (now - last) / 1000 : STEP;
@@ -217,6 +230,7 @@ function loop(now) {
     }
     if (n >= MAX_STEPS) acc = 0;
   }
+  syncFreeze();
   view.frame(dt, scale > 0 ? acc / STEP : 1);
   // Every frame on every screen, so no state can leave a voice playing: no run or an open sheet is 'idle'.
   audio.update(playerView(run?.curr), run?.curr.vehicles ?? [], run && !hud.openSheet ? run.state : 'idle', scale);
@@ -231,8 +245,15 @@ function stopLoop() { cancelAnimationFrame(raf); raf = 0; }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopLoop(); audio.suspend(); } else { startLoop(); if (screen === 'run') audio.resume(); }
 });
-canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); stopLoop(); });
-canvas.addEventListener('webglcontextrestored', () => { view.setQuality(view.quality); startLoop(); });
+// The loop is what drives audio levels, so a stopped loop must silence it; GPU-made content (the PMREM
+// environment) comes back empty, so the theme is re-applied to render it again.
+canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); stopLoop(); audio.suspend(); });
+canvas.addEventListener('webglcontextrestored', () => {
+  applyTheme();
+  view.setQuality(view.quality);
+  startLoop();
+  if (screen === 'run' && !document.hidden) audio.resume();
+});
 for (const target of [window, window.visualViewport].filter(Boolean)) target.addEventListener('resize', () => view.resize());
 addEventListener('orientationchange', () => view.resize());
 
@@ -240,9 +261,11 @@ function applyTheme() {
   palette = env.setTheme(document.documentElement.getAttribute('data-theme') || 'light');
   world?.setTheme(palette);
   vehicles?.setTheme(palette);
-  cockpit?.setTheme?.(palette); // static mirror glass follows the theme
+  cockpit.setTheme(palette); // static mirror glass follows the theme
   // After base.js has written the page colour: the status bar takes the sky's top instead, so it blends in.
   document.querySelector('meta[name="theme-color"]').content = palette.skyTop;
+  // The page behind the canvas is the fog colour, so slivers shown while a mobile toolbar collapses match it.
+  document.documentElement.style.setProperty('--rb-ground', palette.skyHorizon);
 }
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
@@ -281,10 +304,12 @@ const app = {
     setting('drill', drill);
     if (screen === 'preview') startPreview();
   },
+  // Like setTier: a new roundabout always starts a fresh preview, so no finished run is left over a new junction.
   setSeed(text) {
+    if (screen !== 'preview' && screen !== 'analysis') { hud.setSeed(cfg.seed); return; }
     cfg.seed = cleanSeed(text) ?? newSeed();
     setLayout();
-    if (screen === 'preview') startPreview();
+    startPreview();
   },
   setTips: (mode) => setting('tips', mode),
   setSound(on) {
@@ -324,7 +349,7 @@ async function boot() {
   hud.setReady(true);
 }
 
-window.__rb = Object.freeze({
+if (cfg.qa || cfg.debug) window.__rb = Object.freeze({
   renderer, scene, cockpit, stats: view.stats, QUALITY,
   act: () => run?.act(),
   get run() { return run; },
@@ -344,5 +369,5 @@ window.__rb = Object.freeze({
 
 boot().catch((err) => {
   console.error(err);
-  hud.toast('Could Not Load the Roundabout', 'err');
+  hud.toast(COPY.bootFailed, 'err');
 });

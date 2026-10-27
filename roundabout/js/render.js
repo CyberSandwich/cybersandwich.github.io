@@ -19,8 +19,7 @@
  *   view.quality  view.resize()  view.stats  view.dispose()
  */
 import * as THREE from 'three';
-import { dir, wrapPi, bearingOf } from './geom.js';
-import { LOOK } from './headlook.js';
+import { dir, wrapPi, bearingOf, toMph } from './geom.js';
 import { edgeArrow, nextQuality, signalLabel } from './ui.js';
 
 const PIXEL_RATIO = { low: 1, medium: 1.25, high: 1.5 };
@@ -35,9 +34,17 @@ const REPLAY_CAM = { back: 16, side: 9, up: 13, ease: 3 };
 
 export const playerView = (snap) => snap?.vehicles.find((v) => v.isPlayer) ?? null;
 
-function interpolated(a, b, alpha) {
+// The player's view between two snapshots, written into `out` (a scratch object the caller owns, valid until its
+// next call) so the frame allocates nothing.
+function interpolated(a, b, alpha, out) {
   if (!a || !b) return b;
-  return { ...b, x: a.x + (b.x - a.x) * alpha, z: a.z + (b.z - a.z) * alpha, heading: a.heading + wrapPi(b.heading - a.heading) * alpha, steer: a.steer + (b.steer - a.steer) * alpha, speed: a.speed + (b.speed - a.speed) * alpha };
+  Object.assign(out, b);
+  out.x = a.x + (b.x - a.x) * alpha;
+  out.z = a.z + (b.z - a.z) * alpha;
+  out.heading = a.heading + wrapPi(b.heading - a.heading) * alpha;
+  out.steer = a.steer + (b.steer - a.steer) * alpha;
+  out.speed = a.speed + (b.speed - a.speed) * alpha;
+  return out;
 }
 
 function lookPoint(target, snap) {
@@ -50,6 +57,9 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
   const aerial = new THREE.PerspectiveCamera(45, 1, 0.5, 900);
   aerial.layers.enable(2);
   const projected = new THREE.Vector3();
+  const meView = {};
+  const camTo = new THREE.Vector3(); // replay camera: where it is heading, and what it looks at
+  const lookTo = new THREE.Vector3();
   const held = new Set();
   const stats = { calls: 0, triangles: 0, fps: 0 };
   const fps = { t: 0, n: 0, since: 0 };
@@ -77,7 +87,7 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
   // What the cab's head-look scheduler reads each frame; null outside the drive.
   function driveOf(run) {
     if (!DRIVING.has(run.state)) return null;
-    const p = run.sim.player;
+    const p = run.me;
     return { phase: run.player.phase, distToLine: p.stopS - p.s, goWindowOpen: run.player.goWindowOpen, layout: s.layout, path: p.path, vehicles: run.curr.vehicles };
   }
 
@@ -109,14 +119,14 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
       orbit(dt);
       return present(aerial);
     }
-    const me = interpolated(playerView(run.prev), playerView(run.curr), alpha);
+    const me = interpolated(playerView(run.prev), playerView(run.curr), alpha, meView);
     vehicles.update(run.prev, run.curr, alpha, { dt: dt * (run.state === 'frozen' ? 0 : 1), statics, eye: me ?? aerial.position });
     steerLook(dt, run);
     cockpit.setDrive(driveOf(run));
     cockpit.update(me, dt);
     if (me && frame % SPEED_EVERY === 0) {
-      const limit = me.s > (run.sim.player.path.marks.merge ?? 0) ? layout.arms[layout.player.exitArm].limitMph : layout.arms[layout.player.arm].limitMph;
-      hud.speed(Math.round(me.speed / 0.44704), limit, !cockpit.speedoInFrame);
+      const limit = me.s > (run.me.path.marks.merge ?? 0) ? layout.arms[layout.player.exitArm].limitMph : layout.arms[layout.player.arm].limitMph;
+      hud.speed(Math.round(toMph(me.speed)), limit);
     }
     if (me) hud.telltale(me.indicator === 'left' && me.lamp, me.indicator === 'right' && me.lamp);
     return present(cockpit.camera, true);
@@ -146,6 +156,21 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
     hud.tag({ x: (projected.x + 1) / 2, y: (1 - projected.y) / 2, text: signalLabel(v.indicator) });
   }
 
+  // Guide focus only (not the freeze culprit look): the hint's leader line ends at the focus target, in 0..1 of the
+  // canvas. After the render, so the camera's matrices are this frame's.
+  function leaderTo(camera) {
+    const run = s.run;
+    const p = run && run.state !== 'replay' && pin && !pin.fixed && performance.now() < pin.until ? lookPoint(pin.target, run.curr) : null;
+    if (p) {
+      projected.set(p.x, 0.8, p.z).project(camera);
+      if (projected.z <= 1 && Math.abs(projected.x) <= 1 && Math.abs(projected.y) <= 1) {
+        hud.leader({ x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 });
+        return;
+      }
+    }
+    hud.leader(null);
+  }
+
   function orbit(dt) {
     const { layout, preview } = s;
     if (!layout) return;
@@ -159,7 +184,7 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
   // "What Went Wrong": a high three-quarter view of the conflict, eased in from the seat, or the seat itself.
   function renderReplay(dt, rf) {
     s.vehicles.update(rf.a, rf.b, rf.alpha, { showPlayer: !driverView, ghosts: false, statics: s.statics, eye: aerial.position });
-    const me = interpolated(playerView(rf.a), playerView(rf.b), rf.alpha);
+    const me = interpolated(playerView(rf.a), playerView(rf.b), rf.alpha, meView);
     const culprit = rf.b.vehicles.find((v) => v.id === rf.culpritId);
     cockpit.setDrive(null);
     if (driverView && me) {
@@ -170,14 +195,15 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
     if (me) {
       const fwd = dir(me.heading);
       const c = culprit ? { x: (me.x + culprit.x) / 2, z: (me.z + culprit.z) / 2 } : { x: me.x + fwd[0] * 8, z: me.z + fwd[1] * 8 };
-      const pos = new THREE.Vector3(c.x - fwd[0] * REPLAY_CAM.back + fwd[1] * REPLAY_CAM.side, REPLAY_CAM.up, c.z - fwd[1] * REPLAY_CAM.back - fwd[0] * REPLAY_CAM.side);
+      camTo.set(c.x - fwd[0] * REPLAY_CAM.back + fwd[1] * REPLAY_CAM.side, REPLAY_CAM.up, c.z - fwd[1] * REPLAY_CAM.back - fwd[0] * REPLAY_CAM.side);
+      lookTo.set(c.x, 0.5, c.z);
       if (!replayCam) {
         cockpit.camera.updateMatrixWorld();
-        replayCam = { pos: new THREE.Vector3().setFromMatrixPosition(cockpit.camera.matrixWorld), look: new THREE.Vector3(c.x, 0.5, c.z) };
+        replayCam = { pos: new THREE.Vector3().setFromMatrixPosition(cockpit.camera.matrixWorld), look: lookTo.clone() };
       }
       const k = Math.min(1, dt * REPLAY_CAM.ease);
-      replayCam.pos.lerp(pos, k);
-      replayCam.look.lerp(new THREE.Vector3(c.x, 0.5, c.z), k);
+      replayCam.pos.lerp(camTo, k);
+      replayCam.look.lerp(lookTo, k);
       aerial.position.copy(replayCam.pos);
       aerial.lookAt(replayCam.look);
     }
@@ -240,20 +266,22 @@ export function createView({ canvas, renderer, scene, cockpit, hud, reducedMotio
       frame++;
       const camera = render(dt, alpha);
       tagCulprit(camera);
+      leaderTo(camera);
       measure(camera);
       return camera;
     },
     monitor,
     glance: {
       look(target, hold) { pin = target ? { target, until: performance.now() + hold * 1000, fixed: true } : null; },
-      focus(target, hold = LOOK.focusHold, { sign = null, arrows = null } = {}) {
-        cockpit.focus(target, hold);
-        pin = target ? { target, until: performance.now() + hold * 1000, fixed: false } : null;
+      focus(target, hold, { sign = null, arrows = null } = {}) {
+        const held = cockpit.focus(target, hold); // the cab applies its own default and says what it was
+        pin = target ? { target, until: performance.now() + held * 1000, fixed: false } : null;
         mark(pin ? sign : null, pin ? arrows : null);
       },
     },
     clear() {
       pin = null;
+      hud.leader(null);
       mark(null, null);
       cockpit.setDrive(null);
       cockpit.focus(null);

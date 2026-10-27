@@ -119,4 +119,4 @@ export function cluster(geometry, cell) {
   return g;
 }
 
-export const triangles =(geometry) => (geometry.index ? geometry.index.count : geometry.getAttribute('position').count) / 3;
+export const triangles = (geometry) => (geometry.index ? geometry.index.count : geometry.getAttribute('position').count) / 3;

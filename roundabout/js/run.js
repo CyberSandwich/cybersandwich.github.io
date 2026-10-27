@@ -10,19 +10,23 @@
  *   run.tick(dt)            real time: freeze slow-motion, guide slow cues, replay playback; returns time scale
  *   run.act()               the Go/Exit decision (tap, key and guide all come here)
  *   run.state               'approach' | 'atLine' | 'onRing' | 'exited' | 'frozen' | 'replay' | 'analysis' | 'paused'
- *   run.sim  run.player  run.prev  run.curr  run.focus  run.culpritId  run.replayFrame()  run.togglePause()
+ *   run.sim  run.player  run.me  run.prev  run.curr  run.focus  run.culpritId  run.replayFrame()  run.togglePause()
  *   run.replayAgain()  run.continue()  run.showReplay()
+ *   run.keepDriving()       from the freeze or its replay: unfreeze and carry on from the frozen moment; run.canKeepDriving
+ *                           says when it applies. The first red verdict stays the run's recorded one; a later red freezes again.
  *
  * tipsMode: 'off' | 'tips' | 'guided' (learner taps, guide advises) | 'watch' (guide taps).
  * out: { act(label, opts), advice(tone | null), chip(text, opts), toasts(plan), clearToasts(), highlight(id, opts), clearGhosts(),
  *   glance: { look(target, hold), focus(target, hold?, { sign, arrows }), mirrors() }, replay(on), horn(culpritId), ended(view) }
  *   focus marks: sign = layout.signs index to pulse, arrows = arm whose lane arrows pulse (null for none).
+ *   clearToasts() only when the run ends: a freeze, its replay or Keep Driving clears the hint (chip(null)), never
+ *   a verdict toast, which keeps its full time on screen.
  *   target = { id } (a vehicle) or { x, z } (a world point). look() is the fixed freeze glance; focus() is guide
  *   focus, which the cab's head-look scheduler yields to. The scan itself is the cab's (cockpit.setDrive, main).
  */
 import { createSim } from './sim.js';
 import { createPlayer } from './player.js';
-import { judgeGo, judgeExit, createGapLog, judgeHesitation, previousExitS, vehicleName } from './judge.js';
+import { judgeGo, judgeExit, createGapLog, judgeHesitation, previousExitS, vehicleName, missedExit } from './judge.js';
 import { createGuide } from './guide.js';
 import { entryConflicts } from './kinematics.js';
 import { wrapPi, indexAt } from './geom.js';
@@ -33,11 +37,13 @@ const FREEZE_SECONDS = 0.4;
 const REPLAY_AFTER = 1.2; // s frozen before "What Went Wrong" starts on its own
 const END_AFTER_EXIT = 2.6; // sim s after leaving the ring; the path runs ~80 m further, so the car never stops
 const MAX_LAPS = 3;
-const SLOW_SCALE = 0.4;
+const CUE_SLOW_SCALE = 0.25; // time scale at the bottom of a guide 'slow' cue
+const CUE_SLOW_EASE = 0.3; // s to ease into and out of it, so speed never jumps
 const TIP_EVERY = 15; // steps between tip checks
 const UPSTREAM = 1.6; // rad of ring upstream of the player's merge that counts for tips
 const GO_SCENARIOS = ['liar', 'unsafe', 'tight', 'bus', 'blocked', 'shield'];
 const EMPTY_SCENARIOS = ['clear', 'early', 'missed'];
+const LIVE = new Set(['approach', 'atLine', 'onRing', 'exited']); // states in which player events still count
 const EXIT_GOES = new Set(['ok', 'lateSignal']); // Exit verdicts on which the car leaves; red ones freeze
 
 export function createRun({ layout, tier, trafficSeed, traffic = 'normal', preset = null, debug = null, tipsMode = 'tips', tipsShown = {}, out, gapLog = null }) {
@@ -54,20 +60,25 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
   if (EMPTY_SCENARIOS.includes(debug)) sim.debug.scenario('clear');
   else if (debug) sim.debug.clearTraffic(); // scenarios are timed from the line: no queue ahead
 
-  const rec = { go: null, exit: null, laps: 0, red: null, culprit: null, decisionT: null, tip: null, alongside: null, signalAt: null, exitedAt: null };
+  // rec.show is what "What Went Wrong" replays: the red verdict, else the first amber one with a decision to show.
+  const rec = { go: null, exit: null, laps: 0, red: null, culprit: null, show: null, tip: null, alongside: null, signalAt: null, exitedAt: null, goHandled: false };
   let state = 'approach';
   let beforePause = null;
   let endAt = null;
   let frozenFor = 0;
-  let slowUntil = 0;
+  let slowLeft = 0; // s of a guide 'slow' cue still to run, counted down in tick()
+  let slowAge = 0; // s since it began
   let steps = 0;
   let replay = null;
+  let finished = false; // end() has run
+  let resume = null; // { state, exit }: where keepDriving() returns to
   let focus = null;
   let goGate = false;
   let prev = sim.snapshot();
   let curr = prev;
 
-  const me = () => sim.player;
+  let stepState = sim.state();
+  let mine = stepState.vehicles.find((v) => v.isPlayer);
 
   // player.goWindowOpen is the one Go gate (first at its own line, queue included); the button mirrors it.
   function setAct() {
@@ -83,7 +94,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
   function decide() {
     if (state !== 'approach' && state !== 'atLine' && state !== 'onRing') return;
     const phase = player.phase;
-    if ((phase === 'approach' || phase === 'waiting') && player.goWindowOpen) {
+    if ((phase === 'approach' || phase === 'waiting') && player.goWindowOpen && !autoGo) {
       const st = sim.state();
       const v = judgeGo(st);
       // The player decides whether a tap counts (first at its own line); a refused tap leaves no trace at all.
@@ -91,10 +102,12 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
       log.goTapped(sim.t, st);
       out.advice(null);
       rec.go = v;
-      rec.decisionT = sim.t;
       out.chip(null);
       if (RED.has(v.verdict)) freeze(v, st);
-      else if (v.verdict === 'tight') out.toasts(toastPlan([{ verdict: v, name: nameOf(st, v.culpritId) }]));
+      else if (v.verdict === 'tight') {
+        keepForReplay(v, st);
+        out.toasts(toastPlan([{ verdict: v, name: nameOf(st, v.culpritId) }]));
+      }
       setAct();
     } else if (phase === 'ring' && player.exitWindowOpen && exitDecision) {
       const st = sim.state();
@@ -104,15 +117,28 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
         // A late signal is amber: the car still leaves, the toast says why it was late.
         rec.exit = v;
         player.exit();
-        if (v.verdict !== 'ok') out.toasts(toastPlan([{ verdict: v }]));
+        if (v.verdict !== 'ok') {
+          keepForReplay(v, st);
+          out.toasts(toastPlan([{ verdict: v }]));
+        }
       } else if (v.verdict === 'late') player.goRoundAgain();
       else {
         rec.exit = v;
-        rec.decisionT = sim.t;
         freeze(v, st);
       }
       setAct();
     }
+  }
+
+  // A drill's own Go: it waits for the shared Go assessment to say ok (it never times out into an unsafe or tight
+  // Go), and it is neither judged nor logged as the learner's decision.
+  function autoTap() {
+    if (rec.goHandled || state === 'frozen' || !player.goWindowOpen || judgeGo(stepState).verdict !== 'ok') return;
+    if (!player.go()) return;
+    rec.goHandled = true;
+    out.advice(null);
+    out.chip(null);
+    setAct();
   }
 
   const nameOf = (st, id) => {
@@ -120,32 +146,64 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     return v ? vehicleName(v) : null;
   };
 
+  // An amber verdict is replayable from the analysis, so its lead-up is copied now: the sim's 5 s history
+  // would have rolled past it by the time the run ends.
+  function keepForReplay(v, st) {
+    if (rec.show) return;
+    rec.show = { verdict: v, name: nameOf(st, v.culpritId), decisionT: sim.t, frames: sim.replay() };
+  }
+
+  // Red verdicts freeze the run. The first stays the run's recorded verdict (and culprit) however many follow
+  // after keepDriving(); rec.show is always the latest, which is the one the replay explains.
   function freeze(v, st) {
-    rec.red = v;
     const c = v.culpritId != null && st.vehicles.find((w) => w.id === v.culpritId);
-    rec.culprit = c ? { id: c.id, name: vehicleName(c), indicator: c.indicator, comingRound: true } : null;
+    const culprit = c ? { id: c.id, name: vehicleName(c), indicator: c.indicator, comingRound: true } : null;
+    if (!rec.red) { rec.red = v; rec.culprit = culprit; }
+    rec.show = { verdict: v, name: culprit?.name ?? null, decisionT: sim.t, frames: null };
+    replay = null;
+    resume = { state, exit: player.phase === 'ring' };
     beforePause = null;
     state = 'frozen';
     frozenFor = 0;
     out.highlight(v.culpritId, { lamp: true });
     if (c) out.glance.look({ id: c.id }, Infinity);
     if (v.verdict === 'unsafe') out.horn(v.culpritId);
-    out.clearToasts();
-    out.toasts(toastPlan([{ verdict: v, name: rec.culprit?.name }]));
+    // Verdict toasts already up stay (they stack under the red one); only the hint gives way.
+    out.chip(null);
+    out.toasts(toastPlan([{ verdict: v, name: culprit?.name }]));
+  }
+
+  // From the freeze or its replay: the learner carries on from the frozen moment. The sim never advanced during
+  // the replay (it plays recorded frames), so nothing needs restoring; a red Exit goes ahead and leaves.
+  // A replay opened from the analysis belongs to a finished run: there is nothing to resume.
+  const canKeepDriving = () => !finished && (state === 'frozen' || state === 'replay');
+
+  function keepDriving() {
+    if (!canKeepDriving()) return;
+    if (state === 'replay') out.replay(false);
+    replay = null;
+    state = resume.state;
+    frozenFor = 0;
+    slowLeft = 0;
+    out.chip(null);
+    out.glance.look(null);
+    out.highlight(null, {});
+    if (resume.exit) player.exit();
+    setAct();
   }
 
   // ---------- events ----------
 
   function onEvent(e) {
-    // One step can carry events past end() (missedExit then exitWindowOpen); the run is over.
-    if (state === 'analysis') return;
+    // The sim keeps stepping through the freeze slow-motion and past end(): those events must not move the state.
+    if (!LIVE.has(state)) return;
     switch (e.name) {
       case 'goWindowOpen':
-        log.windowOpened(e.t);
+        if (!autoGo) log.windowOpened(e.t);
         break;
       case 'atLine':
         state = 'atLine';
-        log.atLine(e.t); // hesitation counts only from here
+        if (!autoGo) log.atLine(e.t); // hesitation counts only from here
         if (GO_SCENARIOS.includes(debug)) {
           sim.debug.scenario(debug);
           out.clearGhosts();
@@ -157,7 +215,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
       case 'missedExit':
         rec.laps++;
         if (rec.laps >= MAX_LAPS) end();
-        else out.toasts(toastPlan([{ verdict: { verdict: 'late', reason: '' } }]));
+        else out.toasts(toastPlan([{ verdict: missedExit() }]));
         break;
       case 'mirrorGlance':
         out.glance.mirrors();
@@ -194,7 +252,8 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
         out.glance.focus(focus, cue.holdMs != null ? cue.holdMs / 1000 : undefined, marksFor(cue));
         break;
       case 'slow':
-        slowUntil = Math.max(slowUntil, performance.now() + (cue.holdMs ?? 700));
+        if (slowLeft <= 0) slowAge = 0;
+        slowLeft = Math.max(slowLeft, (cue.holdMs ?? 700) / 1000);
         break;
       case 'go':
       case 'exit':
@@ -214,10 +273,9 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
 
   function tips() {
     if (tipsMode !== 'tips' || !player.goWindowOpen || !['approach', 'waiting'].includes(player.phase)) return;
-    const st = sim.state();
-    const p = st.vehicles.find((v) => v.isPlayer);
+    const p = mine;
     const bm = p.path.bearing[indexAt(p.path, p.path.marks.merge)];
-    const cars = st.vehicles.filter((w) => !w.isPlayer && w.inRing).map((w) => {
+    const cars = stepState.vehicles.filter((w) => !w.isPlayer && w.inRing).map((w) => {
       const up = wrapPi(bm - w.bearing);
       return { upstream: up >= 0 && up <= UPSTREAM && entryConflicts(p.path, w.path).length > 0, indicator: w.indicator, large: LARGE_TYPES.has(w.type) };
     });
@@ -231,15 +289,17 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
   // ---------- loop ----------
 
   function step(dt) {
-    player.update();
-    if (guide && (state === 'approach' || state === 'atLine' || state === 'onRing' || state === 'exited')) {
-      for (const cue of guide.update(sim.state(), player.phase)) onCue(cue);
+    stepState = sim.state(); // built once per step; player, guide, log, tips and the view's player all read this one
+    mine = stepState.vehicles.find((v) => v.isPlayer);
+    player.update(stepState);
+    if (guide && LIVE.has(state)) {
+      for (const cue of guide.update(stepState, player.phase)) onCue(cue);
     }
     // Every step: the log gates itself, and keeps going past the Go tap until the player clears the entry,
     // so the car pulled out in front of is logged.
-    log.record(sim.state());
+    if (!autoGo) log.record(stepState);
     if (player.goWindowOpen !== goGate) { goGate = player.goWindowOpen; setAct(); } // the button follows the gate at once
-    if (autoGo && !rec.go && player.goWindowOpen && state !== 'frozen') decide();
+    if (autoGo) autoTap();
     sim.step(dt);
     prev = curr;
     curr = sim.snapshot();
@@ -250,7 +310,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     }
     if (debug === 'alongside' && rec.alongside === null && player.phase === 'ring') {
       // Placed once the player is past the exit before theirs, where an Exit tap is otherwise on time.
-      if (me().s + me().length / 2 >= previousExitS(layout, me().path)) rec.alongside = sim.debug.scenario('alongside') ?? -1;
+      if (mine.s + mine.length / 2 >= previousExitS(layout, mine.path)) rec.alongside = sim.debug.scenario('alongside') ?? -1;
     }
     if (endAt !== null && sim.t >= endAt && state === 'exited') end();
     if (guide?.done && state === 'exited' && endAt === null) endAt = sim.t + END_AFTER_EXIT;
@@ -265,18 +325,26 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     }
     if (state === 'replay') { advanceReplay(dt); return 0; }
     if (state === 'analysis') return 0;
-    return performance.now() < slowUntil ? SLOW_SCALE : 1;
+    if (slowLeft <= 0) return 1;
+    const ramp = Math.min(1, slowAge / CUE_SLOW_EASE, slowLeft / CUE_SLOW_EASE);
+    slowAge += dt;
+    slowLeft -= dt;
+    return 1 - (1 - CUE_SLOW_SCALE) * ramp;
   }
 
   // ---------- replay ("What Went Wrong") ----------
 
+  const replayStart = (r) => r.steps[0]?.from ?? r.frames[0].t;
+
   function startReplay() {
-    if (!rec.red) return;
-    const frames = replay?.frames ?? sim.replay();
-    replay = { frames, steps: directorSteps({ frames, decisionT: rec.decisionT ?? frames[frames.length - 1].t, verdict: rec.red, culpritName: rec.culprit?.name }), i: 0, t: 0, caption: -1 };
-    replay.ft = replay.steps[0]?.from ?? frames[0].t;
+    const show = rec.show;
+    if (!show || !['frozen', 'replay', 'analysis'].includes(state)) return;
+    const frames = replay?.frames ?? show.frames ?? sim.replay();
+    if (!frames.length) return;
+    replay = { frames, steps: directorSteps({ frames, decisionT: show.decisionT, verdict: show.verdict, culpritName: show.name }), i: 0, t: 0, caption: -1 };
+    replay.ft = replayStart(replay);
     state = 'replay';
-    out.clearToasts();
+    out.chip(null);
     out.replay(true);
   }
 
@@ -301,19 +369,20 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     const f = Math.max(0, Math.min(frames.length - 1, (replay.ft - frames[0].t) * 30));
     const i = Math.min(frames.length - 2, Math.floor(f));
     const step = replay.steps[replay.i];
-    return { a: frames[i], b: frames[i + 1], alpha: f - i, culpritId: rec.red?.culpritId ?? null, phase: step?.kind ?? 'end', easing: step?.camera === 'ease' };
+    return { a: frames[i], b: frames[i + 1], alpha: f - i, culpritId: rec.show?.verdict.culpritId ?? null, phase: step?.kind ?? 'end', easing: step?.camera === 'ease' };
   }
 
   function end() {
     if (state === 'analysis') return;
     state = 'analysis';
+    finished = true;
     replay && out.replay(false);
     out.chip(null);
     out.clearToasts();
     const summary = log.summary();
     const view = analysisView({
       go: rec.go, exit: rec.exit, exited: rec.exitedAt !== null, laps: rec.laps, red: rec.red, culprit: rec.culprit, summary, hesitation: judgeHesitation(summary),
-      maxLaps: MAX_LAPS, mode: tipsMode, traffic, signalLead: rec.signalAt !== null && rec.exitedAt != null ? rec.exitedAt - rec.signalAt : null,
+      replayable: Boolean(rec.show), goHandled: rec.goHandled, maxLaps: MAX_LAPS, mode: tipsMode, traffic, signalLead: rec.signalAt !== null && rec.exitedAt != null ? rec.exitedAt - rec.signalAt : null,
     });
     out.ended(view);
   }
@@ -329,9 +398,10 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     get prev() { return prev; },
     get curr() { return curr; },
     get focus() { return focus; },
+    get me() { return mine; }, // the player's state as of the latest step: one build per step, not per read
     get guided() { return guided; },
     get wasRed() { return Boolean(rec.red); },
-    get culpritId() { return rec.red?.culpritId ?? null; },
+    get culpritId() { return rec.show?.verdict.culpritId ?? null; },
     togglePause() {
       if (state === 'paused') { state = beforePause; beforePause = null; return false; }
       if (!['approach', 'atLine', 'onRing', 'exited'].includes(state)) return false;
@@ -340,7 +410,9 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
       return true;
     },
     showReplay: startReplay,
-    replayAgain() { if (replay) { replay.i = 0; replay.t = 0; replay.caption = -1; replay.ft = replay.steps[0].from; } },
+    keepDriving,
+    get canKeepDriving() { return canKeepDriving(); },
+    replayAgain() { if (replay) { replay.i = 0; replay.t = 0; replay.caption = -1; replay.ft = replayStart(replay); } },
     continue: end,
     dispose() { events.length = 0; },
   };

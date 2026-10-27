@@ -2,12 +2,12 @@
  * Road-marking layout: pure (no three, no DOM).
  *
  *   giveWayBars(layout) -> [{ arm, row, a: [x, z], b: [x, z], width }]   every dash of every give-way marking
- *   entryEnds(arm, r)   -> [nearside, offside] where the entry's kerbs cross radius r
  *
  * Give way (TSM ch. 5, diagrams 1003.1 / 1003.3 at a roundabout): one marking per entry, the full width from the
- * nearside kerb to the offside edge (splitter nose or centre line), flare included, following the edge of the
- * circulatory carriageway. It is drawn from the kerbs, not from the lanes: lanes do not span a flared entry, and
- * per-lane runs leave gaps where they meet. 600 mm marks, gaps stretched from 300 mm so a mark starts and ends at
+ * nearside kerb to the offside edge, following the edge of the circulatory carriageway. The offside edge is the
+ * splitter nose (or the centre line), on the arm axis. The entry's own offside kerb is not it: a flared entry
+ * swings that kerb away from the nose and leaves an unmarked wedge. It is drawn from the kerb, not from the
+ * lanes: lanes do not span a flared entry, and per-lane runs leave gaps where they meet. 600 mm marks, gaps stretched from 300 mm so a mark starts and ends at
  * each edge; rows 300 mm apart, two rows (1003.1) or one on a mini (1003.3).
  * Frame: geom.js (x east, z south, compass bearings, clockwise positive).
  */
@@ -33,10 +33,12 @@ function crossing(pts, r) {
   return null;
 }
 
-export function entryEnds(arm, r) {
+// Nearside kerb crossing and the arm axis at radius r.
+function entryEnds(arm, r) {
   const near = crossing(arm.kerbs.entryLeft, r);
-  const off = crossing(arm.kerbs.entryRight, r);
-  return near && off ? [near, off] : null;
+  if (!near) return null;
+  const d = dir(arm.bearing);
+  return [near, [d[0] * r, d[1] * r]];
 }
 
 export function giveWayBars(layout) {
@@ -48,8 +50,8 @@ export function giveWayBars(layout) {
     const rows = gw.diagram === '1003.3' ? 1 : 2;
     // Row centre radii: just outside the ring edge, the second row behind the first.
     const radii = Array.from({ length: rows }, (_, row) => R + gw.width / 2 + row * (gw.width + rowGap));
-    // Each row spans its own kerbs: the nearside kerb sweeps into the ring, so the row nearer the ring can be
-    // a metre wider than the one behind it, and a shared layout would stop short of the kerb.
+    // Each row spans its own kerb crossing: the nearside kerb sweeps into the ring, so the row nearer the ring can
+    // be a metre wider than the one behind it, and a shared layout would stop short of the kerb.
     radii.forEach((r, row) => {
       const ends = entryEnds(arm, r);
       if (!ends) return;

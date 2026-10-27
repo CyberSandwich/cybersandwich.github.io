@@ -3,21 +3,23 @@
  *
  *   const hud = createHud(handlers)
  *     handlers: onTier(t) onShuffle() onStart() onAct() onRetry() onRetryMode(mode) onNew() onChangeTier() onShowReplay()
- *               onReplayAgain() onReplayView() onReplayNext() onMute() onSound(on) onTips(mode) onTraffic(level) onDrill(key|null)
- *               onSeed(text) onCopyLink() onSheet(name | null)
- *   hud.screen('start' | 'run' | 'replay' | 'analysis' | 'none')   which layer of the HUD is up
+ *               onReplayAgain() onReplayView() onReplayNext() onKeepDriving() onMute() onSound(on) onTips(mode)
+ *               onTraffic(level) onDrill(key|null) onSeed(text) onCopyLink()
+ *   hud.screen('start' | 'run' | 'frozen' | 'replay' | 'analysis' | 'none')   which layer of the HUD is up
  *   hud.sheet(name | null) / hud.openSheet                         settings and about float over any screen
- *   hud.route(layout)  hud.speed(mph, limitMph, showMph)  hud.telltale(left, right)
- *   hud.act(label, { enabled, inert })  hud.advice(tone)  hud.chip(text | null, { caption })  hud.edge(pos | null)
+ *   hud.route(ui.routeView(layout))  hud.speed(mph, limitMph)  hud.telltale(left, right)  hud.keepDriving(on)
+ *   hud.act(label, { enabled, inert })  hud.advice(tone)  hud.chip(text | null, { holdMs })  hud.paused(on)  hud.edge(pos | null)
+ *   hud.leader({ x, y } | null)      the hint's target as 0..1 of the canvas, each frame: a thin line from the hint to it
  *   hud.tag({ x, y, text } | null)   the culprit's signal in words, pinned above it in a freeze or replay
- *   hud.analysis(view)  hud.toasts(plan, onTap)  hud.resumeToasts()  hud.clearToasts()  hud.fade(opacity)
- *   hud.setTier/setSeed/setSound/setTips/setTraffic/setDrill/setReady/copied/replayView
+ *   hud.analysis(view)  hud.toasts(plan, onTap)  hud.clearToasts()  hud.fade(opacity)
+ *   hud.setTier/setSeed/setSound/setTips/setTraffic/setDrill/setReady/copied  hud.replayView(driverOn)
  */
-import { hcLink } from './ui.js';
+import { COPY, hcLink, createToastQueue, leaderPath } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
-const CHIP_FADE_MS = 350;
+const TOAST_OUT_MS = 200; // index.html .notif-pill.out
+const TOAST_TONE = { err: 'nf-err', warn: 'nf-warn', ok: 'nf-ok', caption: 'nf-note' };
 const COPIED_MS = 1500;
 
 const svgEl = (tag, attrs = {}, parent) => {
@@ -48,13 +50,22 @@ const onSeg = (id, fn) => $(id).addEventListener('click', (e) => { const b = e.t
 
 export function createHud(h) {
   const act = $('act');
-  const chipEl = $('chip');
+  const hudEl = $('hud');
+  const canvasEl = $('gl');
+  const leaderEl = $('leader');
+  const leaderLine = leaderEl.querySelector('line');
+  const leaderDot = leaderEl.querySelector('circle');
   const sheets = { settings: $('settings'), about: $('about') };
-  const screens = { start: $('start'), analysis: $('analysis'), replay: $('replaybar') };
+  // The freeze shows the replay bar with only Keep Driving and See Analysis (index.html .frozen).
+  const screens = { start: $('start'), analysis: $('analysis'), replay: $('replaybar'), frozen: $('replaybar') };
   let current = 'none';
   let openSheet = null;
-  let chipTimer = 0;
-  const queue = { items: [], timer: 0, onTap: null, paused: false };
+  let leaderTarget = null;
+  let underPause = null; // the hint the Paused hint covers, with its hold left
+  const toastsEl = $('toasts');
+  const toastQueue = createToastQueue({ now: () => performance.now() });
+  let toastTimer = 0;
+  let toastTap = null;
 
   onSeg('tiers', h.onTier);
   onSeg('sound-seg', (v) => h.onSound(v === 'on'));
@@ -81,9 +92,19 @@ export function createHud(h) {
   click('r-again', () => h.onReplayAgain());
   click('r-view', () => h.onReplayView());
   click('r-next', () => h.onReplayNext());
+  click('r-keep', () => h.onKeepDriving());
   $('seed').addEventListener('change', (e) => h.onSeed(e.target.value));
   $('seed').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); e.stopPropagation(); });
   for (const id of ['copy-link', 'about-btn']) $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); $(id).click(); } });
+  // Labels that change at run time start from the same COPY entries they change between.
+  function setReady(on) { $('start-btn').disabled = !on; $('start-btn').textContent = on ? COPY.start : COPY.loading; }
+  setReady(false);
+  $('copy-l').textContent = COPY.link.copy;
+  $('r-again').textContent = COPY.replay.again;
+  $('r-next').textContent = COPY.replay.next;
+  $('r-keep').textContent = COPY.replay.keep;
+  $('r-view').textContent = COPY.replay.driver;
+
   // A tap outside an open sheet closes it (the canvas and HUD gaps both count as outside).
   document.addEventListener('pointerdown', (e) => {
     if (openSheet && !sheets[openSheet].contains(e.target) && !e.target.closest('.corner')) sheet(null);
@@ -92,66 +113,76 @@ export function createHud(h) {
   function sheet(name) {
     openSheet = name;
     for (const [k, s] of Object.entries(sheets)) s.hidden = k !== name;
-    for (const [k, s] of Object.entries(screens)) s.hidden = Boolean(name) || k !== current;
-    h.onSheet(name);
+    for (const s of new Set(Object.values(screens))) s.hidden = true;
+    if (!name && screens[current]) screens[current].hidden = false;
   }
 
+  // 'frozen' is the red-verdict freeze inside a run: the scene stays, the run controls give way to the bar.
   function screen(name) {
     current = name;
     const run = name === 'run';
+    const inRun = run || name === 'frozen' || name === 'replay';
     act.hidden = !run;
     $('route').hidden = name === 'none' || name === 'replay';
     $('speed').hidden = !run;
     $('mute').hidden = !run;
-    $('theme-btn').hidden = run || name === 'replay';
-    $('settings-btn').hidden = run || name === 'replay';
-    if (!run && name !== 'replay') chip(null);
+    $('theme-btn').hidden = inRun;
+    $('settings-btn').hidden = inRun;
+    $('replaybar').classList.toggle('frozen', name === 'frozen');
+    if (!inRun) chip(null);
     if (name !== 'run') edge(null);
-    if (name !== 'run' && name !== 'replay') tag(null);
+    if (!inRun) tag(null);
     sheet(null);
+    // Toasts sit above the freeze/replay bar while it shows (index.html #toasts).
+    const bar = $('replaybar');
+    hudEl.style.setProperty('--bar-h', bar.hidden ? '0px' : `${bar.offsetHeight}px`);
   }
 
-  // Clock-face pip: the player's arm at six o'clock, the target exit picked out.
-  function route(layout) {
-    const pl = layout.player;
-    const me = layout.arms[pl.arm];
+  // Clock-face pip from ui.routeView: the player's arm at six o'clock, the target exit picked out.
+  function route(v) {
     const pip = $('pip');
     pip.replaceChildren();
     const ring = 6.5;
-    if (layout.type === 'mini') svgEl('circle', { r: 4.5, fill: 'currentColor', stroke: 'none' }, pip);
+    if (v.mini) svgEl('circle', { r: 4.5, fill: 'currentColor', stroke: 'none' }, pip);
     else svgEl('circle', { r: ring, 'stroke-width': 2.4 }, pip);
-    for (const arm of layout.arms) {
-      const a = arm.bearing - (me.bearing + Math.PI);
-      const d = [Math.sin(a), -Math.cos(a)];
-      const target = arm.index === pl.exitArm;
+    for (const { angle, target } of v.spokes) {
+      const d = [Math.sin(angle), -Math.cos(angle)];
       const g = svgEl('g', target ? { class: 'tgt' } : {}, pip);
       svgEl('line', { x1: d[0] * ring, y1: d[1] * ring, x2: d[0] * 15, y2: d[1] * 15, 'stroke-width': target ? 3 : 2.2 }, g);
       if (target) svgEl('circle', { cx: d[0] * 15, cy: d[1] * 15, r: 3, fill: 'currentColor', stroke: 'none' }, g);
     }
-    $('r-exit').textContent = `Exit ${pl.exitNumber}`;
-    const lanes = layout.circulatory.lanes;
-    $('r-lane').textContent = lanes > 1 ? `${['Left', lanes === 3 ? 'Middle' : 'Right', 'Right'][pl.lane]} Lane` : '';
-    $('r-dest').textContent = `${pl.route.destination} (${pl.route.road})`;
+    $('r-exit').textContent = v.exitText;
+    $('r-lane').textContent = v.laneText;
+    $('r-dest').textContent = v.destText;
   }
 
-  function chip(text, { caption = false } = {}) {
-    clearTimeout(chipTimer);
-    if (!text) {
-      chipEl.classList.add('off');
-      chipTimer = setTimeout(() => { chipEl.hidden = true; }, CHIP_FADE_MS);
-      return;
+  // The hint line (guide and tip captions, replay captions, Paused) is the toast stack's caption: same place, one
+  // line, below any verdict. holdMs: it clears itself after that long; a later call replaces it and its hold.
+  function chip(text, { holdMs = 0 } = {}) {
+    toastQueue.setCaption(text, { holdMs });
+    syncToasts();
+  }
+
+  // The leader line from the hint to its target: target { x, y } as 0..1 of the canvas, or null. Drawn only while
+  // a hint shows; render calls this every run frame, so the line follows the target.
+  function leader(target) {
+    leaderTarget = target;
+    const note = toastQueue.caption;
+    const el = note && pills.get(note.id);
+    let p = null;
+    if (el && target && !el.classList.contains('out')) {
+      const gl = canvasEl.getBoundingClientRect();
+      const box = hudEl.getBoundingClientRect();
+      p = leaderPath(el.getBoundingClientRect(), { x: gl.left + target.x * gl.width, y: gl.top + target.y * gl.height }, { width: box.width, height: box.height });
     }
-    chipEl.classList.toggle('caption', caption);
-    const show = () => {
-      chipEl.textContent = text;
-      chipEl.hidden = false;
-      requestAnimationFrame(() => chipEl.classList.remove('off'));
-    };
-    // A new line replaces a showing one through a short fade.
-    if (!chipEl.hidden && !chipEl.classList.contains('off') && chipEl.textContent !== text) {
-      chipEl.classList.add('off');
-      chipTimer = setTimeout(show, CHIP_FADE_MS);
-    } else show();
+    leaderEl.classList.toggle('on', Boolean(p));
+    if (!p) return;
+    leaderLine.setAttribute('x1', p.x1);
+    leaderLine.setAttribute('y1', p.y1);
+    leaderLine.setAttribute('x2', p.x2);
+    leaderLine.setAttribute('y2', p.y2);
+    leaderDot.setAttribute('cx', p.x2);
+    leaderDot.setAttribute('cy', p.y2);
   }
 
   function edge(pos) {
@@ -184,7 +215,7 @@ export function createHud(h) {
     for (const gap of g.gaps) {
       const x0 = x(gap.start) + (gap.start > g.start ? 1.5 : 0);
       const w = Math.max(2, x(gap.end) - x0);
-      const tone = gap.taken ? 100 : gap.length > 6 ? 34 : 14;
+      const tone = gap.taken ? 100 : gap.clear ? 34 : 14;
       svgEl('rect', { x: x0, y: 14, width: w, height: 14, rx: 4, style: `fill:color-mix(in srgb, var(--t1) ${tone}%, transparent);stroke:none` }, svg);
       // The taken bar only spans opening-to-tap, not a gap between cars, so it carries no length.
       if (w > 30 && !gap.taken) svgEl('text', { x: x0 + w / 2, y: 9, 'text-anchor': 'middle', stroke: 'none' }, svg).textContent = `${gap.length.toFixed(1)} s`;
@@ -192,7 +223,7 @@ export function createHud(h) {
     if (hasLag) {
       const xn = x(taken.end + taken.lag);
       svgEl('line', { x1: xn, y1: 12, x2: xn, y2: 30, 'stroke-width': 2, style: 'stroke:var(--t1)' }, svg);
-      svgEl('text', { x: Math.min(296, xn), y: 39, 'text-anchor': 'end', stroke: 'none' }, svg).textContent = `Next Car ${taken.lag.toFixed(1)} s`;
+      svgEl('text', { x: Math.min(296, xn), y: 39, 'text-anchor': 'end', stroke: 'none' }, svg).textContent = COPY.taken.next(taken.lag);
     }
   }
 
@@ -221,16 +252,43 @@ export function createHud(h) {
     screens.analysis.scrollTop = 0;
   }
 
-  // Page-local toast queue over base.js's one-at-a-time notify: one verdict per toast, red first (ui.toastPlan).
-  function nextToast() {
-    clearTimeout(queue.timer);
-    if (queue.paused || !queue.items.length) return;
-    const item = queue.items.shift();
-    window._base.notify(item.title, item.kind === 'ok' ? true : item.kind === 'warn' ? 'warn' : false, () => {
-      queue.paused = true;
-      queue.onTap?.(item);
+  // The stack's rules are ui.createToastQueue's; this keeps one pill per visible toast, keyed by id, so a pill
+  // that stays never re-animates, and one timer armed at the queue's next change.
+  const pills = new Map();
+  function drawToasts() {
+    const want = new Set(toastQueue.visible.map((t) => t.id));
+    for (const [id, el] of pills) {
+      if (want.has(id)) continue;
+      pills.delete(id);
+      el.classList.add('out');
+      setTimeout(() => el.remove(), TOAST_OUT_MS);
+    }
+    toastQueue.visible.forEach((t, i) => {
+      let el = pills.get(t.id);
+      if (!el) {
+        el = document.createElement(t.kind === 'caption' ? 'div' : 'button');
+        el.className = `notif-pill ${TOAST_TONE[t.kind]}`;
+        el.textContent = t.title;
+        if (t.kind !== 'caption') {
+          el.addEventListener('click', () => {
+            const item = toastQueue.tap(t.id);
+            syncToasts();
+            if (item) toastTap?.(item);
+          });
+        }
+        pills.set(t.id, el);
+      }
+      // Moved only when out of place: re-inserting a node restarts its entry animation.
+      const ref = [...toastsEl.children].filter((c) => !c.classList.contains('out'))[i];
+      if (ref !== el) toastsEl.insertBefore(el, ref ?? null);
     });
-    queue.timer = setTimeout(nextToast, item.ms);
+    leader(leaderTarget);
+  }
+  function syncToasts() {
+    clearTimeout(toastTimer);
+    drawToasts();
+    const at = toastQueue.nextChange();
+    if (at != null) toastTimer = setTimeout(() => { toastQueue.tick(); syncToasts(); }, Math.max(0, at - performance.now()));
   }
 
   return {
@@ -250,13 +308,28 @@ export function createHud(h) {
       else delete act.dataset.tone;
     },
     chip,
+    leader,
+    // Paused covers the hint; unpausing brings that hint back with the hold it had left.
+    paused(on) {
+      if (on) {
+        const note = toastQueue.caption;
+        underPause = note && { text: note.title, timed: note.until != null, left: note.until == null ? 0 : note.until - performance.now() };
+        chip(COPY.paused);
+        return;
+      }
+      const prev = underPause;
+      underPause = null;
+      if (prev && (!prev.timed || prev.left > 0)) chip(prev.text, { holdMs: prev.left });
+      else chip(null);
+    },
+    // Keep Driving is offered only while the run can carry on from its freeze (run.canKeepDriving).
+    keepDriving(on) { $('r-keep').hidden = !on; },
     edge,
     tag,
     analysis,
-    // The mph readout only stands in for the cab's speedometer when that is out of frame; the limit always shows.
-    speed(mph, limit, showMph = true) {
-      $('mph').textContent = `${mph} mph`;
-      $('mph').classList.toggle('off', !showMph);
+    // Speed always shows beside the limit, whether or not the cab's speedometer is in frame.
+    speed(mph, limit) {
+      $('mph').textContent = COPY.mph(mph);
       $('limit-n').textContent = String(limit);
     },
     telltale(left, right) {
@@ -264,25 +337,28 @@ export function createHud(h) {
       $('ind-r').classList.toggle('on', right);
     },
     toasts(plan, onTap) {
-      queue.items.push(...plan);
-      queue.onTap = onTap;
-      if (!document.querySelector('.notif')) nextToast();
+      toastTap = onTap;
+      toastQueue.push(plan);
+      syncToasts();
     },
-    resumeToasts() { queue.paused = false; nextToast(); },
-    clearToasts() { queue.items = []; clearTimeout(queue.timer); document.querySelector('.notif')?.remove(); },
+    clearToasts() {
+      toastQueue.clear();
+      syncToasts();
+    },
     toast(msg, kind) { window._base.notify(msg, kind === 'ok' ? true : kind === 'warn' ? 'warn' : false); },
     fade(o) { $('fade').style.opacity = String(o); },
-    replayView(label) { $('r-view').textContent = label; },
+    // The view button names the view it switches to.
+    replayView(driver) { $('r-view').textContent = driver ? COPY.replay.above : COPY.replay.driver; },
     setTier(t) { segSelect($('tiers'), t); },
     setSeed(s) { $('seed').value = s; },
     setSound(on) { segSelect($('sound-seg'), on ? 'on' : 'off'); $('mute').classList.toggle('muted', !on); },
     setTips(mode) { segSelect($('tips-seg'), mode); },
     setTraffic(level) { segSelect($('traffic-seg'), level); },
     setDrill(drill) { segSelect($('drill-seg'), drill ?? ''); },
-    setReady(on) { $('start-btn').disabled = !on; $('start-btn').textContent = on ? 'Start' : 'Loading'; },
+    setReady,
     copied() {
-      $('copy-l').textContent = 'Copied';
-      setTimeout(() => { $('copy-l').textContent = 'Copy Link'; }, COPIED_MS);
+      $('copy-l').textContent = COPY.link.copied;
+      setTimeout(() => { $('copy-l').textContent = COPY.link.copy; }, COPIED_MS);
     },
   };
 }

@@ -20,12 +20,94 @@ export const wrapPi = (a) => a - TAU * Math.floor((a + Math.PI) / TAU);
 export const wrap2Pi = (a) => a - TAU * Math.floor(a / TAU);
 export const leftOf = (h) => dir(h - Math.PI / 2);
 export const mph = (v) => v * 0.44704;
+export const toMph = (v) => v / 0.44704;
 
 export const rotate = ([x, z], b) => [x * Math.cos(b) - z * Math.sin(b), x * Math.sin(b) + z * Math.cos(b)];
 export const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
 export const scale = (a, k) => [a[0] * k, a[1] * k];
 export const len = (a) => Math.hypot(a[0], a[1]);
 export const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+
+// Unit-vector helpers (leftOf above takes a heading; leftOf2 takes a unit direction).
+export const leftOf2 = (d) => [d[1], -d[0]];
+export const norm2 = (v) => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+
+/**
+ * Polylines are arrays of [x, z]. Entry kerbs run from far out toward the ring, exit kerbs from the ring out.
+ */
+export const arcLengths = (pts) => pts.reduce((acc, p, i) => (acc.push(i ? acc[i - 1] + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), acc), []);
+
+// Resamples a polyline every `step` metres: [{ p, d (unit direction), s }].
+export function resample(pts, step, from = 0) {
+  const L = arcLengths(pts);
+  const out = [];
+  let j = 0;
+  for (let s = from; s <= L[L.length - 1]; s += step) {
+    while (j < pts.length - 2 && L[j + 1] < s) j++;
+    const f = (s - L[j]) / (L[j + 1] - L[j] || 1);
+    const a = pts[j];
+    const b = pts[j + 1];
+    out.push({ p: [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f], d: norm2([b[0] - a[0], b[1] - a[1]]), s });
+  }
+  return out;
+}
+
+function onCircle(a, b, R) {
+  let lo = 0;
+  let hi = 1;
+  const inside = len(a) < R;
+  for (let k = 0; k < 30; k++) {
+    const m = (lo + hi) / 2;
+    const q = [a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m];
+    if ((len(q) < R) === inside) lo = m;
+    else hi = m;
+  }
+  return [a[0] + (b[0] - a[0]) * hi, a[1] + (b[1] - a[1]) * hi];
+}
+
+// Points of a kerb up to where it first reaches radius R (entry kerbs end inside the ring).
+export function trimIn(pts, R) {
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    if (len(pts[i]) <= R) {
+      if (i > 0) out.push(onCircle(pts[i - 1], pts[i], R));
+      return out;
+    }
+    out.push(pts[i]);
+  }
+  return out;
+}
+
+// Points of a kerb from where it first reaches radius R outward.
+export function trimOut(pts, R) {
+  for (let i = 0; i < pts.length; i++) {
+    if (len(pts[i]) >= R) return i > 0 ? [onCircle(pts[i - 1], pts[i], R), ...pts.slice(i)] : pts.slice(i);
+  }
+  return pts.slice(-1);
+}
+
+export const ARM_REACH = 650; // axial reach of the arms into the fog
+
+// Continues a kerb end straight out along the arm axis to the fog.
+export const extendOut = (p, bearing) => {
+  const u = dir(bearing);
+  const k = Math.max(0, ARM_REACH - dot(p, u));
+  return [p[0] + u[0] * k, p[1] + u[1] * k];
+};
+
+export function circle(r, n = 64) {
+  return Array.from({ length: n }, (_, i) => { const d = dir((i / n) * TAU); return [d[0] * r, d[1] * r]; });
+}
+
+export function pointInPolygon(p, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, zi] = poly[i];
+    const [xj, zj] = poly[j];
+    if ((zi > p[1]) !== (zj > p[1]) && p[0] < ((xj - xi) * (p[1] - zi)) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
+}
 
 /**
  * Segments: { kind: 'line', p0, p1 } or { kind: 'arc', c, r, a0, sweep }.
@@ -138,8 +220,11 @@ export function sAtBearing(path, bearing, fromS, toS = path.length) {
 
 /**
  * Where an other path's vehicle comes close enough to the entering section of `entry` (its give-way line to
- * `entryEnd`) to touch a vehicle on it. Returns runs [{ sFrom, sTo, sEntryMax }] along `other`: sFrom/sTo bound
- * the stretch of `other` inside the conflict area, sEntryMax is the farthest point of `entry` it touches.
+ * `entryEnd`) to touch a vehicle on it. Returns runs [{ sFrom, sTo, sEntryMin, sEntryMax }] along `other`:
+ * sFrom/sTo bound the stretch of `other` inside the conflict area, sEntryMin/sEntryMax the nearest and farthest
+ * points of `entry` it touches; pairs [[sOther, sEntryFirst, sEntryLast]] has one entry per `other` sample in the run, the
+ * first and last `entry` arc lengths that sample conflicts with (a merge runs on alongside the ring, so a run's ends alone
+ * are not enough).
  * Two paths conflict where centrelines are within `clearance` plus `reach * |sin(crossing angle)|`: a body
  * crossing at an angle sweeps its half-length sideways. Cached per path pair (geometry is immutable).
  */
@@ -158,6 +243,7 @@ export function conflictRuns(entry, other, clearance, reach) {
   const runs = [];
   let open = null;
   for (let j = o0; j <= o1; j++) {
+    let touchedMin = -1;
     let touchedMax = -1;
     for (let i = e0; i <= e1; i++) {
       const dx = other.x[j] - entry.x[i];
@@ -165,11 +251,16 @@ export function conflictRuns(entry, other, clearance, reach) {
       const d2 = dx * dx + dz * dz;
       if (d2 >= far) continue;
       const c = clearance + reach * Math.abs(Math.sin(other.heading[j] - entry.heading[i]));
-      if (d2 < c * c) touchedMax = i;
+      if (d2 < c * c) {
+        if (touchedMin < 0) touchedMin = i;
+        touchedMax = i;
+      }
     }
     if (touchedMax >= 0) {
-      if (!open) open = { sFrom: other.s[j], sTo: other.s[j], sEntryMax: entry.s[touchedMax] };
+      if (!open) open = { sFrom: other.s[j], sTo: other.s[j], sEntryMin: entry.s[touchedMin], sEntryMax: entry.s[touchedMax], pairs: [] };
       open.sTo = other.s[j];
+      open.sEntryMin = Math.min(open.sEntryMin, entry.s[touchedMin]);
+      open.pairs.push([other.s[j], entry.s[touchedMin], entry.s[touchedMax]]);
       open.sEntryMax = Math.max(open.sEntryMax, entry.s[touchedMax]);
     } else if (open) {
       runs.push(open);

@@ -10,7 +10,7 @@
  *   guide.dispose()
  *
  * Cue: { t, kind, topic?, text?, focusId?, focusPoint?, signCode?, hcRef?, holdMs?, advice? }
- *   caption  text to show (Title Case, <= ~70 chars); at most one every CAPTION_GAP seconds
+ *   caption  text to show (Title Case, one pill line: <= CAPTION_MAX chars); at most one every CAPTION_GAP seconds
  *   focus    look at and highlight focusId (a vehicle in this state) or focusPoint { x, z } (world metres)
  *   slow     brief slow motion for holdMs at a key moment (the guide's taps, a liar callout)
  *   go       the guide's Go tap: call judgeGo(...) then player.go(), exactly as for a human tap (watch)
@@ -19,7 +19,8 @@
  *            go: 'safe' | 'tight' | 'unsafe' | null   judgeGo now, while the Go window is open
  *            exit: 'early' | 'ok' | 'late' | null     judgeExit now, on the ring with an exit decision
  *            cueId: the vehicle behind a non-safe value (judge culprit), else null
- *            A new value must hold ADVICE_HOLD seconds before it is sent, except a switch to unsafe/early,
+ *            A new value must hold ADVICE_HOLD seconds before it is sent, except a switch away from
+ *            safe/ok (green never outlives judgeGo/judgeExit saying ok) or to unsafe/early,
  *            which is sent at once. Keep the latest advice until the next advice cue replaces it.
  *   topic    what a caption or focus is about: 'route' | 'sign' | 'lane' | 'signal' | 'lookRight' | 'lookAhead'
  *            | 'farCar' | 'blocker' | 'liar' | 'traffic' | 'go' | 'ring' | 'exit'
@@ -31,16 +32,14 @@
  * which beat lane advice. The guide only taps when the judge would say 'ok' with margin to spare, and every
  * caption describes the state it was emitted with: signals, wheels and true paths come from the sim.
  */
-import { assessEntry, entryConflicts } from './kinematics.js';
-import { judgeGo, judgeExit, previousExitS, vehicleName, wheelsOf, TIGHT_GAP, CLEAR_GAP } from './judge.js';
-import { directionOf } from './gen.js';
-import { indexAt, wrap2Pi, wrapPi, dir } from './geom.js';
+import { entryConflicts, CREEP_DISTANCE } from './kinematics.js';
+import { goAssessment, judgeGo, judgeExit, previousExitS, queuedBehind, vehicleName, TIGHT_GAP, CLEAR_GAP } from './judge.js';
+import { indexAt, wrapPi, dir } from './geom.js';
 import { LARGE_TYPES } from './traffic-data.js';
-import { CREEP_DISTANCE } from './player.js';
 
 export const CAPTION_GAP = 1.2; // s between captions
 const CAPTION_HOLD = 1800; // ms a caption stays up
-const SLOW_HOLD = 700;
+export const SLOW_HOLD = 2000; // ms (wall clock) of slow motion at a key moment; its caption stays up as long
 const GO_MARGIN = 0.5; // s beyond the critical gap the guide insists on
 const GO_DECEL = 0.5; // m/s^2: the most any circulating driver may need to ease off for the guide
 const PATIENCE = 25; // s at the line before the guide settles for any 'ok' gap with no margin
@@ -54,7 +53,7 @@ const GO_ADVICE = { ok: 'safe', tight: 'tight', unsafe: 'unsafe', notAllowed: 'u
 const EXIT_ADVICE = { ok: 'ok', lateSignal: 'late', late: 'late', early: 'early', alongside: 'early' };
 
 // Distance bands (metres before the stop point) for the approach looks.
-export const BANDS = {
+const BANDS = {
   sign: [8, 45], // a sign is read while it is this far ahead
   lane: [35, 58],
   giveWay: [30, 44],
@@ -65,65 +64,69 @@ export const BANDS = {
 
 const PRIORITY = { safety: 50, blocker: 40, farCar: 35, lookRight: 30, sign: 20, lane: 10, route: 5 };
 
-// Site Title Case: every word capitalised except these minor words, which stay lowercase unless first or last.
+// Site Title Case: every word capitalised except these minor words, which stay lowercase unless they open a
+// phrase (the string, or after . : ! or ?) or close one (the string's end, or right before punctuation: with
+// no object a preposition is a particle, as in "Wheels In,"). Other letters are kept, so 'HC' stays 'HC'.
 export const MINOR_WORDS = new Set(['a', 'an', 'the', 'and', 'or', 'nor', 'but', 'of', 'in', 'on', 'at', 'to', 'for', 'by', 'per', 'as', 'via', 'from']);
+const OPENS_AFTER = /[.:!?]$/;
+const CLOSES = /[.,;:!?)]$/;
 export function titleCase(s) {
   const words = s.split(' ');
   return words.map((w, i) => {
     const core = w.replace(/^[^A-Za-z0-9']+|[^A-Za-z0-9']+$/g, '');
     if (!core) return w;
-    const minor = i > 0 && i < words.length - 1 && MINOR_WORDS.has(core.toLowerCase());
+    const edge = i === 0 || i === words.length - 1 || OPENS_AFTER.test(words[i - 1]) || CLOSES.test(w);
+    const minor = !edge && MINOR_WORDS.has(core.toLowerCase());
     return w.replace(core, minor ? core.toLowerCase() : core[0].toUpperCase() + core.slice(1));
   }).join(' ');
 }
 const nameOf = (v) => titleCase(vehicleName(v));
 
-// No Go (and no Go advice) while queued: a vehicle ahead in the same entry lane has not crossed its line yet.
-const queuedBehind = (state, me) => state.vehicles.some((w) => !w.isPlayer && w.path.arm === me.path.arm
-  && w.path.lane === me.path.lane && w.s > me.s && w.s - w.length / 2 < w.path.marks.giveWay);
 const SIGNAL_WORDS = { left: 'Signal Left', right: 'Signal Right' };
-const WHEEL_WORDS = { in: 'In', out: 'Out', straight: 'Straight' };
-const DIRECTION_WORDS = { left: 'On Your Left', ahead: 'Straight Ahead', right: 'On Your Right' };
-const FROM_WORDS = { left: 'From The Left', ahead: 'From Ahead', right: 'From The Right' };
+const DIRECTION_WORDS = { left: 'on Your Left', ahead: 'Straight Ahead', right: 'on Your Right' };
 const LANE_NAMES = { 1: ['Single'], 2: ['Left', 'Right'], 3: ['Left', 'Middle', 'Right'] };
 
-// All guide copy. Each entry takes the facts it states.
+// All guide copy, written in site Title Case (caption() still normalises names and words filled in). Each
+// caption is one pill line: at most CAPTION_MAX characters with the longest names filled in ("Orange Estate",
+// the longest road and destination), which tests/test-roundabout-guide.js checks.
+// Each entry takes the facts it states.
+export const CAPTION_MAX = 40;
 export const COPY = {
-  route: (n, road, dest) => `Exit ${n}: ${road} For ${dest}`,
+  route: (n, road) => `Exit ${n}: ${road}`,
   limit: (mph) => `${mph} Limit`,
   roundaboutAhead: () => 'Roundabout Ahead',
-  mapSign: (n, dest, lane) => `Map Sign: Exit ${n} ${dest}, ${lane === 'Single' ? 'One Lane' : `${lane} Lane`}`,
-  giveWay: () => 'Give Way To Traffic From The Right',
-  miniGiveWay: () => 'Mini Roundabout: Give Way To The Right',
+  mapSign: (n, dest, lane) => `Map: Exit ${n} ${dest}, ${lane === 'Single' ? 'One Lane' : `${lane} Lane`}`,
+  giveWay: () => 'Give Way to Traffic from the Right',
+  miniGiveWay: () => 'Mini Roundabout: Give Way to the Right',
   singleLane: (n, dir) => `Single Lane In: Exit ${n} Is ${DIRECTION_WORDS[dir]}`,
   clockLane: (n, dir, lane) => `Exit ${n} Is ${DIRECTION_WORDS[dir]}: ${lane} Lane`,
-  arrowLane: (n, lane) => `Arrows Show The ${lane} Lane For Exit ${n}`,
-  signalLeft: () => 'Signal Left As You Approach',
-  signalRight: () => 'Signal Right As You Approach',
-  noSignal: () => 'Straight On: No Signal On Approach',
-  lookRight: () => 'Look Right: Traffic From The Right Has Priority',
-  farHonest: (name, from) => `${name} ${from} Signalling Right: It Will Come Past You`,
-  farLeaving: (name, wheels) => `${name}: Signal Right, Wheels ${wheels}, Leaving Before You`,
-  farLiar: (name, from, wheels) => `${name} ${from}: Left Signal, Wheels ${wheels}, Still Coming`,
-  waitFor: (name, signal, wheels) => `${name}: ${signal}, Wheels ${wheels}, Coming Round. Wait.`,
-  liar: (name) => `Left Signal, But ${name} Is Coming Round. Don't Trust It.`,
-  blocker: (name) => `Blocker: ${name} Joining From The Right Holds Traffic Back`,
-  crossing: (name) => `${name} Is Crossing Your Entry. Wait.`,
-  turningIn: (name) => `${name} Is Turning Into Your Road. Wait.`,
-  stopped: (name) => `${name} Is Stopped In Your Way. Wait.`,
+  arrowLane: (n, lane) => `Arrows Show the ${lane} Lane for Exit ${n}`,
+  signalLeft: () => 'Signal Left as You Approach',
+  signalRight: () => 'Signal Right as You Approach',
+  noSignal: () => 'Straight On: No Signal on Approach',
+  lookRight: () => 'Look Right: Right Has Priority',
+  farHonest: (name) => `${name}: Signal Right, Coming Past`,
+  farLeaving: (name) => `${name}: Turning Off Before You`,
+  farLiar: (name) => `${name}: Left Signal, Still Coming`,
+  waitFor: (name, signal) => `${name}: ${signal}, Comes Round`,
+  liar: (name) => `Don't Trust ${name}'s Left Signal`,
+  blocker: (name) => `Blocker: ${name} Holds Traffic`,
+  crossing: (name) => `${name} Crossing Your Entry: Wait`,
+  turningIn: (name) => `${name} Turning Into Your Road`,
+  stopped: (name) => `${name} Stopped in Your Way: Wait`,
   large: (type) => `${type} Alongside: Give It Room`,
   lookAhead: () => 'Check Ahead: Your Entry Is Clear',
-  goAfter: (name) => `Back Right: Gap After The ${name} Is Clear. Go.`,
+  goAfter: (name) => `Back Right: Gap After ${name}. Go.`,
   goClear: () => 'Back Right: Clear. Go.',
   // Guided: the learner makes the call.
-  gapAfter: (name) => `Back Right: Gap After The ${name} Is Clear`,
+  gapAfter: (name) => `Back Right: Gap After ${name}`,
   gapClear: () => 'Back Right: Clear',
-  firstExit: () => 'First Exit: Keep Signalling Left And Leave',
+  firstExit: () => 'First Exit: Keep Signalling Left',
   passing: (k, dest) => `Passing Exit ${k} (${dest})`,
   exitNext: (n) => `Exit ${n} Next: Mirror, Signal Left`,
-  alongside: (name) => `${name} On Your Left: Hold Your Lane`,
+  alongside: (name) => `${name} Alongside: Hold Your Lane`,
   missed: () => 'Missed It: Go Round Again, Never Swerve',
-  exited: (n, road) => `Off At Exit ${n}: ${road}`,
+  exited: (n, road) => `Off at Exit ${n}: ${road}`,
 };
 
 const SIGN_ORDER = ['limit', '510', 'map', '602', '611.1'];
@@ -188,6 +191,12 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
     if (focusPoint) push({ kind: 'focus', topic, focusPoint, ...(signCode ? { signCode } : {}) });
     return true;
   }
+  // Slow motion for the moment just captioned: that caption stays up for the whole slow span.
+  function slow() {
+    const cap = cues.findLast((c) => c.kind === 'caption');
+    if (cap) cap.holdMs = Math.max(cap.holdMs, SLOW_HOLD);
+    push({ kind: 'slow', holdMs: SLOW_HOLD });
+  }
   // Highest-priority candidate gets the caption slot; one-offs are remembered by key.
   function best(candidates) {
     if (!captionFree() || !candidates.length) return null;
@@ -219,7 +228,7 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
   function approachCandidates(me, d) {
     const out = [];
     const inBand = (x, [lo, hi]) => x >= lo && x <= hi;
-    if (!said.has('route') && d > BANDS.lane[1]) out.push({ key: 'route', topic: 'route', priority: PRIORITY.route, text: COPY.route(pl.exitNumber, target.name, target.destination) });
+    if (!said.has('route') && d > BANDS.lane[1]) out.push({ key: 'route', topic: 'route', priority: PRIORITY.route, text: COPY.route(pl.exitNumber, target.name) });
     for (const sign of signs) {
       const key = 'sign:' + sign.code;
       const band = sign.code === '602' || sign.code === '611.1' ? BANDS.giveWay : BANDS.sign;
@@ -262,10 +271,7 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
       // A left signal is worth naming only when it lies: the car keeps coming round past the player's road.
       if (w.indicator === 'left' && (!comes || w.path.exitArm === pl.arm)) continue;
       const armsAway = (w.path.arm - pl.arm + nArms) % nArms; // further clockwise from us = read first
-      const from = FROM_WORDS[directionOf(wrap2Pi(layout.arms[w.path.arm].bearing - entry.bearing))];
-      const wheels = WHEEL_WORDS[wheelsOf(w)];
-      const text = w.indicator === 'left' ? COPY.farLiar(nameOf(w), from, wheels)
-        : comes ? COPY.farHonest(nameOf(w), from) : COPY.farLeaving(nameOf(w), wheels);
+      const text = w.indicator === 'left' ? COPY.farLiar(nameOf(w)) : comes ? COPY.farHonest(nameOf(w)) : COPY.farLeaving(nameOf(w));
       out.push({ key: 'far:' + w.id, topic: 'farCar', priority: PRIORITY.farCar + armsAway * 0.1, text, hcRef: 'HC 185', focusId: w.id });
     }
     return out;
@@ -309,7 +315,7 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
       if (o.path.exitArm === pl.arm) return { car: o, text: COPY.turningIn(nameOf(o)) };
       return {
         car: o, liar: o.indicator === 'left' && close.eta < LIAR_HORIZON,
-        text: COPY.waitFor(nameOf(o), SIGNAL_WORDS[o.indicator] ?? 'No Signal', WHEEL_WORDS[wheelsOf(o)]),
+        text: COPY.waitFor(nameOf(o), SIGNAL_WORDS[o.indicator] ?? 'No Signal'),
       };
     }
     if (verdict === 'notAllowed') {
@@ -324,9 +330,8 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
     if (!scanning) return [];
     const canGo = !queuedBehind(state, me) && (phase === 'waiting' || (phase === 'approach' && d < ROLL_IN));
     if (canGo && waitingSince === null) waitingSince = t;
-    const others = state.vehicles.filter((w) => !w.isPlayer && (w.inRing || w.committed));
-    const list = assessEntry(me, others);
-    const tLine = Math.max(0, me.stopS - me.s) / Math.max(me.v, 2);
+    // The judge's own view of this Go (a vehicle passing in front is already left out), so advice and verdict agree.
+    const { list, tLine } = goAssessment(state);
     const minGap = waitingSince !== null && t - waitingSince > PATIENCE ? TIGHT_GAP : TIGHT_GAP + GO_MARGIN;
     const h = holdUp(state, me, list, tLine, minGap);
     const out = [];
@@ -334,7 +339,7 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
     if (h?.liar && !said.has('liar:' + h.car.id)) {
       out.push({
         key: 'liar:' + h.car.id, topic: 'liar', priority: PRIORITY.safety + 1, text: COPY.liar(nameOf(h.car)), hcRef: 'HC 185', focusId: h.car.id,
-        after: () => { lastBlockerId = h.car.id; push({ kind: 'slow', holdMs: SLOW_HOLD }); },
+        after: () => { lastBlockerId = h.car.id; slow(); },
       });
     } else if (h?.car && h.text && h.car.id + '|' + h.text !== narrated) {
       const key = h.car.id + '|' + h.text;
@@ -361,7 +366,7 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
           },
           after: () => {
             if (!watch) return;
-            push({ kind: 'slow', holdMs: SLOW_HOLD });
+            slow();
             push({ kind: 'go' });
             wentAt = t;
           },
@@ -408,7 +413,7 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
         return;
       }
       caption(COPY.exitNext(pl.exitNumber), { topic: 'exit', hcRef: 'HC 186', focusPoint: { x: p.x[i], z: p.z[i] } });
-      push({ kind: 'slow', holdMs: SLOW_HOLD });
+      slow();
       push({ kind: 'exit' });
       exitTapped = true;
     } else if (v.verdict === 'alongside' && !said.has('along:' + v.culpritId)) {
@@ -436,7 +441,10 @@ export function createGuide(layout, { tier, mode = 'watch' } = {}) {
     }
     if (sameAdvice(raw, advice)) { pending = null; return; }
     if (!pending || !sameAdvice(pending.advice, raw)) pending = { advice: raw, since: t };
-    if (raw.go === 'unsafe' || raw.exit === 'early' || t - pending.since >= ADVICE_HOLD - 1e-9) {
+    // Green never outlives the verdict: leaving safe/ok is sent at once, like a switch to unsafe/early; only a
+    // change towards green (or between cautions) waits, so a tap on green is always judged ok.
+    const leavesGreen = advice.go === 'safe' || advice.exit === 'ok';
+    if (leavesGreen || raw.go === 'unsafe' || raw.exit === 'early' || t - pending.since >= ADVICE_HOLD - 1e-9) {
       advice = raw;
       pending = null;
       push({ kind: 'advice', advice });

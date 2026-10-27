@@ -16,13 +16,12 @@
  * Frame: geom.js (x east, z south, compass bearings, clockwise positive).
  */
 import { createRng } from './rng.js';
-import { TAU, dir, bearingOf, wrap2Pi, dot, len, corners, quadsOverlap } from './geom.js';
+import { TAU, dir, bearingOf, wrap2Pi, dot, len, corners, quadsOverlap, leftOf2, norm2, resample, trimIn, trimOut, extendOut, pointInPolygon } from './geom.js';
 
 export const PAVEMENT = 2.2;
-const FAR = 650; // axial reach of the arms into the fog
 
 // Per-tier recipe. Counts are at high quality; QUALITY scales the optional and distant parts first.
-export const RECIPES = {
+const RECIPES = {
   mini: {
     frontage: { kinds: { cottage: 1 }, gap: [5, 16], skip: 0.3, setback: [9, 14], reach: 130 },
     avenue: { spacing: [15, 24], chance: 0.45, kinds: { tree: 5, birch: 3, pine: 1 } },
@@ -66,68 +65,8 @@ const NEAR = 55; // metres beyond the ring where verge detail (tufts) stops
 const FOG_LINE = 270; // beyond this from the centre the fog has swallowed everything
 const SPLAY_BACK = 15; // CD 116: visibility to the right is measured from 15 m back from the give-way line
 
-// ---------- polylines ----------
-
-export const leftOf2 = (d) => [d[1], -d[0]];
-export const norm2 = (v) => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
-export const arcLengths = (pts) => pts.reduce((acc, p, i) => (acc.push(i ? acc[i - 1] + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), acc), []);
-
-// Resamples a polyline every `step` metres: [{ p, d (unit direction), s }].
-export function resample(pts, step, from = 0) {
-  const L = arcLengths(pts);
-  const out = [];
-  let j = 0;
-  for (let s = from; s <= L[L.length - 1]; s += step) {
-    while (j < pts.length - 2 && L[j + 1] < s) j++;
-    const f = (s - L[j]) / (L[j + 1] - L[j] || 1);
-    const a = pts[j];
-    const b = pts[j + 1];
-    out.push({ p: [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f], d: norm2([b[0] - a[0], b[1] - a[1]]), s });
-  }
-  return out;
-}
-
-function onCircle(a, b, R) {
-  let lo = 0;
-  let hi = 1;
-  const inside = len(a) < R;
-  for (let k = 0; k < 30; k++) {
-    const m = (lo + hi) / 2;
-    const q = [a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m];
-    if ((len(q) < R) === inside) lo = m;
-    else hi = m;
-  }
-  return [a[0] + (b[0] - a[0]) * hi, a[1] + (b[1] - a[1]) * hi];
-}
-
-// Points of a kerb up to where it first reaches radius R (entry kerbs end inside the ring).
-export function trimIn(pts, R) {
-  const out = [];
-  for (let i = 0; i < pts.length; i++) {
-    if (len(pts[i]) <= R) {
-      if (i > 0) out.push(onCircle(pts[i - 1], pts[i], R));
-      return out;
-    }
-    out.push(pts[i]);
-  }
-  return out;
-}
-export function trimOut(pts, R) {
-  for (let i = 0; i < pts.length; i++) {
-    if (len(pts[i]) >= R) return [i > 0 ? onCircle(pts[i - 1], pts[i], R) : pts[i], ...pts.slice(i + 1)];
-  }
-  return pts.slice(-1);
-}
-
-// Continues a kerb end straight out along the arm axis to the fog.
-export const extendOut = (p, bearing) => {
-  const u = dir(bearing);
-  const k = Math.max(0, FAR - dot(p, u));
-  return [p[0] + u[0] * k, p[1] + u[1] * k];
-};
-
 // Interior points of the clockwise arc at radius R from bearing b0 to b1.
-export function arcPoints(R, b0, b1, step = 1) {
+function arcPoints(R, b0, b1, step = 1) {
   const sweep = wrap2Pi(b1 - b0);
   const n = Math.max(1, Math.ceil((sweep * R) / step));
   const out = [];
@@ -136,10 +75,6 @@ export function arcPoints(R, b0, b1, step = 1) {
     out.push([d[0] * R, d[1] * R]);
   }
   return out;
-}
-
-export function circle(r, n = 64) {
-  return Array.from({ length: n }, (_, i) => { const d = dir((i / n) * TAU); return [d[0] * r, d[1] * r]; });
 }
 
 // Land between arm i (its entry side) and arm i+1 (its exit side), traced with the land on the LEFT.
@@ -206,16 +141,6 @@ function segmentIndex(lines, cell = 8) {
     return best;
   }
   return { nearest };
-}
-
-function pointInPolygon(p, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const a = poly[i];
-    const b = poly[j];
-    if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]) inside = !inside;
-  }
-  return inside;
 }
 
 function distToSegment(p, a, b) {

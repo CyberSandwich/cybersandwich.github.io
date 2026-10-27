@@ -16,8 +16,8 @@ import * as THREE from 'three';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { loadGlb, flatten, cluster } from './gltf.js';
 import { createRng } from './rng.js';
-import { TAU, dir, dot } from './geom.js';
-import { placeScenery, boundaries, resample, leftOf2, norm2, arcLengths, trimIn, trimOut, extendOut, circle, PAVEMENT } from './scenery.js';
+import { TAU, dir, dot, resample, leftOf2, norm2, arcLengths, trimIn, trimOut, extendOut, circle } from './geom.js';
+import { placeScenery, boundaries, PAVEMENT } from './scenery.js';
 import { giveWayBars } from './markings.js';
 import { blobTexture } from './vehicles.js';
 
@@ -25,18 +25,18 @@ export const PALETTES = {
   light: {
     skyTop: '#86a8c6', skyHorizon: '#dde4ea', skyBottom: '#b9c0b4', fogDensity: 0.0062,
     sun: '#fff3e0', sunI: 2.2, sunDir: [-0.45, 0.8, 0.4], hemiSky: '#e3ebf3', hemiGround: '#5f6650', hemiI: 1.15,
-    envI: 0.55, shadow: 0.36, leds: 0, exposure: 1.0,
+    envI: 0.55, shadow: 0.36, leds: 0, exposure: 1.0, cabFill: 0,
   },
   // Dusk, not night: low warm sun and a bright blue-grey sky fill, so kerbs, markings and paint still read.
   dark: {
     skyTop: '#1d2840', skyHorizon: '#616a7e', skyBottom: '#34363b', fogDensity: 0.006,
-    sun: '#ffbf8a', sunI: 1.4, sunDir: [0.7, 0.22, 0.5], hemiSky: '#9aa3b6', hemiGround: '#575449', hemiI: 2.2,
-    envI: 0.6, shadow: 0.45, leds: 2.2, exposure: 1.5,
+    sun: '#ffbf8a', sunI: 1.4, sunDir: [0.7, 0.22, 0.5], hemiSky: '#9aa3b6', hemiGround: '#575449', hemiI: 2.7,
+    envI: 0.6, shadow: 0.45, leds: 2.2, exposure: 1.5, cabFill: 0.35,
   },
   sepia: {
     skyTop: '#b49e7a', skyHorizon: '#eedcbf', skyBottom: '#c2b08f', fogDensity: 0.0068,
     sun: '#ffd49a', sunI: 2.3, sunDir: [0.6, 0.45, 0.55], hemiSky: '#f1e1c3', hemiGround: '#6b5a40', hemiI: 1.0,
-    envI: 0.5, shadow: 0.34, leds: 0, exposure: 1.0,
+    envI: 0.5, shadow: 0.34, leds: 0, exposure: 1.0, cabFill: 0,
   },
 };
 
@@ -1217,7 +1217,7 @@ export function buildWorld(layout, { base }) {
     palette = p;
     setLens();
     treeShadowMat.opacity = p.shadow * 0.75;
-    routeMat.color.set(getComputedStyle(document.documentElement).getPropertyValue('--rb-route').trim() || '#2A9D8F');
+    routeMat.color.set(getComputedStyle(document.documentElement).getPropertyValue('--rb-route').trim());
   }
 
   // Per frame, before render: refill every scenery set with what this camera sees, near or stand-in.

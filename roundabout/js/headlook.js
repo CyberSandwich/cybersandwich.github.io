@@ -19,10 +19,14 @@
  *   rightGaze(pointYaw, mirrorYaw, pov) -> head yaw for a right look at circulating traffic
  *
  *   const look = createHeadLook({ gentle })
- *   look.update(input, dt) -> { yaw, pitch, rate, key, zoom }   target view, how fast to ease to it (1/s), and
- *                                                              camera zoom (1 except mirror glances, LOOK.mirrorZoom)
+ *   look.update(input, dt) -> { yaw, pitch, rate, key, zoom }   target view, the spring frequency to ease to it
+ *                                                              (1/s, for easeTo), and camera zoom (1 except
+ *                                                              the interior and left wing glances, LOOK.mirrorZoom)
+ *   easeTo(s, to, w, dt) -> s         one critically damped step of s = { x, v } in place; head yaw, pitch and
+ *                                      the mirror zoom all ease with it
  *   look.mirrors()         start the mirror-signal glances (interior, left wing, then the exit)
- *   look.reset()
+ *   look.reset()           at the start of every run (cockpit.resetLook); the only reset: a drive-less gap
+ *                          mid-run (replay) keeps the scan where it was
  *   input = { phase, dist, goWindowOpen, steer, pov, focus?, points: { right, ahead, left, exit },
  *             signs: [{ id, dist, yaw, pitch }], mirrors: { rear, left, right } }
  *     phase: player phase or null (not driving); dist: m to the stop line; points/mirrors: views (aim()) or null.
@@ -74,15 +78,22 @@ export const FRAME = {
 
 export const LOOK = {
   signRead: [12, 38], // m ahead of the eye where a sign gets its one glance
-  signHold: 0.6, // s
+  signHold: 1.1, // s
   armsAt: 50, // m to the line: one look at the ahead and left arms, before the right scan
-  armHold: 0.45,
+  armHold: 1.0,
   rightAt: 28, // m to the line: scanning right starts here or when the Go window opens
-  rightHolds: [1.6, 1.3, 1.8, 1.2, 1.5], // s, cycled so the rhythm is not a metronome
-  checkHold: 0.5, // s, the brief ahead (rolling) or ahead/left (at the line) check between right looks
-  mirrorHolds: [0.5, 0.7, 0.8], // s: interior mirror, left wing mirror, toward the exit
+  // The line scan is right (hold), left (brief), right (hold): right looks alternate a hold and a longer hold
+  // with a calm pause in it, so a long wait repeats the three beats and never ping-pongs.
+  rightHolds: [2.4, 3.8, 2.6, 4.2], // s, cycled so the rhythm is not a metronome
+  leftHold: 1.0, // s, the brief left check between right looks
+  leftMax: 0.7, // rad: the left check turns no further than this; the left arm is still in the frame
+  goRightHold: 0.7, // s: the last right look as the car pulls away, when Go came while the head was not right
+  // s: interior mirror, left wing mirror, toward the exit. The first two fit the shortest leaving phase (~1.6 s
+  // on a first exit), so the exit glance always comes before the ring is left.
+  mirrorHolds: [0.65, 0.75, 1.0],
   focusHold: 2.2, // s a guided focus holds unless renewed
-  focusRight: 0.2, // rad: a focus this far right of ahead counts as "on the right" and may break the line scan
+  focusRight: 0.2, // rad: a focus this far right of ahead counts as "on the right" and aims the line scan's right holds
+  focusRetarget: 1.5, // s: at the line a right focus re-aims the held pose at most this often
   rightScreenX: 0.3, // NDC where a right look puts the upstream point: room for traffic beyond it
   rightEdgeX: 0.45, // NDC the point may drift to so the right wing mirror stays in the frame
   mirrorEdgeX: 0.9, // NDC a mirror's far edge may reach
@@ -90,12 +101,26 @@ export const LOOK = {
   exitAhead: 8, // m past where the path leaves the ring: the exit glance's point
   leadDistance: 10, // m: the curve look-ahead
   leadMax: 0.5, // rad, leading left; leading right stops at FRAME.rearYawSlack
-  rate: { glance: 9, settle: 12, drift: 3 }, // 1/s exponential ease: 9 lands a glance in ~330 ms
-  gentle: 0.55, // reduced motion: same glances, slower ease
+  // Natural frequency (1/s) of the critically damped head spring (easeTo): w lands a glance 95% in 4.74 / w s
+  // with no velocity jump; peak speed is w * swing / e. Fast eases cause headaches.
+  // mirror: the small, quick mirror-signal glances (they must fit the leaving phase).
+  rate: { glance: 3.6, settle: 4.2, drift: 2, mirror: 5 },
+  gentle: 0.7, // reduced motion: same glances, softer spring
   // Camera zoom during the interior and left wing mirror glances, so a true-size glass can be read on a phone.
-  // 1 = off (the default: the owner finds view changes tiring); ~1.6 is the tested candidate.
-  mirrorZoom: 1,
+  mirrorZoom: 1.6,
 };
+
+// One step of a critically damped spring s = { x, v } toward `to` at natural frequency w, in place (the cab runs
+// it every frame). Exact for any dt, so it never overshoots or goes unstable on a slow frame; v stays continuous
+// when `to` jumps.
+export function easeTo(s, to, w, dt) {
+  const d = s.x - to;
+  const c = s.v + w * d;
+  const e = Math.exp(-w * dt);
+  s.x = to + (d + c * dt) * e;
+  s.v = (s.v - w * c * dt) * e;
+  return s;
+}
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const smooth = (a, b, v) => {
@@ -311,6 +336,9 @@ export function createHeadLook({ gentle = false } = {}) {
   let msmAt = null;
   let glance = null; // { key, until, next? }
   let armsDone = false;
+  let lastOnRight = false; // the last output looked right (a right look or a right focus)
+  let lastRightUntil = 0; // the pull-away right look runs until this t
+  let focusPose = null; // { yaw, pitch, at }: the latched right-hold pose of a focus at the line
   const signsDone = new Set();
   const k = gentle ? LOOK.gentle : 1;
 
@@ -321,23 +349,29 @@ export function createHeadLook({ gentle = false } = {}) {
     msmAt = null;
     glance = null;
     armsDone = false;
+    lastOnRight = false;
+    lastRightUntil = 0;
+    focusPose = null;
     signsDone.clear();
   }
 
-  const out = (view, rate, key) => ({
-    yaw: view?.yaw ?? 0, pitch: view?.pitch ?? 0, rate: rate * k, key,
-    zoom: key === 'rear' || key === 'leftWing' ? LOOK.mirrorZoom : 1,
-  });
+  const out = (view, rate, key) => {
+    const yaw = view?.yaw ?? 0;
+    lastOnRight = key === 'right' || (key === 'focus' && yaw <= -LOOK.focusRight);
+    return {
+      yaw, pitch: view?.pitch ?? 0, rate: rate * k, key,
+      zoom: key === 'rear' || key === 'leftWing' ? LOOK.mirrorZoom : 1,
+    };
+  };
 
-  // Which beat of the right rhythm `since` seconds into the scan falls in.
-  function rhythm(since, waiting) {
+  // Which beat of the line scan `since` seconds into it falls in: right holds with brief left checks between.
+  function rhythm(since) {
     const n = LOOK.rightHolds.length;
     for (let i = 0, at = 0; ; i++) {
-      const r = LOOK.rightHolds[i % n];
-      if (since < at + r) return 'right';
-      at += r;
-      if (since < at + LOOK.checkHold) return waiting && i % 2 ? 'left' : 'ahead';
-      at += LOOK.checkHold;
+      at += LOOK.rightHolds[i % n];
+      if (since < at) return 'right';
+      at += LOOK.leftHold;
+      if (since < at) return 'left';
     }
   }
 
@@ -348,7 +382,10 @@ export function createHeadLook({ gentle = false } = {}) {
       return { yaw: rightGaze(p.right.yaw, input.mirrors.right?.yaw ?? null, input.pov), pitch: 0 };
     }
     if (key === 'ahead') return p.ahead ?? { yaw: 0, pitch: 0 };
-    if (key === 'left') return p.left ?? p.ahead ?? { yaw: 0, pitch: 0 };
+    if (key === 'left') {
+      const v = p.left ?? p.ahead ?? { yaw: 0, pitch: 0 };
+      return v.yaw > LOOK.leftMax ? { yaw: LOOK.leftMax, pitch: v.pitch } : v;
+    }
     if (key === 'rear' || key === 'leftWing') return input.mirrors[key === 'rear' ? 'rear' : 'left'];
     if (key === 'exit') return p.exit;
     if (key.startsWith('sign:')) return input.signs.find((s) => 'sign:' + s.id === key) ?? null;
@@ -357,13 +394,11 @@ export function createHeadLook({ gentle = false } = {}) {
 
   function update(input, dt) {
     t += dt;
+    // Only reset() starts a run over: phase null mid-run (a replay at the line) must not replay the arms check.
     if (input.phase !== phase) {
       if (input.phase === 'leaving' && (msmAt === null || t - msmAt > 1)) msmAt = t;
-      if (input.phase === 'approach' || input.phase === null) {
-        scanAt = null;
-        armsDone = false;
-        signsDone.clear();
-      }
+      // Go is the player's and may come mid left check: a driver always takes a last look right moving off.
+      lastRightUntil = input.phase === 'going' && !lastOnRight ? t + LOOK.goRightHold : 0;
       phase = input.phase;
       glance = null;
     }
@@ -375,12 +410,16 @@ export function createHeadLook({ gentle = false } = {}) {
       const s = t - msmAt;
       const key = s < a ? 'rear' : s < a + b ? 'leftWing' : s < a + b + c ? 'exit' : null;
       const v = key && target(key, input);
-      if (v) return out(v, LOOK.rate.glance, key);
+      if (v) return out(v, key === 'exit' ? LOOK.rate.glance : LOOK.rate.mirror, key);
       if (!key) msmAt = null;
     }
-    // While scanning at the line the right rhythm outranks a focus that is not itself on the right.
-    const scanning = (phase === 'approach' || phase === 'waiting') && scanAt !== null;
-    if (input.focus && !(scanning && input.focus.yaw > -LOOK.focusRight)) return out(input.focus, LOOK.rate.glance, 'focus');
+    // While scanning, the rhythm owns the head: a focus only aims the right holds (see the scan below). The scan
+    // starts on distance or the Go window alone, so a focus running then cannot postpone it.
+    const approaching = phase === 'approach' || phase === 'waiting';
+    if (approaching && scanAt === null && (input.dist <= LOOK.rightAt || input.goWindowOpen || phase === 'waiting')) scanAt = t;
+    const scanning = approaching && scanAt !== null;
+    if (!input.focus) focusPose = null;
+    else if (!scanning) return out(input.focus, LOOK.rate.glance, 'focus');
     // After the mirror glances the head stays on the way out until the car has left the ring.
     if (phase === 'leaving' && input.points.exit) return out(input.points.exit, LOOK.rate.drift, 'exit');
 
@@ -402,9 +441,14 @@ export function createHeadLook({ gentle = false } = {}) {
         glance = { key: 'ahead', until: t + LOOK.armHold, next: twoArms ? 'left' : null };
         return out(target('ahead', input), LOOK.rate.glance, 'ahead');
       }
-      if (scanAt === null && (input.dist <= LOOK.rightAt || input.goWindowOpen || phase === 'waiting')) scanAt = t;
-      if (scanAt !== null) {
-        const key = rhythm(t - scanAt, phase === 'waiting');
+      if (scanning) {
+        const key = rhythm(t - scanAt);
+        // A focus on the right holds one pose, re-aimed at most every focusRetarget s, so a guide switching
+        // between cars never makes the head hunt.
+        if (key === 'right' && input.focus && input.focus.yaw <= -LOOK.focusRight) {
+          if (!focusPose || t - focusPose.at >= LOOK.focusRetarget) focusPose = { yaw: input.focus.yaw, pitch: input.focus.pitch, at: t };
+          return out(focusPose, LOOK.rate.glance, 'focus');
+        }
         const v = target(key, input);
         return out(v ?? lead, LOOK.rate.glance, v ? key : 'lead');
       }
@@ -416,7 +460,10 @@ export function createHeadLook({ gentle = false } = {}) {
       }
       return out(lead, LOOK.rate.drift, 'lead');
     }
-    if (phase === 'going') return out(lead, LOOK.rate.settle, 'lead');
+    if (phase === 'going') {
+      const right = t < lastRightUntil && target('right', input);
+      return right ? out(right, LOOK.rate.glance, 'right') : out(lead, LOOK.rate.settle, 'lead');
+    }
     if (phase === 'ring' || phase === 'leaving' || phase === 'exited') return out(lead, LOOK.rate.drift, 'lead');
     return out({ yaw: 0, pitch: 0 }, LOOK.rate.drift, 'rest');
   }
@@ -424,6 +471,7 @@ export function createHeadLook({ gentle = false } = {}) {
   return {
     update,
     reset,
-    mirrors() { if (msmAt === null || t - msmAt > 1) msmAt = t; },
+    // A held key calls this every frame: it restarts the glances only once they have finished.
+    mirrors() { if (msmAt === null) msmAt = t; },
   };
 }

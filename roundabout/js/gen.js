@@ -15,7 +15,7 @@
  * not shift along the flare.
  *
  * Layout (all lengths metres, angles radians):
- *   tier, seed, type ('mini'|'compact'|'normal'|'large'), icd, outerRadius, innerRadius, spiral, honesty
+ *   tier, seed, type ('mini'|'compact'|'normal'|'large'), icd, outerRadius, innerRadius, spiral
  *   circulatory { lanes, width, laneWidth, ratio, laneRadii[] }   island { kind, radius, diameter, feature, apron }
  *   arms[] { index, bearing, name, destination, limitMph, entryLanes, laneWidth, entryWidth, approachWidth,
  *     flareLength, exitLanes, exitLaneWidth, exitWidth, entryAngle, entryAngles[], entryRadius (kerb),
@@ -38,7 +38,7 @@
 import { createRng } from './rng.js';
 import {
   TAU, SAMPLE_STEP, dir, bearingOf, wrapPi, wrap2Pi, leftOf, mph, rotate, add, scale, len, dot,
-  line, arc, segLength, segEnd, segPoint, rotateSeg, samplePath,
+  line, arc, segLength, segEnd, segPoint, rotateSeg, samplePath, pointInPolygon,
 } from './geom.js';
 
 const DEG = Math.PI / 180;
@@ -55,30 +55,30 @@ export const TIERS = {
     // none of the entry-angle and deflection design of a normal roundabout.
     type: 'mini', icd: [14, 28], icdSkew: 1.8, icdTail: { from: 22, chance: 0.1 }, arms: [3, 4], lanes: [1], limits: [20, 30], exitRadius: [3.5, 6.5],
     laneWidth: [3.25, 3.65], deflectRadius: [6, 10], entryAngle: null,
-    splitter: { kind: 'painted', chance: 0.3, width: [0.4, 1.0], length: [3, 6] }, honesty: 0.85,
+    splitter: { kind: 'painted', chance: 0.3, width: [0.4, 1.0], length: [3, 6] },
   },
   easy: {
     type: 'compact', icd: [28, 36], arms: [3, 4], lanes: [1], limits: [20, 30, 30], exitRadius: [10, 20],
-    deflectRadius: [15, 30], splitter: { kind: 'raised', width: [1.5, 3.0], length: [10, 20] }, entryAngle: [20, 60], honesty: 0.8,
+    deflectRadius: [15, 30], splitter: { kind: 'raised', width: [1.5, 3.0], length: [10, 20] }, entryAngle: [20, 60],
   },
   medium: {
     type: 'normal', icd: [40, 60], arms: [4, 4], lanes: [2], limits: [30, 30, 40], exitRadius: [15, 35],
-    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [1.5, 3.0], length: [12, 25] }, entryAngle: [20, 60], honesty: 0.65,
+    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [1.5, 3.0], length: [12, 25] }, entryAngle: [20, 60],
   },
   hard: {
     type: 'large', icd: [60, 90], arms: [4, 5], lanes: [2, 3], limits: [30, 40, 40], exitRadius: [20, 45],
-    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [2.0, 4.0], length: [15, 30] }, entryAngle: [20, 60], honesty: 0.5,
+    deflectRadius: [15, 35], splitter: { kind: 'raised', width: [2.0, 4.0], length: [15, 30] }, entryAngle: [20, 60],
   },
 };
 
-export const STREETS = [
+const STREETS = [
   'Bexley Road', 'Erith Road', 'Lower Road', 'Station Road', 'High Street', 'Church Lane', 'Victoria Road',
   'Mill Road', 'Park Avenue', 'London Road', 'Queens Road', 'Kings Road', 'Manor Road', 'Brook Street',
   'Northumberland Way', 'Bronze Age Way', 'Picardy Road', 'Abbey Road', 'Woolwich Road', 'Belvedere Road',
   'Crayford Way', 'Heath Road', 'Mayplace Road', 'Pier Road', 'Fraser Road', 'West Street', 'Nuxley Road',
   'Hill Road', 'Green Lane', 'Albert Road', 'Avenue Road', 'Bedonwell Road',
 ];
-export const DESTINATIONS = [
+const DESTINATIONS = [
   'Erith', 'Belvedere', 'Bexleyheath', 'Crayford', 'Dartford', 'Abbey Wood', 'Thamesmead', 'Welling',
   'Slade Green', 'Woolwich', 'Sidcup', 'Barnehurst', 'Town Centre', 'Retail Park', 'Station', 'Hospital',
 ];
@@ -460,7 +460,6 @@ export function generate(tier, seed, overrides = {}) {
     innerRadius: raw.innerRadius,
     circulatory: { lanes: raw.nLanes, width: raw.circWidth, laneWidth: raw.ringLaneWidth, ratio: raw.circRatio, laneRadii: raw.ringRadii },
     island: islandOf(rng, tier, raw),
-    honesty: t.honesty,
     spiral: tier === 'hard',
     arms,
     paths: {},
@@ -610,16 +609,6 @@ function pointOnChain(segs, s) {
   }
   const last = segs[segs.length - 1];
   return segPoint(last, segLength(last));
-}
-
-export function pointInPolygon(p, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, zi] = poly[i];
-    const [xj, zj] = poly[j];
-    if ((zi > p[1]) !== (zj > p[1]) && p[0] < ((xj - xi) * (p[1] - zi)) / (zj - zi) + xi) inside = !inside;
-  }
-  return inside;
 }
 
 // Nearest point on a polyline: { d, q }.
