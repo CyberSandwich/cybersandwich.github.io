@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<meta name="robots" content="noindex">
+<title>Roundabout</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Roundabout">
+<meta name="description" content="Practise UK roundabouts from the driver's seat: read indicators, wheels and gaps, then time when to go and when to exit.">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=32">
+<link rel="modulepreload" href="./vendor/three/build/three.core.js">
+<link rel="modulepreload" href="./vendor/three/build/three.module.js">
+<script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
+<style>
+/* --rb-route is the site accent per theme (design-conventions); --rule is the hairline mixed from --t1 (lessons). */
+:root{color-scheme:light;--rb-route:#2A9D8F;--rule:color-mix(in srgb,var(--t1) 10%,transparent);--rb-inset:color-mix(in srgb,var(--card) 72%,transparent)}
+html[data-theme="dark"]{color-scheme:dark;--rb-route:#5EC4B6}
+html[data-theme="sepia"]{color-scheme:light;--rb-route:#A67B5B}
+[hidden]{display:none!important}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none;touch-action:none}
+#gl{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block;touch-action:none;cursor:grab}
+#gl:active{cursor:grabbing}
+#hud{position:fixed;inset:0;pointer-events:none;container-type:size;--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
+#hud>*{pointer-events:auto}
+.rb-round{position:absolute;top:calc(14px + var(--st));width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t2);cursor:pointer;padding:0;text-decoration:none}
+.rb-round:active{opacity:.7}
+.rb-round svg{width:20px;height:20px}
+#back{left:calc(14px + var(--sl))}
+#theme-btn,#mute{right:calc(14px + var(--sr))}
+#theme-btn svg{width:16px;height:16px}
+#mute.muted .on,#mute:not(.muted) .off{display:none}
+
+#route{position:absolute;top:calc(14px + var(--st));left:50%;transform:translateX(-50%);max-width:calc(100cqw - 136px - var(--sl) - var(--sr));display:flex;align-items:center;gap:12px;padding:8px 18px 8px 10px;border-radius:20px;white-space:nowrap}
+#pip{width:40px;height:40px;flex:none;color:var(--t3)}
+#pip .tgt{color:var(--t1)}
+.r1{font:600 .9375rem/1.25 var(--font);color:var(--t1);font-variant-numeric:tabular-nums}
+.r1 span{font-weight:500;color:var(--t3);margin-left:8px}
+.r2{font:400 .8125rem/1.3 var(--font);color:var(--t2);overflow:hidden;text-overflow:ellipsis}
+#route>div{min-width:0}
+
+#act{position:absolute;left:50%;bottom:calc(18px + var(--sb));transform:translateX(-50%);width:min(340px,calc(100cqw - 40px));height:64px;border-radius:var(--rr);border:1px solid var(--tab-border);background:var(--tab-active);color:var(--tab-active-c);font:600 1.125rem/1 var(--font);letter-spacing:.01em;cursor:pointer;box-shadow:var(--tab-shadow);transition:opacity .2s,transform .12s}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){#act{backdrop-filter:blur(10px) saturate(180%);-webkit-backdrop-filter:blur(10px) saturate(180%)}}
+#act:disabled{opacity:.38;cursor:default}
+#act:not(:disabled):active{transform:translateX(-50%) scale(.97)}
+
+#tip{position:absolute;left:50%;bottom:calc(96px + var(--sb));transform:translateX(-50%);padding:10px 18px;border-radius:var(--rr);font:500 .875rem/1 var(--font);color:var(--t2);white-space:nowrap;transition:opacity .35s;pointer-events:none}
+#tip.off{opacity:0}
+
+/* No nav here: the toast sits just above the Go/Exit button, and long reasons wrap. */
+.notif{padding-bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+.notif-pill{white-space:normal;max-width:min(420px,calc(100vw - 40px));line-height:1.35;text-align:center}
+
+.sheet{position:absolute;left:50%;bottom:calc(14px + var(--sb));transform:translateX(-50%);width:min(440px,calc(100cqw - 28px - var(--sl) - var(--sr)));max-height:calc(100cqh - 84px - var(--st) - var(--sb));overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;border-radius:20px;padding:16px;-webkit-user-select:text;user-select:text;animation:sheetIn .28s ease}
+.sheet.glass{background:var(--tab-bg)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.sheet.glass{background:var(--tab-bg);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}}
+@keyframes sheetIn{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.box{background:var(--rb-inset);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.box .seg-row{border-bottom:none}
+.sec{margin-top:16px}
+.sec>h3{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:0 0 10px 4px}
+.sheet h2{font:600 1.0625rem/1.3 var(--font);color:var(--t1);margin:2px 4px 6px}
+.sheet p{font:400 .875rem/1.45 var(--font);color:var(--t2);margin:0 4px}
+.meta{font:500 .8125rem/1.3 var(--font)!important;color:var(--t3)!important;text-align:center;margin:2px 0 12px!important;font-variant-numeric:tabular-nums}
+.primary{display:block;width:100%;height:52px;border:none;border-radius:var(--rr);background:var(--tab-active);color:var(--tab-active-c);font:600 1rem/1 var(--font);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)}
+.primary:disabled{opacity:.45;cursor:default}
+.primary:not(:disabled):active{opacity:.75}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.ghost{height:46px;border:none;border-radius:var(--rr);background:var(--rb-inset);color:var(--t2);font:500 .875rem/1 var(--font);cursor:pointer}
+.ghost:active{opacity:.7}
+.more{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;padding:10px;border:none;background:none;color:var(--t3);font:500 .8125rem/1 var(--font);cursor:pointer}
+.more svg{width:14px;height:14px;transition:transform .2s}
+.more[aria-expanded="true"] svg{transform:rotate(180deg)}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 14px;font:500 .875rem/1.35 var(--font);color:var(--t3)}
+.kv+.kv{border-top:1px solid var(--rule)}
+.kv b{font-weight:500;color:var(--t2);text-align:right;font-variant-numeric:tabular-nums}
+.kv label{flex:1}
+.kv input{width:9em;padding:0;border:none;background:none;outline:none;text-align:right;font:500 .875rem/1.35 var(--font);color:var(--t2);-webkit-user-select:text;user-select:text}
+.kv .seg-row{width:9em;border-radius:10px;overflow:hidden}
+.kv .seg{min-height:32px;padding:6px}
+#a-gaps{display:block;width:100%;height:auto;margin:2px 0 6px}
+#a-gaps text{font:500 10px var(--font);fill:var(--t3)}
+.link{display:inline-block;margin:10px 4px 0;padding:0;border:none;background:none;font:500 .875rem/1.3 var(--font);color:var(--t1);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--t4);cursor:pointer}
+#about p+p{margin-top:8px}
+#about a{color:var(--t1);text-decoration-color:var(--t4)}
+
+#fade{position:fixed;inset:0;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .45s ease}
+
+@container (max-height:460px){
+  #act{height:52px;bottom:calc(10px + var(--sb));width:min(300px,calc(100cqw - 40px))}
+  #tip{bottom:calc(72px + var(--sb))}
+  .sheet{bottom:calc(10px + var(--sb));max-height:calc(100cqh - 20px - var(--st) - var(--sb))}
+  #route{top:calc(10px + var(--st));padding:6px 14px 6px 8px}
+  .rb-round{top:calc(10px + var(--st))}
+}
+@container (max-height:460px) and (min-width:700px){
+  .sheet{left:auto;right:calc(14px + var(--sr));transform:none;animation-name:sheetInSide}
+}
+@keyframes sheetInSide{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-transparency:reduce){.sheet.glass{background:var(--card)!important}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="hud">
+  <a id="back" class="rb-round glass" href="/" aria-label="Home"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <button id="theme-btn" class="rb-round glass" aria-label="Theme"></button>
+  <button id="mute" class="rb-round glass" aria-label="Sound" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path class="on" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="on" d="M18.5 5.5a9 9 0 0 1 0 13"/><path class="off" d="m22 9-6 6M16 9l6 6"/></svg></button>
+  <div id="route" class="glass" hidden>
+    <svg id="pip" viewBox="-20 -20 40 40" aria-hidden="true"></svg>
+    <div><div class="r1"><b id="r-exit"></b><span id="r-lane"></span></div><div class="r2" id="r-dest"></div></div>
+  </div>
+  <div id="tip" class="glass off" hidden></div>
+  <button id="act" hidden disabled>Go</button>
+
+  <section id="start" class="sheet glass">
+    <div class="box"><div class="seg-row c4" id="tiers">
+      <button class="seg" data-tier="mini">Mini</button><button class="seg" data-tier="easy">Easy</button><button class="seg" data-tier="medium">Medium</button><button class="seg" data-tier="hard">Hard</button>
+    </div></div>
+    <p class="meta" id="streak"></p>
+    <button class="primary" id="start-btn" disabled>Loading</button>
+    <button class="more" id="more-btn" aria-expanded="false" aria-controls="more">More<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div id="more" hidden>
+      <div class="box">
+        <div class="kv"><label for="seed">Seed</label><input id="seed" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text" maxlength="24"></div>
+        <div class="kv"><span>Sound</span><div class="seg-row c2" id="sound-seg"><button class="seg" data-v="on">On</button><button class="seg" data-v="off">Off</button></div></div>
+        <div class="kv"><span>Tips</span><div class="seg-row c2" id="tips-seg"><button class="seg" data-v="on">On</button><button class="seg" data-v="off">Off</button></div></div>
+      </div>
+      <button class="ghost" id="about-btn" style="width:100%">About</button>
+    </div>
+  </section>
+
+  <section id="analysis" class="sheet glass" hidden>
+    <h2 id="a-title"></h2>
+    <p id="a-reason"></p>
+    <button class="link" id="a-explain" hidden>Explain</button>
+    <div class="sec" id="a-gap-sec"><h3>Gaps</h3><svg id="a-gaps" viewBox="0 0 300 40" aria-hidden="true"></svg><p class="meta" id="a-react" style="text-align:left;margin:0 4px!important"></p></div>
+    <div class="sec" id="a-car-sec"><h3>Cars</h3><div class="box" id="a-cars"></div></div>
+    <div class="sec"><h3>Decisions</h3><div class="box" id="a-dec"></div></div>
+    <button class="primary" id="a-retry">Retry</button>
+    <div class="pair"><button class="ghost" id="a-new">New Roundabout</button><button class="ghost" id="a-tier">Change Tier</button></div>
+  </section>
+
+  <section id="explain" class="sheet glass" hidden>
+    <h2 id="e-title"></h2>
+    <p id="e-reason"></p>
+    <a class="link" id="e-ref" target="_blank" rel="noopener"></a>
+    <div class="pair"><button class="ghost" id="e-replay">Replay</button><button class="primary" id="e-done" style="height:46px">Done</button></div>
+  </section>
+
+  <section id="about" class="sheet glass" hidden>
+    <h2>About</h2>
+    <p>Vehicle, tree, building and street models by Grab3D (grab3d.com), CC0. Road, kerb, grass and brick textures from Poly Haven (polyhaven.com), CC0.</p>
+    <p>Traffic sign images are Crown copyright, from the Department for Transport's traffic sign images for reproduction. Contains public sector information licensed under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" target="_blank" rel="noopener">Open Government Licence v3.0</a>.</p>
+    <p>Rendered with three.js (MIT) and the meshoptimizer decoder (MIT).</p>
+    <div class="pair" style="grid-template-columns:1fr"><button class="primary" id="about-done" style="height:46px">Done</button></div>
+  </section>
+</div>
+<div id="fade"></div>
+<script src="/shared/base.js?v=32"></script>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
