@@ -43,9 +43,11 @@ export const CAB = {
   // Interior mirror glass on the windscreen centreline (x solved per aspect, see rearMirrorX).
   rear: { y: 1.3, z: -0.35, w: 0.245, h: 0.062, xMax: 0.3, aim: [0, -0.04, 1], widen: 1 },
   // Wing glasses on the door fronts, ahead of the A-pillar bases. Passenger side convex (UK), driver side near flat.
-  // Aimed a little down so the road and the car behind fill the glass rather than sky.
+  // Aimed a little down so the road and the car behind fill the glass rather than sky. The driver's glass sits
+  // close to the eye, so its true-size view is narrow: aimed only just below the horizon and widened, it shows
+  // the lane and traffic behind rather than a patch of tarmac.
   left: { at: [-0.99, 1.04, -0.69], w: 0.16, h: 0.1, aim: [-0.1, -0.09, 1], widen: 1.9 },
-  right: { at: [0.99, 1.04, -0.69], w: 0.16, h: 0.1, aim: [0.1, -0.09, 1], widen: 1.3 },
+  right: { at: [0.99, 1.04, -0.69], w: 0.16, h: 0.1, aim: [0.12, -0.035, 1], widen: 1.7 },
   // Speedometer in a hood above the wheel rim, so no spoke or the rim ever covers it.
   speedo: { at: [0.37, 1.0, -0.53], w: 0.14, h: 0.048 },
   wheel: { at: [0.37, 0.8, -0.33], tilt: -0.42, r: 0.185, tube: 0.021 },

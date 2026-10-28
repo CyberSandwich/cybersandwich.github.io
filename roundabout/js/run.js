@@ -292,9 +292,6 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     stepState = sim.state(); // built once per step; player, guide, log, tips and the view's player all read this one
     mine = stepState.vehicles.find((v) => v.isPlayer);
     player.update(stepState);
-    if (guide && LIVE.has(state)) {
-      for (const cue of guide.update(stepState, player.phase)) onCue(cue);
-    }
     // Every step: the log gates itself, and keeps going past the Go tap until the player clears the entry,
     // so the car pulled out in front of is logged.
     if (!autoGo) log.record(stepState);
@@ -304,6 +301,11 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     prev = curr;
     curr = sim.snapshot();
     for (const e of events.splice(0)) onEvent(e);
+    // The guide reads the state as it stands after the step: the one a tap before the next step is judged on
+    // (decide reads sim.state()), so Guided's light and the verdict on a tap always agree, to the frame.
+    if (guide && LIVE.has(state)) {
+      for (const cue of guide.update(sim.state(), player.phase)) onCue(cue);
+    }
     if (++steps % TIP_EVERY === 0 && (state === 'approach' || state === 'atLine' || state === 'onRing')) {
       setAct();
       tips();

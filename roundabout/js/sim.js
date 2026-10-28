@@ -60,14 +60,14 @@ const AI_CLEAR_MARGIN = 1.2;
 // s a ring vehicle must be clear of an entrant's conflict zone before the entrant arrives to hold on rather
 // than yield: judge.js PASS_MARGIN, the same rule the player's Go is judged by.
 const PASS_IN_FRONT = 1.0;
+const LARGE_EXIT_ROOM = 12; // m before its diverge point from which a bus or lorry turning off is given room
 // Estimates, not sourced: after `ramp` s stopped at the front of its queue a driver accepts gaps `gap` s
 // shorter and lets circulating traffic brake up to the full BRAKE_LIMIT (from brakeShare of it).
 const IMPATIENCE = { ramp: 30, gap: 1.0, brakeShare: 0.8 };
 // A car holding before its exit for a car level with it may stop a little past the diverge point (a late
 // hold brakes past it); below `speed` within `metres` of it, it is still holding, not leaving.
 const HOLD_OVERRUN = { speed: 2, metres: 2 };
-const GO_ROUND_DECEL = 2.5; // m/s^2: an AI driver who would need more than this to yield before its exit goes round// A joiner keeps `headway` s clear of an inner-lane car crossing out of the ring within `reach` m past its merge.
-const CROSS_OUT = { headway: 1.5, reach: 60 };
+const GO_ROUND_DECEL = 2.5; // m/s^2: an AI driver who would need more than this to yield before its exit goes round
 const EXIT_LANE_MARGIN = 1.0; // m of side clearance under which two vehicles bound for one exit lane interact
 const LARGE_BESIDE_MARGIN = 2.5; // m of side clearance on an approach under which a bus or lorry next door counts
 const STEER_LAG = 0.25; // s, steering follows path curvature with this time constant
@@ -338,6 +338,33 @@ export function createSim(layout, opts = {}) {
     return aheadOnly(v.geo.r * (wMin - vMax));
   }
 
+  // An inner-lane vehicle already leaving across v's lane ahead (past its diverge point, so it will not stop for
+  // v): when v would reach the crossing before it has cleared it, it is followed from the crossing in good time,
+  // not once its body is on v's path (a lorry crawling across left the car behind braking at 7 m/s^2). A bus or
+  // lorry counts from LARGE_EXIT_ROOM before its diverge point: traffic behind gives a long vehicle room to turn
+  // off (HC 187) rather than leave it holding at its exit while heavy traffic streams past; once v follows it,
+  // its own crossingYield passes over v, so it goes.
+  function cutAcrossGap(v, w) {
+    const from = w.path.marks.diverge - (LARGE_TYPES.has(w.type) ? LARGE_EXIT_ROOM : 0);
+    // v circulating (past its merge): at its line it judges the gap instead, and its approach is its own lane's.
+    if (v.s < v.path.marks.merge || w.path.ringLane <= v.path.ringLane || w.s < from || w.s >= w.path.marks.exitRing || w.geo.r >= v.geo.r) return Infinity;
+    // v must be wholly behind w: a v level with any of w's body (a long vehicle's rear still in the inner lane) is
+    // alongside, and w keeps yielding to it (crossingYield), as a follower it would not.
+    const front = v.s + v.length / 2;
+    const rearS = sAtBearing(v.path, w.geo.bearing - w.length / 2 / Math.max(w.geo.r, 1), v.s, v.path.marks.exitRing);
+    if (rearS == null || rearS < front) return Infinity;
+    const x = crossingAt(w, v.geo.r - (v.width + w.width) / 2 - 0.3);
+    const sx = x && sAtBearing(v.path, x.bearing, v.s, v.path.marks.exitRing);
+    // Bound for the same exit, w may sweep across v's lane only beyond v's own exit mouth: v holds behind its rear.
+    if (sx == null && w.path.exitArm !== v.path.exitArm) return Infinity;
+    const gap = sx == null ? rearS - front : Math.min(rearS - front, sx - front - w.width / 2);
+    if (gap < 0) return Infinity;
+    // Until its rear is across v's lane, or (same exit, no crossing on the ring) out past its exit mouth.
+    const clearS = x ? x.s + w.length + w.width : w.path.marks.exitRing + w.length / 2;
+    const wClear = (clearS - w.s) / Math.max(w.v, 1);
+    return gap / Math.max(v.v, 1) < wClear + 0.5 ? gap : Infinity;
+  }
+
   function leaderOf(v) {
     let best = { id: null, gap: Infinity, speed: 0 };
     const approachFrame = armFrames[v.path.arm].in;
@@ -370,7 +397,7 @@ export function createSim(layout, opts = {}) {
         gap = Math.min(gap, linearGap(v, w, exitFrame,
           w.path.exitLane === v.path.exitLane ? Math.max(EXIT_LANE_MARGIN, sideMargin(v, w)) : sideMargin(v, w)));
       }
-      if (v.geo.ring && w.geo.ring) gap = Math.min(gap, ringGap(v, w));
+      if (v.geo.ring && w.geo.ring) gap = Math.min(gap, ringGap(v, w), cutAcrossGap(v, w));
       if (v.geo.ring && !v.geo.exit && w.geo.exit && w.path.exitArm === v.path.exitArm) gap = Math.min(gap, exitAheadGap(v, w));
       if (gap < best.gap) best = { id: w.id, gap, speed: Math.max(0, w.v * Math.cos(dh)), accel: w.a };
     }
@@ -415,6 +442,15 @@ export function createSim(layout, opts = {}) {
   // Vehicles that are on the ring or committed to joining it; waiting vehicles will give way themselves.
   const activeOthers = (v) => vehicles.filter((w) => w !== v && (w.geo.ring || w.committed));
 
+  // A joiner reads the player's route from its indicator, not its intent: until the player signals left on the
+  // ring it may leave at its exit or go round again (a missed Exit), so the joiner keeps clear of both. AI
+  // vehicles keep their true paths, as the judge reads them.
+  const asSeen = (w) => {
+    if (!w.isPlayer || w.s < w.path.marks.merge || w.s >= w.path.marks.diverge || w.external?.indicator === 'left') return [w];
+    const p = w.path;
+    return [w, Object.assign(Object.create(w), { path: pathFor(p.arm, p.lane, p.exitArm, p.loops + 1) })];
+  };
+
   // Waiting drivers accept shorter gaps (gap acceptance falls with waiting time), within limits that still
   // never make circulating traffic brake harder than BRAKE_LIMIT. Without this a bus or lorry at a busy ring
   // can wait minutes and starve its arm.
@@ -425,34 +461,10 @@ export function createSim(layout, opts = {}) {
     const impatience = v.waitingSince === null ? 0 : Math.min(1, (clock - v.waitingSince) / IMPATIENCE.ramp);
     const needGap = (followUp ? v.params.tf : v.params.tc) - IMPATIENCE.gap * impatience;
     const brakeOk = BRAKE_LIMIT * (IMPATIENCE.brakeShare + (1 - IMPATIENCE.brakeShare) * impatience);
-    for (const c of assessEntry(asEntrant(v), activeOthers(v), { minSpeed: 4, cruise: true })) {
+    for (const c of assessEntry(asEntrant(v), activeOthers(v).flatMap(asSeen), { minSpeed: 4, cruise: true })) {
       if (c.inZone || c.eta < tMe + needGap || c.eta < c.tClear + AI_CLEAR_MARGIN || c.needDecel > brakeOk) return false;
     }
-    return !crossOutConflict(v);
-  }
-
-  // An inner-lane vehicle (the player included) that will cut out across the lane this entrant joins, just
-  // downstream of its entry, on the way to a later exit: the entry-section conflict test never sees it, and
-  // joining would put the entrant alongside it as it crosses. Compared by when each reaches the crossing.
-  function crossOutConflict(v) {
-    const p = v.path;
-    const m = p.marks;
-    const rLane = p.r[indexAt(p, m.entryEnd)];
-    for (const w of vehicles) {
-      if (w === v || !w.geo.ring || w.path.ringLane === 0 || w.s >= w.path.marks.exitRing || w.geo.r > rLane - 1) continue;
-      const x = crossingAt(w, rLane);
-      if (!x) continue;
-      const sx = sAtBearing(p, x.bearing, m.merge, Math.min(m.diverge, m.merge + CROSS_OUT.reach));
-      if (sx === null) continue;
-      // w may get there as late as at its present speed or as early as pulling away now (a crawler held up by
-      // its leader moves off): the joiner keeps clear of the whole window.
-      const twLate = (x.s - w.s) / Math.max(w.v, 1);
-      const twEarly = Math.min(twLate, timeToReach(w.path, profileOf(w), w.s, w.v, w.params.a, x.s));
-      const tv = timeToReach(p, profileOf(v), v.s, v.v, v.params.a, sx);
-      const pad = CROSS_OUT.headway + (v.length + w.length) / 2 / Math.max(w.v, 3);
-      if (tv > twEarly - pad && tv < twLate + pad) return true;
-    }
-    return false;
+    return true;
   }
 
   // Only the front undecided vehicle of a lane queue judges the gap; the rest follow it. A vehicle behind one
@@ -587,6 +599,7 @@ export function createSim(layout, opts = {}) {
         const passes = run.pairs.every(([sOther, sEntry]) => sOther <= rear || (sOther - rear) / Math.max(v.v, 1) + PASS_IN_FRONT <= arriveAt(sEntry));
         if (passes) break;
         const wClear = timeToReach(w.path, profileOf(w), w.s, w.v, w.params?.a ?? 2, run.sEntryMax + w.length / 2, 15);
+        if (wClear <= 0) break; // its body is already past every entry point of this run: nothing left to yield to
         if (gap / Math.max(v.v, 1) < wClear + 0.5) {
           // The entrant moves on as it joins: only its speed along this vehicle's heading holds the zone up.
           const along = Math.max(0, Math.cos(wrapPi(w.geo.heading - v.geo.heading)));

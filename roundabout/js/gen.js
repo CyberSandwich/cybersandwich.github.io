@@ -36,6 +36,7 @@
  * paths with the same (arm, lane, exitArm) share their samples up to the earlier one's diverge point.
  */
 import { createRng } from './rng.js';
+import { entryConflicts } from './kinematics.js';
 import {
   TAU, SAMPLE_STEP, dir, bearingOf, wrapPi, wrap2Pi, leftOf, mph, rotate, add, scale, len, dot,
   line, arc, segLength, segEnd, segPoint, rotateSeg, samplePath, pointInPolygon,
@@ -376,6 +377,29 @@ function pickTarget(rng, arm, forced) {
   return (surprising.length && rng.chance(0.6) ? rng.pick(surprising) : rng.pick(options)).j;
 }
 
+// Routes from the other arms that cross the player's path at its entry (entryConflicts, cut-outs included),
+// leaving aside those that turn into the player's own road.
+export function crossingRoutes(layout, arm, exitArm) {
+  const me = layout.paths[pathId(arm, layout.arms[arm].exits[exitArm].lane, exitArm, 0)];
+  return Object.values(layout.paths).filter((p) => p.arm !== arm && !p.loops && p.exitArm !== arm && entryConflicts(me, p).length).length;
+}
+
+// A drawn route that no other route crosses (a left turn into the outer lane while every other route keeps to
+// the inner lane) leaves nothing to judge at the line, however heavy the traffic: the first route on that arm
+// with crossing traffic replaces it, else the first on the next arm round. No random draw, so every other
+// layout, and the scenery of this one, stays as it was.
+function routeWithTraffic(layout, arm, target) {
+  if (crossingRoutes(layout, arm, target) > 0) return [arm, target];
+  const n = layout.arms.length;
+  for (let k = 0; k < n; k++) {
+    const a = (arm + k) % n;
+    const exits = Object.entries(layout.arms[a].exits).sort(([, x], [, y]) => x.exitNumber - y.exitNumber);
+    const found = exits.find(([j]) => crossingRoutes(layout, a, Number(j)) > 0);
+    if (found) return [a, Number(found[0])];
+  }
+  return [arm, target];
+}
+
 // ICD in [icd0, icd1], skewed toward the small end; a tier with icdTail draws that fraction uniformly from the
 // tail beyond `from`, so large minis stay rare without dragging the median up.
 function pickIcd(rng, t) {
@@ -472,8 +496,10 @@ export function generate(tier, seed, overrides = {}) {
     }
   }
 
-  const playerArm = overrides.playerArm ?? rng.int(0, arms.length - 1);
-  const targetArm = pickTarget(rng, arms[playerArm], overrides.targetArm);
+  const drawnArm = overrides.playerArm ?? rng.int(0, arms.length - 1);
+  const drawnTarget = pickTarget(rng, arms[drawnArm], overrides.targetArm);
+  const forced = overrides.playerArm !== undefined || overrides.targetArm !== undefined;
+  const [playerArm, targetArm] = forced ? [drawnArm, drawnTarget] : routeWithTraffic(layout, drawnArm, drawnTarget);
   const ex = arms[playerArm].exits[targetArm];
   layout.player = {
     arm: playerArm,

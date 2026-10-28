@@ -83,12 +83,12 @@ export function createPlayer(sim, { onEvent } = {}) {
     const lead = sim.leaderOf(PLAYER_ID);
     const lw = lead.id == null ? null : vehicles.find((w) => w.id === lead.id);
     const nextLane = lw && lw.path.arm === me.path.arm && lw.path.lane !== me.path.lane && lw.s - lw.length / 2 < lw.path.marks.giveWay;
-    let best = nextLane ? { gap: Infinity, speed: 0 } : { gap: lead.gap, speed: lead.speed };
+    let best = nextLane ? { gap: Infinity, speed: 0, accel: 0 } : { gap: lead.gap, speed: lead.speed, accel: lead.accel ?? 0 };
     for (const w of vehicles) {
       if (w.isPlayer || w.path.arm !== me.path.arm || w.path.lane !== me.path.lane || w.s <= me.s) continue;
       if (w.s - w.length / 2 > w.path.marks.entryEnd) continue;
       const gap = w.s - me.s - (w.length + me.length) / 2;
-      if (gap < best.gap) best = { gap, speed: w.v };
+      if (gap < best.gap) best = { gap, speed: w.v, accel: w.a };
     }
     if (phase === 'approach' || phase === 'waiting') return best;
     // Joining behind a vehicle that passed in front (judge lets that Go): until the entry has merged, the sim
@@ -104,7 +104,7 @@ export function createPlayer(sim, { onEvent } = {}) {
         if (rear < run.sFrom || rear > run.sTo) continue;
         const pair = run.pairs.find((p) => p[0] >= rear) ?? run.pairs[run.pairs.length - 1];
         const gap = pair[1] - front;
-        if (gap > 0 && gap < best.gap) best = { gap, speed: w.v * Math.cos(w.heading - me.heading) };
+        if (gap > 0 && gap < best.gap) best = { gap, speed: w.v * Math.cos(w.heading - me.heading), accel: w.a * Math.cos(w.heading - me.heading) };
       }
     }
     return best;
@@ -119,9 +119,11 @@ export function createPlayer(sim, { onEvent } = {}) {
     // A car cutting in close but barely slower (a merge into the same exit) needs only gentle braking: IDM
     // alone stamps on the brakes for any gap under its desired spacing. Brake at least as hard as matching
     // the leader's speed CUT_IN_SPARE behind it takes, never less than comfortable. One that cuts in already
-    // inside CUT_IN_SPARE is matched within half the gap left, not by an emergency stop.
+    // inside CUT_IN_SPARE is matched within half the gap left, not by an emergency stop. A leader pulling away
+    // does part of the matching itself: its acceleration (up to the player's own) comes off what is needed.
     const closing = me.v - lead.speed;
-    const need = closing > 0 ? (closing * closing) / (2 * Math.max(lead.gap - CUT_IN_SPARE, lead.gap / 2, 0.05)) : 0;
+    const pulling = Math.min(MAX_ACCEL, Math.max(0, lead.accel ?? 0));
+    const need = closing > 0 ? Math.max(0, (closing * closing) / (2 * Math.max(lead.gap - CUT_IN_SPARE, lead.gap / 2, 0.05)) - pulling) : 0;
     return Math.max(idm, -Math.max(FOLLOW.b, 1.2 * need));
   }
 

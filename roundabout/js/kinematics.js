@@ -3,7 +3,7 @@
  * conflict assessment for a vehicle entering the ring. Assessment always uses each vehicle's TRUE path, never
  * its signal: the judge compares that truth with the cue the player saw.
  */
-import { conflictRuns, indexAt, mph, sampleAt, wrapPi } from './geom.js';
+import { conflictRuns, indexAt, mph, sAtBearing, sampleAt, wrapPi } from './geom.js';
 
 const COMFORT_DECEL = 1.5; // m/s^2, used to slow ahead of bends
 export const RING_CAP = mph(30);
@@ -20,8 +20,42 @@ export function entryConflicts(entryPath, otherPath, longest = 0) {
   let byReach = byOther.get(otherPath);
   if (!byReach) byOther.set(otherPath, (byReach = new Map()));
   let runs = byReach.get(reach);
-  if (!runs) byReach.set(reach, (runs = conflictRuns(entryPath, otherPath, CONFLICT_CLEARANCE, reach)));
+  if (!runs) {
+    runs = conflictRuns(entryPath, otherPath, CONFLICT_CLEARANCE, reach);
+    const out = crossOutRun(entryPath, otherPath, reach);
+    if (out && !runs.some((r) => r.sTo >= out.sFrom && r.sFrom <= out.sTo)) runs = [...runs, out].sort((a, b) => a.sFrom - b.sFrom);
+    byReach.set(reach, runs);
+  }
   return runs;
+}
+
+export const CROSS_OUT_REACH = 60; // m past the entrant's merge within which an inner-lane car cutting out counts
+/**
+ * An inner-lane path cutting out across the lane an entry joins, just past that entry, on its way to an exit:
+ * the entry stretch conflictRuns scans ends before the crossing, so without this run a car about to swing
+ * across in front of the joiner reads as no traffic at all. One run in conflictRuns' shape around the point
+ * where `other`'s centreline reaches the joined lane's radius, paired with the entry point at that bearing.
+ */
+function crossOutRun(entry, other, reach) {
+  if (other.ringLane <= entry.ringLane || other.arm === entry.arm) return null;
+  const m = entry.marks;
+  // The joined lane's radius: where the entry ends, or where it peels off first (a first exit diverges before
+  // its entry stretch would end, and its radius there is already the exit's).
+  const rLane = entry.r[indexAt(entry, Math.min(m.entryEnd, m.diverge))];
+  const i0 = indexAt(other, other.marks.merge);
+  const i1 = indexAt(other, other.marks.exitRing);
+  let i = i0;
+  while (i <= i1 && other.r[i] >= rLane) i++; // still joining from outside the lane
+  while (i <= i1 && other.r[i] < rLane) i++;
+  if (i > i1) return null;
+  // Up to the entrant's own exit mouth: an inner car leaving at the same exit cuts across it there.
+  const sEntry = sAtBearing(entry, other.bearing[i], m.merge, Math.min(m.exitRing, m.merge + CROSS_OUT_REACH));
+  if (sEntry === null) return null;
+  const sFrom = Math.max(other.marks.merge, other.s[i] - reach);
+  const sTo = other.s[i] + reach;
+  const pairs = [];
+  for (let j = indexAt(other, sFrom); j <= indexAt(other, sTo); j++) pairs.push([other.s[j], sEntry - reach, sEntry + reach]);
+  return { sFrom, sTo, sEntryMin: sEntry - reach, sEntryMax: sEntry + reach, pairs, crossOut: true };
 }
 export const BRAKE_LIMIT = 1.0; // m/s^2 a circulating driver should never be made to exceed
 export const CLEAR_MARGIN = 0.5; // s after the entrant's rear clears before the other may arrive

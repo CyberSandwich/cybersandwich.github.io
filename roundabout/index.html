@@ -38,7 +38,7 @@ html[data-theme="dark"]{color-scheme:dark;--rb-route:#5EC4B6;--rb-glass:rgba(36,
    segments, the big button and inset groups step up in lightness here. */
 :root{--rb-active:var(--tab-active)}
 html[data-theme="dark"]{--rb-active:rgba(245,245,247,.24);--rb-inset:rgba(255,255,255,.07)}
-html[data-theme="dark"] .grp .seg{color:var(--t2)}
+html[data-theme="dark"] .grp .seg:not(.active){color:var(--t2)}
 .grp .seg.active{background:var(--rb-active)}
 html[data-theme="sepia"]{color-scheme:light;--rb-route:#A67B5B;--rb-glass:rgba(245,237,218,.9)}
 /* The hint's leader line: a quiet ink with a thin halo of the opposite tone, so it reads on sky and on the dark
@@ -164,7 +164,8 @@ html[data-theme="sepia"] .ind{color:#3F6212}
 #act[data-tone="go"]{--tone:var(--rb-go)}
 #act[data-tone="caution"]{--tone:var(--rb-caution)}
 #act[data-tone="stop"]{--tone:var(--rb-stop)}
-#act[data-tone]:not(:disabled){transition:background-color .15s,border-color .15s,opacity .2s,transform .12s;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);
+/* No colour fade: the light switches with the verdict, so a fading green never sits over a red tap. */
+#act[data-tone]:not(:disabled){transition:opacity .2s,transform .12s;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);
   background:color-mix(in srgb,var(--tone) 62%,transparent);border-color:color-mix(in srgb,var(--tone) 50%,rgba(255,255,255,.55));
   box-shadow:var(--tab-shadow),inset 0 1px 0 rgba(255,255,255,.3)}
 #act:not(:disabled):active{transform:translateX(-50%) scale(.97)}
