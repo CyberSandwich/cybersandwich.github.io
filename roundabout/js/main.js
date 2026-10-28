@@ -3,7 +3,8 @@
  * The run's own state machine lives in run.js; everything drawn per frame in render.js; buttons and keys in
  * controls.js (onto the `app` commands below); pure rules in ui.js.
  *
- * URL hash (ui.parseHash): #seed=abc&cars=<traffic seed>&tier=easy[&traffic=heavy][&tips=guided][&drill=liarCars][&debug=...][&qa=1]
+ * URL hash (ui.parseHash): #seed=abc&cars=<traffic seed>&tier=easy[&traffic=normal][&tips=guided][&drill=none][&debug=...][&qa=1]
+ * (settings at ui.DEFAULTS stay out of the hash)
  * window.__rb is a read-only QA handle, present only with qa=1 or a debug= scenario in the hash.
  */
 import * as THREE from 'three';
@@ -18,7 +19,7 @@ import { createAudio } from './audio.js';
 import { createRun } from './run.js';
 import { createView, playerView } from './render.js';
 import { createControls } from './controls.js';
-import { resolveSettings, hashOf, newSeed, cleanSeed, nextTrafficSeed, within, routeView, COPY, QUALITY } from './ui.js';
+import { resolveSettings, hashOf, newSeed, cleanSeed, nextTrafficSeed, within, routeView, storedDrill, COPY, QUALITY } from './ui.js';
 
 window.__rbBoot = true; // the module graph settled: index.html's boot watchdog stands down
 
@@ -119,7 +120,7 @@ function endRun() {
   hud.clearToasts();
 }
 
-// mode defaults to the Tips setting; Retry Guided and Watch It Done pass their own without changing it.
+// mode defaults to the Tips setting; See Solution passes 'watch' without changing it.
 function startRun(mode = cfg.tips) {
   if (!vehicles) return;
   endRun();
@@ -179,7 +180,15 @@ const out = {
     const v = run.curr.vehicles.find((w) => w.id === id);
     audio.horn(v ? Math.sign(-view.yawTo(v.x, v.z)) : 0);
   },
+  // A replay opened from the results lifts their fade and offers Back to them (or Keep Driving, when the run
+  // was ended from its freeze).
   replay: (on) => {
+    if (on) {
+      screen = 'run';
+      hud.fade(0);
+      hud.replayEnd(run.finished);
+      hud.keepDriving(Boolean(run.canKeepDriving));
+    }
     hud.screen(on ? 'replay' : 'run');
     world.showRoute(on);
     view.replayView(on);
@@ -274,7 +283,7 @@ new MutationObserver(applyTheme).observe(document.documentElement, { attributes:
 // A stored setting (STORED key) changed: remember it, show it, put it in the hash.
 function setting(key, value) {
   cfg[key] = value;
-  store.save(STORED[key], value);
+  store.save(STORED[key], key === 'drill' ? storedDrill(value) : value);
   hud[`set${key[0].toUpperCase()}${key.slice(1)}`](value);
   writeHash();
 }

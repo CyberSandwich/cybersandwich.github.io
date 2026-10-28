@@ -36,22 +36,23 @@ export const CRITICAL_GAP = { mean: 4.5, sd: 0.6, min: 3.0 };
 export const FOLLOW_UP = { mean: 2.7, sd: 0.3, min: 2.0 };
 
 export const DRIVER_TYPES = {
-  cautious: { weight: 0.25, T: 1.6, s0: 2.5, gapShift: 0.6, accelScale: 0.85, speedScale: 0.92, latScale: 0.9 },
-  normal: { weight: 0.55, T: 1.3, s0: 2.0, gapShift: 0, accelScale: 1, speedScale: 1, latScale: 1 },
-  assertive: { weight: 0.2, T: 1.0, s0: 1.6, gapShift: -0.6, accelScale: 1.2, speedScale: 1.05, latScale: 1.1 },
+  cautious: { weight: 0.15, T: 1.6, s0: 2.5, gapShift: 0.6, accelScale: 0.85, speedScale: 0.92, latScale: 0.9 },
+  normal: { weight: 0.5, T: 1.3, s0: 2.0, gapShift: 0, accelScale: 1, speedScale: 1, latScale: 1 },
+  assertive: { weight: 0.35, T: 1.0, s0: 1.6, gapShift: -0.6, accelScale: 1.2, speedScale: 1.05, latScale: 1.1 },
 };
 
 /**
- * Signal behaviour vs true intent, as shares of all cars (tasks/roundabout-status/liar-research.md). The only
- * UK roundabout split is the Tempcover 2025 survey (self-reported, n=2,000): 65% correct, 13% signal left and
- * go past the exit (wrongLeft), 9% signal late (lateLeft). No signal (none, 10%) is the remainder, cross-checked
- * against Compare the Market's 2023 counts; leftNotCancelled (2%) and rightEarly (signals right, leaves at an
- * earlier exit, 1%) are estimates with no published figure. Every tier and drill uses the same real mix.
+ * Signal behaviour vs true intent, as shares of all cars (tasks/roundabout-status/liar-research.md). Correct
+ * stays at the Tempcover 2025 survey's 65%. The rest leans to no signal and late signals: observed counts (AA
+ * Streetwatchers, 33% of turns not indicated) outweigh the survey's self-reported 13% who signal left going
+ * straight on, which is a misunderstanding on approach more than a left signal on the ring. So none 17%,
+ * lateLeft 11%, wrongLeft 4%; leftNotCancelled (2%) and rightEarly (signals right, leaves at an earlier exit,
+ * 1%) are estimates with no published figure. Every tier and drill uses the same mix.
  *   none  no signal at all          wrongLeft  left while coming round     lateLeft  left only at the exit
  *   leftNotCancelled  left throughout       rightEarly  right until it peels off, no left signal
  */
 export const HONESTY = 0.65;
-export const DISHONEST = { none: 0.1, wrongLeft: 0.13, lateLeft: 0.09, leftNotCancelled: 0.02, rightEarly: 0.01 };
+export const DISHONEST = { none: 0.17, wrongLeft: 0.04, lateLeft: 0.11, leftNotCancelled: 0.02, rightEarly: 0.01 };
 export function signalMix(honesty = HONESTY) {
   const total = Object.values(DISHONEST).reduce((a, b) => a + b, 0);
   const mix = { correct: honesty };
@@ -97,10 +98,10 @@ export const PRESETS = {
 };
 
 export const TRAFFIC = {
-  mini: { rate: 0.05, heavy: 0.11, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
-  easy: { rate: 0.08, heavy: 0.2, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
-  medium: { rate: 0.095, heavy: 0.1, types: { hatch: 0.5, estate: 0.27, van: 0.23 }, busEvery: [40, 80] },
-  hard: { rate: 0.085, heavy: 0.18, types: { hatch: 0.44, estate: 0.22, van: 0.18, lorry: 0.11, bus: 0.05 }, busEvery: null },
+  mini: { rate: 0.05, heavy: 0.13, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
+  easy: { rate: 0.08, heavy: 0.26, types: { hatch: 0.55, estate: 0.3, van: 0.15 }, busEvery: null },
+  medium: { rate: 0.095, heavy: 0.13, types: { hatch: 0.5, estate: 0.27, van: 0.23 }, busEvery: [40, 80] },
+  hard: { rate: 0.085, heavy: 0.24, types: { hatch: 0.44, estate: 0.22, van: 0.18, lorry: 0.11, bus: 0.05 }, busEvery: null },
 };
 
 export const INDICATOR_HZ = 1.5; // R48: 60-120 flashes per minute

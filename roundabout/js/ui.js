@@ -4,6 +4,7 @@
  *   COPY                              every HUD string in one table
  *   signalLabel(indicator)            'Signalling Left' | 'Signalling Right' | 'No Signal'
  *   hcLink(ref)                       'HC 185' / 'DL25 ...' -> { text, href } or null
+ *   DEFAULTS / storedDrill(drill)     first-visit settings; no drill as stored ('none')
  *   parseHash(hash) / hashOf(opts)    #seed=&cars=&tier=&traffic=&tips=&drill=&debug=&qa= <-> settings
  *   resolveSettings(stored, hash)     the session's settings (hash wins, bad values fall back, seeds drawn)
  *   nextTrafficSeed(current, ctx)     same traffic on Retry after red and on Guided/Watch, fresh after clean
@@ -15,7 +16,7 @@
  *   routeView(layout)                 the route card: exit, lane, destination and the clock-face pip's spokes
  *   adviceTone(advice, phase)        Guided mode's live go/caution/stop light on the big button
  *   tipFor(cars, shown, ctx)          at most one tip, each shown a few times at most
- *   analysisView(run)                 the analysis sheet's rows, from verdicts and the gap-log summary
+ *   analysisView(run)                 the results card: the main verdict, the run's other mistakes, what it offers
  *   captionSteps(text)                a verdict sentence as 1-3 Title Case caption lines
  *   directorSteps(input)              the "What Went Wrong" replay timeline
  *   edgeArrow(ndc)                    where to pin the off-screen pointer, or null when on screen
@@ -24,7 +25,7 @@
  */
 
 import { titleCase } from './guide.js';
-import { missedExit, CLEAR_GAP } from './judge.js';
+import { missedExit } from './judge.js';
 
 const TIER_NAMES = ['mini', 'easy', 'medium', 'hard'];
 const TRAFFIC_LEVELS = ['none', 'light', 'normal', 'heavy'];
@@ -46,17 +47,10 @@ const AMBER = new Set(['tight', 'late', 'hesitation', 'lateSignal']);
 // Verdict titles are judge's (every verdict carries `title`); only a run with no verdict needs one here.
 export const COPY = {
   clean: 'Clean Run',
-  go: { ok: 'Safe', tight: 'Tight', unsafe: 'Unsafe', notAllowed: 'No Room', none: 'Not Taken', handled: 'Handled for You' },
-  exit: { ok: 'On Time', early: 'Too Early', alongside: 'Car Alongside', late: 'Missed', lateSignal: 'Late Signal', auto: 'First Exit, Taken for You', none: 'Not Reached' },
-  taken: {
-    next: (s, name) => `Next Car ${s.toFixed(1)} s Away${name ? ` (${name})` : ''}`,
-    none: 'No Car Coming',
-    afterCar: (s) => `Went ${s.toFixed(1)} s After the Last Car Passed`,
-    afterWindow: (s) => `Went ${s.toFixed(1)} s After the Window Opened`,
-  },
   tips: { liar: 'Watch Front Wheels', long: 'Give Long Vehicles Room' },
-  notes: { guided: 'Guided Run', watch: 'Watched Run', traffic: (t) => `${t[0].toUpperCase()}${t.slice(1)} Traffic` },
-  replay: { again: 'Replay Again', driver: 'Driver View', above: 'Above View', keep: 'Keep Driving', next: 'See Analysis' },
+  act: { go: 'Go', exit: 'Signal to Exit' },
+  replay: { again: 'Replay', driver: 'Driver View', above: 'Above View', keep: 'Keep Driving', end: 'End Run', back: 'Back' },
+  results: { retry: 'Try Again', next: 'Next Roundabout', home: 'Start Screen', analysis: 'See Analysis', solution: 'See Solution', also: (titles) => `Also: ${titles.join(', ')}` },
   signal: { left: 'Signalling Left', right: 'Signalling Right', none: 'No Signal' },
   paused: 'Paused',
   start: 'Start',
@@ -100,28 +94,36 @@ export function newSeed(rand = Math.random) {
 
 const pick = (list, v, d) => (list.includes(v) ? v : d);
 
+// The defaults a first visit gets: heavy traffic with the Liar Cars drill, Tips on (sound is on unless muted).
+export const DEFAULTS = { tier: 'easy', traffic: 'heavy', tips: 'tips', drill: 'liarCars' };
+const NO_DRILL = 'none'; // the hash's word for no drill, since no drill param means the default drill
+const pickDrill = (v, d) => (v === NO_DRILL || v === null ? null : pick(DRILLS, v, d));
+/** A drill setting as stored: no drill is NO_DRILL, so it is never mistaken for nothing stored. */
+export const storedDrill = (drill) => drill ?? NO_DRILL;
+
 // cars = the traffic seed: a shared link replays the same arrivals as well as the same roundabout.
 export function parseHash(hash, fallbacks = {}) {
   const p = new URLSearchParams(String(hash ?? '').replace(/^#/, ''));
+  const fb = { ...DEFAULTS, ...fallbacks };
   return {
     seed: cleanSeed(p.get('seed')),
     trafficSeed: cleanSeed(p.get('cars')),
-    tier: pick(TIER_NAMES, p.get('tier'), fallbacks.tier ?? 'easy'),
-    traffic: pick(TRAFFIC_LEVELS, p.get('traffic'), fallbacks.traffic ?? 'normal'),
-    tips: pick(TIP_MODES, p.get('tips'), fallbacks.tips ?? 'tips'),
-    drill: pick(DRILLS, p.get('drill'), fallbacks.drill ?? null),
+    tier: pick(TIER_NAMES, p.get('tier'), fb.tier),
+    traffic: pick(TRAFFIC_LEVELS, p.get('traffic'), fb.traffic),
+    tips: pick(TIP_MODES, p.get('tips'), fb.tips),
+    drill: p.has('drill') ? pickDrill(p.get('drill'), fb.drill) : fb.drill,
     debug: pick(DEBUG_NAMES, p.get('debug'), null),
     qa: p.has('qa'), // the window.__rb QA handle (main.js); kept in the hash so a reload keeps it
   };
 }
 
-// Defaults (normal traffic, Tips, no drill) stay out of shared links.
+// Defaults (DEFAULTS) stay out of shared links.
 export function hashOf({ seed, trafficSeed, tier, traffic, tips, drill, debug, qa }) {
   const p = new URLSearchParams({ seed, tier });
   if (trafficSeed) p.set('cars', trafficSeed);
-  if (traffic && traffic !== 'normal') p.set('traffic', traffic);
-  if (tips && tips !== 'tips') p.set('tips', tips);
-  if (drill) p.set('drill', drill);
+  if (traffic && traffic !== DEFAULTS.traffic) p.set('traffic', traffic);
+  if (tips && tips !== DEFAULTS.tips) p.set('tips', tips);
+  if ((drill ?? null) !== DEFAULTS.drill) p.set('drill', drill ?? NO_DRILL);
   if (debug) p.set('debug', debug);
   if (qa) p.set('qa', '1');
   return '#' + p.toString();
@@ -133,11 +135,12 @@ export function hashOf({ seed, trafficSeed, tier, traffic, tips, drill, debug, q
  * to medium.
  */
 export function resolveSettings(stored, hash, rand = Math.random) {
+  // No drill is stored as storedDrill(null) ('none'): a missing value means nothing was chosen yet.
   const prefs = {
-    tier: pick(TIER_NAMES, stored.tier, 'easy'),
-    traffic: pick(TRAFFIC_LEVELS, stored.traffic, 'normal'),
-    tips: pick(TIP_MODES, stored.tips, 'tips'),
-    drill: pick(DRILLS, stored.drill, null),
+    tier: pick(TIER_NAMES, stored.tier, DEFAULTS.tier),
+    traffic: pick(TRAFFIC_LEVELS, stored.traffic, DEFAULTS.traffic),
+    tips: pick(TIP_MODES, stored.tips, DEFAULTS.tips),
+    drill: stored.drill == null ? DEFAULTS.drill : pickDrill(stored.drill, DEFAULTS.drill),
   };
   const h = parseHash(hash, prefs);
   const twoLanes = (h.debug === 'bus' || h.debug === 'alongside') && (h.tier === 'mini' || h.tier === 'easy');
@@ -146,7 +149,7 @@ export function resolveSettings(stored, hash, rand = Math.random) {
 
 /**
  * The traffic seed for the next run. Retry after a red verdict replays the same traffic (see it again, decide
- * better); after a clean run it brings fresh traffic. Retry Guided and Watch It Done (mode set) always replay it.
+ * better); after a clean run it brings fresh traffic. See Solution (mode set) always replays it.
  */
 export function nextTrafficSeed(current, { wasRed = false, mode = null } = {}, rand = Math.random) {
   return mode || wasRed ? current : newSeed(rand);
@@ -167,7 +170,7 @@ export function keyAction(key, { screen, phase, sheet = null, repeat = false }) 
     if (screen === 'preview') return 'start';
     if (screen === 'run') return phase === 'ring' ? 'exit' : phase === 'approach' || phase === 'waiting' ? 'go' : null;
     if (screen === 'frozen') return 'replay';
-    if (screen === 'replay') return 'seeAnalysis';
+    if (screen === 'replay') return 'endRun';
     if (screen === 'analysis') return 'retry';
     return null;
   }
@@ -175,8 +178,9 @@ export function keyAction(key, { screen, phase, sheet = null, repeat = false }) 
   if (k === 'r') return screen === 'replay' ? 'replayAgain' : screen === 'analysis' || screen === 'frozen' ? 'retry' : null;
   if (k === 'k') return screen === 'frozen' || screen === 'replay' ? 'keepDriving' : null;
   if (k === 'n') return screen === 'run' ? null : 'new';
-  if (k === 'g') return screen === 'analysis' ? 'retryGuided' : null;
+  if (k === 'a') return screen === 'analysis' ? 'replay' : null;
   if (k === 'w') return screen === 'analysis' ? 'watch' : null;
+  if (k === 'h') return screen === 'analysis' ? 'home' : null;
   if (k === 'm') return 'mute';
   if (k === 's') return screen === 'run' ? null : 'settings';
   return null;
@@ -362,18 +366,16 @@ export function captionSteps(text) {
     .map(titleCase);
 }
 
-const signalText = (i) => (i === 'left' ? 'Signal Left' : i === 'right' ? 'Signal Right' : 'No Signal');
-const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
-
 /**
- * run: { go, exit, exited, laps, red, mode ('off'|'tips'|'guided'|'watch'), traffic, signalLead, culprit: { id, name, indicator, comingRound } | null,
- *   summary (gap-log summary), hesitation (verdict), maxLaps, replayable, goHandled (a drill made the Go) }.
- * -> { title, reason, ref (verdict for the reference line), notes[], gaps, takenLines[], cars[], decisions[], explain }
+ * run: { go, exit, laps, red, mode ('off'|'tips'|'guided'|'watch'), summary (gap-log summary), hesitation (verdict),
+ *   maxLaps, replayable, goHandled (a drill made the Go) }.
+ * -> { title, reason, ref (verdict for the reference line), also[], explain, solution }
  *   title: the main verdict's own (red, else a missed-out run, else the first amber), or COPY.clean
- *   takenLines: "Next Car X s Away (Name)" or "No Car Coming", then how long after the last car (or the window)
+ *   also: the titles of the run's other mistakes; the learner already knows the settings and the traffic
+ *   explain: the run kept a lead-up to replay (the red verdict, or an amber decision)
+ *   solution: Watch can be offered (not after a watched run)
  */
 export function analysisView(run) {
-  const { summary } = run;
   const hes = run.goHandled ? null : run.hesitation;
   const missedOut = run.laps >= run.maxLaps;
   const missed = run.laps ? missedExit() : null;
@@ -384,54 +386,14 @@ export function analysisView(run) {
     run.exit?.verdict === 'lateSignal' ? run.exit : null,
   ].filter(Boolean);
   const main = run.red ?? (missedOut ? missed : ambers[0]) ?? { verdict: 'ok', title: COPY.clean, detail: '', hcRef: null };
-
-  const cars = summary.cars.slice(-6).map((c) => ({ name: capital(c.name), value: `${signalText(c.indicator)}, ${c.comingRound ? 'Came Round' : 'Turned Off'}${c.misleading ? ' (Misleading)' : ''}` }));
-  if (run.culprit && !summary.cars.some((c) => c.id === run.culprit.id)) {
-    const c = run.culprit;
-    cars.push({ name: capital(c.name), value: `${signalText(c.indicator)}, Came Round${c.indicator === 'left' ? ' (Misleading)' : ''}` });
-  }
-
-  // The taken entry's length runs from the gap (or window) opening to the tap: never call it "the gap".
-  const taken = summary.taken;
-  const nextName = taken?.nextCarId != null ? summary.cars.find((c) => c.id === taken.nextCarId)?.name : null;
-  const takenLines = !taken ? [] : [
-    taken.lag != null ? COPY.taken.next(taken.lag, nextName && capital(nextName)) : COPY.taken.none,
-    ...(taken.reaction != null ? [(summary.gaps.some((g) => !g.taken) ? COPY.taken.afterCar : COPY.taken.afterWindow)(taken.reaction)] : []),
-  ];
-
-  let exitWord;
-  if (run.exit && run.exit.verdict !== 'ok') exitWord = COPY.exit[run.exit.verdict] ?? capital(run.exit.verdict);
-  else if (missedOut) exitWord = `Missed (${plural(run.laps, 'Lap')})`;
-  else if (run.exit) exitWord = run.laps ? `Went Round ${plural(run.laps, 'Time')}, Then on Time` : COPY.exit.ok;
-  else exitWord = run.exited ? COPY.exit.auto : COPY.exit.none; // the first exit has no Exit decision
-
-  // A drill's Go is made for the learner: nothing about it (or the wait before it) is theirs to judge.
-  const decisions = run.goHandled ? [['Go', COPY.go.handled], ['Exit', exitWord]] : [
-    ['Go', COPY.go[run.go?.verdict ?? 'none'] ?? capital(run.go.verdict)],
-    ['Waiting', hes?.verdict === 'ok' ? 'Fine' : `Hesitant (${plural(summary.missedClear, 'Clear Gap')})`],
-    ['Exit', exitWord],
-  ];
-  if (run.signalLead != null) decisions.push(['Signal', `Given ${run.signalLead.toFixed(1)} s Before Exit`]);
-
-  const notes = [];
-  if (run.mode === 'guided' || run.mode === 'watch') notes.push(COPY.notes[run.mode]);
-  if (run.traffic && run.traffic !== 'normal') notes.push(COPY.notes.traffic(run.traffic));
-
+  const also = [...new Set([run.red, ...ambers].filter((v) => v && v !== main).map((v) => v.title))];
   return {
     title: main.title,
     reason: main.detail ?? main.reason ?? '',
     ref: main.hcRef ?? null,
-    notes,
-    // clear: a gap the judge would have called clear (CLEAR_GAP), so the chart marks it without knowing the rule.
-    gaps: summary.gaps.length ? {
-      gaps: summary.gaps.map((g) => ({ ...g, clear: g.length >= CLEAR_GAP })),
-      start: summary.gaps[0].start,
-      end: summary.end ?? summary.gaps[summary.gaps.length - 1].end,
-    } : null,
-    takenLines,
-    cars,
-    decisions,
-    explain: Boolean(run.replayable || run.red), // the run kept a lead-up to replay: the red verdict, or an amber decision
+    also,
+    explain: Boolean(run.replayable || run.red),
+    solution: run.mode !== 'watch',
   };
 }
 

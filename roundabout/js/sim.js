@@ -56,7 +56,10 @@ const DECISION_ZONE = 20; // metres before the line where an AI driver starts ju
 const LOCK_DECEL = 3; // once stopping would need more than this, a committed driver no longer reconsiders
 // s an AI driver wants between clearing a conflict and the circulating car arriving: crossing a car's
 // path makes its driver ease off well before the bodies meet.
-const AI_CLEAR_MARGIN = 1.5;
+const AI_CLEAR_MARGIN = 1.2;
+// s a ring vehicle must be clear of an entrant's conflict zone before the entrant arrives to hold on rather
+// than yield: judge.js PASS_MARGIN, the same rule the player's Go is judged by.
+const PASS_IN_FRONT = 1.0;
 // Estimates, not sourced: after `ramp` s stopped at the front of its queue a driver accepts gaps `gap` s
 // shorter and lets circulating traffic brake up to the full BRAKE_LIMIT (from brakeShare of it).
 const IMPATIENCE = { ramp: 30, gap: 1.0, brakeShare: 0.8 };
@@ -572,6 +575,17 @@ export function createSim(layout, opts = {}) {
         if (front > run.sFrom || v.s - v.length / 2 > run.sTo) continue;
         const gap = run.sFrom - front;
         if (gap > 60) break;
+        // Passing in front, point by point as judge.goAssessment tests it: at present speed this vehicle's rear
+        // clears each point of the run PASS_IN_FRONT before the entrant's front reaches the matching entry
+        // point. Holding on keeps it clear (the entrant follows it in); braking would leave it crawling across.
+        const rear = v.s - v.length / 2;
+        const arrive = new Map(); // entry point -> s until the entrant's front gets there (pairs repeat points)
+        const arriveAt = (sEntry) => {
+          if (!arrive.has(sEntry)) arrive.set(sEntry, timeToReach(w.path, profileOf(w), w.s, w.v, w.params?.a ?? 2, sEntry - w.length / 2, 15));
+          return arrive.get(sEntry);
+        };
+        const passes = run.pairs.every(([sOther, sEntry]) => sOther <= rear || (sOther - rear) / Math.max(v.v, 1) + PASS_IN_FRONT <= arriveAt(sEntry));
+        if (passes) break;
         const wClear = timeToReach(w.path, profileOf(w), w.s, w.v, w.params?.a ?? 2, run.sEntryMax + w.length / 2, 15);
         if (gap / Math.max(v.v, 1) < wClear + 0.5) {
           // The entrant moves on as it joins: only its speed along this vehicle's heading holds the zone up.

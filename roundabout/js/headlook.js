@@ -82,17 +82,17 @@ export const LOOK = {
   armsAt: 50, // m to the line: one look at the ahead and left arms, before the right scan
   armHold: 1.0,
   rightAt: 28, // m to the line: scanning right starts here or when the Go window opens
-  // The line scan is right (hold), left (brief), right (hold): right looks alternate a hold and a longer hold
-  // with a calm pause in it, so a long wait repeats the three beats and never ping-pongs.
-  rightHolds: [2.4, 3.8, 2.6, 4.2], // s, cycled so the rhythm is not a metronome
-  leftHold: 1.0, // s, the brief left check between right looks
+  // The line scan is right, one brief left check, then right for the rest of the wait: traffic comes from the
+  // right, so a driver who has checked left once keeps watching right.
+  firstRightHold: 2.4, // s
+  leftHold: 1.0, // s, the one left check
   leftMax: 0.7, // rad: the left check turns no further than this; the left arm is still in the frame
   goRightHold: 0.7, // s: the last right look as the car pulls away, when Go came while the head was not right
   // s: interior mirror, left wing mirror, toward the exit. The first two fit the shortest leaving phase (~1.6 s
   // on a first exit), so the exit glance always comes before the ring is left.
   mirrorHolds: [0.65, 0.75, 1.0],
   focusHold: 2.2, // s a guided focus holds unless renewed
-  focusRight: 0.2, // rad: a focus this far right of ahead counts as "on the right" and aims the line scan's right holds
+  focusRight: 0.2, // rad: a focus this far right of ahead counts as a look right (for the pull-away look)
   focusRetarget: 1.5, // s: at the line a right focus re-aims the held pose at most this often
   rightScreenX: 0.3, // NDC where a right look puts the upstream point: room for traffic beyond it
   rightEdgeX: 0.45, // NDC the point may drift to so the right wing mirror stays in the frame
@@ -364,16 +364,8 @@ export function createHeadLook({ gentle = false } = {}) {
     };
   };
 
-  // Which beat of the line scan `since` seconds into it falls in: right holds with brief left checks between.
-  function rhythm(since) {
-    const n = LOOK.rightHolds.length;
-    for (let i = 0, at = 0; ; i++) {
-      at += LOOK.rightHolds[i % n];
-      if (since < at) return 'right';
-      at += LOOK.leftHold;
-      if (since < at) return 'left';
-    }
-  }
+  // Which beat of the line scan `since` seconds into it falls in.
+  const rhythm = (since) => (since >= LOOK.firstRightHold && since < LOOK.firstRightHold + LOOK.leftHold ? 'left' : 'right');
 
   function target(key, input) {
     const p = input.points;
@@ -413,7 +405,7 @@ export function createHeadLook({ gentle = false } = {}) {
       if (v) return out(v, key === 'exit' ? LOOK.rate.glance : LOOK.rate.mirror, key);
       if (!key) msmAt = null;
     }
-    // While scanning, the rhythm owns the head: a focus only aims the right holds (see the scan below). The scan
+    // While scanning, the rhythm owns the head: a focus only replaces the right hold (see the scan below). The scan
     // starts on distance or the Go window alone, so a focus running then cannot postpone it.
     const approaching = phase === 'approach' || phase === 'waiting';
     if (approaching && scanAt === null && (input.dist <= LOOK.rightAt || input.goWindowOpen || phase === 'waiting')) scanAt = t;
@@ -443,9 +435,9 @@ export function createHeadLook({ gentle = false } = {}) {
       }
       if (scanning) {
         const key = rhythm(t - scanAt);
-        // A focus on the right holds one pose, re-aimed at most every focusRetarget s, so a guide switching
-        // between cars never makes the head hunt.
-        if (key === 'right' && input.focus && input.focus.yaw <= -LOOK.focusRight) {
+        // A guide focus takes the right hold's place (only the one left check outranks it), holding one pose
+        // re-aimed at most every focusRetarget s, so a guide switching between cars never makes the head hunt.
+        if (key === 'right' && input.focus) {
           if (!focusPose || t - focusPose.at >= LOOK.focusRetarget) focusPose = { yaw: input.focus.yaw, pitch: input.focus.pitch, at: t };
           return out(focusPose, LOOK.rate.glance, 'focus');
         }

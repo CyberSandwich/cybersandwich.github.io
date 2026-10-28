@@ -34,6 +34,12 @@
   --ctl:46px;--in-r:calc(var(--ctl) / 2);--pad:14px;--out-r:calc(var(--in-r) + var(--pad));--gap:8px;--sec:16px;--edge:14px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
 html[data-theme="dark"]{color-scheme:dark;--rb-route:#5EC4B6;--rb-glass:rgba(36,36,38,.88)}
+/* Dark: the site's 12% white selection and the card-coloured inset both vanish on the dark glass, so selected
+   segments, the big button and inset groups step up in lightness here. */
+:root{--rb-active:var(--tab-active)}
+html[data-theme="dark"]{--rb-active:rgba(245,245,247,.24);--rb-inset:rgba(255,255,255,.07)}
+html[data-theme="dark"] .grp .seg{color:var(--t2)}
+.grp .seg.active{background:var(--rb-active)}
 html[data-theme="sepia"]{color-scheme:light;--rb-route:#A67B5B;--rb-glass:rgba(245,237,218,.9)}
 /* The hint's leader line: a quiet ink with a thin halo of the opposite tone, so it reads on sky and on the dark
    dashboard alike. */
@@ -79,7 +85,7 @@ body{-webkit-user-select:none;user-select:none;touch-action:none}
 .btn:active{opacity:.75}
 .btn:disabled{opacity:.45;cursor:default}
 /* Theme exemption: a 12% black drop shadow and 12% white top light read the same on every theme's fill. */
-.primary{background:var(--tab-active);color:var(--tab-active-c);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)}
+.primary{background:var(--rb-active);color:var(--tab-active-c);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.12)}
 .ghost{background:var(--rb-inset);color:var(--t2)}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap)}
 .icon-btn{width:var(--ctl);height:var(--ctl);flex:none;border:none;border-radius:50%;background:var(--rb-inset);color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
@@ -117,9 +123,15 @@ body{-webkit-user-select:none;user-select:none;touch-action:none}
 .notes{font:500 .75rem/1.3 var(--font);color:var(--t3);margin:6px 4px 0}
 .link{display:inline-block;margin:var(--gap) 4px 0;padding:0;border:none;background:none;font:500 .875rem/1.4 var(--font);color:var(--t1);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--t4);cursor:pointer}
 span.link{text-decoration:none;cursor:default}
-#a-gaps{display:block;width:100%;height:auto;margin:0 0 4px}
-#a-gaps text{font:500 11px var(--font);fill:var(--t2)}
-#a-taken{margin:0 4px;white-space:pre-line}
+.btn svg{width:18px;height:18px;flex:none}
+#settings>.t-title,#about>.t-title{text-align:center}
+/* Results: Home, then the two main pills; the replay and the watched solution as links beneath. */
+.res-row{display:grid;grid-template-columns:var(--ctl) 1fr 1fr;gap:var(--gap)}
+.res-links{display:flex;justify-content:center;gap:24px}
+.res-links .link{margin-top:0}
+/* Each two-way button shows the icon of the view or step it leads to. */
+#r-view[data-to="above"] .to-driver,#r-view:not([data-to="above"]) .to-above{display:none}
+#r-next[data-to="back"] .to-end,#r-next:not([data-to="back"]) .to-back{display:none}
 #about .t-body+.t-body{margin-top:var(--gap)}
 #about a{color:var(--t1);text-decoration-color:var(--t4)}
 
@@ -143,15 +155,18 @@ span.link{text-decoration:none;cursor:default}
 .ind.on{opacity:1}
 html[data-theme="dark"] .ind{color:#3DDC84}
 html[data-theme="sepia"] .ind{color:#3F6212}
-#act{position:absolute;left:50%;bottom:calc(18px + var(--sb));transform:translateX(-50%);width:min(340px,calc(100cqw - 2 * var(--edge)));height:64px;border-radius:32px;border:1px solid var(--tab-border);background:var(--tab-active);color:var(--tab-active-c);font:600 1.125rem/1 var(--font);letter-spacing:.01em;cursor:pointer;box-shadow:var(--tab-shadow);transition:opacity .2s,transform .12s;display:flex;align-items:center;justify-content:center;gap:10px}
+#act{position:absolute;left:50%;bottom:calc(18px + var(--sb));transform:translateX(-50%);width:min(340px,calc(100cqw - 2 * var(--edge)));height:64px;border-radius:32px;border:1px solid var(--tab-border);background:var(--rb-active);color:var(--tab-active-c);font:600 1.125rem/1 var(--font);letter-spacing:.01em;cursor:pointer;box-shadow:var(--tab-shadow);transition:opacity .2s,transform .12s;display:flex;align-items:center;justify-content:center;gap:10px}
 @supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){#act{backdrop-filter:blur(10px) saturate(180%);-webkit-backdrop-filter:blur(10px) saturate(180%)}}
 #act:disabled,#act.inert{opacity:.38;cursor:default}
 /* Only a live button carries the light: faded under :disabled the tints turn muddy and read as neither colour.
-   Theme exemption: white text, since every theme's go/caution/stop fill is a deep saturated tone. */
-#act[data-tone]:not(:disabled){transition:background-color .15s,opacity .2s,transform .12s;color:#fff}
-#act[data-tone="go"]:not(:disabled){background:var(--rb-go)}
-#act[data-tone="caution"]:not(:disabled){background:var(--rb-caution)}
-#act[data-tone="stop"]:not(:disabled){background:var(--rb-stop)}
+   The light is tinted glass, like the button it sits on: the blur shows through a translucent tone, with a tone
+   rim and a top highlight. Theme exemption: white text, since every theme's tone is deep and saturated. */
+#act[data-tone="go"]{--tone:var(--rb-go)}
+#act[data-tone="caution"]{--tone:var(--rb-caution)}
+#act[data-tone="stop"]{--tone:var(--rb-stop)}
+#act[data-tone]:not(:disabled){transition:background-color .15s,border-color .15s,opacity .2s,transform .12s;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);
+  background:color-mix(in srgb,var(--tone) 62%,transparent);border-color:color-mix(in srgb,var(--tone) 50%,rgba(255,255,255,.55));
+  box-shadow:var(--tab-shadow),inset 0 1px 0 rgba(255,255,255,.3)}
 #act:not(:disabled):active{transform:translateX(-50%) scale(.97)}
 .cap{display:none;min-width:22px;height:22px;padding:0 6px;border-radius:6px;border:1px solid color-mix(in srgb,var(--tab-active-c) 45%,transparent);font:500 .75rem/20px var(--font);opacity:.8}
 #edge{position:absolute;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t1);pointer-events:none}
@@ -159,7 +174,8 @@ html[data-theme="sepia"] .ind{color:#3F6212}
 /* Bottom-centre sits on the anchor point above the culprit's roof. */
 #tag{position:absolute;transform:translate(-50%,-100%);padding:6px 12px;border-radius:var(--in-r);font:600 .75rem/1.2 var(--font);color:var(--t1);white-space:nowrap;pointer-events:none}
 /* Freeze and replay bar: two buttons a row at every width (four labels never fit one row at 390 px). The freeze
-   shows only Keep Driving and See Analysis; See Analysis takes the row alone when Keep Driving is not offered. */
+   shows only Keep Driving and End Run; the last button (End Run, or Back from the results) takes the row alone
+   when Keep Driving is not offered. */
 #replaybar{position:absolute;left:50%;bottom:calc(var(--edge) + var(--sb));transform:translateX(-50%);width:min(440px,calc(100cqw - 2 * var(--edge)));padding:var(--pad);border-radius:var(--out-r);display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 #replaybar.frozen #r-again,#replaybar.frozen #r-view{display:none}
 #r-keep[hidden]+#r-next{grid-column:1 / -1}
@@ -230,10 +246,10 @@ html[data-theme="sepia"] .ind{color:#3F6212}
   <div id="edge" class="panel" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
   <button id="act" hidden disabled><span id="act-l">Go</span><span class="cap">Space</span></button>
   <div id="replaybar" class="panel" hidden>
-    <button class="btn ghost" id="r-again" title="Replay Again (R)"></button>
-    <button class="btn ghost" id="r-view"></button>
-    <button class="btn ghost" id="r-keep" title="Keep Driving (K)" hidden></button>
-    <button class="btn primary" id="r-next" title="See Analysis (Space)"></button>
+    <button class="btn ghost" id="r-again" title="Replay (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span id="r-again-l"></span></button>
+    <button class="btn ghost" id="r-view"><svg class="to-driver" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/></svg><svg class="to-above" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg><span id="r-view-l"></span></button>
+    <button class="btn ghost" id="r-keep" title="Keep Driving (K)" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg><span id="r-keep-l"></span></button>
+    <button class="btn primary" id="r-next"><svg class="to-end" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg><svg class="to-back" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span id="r-next-l"></span></button>
   </div>
 
   <section id="start" class="sheet panel">
@@ -249,7 +265,7 @@ html[data-theme="sepia"] .ind{color:#3F6212}
   <section id="settings" class="sheet panel" hidden>
     <h2 class="t-title">Settings</h2>
     <h3 class="lbl">Sound</h3>
-    <div class="grp"><div class="seg-row c2" id="sound-seg"><button class="seg" data-v="on">Sound</button><button class="seg" data-v="off">Mute</button></div></div>
+    <div class="grp"><div class="seg-row c2" id="sound-seg"><button class="seg" data-v="on">On</button><button class="seg" data-v="off">Off</button></div></div>
     <h3 class="lbl">Tips</h3>
     <div class="grp"><div class="seg-row c4" id="tips-seg"><button class="seg" data-v="off">No Tips</button><button class="seg" data-v="tips">Tips</button><button class="seg" data-v="guided">Guided</button><button class="seg" data-v="watch">Watch</button></div></div>
     <h3 class="lbl">Traffic</h3>
@@ -278,17 +294,15 @@ html[data-theme="sepia"] .ind{color:#3F6212}
   <section id="analysis" class="sheet panel" hidden>
     <h2 class="t-title" id="a-title"></h2>
     <p class="t-body" id="a-reason"></p>
-    <p class="notes" id="a-notes"></p>
+    <p class="notes" id="a-also"></p>
     <a class="link" id="a-ref" target="_blank" rel="noopener"></a>
-    <button class="link" id="a-show" hidden>Show What Went Wrong</button>
-    <div id="a-gap-sec"><h3 class="lbl">Gaps</h3><svg id="a-gaps" viewBox="0 0 300 40" aria-hidden="true"></svg><p class="t-body" id="a-taken"></p></div>
-    <div id="a-car-sec"><h3 class="lbl">Cars</h3><div class="grp" id="a-cars"></div></div>
-    <h3 class="lbl">Decisions</h3>
-    <div class="grp" id="a-dec"></div>
     <div class="actions">
-      <button class="btn primary" id="a-retry" title="Retry (Space)">Retry</button>
-      <div class="pair"><button class="btn ghost" id="a-guided" title="Retry Guided (G)">Retry Guided</button><button class="btn ghost" id="a-watch" title="Watch It Done (W)">Watch It Done</button></div>
-      <div class="pair"><button class="btn ghost" id="a-new" title="New Roundabout (N)">New Roundabout</button><button class="btn ghost" id="a-tier">Change Tier</button></div>
+      <div class="res-row">
+        <button class="icon-btn" id="a-home" title="Start Screen (H)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+        <button class="btn primary" id="a-retry" title="Try Again (Space)"></button>
+        <button class="btn ghost" id="a-new" title="Next Roundabout (N)"></button>
+      </div>
+      <div class="res-links"><button class="link" id="a-show" title="See Analysis (A)"></button><button class="link" id="a-watch" title="See Solution (W)"></button></div>
     </div>
   </section>
 

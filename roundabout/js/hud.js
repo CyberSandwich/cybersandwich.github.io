@@ -2,17 +2,19 @@
  * HUD and sheets. DOM only, no three.js and no sim: main/run decide, this module shows. Copy comes from ui.js.
  *
  *   const hud = createHud(handlers)
- *     handlers: onTier(t) onShuffle() onStart() onAct() onRetry() onRetryMode(mode) onNew() onChangeTier() onShowReplay()
+ *     handlers: onTier(t) onShuffle() onStart() onAct() onRetry() onSolution() onNew() onHome() onShowReplay()
  *               onReplayAgain() onReplayView() onReplayNext() onKeepDriving() onMute() onSound(on) onTips(mode)
  *               onTraffic(level) onDrill(key|null) onSeed(text) onCopyLink()
  *   hud.screen('start' | 'run' | 'frozen' | 'replay' | 'analysis' | 'none')   which layer of the HUD is up
- *   hud.sheet(name | null) / hud.openSheet                         settings and about float over any screen
+ *   hud.sheet(name | null) / hud.openSheet   settings and about float over any screen; outside a run a screen
+ *                                            change leaves them open, so several settings can change in one go
  *   hud.route(ui.routeView(layout))  hud.speed(mph, limitMph)  hud.telltale(left, right)  hud.keepDriving(on)
  *   hud.act(label, { enabled, inert })  hud.advice(tone)  hud.chip(text | null, { holdMs })  hud.paused(on)  hud.edge(pos | null)
  *   hud.leader({ x, y } | null)      the hint's target as 0..1 of the canvas, each frame: a thin line from the hint to it
  *   hud.tag({ x, y, text } | null)   the culprit's signal in words, pinned above it in a freeze or replay
  *   hud.analysis(view)  hud.toasts(plan, onTap)  hud.clearToasts()  hud.fade(opacity)
  *   hud.setTier/setSeed/setSound/setTips/setTraffic/setDrill/setReady/copied  hud.replayView(driverOn)
+ *   hud.replayEnd(back)              the bar's last button: End Run, or Back to the results it was opened from
  */
 import { COPY, hcLink, createToastQueue, leaderPath } from './ui.js';
 
@@ -28,19 +30,6 @@ const svgEl = (tag, attrs = {}, parent) => {
   parent?.appendChild(e);
   return e;
 };
-
-function kvRow(k, v) {
-  const row = document.createElement('div');
-  row.className = 'srow static';
-  const a = document.createElement('span');
-  a.className = 'slbl';
-  a.textContent = k;
-  const b = document.createElement('span');
-  b.className = 'val';
-  b.textContent = v;
-  row.append(a, b);
-  return row;
-}
 
 function segSelect(row, value) {
   for (const b of row.querySelectorAll('.seg')) b.classList.toggle('active', b.dataset.v === value);
@@ -85,9 +74,8 @@ export function createHud(h) {
   click('mute', () => h.onMute());
   click('a-retry', () => h.onRetry());
   click('a-new', () => h.onNew());
-  click('a-guided', () => h.onRetryMode('guided'));
-  click('a-watch', () => h.onRetryMode('watch'));
-  click('a-tier', () => h.onChangeTier());
+  click('a-watch', () => h.onSolution());
+  click('a-home', () => h.onHome());
   click('a-show', () => h.onShowReplay());
   click('r-again', () => h.onReplayAgain());
   click('r-view', () => h.onReplayView());
@@ -100,10 +88,27 @@ export function createHud(h) {
   function setReady(on) { $('start-btn').disabled = !on; $('start-btn').textContent = on ? COPY.start : COPY.loading; }
   setReady(false);
   $('copy-l').textContent = COPY.link.copy;
-  $('r-again').textContent = COPY.replay.again;
-  $('r-next').textContent = COPY.replay.next;
-  $('r-keep').textContent = COPY.replay.keep;
-  $('r-view').textContent = COPY.replay.driver;
+  $('r-again-l').textContent = COPY.replay.again;
+  $('r-keep-l').textContent = COPY.replay.keep;
+  $('a-retry').textContent = COPY.results.retry;
+  $('a-new').textContent = COPY.results.next;
+  $('a-home').setAttribute('aria-label', COPY.results.home);
+  $('a-show').textContent = COPY.results.analysis;
+  $('a-watch').textContent = COPY.results.solution;
+  replayView(false);
+  replayEnd(false);
+
+  // The view button names (and shows the icon of) the view it switches to.
+  function replayView(driver) {
+    $('r-view').dataset.to = driver ? 'above' : 'driver';
+    $('r-view-l').textContent = driver ? COPY.replay.above : COPY.replay.driver;
+  }
+  function replayEnd(back) {
+    const label = back ? COPY.replay.back : COPY.replay.end;
+    $('r-next').dataset.to = back ? 'back' : 'end';
+    $('r-next-l').textContent = label;
+    $('r-next').title = `${label} (Space)`;
+  }
 
   // A tap outside an open sheet closes it (the canvas and HUD gaps both count as outside).
   document.addEventListener('pointerdown', (e) => {
@@ -132,7 +137,8 @@ export function createHud(h) {
     if (!inRun) chip(null);
     if (name !== 'run') edge(null);
     if (!inRun) tag(null);
-    sheet(null);
+    // A setting that restarts the preview must not close Settings; a run has no settings button, so it closes.
+    sheet(inRun ? null : openSheet);
     // Toasts sit above the freeze/replay bar while it shows (index.html #toasts).
     const bar = $('replaybar');
     hudEl.style.setProperty('--bar-h', bar.hidden ? '0px' : `${bar.offsetHeight}px`);
@@ -204,35 +210,14 @@ export function createHud(h) {
     e.hidden = false;
   }
 
-  function gapsChart(g) {
-    const svg = $('a-gaps');
-    svg.replaceChildren();
-    const taken = g.gaps.find((x) => x.taken);
-    const hasLag = taken?.lag != null; // null when nothing was coming
-    const end = Math.max(g.end, hasLag ? taken.end + taken.lag : g.end);
-    const span = Math.max(0.5, end - g.start);
-    const x = (t) => ((t - g.start) / span) * 300;
-    for (const gap of g.gaps) {
-      const x0 = x(gap.start) + (gap.start > g.start ? 1.5 : 0);
-      const w = Math.max(2, x(gap.end) - x0);
-      const tone = gap.taken ? 100 : gap.clear ? 34 : 14;
-      svgEl('rect', { x: x0, y: 14, width: w, height: 14, rx: 4, style: `fill:color-mix(in srgb, var(--t1) ${tone}%, transparent);stroke:none` }, svg);
-      // The taken bar only spans opening-to-tap, not a gap between cars, so it carries no length.
-      if (w > 30 && !gap.taken) svgEl('text', { x: x0 + w / 2, y: 9, 'text-anchor': 'middle', stroke: 'none' }, svg).textContent = `${gap.length.toFixed(1)} s`;
-    }
-    if (hasLag) {
-      const xn = x(taken.end + taken.lag);
-      svgEl('line', { x1: xn, y1: 12, x2: xn, y2: 30, 'stroke-width': 2, style: 'stroke:var(--t1)' }, svg);
-      svgEl('text', { x: Math.min(296, xn), y: 39, 'text-anchor': 'end', stroke: 'none' }, svg).textContent = COPY.taken.next(taken.lag);
-    }
-  }
-
+  // The results card: the verdict and why, the run's other mistakes in one line, the reference; See Analysis
+  // only when the run kept a lead-up to replay, See Solution unless the run was the solution.
   function analysis(v) {
     $('a-title').textContent = v.title;
     $('a-reason').textContent = v.reason;
     $('a-reason').hidden = !v.reason;
-    $('a-notes').textContent = v.notes.join(', ');
-    $('a-notes').hidden = !v.notes.length;
+    $('a-also').textContent = v.also.length ? COPY.results.also(v.also) : '';
+    $('a-also').hidden = !v.also.length;
     const ref = hcLink(v.ref);
     const a = $('a-ref');
     a.hidden = !ref;
@@ -241,13 +226,7 @@ export function createHud(h) {
       a.href = ref.href;
     }
     $('a-show').hidden = !v.explain;
-    $('a-gap-sec').hidden = !v.gaps;
-    if (v.gaps) gapsChart(v.gaps);
-    $('a-taken').textContent = v.takenLines.join('\n');
-    $('a-taken').hidden = !v.takenLines.length;
-    $('a-car-sec').hidden = !v.cars.length;
-    $('a-cars').replaceChildren(...v.cars.map((c) => kvRow(c.name, c.value)));
-    $('a-dec').replaceChildren(...v.decisions.map(([k, val]) => kvRow(k, val)));
+    $('a-watch').hidden = !v.solution;
     screen('analysis');
     screens.analysis.scrollTop = 0;
   }
@@ -347,8 +326,8 @@ export function createHud(h) {
     },
     toast(msg, kind) { window._base.notify(msg, kind === 'ok' ? true : kind === 'warn' ? 'warn' : false); },
     fade(o) { $('fade').style.opacity = String(o); },
-    // The view button names the view it switches to.
-    replayView(driver) { $('r-view').textContent = driver ? COPY.replay.above : COPY.replay.driver; },
+    replayView,
+    replayEnd,
     setTier(t) { segSelect($('tiers'), t); },
     setSeed(s) { $('seed').value = s; },
     setSound(on) { segSelect($('sound-seg'), on ? 'on' : 'off'); $('mute').classList.toggle('muted', !on); },

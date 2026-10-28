@@ -48,7 +48,7 @@ const T = {
   povRate: 15, // 1/s: frame changes on resize or rotation settle in ~200 ms
   // Mirror render targets (px at high; medium scales them) and refresh period in frames per tier.
   rt: { rear: [256, 64], left: [256, 160], right: [256, 160] },
-  tiers: { high: { scale: 1, period: 2, live: ['rear', 'left', 'right'] }, medium: { scale: 0.75, period: 3, live: ['rear', 'left'] }, low: { scale: 0.75, period: Infinity, live: [] } },
+  tiers: { high: { scale: 1, period: 2, live: ['rear', 'left', 'right'] }, medium: { scale: 0.75, period: 3, live: ['rear', 'left', 'right'] }, low: { scale: 0.75, period: Infinity, live: [] } },
   // Body motion is kept small: sway and shake in a moving view cause headaches. Reduced motion has none.
   accelPitch: 0.0012, // rad per m/s^2, capped at accelPitchMax: the nose dips under braking
   accelPitchMax: THREE.MathUtils.degToRad(0.25),

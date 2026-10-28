@@ -61,7 +61,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
   else if (debug) sim.debug.clearTraffic(); // scenarios are timed from the line: no queue ahead
 
   // rec.show is what "What Went Wrong" replays: the red verdict, else the first amber one with a decision to show.
-  const rec = { go: null, exit: null, laps: 0, red: null, culprit: null, show: null, tip: null, alongside: null, signalAt: null, exitedAt: null, goHandled: false };
+  const rec = { go: null, exit: null, laps: 0, red: null, show: null, tip: null, alongside: null, goHandled: false };
   let state = 'approach';
   let beforePause = null;
   let endAt = null;
@@ -71,6 +71,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
   let steps = 0;
   let replay = null;
   let finished = false; // end() has run
+  let parked = false; // ended from a freeze or its replay: the results' replay can still keep driving
   let resume = null; // { state, exit }: where keepDriving() returns to
   let focus = null;
   let goGate = false;
@@ -85,8 +86,8 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     const phase = player.phase;
     const going = phase === 'approach' || phase === 'waiting';
     const inert = watch || (going ? autoGo : !exitDecision);
-    if (going) out.act('Go', { enabled: player.goWindowOpen, inert });
-    else out.act('Exit', { enabled: phase === 'ring' && player.exitWindowOpen, inert });
+    if (going) out.act(COPY.act.go, { enabled: player.goWindowOpen, inert });
+    else out.act(COPY.act.exit, { enabled: phase === 'ring' && player.exitWindowOpen, inert });
   }
 
   // ---------- decisions ----------
@@ -153,12 +154,12 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     rec.show = { verdict: v, name: nameOf(st, v.culpritId), decisionT: sim.t, frames: sim.replay() };
   }
 
-  // Red verdicts freeze the run. The first stays the run's recorded verdict (and culprit) however many follow
-  // after keepDriving(); rec.show is always the latest, which is the one the replay explains.
+  // Red verdicts freeze the run. The first stays the run's recorded verdict however many follow after
+  // keepDriving(); rec.show is always the latest, which is the one the replay explains.
   function freeze(v, st) {
     const c = v.culpritId != null && st.vehicles.find((w) => w.id === v.culpritId);
-    const culprit = c ? { id: c.id, name: vehicleName(c), indicator: c.indicator, comingRound: true } : null;
-    if (!rec.red) { rec.red = v; rec.culprit = culprit; }
+    const culprit = c ? { id: c.id, name: vehicleName(c) } : null;
+    rec.red ??= v;
     rec.show = { verdict: v, name: culprit?.name ?? null, decisionT: sim.t, frames: null };
     replay = null;
     resume = { state, exit: player.phase === 'ring' };
@@ -174,12 +175,15 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
   }
 
   // From the freeze or its replay: the learner carries on from the frozen moment. The sim never advanced during
-  // the replay (it plays recorded frames), so nothing needs restoring; a red Exit goes ahead and leaves.
-  // A replay opened from the analysis belongs to a finished run: there is nothing to resume.
-  const canKeepDriving = () => !finished && (state === 'frozen' || state === 'replay');
+  // the replay or the results (both hold time at 0), so nothing needs restoring; a red Exit goes ahead and leaves.
+  // A run ended from its freeze stays parked: See Analysis replays it and can still keep driving. A run that
+  // ended on its own (left the ring, missed out) has nothing to resume.
+  const canKeepDriving = () => (!finished || parked) && (state === 'frozen' || state === 'replay');
 
   function keepDriving() {
     if (!canKeepDriving()) return;
+    finished = false;
+    parked = false;
     if (state === 'replay') out.replay(false);
     replay = null;
     state = resume.state;
@@ -220,12 +224,8 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
       case 'mirrorGlance':
         out.glance.mirrors();
         break;
-      case 'signalLeft':
-        rec.signalAt ??= sim.t;
-        break;
       case 'exited':
         state = 'exited';
-        rec.exitedAt = sim.t;
         endAt = sim.t + END_AFTER_EXIT;
         break;
       default:
@@ -374,6 +374,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
 
   function end() {
     if (state === 'analysis') return;
+    parked = canKeepDriving();
     state = 'analysis';
     finished = true;
     replay && out.replay(false);
@@ -381,8 +382,8 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     out.clearToasts();
     const summary = log.summary();
     const view = analysisView({
-      go: rec.go, exit: rec.exit, exited: rec.exitedAt !== null, laps: rec.laps, red: rec.red, culprit: rec.culprit, summary, hesitation: judgeHesitation(summary),
-      replayable: Boolean(rec.show), goHandled: rec.goHandled, maxLaps: MAX_LAPS, mode: tipsMode, traffic, signalLead: rec.signalAt !== null && rec.exitedAt != null ? rec.exitedAt - rec.signalAt : null,
+      go: rec.go, exit: rec.exit, laps: rec.laps, red: rec.red, summary, hesitation: judgeHesitation(summary),
+      replayable: Boolean(rec.show), goHandled: rec.goHandled, maxLaps: MAX_LAPS, mode: tipsMode,
     });
     out.ended(view);
   }
@@ -401,6 +402,7 @@ export function createRun({ layout, tier, trafficSeed, traffic = 'normal', prese
     get me() { return mine; }, // the player's state as of the latest step: one build per step, not per read
     get guided() { return guided; },
     get wasRed() { return Boolean(rec.red); },
+    get finished() { return finished; }, // the results are (or were last) up: a replay from them goes back to them
     get culpritId() { return rec.show?.verdict.culpritId ?? null; },
     togglePause() {
       if (state === 'paused') { state = beforePause; beforePause = null; return false; }
