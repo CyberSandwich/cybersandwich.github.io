@@ -1,6 +1,6 @@
 ---
 description: UK Innovator Founder visa guide: requirements, endorsing bodies, business plan and evidence, fees, checkpoints and settlement (ILR) after 3 years.
-updated: 2026-10-30
+updated: 2026-11-02
 ---
 
 # A Guide to the Innovator Founder Visa
@@ -35,7 +35,7 @@ updated: 2026-10-30
 | **Endorsement rate** | About 1 in 3: Envestors reports 34.4% (Apr 2023 to Mar 2026), Innovator International reports about 28% to 30% (2025) |
 | **Endorsement time** | Bodies report about 4 to 6 weeks |
 | **Visa decision** | Home Office target of 3 weeks from outside the UK, 8 weeks from inside |
-| **Rule changes** | Settlement rules are under consultation (see [Rule Changes](#rule-changes)) |
+| **Rule changes** | Earned settlement confirmed in Nov 2026, taking effect over 2027 (see [Rule Changes](#rule-changes)) |
 
 ## How It Works
 
@@ -367,6 +367,7 @@ You can apply for ILR at any point from 28 days before the 3 years are complete 
 ### Before Applying for ILR
 
 - [ ] No more than 180 days outside the UK in any 12 months
+- [ ] Earned settlement requirements met once in force (see [Rule Changes](#rule-changes))
 - [ ] Life in the UK test passed (if you are 18 to 64)
 - [ ] English requirement checked against the settlement wording (a UK degree should satisfy it)
 - [ ] Settlement endorsement in hand
@@ -404,7 +405,18 @@ Each dependant pays the ILR fee (£3,226) when they settle. For applications mad
 
 ### Earned Settlement
 
-A Home Office consultation (Nov 2025 to Feb 2026) proposed raising the standard wait for settlement from 5 to 10 years. It says most Innovator Founders should keep an accelerated 3-year route, subject to the mandatory requirements, but its proposed earnings test (above £12,570 a year for 3 to 5 years) names no exemption for them. The changes would apply to everyone who does not yet have ILR. No government response had been published as of Oct 2026. Draw a payroll salary above £12,570 from the first trading month and keep the payslips, and expect any change to take effect with little notice.
+The government confirmed earned settlement on 2 November 2026. The standard wait for settlement rises from 5 to 10 years, with a 3-year path kept for a "Highest Talent Group". The government's own estimates place Innovator Founder and Global Talent holders in that group, but the group is subject to review once the Migration Advisory Committee reports, and your most recent grant must be on the Innovator Founder route to use it. Rules start to be laid from December 2026 and take effect over 2027; none are in the Immigration Rules yet. Founders already on the route get no transitional protection: only care workers and some health and education workers who arrived before May 2025 keep 5 years.
+
+On top of the route's own targets, every applicant must meet new mandatory requirements:
+
+- **Earnings:** at least £12,571 a year for at least 3 years. Draw a payroll salary above that from the first trading month and keep the payslips; how dividends count is not yet published.
+- **Criminality:** any criminal record in the UK means refusal, court fines and conditional cautions included.
+- **Government debt:** none outstanding, including tax, National Insurance and NHS debt.
+- **Public funds:** none of the specified ones claimed in the 5 years before applying, or the wait becomes 20 years.
+- **Immigration breaches:** overstaying, breaking a visa condition or deception as an adult also means 20 years.
+- **Integration:** B2 English and the Life in the UK test. C1 English and volunteering do not shorten the wait.
+
+A partner who arrives with you still settles with you; one who joins later serves the same qualifying period. Time on Student and Graduate visas will not count toward settlement at all, because the 10-year long residence route closes.
 
 ### The Endorsing-Body Contract
 
@@ -473,7 +485,7 @@ Usually 12 months after ILR (straight away if you are married to a British citiz
 
 - [Indefinite Leave to Remain for Innovator Founders](https://www.gov.uk/indefinite-leave-to-remain-innovator-visa)
 - [British citizenship](https://www.gov.uk/british-citizenship)
-- [Earned settlement consultation](https://www.gov.uk/government/consultations/earned-settlement)
+- [Earned settlement consultation and government response](https://www.gov.uk/government/consultations/earned-settlement)
 
 ### Statistics
 
