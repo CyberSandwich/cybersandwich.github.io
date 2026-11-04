@@ -1,6 +1,6 @@
 ---
 description: UK Innovator Founder visa guide: requirements, endorsing bodies, business plan and evidence, fees, checkpoints and settlement (ILR) after 3 years.
-updated: 2026-11-02
+updated: 2026-11-04
 ---
 
 # A Guide to the Innovator Founder Visa
@@ -69,7 +69,7 @@ A skilled side job (RQF level 3 or above) is allowed, but most of your time must
 
 - **Innovative:** customers would switch to it, and a typical competitor could not copy it quickly. The Home Office's guidance for endorsing bodies gives adding an app to a taxi or cleaning company as an example that fails.
 - **Viable:** the plan is realistic for your skills and your money, and there is evidence of real demand.
-- **Scalable:** there is a structured plan to grow nationally and internationally and to create skilled jobs, so that doubling customers needs far less than double the costs. A licensable method or repeatable team delivery counts; a business that stays in one city, or depends on the founder's own hours, does not.
+- **Scalable:** there is a structured plan to grow nationally and internationally and to create skilled jobs, so that doubling customers needs far less than double the costs. A licensable method or repeatable team delivery counts; a small business that stays in one city, or depends on the founder's own hours, does not.
 
 Assessors weigh the file as a whole at the margin, so strong innovation can offset a thin financial plan.
 
@@ -122,7 +122,7 @@ Re-targeting the same service at a new demographic fails, because any provider c
 
 ### Scalability in Practice
 
-Plan growth in phases (one city then more on the same playbook, one sector then adjacent ones, direct sales then a channel), with each phase's assumptions visible.
+Plan growth in phases (one city then more on the same playbook, one sector then adjacent ones, direct sales then a channel), with each phase's assumptions visible. Innovator International says contractors, freelancers or a franchise model can carry the growth instead of employees. It also says a physical business may need more sites, though a large single site can count; its older line is that a one-city business fails, and the Home Office tests national and international growth, so a single-site plan rests on its discretion.
 
 ### Other Routes
 
@@ -132,7 +132,7 @@ To join an existing business, Skilled Worker is the usual route. Scale-up needs 
 
 | Body (as of Oct 2026) | Assessment | Turnaround |
 |---|---|---|
-| Innovator International | Plan answered against its published assessment questions, then an interview; 1 free second assessment after a refusal | Up to 40 days (reports about 5 weeks on average) |
+| Innovator International | Plan answered against its published assessment questions, then an interview; 1 free second assessment after a refusal | Up to 40 days (reports about 22 to 26 days on average as of Nov 2026) |
 | Envestors | Its own online plan form, then a presentation and Q&A call | Reports 4 to 6 weeks |
 | UK Endorsing Services | Plan review, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for applicants outside the UK whose company has revenue of £250,000 or more, or £500,000 or more raised | Not published |
@@ -141,7 +141,7 @@ Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed befo
 
 ### How They Differ
 
-- **Innovator International:** allows part-time work alongside the business, checks about 12 months of runway, runs 2 checkpoints, and likely refuses a product that only combines existing components.
+- **Innovator International:** allows part-time work alongside the business, checks about 12 months of runway, runs 2 checkpoints, and decides case by case on a product that combines existing components: a mix that is merely different fails, while one that creates something new and hard to copy can pass.
 - **Envestors:** takes no plan upload (you complete its own online form), and payment starts a 4-week clock, so finish the plan before paying. It requires full-time involvement and an in-house technical team member the business already has, checks about 24 months of runway (reported), wants your settlement targets named at endorsement, and runs checkpoints at 12, 24 and 36 months plus a monthly trading report.
 - **UK Endorsing Services:** treats innovation as a first yes or no gate, scores outsourced development in bands (largely outsourced scores zero), expects around 21% of revenue spent on R&D, and reads very low startup costs as weak innovation. It has reportedly accepted combining existing components since about Oct 2024, and allows part-time work if the business stays the main activity.
 
@@ -163,7 +163,7 @@ You need sector or technical skill, ideally both, plus the business skill to sel
 
 ### The Business Plan
 
-There is no official template. 30 to 60 pages is normal, shorter can work, and past 60 it gets hard to assess. Write it yourself: the interview tests your own understanding. AI is fine for structure, English, desk research, financial logic checks and a harsh critique of your own plan. It must not generate the core idea, chase trends or supply pasted answers. Show the product with screenshots or a demo.
+There is no official template, and Innovator International supplies none for the plan or the forecasts, saying the Home Office distrusts templated files. 30 to 60 pages is normal, shorter can work, and past 60 it gets hard to assess. Write it yourself: the interview tests your own understanding. AI is fine for structure, English, desk research, financial logic checks and a harsh critique of your own plan. It must not generate the core idea, chase trends or supply pasted answers. Show the product with screenshots or a demo.
 
 Most of your income has to come from the innovation you are endorsed for, at endorsement and again at settlement. Consultancy and other services are the usual way founders fail this; if services will fund the build, show their share of income falling over time.
 
@@ -179,11 +179,13 @@ Write forecasts you can beat: model 3 scenarios, and divide annual sales by 365 
 
 Desk research alone is weak, though small qualitative samples are accepted. Aim for 5 to 10 letters; a few signed letters from real buyers beat a survey of hundreds. One can be enough if a large customer commits money up front, while a low-priced product needs many more. Letters from people with no LinkedIn history before the application read as fabricated. Name contacts in the appendix and get their permission to be called, since assessors may phone them.
 
+Innovator International calls more than 50 people on a waiting list saying they want to buy a good first step, not a threshold. It says strong evidence for the core product is usually enough, with later products shown as pipeline, and that UK sales are not required: overseas sales are a sound base, as long as you also show UK need.
+
 ### Funding
 
 You need enough to cover the deepest dip in your cash-flow forecast, plus contingency, and about 12 months of runway to forecast profit, with the time to self-sustainability stated. Observed asks range from about £30,000 to £2 million, and a smaller ask carries no penalty if the plan reaches sustainability. A small sum is credible only if key resources (someone to build, someone to sell, a network or a built MVP) are already in hand, and it must cover finding customers, not only finishing the product; a funded year 1 with an unfunded year 2 is a named refusal.
 
-The money must be cash you already hold, shown on about 6 months of bank statements (a bank letter cannot show how long it has been there); it can sit in a personal account. Property, future salary, a grant not yet awarded and a raise planned after arrival do not count. No outside investor is needed: your own or a family member's money is fine if documented. Shares count if they convert easily to cash, and money held abroad must be transferable to a UK account. Build the main forecast on money you hold and show any raise as a second scenario. The plan must also say how you will live while drawing little or no salary.
+The money must be cash you already hold, shown on about 6 months of bank statements (a bank letter cannot show how long it has been there); it can sit in a personal account. Property, future salary, a grant not yet awarded and a raise planned after arrival do not count. No outside investor is needed: your own or a family member's money is fine if documented. Shares count if they convert easily to cash, and money held abroad must be transferable to a UK account. Build the main forecast on money you hold and show any raise as a second scenario. The plan must also say how you will live while drawing little or no salary. Innovator International says it sets no figure for this and checks it only generally, though a plan spending all your savings on setup draws the question; it accepts a part-time job, a partner's income or regular income from another business as the answer. The Home Office may look closer.
 
 Money from someone else needs their bank evidence and a signed letter of terms (an investor also supplies a passport). Disclose the source of funds in 3 parts:
 
@@ -191,7 +193,7 @@ Money from someone else needs their bank evidence and a signed letter of terms (
 - Where they are held and how they were injected
 - Any conditions attached, such as equity or repayment
 
-Innovator International asks only for a profit and loss statement and cashflow, 3 years monthly; a balance sheet is worth adding if you can produce one.
+Innovator International asks only for a profit and loss statement and cashflow, 3 years monthly; a balance sheet is worth adding if you can produce one. It suggests headline figures in the plan (revenue, costs, gross and net profit) and full workings as a supporting document.
 
 ---
 
@@ -239,7 +241,7 @@ Request the endorsement letter only when the visa application is ready: it is va
 
 ### Home Office Questions
 
-Some cases get written questions, not an interview, and the weight varies from 3 questions to a 50-email exchange. Topics include who built the product, proof of funds, skills gaps, pricing against competitors, and proof of the customer conversations the plan claims. Replies are often due in about 10 working days, and the Home Office can ask again for proof of customer interest, so keep letters current.
+Some cases get written questions, not an interview, and the weight varies from 3 questions to a 50-email exchange. Topics include who built the product, proof of funds, skills gaps, pricing against competitors, and proof of the customer conversations the plan claims. Replies are often due in about 10 working days, and the Home Office can ask again for proof of customer interest, so keep letters current. Innovator International says the questions usually repeat its own and rarely need new material, and that the Home Office also looks at your history and background.
 
 ### Switching From Another Visa
 
@@ -353,6 +355,7 @@ Supply what the body cannot check itself: a working demo, invoices, bank stateme
 - **In absolute terms too:** £100,000 against £1 million reads as good progress, a few thousand against £250,000 as a fail, so a low forecast is no safe hedge.
 - **Offsets:** strong hiring or exports can carry a revenue shortfall, but a few targets met do not rescue a missed forecast, and revenue without profit is not maturity.
 - **Selling, not just building:** run customer engagement and a pipeline beside the build and start selling early; first sales weeks before expiry look suspicious.
+- **Below the revenue targets:** Innovator International says a mature business turning over about £300,000 can reach ILR if it is profitable, has delivered its plan and meets the other requirements, adding that it depends on the business. It also reports one founder granted ILR with no employees; the targets met in that case were not stated.
 
 ### The Extension Fallback
 
@@ -420,7 +423,7 @@ A partner who arrives with you still settles with you; one who joins later serve
 
 ### The Endorsing-Body Contract
 
-The Home Office contract for endorsing-body services runs to 23 October 2028, and the published notice allows an extension. Checkpoint 2 and the settlement endorsement for a 2027 grant fall after that base term unless it is extended, so the open question is who endorses then. The Migration Advisory Committee is reviewing the talent routes, the endorsing-body model included, and intends to finish in winter 2026.
+The Home Office contract for endorsing-body services runs to 23 October 2028, and the published notice allows an extension. Checkpoint 2 and the settlement endorsement for a 2027 grant fall after that base term unless it is extended, so the open question is who endorses then. The Migration Advisory Committee is reviewing the talent routes, the endorsing-body model included, and intends to finish in winter 2026. Innovator International says it does not expect changes to the route, but gave no basis, and the report is unpublished.
 
 ## FAQ
 
@@ -434,7 +437,7 @@ No. A company, trading and a business bank account are only needed once you are 
 
 ### Can I Apply Without a Co-Founder?
 
-Yes, sole founders qualify. Co-founders each make their own application and pay their own fees on the same plan; see [Meeting the Targets](#meeting-the-targets). Apply with fewer and add later, or send the strongest founder first. A later applicant must predate the idea, concept or MVP, so someone who joins after it exists is an employee; a late co-founder risks their own endorsement, not yours. A co-founder can run a UK business from abroad without a visa.
+Yes, sole founders qualify. Co-founders each make their own application and pay their own fees on the same plan; see [Meeting the Targets](#meeting-the-targets). Apply with fewer and add later, or send the strongest founder first. Innovator International says a co-founder applying after the first is endorsed can reuse the plan, updating it if time has passed, and changes only the personal section, showing more funds only if they add costs. A later applicant must predate the idea, concept or MVP, so someone who joins after it exists is an employee; a late co-founder risks their own endorsement, not yours. A co-founder can run a UK business from abroad without a visa.
 
 ### Is There a Minimum Shareholding?
 
