@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FAFAFA">
+<meta name="robots" content="noindex">
+<title>Park</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Park">
+<meta name="description" content="Bay parking in a VW Polo, to scale: see where full lock takes the car, forward or reverse, left or right.">
+<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(_){}if(t&&t!=='light')document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="/shared/base.css?v=32">
+<!-- three.js is /roundabout's vendored copy (scripts/vendor-three.sh), shared rather than duplicated. -->
+<script type="importmap">{"imports":{
+"three":"/roundabout/vendor/three/build/three.module.min.js",
+"three/addons/loaders/GLTFLoader.js":"/roundabout/vendor/three/addons/loaders/GLTFLoader.min.js",
+"three/addons/controls/OrbitControls.js":"/roundabout/vendor/three/addons/controls/OrbitControls.min.js",
+"three/addons/libs/meshopt_decoder.module.js":"/roundabout/vendor/three/addons/libs/meshopt_decoder.min.js"
+}}</script>
+<style>
+/* Tokens. Panels are concentric: outer radius = inner radius + padding; every control is one 46 px pill. */
+:root{color-scheme:light;
+  --rule:color-mix(in srgb,var(--t1) 10%,transparent);
+  --pk-glass:rgba(250,250,250,.88);--pk-inset:color-mix(in srgb,var(--card) 92%,transparent);--pk-active:var(--tab-active);
+  --ctl:46px;--in-r:calc(var(--ctl) / 2);--pad:10px;--out-r:calc(var(--in-r) + var(--pad));--gap:8px;--edge:14px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
+  /* Scene colours, read by scene.js. */
+  --pk-ground:#A3A7AC;--pk-line:#FFFFFF;--pk-trace:#0F766E;--pk-ghost:#1F2937;--pk-bad:#B91C1C;--pk-target:#FFFFFF;--pk-paint:#5B7FA6}
+html[data-theme="dark"]{color-scheme:dark;--pk-glass:rgba(36,36,38,.88);--pk-active:rgba(245,245,247,.24);--pk-inset:rgba(255,255,255,.07);
+  --pk-ground:#2B2D31;--pk-line:#D9D9DC;--pk-trace:#5EC4B6;--pk-ghost:#E5E7EB;--pk-bad:#DC2626;--pk-target:#FFFFFF;--pk-paint:#6E8FB3}
+html[data-theme="dark"] .grp .seg:not(.active){color:var(--t2)}
+html[data-theme="sepia"]{color-scheme:light;--pk-glass:rgba(245,237,218,.9);
+  --pk-ground:#A39A8A;--pk-line:#F5EDDA;--pk-trace:#4D5E2E;--pk-ghost:#3B2F25;--pk-bad:#9A3412;--pk-target:#F5EDDA;--pk-paint:#8C6E54}
+@media(max-width:480px){:root{--edge:12px}}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--pk-ground)}
+body{-webkit-user-select:none;user-select:none;touch-action:none}
+#gl{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;display:block;touch-action:none;cursor:grab}
+#gl:active{cursor:grabbing}
+svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#hud{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;pointer-events:none;container-type:size}
+#hud>*{pointer-events:auto}
+
+/* ---------- glass ---------- */
+.panel{background:var(--pk-glass);border:1px solid var(--tab-border);box-shadow:var(--tab-shadow)}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.panel{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}}
+@media(prefers-reduced-transparency:reduce){.panel{background:var(--card)}}
+.round{width:var(--ctl);height:var(--ctl);flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:var(--t2);cursor:pointer;text-decoration:none}
+.round:active{opacity:.7}
+.round svg{width:18px;height:18px}
+.round.on{background:var(--pk-active);color:var(--tab-active-c)}
+#theme-btn svg{width:16px;height:16px}
+#back{position:absolute;top:calc(var(--edge) + var(--st));left:calc(var(--edge) + var(--sl))}
+.corner{position:absolute;top:calc(var(--edge) + var(--st));right:calc(var(--edge) + var(--sr));display:flex;gap:var(--gap)}
+.tools{position:absolute;right:calc(var(--edge) + var(--sr));bottom:calc(var(--edge) + var(--sb) + var(--bar-h,190px) + var(--gap));display:flex;flex-direction:column;gap:var(--gap)}
+
+/* ---------- groups ---------- */
+.grp{background:var(--pk-inset);border-radius:var(--in-r);overflow:hidden}
+.grp .seg-row{border-bottom:none}
+.seg-row.c3{grid-template-columns:repeat(3,1fr)}
+.grp .seg{min-height:var(--ctl);font-size:.875rem;padding:0 6px;white-space:nowrap}
+.grp .seg.active{background:var(--pk-active)}
+.stack{display:grid;gap:var(--gap)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+
+/* ---------- top: the preset ---------- */
+#preset{position:absolute;top:calc(var(--edge) + var(--st));left:50%;transform:translateX(-50%);width:min(560px,calc(100cqw - 2 * (var(--edge) + 2 * var(--ctl) + 2 * var(--gap)) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r)}
+@media(max-width:760px){#preset{top:calc(var(--edge) + var(--st) + var(--ctl) + var(--gap));width:calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr))}}
+
+/* ---------- bottom: drive and steer ---------- */
+#bar{position:absolute;left:50%;bottom:calc(var(--edge) + var(--sb));transform:translateX(-50%);width:min(520px,calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:var(--ctl);border:none;border-radius:var(--in-r);font:500 .875rem/1 var(--font);cursor:pointer;padding:0 16px;background:var(--pk-inset);color:var(--t1);touch-action:none}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.held{background:var(--pk-active);color:var(--tab-active-c)}
+.wheel-row{display:flex;align-items:center;gap:12px;height:var(--ctl);padding:0 16px 0 12px;background:var(--pk-inset);border-radius:var(--in-r)}
+#wheel{width:26px;height:26px;color:var(--t2);flex:none;transition:transform .05s linear}
+input[type=range]{flex:1;min-width:0;-webkit-appearance:none;appearance:none;background:none;height:var(--ctl);margin:0;cursor:pointer;touch-action:none}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--rule)}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--rule)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:var(--pk-active);border:none}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--pk-active);border:none}
+.btn.primary{background:var(--pk-active);color:var(--tab-active-c);font-weight:600}
+
+/* ---------- cue lines ---------- */
+#chips{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--edge) + var(--sb) + var(--bar-h,190px) + var(--gap));display:flex;flex-direction:column-reverse;align-items:center;gap:6px;pointer-events:none;width:calc(100cqw - 2 * (var(--edge) + var(--ctl) + var(--gap)))}
+.chip-line{width:max-content;max-width:100%;padding:9px 16px;border-radius:20px;font:600 .875rem/1.25 var(--font);color:var(--t1);text-align:center}
+
+/* ---------- settings sheet ---------- */
+.sheet{position:absolute;top:calc(var(--edge) + var(--st) + var(--ctl) + var(--gap));right:calc(var(--edge) + var(--sr));width:min(360px,calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r);z-index:2}
+.sheet .lbl{font:600 .75rem/1 var(--font);color:var(--t2);margin:6px 6px 8px}
+.sheet .lbl:not(:first-child){margin-top:14px}
+.sheet .note{font:500 .75rem/1.35 var(--font);color:var(--t2);margin:12px 6px 0}
+.sheet .btn{margin-top:12px}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="hud">
+  <a id="back" class="round panel" href="/" aria-label="Home" title="Home (1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
+  <div class="corner">
+    <button id="theme-btn" class="round panel" aria-label="Theme" title="Theme (T)"></button>
+    <button id="settings-btn" class="round panel" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></svg></button>
+  </div>
+
+  <div id="preset" class="panel stack">
+    <div class="duo">
+      <div class="grp"><div class="seg-row c2" id="mode-seg"><button class="seg" data-v="reverse">Reverse In</button><button class="seg" data-v="forward">Forward In</button></div></div>
+      <div class="grp"><div class="seg-row c2" id="side-seg"><button class="seg" data-v="left">Left Bay</button><button class="seg" data-v="right">Right Bay</button></div></div>
+    </div>
+    <div class="grp"><div class="seg-row c3" id="lane-seg"><button class="seg" data-v="left">Start Left</button><button class="seg" data-v="centre">Start Centre</button><button class="seg" data-v="right">Start Right</button></div></div>
+  </div>
+
+  <div class="tools">
+    <button id="trace-btn" class="round panel" aria-label="Trace" title="Trace (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20c5 0 6-4 9-8s5-8 9-8"/><circle cx="3" cy="20" r="1"/></svg></button>
+    <button id="turn-btn" class="round panel" aria-label="Show Turn Point" title="Show Turn Point (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>
+    <button id="top-btn" class="round panel" aria-label="Top View" title="Top View (V)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button id="reset-btn" class="round panel" aria-label="Reset" title="Reset (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+  </div>
+
+  <div id="chips"></div>
+
+  <div id="bar" class="panel stack">
+    <div class="grp"><div class="seg-row c3" id="steer-seg"><button class="seg" data-v="1">Full Left</button><button class="seg" data-v="0">Straight</button><button class="seg" data-v="-1">Full Right</button></div></div>
+    <div class="wheel-row">
+      <svg id="wheel" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/><path d="M12 14v8"/><path d="M10 12H2.2"/><path d="M14 12h7.8"/></svg>
+      <input id="steer" type="range" min="-100" max="100" step="1" value="0" aria-label="Steering">
+    </div>
+    <div class="duo">
+      <button class="btn" id="back-btn" title="Reverse (S)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg><span>Reverse</span></button>
+      <button class="btn" id="fwd-btn" title="Forward (W)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg><span>Forward</span></button>
+    </div>
+  </div>
+
+  <section id="settings" class="sheet panel" hidden>
+    <div class="lbl">Aisle Width</div>
+    <div class="grp"><div class="seg-row c2" id="aisle-seg"><button class="seg" data-v="0">6.0 m</button><button class="seg" data-v="1">6.95 m</button></div></div>
+    <div class="lbl">Bay Size</div>
+    <div class="grp"><div class="seg-row c2" id="bays-seg"><button class="seg" data-v="0">2.4 × 4.8 m</button><button class="seg" data-v="1">2.5 × 5.0 m</button></div></div>
+    <p class="note">VW Polo Mk6 to Scale, 10.6 m Turning Circle. Shows the Geometry of Full Lock, Not a Method: Use Your Instructor's Reference Points.</p>
+    <button class="btn primary" id="settings-done">Done</button>
+  </section>
+</div>
+<script src="/shared/base.js?v=32"></script>
+<script>
+/* Boot watchdog (as /roundabout): an HTTP/1.x dev server can leave one module request unsent, holding the graph
+   pending with no error. main.js sets window.__pkBoot once it has run; with no resource progress for STALL ms the page
+   reloads, up to RETRIES times. */
+(function () {
+  var STALL = 8000, EVERY = 500, RETRIES = 2, KEY = 'pk-boot-retry', FAILED = 'Could Not Load the Car Park';
+  var seen = -1, still = 0, broken = false;
+  var store = function (v) { try { if (v) sessionStorage.setItem(KEY, v); else sessionStorage.removeItem(KEY); } catch (_) {} };
+  addEventListener('error', function () {
+    if (window.__pkBoot || broken) return;
+    broken = true; clearInterval(timer); store(null); window._base.notify(FAILED, false);
+  });
+  var timer = setInterval(function () {
+    if (window.__pkBoot) { clearInterval(timer); store(null); return; }
+    var n = performance.getEntriesByType('resource').length;
+    if (n !== seen) { seen = n; still = 0; return; }
+    if ((still += EVERY) < STALL) return;
+    clearInterval(timer);
+    var tries = RETRIES;
+    try { tries = Number(sessionStorage.getItem(KEY)) || 0; } catch (_) {}
+    if (tries < RETRIES) { store(String(tries + 1)); location.reload(); return; }
+    store(null); window._base.notify(FAILED, false);
+  }, EVERY);
+})();
+</script>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

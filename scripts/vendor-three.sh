@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 # vendor-three.sh: vendor three.js from npm as minified ESM into roundabout/vendor/three
+# /park imports this folder too (its importmap points at /roundabout/vendor/three); move it to /shared if either grows.
 #
 # Usage:
 #   ./scripts/vendor-three.sh <three-version>     e.g. 0.186.1
@@ -38,13 +39,14 @@ files=(
   $work/three/package/build/three.core.js:build/three.core.min.js
   $work/three/package/build/three.module.js:build/three.module.min.js
   $work/three/package/examples/jsm/loaders/GLTFLoader.js:addons/loaders/GLTFLoader.min.js
+  $work/three/package/examples/jsm/controls/OrbitControls.js:addons/controls/OrbitControls.min.js
   $work/three/package/examples/jsm/utils/BufferGeometryUtils.js:addons/utils/BufferGeometryUtils.min.js
   $work/three/package/examples/jsm/utils/SkeletonUtils.js:addons/utils/SkeletonUtils.min.js
   $work/meshopt/package/meshopt_decoder.mjs:addons/libs/meshopt_decoder.min.js
 )
 
 rm -f $out/build/*.js $out/addons/*/*.js
-mkdir -p $out/build $out/addons/loaders $out/addons/utils $out/addons/libs
+mkdir -p $out/build $out/addons/controls $out/addons/loaders $out/addons/utils $out/addons/libs
 
 for pair in $files; do
   src=${pair%%:*} dest=$out/${pair#*:}
