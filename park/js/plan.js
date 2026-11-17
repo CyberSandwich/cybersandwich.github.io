@@ -52,8 +52,9 @@ export function preset(lot, cfg) {
 /**
  * Poses along a sweep from pose: steer at full lock in direction dir until heading targetH, then straight until the
  * body centre reaches depthY. Returns { poses, lockEnd, overshoot } where overshoot > 0 means the lock alone carried the
- * centre past depthY (no single sweep lands centred). When the lock turns away from targetH the sweep is the lock
- * arc alone, MAX_LEN long.
+ * centre past depthY (no single sweep lands centred). Within HEADING_TOL of targetH the car counts as square, so a
+ * parked car a hair past square traces its straight, not a loop. When the lock turns away from targetH the sweep is
+ * the lock arc alone, a quarter turn long.
  */
 export function sweep(pose, { steer, dir, targetH, depthY }) {
   const poses = [pose];
@@ -65,9 +66,10 @@ export function sweep(pose, { steer, dir, targetH, depthY }) {
   };
   const k = curvature(steer);
   const rate = Math.sign(k) * dir; // sign of dh per metre travelled
-  const remaining = wrap(targetH - pose.h);
-  if (k === 0 || (Math.abs(remaining) > 1e-9 && Math.sign(remaining) !== rate)) {
-    const end = add(pose, MAX_LEN);
+  const raw = wrap(targetH - pose.h);
+  const remaining = Math.abs(raw) < HEADING_TOL ? 0 : raw;
+  if (k === 0 || (remaining !== 0 && Math.sign(remaining) !== rate)) {
+    const end = add(pose, k === 0 ? MAX_LEN : Math.PI / 2 / Math.abs(k));
     return { poses, lockEnd: end, overshoot: Infinity, turnedAway: true };
   }
   // Exact lock length to land on targetH: |dh| = |kappa| * len.

@@ -7,7 +7,7 @@ import { preset, traceFrom, turnPoint, liveCue, inBay, goal, autoRoute } from '.
 import { createScene } from './scene.js';
 
 const KEY = 'park:state';
-const DEFAULTS = { mode: 'reverse', side: 'left', lane: 'left', bay: 4, trace: true, turn: false };
+const DEFAULTS = { mode: 'reverse', side: 'left', lane: 'left', bay: 4, trace: true };
 const SPEED = 1.2; // m/s, walking pace
 const ACCEL = 2.5; // m/s^2 to and from SPEED
 const STEER_RATE = 2; // lock fractions per second: straight to full lock in half a second
@@ -34,6 +34,7 @@ function reset() {
   steer = steerTarget = 0;
   v = 0;
   dirty = true;
+  fit(false);
 }
 
 // ---------- the view: fit the manoeuvre into the space the panels leave ----------
@@ -60,7 +61,6 @@ function bindSeg(id, key) {
     paint();
     save();
     reset();
-    fit(false);
   });
   paint();
   return paint;
@@ -78,8 +78,6 @@ function bindToggle(id, key) {
   return toggle;
 }
 const toggleTrace = bindToggle('trace-btn', 'trace');
-const toggleTurn = bindToggle('turn-btn', 'turn');
-$('top-btn').addEventListener('click', () => fit(false));
 $('reset-btn').addEventListener('click', reset);
 
 // ---------- steering: the slider, with full lock either side ----------
@@ -151,9 +149,7 @@ _base.onKey({
   e: () => steerTo(-1),
   c: () => steerTo(0),
   r: reset,
-  v: () => fit(false),
   g: toggleTrace,
-  p: toggleTurn,
   k: startAuto,
 });
 
@@ -171,7 +167,6 @@ canvas.addEventListener('pointerup', (e) => {
   paintSides();
   save();
   reset();
-  fit(false);
 });
 
 // ---------- the live cue ----------
@@ -181,19 +176,14 @@ function setCue(text) {
   if (text && cue.textContent !== text) cue.textContent = text;
 }
 
-/** Everything derived from the pose and settings: trace, ghosts, highlights and the cue. */
+/** Everything derived from the pose and settings: trace, highlights and the cue. */
 function derive() {
   const g = goal(cfg);
-  view.setTrace(cfg.trace ? traceFrom(lot, cfg, pose).poses : null);
   const live = liveCue(lot, cfg, pose);
   let text = live.state === 'ahead' ? `Full Lock in ${live.dist.toFixed(1)} m`
     : live.state === 'now' ? 'Lock Now'
       : live.state === 'past' ? `${(-live.dist).toFixed(1)} m Past the Turn Point`
         : live.state === 'noSweep' ? 'No Single Sweep From This Lane' : null;
-
-  // The turn point for the car's own lane while it is still square to the aisle, else the preset lane's.
-  const tp = cfg.turn ? (live.tp || turnPoint(lot, cfg)) : null;
-  view.setGhosts(tp && tp.ok ? [tp.start, tp.end] : null);
 
   const bad = [];
   const c = centrePos(pose);
@@ -206,6 +196,8 @@ function derive() {
     if (r.ok) text = 'In the Bay';
   }
   view.setHighlights({ target: { s: g.s, i: cfg.bay }, bad });
+  // Parked, the job is done: no trace left to follow.
+  view.setTrace(cfg.trace && text !== 'In the Bay' ? traceFrom(lot, cfg, pose).poses : null);
   setCue(text);
 }
 

@@ -1,6 +1,6 @@
 /**
  * three.js view of the car park as a diorama: a raised plinth with the paved lot, kerbed verges, trees and street
- * furniture, parked cars, the car, the full-lock trace and the turn-point ghosts.
+ * furniture, two parked cars, the car and the full-lock trace.
  * Plane (x, y) from lot.js and polo.js maps to three as X = x, Z = -y, Y up, so a top view with -Z up the screen is
  * the plane as drawn on paper. Grab3D models face +Z with +X their left; rotation.y = h + PI/2 points one along h.
  */
@@ -9,7 +9,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { POLO, CENTRE_U, corners, wheelAngles } from './polo.js';
-import { CAR_URL, PROP_URLS, PAVE, OCCUPIED, rng, dressingFor, paintKit } from './decor.js';
+import { CAR_URL, PROP_URLS, PAVE, rng, dressingFor, paintKit } from './decor.js';
 
 // The model's own wheelbase and front track (roundabout/assets/models/meta.json): scaled to the Polo's.
 const MODEL = { axleZ: 1.28, track: 1.44, wheelR: 0.31 };
@@ -117,8 +117,6 @@ export function createScene(canvas) {
       transparent: true, opacity: 0.24, stencilWrite: true, stencilRef: 1,
       stencilFunc: THREE.NotEqualStencilFunc, stencilZPass: THREE.ReplaceStencilOp,
     }),
-    ghost: new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.32, roughness: 0.6, depthWrite: false }),
-    ghostEdge: basic({ transparent: true, opacity: 0.9 }),
     contact: basic({ color: 0x000000, transparent: true, opacity: 0.16 }),
   };
   const parkedPaint = [];
@@ -129,8 +127,7 @@ export function createScene(canvas) {
   const parkedGroup = new THREE.Group();
   const overGroup = new THREE.Group();
   const traceGroup = new THREE.Group();
-  const ghostGroup = new THREE.Group();
-  scene.add(lotGroup, dressGroup, parkedGroup, overGroup, traceGroup, ghostGroup);
+  scene.add(lotGroup, dressGroup, parkedGroup, overGroup, traceGroup);
 
   const dispose = (group) => {
     for (const o of [...group.children]) {
@@ -270,8 +267,9 @@ export function createScene(canvas) {
   }
 
   /**
-   * Parked cars in a fixed share of the bays, never the target: hatches and estates, nose in or reversed in, each
-   * one's model and paint fixed per bay. The models' origin is midway between the axles, close to the body centre.
+   * Two parked cars: one beside the target (the far side, or the near side at the row's end), where a wide sweep
+   * would hit it, and one across the aisle. Model, paint and nose in or out are seeded. The models' origin is midway
+   * between the axles, close to the body centre.
    */
   let parkedKey = null, pendingTarget = null;
   function setParked(target) {
@@ -282,9 +280,10 @@ export function createScene(canvas) {
     parkedKey = key;
     dispose(parkedGroup);
     const r = rng(11);
-    for (const s of [1, -1]) for (let i = 0; i < lot.nBays; i++) {
-      const [taken, nose, jitter, paint, estate] = [r() < OCCUPIED, r() < 0.5, r() - 0.5, Math.floor(r() * 64), r() < 0.35];
-      if (!taken || (s === target.s && i === target.i)) continue;
+    const beside = target.i + 1 < lot.nBays ? target.i + 1 : target.i - 1;
+    const across = target.i > 0 ? target.i - 1 : target.i + 1;
+    for (const [s, i] of [[target.s, beside], [-target.s, across]]) {
+      const [nose, jitter, paint, estate] = [r() < 0.5, r() - 0.5, Math.floor(r() * 64), r() < 0.35];
       const model = estate && props.estate ? 'estate' : 'hatch';
       const h = s * (nose ? 1 : -1) * Math.PI / 2 + jitter * 0.05;
       const g = new THREE.Group();
@@ -301,21 +300,6 @@ export function createScene(canvas) {
     changed = true;
   }
 
-  function ghostAt(pose) {
-    const g = new THREE.Group();
-    placeRoot(g, pose);
-    if (carModel) {
-      const c = carModel.clone(true);
-      c.traverse((o) => { if (o.isMesh) { o.material = mats.ghost; o.castShadow = false; o.userData.shared = true; } });
-      g.add(c);
-    }
-    const loop = corners({ x: 0, y: 0, h: 0 });
-    // Outline in the root frame: plane (u, v) -> model (X = v, Z = u).
-    const outline = ribbon([...loop, loop[0]].map(([u, v]) => [v, -u]), 0.05);
-    g.add(new THREE.Mesh(polysGeometry(outline, H.ribbon), mats.ghostEdge));
-    return g;
-  }
-
   /** Overlays: the target bay's tint and lines with a tyre over them; parked cars fill the other bays. */
   function setHighlights({ target, bad = [] }) {
     dispose(overGroup);
@@ -324,12 +308,6 @@ export function createScene(canvas) {
     const rectOf = (s, i) => lot.marks.find((m) => m.kind === 'side' && m.s === s && m.i === i).r;
     if (bad.length) overGroup.add(new THREE.Mesh(rectsGeometry(bad.map((b) => b.back
       ? lot.marks.find((m) => m.kind === 'back' && m.s === b.s).r : rectOf(b.s, b.i)), H.over), mats.bad));
-  }
-
-  /** Ghost cars at the given poses (turn point and end), or none. */
-  function setGhosts(poses) {
-    dispose(ghostGroup);
-    for (const p of poses || []) ghostGroup.add(ghostAt(p));
   }
 
   /** The swept band and corner paths of a sweep's poses. */
@@ -347,14 +325,13 @@ export function createScene(canvas) {
   function applyPaint() {
     if (carModel) carModel.traverse(kits.hatch(css('--pk-paint')));
   }
-  const TOKENS = ['pave', 'grass', 'soil', 'kerb', 'line', 'sky', 'sun', 'trace', 'ghost', 'bad', 'target', 'paint'];
+  const TOKENS = ['pave', 'grass', 'soil', 'kerb', 'line', 'sky', 'sun', 'trace', 'bad', 'target', 'paint'];
   function setTheme() {
     for (const k of TOKENS) colours[k] = new THREE.Color(css(`--pk-${k}`) || '#888');
-    for (const k of ['pave', 'grass', 'soil', 'kerb', 'target', 'bad', 'ghost']) mats[k].color.copy(colours[k]);
+    for (const k of ['pave', 'grass', 'soil', 'kerb', 'target', 'bad']) mats[k].color.copy(colours[k]);
     mats.mark.color.copy(colours.line);
     mats.band.color.copy(colours.trace);
     mats.ribbon.color.copy(colours.trace);
-    mats.ghostEdge.color.copy(colours.ghost);
     hemi.color.copy(colours.sky);
     hemi.groundColor.copy(colours.grass);
     sun.color.copy(colours.sun);
@@ -421,5 +398,5 @@ export function createScene(canvas) {
     changed = false;
   }
 
-  return { ready, controls, setLot, setHighlights, setCar, setGhosts, setTrace, setTheme, topView, resize, pick, render };
+  return { ready, controls, setLot, setHighlights, setCar, setTrace, setTheme, topView, resize, pick, render };
 }

@@ -31,18 +31,18 @@
   /* Scene colours, read by scene.js. --pk-cars is the parked cars' paints. */
   --pk-bg1:#FBF5EA;--pk-bg2:#E6DAC4;--pk-pave:#A9ABB0;--pk-grass:#B5CF8E;--pk-soil:#A98764;--pk-kerb:#EFEAE0;--pk-line:#FFFFFF;
   --pk-sky:#FFF6E8;--pk-sun:#FFE9C9;--pk-exposure:1;
-  --pk-trace:#0F766E;--pk-ghost:#1F2937;--pk-bad:#B91C1C;--pk-target:#FFFFFF;--pk-paint:#5B7FA6;
+  --pk-trace:#0F766E;--pk-bad:#B91C1C;--pk-target:#FFFFFF;--pk-paint:#5B7FA6;
   --pk-cars:#F3EFE6,#C9D6DF,#E7C9A9,#9FB7A5,#D9A3A0,#7D8FA3}
 html[data-theme="dark"]{color-scheme:dark;--pk-glass:rgba(30,30,34,.42);--pk-active:rgba(245,245,247,.26);--pk-inset:rgba(255,255,255,.08);
   --pk-bg1:#2A2D36;--pk-bg2:#141519;--pk-pave:#4A4D55;--pk-grass:#4E6646;--pk-soil:#5A4636;--pk-kerb:#8A8C90;--pk-line:#D9D9DC;
   --pk-sky:#8C9BC4;--pk-sun:#C9D3F2;--pk-exposure:.85;
-  --pk-trace:#5EC4B6;--pk-ghost:#E5E7EB;--pk-bad:#DC2626;--pk-target:#FFFFFF;--pk-paint:#6E8FB3;
+  --pk-trace:#5EC4B6;--pk-bad:#DC2626;--pk-target:#FFFFFF;--pk-paint:#6E8FB3;
   --pk-cars:#B9B9B9,#5A6778,#8A7460,#5F7566,#8A5A58,#3E4652}
 html[data-theme="dark"] .grp .seg:not(.active){color:var(--t2)}
 html[data-theme="sepia"]{color-scheme:light;--pk-glass:rgba(245,237,218,.45);--pk-inset:rgba(250,244,230,.4);
   --pk-bg1:#F5EDDA;--pk-bg2:#DCCCAC;--pk-pave:#A0968A;--pk-grass:#ADAE7E;--pk-soil:#8C6B4E;--pk-kerb:#EDE3CC;--pk-line:#F5EDDA;
   --pk-sky:#FFF2DC;--pk-sun:#FFE4C0;--pk-exposure:1;
-  --pk-trace:#4D5E2E;--pk-ghost:#3B2F25;--pk-bad:#9A3412;--pk-target:#F5EDDA;--pk-paint:#8C6E54;
+  --pk-trace:#4D5E2E;--pk-bad:#9A3412;--pk-target:#F5EDDA;--pk-paint:#8C6E54;
   --pk-cars:#EDE3CC,#B8A88E,#C9A17E,#8C9A78,#B97F68,#7D6E5E}
 @media(max-width:480px){:root{--edge:12px}}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
@@ -69,7 +69,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 .grp .seg-row{border-bottom:none}
 .seg-row.c3{grid-template-columns:repeat(3,1fr)}
 .grp .seg{min-height:var(--ctl);font-size:.875rem;padding:0 6px;white-space:nowrap;color:var(--t1)}
-.grp .seg.active{background:var(--pk-active)}
+.grp .seg.active{background:var(--pk-active);color:var(--tab-active-c)}
 .stack{display:grid;gap:var(--gap)}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 
@@ -107,8 +107,6 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
   <div class="tools">
     <button id="theme-btn" class="round panel" aria-label="Theme" title="Theme (T)"></button>
     <button id="trace-btn" class="round panel" aria-label="Trace" title="Trace (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></button>
-    <button id="turn-btn" class="round panel" aria-label="Show Turn Point" title="Show Turn Point (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></button>
-    <button id="top-btn" class="round panel" aria-label="Recentre" title="Recentre (V)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h3"/><path d="M19 12h3"/><path d="M12 2v3"/><path d="M12 19v3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg></button>
     <button id="reset-btn" class="round panel" aria-label="Reset" title="Reset (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     <button id="auto-btn" class="round panel" aria-label="Park for Me" title="Park for Me (K)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg></button>
   </div>

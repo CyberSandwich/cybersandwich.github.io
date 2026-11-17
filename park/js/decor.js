@@ -21,8 +21,6 @@ export const PROP_URLS = {
 
 /** Paving past the back lines to the kerb (m). */
 export const PAVE = 0.6;
-/** Share of the other bays with a parked car, fixed per bay so the scene does not reshuffle. */
-export const OCCUPIED = 0.6;
 
 /** Small seeded PRNG (mulberry32): the dressing is the same on every load. */
 export function rng(seed) {
