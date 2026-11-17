@@ -2,10 +2,11 @@
 # build-roundabout-assets.sh: rebuild /roundabout/assets (models, tex, signs) from the upstream sources
 #
 # Usage:
-#   ./scripts/build-roundabout-assets.sh [models|tex|signs ...]    No argument builds all three
+#   ./scripts/build-roundabout-assets.sh [models|tex|signs|park ...]    No argument builds the first three
 #
-# Sources (licences and authors are in roundabout/assets/CREDITS.md):
+# Sources (licences and authors are in roundabout/assets/CREDITS.md and park/assets/CREDITS.md):
 #   models  Grab3D GLBs (CC0), normalized and slimmed by scripts/lib/roundabout-models.mjs
+#   park    /park's own Grab3D props, same pipeline, into park/assets/models
 #   tex     Poly Haven 1k diffuse JPGs (CC0), resized to 512 webp (the asphalt is drawn at runtime by world.js)
 #   signs   gov.uk traffic-sign-images JPG zips (OGL v3), white ground keyed out, 256 px webp
 # Downloads and the npm toolchain are cached in $ROUNDABOUT_CACHE (default $TMPDIR/roundabout-assets);
@@ -35,7 +36,8 @@ grab3d() {
   fetch https://grab3d.com/dl/$1/$variant.glb $2/$1.glb
 }
 
-build_models() {
+# models_set <set> <out-dir>: one table of scripts/lib/roundabout-models.mjs
+models_set() {
   local tools=$cache/tools src=$cache/grab3d slug
   if [[ ! -d $tools/node_modules/sharp ]]; then
     mkdir -p $tools
@@ -44,12 +46,15 @@ build_models() {
       @gltf-transform/core@4.5.1 @gltf-transform/extensions@4.5.1 @gltf-transform/functions@4.5.1 \
       meshoptimizer@1.3.0 sharp@0.35.5
   fi
-  mkdir -p $src $out/models
-  for slug in $(node scripts/lib/roundabout-models.mjs --slugs); do
+  mkdir -p $src $2
+  for slug in $(node scripts/lib/roundabout-models.mjs --slugs $1); do
     grab3d $slug $src
   done
-  node scripts/lib/roundabout-models.mjs $tools $src $out/models >/dev/null
+  node scripts/lib/roundabout-models.mjs $tools $src $2 $1 >/dev/null
 }
+
+build_models() { models_set roundabout $out/models }
+build_park() { models_set park park/assets/models }
 
 # id -> output name; a texture's page is https://polyhaven.com/a/<id>
 typeset -A textures=(grass_ground grass concrete_pavement_02 pavement red_brick_03 brick)
@@ -86,7 +91,7 @@ build_signs() {
 }
 
 for s in $steps; do
-  (( $+functions[build_$s] )) || { print -u2 "Unknown step: $s (models, tex, signs)"; exit 1 }
+  (( $+functions[build_$s] )) || { print -u2 "Unknown step: $s (models, tex, signs, park)"; exit 1 }
   build_$s
 done
 du -ch $out/models/*.glb $out/tex/*.webp $out/signs/*.webp | tail -1

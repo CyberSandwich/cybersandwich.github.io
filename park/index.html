@@ -24,20 +24,29 @@
 <style>
 /* Tokens. Panels are concentric: outer radius = inner radius + padding; every control is one 46 px pill. */
 :root{color-scheme:light;
-  --rule:color-mix(in srgb,var(--t1) 10%,transparent);
-  --pk-glass:rgba(250,250,250,.88);--pk-inset:color-mix(in srgb,var(--card) 92%,transparent);--pk-active:var(--tab-active);
-  --ctl:46px;--in-r:calc(var(--ctl) / 2);--pad:10px;--out-r:calc(var(--in-r) + var(--pad));--gap:8px;--edge:14px;
+  --rule:color-mix(in srgb,var(--t1) 12%,transparent);
+  --pk-glass:rgba(255,255,255,.42);--pk-inset:rgba(255,255,255,.38);--pk-active:var(--tab-active);
+  --ctl:46px;--in-r:calc(var(--ctl) / 2);--pad:8px;--out-r:calc(var(--in-r) + var(--pad));--gap:8px;--edge:14px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
-  /* Scene colours, read by scene.js. */
-  --pk-ground:#A3A7AC;--pk-line:#FFFFFF;--pk-trace:#0F766E;--pk-ghost:#1F2937;--pk-bad:#B91C1C;--pk-target:#FFFFFF;--pk-paint:#5B7FA6}
-html[data-theme="dark"]{color-scheme:dark;--pk-glass:rgba(36,36,38,.88);--pk-active:rgba(245,245,247,.24);--pk-inset:rgba(255,255,255,.07);
-  --pk-ground:#2B2D31;--pk-line:#D9D9DC;--pk-trace:#5EC4B6;--pk-ghost:#E5E7EB;--pk-bad:#DC2626;--pk-target:#FFFFFF;--pk-paint:#6E8FB3}
+  /* Scene colours, read by scene.js. --pk-cars is the parked cars' paints. */
+  --pk-bg1:#FBF5EA;--pk-bg2:#E6DAC4;--pk-pave:#A9ABB0;--pk-grass:#B5CF8E;--pk-soil:#A98764;--pk-kerb:#EFEAE0;--pk-line:#FFFFFF;
+  --pk-sky:#FFF6E8;--pk-sun:#FFE9C9;--pk-exposure:1;
+  --pk-trace:#0F766E;--pk-ghost:#1F2937;--pk-bad:#B91C1C;--pk-target:#FFFFFF;--pk-paint:#5B7FA6;
+  --pk-cars:#F3EFE6,#C9D6DF,#E7C9A9,#9FB7A5,#D9A3A0,#7D8FA3}
+html[data-theme="dark"]{color-scheme:dark;--pk-glass:rgba(30,30,34,.42);--pk-active:rgba(245,245,247,.26);--pk-inset:rgba(255,255,255,.08);
+  --pk-bg1:#2A2D36;--pk-bg2:#141519;--pk-pave:#4A4D55;--pk-grass:#4E6646;--pk-soil:#5A4636;--pk-kerb:#8A8C90;--pk-line:#D9D9DC;
+  --pk-sky:#8C9BC4;--pk-sun:#C9D3F2;--pk-exposure:.85;
+  --pk-trace:#5EC4B6;--pk-ghost:#E5E7EB;--pk-bad:#DC2626;--pk-target:#FFFFFF;--pk-paint:#6E8FB3;
+  --pk-cars:#B9B9B9,#5A6778,#8A7460,#5F7566,#8A5A58,#3E4652}
 html[data-theme="dark"] .grp .seg:not(.active){color:var(--t2)}
-html[data-theme="sepia"]{color-scheme:light;--pk-glass:rgba(245,237,218,.9);
-  --pk-ground:#A39A8A;--pk-line:#F5EDDA;--pk-trace:#4D5E2E;--pk-ghost:#3B2F25;--pk-bad:#9A3412;--pk-target:#F5EDDA;--pk-paint:#8C6E54}
+html[data-theme="sepia"]{color-scheme:light;--pk-glass:rgba(245,237,218,.45);--pk-inset:rgba(250,244,230,.4);
+  --pk-bg1:#F5EDDA;--pk-bg2:#DCCCAC;--pk-pave:#A0968A;--pk-grass:#ADAE7E;--pk-soil:#8C6B4E;--pk-kerb:#EDE3CC;--pk-line:#F5EDDA;
+  --pk-sky:#FFF2DC;--pk-sun:#FFE4C0;--pk-exposure:1;
+  --pk-trace:#4D5E2E;--pk-ghost:#3B2F25;--pk-bad:#9A3412;--pk-target:#F5EDDA;--pk-paint:#8C6E54;
+  --pk-cars:#EDE3CC,#B8A88E,#C9A17E,#8C9A78,#B97F68,#7D6E5E}
 @media(max-width:480px){:root{--edge:12px}}
-html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--pk-ground)}
-body{-webkit-user-select:none;user-select:none;touch-action:none}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none;touch-action:none;background:radial-gradient(ellipse 120% 90% at 50% 45%,var(--pk-bg1),var(--pk-bg2))}
 #gl{position:fixed;inset:0;width:100vw;height:100vh;height:100lvh;display:block;touch-action:none;cursor:grab}
 #gl:active{cursor:grabbing}
 svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -46,65 +55,46 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 
 /* ---------- glass ---------- */
 .panel{background:var(--pk-glass);border:1px solid var(--tab-border);box-shadow:var(--tab-shadow)}
-@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.panel{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}}
+@supports(backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){.panel{backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%)}}
 @media(prefers-reduced-transparency:reduce){.panel{background:var(--card)}}
-.round{width:var(--ctl);height:var(--ctl);flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:var(--t2);cursor:pointer;text-decoration:none}
+.round{width:var(--ctl);height:var(--ctl);flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;color:var(--t1);cursor:pointer;text-decoration:none}
 .round:active{opacity:.7}
-.round svg{width:18px;height:18px}
+.round svg{width:20px;height:20px}
 .round.on{background:var(--pk-active);color:var(--tab-active-c)}
-#theme-btn svg{width:16px;height:16px}
-#back{position:absolute;top:calc(var(--edge) + var(--st));left:calc(var(--edge) + var(--sl))}
-.corner{position:absolute;top:calc(var(--edge) + var(--st));right:calc(var(--edge) + var(--sr));display:flex;gap:var(--gap)}
-.tools{position:absolute;right:calc(var(--edge) + var(--sr));bottom:calc(var(--edge) + var(--sb) + var(--bar-h,190px) + var(--gap));display:flex;flex-direction:column;gap:var(--gap)}
+#theme-btn svg{width:18px;height:18px}
+.tools{position:absolute;right:calc(var(--edge) + var(--sr));bottom:calc(var(--edge) + var(--sb) + var(--bar-h,140px) + var(--gap));display:flex;flex-direction:column;gap:var(--gap)}
 
 /* ---------- groups ---------- */
 .grp{background:var(--pk-inset);border-radius:var(--in-r);overflow:hidden}
 .grp .seg-row{border-bottom:none}
 .seg-row.c3{grid-template-columns:repeat(3,1fr)}
-.grp .seg{min-height:var(--ctl);font-size:.875rem;padding:0 6px;white-space:nowrap}
+.grp .seg{min-height:var(--ctl);font-size:.875rem;padding:0 6px;white-space:nowrap;color:var(--t1)}
 .grp .seg.active{background:var(--pk-active)}
 .stack{display:grid;gap:var(--gap)}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 
-/* ---------- top: the preset ---------- */
-#preset{position:absolute;top:calc(var(--edge) + var(--st));left:50%;transform:translateX(-50%);width:min(560px,calc(100cqw - 2 * (var(--edge) + 2 * var(--ctl) + 2 * var(--gap)) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r)}
-@media(max-width:760px){#preset{top:calc(var(--edge) + var(--st) + var(--ctl) + var(--gap));width:calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr))}}
+/* ---------- top: the preset and the live cue ---------- */
+#preset{position:absolute;top:calc(var(--edge) + var(--st));left:50%;transform:translateX(-50%);width:min(560px,calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r)}
+#cue{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--top-h,130px) + var(--gap));padding:9px 16px;border-radius:20px;font:600 .875rem/1.25 var(--font);color:var(--t1);white-space:nowrap;pointer-events:none}
 
 /* ---------- bottom: drive and steer ---------- */
 #bar{position:absolute;left:50%;bottom:calc(var(--edge) + var(--sb));transform:translateX(-50%);width:min(520px,calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r)}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:var(--ctl);border:none;border-radius:var(--in-r);font:500 .875rem/1 var(--font);cursor:pointer;padding:0 16px;background:var(--pk-inset);color:var(--t1);touch-action:none}
 .btn svg{width:18px;height:18px;flex:none}
 .btn.held{background:var(--pk-active);color:var(--tab-active-c)}
-.wheel-row{display:flex;align-items:center;gap:12px;height:var(--ctl);padding:0 16px 0 12px;background:var(--pk-inset);border-radius:var(--in-r)}
-#wheel{width:26px;height:26px;color:var(--t2);flex:none;transition:transform .05s linear}
+.steer-row{display:flex;align-items:center;gap:6px;background:var(--pk-inset);border-radius:var(--in-r)}
+.steer-row .lock{border:none;background:none}
+.steer-row .lock.on{background:var(--pk-active)}
 input[type=range]{flex:1;min-width:0;-webkit-appearance:none;appearance:none;background:none;height:var(--ctl);margin:0;cursor:pointer;touch-action:none}
 input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--rule)}
 input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--rule)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:var(--pk-active);border:none}
-input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--pk-active);border:none}
-.btn.primary{background:var(--pk-active);color:var(--tab-active-c);font-weight:600}
-
-/* ---------- cue lines ---------- */
-#chips{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--edge) + var(--sb) + var(--bar-h,190px) + var(--gap));display:flex;flex-direction:column-reverse;align-items:center;gap:6px;pointer-events:none;width:calc(100cqw - 2 * (var(--edge) + var(--ctl) + var(--gap)))}
-.chip-line{width:max-content;max-width:100%;padding:9px 16px;border-radius:20px;font:600 .875rem/1.25 var(--font);color:var(--t1);text-align:center}
-
-/* ---------- settings sheet ---------- */
-.sheet{position:absolute;top:calc(var(--edge) + var(--st) + var(--ctl) + var(--gap));right:calc(var(--edge) + var(--sr));width:min(360px,calc(100cqw - 2 * var(--edge) - var(--sl) - var(--sr)));padding:var(--pad);border-radius:var(--out-r);z-index:2}
-.sheet .lbl{font:600 .75rem/1 var(--font);color:var(--t2);margin:6px 6px 8px}
-.sheet .lbl:not(:first-child){margin-top:14px}
-.sheet .note{font:500 .75rem/1.35 var(--font);color:var(--t2);margin:12px 6px 0}
-.sheet .btn{margin-top:12px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-10px;border-radius:50%;background:var(--pk-active);border:none}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--pk-active);border:none}
 </style>
 </head>
 <body>
 <canvas id="gl"></canvas>
 <div id="hud">
-  <a id="back" class="round panel" href="/" aria-label="Home" title="Home (1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></a>
-  <div class="corner">
-    <button id="theme-btn" class="round panel" aria-label="Theme" title="Theme (T)"></button>
-    <button id="settings-btn" class="round panel" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></svg></button>
-  </div>
-
   <div id="preset" class="panel stack">
     <div class="duo">
       <div class="grp"><div class="seg-row c2" id="mode-seg"><button class="seg" data-v="reverse">Reverse In</button><button class="seg" data-v="forward">Forward In</button></div></div>
@@ -112,36 +102,28 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
     </div>
     <div class="grp"><div class="seg-row c3" id="lane-seg"><button class="seg" data-v="left">Start Left</button><button class="seg" data-v="centre">Start Centre</button><button class="seg" data-v="right">Start Right</button></div></div>
   </div>
+  <div id="cue" class="panel" hidden></div>
 
   <div class="tools">
-    <button id="trace-btn" class="round panel" aria-label="Trace" title="Trace (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20c5 0 6-4 9-8s5-8 9-8"/><circle cx="3" cy="20" r="1"/></svg></button>
-    <button id="turn-btn" class="round panel" aria-label="Show Turn Point" title="Show Turn Point (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>
-    <button id="top-btn" class="round panel" aria-label="Top View" title="Top View (V)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button>
+    <button id="theme-btn" class="round panel" aria-label="Theme" title="Theme (T)"></button>
+    <button id="trace-btn" class="round panel" aria-label="Trace" title="Trace (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></button>
+    <button id="turn-btn" class="round panel" aria-label="Show Turn Point" title="Show Turn Point (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></button>
+    <button id="top-btn" class="round panel" aria-label="Recentre" title="Recentre (V)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h3"/><path d="M19 12h3"/><path d="M12 2v3"/><path d="M12 19v3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg></button>
     <button id="reset-btn" class="round panel" aria-label="Reset" title="Reset (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    <button id="auto-btn" class="round panel" aria-label="Park for Me" title="Park for Me (K)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg></button>
   </div>
 
-  <div id="chips"></div>
-
   <div id="bar" class="panel stack">
-    <div class="grp"><div class="seg-row c3" id="steer-seg"><button class="seg" data-v="1">Full Left</button><button class="seg" data-v="0">Straight</button><button class="seg" data-v="-1">Full Right</button></div></div>
-    <div class="wheel-row">
-      <svg id="wheel" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/><path d="M12 14v8"/><path d="M10 12H2.2"/><path d="M14 12h7.8"/></svg>
+    <div class="steer-row">
+      <button class="round lock" id="lock-left" aria-label="Full Left" title="Full Left (Q)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
       <input id="steer" type="range" min="-100" max="100" step="1" value="0" aria-label="Steering">
+      <button class="round lock" id="lock-right" aria-label="Full Right" title="Full Right (E)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg></button>
     </div>
     <div class="duo">
       <button class="btn" id="back-btn" title="Reverse (S)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg><span>Reverse</span></button>
       <button class="btn" id="fwd-btn" title="Forward (W)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg><span>Forward</span></button>
     </div>
   </div>
-
-  <section id="settings" class="sheet panel" hidden>
-    <div class="lbl">Aisle Width</div>
-    <div class="grp"><div class="seg-row c2" id="aisle-seg"><button class="seg" data-v="0">6.0 m</button><button class="seg" data-v="1">6.95 m</button></div></div>
-    <div class="lbl">Bay Size</div>
-    <div class="grp"><div class="seg-row c2" id="bays-seg"><button class="seg" data-v="0">2.4 × 4.8 m</button><button class="seg" data-v="1">2.5 × 5.0 m</button></div></div>
-    <p class="note">VW Polo Mk6 to Scale, 10.6 m Turning Circle. Shows the Geometry of Full Lock, Not a Method: Use Your Instructor's Reference Points.</p>
-    <button class="btn primary" id="settings-done">Done</button>
-  </section>
 </div>
 <script src="/shared/base.js?v=32"></script>
 <script>

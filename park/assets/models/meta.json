@@ -1,0 +1,47 @@
+{
+ "cherry": {
+  "size": {
+   "width": 5.4,
+   "depth": 4.89,
+   "height": 4.19
+  },
+  "triangles": 2525,
+  "primitives": 1
+ },
+ "maple": {
+  "size": {
+   "width": 6.78,
+   "depth": 5.7,
+   "height": 4.72
+  },
+  "triangles": 2500,
+  "primitives": 1
+ },
+ "vending": {
+  "size": {
+   "width": 0.9,
+   "depth": 0.84,
+   "height": 1.85
+  },
+  "triangles": 3376,
+  "primitives": 8
+ },
+ "ticket": {
+  "size": {
+   "width": 0.87,
+   "depth": 0.65,
+   "height": 1.81
+  },
+  "triangles": 1540,
+  "primitives": 11
+ },
+ "bench": {
+  "size": {
+   "width": 1.8,
+   "depth": 0.7,
+   "height": 0.88
+  },
+  "triangles": 1200,
+  "primitives": 1
+ }
+}

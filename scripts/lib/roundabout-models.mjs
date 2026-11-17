@@ -54,13 +54,25 @@ const PROPS = {
 const WHEELS = { fl: 'wheel_FL', fr: 'wheel_FR', rl: 'wheel_RL', rr: 'wheel_RR', r1l: 'wheel_RL', r1r: 'wheel_RR', r2l: 'wheel_RL2', r2r: 'wheel_RR2' };
 const round = (v) => Math.round(v * 100) / 100;
 
-// --slugs lists every Grab3D slug the tables use, for the download step in build-roundabout-assets.sh
+// /park's own props (it also loads roundabout's hatch, estate and some scenery directly).
+const PARK = {
+  cherry: { slug: 'cherry-blossom-tree', tris: 2500, tex: 256 },
+  maple: { slug: 'maple-tree', tris: 2500, tex: 256 },
+  vending: { slug: 'vending-machine', tris: 1500, tex: 256, normals: 'flat' },
+  ticket: { slug: 'ticket-machine', tris: 1000, tex: 256 },
+  bench: { slug: 'park-bench', tris: 1200, tex: 256 },
+};
+const SETS = { roundabout: { vehicles: VEHICLES, props: PROPS }, park: { vehicles: {}, props: PARK } };
+
+// --slugs [set] lists every Grab3D slug a set uses, for the download step in build-roundabout-assets.sh
 if (process.argv[2] === '--slugs') {
-  console.log([...Object.values(VEHICLES), ...Object.values(PROPS)].map((c) => c.slug).join('\n'));
+  const s = SETS[process.argv[3] || 'roundabout'];
+  console.log([...Object.values(s.vehicles), ...Object.values(s.props)].map((c) => c.slug).join('\n'));
   process.exit(0);
 }
-const [toolsDir, srcDir, outDir] = process.argv.slice(2);
-if (!outDir) { console.error('usage: roundabout-models.mjs <tools-dir> <src-dir> <out-dir> | --slugs'); process.exit(1); }
+const [toolsDir, srcDir, outDir, setName = 'roundabout'] = process.argv.slice(2);
+const SET = SETS[setName];
+if (!outDir || !SET) { console.error('usage: roundabout-models.mjs <tools-dir> <src-dir> <out-dir> [roundabout|park] | --slugs [set]'); process.exit(1); }
 const need = createRequire(join(toolsDir, 'package.json'));
 const { NodeIO, getBounds, Logger } = need('@gltf-transform/core');
 const { ALL_EXTENSIONS } = need('@gltf-transform/extensions');
@@ -225,7 +237,7 @@ async function prop(name, { slug, tris, ...opts }) {
   meta[name] = { size: { width: round(b.max[0] - b.min[0]), depth: round(b.max[2] - b.min[2]), height: round(b.max[1]) }, triangles: triangles(doc), primitives };
 }
 
-for (const [name, cfg] of Object.entries(VEHICLES)) await vehicle(name, cfg);
-for (const [name, cfg] of Object.entries(PROPS)) await prop(name, cfg);
+for (const [name, cfg] of Object.entries(SET.vehicles)) await vehicle(name, cfg);
+for (const [name, cfg] of Object.entries(SET.props)) await prop(name, cfg);
 writeFileSync(join(outDir, 'meta.json'), JSON.stringify(meta, null, 1) + '\n');
 console.log(JSON.stringify(meta, null, 1));

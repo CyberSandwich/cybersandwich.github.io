@@ -13,8 +13,10 @@ export const SIDES = ['left', 'right'];
 export const LANES = ['left', 'centre', 'right'];
 /** Clearance from the aisle edge to the body for a left or right lane start (an estimate of normal practice). */
 export const LANE_CLEARANCE = 0.6;
-/** Distance from the bay's centre to the start pose, back along the aisle (about 2 car lengths). */
+/** Distance from the bay's centre to the start pose, back along the aisle, when the lane has no turn point. */
 export const START_BACK = 2 * POLO.length;
+/** A preset starts this far short of its turn point, so the run-up is short and the car opens near the bay. */
+export const START_LEAD = 3;
 export const HEADING_TOL = 3 * Math.PI / 180;
 /** Within this along-aisle distance of the turn point the cue reads Lock Now. */
 export const LOCK_NOW = 0.15;
@@ -37,9 +39,14 @@ export function goal(cfg) {
   return { s, steer: s, dir: fwd ? 1 : -1, targetH: s * (fwd ? 1 : -1) * Math.PI / 2 };
 }
 
-/** Start pose for a preset: in the chosen lane, heading along the aisle, START_BACK before the bay's centre. */
+/**
+ * Start pose for a preset: in the chosen lane, heading along the aisle, START_LEAD short of the lane's turn point,
+ * or START_BACK before the bay's centre when the lane has none.
+ */
 export function preset(lot, cfg) {
-  return { x: lot.bayX(cfg.bay) - START_BACK, y: laneY(lot, cfg.lane), h: 0 };
+  const y = laneY(lot, cfg.lane);
+  const tp = turnPoint(lot, cfg, y);
+  return { x: tp.ok ? tp.start.x - START_LEAD : lot.bayX(cfg.bay) - START_BACK, y, h: 0 };
 }
 
 /**
@@ -191,6 +198,33 @@ export function turnPoint(lot, cfg, y0 = laneY(lot, cfg.lane)) {
     ok, reason, start, end, poses, check, opposite: ex.opposite, neighbour: ex.neighbour,
     cue: { mirror: cueAt(lot, cfg.bay, mirrorX), shoulder: cueAt(lot, cfg.bay, shoulderX) },
   };
+}
+
+/**
+ * The drive that parks the car in one sweep: straight along the aisle to the turn point, full lock until square, then
+ * straight to the bay's centre. From the car's own pose when it is square to the aisle and its lane solves; else from
+ * the preset start; else from the aisle centre at the preset's x. Returns { start, end, segs: [{ steer, dir, len }] }
+ * (start differs from pose when the car must be placed first), or null when no start solves.
+ */
+export function autoRoute(lot, cfg, pose) {
+  const g = goal(cfg);
+  const lockLen = Math.abs(g.targetH) / Math.abs(curvature(g.steer));
+  const p0 = preset(lot, cfg);
+  const starts = [Math.abs(wrap(pose.h)) < 1e-9 && pose, p0, { ...p0, y: laneY(lot, 'centre') }].filter(Boolean);
+  for (const start of starts) {
+    const tp = turnPoint(lot, cfg, start.y);
+    if (!tp.ok) continue;
+    const dx = tp.start.x - start.x;
+    const sq = step(tp.start, g.steer, g.dir * lockLen);
+    return {
+      start, end: tp.end, segs: [
+        { steer: 0, dir: dx < 0 ? -1 : 1, len: Math.abs(dx) },
+        { steer: g.steer, dir: g.dir, len: lockLen },
+        { steer: 0, dir: g.dir, len: Math.hypot(tp.end.x - sq.x, tp.end.y - sq.y) },
+      ],
+    };
+  }
+  return null;
 }
 
 /**
