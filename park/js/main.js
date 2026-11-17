@@ -206,10 +206,12 @@ function frame(now) {
   if (keySteer) steerTarget = Math.max(-1, Math.min(1, steerTarget + keySteer * KEY_STEER_RATE * dt));
   const want = (held.drive || Math.sign(keyDrive)) * SPEED;
   const dv = want - v;
+  const wasMoving = v !== 0;
   v = Math.abs(dv) <= ACCEL * dt ? want : v + Math.sign(dv) * ACCEL * dt;
   const ds = steerTarget - steer;
   if (ds) steer = Math.abs(ds) <= STEER_RATE * dt ? steerTarget : steer + Math.sign(ds) * STEER_RATE * dt;
-  if (v !== 0 || ds) {
+  // The stopping frame must derive too: the parked check only runs at v === 0.
+  if (v !== 0 || wasMoving || ds) {
     if (v !== 0) {
       pose = step(pose, steer, v * dt);
       travelled += v * dt;
