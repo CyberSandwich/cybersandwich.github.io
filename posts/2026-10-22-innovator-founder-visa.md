@@ -1,6 +1,6 @@
 ---
 description: UK Innovator Founder visa guide: requirements, endorsing bodies, business plan and evidence, fees, checkpoints and settlement (ILR) after 3 years.
-updated: 2026-11-04
+updated: 2026-11-18
 ---
 
 # A Guide to the Innovator Founder Visa
@@ -30,12 +30,12 @@ updated: 2026-11-04
 |---|---|
 | **What it is** | A UK visa for founders whose business an approved endorsing body judges innovative, viable and scalable |
 | **Length** | 3 years, extendable for the same business |
-| **Settlement** | Indefinite Leave to Remain (ILR) after 3 years if the business meets 2 of the 7 listed targets |
+| **Settlement** | Indefinite Leave to Remain (ILR) after 3 years if the business meets 2 of the 7 listed targets (5 years proposed, not law) |
 | **Fees** | About £10,700 to £11,700 for a single applicant over 3 years (as of Oct 2026), plus the business's own funding |
-| **Endorsement rate** | About 1 in 3: Envestors reports 34.4% (Apr 2023 to Mar 2026), Innovator International reports about 28% to 30% (2025) |
+| **Endorsement rate** | About 1 in 4: the Migration Advisory Committee puts the 3 private bodies at 13% to 25% for new applications (2024/25); Envestors reports 34.4% (Apr 2023 to Mar 2026), Innovator International about 28% to 30% (2025) |
 | **Endorsement time** | Bodies report about 4 to 6 weeks |
 | **Visa decision** | Home Office target of 3 weeks from outside the UK, 8 weeks from inside |
-| **Rule changes** | Earned settlement confirmed in Nov 2026, taking effect over 2027 (see [Rule Changes](#rule-changes)) |
+| **Rule changes** | Earned settlement confirmed in Nov 2026, taking effect over 2027; the Migration Advisory Committee recommended abolishing the route in Nov 2026, a proposal with no government response yet (see [Rule Changes](#rule-changes)) |
 
 ## How It Works
 
@@ -256,7 +256,7 @@ If you apply before your current visa expires, your permission to stay (called l
 
 The Home Office aims to decide in 3 weeks from outside the UK and 8 weeks from inside. Paid priority takes 5 working days and super priority the next working day.
 
-In practice, founders report 3 to 6 months from application to decision, priority included (as of Oct 2026): priority buys a place in the queue, not a date. Your endorsing body cannot chase the Home Office.
+In practice, founders report 3 to 6 months from application to decision, priority included (as of Oct 2026): priority buys a place in the queue, not a date. Your endorsing body cannot chase the Home Office. The Migration Advisory Committee found 13% of applications (2021 to 2025) took over 100 days, and a third of those took over 6 months.
 
 > [!warning] Rising Refusals After Endorsement
 > Refusals of in-UK applications by main applicants (switches and extensions on this route and the old Innovator route) rose from 3.2% in 2021 to 31.4% in Q2 2026.
@@ -406,9 +406,26 @@ Each dependant pays the ILR fee (£3,226) when they settle. For applications mad
 
 ## Rule Changes
 
+### The Migration Advisory Committee Review (A Proposal, Not Law)
+
+The Migration Advisory Committee, which advises the government, published its review of the talent routes on 17 November 2026. It found the route is not meeting its objectives and recommends that the government abolish it in its current form. These are recommendations only: the government has not responded and has set no date to, and nothing changes until the Immigration Rules do. A closure or a new settlement period needs a Statement of Changes, and the committee says a fundamental redesign would need consultation.
+
+If the route is kept, it recommends:
+
+- **Settlement after 5 years, not 3,** with stronger business targets; the committee does not count turnover under £200,000 as meaningful scale.
+- **An income floor at settlement** of at least a full-time National Living Wage salary (about £23,800 in 2025), where today there is none.
+- **A more selective route** at endorsement, extension and settlement, with interviews and the innovation test kept, and a fresh review after one year with a view to closing the route unless results improve.
+- **No paid support from your own endorsing body:** bodies could sell services only to founders another body endorsed.
+
+The report does not say what happens to founders already on the route or partway through endorsement. When the Start-up route closed in 2023, its holders kept their leave until it expired and could switch to Innovator Founder; that is a precedent, not a promise, and settlement is decided under the Rules in force on the day of the decision.
+
+- **Already on the visa:** pay yourself a payroll salary of at least the full-time National Living Wage, which also clears earned settlement's £12,571, and keep a third settlement target in reach in case the bar rises.
+- **Planning to apply:** budget for a 5-year path to settlement, and keep a second route open. The committee found Global Talent largely working and recommends only small changes to it.
+- **Watch** each Statement of Changes, starting with the earned settlement rules from December 2026.
+
 ### Earned Settlement
 
-The government confirmed earned settlement on 2 November 2026. The standard wait for settlement rises from 5 to 10 years, with a 3-year path kept for a "Highest Talent Group". The government's own estimates place Innovator Founder and Global Talent holders in that group, but the group is subject to review once the Migration Advisory Committee reports, and your most recent grant must be on the Innovator Founder route to use it. Rules start to be laid from December 2026 and take effect over 2027; none are in the Immigration Rules yet. Founders already on the route get no transitional protection: only care workers and some health and education workers who arrived before May 2025 keep 5 years.
+The government confirmed earned settlement on 2 November 2026. The standard wait for settlement rises from 5 to 10 years, with a 3-year path kept for a "Highest Talent Group". The government's own estimates place Innovator Founder and Global Talent holders in that group, but the group was left subject to the Migration Advisory Committee's review, which has since recommended 5 years for this route (see above), and your most recent grant must be on the Innovator Founder route to use it. Rules start to be laid from December 2026 and take effect over 2027; none are in the Immigration Rules yet. Founders already on the route get no transitional protection: only care workers and some health and education workers who arrived before May 2025 keep 5 years.
 
 On top of the route's own targets, every applicant must meet new mandatory requirements:
 
@@ -423,7 +440,7 @@ A partner who arrives with you still settles with you; one who joins later serve
 
 ### The Endorsing-Body Contract
 
-The Home Office contract for endorsing-body services runs to 23 October 2028, and the published notice allows an extension. Checkpoint 2 and the settlement endorsement for a 2027 grant fall after that base term unless it is extended, so the open question is who endorses then. The Migration Advisory Committee is reviewing the talent routes, the endorsing-body model included, and intends to finish in winter 2026. Innovator International says it does not expect changes to the route, but gave no basis, and the report is unpublished.
+The Home Office contract for endorsing-body services runs to 23 October 2028, and the published notice allows an extension. Checkpoint 2 and the settlement endorsement for a 2027 grant fall after that base term unless it is extended, so the open question is who endorses then. Innovator International said before the review that it expected no changes to the route; it now rejects abolition and argues for reform instead.
 
 ## FAQ
 
@@ -489,6 +506,7 @@ Usually 12 months after ILR (straight away if you are married to a British citiz
 - [Indefinite Leave to Remain for Innovator Founders](https://www.gov.uk/indefinite-leave-to-remain-innovator-visa)
 - [British citizenship](https://www.gov.uk/british-citizenship)
 - [Earned settlement consultation and government response](https://www.gov.uk/government/consultations/earned-settlement)
+- [Migration Advisory Committee: Review of talent routes](https://www.gov.uk/government/publications/talent-routes-review)
 
 ### Statistics
 
