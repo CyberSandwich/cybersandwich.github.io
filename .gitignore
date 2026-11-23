@@ -14,3 +14,7 @@ context/
 posts/archive/
 archive/
 tests/
+
+# Repo
+# Source masters for build scripts (scripts/build-photo.sh); the built files are tracked, the masters stay local
+website-assets/
