@@ -1,5 +1,10 @@
 [
   {
+    "slug": "bloop",
+    "url": "https://bloop.dsap.workers.dev",
+    "title": "bloop"
+  },
+  {
     "slug": "caption",
     "url": "https://github.com/DukeSaputra/caption",
     "title": "Caption"
