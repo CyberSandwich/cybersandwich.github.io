@@ -132,7 +132,7 @@ To join an existing business, Skilled Worker is the usual route. Scale-up needs 
 
 | Body (as of Oct 2026) | Assessment | Turnaround |
 |---|---|---|
-| Innovator International | Plan answered against its published assessment questions, then an interview; 1 free second assessment after a refusal | Up to 40 days (reports about 21 days on average, 18 for refusals and 36 for endorsements, with none past 60, as of Oct 2026) |
+| Innovator International | Plan answered against its published assessment questions, then an interview; 1 free second assessment after a refusal | Usually up to 40 days, 60 at most (reports about 21 days on average, 18 for refusals and 36 for endorsements, as of Oct 2026) |
 | Envestors | Its own online plan form, then a presentation and Q&A call | Reports 4 to 6 weeks |
 | UK Endorsing Services | Plan review, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for applicants outside the UK whose company has revenue of £250,000 or more, or £500,000 or more raised | Not published |
