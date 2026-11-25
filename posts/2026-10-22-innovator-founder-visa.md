@@ -1,6 +1,6 @@
 ---
 description: UK Innovator Founder visa guide: requirements, endorsing bodies, business plan and evidence, fees, checkpoints and settlement (ILR) after 3 years.
-updated: 2026-11-18
+updated: 2026-11-25
 ---
 
 # A Guide to the Innovator Founder Visa
@@ -32,7 +32,7 @@ updated: 2026-11-18
 | **Length** | 3 years, extendable for the same business |
 | **Settlement** | Indefinite Leave to Remain (ILR) after 3 years if the business meets 2 of the 7 listed targets (5 years proposed, not law) |
 | **Fees** | About £10,700 to £11,700 for a single applicant over 3 years (as of Oct 2026), plus the business's own funding |
-| **Endorsement rate** | About 1 in 4: the Migration Advisory Committee puts the 3 private bodies at 13% to 25% for new applications (2024/25); Envestors reports 34.4% (Apr 2023 to Mar 2026), Innovator International about 28% to 30% (2025) |
+| **Endorsement rate** | About 1 in 5 to 1 in 4: the Migration Advisory Committee puts the 3 private bodies at 13% to 25% for new applications (2024/25); Envestors reports 34.4% (Apr 2023 to Mar 2026), Innovator International 22% for this visa alone (Apr 2023 to Oct 2026, self-reported) |
 | **Endorsement time** | Bodies report about 4 to 6 weeks |
 | **Visa decision** | Home Office target of 3 weeks from outside the UK, 8 weeks from inside |
 | **Rule changes** | Earned settlement confirmed in Nov 2026, taking effect over 2027; the Migration Advisory Committee recommended abolishing the route in Nov 2026, a proposal with no government response yet (see [Rule Changes](#rule-changes)) |
@@ -67,7 +67,7 @@ A skilled side job (RQF level 3 or above) is allowed, but most of your time must
 
 ### The Three Tests
 
-- **Innovative:** customers would switch to it, and a typical competitor could not copy it quickly. The Home Office's guidance for endorsing bodies gives adding an app to a taxi or cleaning company as an example that fails.
+- **Innovative:** customers would switch to it, and a typical competitor could not copy it quickly. The Home Office's guidance for endorsing bodies gives adding an app to a taxi or cleaning company as an example that fails. The test is the Home Office's criteria, not an investor's view of what is innovative, and taking customers from a UK rival needs a significant improvement, never a lower price alone.
 - **Viable:** the plan is realistic for your skills and your money, and there is evidence of real demand.
 - **Scalable:** there is a structured plan to grow nationally and internationally and to create skilled jobs, so that doubling customers needs far less than double the costs. A licensable method or repeatable team delivery counts; a small business that stays in one city, or depends on the founder's own hours, does not.
 
@@ -132,12 +132,14 @@ To join an existing business, Skilled Worker is the usual route. Scale-up needs 
 
 | Body (as of Oct 2026) | Assessment | Turnaround |
 |---|---|---|
-| Innovator International | Plan answered against its published assessment questions, then an interview; 1 free second assessment after a refusal | Up to 40 days (reports about 22 to 26 days on average as of Nov 2026) |
+| Innovator International | Plan answered against its published assessment questions, then an interview; 1 free second assessment after a refusal | Up to 40 days (reports about 21 days on average, 18 for refusals and 36 for endorsements, with none past 60, as of Oct 2026) |
 | Envestors | Its own online plan form, then a presentation and Q&A call | Reports 4 to 6 weeks |
 | UK Endorsing Services | Plan review, then an interview | 21 working days |
 | Global Entrepreneurs Programme | By invitation, for applicants outside the UK whose company has revenue of £250,000 or more, or £500,000 or more raised | Not published |
 
 Another 63 legacy bodies (as of Aug 2026) serve only founders they endorsed before 13 April 2023.
+
+Innovator International reports that of 2,910 Innovator Founder applications it assessed from April 2023 to October 2026, 640 (22%) were endorsed, and 91% of those became visas; the rest rarely fail on the endorsement itself, more often on other issues such as personal history. It sets no endorsement quota, and describes its applications as about 20% suitable, 40% bought plans and 40% speculative. Earlier figures of 28% to 30% mixed in legacy routes.
 
 ### How They Differ
 
@@ -150,7 +152,7 @@ Bodies cannot give individual pre-application advice (barred since 2023), so use
 ### Scams
 
 - Deal with the bodies directly: scammers forge endorsement letters and falsely claim to partner with a body.
-- Bodies cannot partner with plan writers. A bought plan passes the written stage and fails the interview, and a bought idea is a flat refusal.
+- Bodies cannot partner with plan writers. A bought plan passes the written stage and fails the interview, and a bought idea is a flat refusal. Innovator International puts bought plans at about 40% of its applications.
 
 ## Preparing the Plan
 
@@ -231,7 +233,7 @@ The interview is usually a recorded video call. It tests that you can explain ho
 The usual grounds, in order: not innovative enough, no customer validation, weak development plans, unrealistic projections, viability or scalability doubts, and the founder's capability. Some refusals are flat: no intent to build.
 
 - **Second assessment:** Innovator International gives 1 free second assessment and reports that 95% fail. It wins only on a fact the assessor missed, never on repeating or amending the plan: say what was missed and what you hold, attach nothing, and expect about 4 to 5 weeks. The form has one box per criterion, so signpost the evidence you hold in the matching box.
-- **Appeal:** a separate assessor rereads the original submission only. Appeals succeed occasionally, each time on a plan the assessor misread. At Envestors, new information means a fresh paid application, and the Home Office is told an appeal was made.
+- **Appeal:** a separate assessor rereads the original submission only. Appeals succeed rarely, each time on a plan the assessor misread: Innovator International counts 38 of its 640 Innovator Founder endorsements as second assessments and 3 as appeals. At Envestors, new information means a fresh paid application, and the Home Office is told an appeal was made.
 - **Reapplying:** no limit, but £1,000 each time. Assessors read a later application alongside earlier ones and ask why the strongest version was not sent first, and after 2 refusals they doubt you will ever be accepted. Fix the proposition on the feedback first.
 - **No legal remedy:** no case law exists on the route and whether a body is reviewable is untested. Plan for 2 to 3 attempts, about £3,600 in fees.
 
@@ -290,7 +292,7 @@ By default the first accounts fall due about 2 years out, after the checkpoints.
 
 Your endorsing body meets you at 12 and 24 months and visits your main trading premises at either one; having none by 24 months puts the endorsement at risk. Attend both: an extension needs at least 2 checkpoint meetings.
 
-- **12 months:** progress should be reasonable for the time; profit is not expected.
+- **12 months:** progress should be reasonable for the time. Profit is judged against your plan, so a plan that forecast none is not expected to show it. Innovator International allows for outside shocks and says missing a 12-month goal alone does not cost the endorsement; hire when the business needs it, not to a checkpoint date.
 - **24 months:** the body also expects commercial progress, such as engaged customers or sales, and reviews the past year rather than future plans.
 
 Expect little contact between checkpoints. Keep your own quarterly record (dated milestones, P&Ls, management accounts) in a data room that serves the checkpoints, an extension and settlement.
@@ -355,6 +357,7 @@ Supply what the body cannot check itself: a working demo, invoices, bank stateme
 - **In absolute terms too:** £100,000 against £1 million reads as good progress, a few thousand against £250,000 as a fail, so a low forecast is no safe hedge.
 - **Offsets:** strong hiring or exports can carry a revenue shortfall, but a few targets met do not rescue a missed forecast, and revenue without profit is not maturity.
 - **Selling, not just building:** run customer engagement and a pipeline beside the build and start selling early; first sales weeks before expiry look suspicious.
+- **Years to settle:** Innovator International says settlement normally takes 5 to 6 years and very few founders manage 3, so a same-business extension is the usual path. £50,000 spent plus a trademark does not get ILR.
 - **Below the revenue targets:** Innovator International says a mature business turning over about £300,000 can reach ILR if it is profitable, has delivered its plan and meets the other requirements, adding that it depends on the business. It also reports one founder granted ILR with no employees; the targets met in that case were not stated.
 
 ### The Extension Fallback
@@ -419,6 +422,8 @@ If the route is kept, it recommends:
 
 The report does not say what happens to founders already on the route or partway through endorsement. When the Start-up route closed in 2023, its holders kept their leave until it expired and could switch to Innovator Founder; that is a precedent, not a promise, and settlement is decided under the Rules in force on the day of the decision.
 
+Innovator International says a change cannot touch founders already endorsed and on the visa ("you have a contract"), but accepts that fees can change and refers questions on settlement timing to an immigration specialist. Treat that as reassurance, not law: settlement-clock changes have applied to existing holders before.
+
 - **Already on the visa:** pay yourself a payroll salary of at least the full-time National Living Wage, which also clears earned settlement's £12,571, and keep a third settlement target in reach in case the bar rises.
 - **Planning to apply:** budget for a 5-year path to settlement, and keep a second route open. The committee found Global Talent largely working and recommends only small changes to it.
 - **Watch** each Statement of Changes, starting with the earned settlement rules from December 2026.
@@ -440,7 +445,9 @@ A partner who arrives with you still settles with you; one who joins later serve
 
 ### The Endorsing-Body Contract
 
-The Home Office contract for endorsing-body services runs to 23 October 2028, and the published notice allows an extension. Checkpoint 2 and the settlement endorsement for a 2027 grant fall after that base term unless it is extended, so the open question is who endorses then. Innovator International said before the review that it expected no changes to the route; it now rejects abolition and argues for reform instead.
+The Home Office contract for endorsing-body services runs to 23 October 2028, and the published notice allows an extension. Checkpoint 2 and the settlement endorsement for a 2027 grant fall after that base term unless it is extended, so the open question is who endorses then. Innovator International said before the review that it expected no changes to the route; it now rejects abolition and argues for reform instead. It says the three bodies met the committee at least twice but did not see the report before publication, and that they are writing a joint counter-report.
+
+An Innovator International director, giving a personal opinion rather than a Home Office signal, expects no change to the criteria for at least 2 years, a redesign most likely around the contract's end in late 2028, and applying under the current rules to be safe at least until mid-2028. Nothing published confirms this, so treat it as a forecast only.
 
 ## FAQ
 
