@@ -1,6 +1,6 @@
 ---
 description: UK Innovator Founder visa guide: requirements, endorsing bodies, business plan and evidence, fees, checkpoints and settlement (ILR) after 3 years.
-updated: 2026-11-25
+updated: 2026-11-26
 ---
 
 # A Guide to the Innovator Founder Visa
@@ -250,7 +250,7 @@ Some cases get written questions, not an interview, and the weight varies from 3
 Most visa holders, Graduate, Student and Skilled Worker included, can switch inside the UK. Visitors cannot and must apply from outside.
 
 - **Graduate:** a Graduate visa applied for from 1 January 2027 lasts 18 months, not 2 years (PhD graduates keep 3 years), so start the plan early. It can be used once and allows self-employment, so the business can start on it; lodge the switch before it expires.
-- **Student:** you can switch once you complete your course, or during a PhD after at least 24 months of full-time study (caseworker guidance reportedly says 12; the Rules govern). Until then, Student leave bars self-employment and business activity, including taking money, accepting orders or becoming a company director; desk research and customer interviews are fine, and a breach risks refusal of later applications. Since 25 November 2025 you may work self-employed on the business once an Innovator Founder application supported by an endorsement is pending.
+- **Student:** you can switch once you complete your course, or during a PhD after at least 24 months of full-time study. Until then, Student leave bars self-employment and business activity, including taking money, accepting orders or becoming a company director; desk research and customer interviews are fine, and a breach risks refusal of later applications. Since 25 November 2025 you may work self-employed on the business once an Innovator Founder application supported by an endorsement is pending.
 
 If you apply before your current visa expires, your permission to stay (called leave) continues while the Home Office decides, but you cannot make a new application during that time. Apply well before it expires, leaving time for a second endorsement attempt. Do not travel outside the UK, Ireland, the Channel Islands or the Isle of Man while the application is pending: it is treated as withdrawn from the day you leave.
 
